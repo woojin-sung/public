@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="56020" scrname="ISA 입출금/고 내역" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab0" fontstyle="01" tabcount="2" tabwidthtype="1" tabheadheight="42" autosave="1" ly_vert="0,103,375,459,1" >
+			<PAGE name="page008561" caption="입출금/고" linkfile="mbisa56020_t1" loadingtype="1" />
+			<PAGE name="page004795" caption="보수징수" linkfile="mbisa56020_t2" loadingtype="1" />
+		</FORMTAB>
+		<ACCOUNT name="acnt0" itemcodetype="133" etcfunctions="" totalacc="1" senddatafield="obwat_ctad_011r.InBlock1.WA_ACNO,obwat_mgmt_271r.InBlock1.WA_ACNO" ly_vert="10,10,179,39,1" export="0,0,0;1,0,0" />
+		<LABEL name="lblNo" caption="계약번호" halign="1" ly_vert="196,10,65,39,1" />
+		<COMBO name="cmbSeq" ly_vert="260,10,56,39,1" />
+		<TABLE name="tbl0" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="10,59,355,39,1" >
+			<COL_INFO ly_vert_width="124,231" />
+			<ROW_INFO ly_vert_height="39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="계약상태" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,10,39,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4549" _ulen="4139" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : ISA 입출금/고 내역
+' 02. 화면설명 : 
+' 03. 작    성 : 2016.04.01 김은숙
+' 2016-06-13 ESKIM : 계약번호 없을시 메세지 팝업 요청(노희범 차장님)
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+'조회
+Sub RequestData(nIndex)
+	'폼탭 변경시에는 계약상태를 조회하지 않음
+	If nIndex = 0 then
+		tbl0.SetCellString( 0 , 1 , "")		'계약상태 Clear
+		DATAMANAGER.RequestTranData( "obwat_mgmt_271r" )	'계약상태 조회
+	End If
+	
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+End Sub
+
+'============================================================================
+'계약상태 Display
+Sub SetCnrcStat(szTranID)
+	Dim sCode, sCnrcStat
+	sCode = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "WA_CNRC_STAT_CLCD" , 0 )
+
+	Select Case sCode
+		Case "01"
+			sCnrcStat = "운용불가"
+		Case "02"
+			sCnrcStat = "정상"
+		Case "03"
+			sCnrcStat = "청산진행"
+		Case "04"
+			sCnrcStat = "청산완료"
+		Case "05"
+			sCnrcStat = "계약해지"
+		Case "06"
+			sCnrcStat = "계약취소"
+		Case "07"
+			sCnrcStat = "승인대기"
+		Case "08"
+			sCnrcStat = "거부"
+	End Select
+	
+	tbl0.SetCellString( 0 , 1 , sCnrcStat)
+End Sub
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Call acnt0_ChangeAccount()
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	Call RequestData(0)	'조회
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+	'계좌번호 변경시 계약번호 TR 태운 후 조회하기 때문에 Clear 시간차 발생, 이에 계약상태 Clear 먼저함
+	tbl0.SetCellString( 0 , 1 , "")
+	cmbSeq.clear = 1								'계약번호 초기화
+	DATAMANAGER.RequestTranData( "obwat_ctad_011r" )	'계약번호 조회
+End Sub
+
+'============================================================================
+Sub cmbSeq_OnEditComplete(iIndex)
+	Call RequestData(0)	'조회
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Call RequestData(0)	'조회
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)	
+	Call RequestData(1)	'조회
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "WA_CNRC_NO" , 0 , cmbSeq.caption )
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'계약번호
+	If szTranID == "obwat_ctad_011r" then
+		Dim i, nCnt	
+
+		nCnt = DATAMANAGER.GetDataCount( 0, szTranID , "OutBlock1" )
+
+		'2016-06-13 ESKIM : 계약번호 없을시 메세지 팝업 요청(노희범 차장님)
+		If nCnt == 0 then
+			Form.ShowAlert("알림", "ISA 계약이 존재하지 않습니다.")
+		End If
+		
+		For i = 0 To nCnt - 1
+			cmbSeq.cbadddatatext = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "WA_CNRC_NO" , i )		'계약번호
+		Next
+
+		cmbSeq.SetCurSel( 0 )	
+		Call RequestData(0)	'조회
+	End If
+	
+	'계약상태
+	If szTranID == "obwat_mgmt_271r" then
+		Call SetCnrcStat(szTranID)
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubmsg
+	sSubmsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	Form.MsgBox( "알림", szErrMsg & " " & sSubmsg, "", 0 )
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_ctad_011r" trcode="obwat_ctad_011r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="IQRY_CLS_CODE" idx="1" defconst="7" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="obwat_mgmt_271r" trcode="obwat_mgmt_271r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_ctad_011r" title="랩계약번호조회(콤보)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="105" _ulen="75" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="61" _ulen="43" >
+
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_mgmt_271r" title="ISA계약평가현황조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="193" _ulen="137" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1338" _ulen="952" >
+
+WA_INDV_MGRI_ACNO^랩어카운트개별운용계좌번호^8^0^0^0^0^0^0
+WA_INDV_MGRI_ASNO^랩어카운트개별운용계좌일련번호^2^0^0^0^0^0^0
+FRST_CNRC_DATE^최초계약일자^8^0^0^0^0^0^0
+CNRC_MTRT_DATE^계약만기일자^8^0^0^0^0^0^0
+WA_INVT_AMT^랩어카운트투자금액^19^0^7^0^0^0^0
+WA_VLTN_AMT^랩어카운트평가금액^19^0^7^0^0^0^0
+WA_VLTN_PRLS_AMT^랩어카운트평가손익금액^19^0^7^0^0^0^0
+WA_SMPL_ERT^랩어카운트단순수익률^23^6^7^0^0^0^0
+WA_GOAL_ERT^랩어카운트목표수익률^23^6^7^0^0^0^0
+LOSS_LIMT_RATE^손실한도비율^9^4^7^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+WA_KYC_GRAD_CODE^랩어카운트KYC등급코드^2^0^0^0^0^0^0
+IO_AMT^입출금액^19^0^7^0^0^0^0
+LOAN_BAL^대출잔액^19^0^7^0^0^0^0
+CMTL_PRLS_AMT^누계손익금액^19^0^7^0^0^0^0
+ACML_ERT^누적수익률^11^6^7^0^0^0^0
+TXTN_TRGT_PRD_FIN_DATE^과세대상기간종료일자^8^0^0^0^0^0^0
+TOTAL_PAYM_AMT^총납입금액^19^0^7^0^0^0^0
+WA_CNRC_ACML_ERT^랩어카운트계약누적수익률^23^6^7^0^0^0^0
+PAY_AMT^보수금액^19^0^7^0^0^0^0
+MANG_DATE^관리일자^8^0^0^0^0^0^0
+WA_CNRC_STAT_CLCD^랩어카운트계약상태구분코드^2^0^0^0^0^0^0
+PAYM_AMT^납입금액^19^0^7^0^0^0^0
+PAYM_ABLE_AMT^납입가능금액^19^0^7^0^0^0^0
+ABLE_AMT^가능금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="308" _ulen="220" >
+
+WA_INVT_PROD_CLCD^랩어카운트투자상품구분코드^2^0^0^0^0^0^0
+WA_VLTN_AMT^랩어카운트평가금액^19^0^7^0^0^0^0
+BYOV_AMT^매수금액^19^0^7^0^0^0^0
+WA_DEAL_ERT^랩어카운트매매수익률^23^6^7^0^0^0^0
+LOAN_BAL^대출잔액^19^0^7^0^0^0^0
+RLIM_RATE^비중비율^9^4^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="3000" inout="out" _len="539" _ulen="419" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+ABRV_ISNM^축약종목명^40^0^0^0^0^0^0
+RMND_QTY^잔고수량^19^0^7^0^0^0^0
+BYNG_UNPR^매입단가^20^2^7^0^0^0^0
+PSNT_PRC^현재가격^20^6^7^0^0^0^0
+VLTN_AMT^평가금액^19^0^7^0^0^0^0
+VLTN_PRLS_AMT^평가손익금액^19^0^7^0^0^0^0
+ERT^수익률^14^5^7^0^0^0^0
+LOAN_AMT^대출금액^19^0^7^0^0^0^0
+LOAN_DATE^대출일자^8^0^0^0^0^0^0
+LOAN_MTRT_DATE^대출만기일자^8^0^0^0^0^0^0
+RATE^비율^10^5^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="275" _ulen="203" >
+
+MKSC_CLS_CODE^유가증권구분코드^1^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+LOAN_DTL_TYPE_CODE^대출상세유형코드^4^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+LOAN_DATE^대출일자^8^0^0^0^0^0^0
+LOAN_SRNO^대출일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

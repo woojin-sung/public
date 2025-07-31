@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="55004" scrname="Q&A" version="2" writer="신재영" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="3" tabwidthtype="1" tabheadheight="40" ly_vert="0,0,375,562,1" >
+			<PAGE name="page009335" caption="일반 용어" linkfile="mbfnp55004_t1" />
+			<PAGE name="page009336" caption="설계/발행/상환" linkfile="mbfnp55004_t2" />
+			<PAGE name="page003806" caption="기타 사항" linkfile="mbfnp55004_t3" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1787" _ulen="1769" >
+Dim Max
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	i = 0
+	
+	Height = 0
+	Max = 11
+
+	For i = 1 To Max Step 2
+
+		TableNm = "Container0.Table" & i
+		BfTableNm = "Container0.Table" & i-1
+		AfTableNm = "Container0.Table" & i+1
+		
+		Form.SetCtlProp(BfTableNm, "top", Height)
+		
+		Height = Height + Form.GetCtlProp(BfTableNm, "height") ' 앞의 Q항목 높이 더해줌
+		
+		If Form.GetPropTable(BfTableNm, "caption",0,2) == "Y" Then
+			
+			Form.SetCtlProp(TableNm, "visible", True)
+			Form.SetCtlProp(TableNm, "top", Height)
+			
+			Height = Height + Form.GetCtlProp(TableNm, "height")
+		Else
+			Form.SetCtlProp(TableNm, "visible", False)
+		End If
+		
+	Next
+
+End Sub
+
+'============================================================================
+Sub SetTableClick(Number)
+
+	i = 0
+	TableNm = "Container0.Table" & Number
+	
+	If Form.GetPropTable(TableNm, "caption",0,2) == "N" Then
+		Form.SetPropTable(TableNm, "caption",0,2, "Y")
+		For i = 0 To Max
+		TableNm = "Container0.Table" & i
+		If i <> Number Then
+				Form.SetPropTable(TableNm, "caption",0,2, "N")
+			End If
+		Next
+	Else
+		Form.SetPropTable(TableNm, "caption",0,2, "N")
+	End If
+	
+	Form_OnFormInit()
+End Sub
+'============================================================================
+
+
+'============================================================================
+
+
+'============================================================================
+
+'============================================================================
+
+'============================================================================
+
+'============================================================================
+
+'============================================================================
+
+	</SCRIPT_INFO>
+</ROOT>

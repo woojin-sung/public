@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="56060" scrname="ISA_금융소비자의권리_팝업" version="2" writer="고승연" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" autosize="1" imgpath="alpha128" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,250,375,397,1" />
+		<CONTAINER name="cont0" vscroll="1" scroll_pos="0,0" ly_vert="0,50,375,551,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="lblTitl0" fontsize="2" fontstyle="01" caption="금융소비자의 권리" ly_vert="10,0,355,20,1" />
+				<LABEL name="lblLine0" bgcolor="026:186186186" transmode="0" ly_vert="15,30,345,1,1" />
+				<LABEL name="Label0" fontsize="-2" bgcolor="132:215215215" transmode="0" valign="0" multiline="1" ly_vert="15,80,340,290,1" />
+				<LABEL name="lblTitl1" fontsize="1" fontstyle="01" caption="위법계약해지권" ly_vert="10,50,355,20,1" />
+				<LABEL name="lblTitl2" fontsize="1" fontstyle="01" caption="자료열람요구권" ly_vert="10,400,355,20,1" />
+				<LABEL name="Label1" fontsize="-2" bgcolor="132:215215215" transmode="0" valign="0" multiline="1" ly_vert="15,430,340,340,1" />
+				<LABEL name="lblTitl3" fontsize="1" fontstyle="01" ly_vert="10,780,355,20,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_20.9.png" ly_vert="187,597,188,50,1" />
+		<BUTTON name="btnCancel" caption="닫기" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,597,187,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3430" _ulen="2331" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : ISA 투자유의사항 팝업
+' 02. 화면설명 : 
+' 03. 작    성 : 2023.12.04 : 고승연 : v0001 : [T2310260012] 온라인 설명의무 가이드 적용
+' 04. 수    정 : 
+'
+'-------------------------------------------------------------------------------------------
+Dim g_bAgree
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_bAgree = false
+	
+	dim str0, str1
+	
+	str0 = "\n※ 금융회사가 다음의 의무를 위반하여 계약을 체결한 경우, 금융소비자는 해당 계약을"
+	    .. " 위약금 등 수수료 부과 없이 해지할 수 있습니다.\n\n"
+	    .. "※ 일반금융소비자 : 적합성/적정성 원칙 및 설명의무 위반, 불공정영업/부당권유행위"
+	    .. " 금지 위반\n\n"
+	    .. "※ 전문금융소비자 : 불공정영업부당권유 행위 금지 위반\n\n"
+	    .. "※ 금융소비자는 위법계약해지를 요구하기 위해서는 법 위반사실을 안 날로부터 1년"
+	    .. " 이내의 기간으로 계약체결일로부터 5년 이내에 계약해지요구서에 위반사실을 입증하는"
+	    .. " 서류를 첨부하여 계약의 해지를 요구하여야 합니다."
+	
+	cont0.Label0.caption = str0
+	cont0.Label0.changeTextAttr(163, 117, 1, -2, false)
+
+	str1 = "\n※ 금융소비자는 분쟁조정 또는 소송의 수행 등 권리구제를 위한 목적으로 금융상품판매업자"
+	    .. " 등이 기록 및 유지·관리하는 다음의 자료에 대한 열람(사본 및 청취 포함)을 요구할"
+	    .. " 수 있습니다.\n\n"
+	    .. "※ 계약체결에 관한 자료, 계약의 이행에 관한 자료, 금융상품등에 관한 광고 자료,"
+	    .. " 금융소비자의 권리행사에 관한 자료, 내부통제기준의 제정 및 운영 등에 관한 자료,"
+	    .. " 업무 위탁에 관한 자료\n\n"
+	    .. "※ 회사는 금융소비자의 분쟁조정 신청내역 또는 소송제기 등의 목적 및 열람의 범위가"
+	    .. " 기재된 열람요구서로 열람을 요구받은 날로부터 6영업일 이내에 금융소비자가 해당 자료를"
+	    .. " 열람할 수 있게 합니다.\n\n"
+	    .. "※ 회사는 법령, 제3자의 이익 침해, 영업비밀의 침해 등의 사유를 금융소비자에게"
+	    .. " 알리고 자료 열람을 제한 하거나 거절할 수 있습니다."
+	
+	'텍스트 색상 처리
+	cont0.Label1.caption = str1
+	cont0.Label1.changeTextAttr(1, 103, 1, -2, false)
+	cont0.Label1.changeTextAttr(212, 109, 1, -2, false)
+	
+	imgBg.top = Form.GetCtlProp("cont0", "top") - 15
+	imgBg.height = 647 - (Form.GetCtlProp("cont0", "top") - 15)
+	
+	'스크롤 되는 공간을 확보하기 위해 cont0.lblTitl3 컨트롤 생성
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	g_bAgree = false
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	g_bAgree = true
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+
+	if g_bAgree == true then
+		Form.SendReturnToParent("mbisa56060_pf", "AGREE")
+	else
+		Form.SendReturnToParent("mbisa56060_pf", "CANCEL")
+	end if
+	
+End Sub
+
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

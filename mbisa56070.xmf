@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="56070" scrname="ISA 해지신청" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnOK" caption="해지신청" btnimage="btn_01.9" ly_vert="192,498,173,44,1" />
+		<TABLE name="tbl0" insidelinecolor="102:255255255" colcount="2" rowcount="6" designorder="1" ly_vert="0,118,375,330,1" >
+			<COL_INFO ly_vert_width="110,265" />
+			<ROW_INFO ly_vert_height="55,55,55,55,55,55" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="상품명" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" import="1,1,5" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="만기일" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,1,1,1" import="1,1,7" mask="1,0,,,1,####/##/##,0,1,1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="약정출금계좌" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,2,1,2" mask="1,0,,,1,####-####-##,0,1,1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="평가금액" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,3,1,3" import="1,1,0" halign="2" mask="0,1,,원,0,,0,1,1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="수수료예정금액" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,4,1,4" import="1,1,1" halign="2" mask="0,1,,원,0,,0,1,1" impidxs="" />
+				<CELL cell_ly="0,5,0,5" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="해지구분" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,5,1,5" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="edtPwd" password="2" imetype="1" maxlength="68" minlength="4" hintcaption="비밀번호" des="비밀번호" senddatafield="obwat_ctad_012r.InBlock1.PWD" ly_vert="278,10,86,39,1" export="1,0,3" />
+		<ACCOUNT name="acnt0" itemcodetype="133" etcfunctions="" accpwdctl="edtPwd" totalacc="1" senddatafield="obwat_ctad_011r.InBlock1.WA_ACNO,obwat_ctad_012r.InBlock1.WA_ACNO,obwat_ctad_011a.InBlock1.WA_ACNO" ly_vert="10,10,259,39,1" export="0,0,0;1,0,0;2,0,0" />
+		<LABEL name="lblNo" caption="계약번호" ly_vert="0,59,91,39,1" />
+		<COMBO name="cmbSeq" ly_vert="83,59,233,39,1" />
+		<COMBO name="cmbGubn" cbinputdatatext="01`현금해지
+02`현물해지" ly_vert="120,400,245,39,1" />
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,59,39,39,1" />
+		<BUTTON name="btnCancel" enable="0" caption="해지신청취소" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="10,498,173,44,1" />
+		<CALENDAR name="cal0" visible="0" dispmode="1313424906" ly_vert="220,460,140,32,0" />
+		<EDIT name="EdtWaPrcd" enable="0" visible="0" imetype="0" recvdatafield="obwat_ctad_012r.OutBlock1.WA_PRCD" ly_vert="123,597,100,32,0" import="1,1,4" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9413" _ulen="8371" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : ISA 해지신청
+' 02. 화면설명 : 
+' 03. 작    성 : 2016.04.18 김은숙
+'                2016.06.14 : 신극수 : 신청완료시 비밀번호 초기화  v0001
+'                2020.12.07 : 김유경 : 특정상품 해지신청시 안내 문구 팝업 추가 v0002
+'                2021.03.16 : 신극수 : [T2102230014] [Wrap/ISA] 특정상품 해지신청 제어로직 변경 요청 v0003
+'                2021.06.17 : 신극수 : v0004 : [T2106170005] 특정 Wrap/ISA 상품 해지신청 제어 로직 변경
+'                2023.11.27 : 고승연 : v0005 : [T2311160009] obwat_ctad_012r IO 수정
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_sFlag		'"I" = 해지신청, "U" = 해지신청취소
+Dim g_bCheckProsYn 'v0001
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+Function Account_Check()
+	If acnt0.caption == "" Then
+		Form.ShowAlert("알림", "계좌번호는 필수값입니다.")
+		Return False
+	End If
+
+	If Len(edtPwd.caption) < 4 Then
+		Form.ShowAlert("알림", "비밀번호는 필수값입니다.")
+		Return False
+	End If
+	
+	If cmbSeq.caption == "" Then
+		'Form.ShowAlert("알림", "계약번호는 필수값입니다.")
+		Return False
+	End If
+	
+	'v0002. 특정상품 해지신청시 안내 문구 팝업 추가 sta
+	If g_sFlag == "I" Then '해지신청
+	     Dim sMsg
+	     sMsg = ""
+	     'Form.ShowAlert("알림", cmbGubn.cbkeydata)
+	     if cmbGubn.cbkeydata == "01" Then 'v0003 현금해지일 경우에만 팝업창으로 제어처리.
+			If Trim(EdtWaPrcd.caption) = "WA000107" or Trim(EdtWaPrcd.caption) = "WA000108" Then
+			    'v0004
+			    IF DATAMANAGER.GetDataValue( 0, "obwat_ctad_012r" , "OutBlock1" , "THCO_FRST_JOIN_DATE" , 0 ) <  "20201001" THEN
+					sMsg =   " 해당 상품은 편입자산(키움글로벌얼터너티브) 환매 연기에 따라 당분간 해지 신청이 제한되고 있습니다. (2020.10월 이후 신규 계약 고객은 제외)" & Chr(13) & " 다만, 신청가능금액 범위내에서 출금 신청은 동일하게 가능하므로 출금신청으로 진행해주시기 바랍니다." & Chr(13) & " (업무처리 방법은 관리점 또는 컨택센터로 문의 요망(☎1588-3400))"
+					Form.ShowAlert("알림", sMsg)
+					Return False	
+				END IF 
+			End If
+		End If
+	End If 
+	'v0002. fin
+	
+	Return true
+End Function
+
+'============================================================================
+'조회
+Sub RequestData()
+	Call ClearAllData()
+	
+	If Account_Check() == False then
+		Exit Sub
+	End If
+	
+	DATAMANAGER.RequestTranData("obwat_ctad_012r")	
+	
+	'v0001 sta
+	if g_bCheckProsYn  = "Y" then
+		edtPwd.caption= ""
+		g_bCheckProsYn  = "N"
+	end if 
+	'v0001 fin
+End Sub
+
+'============================================================================
+Sub ClearAllData()
+	For i = 0 to 4
+		tbl0.SetCellString( i, 1, "")
+	Next
+
+	btnCancel.enable = True
+	btnOK.enable = True
+End Sub
+
+'============================================================================
+'조회 후처리
+Sub SetTableData(szTranID)
+	'1. 약정출금계좌 Display
+	Dim szACNO, szASNO
+	
+	szACNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "LNKD_ACNO" , 0 )
+	szASNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "LNKD_ASNO" , 0 )
+	tbl0.SetCellString( 2, 1, szACNO & szASNO )	
+	
+	'2. 해지 TR INPUT값 셋팅
+	Dim sOutput0, sOutput1, sOutput2, sOutput3
+	
+	sOutput0 = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "DRNG_SCDL_DATE" , 0 )
+	sOutput1 = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "RQST_DATE" , 0 )
+	sOutput2 = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "ATMT_CANC_YN" , 0 )
+	sOutput3 = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "JOIN_TYPE_CODE" , 0 )
+	
+	DATAMANAGER.SetDataValue( 0 , "obwat_ctad_011a", "InBlock1", "DRNG_SCDL_DATE" , 0 , sOutput0)
+	DATAMANAGER.SetDataValue( 0 , "obwat_ctad_011a", "InBlock1", "RQST_DATE" , 0 , sOutput1)
+	DATAMANAGER.SetDataValue( 0 , "obwat_ctad_011a", "InBlock1", "ATMT_CANC_YN" , 0 , sOutput2)
+	DATAMANAGER.SetDataValue( 0 , "obwat_ctad_011a", "InBlock1", "JOIN_TYPE_CODE" , 0 , sOutput3)
+	
+	'3. 해지신청취소/해지신청 버튼 활성화
+	Dim sDate
+	sDate = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "RQST_DATE" , 0 )
+	
+	If sDate <> "" and sDate == cal0.caption then		'취소버튼 활성화
+		btnCancel.enable = True
+		btnOK.enable = False
+		
+	ElseIf sDate <> "" and sDate <> cal0.caption then	'취소/신청 버튼 모두 비활성화
+		btnCancel.enable = False
+		btnOK.enable = False
+		Form.ShowAlert("알림", "이미 해지신청된 내역이 존재합니다.")
+		Exit Sub
+		
+	Else											'신청버튼 활성화
+		btnCancel.enable = False
+		btnOK.enable = True
+	End If
+End Sub
+
+'============================================================================
+'sFlag = "U" : 해지신청취소
+'sFlag = "I" : 해지신청
+Sub CancelContract()
+	If Account_Check() == False then
+		Exit Sub
+	End If
+	
+	DATAMANAGER.SetEventFlag( "obwat_ctad_011a", g_sFlag )
+	DATAMANAGER.RequestTranData( "obwat_ctad_011a" )	'랩계약출금해지신청 및 취소
+End Sub
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Call acnt0_ChangeAccount()
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	Call RequestData()	'조회
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+	ClearAllData()
+	cmbSeq.clear = 1								'계약번호 초기화
+	DATAMANAGER.RequestTranData( "obwat_ctad_011r" )	'계약번호 조회
+End Sub
+
+'============================================================================
+Sub edtPwd_OnEditComplete()
+	Call RequestData()	'조회
+End Sub
+
+'============================================================================
+Sub cmbSeq_OnEditComplete(iIndex)
+	If edtPwd.caption <> "" Then
+		Call RequestData()	'조회
+	End If
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Call RequestData()	'조회
+End Sub
+
+'============================================================================
+'해지신청
+Sub btnOK_OnClick()
+	g_sFlag = "I"
+	Call CancelContract()	'랩계약출금해지신청 및 취소
+End Sub
+
+'============================================================================
+'해지신청취소
+Sub btnCancel_OnClick()
+	g_sFlag = "U"
+	Call CancelContract()	'랩계약출금해지신청 및 취소
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	If szTranID == "obwat_ctad_012r" then
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "WA_CNRC_NO" , 0 , cmbSeq.caption)
+	End If
+	
+	If szTranID == "obwat_ctad_011a" then
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "WA_CNRC_NO" , 0 , cmbSeq.caption)
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "WA_CANC_CLCD" , 0 , cmbGubn.cbkeydata)
+		IF g_sFlag = "I" THEN
+			DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "DRNG_CANC_CLCD" , 0 , "02")
+		ELSEIF g_sFlag = "U" THEN
+			DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "DRNG_CANC_CLCD" , 0 , "04")
+		END IF 
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'계약번호 조회
+	If szTranID == "obwat_ctad_011r" then
+		Dim i, nCnt	
+
+		nCnt = DATAMANAGER.GetDataCount( 0, szTranID , "OutBlock1" )
+		
+		If nCnt == 0 then
+			Form.ShowAlert("알림", "ISA 계약이 존재하지 않습니다.")
+			Exit Sub
+		End If
+		
+		For i = 0 To nCnt - 1
+			cmbSeq.cbadddatatext = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "WA_CNRC_NO" , i )		'계약번호
+		Next
+
+		cmbSeq.SetCurSel( 0 )	
+	End If
+	
+	'조회
+	If szTranID == "obwat_ctad_012r" then
+		Call SetTableData(szTranID)
+	End If
+	
+	'해지신청/해지신청취소
+	If szTranID == "obwat_ctad_011a" then
+		Dim sMsg
+		sMsg = ""
+		
+		If g_sFlag = "I" then
+			sMsg = "ISA 해지신청이 완료되었습니다."
+		ElseIf g_sFlag = "U" then
+			sMsg = "ISA 해지신청취소가 완료되었습니다."
+		End If
+		
+		Form.ShowAlert("알림", sMsg)
+		
+		g_bCheckProsYn = "Y"
+		
+		Call RequestData()
+		
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubmsg
+	sSubmsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	Form.MsgBox( "알림", szErrMsg & " " & sSubmsg, "", 0 )
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_ctad_011r" trcode="obwat_ctad_011r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="IQRY_CLS_CODE" idx="1" defconst="7" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="obwat_ctad_012r" trcode="obwat_ctad_012r" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="DRNG_CANC_CLCD" idx="2" defconst="2" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="obwat_ctad_011a" trcode="obwat_ctad_011a" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="DRNG_CANC_CLCD" idx="2" />
+					<FIELD name="CANC_CLS_CODE" idx="11" defconst="2" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_ctad_011r" title="랩계약번호조회(콤보)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="105" _ulen="75" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="61" _ulen="43" >
+
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_ctad_012r" title="랩계약평가금액조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="200" _ulen="140" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+DRNG_CANC_CLCD^출금해지구분코드^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2375" _ulen="1719" >
+
+WA_VLTN_AMT^랩어카운트평가금액^19^0^7^0^0^0^0
+FEE_AMT^수수료금액^19^0^7^0^0^0^0
+DRNG_APLT_AMT^출금신청금액^19^0^7^0^0^0^0
+WA_CNRC_TIMS^랩어카운트계약회차^4^0^7^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+LWST_MNTN_AMT^최저유지금액^19^0^7^0^0^0^0
+CNRC_MTRT_DATE^계약만기일자^8^0^0^0^0^0^0
+LNKD_ACNO^연계계좌번호^8^0^0^0^0^0^0
+LNKD_ASNO^연계계좌일련번호^2^0^0^0^0^0^0
+DRNG_SCDL_DATE^출금예정일자^8^0^0^0^0^0^0
+DRNG_ABLE_AMT^출금가능금액^19^0^7^0^0^0^0
+WA_DRNG_REAS^랩어카운트출금사유^100^0^0^0^0^0^0
+WA_CANC_CLCD^랩어카운트해지구분코드^2^0^0^0^0^0^0
+RQST_SRNO^요청일련번호^11^0^7^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+HLFW_DRNG_ABLE_YN^중도출금가능여부^1^0^0^0^0^0^0
+WA_MGRI_STAT_CLCD^랩어카운트운용상태구분코드^2^0^0^0^0^0^0
+LOAN_BAL^대출잔액^19^0^7^0^0^0^0
+RQST_DATE^요청일자^8^0^0^0^0^0^0
+DRNG_CANC_CLCD^출금해지구분코드^2^0^0^0^0^0^0
+DRNG_REQ_AMT^출금의뢰금액^19^0^7^0^0^0^0
+DRNG_AMT^출금금액^19^0^7^0^0^0^0
+APRV_YN^승인여부^1^0^0^0^0^0^0
+PROS_SCDL_DATE^처리예정일자^8^0^0^0^0^0^0
+WA_DRNG_CLCD^랩어카운트출금구분코드^2^0^0^0^0^0^0
+CANC_CLS_CODE^해지구분코드^1^0^0^0^0^0^0
+SPCI_CANC_REAS_CODE^특별해지사유코드^2^0^0^0^0^0^0
+JOIN_TYPE_CODE^가입유형코드^2^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+FRST_CNRC_DATE^최초계약일자^8^0^0^0^0^0^0
+ATMT_CANC_YN^자동해지여부^1^0^0^0^0^0^0
+FUTS_OPTN_ACNT_APLT_YN^선물옵션계좌신청여부^1^0^0^0^0^0^0
+RGPL_STUP_YN^질권설정여부^1^0^0^0^0^0^0
+SNBC_YN^반송여부^1^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+APLT_FRCR_AMT^신청외화금액^20^3^7^0^0^0^0
+DRNG_FRCR_AMT^출금외화금액^20^3^7^0^0^0^0
+THTR_MGRI_PAY_ACML_AMT^당기운용보수누적금액^19^0^7^0^0^0^0
+PVPR_NLV_OTCM_PAY_AMT^전기미징수성과보수금액^19^0^7^0^0^0^0
+WA_OTCM_PAY_AMT^랩어카운트성과보수금액^19^0^7^0^0^0^0
+PVPR_NLV_MGRI_PAY_AMT^전기미징수운용보수금액^19^0^7^0^0^0^0
+RSEV_AMT^예약금액^19^0^7^0^0^0^0
+THCO_FRST_JOIN_DATE^당사최초가입일자^8^0^0^0^0^0^0
+ACTL_ERT_RPRT_INAG_TYPE_CODE^실질수익률보고서통보처유형코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_ctad_011a" title="랩계약출금해지신청및취소" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="872" _ulen="624" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+DRNG_CANC_CLCD^출금해지구분코드^2^0^0^0^0^0^0
+RQST_SRNO^요청일련번호^11^0^7^0^0^0^0
+WA_CANC_CLCD^랩어카운트해지구분코드^2^0^0^0^0^0^0
+DRNG_APLT_AMT^출금신청금액^19^0^7^0^0^0^0
+DRNG_AMT^출금금액^19^0^7^0^0^0^0
+DRNG_SCDL_DATE^출금예정일자^8^0^0^0^0^0^0
+WA_DRNG_REAS^랩어카운트출금사유^100^0^0^0^0^0^0
+WA_CNRC_TIMS^랩어카운트계약회차^4^0^7^0^0^0^0
+WA_DRNG_CLCD^랩어카운트출금구분코드^2^0^0^0^0^0^0
+CANC_CLS_CODE^해지구분코드^1^0^0^0^0^0^0
+SPCI_CANC_REAS_CODE^특별해지사유코드^2^0^0^0^0^0^0
+ATMT_CANC_YN^자동해지여부^1^0^0^0^0^0^0
+JOIN_TYPE_CODE^가입유형코드^2^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+APLT_FRCR_AMT^신청외화금액^20^3^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="30" inout="in" _len="289" _ulen="201" >
+
+WA_INDV_MGRI_ACNO^랩어카운트개별운용계좌번호^8^0^0^0^0^0^0
+WA_INDV_MGRI_ASNO^랩어카운트개별운용계좌일련번호^2^0^0^0^0^0^0
+DRNG_APLT_AMT^출금신청금액^19^0^7^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+APLT_FRCR_AMT^신청외화금액^20^3^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

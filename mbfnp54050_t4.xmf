@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="54050" scrname="채권대용주문_취소" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,401,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contBuy" bgcolor="038:255255255" scroll_pos="0,0" ly_vert="0,0,375,401,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<BUTTON name="btnBuy" caption="취소" btnimage="btn_08.9" ly_vert="257,340,108,52,1" />
+				<EDIT name="edtQty" mask="0,0,, (천),0,,0,1,0,0,0" halign="2" imetype="1" maxlength="15" hintcaption="수량(천원)" ly_vert="180,57,186,39,1" />
+				<EDIT name="edtOrgNo" mask="0,0,,,0,,0,0,0,0,0" imetype="1" maxlength="10" hintcaption="원주문번호" des="원주문번호" ly_vert="180,9,118,39,1" />
+				<BUTTON name="btnMiche" caption="미체결" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="304,9,61,39,1" />
+				<BUTTON name="btnQty" btnimage="alpha" ly_vert="180,57,185,39,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11378" _ulen="10250" >
+'============================================================================
+' 화 면 명 : 채권주문_취소
+' 화면설명 : 체권주문 취소주문 화면탭(t4)
+' 작    성 : 2016.01.28 ~ 2016.  .       test3
+'============================================================================
+'20200910 SWJ START 메모리평문제거 (plain_rm = 0 미적용 / plain_rm = 1 적용)
+'****************************************************************************
+'               G  R  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+' ----- 주문설정값 공통변수 Start -------------------------------------------
+'주문 환경
+Dim g_szOdrPop
+
+' 가격, 수량 설정
+Dim g_szAfterInit
+Dim g_szChangeInit
+
+' 주문후 
+Dim g_szAfterOrg
+
+' ----- 주문설정값 공통변수 End ---------------------------------------------
+Dim g_szCd, g_szMk
+
+Dim g_szTitle
+g_szTitle ="알림"
+
+' 20200910 SWJ START : 메모리평문제거 적용구분값
+Dim plain_rm
+plain_rm =""
+
+'****************************************************************************
+'			P  E  R  S  O  N  A  L     F  U  N  C  T  I  O  N
+'****************************************************************************
+
+'============================================================================
+' Load_OrderSet : 환경설정값 정의
+'============================================================================
+Function Load_OrderSet() '주문설정/계좌정보/확인창
+	' 환경설정값 정의...
+	g_szOdrPop     = Form.LoadConfigData("SET_ORDER", "OPEN_CONFIRM")			' 주문확인창
+	g_szAfterInit  = Form.LoadConfigData("SET_ORDER", "AFERTORD_INIT")			' 주문전송 후 초기화
+	g_szChangeInit = Form.LoadConfigData("SET_ORDER", "CHANGE_INIT")			' 종목/탭 변경시 초기화
+	g_szAfterOrg   = Form.LoadConfigData("SET_ORDER", "AUTO_ORGNO")				' 원주문번호 자동입력
+
+	' 주문확인창(기본값 : 사용)
+	if Trim(g_szOdrPop) = "" then
+		g_szOdrPop = "1"
+	end if
+	
+	' 주문전송 후 초기화(기본값 : 사용)
+	if Trim(g_szAfterInit) = "" then
+		g_szAfterInit = "1"
+	end if	
+	
+	'20170919 HAMWG START : 종목/탭 변경시 초기화 사용을 초기값으로 설정
+	' 종목/탭 변경시 초기화(기본값 : 사용)
+	if Trim(g_szChangeInit) = "" then
+		g_szChangeInit = "1"
+	end if	
+	'20170919 HAMWG END
+	
+	' 원주문번호 자동입력(기본값 : 사용)
+	if Trim(g_szAfterOrg) = "" then
+		g_szAfterOrg = "1"
+	end if
+End Function
+
+'============================================================================
+' Check_Account
+'============================================================================
+Function Check_Account()
+	Dim szAcnt, szPwd
+	
+	szAcnt = Form.GetCtlProp("#acc", "caption")
+	
+    If Len(szAcnt) < 10 Then
+	    Form.ShowAlert(g_szTitle, "계좌번호를 확인후 다시 입력하십시오.")
+	    return False
+	End If
+	
+	szPwd = Form.GetCtlProp("#edtPwd", "caption")
+	
+	If Trim(szPwd) = "" Then
+			Form.ShowAlert(g_szTitle, "비밀번호를 확인후 다시 입력하십시오.")
+			return False
+	end If
+	
+	return True
+End Function
+'============================================================================
+' Check_InputData
+'============================================================================
+Function Check_InputData()
+	' 계좌번호와 계좌비밀번호 체크
+	if Check_Account() == false then
+		return false
+	end if
+
+	if Trim(g_szCd) == "" then
+		Form.ShowAlert(g_szTitle, "종목코드를 입력하십시요.")
+		return false
+	end if
+	
+	if Trim(contBuy.edtQty.caption) == "" or Trim(contBuy.edtQty.caption) == "0" then
+		Form.ShowAlert(g_szTitle, "주문수량을 입력하십시요.")
+		return false
+	end if
+	if Trim(contBuy.edtOrgNo.caption) == "" then
+		Form.ShowAlert(g_szTitle, "원주문번호를 입력하십시요.")
+		return false
+	end if	
+	
+	' 주문확인창 오픈여부'''
+	if g_szOdrPop == "1" then
+		Open_ConfirmPopup()
+	else
+	   DATAMANAGER.RequestTranData( "obtrs_oder_301a" )	
+	   return true
+	end if
+		
+End Function
+'============================================================================
+' Open_ConfirmPopup
+'============================================================================
+Function Open_ConfirmPopup(szWarn)
+	Dim szData
+
+	szData = "3"													' 매매구분:취소(3)
+	szData = szData & "|" & g_szMk									' 시장구분
+	szData = szData & "|" & Form.GetCtlProp("#acc", "caption")			' 계좌번호
+	szData = szData & "|" & Form.GetCtlProp("#acc", "accountname")		' 계좌명
+	szData = szData & "|" & g_szCd									' 종목코드
+	szData = szData & "|" & Form.GetItemCodeInfo(g_szCd, "name")		' 종목명
+	szData = szData & "|" & ""										' 소액매매구분
+	szData = szData & "|" & ""										' 소액매매구분데이타
+	szData = szData & "|" & ""										' 시장구분2
+	szData = szData & "|" & ""										' 매수일자
+	szData = szData & "|" & contBuy.edtQty.caption					' 주문수량
+	szData = szData & "|" & ""										' 주문가격
+	szData = szData & "|" & contBuy.edtOrgNo.caption					' 원주문번호
+	szData = szData & "|" & ""										' 과세구분
+	szData = szData & "|" & ""										' 수수료구분
+		
+	Form.OpenPopup("mbfnp54050_p4", szData , "")
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Load_OrderSet() '주문설정값 읽어오기
+	
+	'20200910 SWJ START
+	'MTS메모리평문 적용유무
+	'plain_rm = ( 0 : 미적용/ 1 : 적용)
+	plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	'20200910 SWJ END
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "INIT_CODE" then		' 메인화면에서 종목코드 받기
+		if sParam <> "" then
+			tData = Split(sParam, "★")
+
+			if #tData > 0 then
+			
+				if #tData > 2 then
+					g_szMK = tData(0)
+					g_szCd = tData(1)
+					contBuy.edtQty.caption   = tData(2) '수량
+					contBuy.edtOrgNo.caption = tData(3) '주문번호
+					'tData(4) '주문유형
+					'tData(5) '가격
+					'tData(6) '주문조건코드
+				else
+					g_szMK = tData(0)
+					g_szCd = tData(1)
+					
+					'20170919 HAMWG START : 미체결팝업 연동시 데이터 초기화 방지
+					if g_szChangeInit == "1" then		' 종목변경시 인풋항목 초기화
+						contBuy.edtQty.caption = ""
+						contBuy.edtOrgNo.caption = ""
+					end if
+					'20170919 HAMWG END
+				end if
+
+			end if
+			
+		end if
+		
+	elseif sEventName == "54050_CONTRACT_RETURN" then	
+	    if sParam == "" then
+			Exit Sub
+		end if
+      
+	    tData = Split(sParam, "♥")
+	    if UBOUND(tData) < 1 then
+	      Exit Sub
+	    End if	
+	   
+	    contBuy.edtQty.caption = tData(0)
+	    contBuy.edtOrgNo.caption = tData(1) '주문번호
+
+	elseif sEventName == "AFTER_ORGNO" then		
+		if g_szAfterOrg == "1" then			' 주문번호 연동
+			contBuy.edtOrgNo.caption = Form.GetCtlProp("#edtOrgNo", "caption")
+		end if	
+	end if
+End Sub
+
+'============================================================================
+Sub contBuy_btnBuy_OnClick()
+	Call Check_InputData()'''0
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	If szTranID == "obtrs_oder_301a" then
+	
+		Dim szOrdCd, szOrdMsg, szOrgNo
+		
+		szOrdCd  = DATAMANAGER.GetDataMsgCode(szTranID)
+		szOrdMsg = DATAMANAGER.GetDataMsgText(szTranID)
+
+	    if Trim(szOrdCd) == "0001" then			' 정상주문
+	    
+		    Form.Toast(0, szOrdMsg, true)
+		    
+		    if g_szAfterInit == "1" then		' 주문후 초기화
+		       contBuy.edtOrgNo.caption = ""
+		       contBuy.edtQty.caption = ""
+		    end if
+		end if	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)'''HTS(*)
+	if szTranID == "obtrs_oder_301a" then
+		DATAMANAGER.ClearInputData(0, "obtrs_oder_301a")
+
+		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "SVCD", 0, "304")				''' 서비스코드'
+		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "CHAN_TYPE_CLS_CODE", 0, "020")
+		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "ACNO"				, 0, Form.GetCtlProp("#acc", "total"))	' 계좌번호(8)
+		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "ASNO"				, 0, Form.GetCtlProp("#acc", "sequence"))	' 계좌일련번호(2)
+		
+		'20200910 SWJ START
+		'MTS메모리평문제거 적용상태일 때
+		if plain_rm == "1" then
+			DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "ACNT_PWD"			, 0, Form.GetCtlProp("#edtPwd", "caption"))	' 계좌 비밀번호
+		'MTS메모리평문제거 미적용상태일 때
+		else	
+			DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "ACNT_PWD"			, 0, Form.GetCtlProp("#edtPwd", "encdata"))	' 계좌 비밀번호
+		end if
+		'20200910 SWJ END
+		
+		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "ISCD"				, 0, g_szCd)'''szCd								' 종목코드
+'''		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "ODER_PRC"			, 0, contBuy.edtPrice.caption)								' 주문단가
+		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "ODQT"				, 0, contBuy.edtQty.caption)						' 주문수량
+		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "ORGL_ODER_NO"		, 0, contBuy.edtOrgNo.caption)								' 원주문번호
+'''		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "BYOV_DATE"		, 0, szDATE)'''								' 매수일자
+		DATAMANAGER.SetDataValue(0, "obtrs_oder_301a", "InBlock1", "FEE_LEVY_YN", 0, "0")			' 수수료 징수 여부
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+	Dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+    if Trim(szSubMsg) <> "" then
+		Form.ShowAlert(g_szTitle, szErrMsg & "(" & szSubMsg & ")")
+		'Form.Toast(0, szErrMsg & "(" & szSubMsg & ")", true)	
+	else
+		Form.ShowAlert(g_szTitle, szErrMsg)
+		'Form.Toast(0, szErrMsg, true)
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "주문전송" then
+	  if sRet == "1" then
+	      DATAMANAGER.RequestTranData( "obtrs_oder_301a" )
+      end if
+	' ----------------------------------------------------------------------
+	' 수량확인창에서 리턴
+	' ----------------------------------------------------------------------	
+	elseif sKeyName == "QTY_POPUP" then
+		contBuy.edtQty.caption = sRet
+    end if
+End Sub
+
+'============================================================================
+Sub contBuy_btnMiche_OnClick()
+	Form.triggerEvent("#", "54050_CONTRACT_OPEN", "")
+End Sub
+
+'============================================================================
+Sub contBuy_btnQty_OnClick()
+	Dim szQty, szData
+
+    szQty = contBuy.edtQty.caption
+    szData = szQty
+    Form.OpenPopup("mbfnp54020_p7", szData, "")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrs_oder_301a" trcode="obtrs_oder_301a" compress="1" encryption="1" inputcheck="1" digitalsign="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="SVCD" idx="0" defconst="304" />
+					<FIELD name="CHAN_TYPE_CLS_CODE" idx="16" defconst="020" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrs_oder_301a" title="장내채권 주문" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="1120" _ulen="826" >
+
+SVCD^서비스코드^3^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+BOND_MKPL_CLS_CODE^채권 매매시장 구분 코드^2^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+LOAN_SELN_CLS_CODE^대출매도구분코드^2^0^0^0^0^0^0
+BOND_ODER_UNPR^채권주문단가^20^2^7^0^0^0^0
+ODQT^주문 수량^19^0^7^0^0^0^0
+BYOV_DATE^매수일자^8^0^0^0^0^0^0
+LOAN_DATE^대출 일자^8^0^0^0^0^0^0
+LOAN_SRNO^대출 일련번호^11^0^7^0^0^0^0
+OVRL_SPTX_CLS_CODE^종합 분리과세 구분 코드^1^0^0^0^0^0^0
+BOND_MKFN_CODL_YN^채권 장종료 동시매매 여부^1^0^0^0^0^0^0
+FEE_LEVY_YN^수수료 징수 여부^1^0^0^0^0^0^0
+SSTS_YN^공매도여부^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+ODER_OCRN_TYPE_CODE^주문발생유형코드^2^0^0^0^0^0^0
+ODER_GRP_NO^주문그룹번호^11^0^7^0^0^0^0
+ORGL_ODER_GRP_NO^원주문그룹번호^11^0^7^0^0^0^0
+ORGL_ODER_NO^원주문번호^11^0^7^0^0^0^0
+ODER_COND_CLS_CODE^주문조건구분코드^1^0^0^0^0^0^0
+FLRM_NO^거래원번호^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="44" _ulen="36" >
+
+ODER_NO^주문 번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

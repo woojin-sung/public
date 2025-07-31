@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="56060" scrname="ISA 서비스신청 팝업" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,316,346,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="pop_header.9.png" ly_vert="-4,0,320,55,1" />
+		<IMAGE name="Image5" imgpath="icon_main_11" ly_vert="270,10,30,28,1" />
+		<LABEL name="Label0" fgcolor="006:213049051" fontsize="2" caption="1" ly_vert="20,69,36,40,1" />
+		<LABEL name="Label1" fontsize="2" caption="완료 후 이어하시겠습니까?" ly_vert="82,73,250,31,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="-1,296,160,50,1" />
+		<BUTTON name="ButtonOK" caption="이어하기" fgcolor="001:213049051" btnimage="btn_pop2.9.png" ly_vert="159,296,158,50,1" />
+		<LABEL name="Label3" fontsize="2" fontstyle="01" caption="안내" ly_vert="129,13,52,32,1" />
+		<LABEL name="Label2" fgcolor="006:213049051" fontsize="2" caption="단계" ly_vert="40,69,44,40,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="5" designorder="1" ly_vert="16,115,282,111,1" >
+			<COL_INFO ly_vert_width="141,70,71" />
+			<ROW_INFO ly_vert_height="22,22,22,22,23" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,1" bgcolor="081:229229229" caption="최초신청일" impidxs="" />
+				<CELL cell_ly="1,0,2,1" bgcolor="081:229229229" caption="신청 완료 단계" impidxs="" />
+				<CELL cell_ly="0,2,0,4" impidxs="" />
+				<CELL cell_ly="1,2,2,4" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="Label4" caption="하루동안 서비스신청이 종료되지 않으면" ly_vert="14,231,277,31,1" />
+		<LABEL name="Label5" caption="자동취소 됩니다" ly_vert="14,255,250,31,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1449" _ulen="1419" >
+'=======================================================================
+'20210312_01 SWJ START : ISA 계좌 서비스 신청 이어가기 팝업
+'=======================================================================
+Dim szStep,szStepData 
+'=======================================================================
+Sub Image5_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	
+	if szStep ~= "" or szStep ~= null then 
+		szStep = Form.GetOpenLinkData()
+		
+		Label0.caption = szStep
+	end if
+	
+	
+	shostDate = Form.GetSharedData("&HOST_DATE", true)
+	
+	sYear  = Left(shostDate,4)
+	sMonth = Mid(shostDate,5,2)
+	sDay   = Right(shostDate,2)
+	
+	Table0.SetCellString(1, 0, sYear.."."..sMonth.."."..sDay)
+	Table0.SetCellString(1, 1, szStep.."  단계")
+	Table0.SetCellFgColor(1, 1, 1 )
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	Select Case szStep
+	
+		Case "1"
+			szStepData = "0"
+		Case "2"
+			szStepData = "1"
+		Case "3"
+			szStepData = "2"
+		Case "4"
+			szStepData = "3"
+		Case Else
+			szStepData = "0"
+	
+	End Select
+	
+	Form.SendReturnToParent("Step_Return", szStepData)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.SendReturnToParent("Step_Return_Cancel", "")
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

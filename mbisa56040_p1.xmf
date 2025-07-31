@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="56040" scrname="ISA 매체사용신청_통장" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,213,1" />
+	<CONTROL_INFO>
+		<GRID name="grd0" colcount="2" ly_vert="0,65,309,148,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-2" mask="1,0,,,1,####-####-##,0,1,1,0,0" autofontsize="1" />
+				<LABEL name="th_cell0" fontsize="-2" caption="계좌번호" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-2" autofontsize="1" />
+				<LABEL name="th_cell1" fontsize="-2" caption="상품명" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" initrowcount="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="130,178" ly_vert_visible="0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="130" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="39" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="178" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="39" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle01" fontsize="2" fontstyle="01" caption="통장선택" bgcolor="064:255255255" halign="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="ImageClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4107" _ulen="3551" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : ISA 매체사용신청_통장
+' 02. 화면설명 : 
+' 03. 작    성 : 2016.04.01 김은숙
+' 2020.10.28 : 정민영 : v0001 : 계좌상품 추가
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_sACNO
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_sACNO = Form.GetOpenLinkData()
+	DATAMANAGER.SetDataValue(0, "obaci_mdia_010r", "InBlock1", "ACNO", 0, g_sACNO)	
+	DATAMANAGER.RequestTranData("obaci_mdia_010r")	'통장 사용등록 대상 조회
+End Sub
+
+'============================================================================
+Sub grd0_OnClickUp(lRow, szCellID)
+	Form.SendReturnToParent( "mbisa56040_p1" , grd0.GetCellData( "bd_cell0" , lRow) )
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ImageClose_OnClick()
+	Form.SendReturnToParent( "mbisa56040_p1" , "cancel" )
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If DATAMANAGER.GetDataCount( 0, szTranID , "OutBlock1" ) == 0 then
+		Form.ShowAlert("알림", "사용등록 가능 통장이 없습니다.")
+		Exit Sub
+	End If
+	
+	Dim sASNO, sCode, sText
+	
+	For i = 0 to grd0.rowcount - 1
+		'계좌번호
+		sASNO = grd0.GetCellData("bd_cell0", i)
+		grd0.SetCellData("bd_cell0", i, g_sACNO & sASNO)
+		
+		'상품명
+		sCode = grd0.GetCellData("bd_cell1", i)
+		Select Case sCode
+			Case "100"
+				sText = "종합매매"
+			Case "101"
+				sText = "선물옵션"
+			Case "102"
+				sText = "증권저축"
+			Case "103"
+				sText = "세금우대"
+			Case "104"
+				sText = "생계형저축"
+			Case "105"
+				sText = "은행제휴(위탁)"
+			Case "106"
+				sText = "은행제휴(수익)"
+			Case "107"
+				sText = "은행제휴(은행예수금방식)"
+			Case "108"
+				sText = "(구)증권저축(통합)"
+			Case "109"
+				sText = "연금저축"
+			Case "110"
+				sText = "장기주택마련저축"
+			Case "112"
+				sText = "공동"
+			Case "113"
+				sText = "퇴직연금신탁"
+			Case "114"
+				sText = "비과세장기회사채"
+			Case "115"
+				sText = "MMW"
+			Case "117"
+				sText = "은행제휴종합"
+			Case "118"
+				sText = "CMA자산관리"
+			Case "119"
+				sText = "WRAP(종합매매)"
+			Case "120"
+				sText = "WRAP(선물)"
+			Case "121"
+				sText = "WRAP(CMA자산관리)"
+			Case "123"
+				sText = "생계형(CMA자산관리)"
+			Case "124"
+				sText = "신탁"
+			Case "125"
+				sText = "어음관리계좌"
+			Case "126"
+				sText = "세금우대형(CMA자산관리)"
+			Case "127"
+				sText = "생계형 어음관리계좌"
+			Case "128"
+				sText = "비과세재형저축"
+			'v0001 129~135 상품명 추가(통장 발급 불가상품도 로직은 추가해놓음)
+			Case "129"
+				sText = "메리츠스마트 채권형 랩"
+			Case "130"
+				sText = "소득공제장기저축"
+			Case "131"
+				sText = "연금저축"
+			Case "132"
+				sText = "해외주식펀드저축"
+			Case "133"
+				sText = "개인종합자산관리계좌(ISA)"
+			'134.EUREX 연계계좌 는 개설상품이 아님
+			Case "135"
+				sText = "해외파생"
+			Case Else
+				sText = ""
+		End Select
+		
+		grd0.SetCellData("bd_cell1", i, sText)
+	Next
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_mdia_010r" trcode="obaci_mdia_010r" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="IQRY_CLS_CODE" idx="0" defconst="1" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_mdia_010r" title="통장 사용등록 대상 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="87" _ulen="67" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="99" inout="out" _len="78" _ulen="58" >
+
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="45" _ulen="33" >
+
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

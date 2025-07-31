@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="55000" scrname="비중입력" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,646,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblBack" bgcolor="038:255255255" transmode="0" ly_vert="0,262,375,385,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="330,81,45,45,1" />
+		<IMAGE name="imgDim" imgpath="bg_dim40.9.png" ly_vert="0,0,375,263,1" />
+		<LABEL name="lblBack0" bgcolor="038:255255255" transmode="0" ly_vert="3,316,375,332,1" />
+		<BUTTON name="btnPlus4" caption="4" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,447,94,67,1" />
+		<BUTTON name="btnPlus5" caption="5" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="94,447,94,67,1" />
+		<BUTTON name="btnPlus6" caption="6" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="188,447,94,67,1" />
+		<BUTTON name="btnPlus7" caption="7" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,514,94,67,1" />
+		<BUTTON name="btnPlus8" caption="8" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="94,514,94,67,1" />
+		<BUTTON name="btnPlus9" caption="9" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="188,514,94,67,1" />
+		<BUTTON name="btnClear" caption="C" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="282,447,94,67,1" />
+		<EDIT name="edtQty" mask="0,0,, %,0,,0,1,0" halign="2" imetype="0" maxlength="20" hintcaption=" %" clearall="0" ly_vert="95,319,181,39,1" />
+		<BUTTON name="btnQPlus" btnimage="btn_etc12.9.png" ly_vert="286,319,39,39,1" />
+		<BUTTON name="btnQMinus" btnimage="btn_etc13.9.png" ly_vert="324,319,39,39,1" />
+		<BUTTON name="btnQty" btnimage="alpha" ly_vert="95,319,181,39,1" />
+		<BUTTON name="btnConfirm" caption="확인" fgcolor="128:188030030" fontsize="6" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="282,514,93,134,1" />
+		<BUTTON name="btnPlus1" caption="1" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,380,94,67,1" />
+		<BUTTON name="btnPlus2" caption="2" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="94,380,94,67,1" />
+		<BUTTON name="btnPlus3" caption="3" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="188,380,94,67,1" />
+		<BUTTON name="btnBack" btnimage="btn_keypad3.9.png" ly_vert="282,380,94,67,1" />
+		<BUTTON name="btnPlus0" caption="0" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,581,94,67,1" />
+		<BUTTON name="btnPlus00" caption="00" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="94,581,94,67,1" />
+		<BUTTON name="btnPlus000" caption="000" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="188,581,94,67,1" />
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9.png" ly_vert="-1,263,375,45,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="비중 입력" bgcolor="064:188030030" halign="1" ly_vert="-1,263,375,45,1" />
+		<BUTTON name="btnClose0" btnimage="alpha" ly_vert="329,263,45,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="330,273,24,24,1" />
+		<LABEL name="Label0" caption="비중" halign="1" ly_vert="13,324,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11256" _ulen="11102" >
+
+' 20160317 수량 Max : 8 (전요셉과장)
+
+'============================================================================
+' 화 면 명 : 주식주문_수량입력창
+' 화면설명 : 주식주문 수량입력시
+' 작    성 : 2016.02.15 ~ 2016.  .       ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szMk, g_szReceive
+g_szMk, g_szReceive = "", ""
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+' Calc_Qty : +, - 버튼클릭시 수량 length로 수량단위 계산
+'============================================================================
+Function Calc_Qty(nGbn)
+	Dim szQty, szCalc, szUnit, szCut, szData, szChk
+	Dim nUnit, nLen, nResult
+	
+	g_szReceive = ""
+	g_szMk = Form.GetCtlProp("#edtMk", "caption")
+	szQty = edtQty.caption
+
+	 ' 20160317 예외처리 추가 //////////////////////////////////////////////
+	if Trim(szQty) <> "" then
+		if CDbl(szQty) >= 99000000 then
+			if nGbn == 0 then
+				Exit Function
+			end if
+		end if
+	end if
+	' //////////////////////////////////////////////////////////////////////
+	
+	if g_szMk == "W" then
+		if Trim(szQty) == "" then
+			szQty = 10
+		else			
+			nUnit = 10
+			
+			nLen = Len(nUnit)
+			
+			if nGbn == 0 then
+				szQty = CDbl(szQty) + nUnit
+				nResult = CDbl(szQty) Mod 10
+				
+				if nResult <> 0 then
+					szQty = CDbl(szQty) - nResult
+				end if
+			else			
+				if CDbl(szQty) == 0 then
+					Exit Function
+				else
+					szQty = szQty - nUnit
+					nResult = CDbl(szQty) Mod 10
+					
+					if nResult <> 0 then
+						nResult = 10 - nResult
+						szQty = CDbl(szQty) + nResult
+					end if
+				end if
+			end if
+		end if
+	else
+		if Trim(szQty) == "" then
+			if nGbn == 0 then
+				szQty = 1
+			else
+				Exit Function
+			end if
+		else
+			if Len(szQty) = 1 or Len(szQty) = 2 then
+				nUnit = 1
+			else
+				nCnt = Len(szQty)-1
+				
+				For i = 0 to nCnt-1
+					if i == 0 then
+						szUnit = "1"
+					else
+						szUnit = szUnit & "0"
+					end if
+				Next
+				
+				nUnit = CDbl(szUnit)
+			end if
+		
+			if nGbn == 0 then
+				szQty = CDbl(szQty) + nUnit
+				nResult = CDbl(szQty) Mod nUnit
+				
+				if nResult <> 0 then
+					szQty = CDbl(szQty) - nResult
+				end if
+			elseif nGbn == 1 then
+				if CDbl(szQty) == 0 then
+					Exit Function
+				else		' 20160317 추가사항 적용
+					szQty = szQty - nUnit
+					nResult = CDbl(szQty) Mod nUnit
+
+					if nResult <> 0 then
+						nResult = nUnit - nResult
+						szQty = CDbl(szQty) + nResult
+					elseif nResult == 0 then
+						if Len(nUnit) > 1 then
+							szQty = szQty + nUnit
+							szCut = Mid(szQty, 1, 1)
+							
+							if szCut == "1" then
+								szChk = Mid(szQty, 2, Len(szQty))
+
+								For i = 0 to Len(szChk)-1
+									szData = Mid(szChk, i+1, 1)
+
+									if szData <> "0" then
+										szQty = szQty - nUnit
+										Exit For
+									end if
+									
+									if i == Len(szChk)-1 then
+										nUnit = Left(nUnit, Len(nUnit)-1)
+										szQty = szQty - nUnit
+									end if
+								Next
+							else
+								szQty = szQty - nUnit
+							end if
+						end if
+					end if
+				end if
+			end if
+		end if
+	end if
+	
+	Sum_Qty(szQty)
+End Function
+
+'============================================================================
+' Calc_Plus
+'============================================================================
+Function Calc_Plus(nGbn, nPlus)
+	Dim szQty
+	
+	if g_szReceive == "1" then
+		g_szReceive = ""
+		edtQty.caption = nPlus
+	else
+		szQty = edtQty.caption
+		
+		if nGbn == 1 then
+			if Trim(szQty) == "" then
+				szQty = 0
+			end if
+			
+			szQty = CDbl(szQty) + nPlus
+		else
+			szQty = szQty & nPlus
+		end if
+		
+		Sum_Qty(szQty)
+	end if
+End Function
+
+'============================================================================
+' Calc_Zero
+'============================================================================
+Function Calc_Zero(szPlus)
+	Dim szQty
+	
+	if g_szReceive == "1" then
+		g_szReceive = ""
+		edtQty.caption = ""
+	else	
+		szQty = edtQty.caption
+		
+		if Len(edtQty.caption) > 0 then
+			szQty = edtQty.caption & szPlus
+			
+			Sum_Qty(szQty)
+		end if
+	end if
+End Function
+
+'============================================================================
+' Sum_Qty
+'============================================================================
+Function Sum_Qty(szData)
+	'if Len(szData) < 16 then
+	if Len(szData) < 9 then		' Max 8(20160317 전요셉과장)
+		if CStr(szData) == "0" or CStr(szData) == "" then
+			edtQty.caption = ""
+		else
+			edtQty.caption = szData
+		end if
+	end if
+End Function	
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "INIT" then
+		g_szReceive = "1"
+		edtQty.caption = sParam
+	end if
+End Sub
+
+'============================================================================
+' btnQPlus_OnClick : 수량 + 버튼
+'============================================================================
+Sub btnQPlus_OnClick()	
+	Calc_Qty(0)
+End Sub
+
+'============================================================================
+' btnQMinus_OnClick : 수량 - 버튼
+'============================================================================
+Sub btnQMinus_OnClick()
+	Calc_Qty(1)
+End Sub
+
+'============================================================================
+' btnPlus1_OnClick
+'============================================================================
+Sub btnPlus1_OnClick()
+	Calc_Plus(0, 1)
+End Sub
+
+'============================================================================
+' btnPlus2_OnClick
+'============================================================================
+Sub btnPlus2_OnClick()
+	Calc_Plus(0, 2)
+End Sub
+
+'============================================================================
+' btnPlus3_OnClick
+'============================================================================
+Sub btnPlus3_OnClick()
+	Calc_Plus(0, 3)
+End Sub
+
+
+'============================================================================
+' btnPlus4_OnClick
+'============================================================================
+Sub btnPlus4_OnClick()
+	Calc_Plus(0, 4)
+End Sub
+
+'============================================================================
+' btnPlus5_OnClick
+'============================================================================
+Sub btnPlus5_OnClick()
+	Calc_Plus(0, 5)
+End Sub
+
+'============================================================================
+' btnPlus6_OnClick
+'============================================================================
+Sub btnPlus6_OnClick()
+	Calc_Plus(0, 6)
+End Sub
+
+'============================================================================
+' btnPlus7_OnClick
+'============================================================================
+Sub btnPlus7_OnClick()
+	Calc_Plus(0, 7)
+End Sub
+
+'============================================================================
+' btnPlus8_OnClick
+'============================================================================
+Sub btnPlus8_OnClick()
+	Calc_Plus(0, 8)
+End Sub
+
+'============================================================================
+' btnPlus9_OnClick
+'============================================================================
+Sub btnPlus9_OnClick()
+	Calc_Plus(0, 9)
+End Sub
+
+'============================================================================
+' btnPlus0_OnClick
+'============================================================================
+Sub btnPlus0_OnClick()
+	Calc_Zero("0")
+End Sub
+
+'============================================================================
+' btnPlus00_OnClick
+'============================================================================
+Sub btnPlus00_OnClick()
+	Calc_Zero("00")
+End Sub
+
+'============================================================================
+' btnPlus000_OnClick
+'============================================================================
+Sub btnPlus000_OnClick()
+	Calc_Zero("000")
+End Sub
+
+'============================================================================
+' btnPlus10_OnClick
+'============================================================================
+
+
+'============================================================================
+' btnPlus50_OnClick
+'============================================================================
+
+
+'============================================================================
+' btnPlus100_OnClick
+'============================================================================
+
+
+'============================================================================
+' btnPlus500_OnClick
+'============================================================================
+
+
+'============================================================================
+' btnPlus1000_OnClick
+'============================================================================
+
+
+'============================================================================
+' btnBack_OnClick
+'============================================================================
+Sub btnBack_OnClick()
+	Dim nLen
+	nLen = Len(edtQty.caption)
+
+	if nLen <> 0 then
+		szQty = Left(edtQty.caption, nLen-1)
+		edtQty.caption = szQty
+	end if
+End Sub
+
+'============================================================================
+' btnClear_OnClick
+'============================================================================
+Sub btnClear_OnClick()
+	edtQty.caption = ""
+End Sub
+
+'============================================================================
+' btnConfirm_OnClick
+'============================================================================
+Sub btnConfirm_OnClick()
+	'Form.triggerEvent("#", "RETURN_QTY", edtQty.caption)
+	Form.SendReturnToParent( "mbfnp55000_p5" , edtQty.caption )
+	Form.CloseForm( )
+End Sub
+
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

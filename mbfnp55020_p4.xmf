@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="55020" scrname="외화RP매도_예상금액조회(기타)" version="2" writer="아이티젠" />
+	<FORM_INFO name="GridBank" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="-1,0,375,639,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,270,375,378,1" />
+		<LABEL name="lblMaemae" fontsize="4" fontstyle="01" caption="예상금액 조회" bgcolor="064:188030030" autofontsize="1" ly_vert="20,271,169,61,1" />
+		<TABLE name="tblMaemae" insidelinecolor="102:255255255" colcount="2" rowcount="6" outline="0000" designorder="1" ly_vert="20,339,335,195,1" >
+			<COL_INFO ly_vert_width="125,210" />
+			<ROW_INFO ly_vert_height="35,35,35,20,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="매도신청금액" impidxs="" />
+				<CELL cell_ly="1,0,1,0" import="0,2,0" halign="2" line="0,0" mask="0,0,,USD,0,,2,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="적용이율" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" mask="0,0,,%,0,,2,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="보유기간" impidxs="" />
+				<CELL cell_ly="1,2,1,2" import="0,2,7" halign="2" line="0,0" mask="0,0,,일,1,,0,0,0,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" line="0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="0,0" caption="이자금액" impidxs="" />
+				<CELL cell_ly="1,4,1,4" import="0,2,2" halign="2" line="0,0" mask="0,0,,USD,0,,2,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,5,0,5" halign="0" line="0,0" caption="세금" impidxs="" />
+				<CELL cell_ly="1,5,1,5" import="0,2,3" halign="2" line="0,0" mask="0,0,,USD,0,,2,1,1,0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnClose" caption="확인" fontsize="3" fontstyle="01" btnimage="btn_20.9.png" ly_vert="0,596,375,51,1" />
+		<LABEL name="Label0" caption="정산금액" ly_vert="20,551,125,35,1" />
+		<LABEL name="lblData" mask="0,0,,USD,0,,2,1,1,0,0" halign="2" autofontsize="1" ly_vert="175,551,180,35,1" />
+		<LABEL name="lblLine0" bgcolor="132:215215215" transmode="0" ly_vert="25,451,325,1,1" />
+		<LABEL name="lblLine1" bgcolor="132:215215215" transmode="0" ly_vert="25,541,325,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4483" _ulen="4109" >
+'-------------------------------------------------------------------------------------------
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_sSTPL_INTRT '약정이자율
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInitBefore()
+	 Dim szData, arrData
+	 
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData,"☆")
+	
+	if UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+	
+	'계좌번호 앞8 ^ 계좌번호 뒤2 ^ RP상품유형코드 ^ 종목코드 ^ 신청금액 ^ 매수일자 매수일련번호 만기일자 약정이자율 중도환매이율 만기후적용이율
+	
+	
+	
+	Dim szDate
+	szDate = Form.GetSharedData("&HOST_DATE", false )
+
+	DATAMANAGER.ClearInputData(0, "obsav_deal_207r")
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock1", "ACNO" , 0 , arrData(0) )	'계좌번호8
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock1", "ASNO" , 0 , arrData(1) )	'계좌번호2
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock1", "RP_PROD_TYPE_CODE" , 0 , arrData(2) )	'종목코드
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock1", "ISCD" , 0 , arrData(3) )	'종목코드
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock1", "STND_DATE" , 0 , szDate )	'기준일자
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock1", "RP_DEAL_CLS_CODE" , 0 , "2" )	'매매구분코드
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock1", "DRNG_FRCR_AMT" , 0 , arrData(4) )	'출금금액
+	
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock2", "BYOV_DATE" , 0 , arrData(5) )	'매수일자
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock2", "BYOV_SRNO" , 0 , arrData(6) )	'매수일련번호
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock2", "MTRT_DATE" , 0 , arrData(7) )	'만기일자
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock2", "STPL_INTRT" , 0 , arrData(8) )	'약정이자율
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock2", "HLFW_RPRC_INRT" , 0 , arrData(9) )	'중도환매이율
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock2", "MTRT_AFT_APLY_INRT" , 0 , arrData(10) )	'만기후적용이율
+	DATAMANAGER.SetDataValue( 0 , "obsav_deal_207r", "InBlock2", "PRSN_CORP_CLS_CODE" , 0 , "1" )	'개인법인구분코드
+	
+	DATAMANAGER.RequestTranData( "obsav_deal_207r" )
+
+	'적용이율
+	if Cdbl(szDate) == Cdbl(arrData(7)) then '매도일자 = 만기일자 : 만기이율
+		g_sSTPL_INTRT = arrData(8)
+	elseif Cdbl(szDate) < Cdbl(arrData(7)) then ' 매도일자 < 만기일자 : 중도매도이율
+		g_sSTPL_INTRT = arrData(9)
+	elseif Cdbl(szDate) > Cdbl(arrData(7)) then ' 매도일자 > 만기일자 : 만기후적용이율
+		g_sSTPL_INTRT = arrData(10)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obsav_deal_207r" then
+		Dim sData
+		sData = DATAMANAGER.GetDataValue( 0, "obsav_deal_207r", "OutBlock1", "EXCL_FRCR_AMT" , 0 )
+		
+		lblData.caption = sData '정산금액
+		tblMaemae.SetCellString( 1, 1, g_sSTPL_INTRT ) '약정이율
+	end if
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Form.ShowAlert("알림", szErrMsg)
+End Sub
+
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm( )	
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm( )
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obsav_deal_207r" trcode="obsav_deal_207r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obsav_deal_207r" title="외화RP가상매매" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="349" _ulen="269" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RP_PROD_TYPE_CODE^RP상품유형코드^2^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+STND_DATE^기준일자^8^0^0^0^0^0^0
+MMF_MNRC_YN^MMF입금여부^1^0^0^0^0^0^0
+RP_DEAL_CLS_CODE^RP매매구분코드^1^0^0^0^0^0^0
+DRNG_FRCR_AMT^출금외화금액^20^3^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="361" _ulen="277" >
+
+BYOV_DATE^매수일자^8^0^0^0^0^0^0
+BYOV_SRNO^매수일련번호^11^0^7^0^0^0^0
+MTRT_DATE^만기일자^8^0^0^0^0^0^0
+STPL_INTRT^약정이자율^9^4^7^0^0^0^0
+HLFW_RPRC_INRT^중도환매이율^9^4^7^0^0^0^0
+MTRT_AFT_APLY_INRT^만기후적용이율^9^4^7^0^0^0^0
+PRSN_CORP_CLS_CODE^개인법인구분코드^2^0^0^0^0^0^0
+EXRT^환율^12^4^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="606" _ulen="472" >
+
+FRCR_RPRC_PRNC^외화환매원금^20^3^7^0^0^0^0
+FRCR_DEAL_AMT^외화매매금액^20^3^7^0^0^0^0
+FRCR_INT_AMT^외화이자금액^20^3^7^0^0^0^0
+TAX_SMTN_FRCR_AMT^세금합계외화금액^20^3^7^0^0^0^0
+EXCL_FRCR_AMT^정산외화금액^20^3^7^0^0^0^0
+ERT1^수익률1^14^5^7^0^0^0^0
+ERT2^수익률2^14^5^7^0^0^0^0
+PRD_DYNU^기간일수^9^0^7^0^0^0^0
+INT_AMT^이자금액^19^0^7^0^0^0^0
+INTX^소득세^19^0^7^0^0^0^0
+RSTX^주민세^19^0^7^0^0^0^0
+SRTX^농특세^19^0^7^0^0^0^0
+TAX_AMT^세금금액^19^0^7^0^0^0^0
+EXCL_AMT^정산금액^19^0^7^0^0^0^0
+STND_EXRT^기준환율^12^4^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

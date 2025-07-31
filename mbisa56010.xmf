@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="56010" scrname="ISA 계약평가" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,10,39,39,1" />
+		<FORMTAB name="fmtab0" fontstyle="01" tabcount="3" tabwidthtype="1" tabheadheight="42" autosave="1" ly_vert="0,54,375,508,1" >
+			<PAGE name="page008561" caption="계약평가" linkfile="mbisa56010_t1" loadingtype="1" />
+			<PAGE name="page004795" caption="자산별평가" linkfile="mbisa56010_t2" loadingtype="1" />
+			<PAGE name="page008634" caption="보유현황" linkfile="mbisa56010_t3" loadingtype="1" />
+		</FORMTAB>
+		<ACCOUNT name="acnt0" itemcodetype="133" etcfunctions="" totalacc="1" senddatafield="obwat_ctad_011r.InBlock1.WA_ACNO" ly_vert="10,10,179,39,1" export="0,0,0" />
+		<LABEL name="lblNo" caption="계약번호" halign="1" ly_vert="196,10,65,39,1" />
+		<COMBO name="cmbSeq" ly_vert="260,10,56,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3171" _ulen="2971" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : ISA 계약평가
+' 02. 화면설명 : 
+' 03. 작    성 : 2016.04.01 김은숙
+' 2016-06-13 ESKIM : 계약번호 없을시 메세지 팝업 요청(노희범 차장님)
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+'조회
+Sub RequestData()
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+End Sub
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Call acnt0_ChangeAccount()
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	Call RequestData()	'조회
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+	cmbSeq.clear = 1								'계약번호 초기화
+	DATAMANAGER.RequestTranData( "obwat_ctad_011r" )	'계약번호 조회
+End Sub
+
+'============================================================================
+Sub cmbSeq_OnEditComplete(iIndex)
+	Call RequestData()	'조회
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Call RequestData()	'조회
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	Call RequestData()	'조회
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If szTranID == "obwat_ctad_011r" then
+		Dim i, nCnt	
+
+		nCnt = DATAMANAGER.GetDataCount( 0, szTranID , "OutBlock1" )
+		
+		'2016-06-13 ESKIM : 계약번호 없을시 메세지 팝업 요청(노희범 차장님)
+		If nCnt == 0 then
+			Form.ShowAlert("알림", "ISA 계약이 존재하지 않습니다.")
+		End If
+		
+		For i = 0 To nCnt - 1
+			cmbSeq.cbadddatatext = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "WA_CNRC_NO" , i )		'계약번호
+		Next
+
+		cmbSeq.SetCurSel( 0 )	
+		Call RequestData()	'조회
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubmsg
+	sSubmsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	Form.MsgBox( "알림", szErrMsg & " " & sSubmsg, "", 0 )
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_ctad_011r" trcode="obwat_ctad_011r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="IQRY_CLS_CODE" idx="1" defconst="7" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_ctad_011r" title="랩계약번호조회(콤보)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="105" _ulen="75" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="61" _ulen="43" >
+
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
