@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="계좌비밀번호 오류안내" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha128.png" ly_vert="-1,2,376,649,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image1" imgpath="popup_bg_common.9" ly_vert="21,218,335,208,1" />
+		<BUTTON name="Button1" caption="확인" fontsize="2" fontstyle="01" btnimage="btn_22.9" ly_vert="21,380,335,60,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="4" outline="0000" designorder="1" ly_vert="70,262,229,91,1" >
+			<COL_INFO ly_vert_width="229" />
+			<ROW_INFO ly_vert_height="10,40,40,1" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" valign="2" halign="0" line="0,0" caption="유효하지 않은 비밀번호입니다." fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,0" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="LblTitle" fontsize="2" fontstyle="01" caption="알림" halign="1" ly_vert="62,226,227,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_vert="313,231,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2107" _ulen="1777" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 계좌비밀번호 오류안내
+' 02. 화면설명 : 계좌비밀번호 오류안내
+' 03. 작    성 : 2021.01.13 김유경
+'-------------------------------------------------------------------------------------------
+
+Dim g_Flag
+'============================================================================
+Sub Form_OnFormInit()
+		
+	Image0.imgpath     = "alpha128.png"
+	Button1.btnimage   = "btn_22.9"
+	
+	Dim szData 
+	szData = Form.GetOpenLinkData()
+	
+	If szData = "06" Then '4-8 자리체크
+		Table0.SetCellString( 2, 0,"( 4 ~ 8자리 가능 )")
+	ElseIf szData = "01" Then     '연속된 4자리 숫자
+		Table0.SetCellString( 2, 0,"(연속된 4자리 숫자)")
+	ElseIf szData = "02" Then '동일한 숫자 입력 시
+		Table0.SetCellString( 2, 0,"(동일한 숫자)")
+	ElseIf szData = "03" Then '휴대폰번호와 4자리 이상 일치 시
+		Table0.SetCellString( 2, 0,"(휴대폰번호와 4자리 이상 일치)")
+	ElseIf szData = "04" Then '자택번호와 4자리 이상 일치 시
+		Table0.SetCellString( 2, 0,"(자택번호와 4자리 이상 일치)")
+	ElseIf szData = "05" Then '직장번호와 4자리 이상 일치 시
+		Table0.SetCellString( 2, 0,"(직장번호와 4자리 이상 일치)")
+	ElseIf szData = "07" Then '실명확인번호와 4자리 이상 일치 시
+		Table0.SetCellString( 2, 0,"(실명확인번호와 4자리 이상 일치)")
+	End If
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbbdm85160_p1_end" , "")
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	g_Flag = "ok"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbbdm85160_p1_end" , g_Flag)
+End Sub
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

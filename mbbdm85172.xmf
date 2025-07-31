@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85172" scrname="업무신청-본인계좌 인증(2/2)" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="ContMain" scroll_pos="0,0" ly_vert="0,104,375,475,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="LabStnd" ly_vert="0,488,376,32,1" />
+				<EDIT name="Edit0" imetype="1" maxlength="3" minlength="3" hintcaption="숫자 3자리 입력" imagefilepth="input_03.9" ly_vert="20,193,335,74,1" />
+				<IMAGE name="Image0" imgpath="icon_arrow_right_on" ly_vert="341,283,30,31,1" />
+				<LABEL name="Label0" fontsize="-2" fontstyle="01" caption="계좌변경" ly_vert="274,287,65,23,1" />
+				<LABEL name="Label3" caption="입금자명으로 표시된" ly_vert="10,18,145,19,1" />
+				<LABEL name="Label4" fgcolor="006:213049051" caption="숫자 3자리를 입력" ly_vert="152,18,127,19,1" />
+				<LABEL name="Label2" caption="입력하신 계좌로 1원을 보냈습니다." ly_vert="10,0,335,19,1" />
+				<LABEL name="Label5" caption="하세요." ly_vert="274,18,81,19,1" />
+				<IMAGE name="Image2" autosize="1" imgpath="icon_1won" ly_vert="92,87,191,106,1" />
+				<BUTTON name="Button0" btnimage="alpha" ly_vert="256,274,118,54,1" />
+				<LABEL name="LblTime" fontsize="-2" caption="5:00" ly_vert="268,229,48,32,1" />
+				<IMAGE name="Image3" autosize="1" imgpath="btn_re_request.png" ly_vert="248,232,82,23,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="Label1" fontsize="4" fontstyle="01" caption="본인계좌 인증" halign="1" ly_vert="0,19,375,22,1" />
+		<BUTTON name="BtnNext" caption="확인" fgcolor="016:255255255" fontsize="4" ly_vert="0,587,375,60,1" />
+		<IMAGE name="Image1" imgpath="icon_top_Back Light" ly_vert="22,18,24,24,1" />
+		<CHKBUTTON name="chkSkip" fontsize="-2" chkcaption="테스트인증Skip" unchkcaption="테스트인증Skip" ly_vert="236,53,127,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="14958" _ulen="13448" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 업무신청-본인계좌 인증(2/2)
+' 02. 화면설명 : 본인계좌 인증_입금자명 인증
+' 03. 작    성 : 2021.01.13 김유경
+' 04. 수    정 :  
+'-------------------------------------------------------------------------------------------
+' 1. 수취조회
+'    - mbbdm10070.xmf (obtss_arss_101r)
+' 2. 비대면 업무신청  송금정보 관리 (신규)
+'    - TBACIA072L03  계좌_비대면계좌개설예정 송금정보  / 변경
+'    - 수취조회한 이력까지만 INSERT 
+'    -  mbbdm10070.xmf (obaci_nmet_013a)
+' 3. 1원 역이체 
+'    -  mbbdm10070.xmf (obtss_opnf_101a)
+' 4. 1원이체 검증 (신규)_
+'    -  mbbdm10072.xmf (obaci_nmet_012a)
+' 5. 민간인증서 관리/사용에 필요한 CIKEY 정보 INSERT (신규)
+'   - TBCSBA100L00 고객_개인식별번호내역
+'   -  mbbdm10072.xmf (obcsb_nmet_101a)
+' 2022.12.08 : 강희승 : v0007 : 비대면 본인계좌인증 화면 개선 요청의 건
+' 2023.08.04 : 양현정 : v0008 : 권한설정 추가
+' 2023.08.22 : 전상일 : v0009 : "계좌변경" 텍스트 짤림 수정(스크립트 수정 없음)
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim gTrDate
+Dim gOtsdTrUniqNo
+Dim gAthnMstkCsnu
+Dim sNmetBswrGb '비대면업무구분 (100.비대면계좌개설 000.비대면업무신청)
+Dim gRegUniqNo '등록고유번호
+Dim gCsno
+Dim gBackYn
+
+Dim g_OsType
+Dim szTheme
+
+Dim sLOGIN_TYPE 'v0008
+
+'****************************************************************************
+' v0007 obtss_opnf_101a
+'****************************************************************************
+Dim gRcvnDate
+Dim gRcvnIqryNo
+Dim gBankCode
+Dim gBankAcno
+Dim sName
+Dim getDataBankCode        
+Dim getDataBankAcno  
+Dim getDataBankName
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+Sub Form_OnFormInit()
+	g_OsType = Form.GetSharedData("&OS_TYPE", False)
+	szTheme  = Form.GetEnvData("common.theme")
+	ContMain.Image3.SetMaintainingRatio("3")
+	ContMain.Image3.imgpath ="btn_re_request"
+	
+	Image1.imgpath = "icon_top_back_light"
+	
+	'확인버튼 비활성화
+	BtnNext.enable   = False
+	If szTheme == "black" Then
+		BtnNext.btnimage = "btn_27.9"
+	Else
+		BtnNext.btnimage = "btn_21.9"
+	End If
+	BtnNext.fgcolor  = "269"
+	
+	
+    'v0008 다른앱 인증번호 확인후 돌아오면서 권한설정 풀리는 경우가 있어 재설정 추가(함원규대리확인)
+    '로그인여부
+    sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", False )
+
+    '비로그인상태에서만 비대면화면 권한부여
+    If CInt(sLOGIN_TYPE) <= 1 Then '비로그인상태
+        Form.SetSharedData("&SCREEN_AUTH" , "99") '비대면화면 권한부여
+    End If
+    	
+	
+	ContMain.Edit0.setApplyLabel("입금자 표시번호" ,0 , 268 , "left" , False )
+	ContMain.Edit0.SetUseResultLabel(true,2)
+	'v0007 start
+	ContMain.LblTime.bringFront("1")
+	ContMain.Image3.bringFront("1")
+	ContMain.Image3.visible = false
+	InitCountTimer()
+	Form.SetTimerEvent(14, 1, 1)
+	'v0007 end
+	
+	sNmetBswrGb	= Form.GetSharedData("BDM_NMETBSWRGB"      , false ) 
+	gTrDate 	     = Form.GetSharedData("BDM_TR_DATE"         , false ) 
+	gOtsdTrUniqNo = Form.GetSharedData("BDM_OTSD_TR_UNIQ_NO" , false ) 
+	gRegUniqNo    = Form.GetSharedData("BDM_REG_UNIQ_NO"     , false ) 
+	gCsno         = Form.GetSharedData("BDM_CSNO"            , false ) 
+	
+	'v0007 start
+	gRcvnDate = Form.GetSharedData("RCVN_DATE"      , false ) 
+	gRcvnIqryNo = Form.GetSharedData("RCVN_IQRY_NO"      , false ) 
+	sName = Form.GetSharedData("ACHO_NAME"      , false )
+	
+	getDataBankCode = Form.GetSharedData("BDM_BANKCODE"	      , false )
+	getDataBankAcno = Form.GetSharedData("BDM_BANKACNO"	      , false )
+	getDataBankName =	Form.GetSharedData("BDM_BANKNAME"         , false )
+	'v0007 end
+	
+	'테스트용 인증스킵 체크
+    nDev = Form.GetSharedData("&SERVER_MODE", False )
+    
+    If nDev == "1" Or nDev == 1 Then
+        chkSkip.visible = True
+        'chkSkip.checkstate = "1"  '자동체크 해제
+    Else
+        chkSkip.visible = False
+        chkSkip.checkstate = "0"
+    End If
+    
+End Sub
+
+'============================================================================
+Sub ContMain_Edit0_OnEditComplete()
+	If ContMain.Edit0.caption = "" Then
+	   g_szResultText = "인증번호가 입력되지 않았습니다."
+	   Form.SetTimerEvent2(15, 1, 0.3)
+	   ContMain.Edit0.SetStatus("error")
+	else
+		DATAMANAGER.RequestTranData("obaci_nmet_012a")
+	End If
+End Sub
+
+'============================================================================
+Sub ContMain_Label0_OnClick()
+	
+	'Form.SetSharedData("BACK_YN", "Y")
+	
+	'gBackYn = Form.GetSharedData("BACK_YN", "Y")
+	'If gBackYn == "Y" Then
+		'20210309 김유경 Form.CloseForm() 제거, OpenNextPopup 추가
+		Form.OpenNextPopup("mbbdm85170", "", "" )
+		'20210309 김유경 Form.CloseForm() 제거, OpenNextPopup 추가
+	'End If 	
+
+End Sub
+
+'============================================================================
+Sub ContMain_Image0_OnClick()
+	ContMain_Label0_OnClick()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	If szTranId = "obaci_nmet_012a" Then
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "ATHN_CNFR_NO"  , 0 , ContMain.Edit0.caption) '인증확인번호	
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "REG_UNIQ_NO"   , 0 , gRegUniqNo            ) '인증확인번호	
+	ElseIf szTranId = "obcsb_nmet_101a" Then
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "CSNO" 			, 0 , gCsno                 ) '거래일자
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "REG_UNIQ_NO" 	, 0 , gRegUniqNo            ) '등록고유번호
+	ElseIf szTranID = "obtss_opnf_101a" Then
+		'v0007 start
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "RCVN_DATE"			 , 0 , gRcvnDate              )
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "RCVN_IQRY_NO"		 , 0 , gRcvnIqryNo            )
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "NMET_BSWR_CLCD"		 , 0 , sNmetBswrGb            )
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "MNRC_BANK_CODE"		 , 0 , getDataBankCode             )
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "BANK_ACNO"			 , 0 , getDataBankAcno )
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "ACHO_NAME"			 , 0 , sName                  )
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1",  "REG_UNIQ_NO"		 , 0 , gRegUniqNo             )
+		'v0007 end
+	End If
+End Sub
+
+'===========================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If szTranID = "obaci_nmet_012a" Then
+		
+		gAthnMstkCsnu = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" ,  "ATHN_MSTK_CSNU", 0) 
+		gAthnCnfrDate = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" ,  "ATHN_CNFR_DATE", 0) 
+		
+		If LEN(TRIM(gAthnCnfrDate)) > 0 Then '인증완료 
+			InitCountTimer()
+			ContMain.Edit0.SetResultLabel("1", "complete","본인계좌 인증에 성공하였습니다.","ContMain")
+			ContMain.Edit0.enable = False
+			Form.SetTimerEvent(14, 0, 1)   '타이머 종료
+			'2021.04.28. CIKEY insert/update 서비스 콜 제거
+			'DATAMANAGER.RequestTranData("obcsb_nmet_101a")
+			BtnNext.enable = True
+			BtnNext.btnimage = "btn_20.9"
+			BtnNext.fgcolor = "273"
+			
+		Else
+			
+			If Cint(gAthnMstkCsnu) >= 10 Then
+				Form.OpenPopup("mbbdm85172_p1", "" , "" )
+			Else
+				if g_HPSec ==  60 then
+				else
+					g_szResultText = "인증번호가 일치하지 않습니다.("..	Cint(gAthnMstkCsnu).."/10)\n 10회 오류 시 신청과정이 종료됩니다."
+					Form.SetTimerEvent2(15, 1, 0.3)
+					'ContMain.Edit0.SetResultLabel("1", "error","인증번호가 일치하지 않습니다.("..	Cint(gAthnMstkCsnu).."/10)\n 10회 오류 시 신청과정이 종료됩니다." ,"ContMain")
+					Form.SetTimerEvent2("2", 1, 0.8) '1:Set
+				End If
+			End If
+
+		End If
+	'2021.04.28. CIKEY insert/update 서비스 콜 제거
+'	ElseIf szTranID = "obcsb_nmet_101a" Then
+'		BtnNext.enable = True
+'		BtnNext.btnimage = "btn_20.9"
+'		BtnNext.fgcolor = "273"
+	'v0007 start
+	ElseIf szTranID = "obtss_opnf_101a" Then
+		Dim gNrmlYn
+		gNrmlYn           = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "NRML_YN" 	         , 0)
+		if gNrmlYn == "Y" Then
+			Form.MsgBox( "알림", "1원송금을 완료했습니다.\n입금자명을 확인해주시기 바랍니다.", "", 6 )
+			ContMain.Image3.visible = false
+			ContMain.LblTime.visible = true
+			ContMain.Edit0.enable = true
+			ContMain.Edit0.SetResultLabel("0", "","" ,"ContMain")
+			ContMain.Edit0.caption = ""
+			InitCountTimer()
+			Form.SetTimerEvent(14, 1, 1)	
+		else
+			Form.MsgBox( "알림", "본인계좌인증에 실패하였습니다. 다시 시도하여 주시기 바랍니다.", "", 6 )
+		end if
+	'v0007 end
+	End If
+End Sub 
+	
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg) 
+	If szTranID == "obaci_nmet_012a" Then
+		'2021.04.13. 김유경. 메시지 추가
+		'ContMain.Edit0.SetResultLabel("1", "error","계좌변경 선택 후 재처리 바랍니다." ,"ContMain")
+		g_szResultText = "계좌변경 선택 후 재처리 바랍니다."
+		Form.SetTimerEvent2(15, 1, 0.3)
+	Else
+		ShowAlert "안내", szErrMsg&"\n("&DATAMANAGER.GetDataMsgSubText(szTranID)&")"
+	End If
+			
+End Sub 
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+'	If sKeyName == "mbbdm10071_p1" Then	
+'		Form.OpenPopup("tmp10002", "" , "" ) '홈으로
+'	End If
+
+	If sKeyName = "mbbdm85172_p1_end" Then
+		If sRet == "ok" Then
+			
+			closeFlag = "2"
+			Form.CloseForm()
+			
+		End If
+		
+    end if
+    
+End Sub 
+'============================================================================
+Sub Image1_OnClick()
+	'Form.SetSharedData("BACK_YN", "Y")
+	
+	'gBackYn = Form.GetSharedData("BACK_YN", "Y")
+	'If gBackYn == "Y" Then
+		'20210309 김유경 Form.CloseForm() 제거, OpenNextPopup 추가
+		Form.OpenNextPopup("mbbdm85170", "", "" )
+		'20210309 김유경 Form.CloseForm() 제거, OpenNextPopup 추가
+	'End If 		
+End Sub 
+
+'============================================================================
+Sub BtnNext_OnClick()
+
+	'20210309 김유경 Form.CloseForm() 제거, OpenNextPopup 추가
+	If sNmetBswrGb == "001" Then
+		Form.OpenNextPopup("mbbdm85250", "", "" ) '001.온라인개설계좌 실명확인
+	ElseIf sNmetBswrGb == "002" Then
+		Form.OpenNextPopup("mbbdm85290", "", "" ) '002.계좌비밀번호 재설정
+	ElseIf sNmetBswrGb == "003" Then	
+		Form.OpenNextPopup("mbbdm85260", "", "" ) '003.인증서 온라인신원확인 동의
+	ElseIf sNmetBswrGb == "004" Then
+		Form.OpenNextPopup("mbbdm85210", "", "" ) '004.온라인서비스 신청
+	ElseIf sNmetBswrGb == "005" Then
+		Form.OpenNextPopup("mbbdm85220", "", "" ) '005.온라인 이체한도 등록 및 증액
+	ElseIf sNmetBswrGb == "006" Then
+		Form.OpenNextPopup("mbotp86106", "", "" ) '006.타기관 OTP이용등록
+	ElseIf sNmetBswrGb == "007" Then
+		Form.OpenNextPopup("mbbdm85270", "", "" ) '007.타기관 은행 이체 등록
+	ElseIf sNmetBswrGb == "008" Then
+		Form.OpenNextPopup("mbbdm85280", "", "" ) '008.메리츠 종합계좌간 대체 등록
+	ElseIf sNmetBswrGb == "009" Then
+		Form.OpenNextPopup("mbotp86100", "", "" ) '009.모바일OTP발급
+	ElseIf sNmetBswrGb == "300" Then		'300. MTS에서 모바일 OTP 발급 진행
+		Form.PostLinkData( "mOTPIssuAbleYn", "OK")
+		Form.CloseForm()
+	ElseIf sNmetBswrGb == "301"     Then
+		szData = "P☆안내"
+		Form.OpenNextPopup("mbotp86101", szData, "" ) '301. 모바일OTP비밀번호 초기화
+		
+	ElseIf sNmetBswrGb == "010" Then		'단기다수개설_출금고_제한해지
+		Form.OpenNextPopup("mbbdm85240", "", "")
+		'Form.CloseForm()
+	End If
+	'20210309 김유경 Form.CloseForm() 제거, OpenNextPopup 추가
+	
+End Sub
+
+'============================================================================
+' 테스트인증Skip
+'============================================================================
+Sub chkSkip_OnChange(sCheckState)
+	If sCheckState == "0" Or sCheckState == 0 Then     	
+		BtnNext.enable = False
+		BtnNext.btnimage = "btn_21.9"
+		BtnNext.fgcolor = "269"
+	Else 
+		BtnNext.enable = True
+		BtnNext.btnimage = "btn_20.9"
+		BtnNext.fgcolor = "273"
+    End If
+End Sub 
+
+'============================================================================
+Sub Form_OnFormClose()
+	If closeFlag == "2" Then
+		Form.OpenScreen( "41000" , "")
+	End If
+End Sub 
+'============================================================================
+Sub ContMain_Button0_OnClick()
+	Call Image1_OnClick()
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	If sTimerID == "2" or sTimerID == 2 Then
+		Form.SetTimerEvent2("2", 0, 0.8)
+		ContMain.Edit0.SetShowKeypad(true)
+	Elseif sTimerID == 14 or sTimerID == "14" then
+		if g_HPSec ==  0 then
+			Form.SetTimerEvent(14, 0, 1)
+			Call InitCountTimer()					'5분 타이머 초기화
+			ContMain.Edit0.SetResultLabel("1", "error","인증시간이 만료되었습니다.\n 다시 시도하여 주시기 바랍니다." ,"ContMain")
+			ContMain.Image3.visible = true
+			ContMain.LblTime.visible = false
+			ContMain.Edit0.enable = false
+			ContMain.Edit0.SetStatus("error")
+			'Container0.Edit1.enable = false
+			'Container0.Edit1.caption = ""
+			'Container0.btnConfirm.enable = false		
+			'Container0.btnConfirm.visible = false	
+			
+		else
+			Dim nMin, nSec
+			nMin  = int(g_HPSec / 60 )
+			nSec  =  g_HPSec mod  60
+			if len(nSec) == 1 then 
+				nSec = "0"..nSec
+				nSec = nSec
+			End if 	
+			ContMain.LblTime.caption = nMin..":"..nSec
+			g_HPSec = g_HPSec-1		
+		End if
+	Elseif sTimerID == 15 or sTimerID == "15" then
+		Form.SetTimerEvent2(sTimerID, 0, 0)
+		ContMain.Edit0.SetResultLabel("1", "error",g_szResultText,"ContMain")	
+	End If
+End Sub
+
+'============================================================================
+' 인증번호 만료기간 5분 타이머 초기화 'v0007
+'============================================================================
+Sub InitCountTimer()
+	ContMain.LblTime.caption	= "5:00"	
+	g_HPSec = 300
+	Form.SetTimerEvent(14, 0, 1)	'5분타이머 종료
+End Sub
+
+'============================================================================
+' v0007 인증번호 재요청
+'============================================================================
+Sub ContMain_Image3_OnClick()
+    DATAMANAGER.RequestTranData("obtss_opnf_101a")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_nmet_012a" trcode="obaci_nmet_012a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_nmet_101a" trcode="obcsb_nmet_101a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_opnf_101a" trcode="obtss_opnf_101a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_nmet_012a" title="비대면업무_1원이체 검증 및 오류" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="301" _ulen="221" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_SRNO^등록일련번호^11^0^7^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+ATHN_CNFR_NO^인증확인번호^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="804" _ulen="598" >
+
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+RCVN_DATE^수취일자^8^0^0^0^0^0^0
+TLMS_MNNO^전문관리번호^13^0^0^0^0^0^0
+NMET_BSWR_CLCD^비대면업무구분코드^3^0^0^0^0^0^0
+TACT_DATE^이체일자^8^0^0^0^0^0^0
+TR_TIME^거래시각^9^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+BANK_ACNO^은행계좌번호^16^0^0^0^0^0^0
+BANK_USE_ACNO^은행사용계좌번호^20^0^0^0^0^0^0
+ACHO_NAME^예금주명^40^0^0^0^0^0^0
+ATHN_CNFR_NO^인증확인번호^5^0^0^0^0^0^0
+ATHN_MSTK_CSNU^인증오류건수^11^0^7^0^0^0^0
+ATHN_CNFR_DATE^인증확인일자^8^0^0^0^0^0^0
+ATHN_CNFR_TIME^인증확인시각^9^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_SRNO^등록일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_nmet_101a" title="비대면업무신청휴대폰인증CI관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="87" _ulen="67" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+RSLT_YN^결과여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_opnf_101a" title="비대면업무_1원이체" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="429" _ulen="319" >
+
+RCVN_DATE^수취일자^8^0^0^0^0^0^0
+RCVN_IQRY_NO^수취조회번호^13^0^0^0^0^0^0
+NMET_BSWR_CLCD^비대면업무구분코드^3^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+BANK_ACNO^은행계좌번호^16^0^0^0^0^0^0
+BANK_USE_ACNO^은행사용계좌번호^20^0^0^0^0^0^0
+ACHO_NAME^예금주명^40^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_SRNO^등록일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="211" _ulen="155" >
+
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+TACT_LNKD_ISTU_CODE^이체연계기관코드^3^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+NRML_YN^정상여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

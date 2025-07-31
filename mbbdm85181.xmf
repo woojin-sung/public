@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85181" scrname="계좌개설실패" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="ContMain" vscroll="1" scroll_pos="0,0" ly_vert="0,0,375,587,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" imgpath="icon_error" ly_vert="153,140,70,70,1" />
+				<LABEL name="Label0" fontsize="8" fontstyle="01" caption="계좌 개설이 불가능합니다." halign="1" ly_vert="0,230,375,26,1" />
+				<LABEL name="Label3" halign="1" valign="0" multiline="1" ly_vert="20,276,335,222,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="BtnNext" caption="나중에 개설하기" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9245" _ulen="8429" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 계좌개설실패
+' 02. 화면설명 : 계좌개설실패
+' 03. 작    성 : 2021.01.11 김유경
+' 04. 수    정 :  
+' 2022.05.04 : 김수진 : v0001 : 계약서류 제공방식 추가 > Shared 값 정리
+' 2023.01.26 : 전상일 : v0002 : 임직원매매오류 시 고객센터 문구 제거
+'-------------------------------------------------------------------------------------------
+
+'============================================================================
+Dim g_OsType
+'============================================================================
+Sub Form_OnFormInit()
+	g_OsType = Form.GetSharedData("&OS_TYPE", False)
+	l_emp_yn  = Form.GetSharedData("mbbdm85181_EMP_YN", False) 'v0002
+	
+	szLinkedData = Form.GetOpenLinkData( )
+	
+	'v0002 start
+	if l_emp_yn <> "Y" then
+		szLinkedData = szLinkedData & "\n\n\n\n고객센터에 문의해주세요.\n1588-3400"
+	end if
+	'v0002 end
+	ContMain.Label3.caption = szLinkedData
+			
+	BtnNext.bgcolor 		 = 265 '#EF3B24
+	ContMain.Label1.fgcolor = 268 '#444444
+	ContMain.Label2.fgcolor = 268 '#444444
+	ContMain.Label3.fgcolor = 268 '#444444
+	ContMain.Label4.fgcolor = 268 '#444444
+	
+	'SharedData 초기화
+	Form.SetSharedData("BDM_NMETBSWRGB"           , "" )
+	Form.SetSharedData("BDM_FRST_MAPID"           , "" )
+	Form.SetSharedData("BDM_NAME"                 , "" )
+	Form.SetSharedData("BDM_RCNO_PIP"             , "" )
+	Form.SetSharedData("BDM_COMPANY_CODE"         , "" )
+	Form.SetSharedData("BDM_HP1"                  , "" )
+	Form.SetSharedData("BDM_HP2"                  , "" )
+	Form.SetSharedData("BDM_HP3"                  , "" )
+	Form.SetSharedData("BDM_REG_UNIQ_NO"          , "" )
+	Form.SetSharedData("BDM_REG_STAG_CLS_CODE"    , "" )
+	Form.SetSharedData("BDM_LAST_STAG_CLS_CODE"   , "" )
+	Form.SetSharedData("BDM_CLEAR_YN"             , "" )
+	Form.SetSharedData("BDM_PRNM"                 , "" )
+	Form.SetSharedData("BDM_APLTDATE"             , "" )
+	Form.SetSharedData("BDM_CLSNDATE"             , "" )
+	Form.SetSharedData("BDM_ABLE_YN"              , "" )
+	Form.SetSharedData("BDM_OVRL_ACNT_OPNG_YN"    , "" )
+	Form.SetSharedData("BDM_IDNTF_SRNO"           , "" )
+	Form.SetSharedData("BDM_PRCD100"              , "" )
+	Form.SetSharedData("BDM_PRCD118RP"            , "" )
+	Form.SetSharedData("BDM_PRCD100F"             , "" )
+	Form.SetSharedData("BDM_PRCD101"              , "" )
+	Form.SetSharedData("BDM_PRCD135"              , "" )
+	Form.SetSharedData("BDM_PRCD133"              , "" )
+	Form.SetSharedData("BDM_PRCDCFD"			, ""	)	'v0001 CFD가입여부
+	Form.SetSharedData("BDM_PRCD137"			, ""	)	'v0001 해외CFD가입여부
+	Form.SetSharedData("BDM_ISA_PROD_TYPE"		, ""	)	'v0001 ISA타입	
+	Form.SetSharedData("BDM_CtcnChkAll"           , "" )
+	Form.SetSharedData("BDM_CtcnChk1"             , "" )
+	Form.SetSharedData("BDM_CtcnChk2"             , "" )
+	Form.SetSharedData("BDM_CtcnChk100"           , "" )
+	Form.SetSharedData("BDM_CtcnChk118"           , "" )
+	Form.SetSharedData("BDM_CtcnChk101"           , "" )
+	Form.SetSharedData("BDM_CtcnChk135"           , "" )
+	Form.SetSharedData("BDM_CtcnChkMndt"          , "" )
+	Form.SetSharedData("BDM_CtcnChkSlct"          , "" )
+	Form.SetSharedData("BDM_CtcnChkCFD"			, "")	'v0001 CFD 주요약관/설명서
+	Form.SetSharedData("BDM_MISA_CtcnChk1"		, "")	'v0001 중개형ISA 주요약관/설명서
+	Form.SetSharedData("BDM_ISA_ACNT_OPNG_CLCD" 	, "")	'v0001 ISA계좌개설구분코드(1:신규/2:이수)
+	Form.SetSharedData("BDM_137_CtcnChk1"		, "")	'v0001 해외CFD계좌 약관/거래설명서(위험고지)
+	Form.SetSharedData("BDM_BNK_MNY_OPNG_YN" 	, "")	'v0001 단기다수개설여부	
+	Form.SetSharedData("BDM_MndtC"                , "" )
+	Form.SetSharedData("BDM_MndtD"                , "" )
+	Form.SetSharedData("BDM_MndtE"                , "" )
+	Form.SetSharedData("BDM_MndtE1"               , "" )
+	Form.SetSharedData("BDM_MndtE2"               , "" )
+	Form.SetSharedData("BDM_MndtF"                , "" )
+	Form.SetSharedData("BDM_SlctG"                , "" )
+	Form.SetSharedData("BDM_SlctH"                , "" )
+	Form.SetSharedData("BDM_SlctTel"              , "" )
+	Form.SetSharedData("BDM_SlctSMS"              , "" )
+	Form.SetSharedData("BDM_SlctEmail"            , "" )
+	Form.SetSharedData("BDM_SlctPost"             , "" )
+	Form.SetSharedData("BDM_BDM_ACNT_OPNG_CLCD"   , "" )
+	Form.SetSharedData("BDM_MANG_BRCD"            , "" )
+	Form.SetSharedData("BDM_DALY_TACT_AMT"        , "" )
+	Form.SetSharedData("BDM_ONTR_TACT_AMT"        , "" )
+	Form.SetSharedData("BDM_MARG_GRAD_CODE"       , "" )
+	Form.SetSharedData("BDM_ACNO"                 , "" )
+	Form.SetSharedData("BDM_ACNT_PWD"             , "" )
+	Form.SetSharedData("BDM_DMST_CFD_ACNT_APLT_YN1" , ""  )   'v0001 국내CFD 계좌신청여부(일반)
+	Form.SetSharedData("BDM_DMST_CFD_ACNT_APLT_YN2" , ""  )   'v0001 국내CFD 계좌신청여부(안심)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN1" , ""  )   'v0001 해외CFD 계좌신청여부(미국/일반)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN2" , ""  )   'v0001 해외CFD 계좌신청여부(미국/안심)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN3" , ""  )   'v0001 해외CFD 계좌신청여부(중국/일반)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN4" , ""  )   'v0001 해외CFD 계좌신청여부(중국/안심)	
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN5" , ""  )   'v0001 해외CFD 계좌신청여부(홍콩/일반)			
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN6" , ""  )   'v0001 해외CFD 계좌신청여부(홍콩/안심)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN7" , ""  )   'v0001 해외CFD 계좌신청여부(일본/일반)			
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN8" , ""  )   'v0001 해외CFD 계좌신청여부(일본/안심)		
+	Form.SetSharedData("BDM_RCNO"                 , "" )
+	Form.SetSharedData("BDM_ENGNAME"              , "" )
+	Form.SetSharedData("BDM_ADDRGBN"              , "" )
+	Form.SetSharedData("BDM_ADDR"                 , "" )
+	Form.SetSharedData("BDM_ADDRDTL"              , "" )
+	Form.SetSharedData("BDM_SNMLCLCD"             , "" )
+	Form.SetSharedData("BDM_MAILCLCD"             , "" )
+	Form.SetSharedData("BDM_HP"                   , "" )
+	Form.SetSharedData("BDM_EMAIL"                , "" )
+	Form.SetSharedData("BDM_HNDV_MTHD_CODE"       , "" )	'v0001 계약서류 제공방식	
+	Form.SetSharedData("BDM_OWHSNUM"              , "" )
+	Form.SetSharedData("BDM_WRPLNUM"              , "" )
+	Form.SetSharedData("BDM_ACNTOPNGCLCD"         , "" )
+	Form.SetSharedData("BDM_ADDRESS_YN  "         , "" )
+	Form.SetSharedData("BDM_ADDRESS_REGN_ZIP"     , "" )
+	Form.SetSharedData("BDM_ADDRESS_DTL_ZIP "     , "" )
+	Form.SetSharedData("BDM_ADDRESS_POST"         , "" )
+	Form.SetSharedData("BDM_ADDRESS_DTAD"         , "" )
+	Form.SetSharedData("BDM_ADDRESS_BLDN"         , "" )
+	Form.SetSharedData("BDM_TR_DATE"              , "" )
+	Form.SetSharedData("BDM_OTSD_TR_UNIQ_NO"      , "" )
+	Form.SetSharedData("BDM_CSNO"                 , "" )
+	Form.SetSharedData("BDM_BANKCODE"             , "" )
+	Form.SetSharedData("BDM_BANKACNO"             , "" )
+	Form.SetSharedData("BDM_BACK_YN"              , "" )
+	Form.SetSharedData("BDM_NMET_ACNO"            , "" )
+	Form.SetSharedData("BDM_PW_PIP"               , "" )
+	Form.SetSharedData("BDM_CNFR_PW_PIP"          , "" )
+	Form.SetSharedData("BDM_BANKNAME"             , "" )
+	Form.SetSharedData("BDM_CFD_CtcnChkAll"      , ""  )  'v0001 CFD 전체약관
+	Form.SetSharedData("BDM_CFD_CtcnChk1"        , ""  )  'v0001 장외파생상품거래 기본계약서(위험고지 포함)
+	Form.SetSharedData("BDM_CFD_CtcnChk2"        , ""  )  'v0001 장외파생상품 담보계약서
+	Form.SetSharedData("BDM_CFD_CtcnChk3"        , ""  )  'v0001 장외파생상품 투자를 위한 전문투자자 대우 확인서
+	Form.SetSharedData("BDM_CFD_CtcnChk4"        , ""  )  'v0001 개인전문투자자에 대한 보호제도 미적용 확인서
+	Form.SetSharedData("BDM_CFD_CtcnChk5"        , ""  )  'v0001 금융거래 정보제공 동의서
+	Form.SetSharedData("BDM_REG_SRNO"				, "" )	'v0001 국내CFD목표시장등록일련번호	'ksj 2021-07-23
+	Form.SetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	 	, "" )	'v0001 해외CFD목표시장부적합여부	'ksj 2021-07-23
+	Form.SetSharedData("BDM_ACFD_REG_SRNO"			, "" )	'v0001 해외CFD목표시장등록일련번호	
+	Form.SetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, "" )	'v0001 해외CFD목표시장부적합여부
+End Sub
+'============================================================================
+Sub BtnNext_OnClick()
+	'안내팝업 실행
+	Form.OpenPopup("mbbdm85181_p1" , "" , "")
+End Sub
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName = "mbbdm85181_p1_end" Then
+		If sRet == "ok" Then
+			Form.CloseForm()
+			Form.OpenScreen( "41000" , "")
+		End If
+	End If 
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed() '안드로이드전용
+	Form.OpenPopup("mbbdm85181_p1" , "" , "") 
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

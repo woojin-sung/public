@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="본인확인서비스 이용약관" version="2" writer="정민영" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="labTitle" fontsize="4" fontstyle="01" caption="본인인증 이용약관" halign="1" ly_vert="0,0,375,60,1" />
+		<FORMTAB name="fmtab" tabcount="4" tabheadwidth="0" tabheadheight="0" usepg="1" ly_vert="20,60,335,489,1" >
+			<PAGE name="1" caption="개인정보수집/이용등록" linkfile="mbbdm85110_s1" loadingtype="1" />
+			<PAGE name="2" caption="고유식별정보처리동의" linkfile="mbbdm85110_s2" loadingtype="1" />
+			<PAGE name="3" caption="통신사이용약관동의" linkfile="mbbdm85110_s3" loadingtype="1" />
+			<PAGE name="4" caption="서비스이용약관" linkfile="mbbdm85110_s4" loadingtype="1" />
+		</FORMTAB>
+		<BUTTON name="bntOK" caption="확인" fontsize="4" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+		<IMAGE name="imgNext" autosize="1" ly_vert="329,311,24,24,1" />
+		<IMAGE name="imgPrev" autosize="1" ly_vert="20,311,24,24,1" />
+		<IMAGE name="imgCanc" autosize="1" imgpath="icon_close.png" ly_vert="20,18,24,24,1" />
+		<LABEL name="lblPage" halign="1" autofontsize="1" ly_vert="0,559,375,18,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3295" _ulen="2959" >
+'--===========================================================================
+' 01. 화 면 명 : 본인확인서비스 이용약관
+' 02. 화면설명 : 휴대폰 본인확인서비스 이용약관
+' 03. 작    성 : 2021.01.22 : 정민영
+' 04. 수    정 : 
+'
+'--===========================================================================
+
+Dim g_Flag
+
+'============================================================================
+' Form
+'============================================================================
+'============================================================================
+Sub Form_OnFormInit()
+
+    '좌/우페이지넘김 이미지 설정
+    'imgPrev.imgpath = "icon_menu_scroll_arrow_left.9.png"    '연한회색 작은꺽쇠
+    'imgNext.imgpath = "icon_menu_scroll_arrow_right.9.png"
+    'imgPrev.imgpath = "icon_arrow5_l.png"    '두껍고 큰 꺽쇠
+    'imgNext.imgpath = "icon_arrow5_r.png"
+    imgPrev.imgpath = "icon_arrow3_l.png"    '덜두껍고 큰 꺽쇠
+    imgNext.imgpath = "icon_arrow3_r.png"
+
+	'안드로이드-백버튼 작동X
+	'부모창이 먼저 닫히는 오류방지를 위해 해당화면은 백버튼 작동X 처리
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+
+	fmtab.currenttab = 0 
+	fmtab_OnTabChanged(0)
+End Sub
+
+
+
+'============================================================================
+' 좌/우 페이지처리
+'============================================================================
+'============================================================================
+Sub fmtab_OnTabChanged(nCurrentTab)
+    '페이지표시
+	nowPage = CInt(nCurrentTab)+1
+	If nowPage > 4 Then
+        nowPage = 4
+	end If
+    lblPage.caption = nowPage.."/4"
+End Sub
+'============================================================================
+Sub imgPrev_OnClick()
+    nowTabId = fmtab.currenttab
+    If CInt(nowTabId) > 0 Then
+		iIdx = fmtab.currenttab
+		fmtab.currenttab = CInt(iIdx) - 1
+		fmtab_OnTabChanged(CInt(iIdx) - 1)
+	End If
+End Sub
+'============================================================================
+Sub imgNext_OnClick()
+    'nowTabId = fmtab.currenttab
+    nowTabId = fmtab.currenttabpageid
+    If CInt(nowTabId) < 4 Then
+		iIdx = fmtab.currenttab
+		fmtab.currenttab = CInt(iIdx) + 1
+		fmtab_OnTabChanged(CInt(iIdx) + 1)
+	End If	
+End Sub
+
+
+
+'============================================================================
+' 종료
+'============================================================================
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	imgCanc_OnClick()
+End Sub
+'============================================================================
+Sub imgCanc_OnClick()
+	g_Flag = ""
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub bntOK_OnClick()
+	'확인 버튼으로 종료시에만 정상확인 처리
+	g_Flag = "ok"
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+	'화면닫기전 안드로이드-백버튼 작동Y 원복
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+	
+	Form.SendReturnToParent("mbbdm85110_p1", g_Flag)
+End Sub
+
+
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="10926" scrname="업무신청 실패" version="2" writer="성주혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" scroll_pos="0,0" ly_vert="0,3,374,506,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" imgpath="icon_error" ly_vert="153,140,70,70,1" />
+				<LABEL name="Label0" fontsize="8" fontstyle="01" caption="업무신청이 불가능합니다." halign="1" ly_vert="0,230,375,26,1" />
+				<LABEL name="Label1" caption="고객센터에 문의해주세요.
+1588-3400" halign="1" multiline="1" ly_vert="0,334,375,38,1" />
+				<LABEL name="Label2" halign="1" multiline="1" ly_vert="20,276,335,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="btnOK" caption="나중에 신청하기" fontsize="4" btnimage="btn_01.9" ly_vert="0,587,375,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1774" _ulen="1544" >
+'===========================================================================
+'v0002 : 전상일 : 단기다수개설자 시 실패 후 단기다수개설 출금/고 제한 해지 화면으로 이동
+'===========================================================================
+'진입점에서 설정되는 정보 ---------------------------------------
+Dim g_BDM_FRST_MAPID			'최초진입점화면ID
+
+Dim Acno
+Dim ApltGubun
+Dim ApltCntt
+Dim ApltTime
+
+Dim ErrMsg
+
+Dim g_Flag
+
+Dim g_BDM_STO 'v0002 단기다수개설자
+'============================================================================
+Sub Form_OnFormInit()
+	g_BDM_FRST_MAPID = Form.GetSharedData("BDM_FRST_MAPID"         , false)  '최초진입화면ID
+	g_BDM_STO = Form.GetSharedData("BDM_NMET_SHORT_TERM_OPEN"         , false)  ' v0002 단기다수개설자여부
+	'g_BDM_FRST_MAPID = "screen41000"
+	'ShowAlert("g_BDM_FRST_MAPID", g_BDM_FRST_MAPID)
+	if g_BDM_STO == "Y" then
+		btnOK.caption = "단기다수개설 출금/고 제한 해지 신청하기" 
+	end if
+	szData = Form.GetOpenLinkData() 'errmsg
+	
+	ErrMsg = szData
+	Container0.Label2.caption =ErrMsg 
+	
+End Sub
+'============================================================================
+Sub btnOK_OnClick()
+	g_Flag = "ok"
+	Form.CloseForm()
+End Sub
+
+Sub Form_OnFormClose()
+	if g_BDM_STO == "Y" then
+		Form.SetSharedData("BDM_NMETBSWRGB", "010") '단기다수 해지쪽으로 토스
+		Form.SendReturnToParent("mbbdm85240_start" , g_Flag)
+	else
+		Form.SetSharedData("BDM_NMETBSWRGB", "") '업무구분초기화 JMY
+		Form.SendReturnToParent("mbbdm85202_end" , g_Flag)
+	end if
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용
+	btnOK_OnClick()
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

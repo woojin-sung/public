@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86151" scrname="신분증촬영_메시지팝업" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha128.png" ly_vert="-2,-1,376,649,1" />
+		<IMAGE name="Image1" imgpath="popup_bg_common.9" ly_vert="29,164,315,269,1" />
+		<LABEL name="titleLabel0" fontsize="2" fontstyle="01" caption="알 림" halign="1" ly_vert="49,193,275,32,1" />
+		<IMAGE name="Image0" imgpath="icon_main_13" ly_vert="304,174,20,20,1" />
+		<LABEL name="BodyLabel0" halign="1" multiline="1" ly_vert="48,231,275,145,1" />
+		<BUTTON name="Button1" caption="확  인" btnimage="btn_22.9" ly_vert="29,383,315,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1348" _ulen="1300" >
+'============================================================================
+Dim gFlag 
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	szData = Form.GetOpenLinkData()
+	if szData <> "" and szData <> null then
+		szData_arr = Split(szData, "#")
+		
+		'0:타이틀명 1:본문 2:플래그값
+		szTitle = szData_arr(0)
+		szBody = szData_arr(1)
+		gFlag = szData_arr(2)
+		
+		
+		Image0.visible = false	'X표 없애달라고 함
+		
+		'화면사이즈 변경
+		if gFlag == "complete" then
+			
+			Image1.height = 219		'Image1.height - 50
+			BodyLabel0.height = 95		'BodyLabel0.height - 50
+			BodyLabel0.top = 221
+			Button1.top = 333
+			
+		elseif gFlag = "error" then
+		
+			Image1.height = 219		'Image1.height - 50
+			BodyLabel0.height = 95		'BodyLabel0.height - 50
+			BodyLabel0.top = 221
+			Button1.top = 333
+		
+		end if
+		
+		
+		titleLabel0.caption = szTitle
+		BodyLabel0.caption = szBody
+	end if
+
+End Sub
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	
+	if gFlag == "complete" then
+		Form.SendReturnToParent("mbbdm86151_p1" , "complete_ok")
+		Form.CloseForm()
+	else
+		Form.CloseForm()
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85240" scrname="단기다수개설_출금고_제한해지" version="2" writer="양현정" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label2" fontsize="3" caption="단기다수개설 출금/고 제한 해지" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="Image1" imgpath="icon_top_back_light" ly_vert="21,19,22,22,1" />
+		<BUTTON name="Button1" caption="홈으로" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+		<BUTTON name="Button0" caption="신청" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+		<CONTAINER name="Container1" visible="0" bgcolor="038:255255255" scroll_pos="0,0" ly_vert="0,60,375,537,0" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fontsize="1" fontstyle="01" caption="출금/고 제한 해지가
+완료되었습니다." halign="1" multiline="1" ly_vert="60,120,255,50,1" />
+				<TABLE name="Table0" outlinecolor="144:034034034" insidelinecolor="026:186186186" colcount="3" rowcount="3" outline="0100" designorder="1" ly_vert="10,187,355,120,1" >
+					<COL_INFO ly_vert_width="75,100,180" />
+					<ROW_INFO ly_vert_height="40,40,40" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" bgcolor="132:215215215" line="0,1" caption="계좌번호" fontsize="-1" impidxs="" />
+						<CELL cell_ly="1,0,2,0" halign="0" line="0,1" caption="111" fontsize="-1" impidxs="" />
+						<CELL cell_ly="0,1,0,1" bgcolor="132:215215215" line="0,1" caption="신청업무" fontsize="-1" impidxs="" />
+						<CELL cell_ly="1,1,2,1" halign="0" line="0,1" caption="단기다수개설 출금/고 제한 해지" fontsize="-1" impidxs="" />
+						<CELL cell_ly="0,2,0,2" bgcolor="132:215215215" line="0,1" caption="신청일시" fontsize="-1" impidxs="" />
+						<CELL cell_ly="1,2,1,2" halign="0" line="0,1" caption="20230223" fontsize="-1" mask="1,0,,,1,####-##-##,0,1,1" impidxs="" />
+						<CELL cell_ly="2,2,2,2" halign="0" line="0,1" caption="1721" fontsize="-1" mask="1,0,,,1,##:##,0,1,1" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<IMAGE name="Image0" imgpath="icon_ok" ly_vert="145,70,85,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="Container0" bgcolor="038:255255255" vscroll="1" scroll_pos="0,0" ly_vert="0,60,375,537,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<COMBO name="cmbAcct" fontsize="4" popuptitle="종합계좌를 선택해주세요" imagefilepth="input_03.9" disptype="-1" ly_vert="20,20,335,75,1" />
+				<EDIT name="edtPwd" visible="0" fontsize="4" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호를 입력해주세요" imagefilepth="input_03.9" ly_vert="20,110,335,75,0" />
+				<LABEL name="AinfoPos" caption="   " ly_vert="0,0,100,32,1" />
+				<LABEL name="Label1" fgcolor="146:124124124" caption="단기간 다수계좌로 20영업일간 출금/고
+제한 사항이 해지됩니다." bgcolor="143:049050052" halign="1" multiline="1" ly_vert="0,450,375,50,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11686" _ulen="10598" >
+'============================================================================
+' 화 면 명 : 단기다수개설 출금고 제한해지(mbbdm85240.xmf)
+'============================================================================
+
+'============================================================================
+' 전역변수
+'============================================================================
+Dim g_ACNO
+
+'============================================================================
+' 							FORM 함수
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Container1.Image0.SetMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'항목가이드 Default 설정
+	Container0.cmbAcct.SetApplyLabel	("종합계좌번호", 		0, 268  ,"left", true, 80) 'True.필수입력 / False.선택입력
+	Container0.edtPwd.SetApplyLabel		("종합계좌 비밀번호",	0, 268 , "left", true)
+    
+    '헬퍼텍스트 설정
+    Container0.cmbAcct.SetUseResultLabel	(True, 1)  'True.사용가능 / False.사용불가, 라인수
+    Container0.edtPwd.SetUseResultLabel	(True, 1)
+    
+    Button0.visible	= true
+    Button0.enable	= false
+    Button1.visible	= false
+    Button1.enable	= false
+    
+	DATAMANAGER.RequestTranData("obaci_nmet_017r")
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+
+    '종합계좌콤보 포커싱 및 자동펼치기
+    if sTimerID == "9999" Or sTimerID == 9999 Then
+        Form.SetTimerEvent2(sTimerID, 0, 0.8)
+
+        if CInt(Container0.cmbAcct.currentindex) < 1 Then
+            Container0.cmbAcct.openList()
+        end if
+	
+    end if
+    
+End Sub
+
+'============================================================================
+' 							DATAMANAGER 함수
+'============================================================================		
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	' 단기다수개설 출금/고 제한 계좌 조회
+	if szTranID == "obaci_nmet_017r" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "BSWR_CLCD", 			0, "1")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RCNO_PIP", 			0, Form.GetSharedData("BDM_RCNO_PIP", false))
+	' 계좌비밀번호 체크
+	elseif szTranID == "obacp_opop_066r" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO", 				0, replace(g_ACNO, "-" , ""))
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNT_PWD", 			0, Container0.edtPwd.caption)
+			
+	' 단기다수개설 출금/고 제한 해지
+	elseif szTranID == "obaci_acct_307a" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO", 				0, replace(g_ACNO, "-" , ""))
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNT_PWD", 			0, Container0.edtPwd.caption)
+		
+	elseif szTranID == "obaci_nmet_005a" then
+		Dim HP1, HP2, HP3, TEL_no, strREG_UNIQ_NO
+		HP1 				= Form.GetSharedData("BDM_HP1", False )
+		HP2 				= Form.GetSharedData("BDM_HP2", False )
+		HP3				= Form.GetSharedData("BDM_HP3", False )
+		TEL_no			= HP1 & HP2 & HP3
+		strREG_UNIQ_NO	= Form.GetSharedData("BDM_REG_UNIQ_NO", False)
+		
+		'고정부
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO", 				0, replace(g_ACNO, "-" , "")) '계좌번호
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ASNO", 				0, "") 
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "DRNG_BANK_CODE",		0, "")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "BANK_ACNO", 			0, "")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "THCO_MNRC_ACNO", 		0, "")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "THCO_MNRC_ASNO", 		0, "")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "IDNTF_SRNO", 		0, Trim(Form.GetSharedData("BDM_IDNTF_SRNO", false)))'신분증인증화면에서 가져옴
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RLNM_CNFR_MTHD_CODE", 0, "01")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "WHOL_CPNO", 			0, TEL_no)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "REG_UNIQ_NO", 		0, strREG_UNIQ_NO)
+	
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN1", 			0, "") '온라인개설계좌 실명 확인
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN2", 			0, "") '비밀번호 재설정
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN3", 			0, "") '공인인증서 재발급 동의  신청여부 
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN4", 			0, "") '온라인서비스 신청
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN5", 			0, "") '온라인 이체한도 등록 및 증액
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN6", 			0, "") '타기관OTP 등록
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN7", 			0, "") '타기관 은행이체 등록
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN8", 			0, "") '메리츠 종합계좌간 대체 등록
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN9", 			0, "") '메리츠 종합계좌간 대체 등록
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "APLT_YN10", 			0, "Y") '메리츠 종합계좌간 대체 등록
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "T1_TACT_LIMT_AMT", 	0, 0) 
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "D1_TACT_LIMT_AMT", 	0, 0)
+		
+		'otp업무 안하므로 고정 ""
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "OTP_SUPL_CO_CODE", 	0, "")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "OTP_CARD_SRNO", 		0, "")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "OTP_ISNC_ISTU_CODE",	0, "")
+
+		'대체/이체 등록 화면외 전부 ""
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ALTN_ACNO1",			0, "") '메리츠계좌간대체 계좌1
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ALTN_ACNO2",			0, "") '계좌2
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ALTN_ACNO3",			0, "") '계좌3
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "TACT_BANK_ACNO1", 	0, "") '타기관 은행이체 계좌1
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "TACT_BANK_ACNO2", 	0, "") '계좌2
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "TACT_BANK_ACNO3", 	0, "") '계좌3
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "BANK_CODE1", 		0, "") '타기관 은행이체 은행1
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "BANK_CODE2", 		0, "") '은행2
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "BANK_CODE3", 		0, "") '은행3
+	end if
+	
+End Sub	
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	' 단기다수개설 출금/고 제한 계좌 조회
+	if szTranID = "obaci_nmet_017r" then	
+	
+		if DATAMANAGER.IsMoreNextData(szTranID) then
+			DATAMANAGER.RequestNextData(szTranID)
+			Exit Sub
+		end if
+
+		Dim IQRY_CSNU, nCnt, nGrdCnt
+		nCnt = CInt(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "IQRY_CSNU", 0))	'조회건수
+		
+		' 계좌가 있는 경우
+		if nCnt > 0 then
+
+			for i = 0 to nCnt - 1
+				Dim ACNO
+				ACNO = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock2", "ACNO", i)	'계좌번호
+
+				if Len(Trim(ACNO)) == 8 Then
+					Container0.cmbAcct.cbadddatatext = ACNO.."`"..Left(ACNO, 4).."-"..Mid(ACNO, 5, 4)
+				end if
+				
+			next
+			
+			Container0.cmbAcct.caption	= "종합계좌를 선택해주세요"
+			Container0.cmbAcct.enable	= true
+
+			'종합계좌콤보 리스트 자동오픈
+			Form.SetTimerEvent2("9999", 1, 0.8)
+
+		' 계좌가 없는 경우
+		else
+			Form.openPopupAnimation("mbbdm85240_p1", "", "", "2")
+			
+			Container0.cmbAcct.caption	= "선택가능한 종합계좌가 없습니다."
+			Container0.cmbAcct.enable	= false
+		end if
+
+	' 단기다수개설 출금/고 제한 해지
+	elseif szTranID = "obaci_acct_307a" then
+		Dim PROS_YN
+		PROS_YN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PROS_YN", 0)
+
+		if PROS_YN = "Y" then
+			Dim HostDate, HostTime
+			HostDate	= Form.GetSharedData("&HOST_DATE", false)			'오늘날짜
+			HostTime	= LEFT(Form.GetSharedData("&HOST_TIME", false), 4)	'오늘시간(시분)
+
+			Button0.visible	= false
+			Button0.enable	= false
+			Button1.visible	= true
+			Button1.enable	= true
+			
+			Container0.visible = false
+			Container1.visible = true
+			
+			Container1.Table0.SetCellString(0, 1, g_ACNO)
+			Container1.Table0.SetCellString(2, 1, HostDate)
+			Container1.Table0.SetCellString(2, 2, HostTime)		
+		end if
+	
+	elseIf szTranID == "obaci_nmet_005a" then '최종업무신청 성공
+		DATAMANAGER.RequestTranData("obaci_acct_307a")
+	elseIf szTranID == "obacp_opop_066r" then '계좌비밀번호 조회
+		DATAMANAGER.RequestTranData("obaci_nmet_005a")	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubErr = DATAMANAGER.GetDataMsgSubText(szTranID)
+
+	if szSubErr <> null and Trim(szSubErr) <> "" then
+		Form.ShowAlert("안내", szErrMsg.."("..szSubErr..")")
+	else
+		Form.ShowAlert("안내", szErrMsg)
+	end if
+	
+	if szErrCode = "3335" or szErrCode = 3335 then
+		
+	else 
+		Button1_OnClick()
+	end if
+	
+End Sub
+
+'============================================================================
+' 							CONTROL 함수
+'============================================================================
+'종합계좌번호
+'============================================================================
+Sub Container0_cmbAcct_OnEditComplete(iIndex)
+	Container0.cmbAcct.SetResultLabel("0","complete","","Container0")
+	Container0.edtPwd.visible = True
+	Container0.edtPwd.caption = ""
+	
+	'계좌비밀번호 입력키보드 자동보이기
+	if Container0.edtPwd.caption == "" or Container0.edtPwd.caption == null then
+		Container0.edtPwd.SetShowKeypad(true)
+	end if
+	
+End Sub
+
+'============================================================================
+'종합계좌 비밀번호
+'============================================================================
+Sub Container0_edtPwd_OnEditComplete()
+
+	if Trim(Container0.cmbAcct.caption) == "" or Trim(Container0.cmbAcct.caption) == null or Trim(Container0.cmbAcct.caption) == "종합계좌를 선택해주세요" then
+		ShowAlert("안내", "종합계좌번호를 선택해주세요.")
+		Button0.enable = false
+		Exit Sub
+
+	elseif CInt(Container0.edtPwd.pwdlen) < 4 then
+		ShowAlert("안내", "최소 4자리 이상 입력해야 합니다.")
+		Button0.enable = false
+		Exit Sub	
+	end if
+	
+	Button0.enable = true
+End Sub
+
+'============================================================================
+' 최종업무신청
+'============================================================================
+Sub Button0_OnClick()
+
+	if Trim(Container0.cmbAcct.caption) == "" or Trim(Container0.cmbAcct.caption) == null or Trim(Container0.cmbAcct.caption) == "종합계좌를 선택해주세요" then
+		ShowAlert("안내", "종합계좌번호를 선택해주세요.")
+		Exit Sub
+
+	elseif Container0.edtPwd.caption == "" then
+		ShowAlert("안내", "비밀번호를 입력하세요.")
+		Exit Sub
+	End If
+	
+	g_ACNO = Container0.cmbAcct.caption
+	
+	DATAMANAGER.RequestTranData("obacp_opop_066r")
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	Form.OpenScreen("41000", "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Image1_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_nmet_017r" trcode="obaci_nmet_017r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_307a" trcode="obaci_acct_307a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_nmet_005a" trcode="obaci_nmet_005a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_opop_066r" trcode="obacp_opop_066r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_nmet_017r" title="단기다수개설 출금/고 제한 계좌" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="130" _ulen="98" >
+
+BSWR_CLCD^업무구분코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="45" _ulen="37" >
+
+IQRY_CSNU^조회건수^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="100" inout="out" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_307a" title="단기다수개설 출금/고 제한 계좌" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="83" _ulen="63" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_nmet_005a" title="비대면 유선업무 신청 (App)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="545" _ulen="395" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+DRNG_BANK_CODE^출금은행코드^3^0^0^0^0^0^0
+BANK_ACNO^은행계좌번호^16^0^0^0^0^0^0
+THCO_MNRC_ACNO^당사입금계좌번호^8^0^0^0^0^0^0
+THCO_MNRC_ASNO^당사입금계좌일련번호^2^0^0^0^0^0^0
+IDNTF_ISNC_DATE^신분증발급일자^8^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+RLNM_CNFR_MTHD_CODE^실명확인방법코드^2^0^0^0^0^0^0
+WHOL_CPNO^전체휴대폰번호^16^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="867" _ulen="667" >
+
+APLT_YN1^신청여부^1^0^0^0^0^0^0
+APLT_YN2^신청여부^1^0^0^0^0^0^0
+APLT_YN3^신청여부^1^0^0^0^0^0^0
+APLT_YN4^신청여부^1^0^0^0^0^0^0
+APLT_YN5^신청여부^1^0^0^0^0^0^0
+APLT_YN6^신청여부^1^0^0^0^0^0^0
+APLT_YN7^신청여부^1^0^0^0^0^0^0
+APLT_YN8^신청여부^1^0^0^0^0^0^0
+APLT_YN9^신청여부^1^0^0^0^0^0^0
+APLT_YN10^신청여부^1^0^0^0^0^0^0
+CNFT_ACNO^상대계좌번호^8^0^0^0^0^0^0
+CNFT_ASNO^상대계좌일련번호^2^0^0^0^0^0^0
+T1_TACT_LIMT_AMT^1회이체한도금액^19^0^7^0^0^0^0
+D1_TACT_LIMT_AMT^1일이체한도금액^19^0^7^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+BANK_ACNO^은행계좌번호^16^0^0^0^0^0^0
+ACHO_NAME^예금주명^40^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="144" _ulen="108" >
+
+ALTN_ACNO1^대체계좌번호1^8^0^0^0^0^0^0
+ALTN_ACNO2^대체계좌번호2^8^0^0^0^0^0^0
+ALTN_ACNO3^대체계좌번호3^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="296" _ulen="224" >
+
+TACT_BANK_ACNO1^이체은행계좌번호^16^0^0^0^0^0^0
+TACT_BANK_ACNO2^이체은행계좌번호^16^0^0^0^0^0^0
+TACT_BANK_ACNO3^이체은행계좌번호^16^0^0^0^0^0^0
+BANK_CODE1^은행코드1^3^0^0^0^0^0^0
+BANK_CODE2^은행코드2^3^0^0^0^0^0^0
+BANK_CODE3^은행코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="272" _ulen="202" >
+
+TACT_MNRC_SCDL_AMT^이체입금예정금액^19^0^7^0^0^0^0
+TACT_MNRC_CLSN_DATE^이체입금마감일자^8^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+NMET_OPNG_APLT_TIME^비대면개설신청시각^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_opop_066r" title="계좌Control 비밀번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="196" _ulen="150" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_EMPNO^관리 직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

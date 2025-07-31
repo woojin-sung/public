@@ -1,0 +1,3964 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86130" scrname="비대면휴대폰인증" version="2" writer="정민영" />
+	<FORM_INFO name="Form" acecnt="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" vscroll="1" ly_vert="0,84,375,506,1" scroll_ly_vert="0,84,375,506,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="휴대폰 본인인증" ly_vert="20,10,342,20,1" />
+				<EDIT name="edtName" fontsize="4" imetype="0" maxlength="40" hintcaption="이름을 입력해주세요" imagefilepth="input_03.9" ly_vert="20,76,335,74,1" />
+				<EDIT name="edtRcno" visible="0" fontsize="4" password="1" imetype="1" maxlength="13" hintcaption="주민등록번호를 입력해주세요" imagefilepth="input_03.9" ly_vert="20,166,335,74,0" />
+				<LABEL name="lblScrollPos" bgcolor="227:248084091" ly_vert="14,422,336,13,1" />
+				<COMBO name="cmbMcco" visible="0" fontsize="4" cbinputdatatext="<![CDATA[1`SKT
+2`KT
+3`LG U+
+5`SKT 알뜰폰
+6`KT 알뜰폰
+7`LG 알뜰폰]]>" popuptitle="통신사를 선택해주세요" imagefilepth="input_03.9" disptype="-1" ly_vert="20,257,335,74,0" />
+				<EDIT name="edtHPNo" visible="0" fontsize="4" mask="1,0,,,1,###-####-####,0,1,1,0,0" imetype="1" maxlength="13" hintcaption="휴대폰번호를 입력하세요" imagefilepth="input_03.9" ly_vert="20,346,335,74,0" />
+				<EDIT name="edtAthnNo" enable="0" visible="0" fontsize="4" imetype="1" maxlength="6" minlength="6" hintcaption="인증번호를 입력하세요" imagefilepth="input_03.9" ly_vert="20,526,335,74,0" />
+				<LABEL name="lblSubTitle" fgcolor="146:124124124" fontsize="-2" valign="0" multiline="1" ly_vert="20,42,357,20,1" />
+				<BUTTON name="btnCtcnAgrm" visible="0" btnimage="input_03.9" ly_vert="20,436,335,74,0" />
+				<CHKBUTTON name="chkCtcnAgrm" visible="0" fontsize="4" chkcaption=" 휴대폰 본인인증 약관동의" unchkcaption=" 휴대폰 본인인증 약관동의" chkbtnimage="checkmenu_o" unchkbtnimage="checkmenu_n" ly_vert="40,439,260,68,0" />
+				<BUTTON name="btnAthnRetry" visible="0" btnimage="alpha" halign="2" ly_vert="273,610,82,32,0" />
+				<LABEL name="lblAthnTime" visible="0" caption="3:00" halign="2" valign="2" ly_vert="262,552,53,32,0" />
+				<IMAGE name="imgAthnShow" visible="0" autosize="1" imgpath="icon_arrow_right_off.png" des="약관보기" ly_vert="316,460,24,24,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="btnNext" visible="0" caption="확인" fontsize="4" btnimage="btn_20.9" ly_vert="0,597,375,50,0" />
+		<EDIT name="edtRqstTlmsNo" imetype="0" ly_vert="407,131,149,32,1" />
+		<EDIT name="edtVrfcTlmsNo" imetype="0" ly_vert="407,167,149,32,1" />
+		<LABEL name="labTitle" fontsize="4" caption="휴대폰 인증" halign="1" ly_vert="0,0,375,60,1" />
+		<CHKBUTTON name="chkSkip" fontsize="-3" chkcaption="테스트인증Skip" unchkcaption="테스트인증Skip" ly_vert="31,45,154,41,1" />
+		<IMAGE name="imgBack" autosize="1" imgpath="icon_top_back_light.png" ly_vert="21,19,22,22,1" />
+		<EDIT name="edt091TlmsNo2" imetype="0" ly_vert="407,260,149,32,1" />
+		<EDIT name="edt091TlmsNo1" imetype="0" ly_vert="407,206,149,32,1" />
+		<IMAGE name="imgStep" visible="0" autosize="1" imgpath="step01" ly_vert="245,60,108,21,0" />
+		<IMAGE name="ImgInfo" autosize="1" imgpath="icon_notice" ly_vert="331,19,22,22,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="170938" _ulen="141264" >
+'--===========================================================================
+' 01. 화 면 명 : 비대면휴대폰인증
+' 02. 화면설명 : 비대면휴대폰인증
+' 03. 작    성 : 2021.01.22 : 정민영
+' 04. 수    정 :
+' 2021.05.30 : 정민영 : v0001 : T2105070009 : 개인신용정보동의제도 개편안 반영
+' 2021.06.09 : 정민영 : v0002 : T2102250017 : CFD차액결제시스템 구축
+'            :        : obaci_acct_072r, obaci_acct_049c 변경IO 적용
+' 2021.07.26 : 정민영 : v0003 : 비대면화면권한 설정 수정
+' 2021.07.27 : 정민영 : v0004 : 비대면CFD개설 목표시장비교에 따른 obaci_acct_072r, obaci_acct_049c 변경IO 적용
+'            :        : CFD,금소법,고난도관련 공유변수 초기화로직 추가
+' 2021.10.15 : 권오상 : V0005 : 알뜰폰 처리 가능하게 변경
+' 2021.10.26 : 김수진 : v0006 : 중개형ISA/ 해외 CFD 추가, Shared 값정리. obaci_acct_072r, obaci_acct_049c 변경IO 적용
+' 2021.12.24 : 김수진 : v0007 : 해외CFD 약관 수정, CFD 약관 금융거래 정보제공 동의서 추가 > Shared 값 정리
+' 2022.01.25 : 김수진 : v0008 : 국내/해외 CFD 계좌개설시_계좌 유형 선택 추가 > Shared 값 정리 / obaci_acct_072r 변경IO 적용
+' 2022.02.21 : 김수진 : v0009 : 국내/해외 CFD 계좌개설시_국가/계좌 유형 일괄개설 추가 > Shared 값 정리 / obaci_acct_072r, obaci_acct_049c 변경IO 적용
+' 2022.03.18 : 김수진 : v0010 : 관리점 지정 프로세스 개선 > Shared 값 정리
+' 2022.05.04 : 김수진 : v0011 : 계약서류 제공방식 추가 > Shared 값 정리/ obaci_acct_049c 변경IO 적용
+' 2023.05.24 : 전상일 : v0012 : obaci_acct_400r 에러 추가 grp_no = 8 (고령자(만65세 이상) 대면 개설만 가능
+' 2023.06.08 : 전상일 : v0013 : 매체별 진입지점 추가(디지털금융센터 마케팅)
+' 2023.08.03 : 전상일 : v0014 : 비대면신청건 존재 시 추가 개설 불가
+' 2023.08.14 : 양현정 : v0015 : CFD개설제한요건 체크 추가
+' 2023.09.13 : 전상일 : v0016 : 주석원복 및 슈퍼365 랜딩 추가
+' 2024.04.26 : 전상일 : v0017 : 권한설정 (on fresh에서 처리)
+' 2024.04.30 : 양현정 : v0018 : 임직원 개설불가 체크 로직 앞으로 이동
+' 2024.07.24 : 전상일 : v0019 : 금융거래한도제한 및 사기이용계좌 이용한도 신설
+'--===========================================================================
+' < 휴대폰 본인인증 프로세스 >
+'1. 약관 동의 체크시, 인증번호 요청 Call(obcsb_oimf_653a)
+'2_1. 인증번호 요청(1) 정상인 경우,
+'    2_1_1. 인증번호 요청(sTimerID=0) 타이머실행
+'        - 인증유효횟수 10회 초과 체크
+'    2_1_2. 인증확인 요청 Call(obcsb_oimf_654a)
+'2_2. 인증번호 요청(1) 오류인 경우,
+'    2_2_1. 인증번호 재요청 버튼 Show
+'3_1. 인증확인 요청(2_1_2) 정상인경우,
+'    3_1_1. 인증유효시간(sTimerID=2) 타이머실행
+'3_2. 인증확인 요청(2_1_2) 오류인경우,
+'    - 전문미수신인경우, 인증번호 재요청(1번 프로세스로 돌아감)
+'    - 아니면 오류메시지 처리
+'4. (사용자입력)인증번호 입력시, 인증확인 요청검증 Call(obcsb_oimf_654a_1)
+'5_1. 인증확인 요청검증(4) 오류인 경우, 오류메시지 처리
+'5_2. 인증확인 요청검증(4) 정상인 경우,
+'    5_2_1. 인증확인 요청검증(sTimerID=1) 타이머실행
+'        - 인증유효횟수 10회 초과 체크
+'        - 인증결과 검증 Call(obcsb_oimf_655r)
+'6_1. 인증결과 검증(5_2_1) 오류인 경우,
+'    - 전문미수신인경우, 인증결과 검증 재처리(5_2_1번 프로세스로 돌아감)
+'    - 아니면 오류메시지 처리
+'6_2. 인증결과 검증(5_2_1) 정상인 경우,
+'    - 정상처리 및 3분 타이머 초기화(인증유효시간(sTimerID=2))
+'
+'** 3_1_1부터 3분체크 시작. 3분 지난경우 인증프로세스 중단 및 인증번호 재요청부터 다시 해야함
+'--===========================================================================
+' < 비대면계좌개설 >
+' 휴대폰본인인증(+대포통장여부체크) -> 신분증진위확인 -> 계좌개설 진행
+'
+' < 비대면업무신청 >
+' 휴대폰본인인증(+대포통장여부체크) -> 신분증진위확인 -> 1원역이체 -> 업무신청 진행
+'
+' < 모바일OTP발급 >
+' 휴대폰본인인증 -> 신분증진위확인 -> 1원역이체 -> 다음단계 진행
+'
+' < 비대면진행상태확인 >   ==> 인증이력 안쌓음
+' 휴대폰본인인증 -> 진행상태확인 진행
+'
+'--===========================================================================
+
+
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_sz_SubNmetBswrGb   '비대면업무구분1자리
+Dim g_sz_OSType        'OS타입
+Dim g_nDev
+Dim sLOGIN_TYPE        '로그인여부
+Dim g_SCR_NO            '화면번호
+Dim g_sz_HPCo          '통신사정보
+Dim g_sz_HPNo          '휴대폰번호
+Dim g_sz_AthnGb        '본인인증구분 1.휴대폰본인인증 2.공인인증서인증 3.바이오인증
+Dim g_CIKeyNo          'CIKEY번호
+Dim g_BNK_NMPR_YN      '대포통장명의인여부
+Dim g_FRD_NMPR_YN      '사기계좌명의인여부
+Dim g_HPSec            '본인인증유효시간(3분)
+    g_HPSec = 180
+Dim g_nCnt             '본인인증용호출횟수
+    g_nCnt = 0
+Dim g_nCnt_091_1       'obaci_acct_091r_1 서비스 호출 횟수 max7
+    g_nCnt_091_1 = 0
+Dim g_nCnt_096         'obaci_acct_096r   서비스 호출 횟수 max7
+    g_nCnt_096 = 0
+Dim g_Re_RegYN         '재등록여부
+Dim g_Frst_YN          '인증번호요청구분용
+    g_Frst_YN = "Y"
+'스크롤체크용(입력항목갯수만큼 설정) - 컨트롤 visible 체크가 안되는 경우가 있어 변수로 변경
+Dim g_Cntt1
+    g_Cntt1 = "N"
+Dim g_Cntt2
+    g_Cntt2 = "N"
+Dim g_Cntt3
+    g_Cntt3 = "N"
+Dim g_Cntt4
+    g_Cntt4 = "N"
+Dim g_Cntt5
+    g_Cntt5 = "N"
+Dim g_Cntt6
+    g_Cntt6 = "N"
+Dim g_Back_Flag   '뒤로가기플래그
+
+
+
+'-------------------------------------------------------------------------------
+Dim g_Opng_File              '오픈할화면
+Dim g_Send_Data              '인자정보
+'진입점에서 설정되는 정보 ------------------------------------------------------
+Dim g_BDM_FRST_MAPID        '최초진입점화면ID
+Dim g_BDMNMETBSWRGB         '비대면업무구분 : 100.비대면계좌개설    0xx.비대면업무신청 3xx.모바일OTP발급    999.비대면진행상태조회
+Dim g_mOTP_IntoClcd         '(모바일OTP)진입구분코드 NMET_ACNT.계좌개설후처리, NMET_BSWR.업무처리, MTS.MTS
+Dim g_BDM_CSNO              '고객번호 :진행상태의이어가기/비대면업무신청/모바일OTP발급업무시 1원역이체 화면에서 사용
+Dim g_BDM_CONNECTING        '(계좌개설/업무신청)안내화면에서 넘어오는 진행상태구분 1.계좌개설상태조회 2.업무신청상태조회
+'휴대폰본인인증에서 설정되는 정보 ----------------------------------------------
+Dim g_BDM_REG_UNIQ_NO      '등록고유번호:비대면계좌개설(YYYYMMDD+N+일련번호4자리), 비대면업무신청(YYYYMMDD+B+일련번호4자리), 모바일OTR업무(YYYYMMDD+O+일련번호4자리)
+Dim g_BDM_REG_STAG_CLS_CODE  '등록단계구분코드
+Dim g_BDM_NAME             '이름
+Dim g_BDM_RCNO_PIP         '주민등록번호
+Dim g_BDM_COMPANY_CODE     '통신사 정보
+Dim g_BDM_HP1              '휴대폰번호
+Dim g_BDM_HP2
+Dim g_BDM_HP3
+'신분증진위확인에서 설정되는 정보 ----------------------------------------------
+Dim g_BDM_IDNTF_SRNO        '신분증일련번호
+'이어하기안내용, 진행상태보기용 Data -------------------------------------------
+Dim g_BDM_EXSN_CUST_YN      'Y.기존고객 N.신규고객
+Dim g_BDM_ISA_ACNT_YN       'ISA(정상)계좌 보유여부 Y.보유 N.미보유
+Dim g_BDM_DREM_YN           'Y.임직원 N.고객
+Dim g_BDM_LAST_BSWR_GB        '최근처리업무구분-1.비대면계좌개설 2.비대면업무신청
+Dim g_BDM_PRGS_YN             '(계좌개설)진행중데이터여부
+Dim g_BDM_LAST_STAG_CLS_CODE  '최종등록단계구분코드
+Dim g_BDM_CLEAR_YN          'Y:처음부터하기 N:이어하기
+Dim g_BDM_PRNM              '개설상품명
+Dim g_BDM_APLTDATE          '신청일자
+Dim g_BDM_CLSNDATE          '신청마감일자
+Dim g_BDM_ACNT_OPNG_CLCD    '1.종합개설 2.개별추가
+'-------------------------------------------------------------------------------
+
+'전문투자자 관련
+Dim g_BDM_PFIN_YN		
+Dim g_BDM_PRSN_PFIN_YN
+Dim g_BDM_PFIN_CLS_CODE
+
+'상품개설여부
+Dim g_STOCKYN		'종합매매계좌
+Dim g_CMAYN			'CMA계좌
+Dim g_FSTOCKYN		'종합매매금상
+Dim g_OPTNYN			'선물옵션
+Dim g_OVDVYN			'해외파생
+Dim g_ISAYN			'ISA
+Dim g_CFDYN			'국내 CFD
+Dim g_ACFDYN			'해외 CFD
+Dim g_ISA_PROD_TYPE	'ISA 타입 (중개형ISA : 3 / 일임형 ISA: 2)
+Dim g_BDM_ISA_ACNT_OPNG_CLCD		'ISA 개설 타입
+Dim g_PNSNYN			'연금저축
+Dim g_WRAPYN			'WRAP
+Dim g_SAYN			'다드림
+
+'지점코드
+Dim g_BDM_MANG_BRCD
+
+'v0015
+Dim g_Close_Gb 
+
+
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+'============================================================================
+'인증번호 만료기간 3분 타이머 초기화
+Function InitCountTimer()
+	btnNext.enable = true	'20230417 추가
+	
+	btnNext.btnimage = "btn_20.9"
+	btnNext.fgcolor = "273"
+	
+    contMain.lblAthnTime.caption = "3:00"
+    contMain.lblAthnTime.visivle = False
+    g_HPSec = 180
+    Form.SetTimerEvent(2, 0, 1)  '3분타이머 종료
+End Function
+'============================================================================
+'(공통)진행불가안내
+Function CommErrClose(gb)
+	btnNext.enable = False	'20230419 추가
+	
+	If Form.GetEnvData("common.theme") = "black" Then
+		btnNext.btnimage = "btn_27.9"
+	Else 
+		btnNext.btnimage = "btn_21.9"
+	End If
+	btnNext.fgcolor = "269"
+	
+    '에러메시지코드 조립
+    'E + 업무구분(1) + 오류코드(2)
+    strErrCode = "E"..g_sz_SubNmetBswrGb..gb
+    'Form.ShowAlert("ErrorCode", strErrCode)
+
+    '개설불가 안내 후, 종료
+    g_Opng_File = "ERROR"     '오픈할화면
+    g_Send_Data = strErrCode  '인자정보
+
+    NextStep()
+End Function
+'============================================================================
+Function User_SharedData_All_Init()
+
+    '진입정보, 1단계(휴대폰인증,신분증진위확인) 정보외 뒷단업무에서 사용되는 공유변수 초기화(처리중 종료 후 재처리시, 이전 선택값 남아있는 오류해결)
+    Form.SetSharedData("BDM_PRCD100 "        , "")  '종합매매 가입여부
+    Form.SetSharedData("BDM_PRCD118RP"       , "")  'CMA(증권형) 가입여부
+    Form.SetSharedData("BDM_PRCD100F"        , "")  '종합매매(금상전용) 가입여부
+    Form.SetSharedData("BDM_PRCD101"         , "")  '선물옵션 가입여부
+    Form.SetSharedData("BDM_PRCD135"         , "")  '해외파생 가입여부
+    Form.SetSharedData("BDM_PRCD133"         , "")  'ISA 가입여부
+    Form.SetSharedData("BDM_PRCD200"         , "")  '다드림 가입여부
+    Form.SetSharedData("BDM_PRCD131"         , "")  '연금저축 가입여부
+    Form.SetSharedData("BDM_WRAP"            , "")  '랩 가입여부
+    Form.SetSharedData("BDM_CtcnChkAll"      , "")  '전체약관
+    Form.SetSharedData("BDM_CtcnChk1"        , "")  '계좌개설/서비스기본약관
+    Form.SetSharedData("BDM_CtcnChk2"        , "")  '금융거래필수안내/위험고지 확인
+    Form.SetSharedData("BDM_CtcnChk100"      , "")  '종합매매계좌 주요약관/설명서
+    Form.SetSharedData("BDM_CtcnChk118"      , "")  'CMA계좌 주요약관/설명서
+    Form.SetSharedData("BDM_CtcnChk101"      , "")  '선물옵션계좌 주요약관/설명서
+    Form.SetSharedData("BDM_CtcnChk135"      , "")  '해외파생계좌 주요약관/설명서
+    Form.SetSharedData("BDM_CtcnChkMndt"     , "")  '개인(신용)정보 처리 필수 동의서
+    Form.SetSharedData("BDM_CtcnChkSlct"     , "")  '개인(신용)정보 처리 선택 동의서
+    Form.SetSharedData("BDM_MndtC"           , "")  '(공통)고유식별정보처리
+    Form.SetSharedData("BDM_MndtD"           , "")  '(상품)조회
+    Form.SetSharedData("BDM_MndtE"           , "")  '(상품)제공
+    Form.SetSharedData("BDM_MndtE1"          , "")  '(상품)신용정보조회및집중
+    Form.SetSharedData("BDM_MndtE2"          , "")  '(상품)해외증권/파생
+    Form.SetSharedData("BDM_MndtF"           , "")  '(상품)민감정보
+    Form.SetSharedData("BDM_SlctG"           , "")  '(선택)수집이용
+    Form.SetSharedData("BDM_SlctH"           , "")  '(선택)고유식별정보처리
+    Form.SetSharedData("BDM_SlctTel"         , "")  '홍보수신_전화
+    Form.SetSharedData("BDM_SlctSMS"         , "")  '홍보수신_문자
+    Form.SetSharedData("BDM_SlctEmail"       , "")  '홍보수신_이메일
+    Form.SetSharedData("BDM_SlctPost"        , "")  '홍보수신_우편
+    Form.SetSharedData("BDM_ACNT_OPNG_CLCD"  , "")  '계좌개설구분
+    Form.SetSharedData("BDM_MANG_BRCD"       , "")  '관리지점코드
+    Form.SetSharedData("BDM_DALY_TACT_AMT"   , "")  '1일이체한도
+    Form.SetSharedData("BDM_ONTR_TACT_AMT"   , "")  '1회이체한도
+    Form.SetSharedData("BDM_MARG_GRAD_CODE"  , "")  '증거금등급코드
+    Form.SetSharedData("BDM_ACNO"            , "")  '계좌번호
+    Form.SetSharedData("BDM_ACNT_PWD"        , "")  '계좌비밀번호
+    '신분증진위확인에서 사용하므로 초기화 안함 Form.SetSharedData("BDM_NAME"            , "")  '이름
+    Form.SetSharedData("BDM_RCNO"            , "")  '주민등록번호
+    Form.SetSharedData("BDM_ENGNAME"         , "")  '영문명
+    Form.SetSharedData("BDM_ADDRGBN"         , "")  '주소지정보(자택/직장)
+    Form.SetSharedData("BDM_ADDR"            , "")  '주소
+    Form.SetSharedData("BDM_ADDRDTL"         , "")  '상세주소
+    Form.SetSharedData("BDM_SNMLCLCD"        , "")  '거래내역통보(자택/직장)
+    Form.SetSharedData("BDM_MAILCLCD"        , "")  '우편물통보(자택/직장)
+    Form.SetSharedData("BDM_HP"              , "")  '휴대폰번호
+    Form.SetSharedData("BDM_EMAIL"           , "")  '이메일주소
+    Form.SetSharedData("BDM_OWHSNUM"         , "")  '자택전화번호
+    Form.SetSharedData("BDM_WRPLNUM"         , "")  '직장전화번호
+    Form.SetSharedData("BDM_ACNTOPNGCLCD"    , "")  '계좌개설구분
+    Form.SetSharedData("BDM_ADDRESS_YN"      , "")  '새도로주소여부
+    Form.SetSharedData("BDM_ADDRESS_REGN_ZIP", "")  '우편번호
+    Form.SetSharedData("BDM_ADDRESS_DTL_ZIP" , "")  '우편번호
+    Form.SetSharedData("BDM_ADDRESS_POST"    , "")  '주소
+    Form.SetSharedData("BDM_ADDRESS_DTAD"    , "")  '상세주소
+    Form.SetSharedData("BDM_ADDRESS_BLDN"    , "")  '건물번호
+    Form.SetSharedData("BDM_TR_DATE"         , "")  '거래일자
+    Form.SetSharedData("BDM_OTSD_TR_UNIQ_NO" , "")  '오픈뱅킹대외거래고유번호
+    Form.SetSharedData("BDM_CSNO"            , "")  '고객번호
+    Form.SetSharedData("BDM_BANKCODE"        , "")  '본인인증 은행코드
+    Form.SetSharedData("BDM_BANKACNO"        , "")  '본인인증 은행계좌번호
+    Form.SetSharedData("BDM_BACK_YN"         , "")  'BACK 여부
+    Form.SetSharedData("BDM_NMET_ACNO"       , "")  '비대면계좌번호
+    Form.SetSharedData("BDM_PW_PIP"          , "")  '신규종합비밀번호
+    Form.SetSharedData("BDM_CNFR_PW_PIP"     , "")  '신규종합비밀번호확인
+    Form.SetSharedData("BDM_BANKNAME"        , "")  '본인인증 은행명
+    Form.SetSharedData("BDM_RCMD_YN"         , "")  '투자권유여부
+    Form.SetSharedData("BDM_INFO_OFER_YN"    , "")  '투자성향 정보제공여부
+    Form.SetSharedData("BDM_CHK_KYC"         , "")  '설문등록여부
+    Form.SetSharedData("BDM_KYC_GRAD"        , "")  '투자성향등급
+    Form.SetSharedData("BDM_PROD_GRAD"       , "")  '상품등급
+    Form.SetSharedData("BDM_UNFIT_YN"        , "")  '부적합여부
+    Form.SetSharedData("BDM_DVPD_KYC_GRAD"   , "")  '파생상품투자성향등급
+    Form.SetSharedData("BDM_DVPD_PROD_GRAD"  , "")  '파생상품상품등급
+    Form.SetSharedData("BDM_DVPD_UNFIT_YN"   , "")  '파생상품부적합여부
+    Form.SetSharedData("BDM_WEAK_FNNC_YN"    , "")  '취약금융소비자여부
+    Form.SetSharedData("BDM_HTS_STPL_APLT_YN", "")  'HTS약정신청여부
+    User_v0001_Set_Init()  'v0001
+    User_v0004_Set_Init()  'v0004
+    User_v0006_Set_Init()  'v0006
+End Function 
+'============================================================================
+Function User_v0001_Set_Init()
+	Form.SetSharedData("BDM_Mndt_1_1_1_1"       , ""  )  '1.1 수집이용(공통)_고유식별
+	Form.SetSharedData("BDM_Mndt_1_1_1_2"       , ""  )  '1.1 수집이용(공통)_개인신용
+	Form.SetSharedData("BDM_Mndt_1_2_1_1"       , ""  )  '1.2 수집이용(상품)_신용/미수/파생_고유식별
+	Form.SetSharedData("BDM_Mndt_1_2_1_2"       , ""  )  '1.2 수집이용(상품)_신용/미수/파생_개인신용
+	Form.SetSharedData("BDM_Mndt_1_2_2_1"       , ""  )  '1.2 수집이용(상품)_비과세/ISA/연금저축_고유식별
+	Form.SetSharedData("BDM_Mndt_1_2_2_3"       , ""  )  '1.2 수집이용(상품)_비과세/ISA/연금저축_민감정보
+	Form.SetSharedData("BDM_Mndt_1_2_2_2"       , ""  )  '1.2 수집이용(상품)_비과세/ISA/연금저축_개인신용
+	Form.SetSharedData("BDM_Mndt_1_2_3_1"       , ""  )  '1.2 수집이용(상품)_해외주식/해외파생/해외금융/EUREX_고유식별
+	Form.SetSharedData("BDM_Mndt_1_2_3_2"       , ""  )  '1.2 수집이용(상품)_해외주식/해외파생/해외금융/EUREX_개인신용
+	Form.SetSharedData("BDM_Mndt_2_1_1_1"       , ""  )  '2.1 제공(상품)_신용/미수/파생/해외파생_고유식별
+	Form.SetSharedData("BDM_Mndt_2_1_1_2"       , ""  )  '2.1 제공(상품)_신용/미수/파생/해외파생_개인신용
+	Form.SetSharedData("BDM_Mndt_2_1_2_1"       , ""  )  '2.1 제공(상품)_해외주식/해외파생/해외금융/EUREX_고유식별
+	Form.SetSharedData("BDM_Mndt_2_1_2_2"       , ""  )  '2.1 제공(상품)_해외주식/해외파생/해외금융/EUREX_개인신용
+	Form.SetSharedData("BDM_Mndt_3_1_1_1"       , ""  )  '3   조회(상품)_신용/미수/파생/해외파생_고유식별
+	Form.SetSharedData("BDM_Mndt_3_1_1_2"       , ""  )  '3   조회(상품)_신용/미수/파생/해외파생_개인신용
+	Form.SetSharedData("BDM_Slct_1_1"           , ""  )  '수집이용_고유식별
+	Form.SetSharedData("BDM_Slct_1_2"           , ""  )  '수집이용_개인신용
+	Form.SetSharedData("BDM_Slct_2_1"           , ""  )  '상품서비스안내
+End Function
+'============================================================================
+Function User_v0004_Set_Init()  'v0004
+	Form.SetSharedData("BDM_PRCDCFD"            		, ""  )  'CFD 가입여부	
+	Form.SetSharedData("BDM_CtcnChkCFD"         		, ""  )  'CFD계좌 주요약관/설명서
+	Form.SetSharedData("BDM_CFD_CtcnChkAll"     		, ""  )  'CFD 전체약관
+	Form.SetSharedData("BDM_CFD_CtcnChk1"       		, ""  )  '장외파생상품거래 기본계약서(위험고지 포함)
+	Form.SetSharedData("BDM_CFD_CtcnChk2"       		, ""  )  '장외파생상품 담보계약서
+	Form.SetSharedData("BDM_CFD_CtcnChk3"       		, ""  )  '장외파생상품 투자를 위한 전문투자자 대우 확인서
+	Form.SetSharedData("BDM_CFD_CtcnChk4"       		, ""  )  '개인전문투자자에 대한 보호제도 미적용 확인서
+	Form.SetSharedData("BDM_CFD_CtcnChk5"       		, ""  )  'v0007 금융거래 정보제공 동의서
+	
+	Form.SetSharedData("BDM_KYC_INVT_RCMD_CLS_CODE"   , ""  )  'KYC투자권유구분코드	
+	Form.SetSharedData("BDM_REG_SRNO"                 , ""  )	'등록일련번호
+	Form.SetSharedData("BDM_GOAL_MRKT_UNFIT_YN"       , ""  )	'목표시장부적합여부 '(Y.목표시장부적합 N.정상)
+End Function
+'============================================================================
+Function User_v0006_Set_Init()  'v0006
+	Form.SetSharedData("BDM_PRCD137"				, ""	 )	'해외CFD 가입여부
+	Form.SetSharedData("BDM_ISA_PROD_TYPE"			, ""	 )	'ISA타입
+	Form.SetSharedData("BDM_MISA_CtcnChk1"			, "" )	'중개형ISA 주요약관/설명서
+	Form.SetSharedData("BDM_ISA_ACNT_OPNG_CLCD" 		, "" )	'ISA계좌개설구분코드(1:신규/2:이수)
+	Form.SetSharedData("BDM_ACFD_REG_SRNO"			, "" )	'해외CFD목표시장등록일련번호	
+	Form.SetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, "" )	'해외CFD목표시장부적합여부
+	Form.SetSharedData("BDM_137_CtcnChk1"			, "" )	'v0007 해외CFD계좌 약관/거래설명서(위험고지)
+	Form.SetSharedData("BDM_ACFD_CTCD"           		, "" )  	'v0006 해외CFD국가코드
+	Form.SetSharedData("BDM_DMST_CFD_ACNT_APLT_YN1"   , ""  )   'v0009 국내CFD 계좌신청여부(일반)
+	Form.SetSharedData("BDM_DMST_CFD_ACNT_APLT_YN2"   , ""  )   'v0009 국내CFD 계좌신청여부(안심)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN1"   , ""  )   'v0009 해외CFD 계좌신청여부(미국/일반)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN2"   , ""  )   'v0009 해외CFD 계좌신청여부(미국/안심)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN3"   , ""  )   'v0009 해외CFD 계좌신청여부(중국/일반)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN4"   , ""  )   'v0009 해외CFD 계좌신청여부(중국/안심)	
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN5"   , ""  )   'v0009 해외CFD 계좌신청여부(홍콩/일반)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN6"   , ""  )   'v0009 해외CFD 계좌신청여부(홍콩/안심)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN7"   , ""  )   'v0009 해외CFD 계좌신청여부(일본/일반)
+	Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN8"   , ""  )   'v0009 해외CFD 계좌신청여부(일본/안심)  
+	Form.SetSharedData("BDM_BNK_MNY_OPNG_YN"   		, ""  )   'v0010 단기다수개설여부
+	Form.SetSharedData("BDM_HNDV_MTHD_CODE"       	, ""  )	 'v0011 계약서류 제공방식
+End Function
+'============================================================================
+Function User_SharedData_Set(gb)
+    '진입점에서 설정되는 정보 ---------------------------------------
+    Form.SetSharedData("BDM_FRST_MAPID"  , g_BDM_FRST_MAPID    )  '최초진입화면ID
+    Form.SetSharedData("BDM_NMETBSWRGB"  , g_BDMNMETBSWRGB     )  '비대면업무구분
+    Form.SetSharedData("mOTP_IntoClcd"   , g_mOTP_IntoClcd     )  '(모바일OTP)진입구분코드
+    Form.SetSharedData("BDM_CSNO"        , g_BDM_CSNO          )  '고객번호
+    Form.SetSharedData("BDM_CONNECTING"  , g_BDM_CONNECTING    )  '(계좌개설/업무신청)안내화면에서 넘어오는 진행상태구분
+
+    If gb == "Init" Then
+        '첫화면으로 돌아가는경우 비대면업무구분 초기화
+        If g_Opng_File == "HOME" Then
+            Form.SetSharedData("BDM_NMETBSWRGB"      , "" )  '비대면업무구분
+            Form.SetSharedData("BDM_CSNO"            , "" )  '고객번호
+            Form.SetSharedData("BDM_CONNECTING"      , "" )  '(계좌개설/업무신청)안내화면에서 넘어오는 진행상태구분
+        End If
+
+        '휴대폰본인인증에서 설정되는 정보 ------------------------------------------
+        Form.SetSharedData("BDM_REG_UNIQ_NO"         , "" )  '등록고유번호
+        Form.SetSharedData("BDM_REG_STAG_CLS_CODE"   , "" )  '등록단계구분코드
+        Form.SetSharedData("BDM_NAME"                , "" )  '이름
+        Form.SetSharedData("BDM_RCNO_PIP"            , "" )  '주민등록번호
+        Form.SetSharedData("BDM_COMPANY_CODE"        , "" )  '통신사 정보
+        Form.SetSharedData("BDM_HP1"                 , "" )  '휴대폰번호
+        Form.SetSharedData("BDM_HP2"                 , "" )
+        Form.SetSharedData("BDM_HP3"                 , "" )
+        Form.SetSharedData("BDM_CI_KEY"                , "")
+		
+		Form.SetSharedData("BDM_PFIN_YN"			, ""			)	'전문투자자등록여부인
+		Form.SetSharedData("BDM_PRSN_PFIN_YN"		, ""		)	'개인 전문투자자 여부
+		Form.SetSharedData("BDM_PFIN_CLS_CODE"		, ""		)	'전문투자자 구분 코드
+		Form.SetSharedData("BDM_MNY_ACNT_YN"		, ""		)
+		
+		Form.SetSharedData("BDM_ISA_ACNT_OPNG_CLCD" 		, "" )	'ISA계좌개설구분코드(1:신규/2:이수)
+
+        '신분증진위확인에서 설정되는 정보 ------------------------------------------
+        Form.SetSharedData("BDM_IDNTF_SRNO"          , "" )  '신분증일련번호
+        Form.SetSharedData("&RET_NAME"               , "" )  '이름
+
+        '이어하기안내용, 진행상태보기용 Data ---------------------------------------
+        Form.SetSharedData("BDM_EXSN_CUST_YN"        , "" )  'Y.기존고객 N.신규고객
+        Form.SetSharedData("BDM_ISA_ACNT_YN"         , "" )  'ISA계좌보유여부
+        Form.SetSharedData("BDM_DREM_YN"             , "" )  'Y.임직원 N.고객
+        Form.SetSharedData("BDM_LAST_BSWR_GB"        , "" )  '최근처리업무구분
+        Form.SetSharedData("BDM_PRGS_YN"             , "" )  '(계좌개설)진행중데이터여부
+        Form.SetSharedData("BDM_LAST_STAG_CLS_CODE"  , "" )  '최종등록단계구분코드
+        Form.SetSharedData("BDM_CLEAR_YN"            , "" )  '이어하기여부
+        Form.SetSharedData("BDM_PRNM"                , "" )  '개설상품명
+        Form.SetSharedData("BDM_BDM_APLTDATE"        , "" )  '신청일자
+        Form.SetSharedData("BDM_BDM_CLSNDATE"        , "" )  '신청마감일자
+        Form.SetSharedData("BDM_ACNT_OPNG_CLCD"      , "" )  '계좌개설구분
+    Else
+        '휴대폰본인인증에서 설정되는 정보 ---------------------------------------
+        Form.SetSharedData("BDM_REG_UNIQ_NO"         , g_BDM_REG_UNIQ_NO        )  '등록고유번호
+        Form.SetSharedData("BDM_REG_STAG_CLS_CODE"   , g_BDM_REG_STAG_CLS_CODE  )  '등록단계구분코드
+        Form.SetSharedData("BDM_NAME"                , g_BDM_NAME               )  '이름
+        Form.SetSharedData("BDM_RCNO_PIP"            , g_BDM_RCNO_PIP           )  '주민등록번호
+        Form.SetSharedData("BDM_COMPANY_CODE"        , g_BDM_COMPANY_CODE       )  '통신사 정보
+        Form.SetSharedData("BDM_HP1"                 , g_BDM_HP1                )  '휴대폰번호
+        Form.SetSharedData("BDM_HP2"                 , g_BDM_HP2                )
+        Form.SetSharedData("BDM_HP3"                 , g_BDM_HP3                )
+        Form.SetSharedData("BDM_CI_KEY"                , g_CIKeyNo)
+        Form.SetSharedData("BDM_PRSN_PFIN_YN"			, g_BDM_PRSN_PFIN_YN		)
+        Form.SetSharedData("BDM_PFIN_CLS_CODE"		, g_BDM_PFIN_CLS_CODE		)
+        Form.SetSharedData("BDM_MNY_ACNT_YN"		, g_MNY_ACNT_YN		)
+	
+		Form.SetSharedData("BDM_PFIN_YN"			, g_BDM_PFIN_YN			)	'전문투자자등록여부인
+		Form.SetSharedData("BDM_PRSN_PFIN_YN"		, g_BDM_PRSN_PFIN_YN		)	'개인 전문투자자 여부	'ksj 2021-07-23
+		Form.SetSharedData("BDM_PFIN_CLS_CODE"		, g_BDM_PFIN_CLS_CODE		)	'전문투자자 구분 코드 'ksj 2021-07-23
+		
+		Form.SetSharedData("BDM_ISA_ACNT_OPNG_CLCD" 		, g_BDM_ISA_ACNT_OPNG_CLCD )	'ISA계좌개설구분코드(1:신규/2:이수)
+		
+        '신분증진위확인에서 설정되는 정보 ---------------------------------------
+        Form.SetSharedData("BDM_IDNTF_SRNO"          , g_BDM_IDNTF_SRNO         )  '신분증일련번호
+        Form.SetSharedData("&RET_NAME"               , g_BDM_NAME               )  '이어가기시 필요
+
+        '이어하기안내용, 진행상태보기용 Data ---------------------------------------
+        Form.SetSharedData("BDM_EXSN_CUST_YN"        , g_BDM_EXSN_CUST_YN        )  'Y.기존고객 N.신규고객
+        Form.SetSharedData("BDM_ISA_ACNT_YN"         , g_BDM_ISA_ACNT_YN         )  'ISA계좌보유여부
+        Form.SetSharedData("BDM_DREM_YN"             , g_BDM_DREM_YN             )  'Y.임직원 N.고객
+        Form.SetSharedData("BDM_LAST_BSWR_GB"        , g_BDM_LAST_BSWR_GB        )  '최근처리업무구분
+        Form.SetSharedData("BDM_PRGS_YN"             , g_BDM_PRGS_YN             )  '(계좌개설)진행중데이터여부
+        Form.SetSharedData("BDM_LAST_STAG_CLS_CODE"  , g_BDM_LAST_STAG_CLS_CODE  )  '최종등록단계구분코드
+        Form.SetSharedData("BDM_CLEAR_YN"            , g_BDM_CLEAR_YN            )  '이어하기여부
+        Form.SetSharedData("BDM_PRNM"                , g_BDM_PRNM                )  '개설상품명
+        Form.SetSharedData("BDM_APLTDATE"            , g_BDM_APLTDATE            )  '신청일자
+        Form.SetSharedData("BDM_CLSNDATE"            , g_BDM_CLSNDATE            )  '신청마감일자
+        Form.SetSharedData("BDM_ACNT_OPNG_CLCD"      , g_BDM_ACNT_OPNG_CLCD      )  '계좌개설구분
+
+    End If
+End Function
+'============================================================================
+Function User_SharedData_Get()
+    '진입점에서 설정되는 정보 ---------------------------------------
+    g_BDM_FRST_MAPID          = Form.GetSharedData("BDM_FRST_MAPID"         , False)  '최초진입화면ID
+    g_BDMNMETBSWRGB           = Form.GetSharedData("BDM_NMETBSWRGB"         , False)  '비대면업무구분
+    g_mOTP_IntoClcd           = Form.GetSharedData("mOTP_IntoClcd"          , False)  '(모바일OTP)진입구분코드
+    g_BDM_CSNO                = Form.GetSharedData("BDM_CSNO"               , False)  '고객번호
+    g_BDM_CONNECTING          = Form.GetSharedData("BDM_CONNECTING"         , False)  '(계좌개설/업무신청)안내화면에서 넘어오는 진행상태구분
+
+    '휴대폰본인인증에서 설정되는 정보 ---------------------------------------
+    g_BDM_REG_UNIQ_NO         = Form.GetSharedData("BDM_REG_UNIQ_NO"        , False)  '등록고유번호
+    g_BDM_REG_STAG_CLS_CODE   = Form.GetSharedData("BDM_REG_STAG_CLS_CODE"  , False)  '등록단계구분코드
+    g_BDM_NAME                = Form.GetSharedData("BDM_NAME"               , False)  '이름
+    g_BDM_RCNO_PIP            = Form.GetSharedData("BDM_RCNO_PIP"           , False)  '주민등록번호
+    g_BDM_COMPANY_CODE        = Form.GetSharedData("BDM_COMPANY_CODE"       , False)  '통신사 정보
+    g_BDM_HP1                 = Form.GetSharedData("BDM_HP1"                , False)  '휴대폰번호
+    g_BDM_HP2                 = Form.GetSharedData("BDM_HP2"                , False)
+    g_BDM_HP3                 = Form.GetSharedData("BDM_HP3"                , False)
+    g_CIKeyNo                 = Form.GetSharedData("BDM_CI_KEY"                , False)
+    g_BDM_PRSN_PFIN_YN        = Form.GetSharedData("BDM_PRSN_PFIN_YN"                , False)
+    g_BDM_PFIN_CLS_CODE       = Form.GetSharedData("BDM_PFIN_CLS_CODE"               , False)
+    g_BDM_PFIN_YN				= Form.GetSharedData("BDM_PFIN_YN"               , False)
+    g_MNY_ACNT_YN				= Form.GetSharedData("BDM_MNY_ACNT_YN"               , False)
+    
+    '신분증진위확인에서 설정되는 정보 ---------------------------------------
+    g_BDM_IDNTF_SRNO          = Form.GetSharedData("BDM_IDNTF_SRNO"         , False)  '신분증일련번호
+    'g_BDM_NAME                = Form.GetSharedData("&RET_NAME"              , False)  '이름-신분증진위확인시 재설정됨
+
+    '이어하기안내용, 진행상태보기용 Data ---------------------------------------
+    g_BDM_EXSN_CUST_YN        = Form.GetSharedData("BDM_EXSN_CUST_YN"       , False)  'Y.기존고객 N.신규고객
+    g_BDM_ISA_ACNT_YN         = Form.GetSharedData("BDM_ISA_ACNT_YN"        , False)  'ISA계좌보유여부
+    g_BDM_DREM_YN             = Form.GetSharedData("BDM_DREM_YN"            , False)  'Y.임직원 N.고객
+    g_BDM_LAST_BSWR_GB        = Form.GetSharedData("BDM_LAST_BSWR_GB"       , False)  '최근처리업무구분
+    g_BDM_PRGS_YN             = Form.GetSharedData("BDM_PRGS_YN"            , False)  '(계좌개설)진행중데이터여부
+    g_BDM_LAST_STAG_CLS_CODE  = Form.GetSharedData("BDM_LAST_STAG_CLS_CODE" , False)  '최종등록단계구분코드
+    g_BDM_CLEAR_YN            = Form.GetSharedData("BDM_CLEAR_YN"           , False)  '이어하기여부
+    g_BDM_PRNM                = Form.GetSharedData("BDM_PRNM"               , False)  '개설상품명
+    g_BDM_APLTDATE            = Form.GetSharedData("BDM_APLTDATE"           , False)  '신청일자
+    g_BDM_CLSNDATE            = Form.GetSharedData("BDM_CLSNDATE"           , False)  '신청마감일자
+    g_BDM_ACNT_OPNG_CLCD      = Form.GetSharedData("BDM_ACNT_OPNG_CLCD"     , False)  '계좌개설구분
+	
+	g_STOCKYN	= Form.GetSharedData("BDM_PRCD100"		, false)	'종합매매 가입여부
+	g_CMAYN		= Form.GetSharedData("BDM_PRCD118RP"		, false)	'CMA(증권형) 가입여부
+	g_FSTOCKYN	= Form.GetSharedData("BDM_PRCD100F"		, false)	'종합매매(금상전용) 가입여부
+	g_OPTNYN		= Form.GetSharedData("BDM_PRCD101"		, false)	'선물옵션 가입여부
+	g_OVDVYN		= Form.GetSharedData("BDM_PRCD135"		, false)	'해외파생 가입여부
+	g_ISAYN		= Form.GetSharedData("BDM_PRCD133"		, false)	'ISA 가입여부	
+	g_CFDYN		= Form.GetSharedData("BDM_PRCDCFD"		, false)	'CFD 가입여부
+	g_ACFDYN		= Form.GetSharedData("BDM_PRCD137"		, false)	'해외CFD 가입여부
+	g_ISA_PROD_TYPE	= Form.GetSharedData("BDM_ISA_PROD_TYPE"	, false)	'ISA 타입
+	g_PNSNYN		= Form.GetSharedData("BDM_PRCD131"	, false	)		'연금저축 가입여부
+	g_WRAPYN		= Form.GetSharedData("BDM_WRAP"		, false	)		'랩 가입여부
+	g_SAYN		= Form.GetSharedData("BDM_PRCD200"		, false	)	'다드림 가입여부
+	
+	g_BDM_MANG_BRCD = Form.GetSharedData("BDM_MANG_BRCD"		, false)	'관리점
+End Function
+'============================================================================
+Function NextStep()
+
+'화면오픈후현재창닫아야하는경우 : Form.OpenNextPopup()  -> 별도의Form.CloaseForm() 불필요
+'화면오픈만하는경우 : Form.OpenPopup()
+
+    '이전 ---------------------------------------------------------------------
+    If g_Opng_File == "HOME" Then
+        '공유변수 설정
+        User_SharedData_Set("Init")
+        Form.SetSharedData("BDM_NMETBSWRGB", "") '업무 중단인경우, 업무구분도 초기화처리
+        Form.SetSharedData("BDM_CONNECTING", "") '업무 중단인경우, (계좌개설/업무신청)안내화면에서 넘어오는 진행상태구분 초기화처리
+        Form.SetSharedData("&SCREEN_AUTH"  , "") '비대면화면 권한프리
+
+        '휴대폰본인인증 이전단계는 최초진입점으로 위치
+'Form.ShowAlert("g_BDM_FRST_MAPID", "["..g_BDM_FRST_MAPID.."]")    
+        If g_BDM_FRST_MAPID ~= "" And g_BDM_FRST_MAPID ~= null Then
+            '시장종합으로 가는경우에는 OpenScreen()으로 처리
+            If g_BDM_FRST_MAPID == "screen41000" Then
+                Form.OpenScreen("41000", "")        
+                Form.CloseForm()
+            Else
+                'Form.OpenPopup(g_BDM_FRST_MAPID, g_Send_Data, "")
+                Form.OpenNextPopup(g_BDM_FRST_MAPID, g_Send_Data, "")
+            End If
+        Else
+            Form.CloseForm()
+        End If
+
+    '개설/업무신청 처리 불가 --------------------------------------------------
+    ElseIf g_Opng_File == "ERROR" Then
+        '공유변수 설정
+        User_SharedData_Set("Init")
+        Form.SetSharedData("&SCREEN_AUTH" , "") '비대면화면 권한프리
+
+        'Form.OpenPopup("mbbdm85111", g_Send_Data, "")
+        Form.OpenNextPopup("mbbdm85111", g_Send_Data, "")
+
+    '다음 ---------------------------------------------------------------------
+    ElseIf g_Opng_File == "NEXT" Then   
+        '공유변수 설정
+        User_SharedData_Set("")
+
+        '진행상태확인
+        If g_sz_SubNmetBswrGb == "9" Or g_sz_SubNmetBswrGb  == 9 Then
+            '계좌개설진행상태조회
+            If g_SCR_NO == "85184" Or g_SCR_NO == 85184 Then
+                 'Form.OpenPopup("mbbdm85183", "85184", "")
+                 Form.OpenNextPopup("mbbdm85183", "85184", "")
+             '업무신청진행상태조회
+             ElseIf g_SCR_NO == "85183" Or g_SCR_NO == 85183 Then
+                 'Form.OpenPopup("mbbdm85183", "85183", "")
+                 Form.OpenNextPopup("mbbdm85183", "85183", "")
+             Else
+
+                 '계좌개설신청안내_진행상태조회
+                 If g_BDM_CONNECTING == "1" Or g_BDM_CONNECTING == 1 Then
+                     Form.OpenNextPopup("mbbdm85183", "85184", "")
+                 '비대면업무신청안내_진행상태조회
+                 ElseIf g_BDM_CONNECTING == "2" Or g_BDM_CONNECTING == 2 Then
+                     Form.OpenNextPopup("mbbdm85183", "85183", "")
+                 Else
+				  
+                     '로그인화면에서 들어오는 경우, 
+                     Form.OpenNextPopup("mbbdm85183", "85184", "")
+                 End If
+             End If
+	    
+	    '업무신청
+	    ElseIf g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb  == 0 Or g_sz_SubNmetBswrGb == "3" Or g_sz_SubNmetBswrGb  == 3 Then
+		     if g_BDMNMETBSWRGB == "010" then
+			     '단기다수개설 출금고제한 계좌조회
+			     DATAMANAGER.RequestTranData( "obaci_nmet_017r" )
+		     else
+			     Form.OpenNextPopup("mbbdm86150", g_Send_Data, "")
+		     end if 
+		     
+        '비대면계좌개설/비대면업무신청/모바일OTP -> 신분증진위확인
+        Else
+            'Form.OpenPopup("mbbdm85120", g_Send_Data, "")
+'		   g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+		   
+		     if gOVRL_ACNT_OPNG_YN == "Y" then
+			     g_MNY_ACNT_YN = "Y"
+		     end if
+		     
+		     'Form.ShowAlert("jsi 들어오나??", g_BDM_RCNO_PIP)
+		     'v0019 START
+		     'v0019 단기다수가 아니어도 항상 팝업되어야함
+		     Form.OpenPopup("mbbdm86131" , "" , "")
+			
+			'if g_MNY_ACNT_YN == "Y" then
+			'	Form.OpenPopup("mbbdm86131" , "" , "")
+			'	exit function	
+			'end if
+			
+			'CFD목표시장비교
+			'if g_CFDYN == "Y" or g_ACFDYN == "Y" then
+			'	f_Check_CFDTarMarket()
+			'	exit function
+			'end if
+			
+			'약관단계로 이동
+			'Form.OpenNextPopup("mbbdm86140", g_Send_Data, "")
+			'v0019 END
+        End If
+
+    Else
+    
+        '이어하기 화면설정되어 있는 경우
+        If g_Opng_File ~= "" And g_Opng_File ~= null Then
+            '공유변수 설정
+            User_SharedData_Set("")
+
+            Form.OpenNextPopup(g_Opng_File, g_Send_Data, "")
+            
+        Else
+            '공유변수 설정
+            User_SharedData_Set("Init")
+
+            '최초진입점으로 위치
+            If g_BDM_FRST_MAPID ~= "" And g_BDM_FRST_MAPID ~= null Then
+                Form.OpenNextPopup(g_BDM_FRST_MAPID, g_Send_Data, "")
+            Else
+                Form.CloseForm()
+            End If
+        End If
+    End If
+End Function
+
+'============================================================================
+'f_SetCusType : 투자자타입 리턴
+'============================================================================
+Function f_SetCusType()	
+	Dim szCusType
+	If g_BDM_PRSN_PFIN_YN == "Y" Then
+		szCusType =  "1"   '개인전문투자자
+	Else
+		'v0003 당연/전환가능/일반 체크 변경
+		If g_BDM_PFIN_YN = "Y" Then
+		    If g_BDM_PFIN_CLS_CODE == "1" Then
+		         szCusType =  "3"   '당연
+		    Else
+		         szCusType =  "2"   '전환가능
+		    End If
+		Else
+		    szCusType =  "0"   '일반
+		End If
+	End If
+	return szCusType
+End Function
+
+'============================================================================
+'f_Check_TarMarket() : CFD목표시장 팝업 체크 
+'============================================================================
+Function f_Check_CFDTarMarket()
+	Dim szCusType
+	szCusType = f_SetCusType()	
+	'v0003 당연전문투자자는 목표시장비교 Skip
+	If g_BDM_PFIN_YN == "Y" then	'전문투자자 등록 여부
+		If g_BDM_PFIN_CLS_CODE == "1" Then
+			Form.SetSharedData("BDM_REG_SRNO", "")
+			Form.SetSharedData("BDM_GOAL_MRKT_UNFIT_YN", "")
+			Form.SetSharedData("BDM_ACFD_REG_SRNO", "")
+			Form.SetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN", "")				     
+			g_BDM_REG_SRNO			= Form.GetSharedData("BDM_REG_SRNO"			, false)	'국내CFD목표시장등록일련번호
+			g_BDM_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, false)	'국내CFD목표시장부적합여부
+			g_BDM_ACFD_REG_SRNO			= Form.GetSharedData("BDM_ACFD_REG_SRNO"				, false)	'해외CFD목표시장일련번호
+			g_BDM_ACFD_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, false)	'해외CFD목표시장부적합여부			
+			
+			g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+			
+			User_SharedData_Set("")
+			
+			'약관단계로 이동
+			g_Opng_File = "mbbdm86140"
+			g_Send_Data = ""
+			
+			NextStep()
+		Else
+			g_BDM_REG_SRNO			= Form.GetSharedData("BDM_REG_SRNO"			, false)	'국내CFD목표시장등록일련번호
+			g_BDM_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, false)	'국내CFD목표시장부적합여부
+			g_BDM_ACFD_REG_SRNO			= Form.GetSharedData("BDM_ACFD_REG_SRNO"				, false)	'해외CFD목표시장일련번호
+			g_BDM_ACFD_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, false)	'해외CFD목표시장부적합여부
+
+			'CFD 상품 개설 선택시 목표시장 팝업 호출
+			If g_CFDYN == "Y" And g_ACFDYN == "Y" Then
+				If g_BDM_REG_SRNO == "" Or g_BDM_ACFD_REG_SRNO == "" Then
+					Form.OpenPopup("mbbdm86132", "136".."★"..szCusType.."★".."2", "")	'상품코드+ 고객유형 + 처리횟수
+				Else
+					g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+					
+					User_SharedData_Set("")
+					
+					'약관단계로 이동
+					g_Opng_File = "mbbdm86140"
+					g_Send_Data = ""
+					
+					NextStep()
+				End If
+			Else
+				If g_CFDYN == "Y" Then
+					'Form.SetSharedData("BDM_ACFD_REG_SRNO", "")
+					'Form.SetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN", "")	
+					'g_BDM_ACFD_REG_SRNO			= Form.GetSharedData("BDM_ACFD_REG_SRNO"				, false)	'해외CFD목표시장일련번호
+					'g_BDM_ACFD_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, false)	'해외CFD목표시장부적합여부	
+					Form.SetSharedData("BDM_REG_SRNO", "")
+					Form.SetSharedData("BDM_GOAL_MRKT_UNFIT_YN", "")	
+					g_BDM_REG_SRNO			= Form.GetSharedData("BDM_REG_SRNO"			, false)	'국내CFD목표시장등록일련번호
+					g_BDM_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, false)	'국내CFD목표시장부적합여부					
+					If g_BDM_REG_SRNO == "" Then
+						Form.OpenPopup("mbbdm86132", "136".."★"..szCusType.."★".."1", "")
+					Else
+						g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+						
+						User_SharedData_Set("")
+						
+						'약관단계로 이동
+						g_Opng_File = "mbbdm86140"
+						g_Send_Data = ""
+						
+						NextStep()
+					End If
+				ElseIf g_ACFDYN == "Y" Then				
+					'Form.SetSharedData("BDM_REG_SRNO", "")
+					'Form.SetSharedData("BDM_GOAL_MRKT_UNFIT_YN", "")	
+					'g_BDM_REG_SRNO			= Form.GetSharedData("BDM_REG_SRNO"			, false)	'국내CFD목표시장등록일련번호
+					'g_BDM_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, false)	'국내CFD목표시장부적합여부
+					Form.SetSharedData("BDM_ACFD_REG_SRNO", "")
+					Form.SetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN", "")	
+					g_BDM_ACFD_REG_SRNO			= Form.GetSharedData("BDM_ACFD_REG_SRNO"				, false)	'해외CFD목표시장일련번호
+					g_BDM_ACFD_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, false)	'해외CFD목표시장부적합여부						
+					If g_BDM_ACFD_REG_SRNO == "" Then
+						Form.OpenPopup("mbbdm86132", "137".."★"..szCusType.."★".."1", "")
+					Else
+						g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+						
+						User_SharedData_Set("")
+						
+						'약관단계로 이동
+						g_Opng_File = "mbbdm86140"
+						g_Send_Data = ""
+						
+						NextStep()
+					End If				
+				End If
+			End if
+		End If 
+	Else
+		if g_BDM_MANG_BRCD == "1065" then
+			'v0015 문구변경
+			'계좌 보유 고객인경우 아닌경우 모두 전문투자자 안내페이지로 이동
+			'Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자로 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 슈퍼365계좌 개설 후 전문투자자 등록을 하시고, CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")
+			'Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자로 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 Super365계좌 개설 후 전문투자자 등록을 하시고, CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")
+			Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자 및 장외파생상품 거래요건이 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 Super365계좌 개설 후 전문투자자 등록을 하시고, CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")
+		else
+			'계좌 보유 고객인경우 아닌경우 모두 전문투자자 안내페이지로 이동
+			'Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자로 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 종합매매계좌 개설 후 전문투자자 등록을 하시고 CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")		
+			Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자 및 장외파생상품 거래요건이 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 종합매매계좌 개설 후 전문투자자 등록을 하시고, CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")
+		end if
+	End If
+End Function
+
+'============================================================================
+Function CheckData()
+    If Trim(contMain.edtName.caption) == "" Or Trim(contMain.edtName.caption) == null Then
+        '(순서주의) 포커스후->Alert처리해야함
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtName.top, "1"))
+        Form.ShowAlert("오류", "이름을 입력해주시기 바랍니다.")
+        return False
+    Else
+        '이름 공백 체크
+        sStr = Len(contMain.edtName.Caption)
+        sRplStr = Len(replace(contMain.edtName.caption, " " , ""))
+        If sStr <> sRplStr Then
+            contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtName.top, "1"))
+            Form.ShowAlert("오류", "이름을 입력해주시기 바랍니다.(공백 불가)")
+            return False
+        End If
+    End If
+
+    If Trim(contMain.edtRcno.caption) == "" Or Trim(contMain.edtRcno.caption) == null Then
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+        Form.ShowAlert("오류", "주민번호를 입력해주시기 바랍니다.")
+        return False
+    Else
+        nLen = contMain.edtRcno.pwdlen
+        If CInt(nLen) < 13 Then
+            contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+            Form.ShowAlert("오류", "주민번호를 확인해주세요.(13자리)")
+            return False
+        End If
+    End If
+
+    If Trim(contMain.cmbMcco.caption) == "" Or Trim(contMain.cmbMcco.caption) == null Then
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+        Form.ShowAlert("오류", "통신사를 확인해주세요.")
+        return False    
+    End If
+    '비대면계좌개설_알뜰폰은 테스트서버 && 테스트SKip일때만 허용
+    'V0005 : 알뜰폰 제한 처리 제거.
+'    If g_sz_SubNmetBswrGb == "1" Or g_sz_SubNmetBswrGb == 1 Then  '계좌개설
+'        '통신사확인 0.SKT 1.KT 2.LGU+ 3.SK알뜰 4.KT알뜰 5.LG알뜰
+'        nIdx = contMain.cmbMcco.currentindex
+'        '개발서버인 경우, 
+'        If (g_nDev == "1" Or g_nDev == 1) Then
+'            '테스트Skip아닌 경우에는 알뜰폰 선택 불가
+'            If CInt(chkSkip.checkstate) == 0 Then
+'                If (nIdx == "3" Or nIdx == 3) Or (nIdx == "4" Or nIdx == 4) Or (nIdx == "5" Or nIdx == 5) Then
+'                    contMain.scroll_pos = CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+'                    Form.ShowAlert("오류", "알뜰폰을 이용한 휴대폰인증으로는 비대면계좌개설이 불가합니다. 고객님의 안전한 금융거래를 위해 영업점에 내점하시어 개설을 부탁드립니다.")
+'                    return False
+'                End If
+'            End If
+'        '운영서버_알뜰폰 불가
+'        Else
+'            If (nIdx == "3" Or nIdx == 3) Or (nIdx == "4" Or nIdx == 4) Or (nIdx == "5" Or nIdx == 5) Then
+'                contMain.scroll_pos = CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+'                Form.ShowAlert("오류", "알뜰폰을 이용한 휴대폰인증으로는 비대면계좌개설이 불가합니다. 고객님의 안전한 금융거래를 위해 영업점에 내점하시어 개설을 부탁드립니다.")
+'                return False
+'            End If
+'        End If
+'    End If
+'
+    If Trim(contMain.edtHPNo.caption) == "" Or Trim(contMain.edtHPNo.caption) == null Then
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+        Form.ShowAlert("오류", "휴대폰번호를 입력해주시기 바랍니다.")
+        return False
+    ElseIf Mid(contMain.edtHPNo.caption,1,2) <> "01" Then 
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+        Form.ShowAlert("오류", "휴대폰번호를 확인해주시기 바랍니다.")
+        return False
+    Else
+        If Len(contMain.edtHPNo.Caption) < 10 Or Len(contMain.edtHPNo.Caption) > 11 Then
+            contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+            Form.ShowAlert("오류", "휴대폰번호를 확인해주시기 바랍니다.")
+            return False
+        End If
+    End If
+
+    If CInt(contMain.chkCtcnAgrm.checkstate) < 1 Then  '0.uncheck 1.check
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+        Form.ShowAlert("안내", "휴대폰 본인명의 인증서비스를 위한 약관에 전체 동의가 필요합니다.")
+        return False
+    End If
+    
+    return True
+end Function 
+'============================================================================
+Function User_Stop_Timer()
+
+    'sTimerID = 0 : 인증번호 요청
+    'sTimerID = 1 : 인증확인 요청/요청검증
+    'sTimerID = 2 : 인증유효시간
+    'sTimerID = 3 : 단기다수계좌여부/대포통장명의인여부 확인
+    'sTimerID = 4 : 사기계좌명의인여부 확인
+    'sTimerID = 5 : 통신사콤보 자동펼치기
+    
+    Form.SetTimerEvent(0, 0, 1)
+    Form.SetTimerEvent(1, 0, 1)
+    Form.SetTimerEvent(2, 0, 1)
+    Form.SetTimerEvent(3, 0, 1)
+    Form.SetTimerEvent(4, 0, 1)
+    Form.SetTimerEvent(5, 0, 1)
+End Function 
+
+
+
+
+
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form
+'============================================================================
+'============================================================================
+Sub Form_OnFormInit()
+	
+    '안드로이드-백버튼 작동X
+    '부모창이 먼저 닫히는 오류방지를 위해 해당화면은 백버튼 작동X 처리
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+    
+    '로그인여부
+    sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", False )
+
+    'v0003 비로그인상태에서만 비대면화면 권한부여
+    If CInt(sLOGIN_TYPE) <= 1 Then '비로그인상태
+        Form.SetSharedData("&SCREEN_AUTH" , "99") '비대면화면 권한부여
+    End If
+
+    'OSType 1.안드로이드 2.IOS
+    g_sz_OSType = Form.GetSharedData("&OS_TYPE", False)
+    'Form.ShowAlert("OS_VERSION", "["..g_sz_OSType.."](1.안드로이드 2.IOS)")
+	
+	'iOS 스크롤 제어용
+	if g_sz_OSType == "2" then
+		contMain.setExceptInvisibleCtl(true)
+		contMain.setScrollAutoSize()
+	else
+		contMain.setScrollBarVisible("2")
+	end if
+	
+	
+    '메뉴에서 진입하는 입하므로 화면번호로 체크 
+    g_SCR_NO = Form.GetSharedData( "&POPUP_SCREEN_NO" , False )
+    
+    'Form.ShowAlert("g_SCR_NO", g_SCR_NO)
+    '계좌개설진행상태조회 : 85184
+    If g_SCR_NO == "85184" Or g_SCR_NO == 85184 Then
+        '비대면업무코드=999.비대면진행상태조회 로 강제 설정
+        Form.SetSharedData("BDM_NMETBSWRGB" , "999")
+        g_BDMNMETBSWRGB = Form.GetSharedData("BDM_NMETBSWRGB", False)
+    '업무신청진행상태조회 : 85183
+    ElseIf g_SCR_NO == "85183" Or g_SCR_NO == 85183 Then
+        '비대면업무코드=999.비대면진행상태조회 로 강제 설정
+        Form.SetSharedData("BDM_NMETBSWRGB" , "999")
+	    Form.SetSharedData("BDM_CONNECTING" , "1")	'20230428 추가
+        g_BDMNMETBSWRGB = Form.GetSharedData("BDM_NMETBSWRGB", False)
+    End If
+    
+    '호출업무 확인
+    'g_BDMNMETBSWRGB = Form.GetSharedData("BDM_NMETBSWRGB", False)
+    'g_sz_SubNmetBswrGb = Mid(g_BDMNMETBSWRGB, 1, 1)
+    User_SharedData_Get()
+
+    '비대면업무구분1자리 설정
+    g_sz_SubNmetBswrGb = Mid(g_BDMNMETBSWRGB,1,1)
+
+
+    '비대면업무의 공유변수 일괄 초기화
+	if g_sz_SubNmetBswrGb <> "1" and g_sz_SubNmetBswrGb <> 1 then
+		User_SharedData_All_Init()
+				
+		'비대면 업무로 접근시 유의사항 막아달라함
+		ImgInfo.visible = false
+		ImgInfo.enable = false
+	end if
+
+    'Form.ShowAlert("비대면업무구분", "["..g_BDMNMETBSWRGB.."](100.비대면계좌개설 0xx.비대면업무신청 3xx.모바일OTP발급 999.비대면진행상황)")
+'    If g_sz_SubNmetBswrGb == "1" Or g_sz_SubNmetBswrGb == 1 Then
+'        tmpMsg1 = "메리츠증권 비대면 계좌개설을 위해"
+'    ElseIf g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb == 0 Then
+'        tmpMsg1 = "메리츠증권 비대면 업무처리를 위해"
+'    ElseIf g_sz_SubNmetBswrGb == "3" Or g_sz_SubNmetBswrGb == 3 Then
+'        tmpMsg1 = "메리츠증권 모바일OTP 업무처리를 위해"
+'    ElseIf g_sz_SubNmetBswrGb == "9" Or g_sz_SubNmetBswrGb == 9 Then
+'        '계좌개설진행상태조회 : 85184
+'        If g_SCR_NO == "85184" Or g_SCR_NO == 85184 Then
+'            tmpMsg1 = "비대면 계좌개설 진행상태 확인을 위해"
+'        '업무신청진행상태조회 : 85183
+'        ElseIf g_SCR_NO == "85183" Or g_SCR_NO == 85183 Then
+'            tmpMsg1 = "비대면 업무신청 진행상태 확인을 위해"
+'        Else
+'            '계좌개설신청안내_진행상태조회
+'            If g_BDM_CONNECTING == "1" Or g_BDM_CONNECTING == 1 Then
+'                tmpMsg1 = "비대면 계좌개설 진행상태 확인을 위해"
+'            '비대면업무신청안내_진행상태조회
+'            ElseIf g_BDM_CONNECTING == "2" Or g_BDM_CONNECTING == 2 Then
+'                tmpMsg1 = "비대면 업무신청 진행상태 확인을 위해"
+'            Else
+'                tmpMsg1 = "비대면 계좌개설/업무신청 진행상태 확인을 위해"
+'            End If
+'        End If
+'    Else
+'        tmpMsg1 = "본인확인을 위해"
+'    End If
+'    tmpMsg2 = "휴대폰 인증을 진행합니다."
+'    contMain.lblSubTitle.caption = tmpMsg1.."\n"..tmpMsg2
+	contMain.lblSubTitle.caption = "본인명의의 휴대폰으로 인증을 진행해주세요."
+
+    '재요청버튼 문구
+    contMain.btnAthnRetry.caption = "재요청 >"
+    contMain.btnAthnRetry.fgcolor = 267   '검은색
+
+    '비대면계좌개설만 진행상태 표시
+    If g_sz_SubNmetBswrGb == "1" Or g_sz_SubNmetBswrGb == 1 Then
+        imgStep.visible = True
+    Else
+        imgStep.visible = False
+    End If
+
+    '통신사정보-Default설정 없음
+    'g_sz_HPCo = Form.GetSharedData("&PHONE_COMPANY_CODE", False )  '통신사 정보
+    g_sz_HPNo = Form.GetSharedData("&PHONE_NUMBER"      , False ) '기기정보에서 읽어온 휴대폰번호(P로 시작하면 핸드폰번호, R로 시작하면 단말ID)
+    'Form.ShowAlert("통신사정보", "["..g_sz_HPCo.."]["..g_sz_HPNo.."]")
+
+    '테스트용 인증스킵 체크
+    g_nDev = Form.GetSharedData("&SERVER_MODE", False )
+    'Form.ShowAlert("SERVER_MODE(1.테스트)", nDev)
+    If g_nDev == "1" Or g_nDev == 1 Then
+'금보원앱심사까지 Hidden
+'chkSkip.visible = False
+'chkSkip.checkstate = "0"
+        chkSkip.visible = True
+        chkSkip.checkstate = "0"   '자동체크 제외 "1"  '자동체크
+    Else
+        chkSkip.visible = False
+        chkSkip.checkstate = "0"
+    End If
+
+    '본인인증구분
+    g_sz_AthnGb = "1" '현재는 휴대폰본인인증만 함
+
+    '서비스에 대한 토스메시지 제거
+    DATAMANAGER.setNotifyDataMessage( "obcsb_oimf_639a"   , False )
+    DATAMANAGER.SetNotifyDataMessage( "obcsb_oimf_653a"   , False )  '인증번호 요청
+    DATAMANAGER.SetNotifyDataMessage( "obcsb_oimf_654a"   , False )  '인증확인 요청
+    DATAMANAGER.SetNotifyDataMessage( "obcsb_oimf_654a_1" , False )  '인증확인 요청검증
+    DATAMANAGER.SetNotifyDataMessage( "obcsb_oimf_655r"   , False )  '인증결과 검증
+    DATAMANAGER.setNotifyDataMessage( "obaci_acct_091r"   , False )  '단기다수계좌여부 조회
+    DATAMANAGER.setNotifyDataMessage( "obaci_acct_091r_1" , False )  '대포통장명의인여부 조회
+    DATAMANAGER.setNotifyDataMessage( "obaci_acct_091r_2" , False )  '사기계좌명의인여부 조회
+    DATAMANAGER.setNotifyDataMessage( "obaci_acct_096r"   , False )  '단기다수계좌여부/대포통장명의인여부/사기계좌명의인여부 확인
+    DATAMANAGER.setNotifyDataMessage( "obaci_acct_058r"   , False )  '비대면계좌개설 이어하기 조회
+    DATAMANAGER.setNotifyDataMessage( "obaci_acct_058r_1"   , False )'비대면업무진행상태조회
+    'DATAMANAGER.setNotifyDataMessage( "obaci_acct_072r"   , False )  '비대면계좌개설 이어하기 조회
+    'DATAMANAGER.setNotifyDataMessage( "obaci_acct_072r_1" , False )  '비대면업무진행상태조회
+    'DATAMANAGER.setNotifyDataMessage( "obaci_acct_049c"   , False )  '비대면계좌개설 이어하기 등록_0단계
+    'DATAMANAGER.setNotifyDataMessage( "obaci_acct_049c_1" , False )  '비대면계좌개설 이어하기 취소
+    DATAMANAGER.setNotifyDataMessage( "obcsb_nmet_102c"   , False )  '비대면본인인증및1원역이체관리
+
+    '항목가이드 Default 설정 (267.검정색)
+    contMain.edtName.SetApplyLabel   ("이름"         , 0, 267, "left", True)  'True.필수입력 / False.선택입력
+    contMain.edtRcno.SetApplyLabel   ("주민등록번호" , 0, 267, "left", True)
+    contMain.cmbMcco.SetApplyLabel   ("통신사"       , 0, 267, "left", True, 111) 'HWG
+    contMain.edtHPNo.SetApplyLabel   ("휴대폰번호"   , 0, 267, "left", True)
+    contMain.edtAthnNo.SetApplyLabel ("인증번호"     , 0, 267, "left", True)
+    
+    '통신사선택콤보 타입 설정
+    contMain.cmbMcco.cbtype = 5
+    
+    '헬퍼텍스트 설정
+    contMain.edtName.SetUseResultLabel  (True, 1)  'True.사용가능 / False.사용불가, 라인수
+    contMain.edtRcno.SetUseResultLabel  (True, 1)
+    contMain.cmbMcco.SetUseResultLabel  (True, 1)
+    contMain.edtHPNo.SetUseResultLabel  (True, 1)
+    contMain.edtAthnNo.SetUseResultLabel(True, 2)
+    
+    '주민등록번호 자릿수 설정
+    contMain.edtRcno.pwdlen = 13
+    
+    '신분증단계에서 넘어온경우, 기입력정보 재설정
+    'strStepBackYN = Form.GetSharedData("StepBackYN", True) 'False
+    sRevData = Form.GetOpenLinkData()
+    
+'    '20230713 SWJ START : AOS에서 null까지 줘서 Split 처리함
+'    sRetItem = Split(sRevData, "★")
+'    
+'    if #sRetItem > 1 then
+'	    if sRetItem(1) == "Super365Acnt" then
+'		    sRevData = "Super365Acnt"
+'	    end if
+'	    
+'	    if #sRetItem > 2 then
+'			if sRetItem(2) == "Super365Acnt" then
+'				sRevData = "Super365Acnt"
+'			end if
+'		end if
+'
+'    end if
+'    '20230713 SWJ END
+    
+    If sRevData == "StepBack" Then
+        '컨트롤 모두보이기
+        contMain.edtName.visible      = True   '이름
+        contMain.edtRcno.visible      = True   '주민등록번호
+        contMain.cmbMcco.visible      = True   '통신사
+        contMain.edtHPNo.visible      = True   '휴대폰번호
+        contMain.btnCtcnAgrm.visible  = True   '약관동의
+        contMain.chkCtcnAgrm.visible  = True
+        contMain.imgAthnShow.visible  = True
+        contMain.lblCtcnShow.visible  = True
+        contMain.edtAthnNo.visible    = True   '인증번호
+        '안드로이드 인증유효시간이 표시가 되지 않아 true -> false 처리
+        contMain.lblAthnTime.visible  = True  '인증유효시간 -> ReTry버튼클릭시,visible True
+        contMain.lblAthnTime.bringFront("1")   '인증유효시간을 제일앞단으로 위치시킴
+        'contMain.lblAthnTime.visible  = False
+        contMain.btnAthnRetry.visible = True   '인증번호재요청
+        contMain.btnAthnRetry.ebable  = True
+        g_Frst_YN = "N" 
+
+        '스크롤설정 체크용 변수 설정
+        g_Cntt1 = "Y"
+        g_Cntt2 = "Y"
+        g_Cntt3 = "Y"
+        g_Cntt4 = "Y"
+        g_Cntt5 = "Y"
+        g_Cntt6 = "Y"
+
+        '스크롤 설정
+        nContResize = 0
+        nTop = 0
+        nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.edtAthnNo.top, "1"))
+        contMain.lblScrollPos.top = nContResize
+        contMain.SetScrollAutoSize()
+        contMain.scroll_pos = nTop
+        
+        '신분증단계로 넘긴 입력정보 다시 설정
+        '단, 화면이 넘어온 경우, 인증은 다시 받아야 함
+        g_BDM_NAME          = Form.GetSharedData("BDM_NAME"         , False)  '이름
+        g_BDM_RCNO_PIP      = Form.GetSharedData("BDM_RCNO_PIP"     , False)  '주민등록번호
+        g_BDM_COMPANY_CODE  = Form.GetSharedData("BDM_COMPANY_CODE" , False)  '통신사 정보
+        g_BDM_HP1           = Form.GetSharedData("BDM_HP1"          , False)  '휴대폰번호
+        g_BDM_HP2           = Form.GetSharedData("BDM_HP2"          , False)
+        g_BDM_HP3           = Form.GetSharedData("BDM_HP3"          , False)
+
+        contMain.edtName.caption        = Trim(g_BDM_NAME)          '이름
+        contMain.edtRcno.caption        = Trim(g_BDM_RCNO_PIP)      '주민등록번호
+        contMain.cmbMcco.cbkeydata      = Trim(g_BDM_COMPANY_CODE)  '통신사
+        contMain.edtHPNo.caption        = Trim(g_BDM_HP1)..Trim(g_BDM_HP2)..Trim(g_BDM_HP3)  '휴대폰번호
+        contMain.chkCtcnAgrm.checkstate = "1" '약관동의
+'    elseif sRevData == "Super365Acnt" Then 'v0013	 '20230713 SWJ START 
+'	    '메모리용
+'	    'Form.ShowAlert("오류", "들어오나?")
+'	    Form.SetSharedData("BDM_MANG_BRCD" , "1065")  
+'	    Form.SetSharedData("BDM_PRCD200"	, "Y"	)
+'	    Form.SetSharedData("BDM_NMETBSWRGB"  , "100"   )
+'	    Form.SetSharedData("BDM_BDM_FRST_MAPID"  , "mbbdm85100"   )
+'	    '변수용
+'	     g_BDM_MANG_BRCD  = "1065"        '디지털금융센터
+'		g_SAYN          = "Y"           '다드림 가입여부
+'		g_BDMNMETBSWRGB = "100"         '비대면업무구분
+'		g_BDM_FRST_MAPID = "mbbdm85100" '최초진입화면ID
+'		g_sz_SubNmetBswrGb = "1"        '
+    End If
+    
+End Sub
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+    '안드로이드-백버튼 작동X
+    '부모창이 먼저 닫히는 오류방지를 위해 해당화면은 백버튼 작동X 처리
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+    
+    '휴대폰 본인인증 약관동의 -----------------------------------------------
+    If sKeyName == "mbbdm86130_p1"  Then
+        If sRet == "ok" Then
+            '약관동의 체크
+            If contMain.chkCtcnAgrm.checkstate == "0" Or contMain.chkCtcnAgrm.checkstate == 0 Then  '0.uncheck 1.check
+                contMain.chkCtcnAgrm.checkstate = "1"
+                contMain_chkCtcnAgrm_OnChange("1")
+            End If
+        End If
+
+    '비대면 계좌개설이어하기 -----------------------------------------------
+    ElseIf sKeyName = "mbbdm86130_p2" Then
+        g_BDM_CLEAR_YN = sRet
+        User_SharedData_Set("")
+
+        '개설취소/처음부터하기
+        If sRet == "Y" Then
+'            DATAMANAGER.RequestTranData "obaci_acct_049c_1"
+		    
+		    g_Re_RegYN = "Y"
+'		    DATAMANAGER.RequestTranData("obaci_acct_058r")
+
+			'비대면계좌개설 이어하기 관리(취소 후 새로 진행)
+		    DATAMANAGER.RequestTranData("obaci_acct_059c")
+		    
+        '이어하기
+        ElseIf sRet == "N" Then
+            '완료단계 이후 화면으로 진입
+            If g_BDM_LAST_STAG_CLS_CODE == "1" Or g_BDM_LAST_STAG_CLS_CODE == 1 Then  '1단계까지 완료 > 고객정보입력 단계로 이동
+                g_Opng_File = "mbbdm86160"
+                g_Send_Data = ""
+
+            ElseIf g_BDM_LAST_STAG_CLS_CODE == "2" Or g_BDM_LAST_STAG_CLS_CODE == 2 Then  '2단계까지 완료 > 비밀번호등록 단계로 이동
+                g_Opng_File = "mbbdm86180"
+                g_Send_Data = ""
+		
+            ElseIf g_BDM_LAST_STAG_CLS_CODE == "3" Or g_BDM_LAST_STAG_CLS_CODE == 3 Then  '3단계까지 완료 > 본인계좌인증 단계로 이동
+                g_Opng_File = "mbbdm86190"
+                g_Send_Data = ""
+		
+            ElseIf g_BDM_LAST_STAG_CLS_CODE == "4" Or g_BDM_LAST_STAG_CLS_CODE == 4 Then  '4단계-본인계좌인증 입력완료
+                g_Opng_File = "mbbdm86190"
+                g_Send_Data = ""		
+	
+            Else 
+				'비대면계좌개설 이어하기 관리(취소 후 새로 진행)
+				DATAMANAGER.RequestTranData("obaci_acct_059c")
+            End If
+
+            NextStep()
+        End If
+
+    '이전으로 돌아가기(계좌개설종료) -----------------------------------------------
+'    ElseIf sKeyName = "mbbdm85100_p9_end" Then
+'        If sRet == "ok" Then
+'            g_Opng_File = "HOME"  '오픈할화면
+'            g_Send_Data = ""      '인자정보
+'
+'            NextStep()
+'        End If
+
+    '이전으로 돌아가기(계좌개설외종료) -----------------------------------------------
+'    ElseIf sKeyName = "mbbdm85200_p9_end" Then
+'        If sRet == "ok" Then
+'            g_Opng_File = "HOME"  '오픈할화면
+'            g_Send_Data = ""      '인자정보
+'
+'            NextStep()
+'        End If
+	
+	
+	'단기다수개설여부 대상자 팝업 리턴 
+	elseif sKeyName == "mbbdm86131" then
+		if sRet == "ok" then
+			'CFD목표시장비교
+			if g_CFDYN == "Y" or g_ACFDYN == "Y" then
+				f_Check_CFDTarMarket()
+				exit sub
+			end if
+			
+			if g_sz_OSType == "1" then
+				g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+						
+				User_SharedData_Set("")
+				
+				'약관단계로 이동
+				g_Opng_File = "mbbdm86140"
+				g_Send_Data = ""
+				
+				NextStep()
+			else
+				Form.SetTimerEvent2(20, 1, 0.1)
+			end if
+		else
+			Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")	
+			
+'			Form.CloseForm()
+			
+			Form.OpenNextPopup("mbbdm85100", "", "")
+			
+		end if
+	
+	'CFD 목표시장비교 팝업 리턴
+	elseif sKeyName == "mbbdm86132" then
+		if sRet == "ok" then
+			g_BDM_REG_SRNO			= Form.GetSharedData("BDM_REG_SRNO"			, false)			'국내CFD목표시장등록일련번호	
+			g_BDM_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, false)			'국내CFD목표시장부적합여부
+			g_BDM_ACFD_REG_SRNO			= Form.GetSharedData("BDM_ACFD_REG_SRNO"				, false)			'해외CFD목표시장등록일련번호
+			g_BDM_ACFD_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, false)			'해외CFD목표시장부적합여부
+			
+			if g_sz_OSType == "1" then
+				g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+							
+				User_SharedData_Set("")
+				
+				'약관단계로 이동
+				Form.OpenNextPopup("mbbdm86140", g_Send_Data, "")
+			else
+				Form.SetTimerEvent2(21, 1, 0.1)
+			end if
+			
+		else
+			Form.SetSharedData("BDM_REG_SRNO", "")
+			Form.SetSharedData("BDM_GOAL_MRKT_UNFIT_YN", "")
+			Form.SetSharedData("BDM_ACFD_REG_SRNO", "")
+			Form.SetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN", "")
+				     
+			g_BDM_REG_SRNO			= Form.GetSharedData("BDM_REG_SRNO"			, false)	'국내CFD목표시장등록일련번호
+			g_BDM_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, false)	'국내CFD목표시장부적합여부
+			g_BDM_ACFD_REG_SRNO			= Form.GetSharedData("BDM_ACFD_REG_SRNO"				, false)			'해외CFD목표시장일련번호
+			g_BDM_ACFD_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, false)	'해외CFD목표시장부적합여부			
+			
+			Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")	
+			
+'			Form.CloseForm()
+
+			Form.OpenNextPopup("mbbdm85100", "", "")
+			
+		end if
+	ElseIf sKeyName = "mbonl89000" or sKeyName = "mbonl89020" Then
+		'Form.ShowAlert("오류", "들어오나?")
+		Form.OpenScreen("41000", "")	'시장종합화면
+		Form.CloseForm()
+	End If
+End Sub
+'============================================================================
+' IOS-인증문자 자동 설정
+Sub Form_OnTriggerEvent(sEventName, sParam)
+    If sEventName == "event_HpCertNo" Then
+        If sParam <>"" Then
+            strData = Split(sParam,":")
+            If len(strData[1]) == 8 Then
+                strCertNo = Mid(strData[1],2,6)
+                contMain.edtAthnNo.caption = strCertNo
+            End If
+        End If
+    End If
+End Sub
+'============================================================================
+' 본인인증용 타이머
+Sub Form_OnTimerEvent(sTimerID)
+
+    'sTimerID = 0 : 인증번호 요청
+    'sTimerID = 1 : 인증확인 요청/요청검증
+    'sTimerID = 2 : 인증유효시간
+    'sTimerID = 3 : 단기다수계좌여부/대포통장명의인여부 확인
+    'sTimerID = 4 : 사기계좌명의인여부 확인
+    'sTimerID = 5 : 통신사콤보 자동펼치기
+
+    '인증번호 요청 -------------------------------------------------------
+    If  sTimerID == 0 Or sTimerID == "0" Then
+        '인증요청 타이머종료
+        Form.SetTimerEvent(0, 0, 1)
+
+        '인증유효횟수 설정
+        g_nCnt = CInt(g_nCnt) + 1
+
+        '인증유효횟수 초과 체크
+        If CInt(g_nCnt) > 10 Then
+            contMain.edtAthnNo.SetResultLabel("1","error","본인인증에 실패하였습니다. 다시 시도하여 주시기 바랍니다.","contMain")
+
+            '인증번호 재요청버튼 Show
+            contMain.edtAthnNo.caption    = ""
+            contMain.edtAthnNo.enable     = False
+            contMain.btnAthnRetry.visible = True
+            contMain.btnAthnRetry.enable  = True
+
+            '3분 타이머 초기화
+            InitCountTimer()
+            Exit Sub
+        End If
+
+        '인증확인 요청
+        DATAMANAGER.RequestTranData "obcsb_oimf_654a"
+
+    '인증확인 요청검증 -------------------------------------------------------
+    ElseIf sTimerID == 1 Or sTimerID == "1" Then
+        '검증요청 타이머종료
+        Form.SetTimerEvent(1, 0, 1)
+
+        '인증유효횟수 설정
+        g_nCnt = CInt(g_nCnt)+1
+
+        '인증유효횟수 초과 체크
+        If CInt(g_nCnt) > 10 Then
+            contMain.edtAthnNo.SetResultLabel("1","error","SMS 검증요청이 실패하였습니다. 잠시 후 다시 시도해 주십시오.","contMain")
+
+            '인증번호 재요청버튼 Show
+            contMain.edtAthnNo.caption    = ""
+            contMain.edtAthnNo.enable     = False
+            contMain.btnAthnRetry.visible = True
+            contMain.btnAthnRetry.enable  = True
+
+            '3분 타이머 초기화
+            InitCountTimer()
+            Exit Sub
+        End If
+
+        '인증결과 검증
+        DATAMANAGER.RequestTranData "obcsb_oimf_655r"
+
+    '휴대폰본인인증 유효시간(3분) -------------------------------------------------------
+    ElseIf sTimerID == 2 Or sTimerID == "2" Then
+        If g_HPSec == 0 Then
+            contMain.edtAthnNo.SetResultLabel("1","error","인증시간이 만료되었습니다. 다시 시도하여 주시기 바랍니다","contMain")
+
+            '유효시간체크 종료
+            Form.SetTimerEvent(2, 0, 1)
+
+            '인증번호 재요청버튼 Show
+            contMain.edtAthnNo.caption    = ""
+            contMain.edtAthnNo.enable     = False
+            contMain.btnAthnRetry.visible = True
+            contMain.btnAthnRetry.enable  = True
+            
+            '시간만료시엔 초기화시키지 않는다
+            contMain.lblAthnTime.caption = "0:00"
+	    
+            '3분 타이머 초기화
+'            InitCountTimer()
+        Else
+            Dim nMin, nSec
+            nMin  = Int(CInt(g_HPSec) / 60 )
+            nSec  = CInt(g_HPSec) Mod  60
+            If Len(nSec) == 1 Then
+                nSec = "0"..nSec
+                nSec = nSec
+            End If
+
+            '#:##
+            contMain.lblAthnTime.caption = nMin..":"..nSec
+            g_HPSec = CInt(g_HPSec)-1
+        End If
+
+    '단기다수계좌여부/대포통장명의인여부 확인 -------------------------------------------------------
+    ElseIf sTimerID == 3 Or sTimerID == "3" Then
+        '정보송신 타이머종료
+        Form.SetTimerEvent(3, 0, 1)
+
+        '송신유효횟수 설정
+        g_nCnt_091_1 = CInt(g_nCnt_091_1) + 1
+
+        '송신유효횟수 초과 체크
+        If CInt(g_nCnt_091_1) > 7 Then
+		   btnNext.enable = true	'20230419 추가
+		   
+		   btnNext.btnimage = "btn_20.9"
+			btnNext.fgcolor = "273"
+		   
+            'contMain.edtAthnNo.SetResultLabel("1","error","은행연합회와 통신상태가 원활하지 않습니다. 잠시 후 다시 시도해 주십시오.","contMain")
+            Form.ShowAlert("오류", "은행연합회와 통신상태가 원활하지 않습니다. 잠시 후 다시 시도해 주십시오.")
+
+            '3분 타이머 초기화
+            'InitCountTimer()
+
+            Exit Sub
+        End If
+
+        '단기다수계좌여부/대포통장명의인여부 확인
+        DATAMANAGER.RequestTranData "obaci_acct_091r_1"
+
+    '사기계좌명의인여부 확인 -------------------------------------------------------
+    ElseIf sTimerID == 4 Or sTimerID == "4" Then
+        '정보송신 타이머종료
+        Form.SetTimerEvent(4, 0, 1)
+
+        '송신유효횟수 설정
+        g_nCnt_096 = CInt(g_nCnt_096) + 1
+
+        '송신유효횟수 초과 체크
+        If CInt(g_nCnt_096) > 7 Then
+		   btnNext.enable = true	'20230419 추가
+		   
+		   btnNext.btnimage = "btn_20.9"
+			btnNext.fgcolor = "273"
+		   
+            'contMain.edtAthnNo.SetResultLabel("1","error","은행연합회와 통신상태가 원활하지 않습니다. 잠시 후 다시 시도해 주십시오.","contMain")
+            Form.ShowAlert("오류", "은행연합회와 통신상태가 원활하지 않습니다. 잠시 후 다시 시도해 주십시오.")
+
+            '3분 타이머 초기화
+            'InitCountTimer()
+            Exit Sub
+        End If
+
+        '사기계좌명의인여부 확인
+        DATAMANAGER.RequestTranData "obaci_acct_096r"
+
+    'LES START
+    '통신사콤보 포커싱 및 자동펼치기
+    ElseIf sTimerID = "5" Or sTimerID = 5 Then
+        Form.SetTimerEvent2(sTimerID, 0, 0.8)
+
+'Form.ShowAlert("a", contMain.cmbMcco.caption)
+        If CInt(contMain.cmbMcco.currentindex) < 1 And Trim(contMain.cmbMcco.caption) == "통신사를 선택해주세요" Then
+            contMain.cmbMcco.openList()
+        End If
+
+	
+    End If
+    
+    'v0002 sta 은합회 결과값에 따라 체크 
+    '안드로이드는 num, 아이폰은 string으로 받음
+'	If sTimerID == 10 or sTimerID == "10" then
+'		Form.SetTimerEvent( 10, 0, 1 )
+'		DATAMANAGER.RequestTranData("obaci_acct_089r_1")
+'	End If
+	
+'	If sTimerID == 11 or sTimerID == "11" then
+'		Form.SetTimerEvent( 11, 0, 1 )
+'		DATAMANAGER.RequestTranData("obaci_acct_089r_2")
+'	End If
+	
+'	If sTimerID == 12 or sTimerID == "12" then
+'		Form.SetTimerEvent( 12, 0, 1 )
+'		DATAMANAGER.RequestTranData("obaci_acct_089r_3")
+'	End If
+	
+'	If sTimerID == 13 or sTimerID == "13" then
+'		Form.SetTimerEvent( 13, 0, 1 )
+'		DATAMANAGER.RequestTranData("obaci_acct_089r_4")
+'	End If
+		
+	if sTimerID == 20 or sTimerID == "20" then
+		Form.SetTimerEvent2(20, 0, 0.1)
+		
+		g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+					
+		User_SharedData_Set("")
+		
+		'약관단계로 이동
+		g_Opng_File = "mbbdm86140"
+		g_Send_Data = ""
+		
+		NextStep()
+	end if
+	if sTimerID == 21 or sTimerID == "21" then
+		Form.SetTimerEvent2(21, 0, 0.1)
+		
+		g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+						
+		User_SharedData_Set("")
+		
+		'약관단계로 이동
+		Form.OpenNextPopup("mbbdm86140", g_Send_Data, "")
+	end if
+	
+	'통신사 선택 후 휴대전화번호 키패드 자동 노출
+	if sTimerID == 50 or sTimerID == "50" then
+		Form.SetTimerEvent2(50, 0, 0.1)
+		contMain.edtHPNo.SetShowKeypad(True)
+	end if
+	
+	if sTimerID == 99 or sTimerID == "99" then
+		Form.SetTimerEvent(99,0,1)
+		Form.clearWaitCursor()
+		
+		'v0017 : 권한설정 추가4 (타이머 안에서 권한 설정 해제 추가)
+		'로그인여부
+	    sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", False )
+	
+	    '비로그인상태에서만 비대면화면 권한부여
+	    If CInt(sLOGIN_TYPE) <= 1 Then '비로그인상태
+			Form.SetSharedData("&SCREEN_AUTH" , "99") '비대면화면 권한부여
+	    End If
+	end if	
+End Sub
+
+
+
+'============================================================================
+' 입력항목 Show
+' 이름 -> 주민등록번호 -> 통신사 -> 휴대폰번호 -> 약관 -> 인증번호 순으로 Show
+'============================================================================
+'============================================================================
+Sub contMain_edtName_OnEditComplete() '이름
+    g_Cntt1 = "Y"  '스크롤설정 체크용 변수 설정
+
+    nTop = 0
+    nContResize = 0
+
+    If contMain.edtName.caption ~= "" Or contMain.edtName.caption ~= null Then
+        If Len(replace(contMain.edtName.caption, " " , "")) == 0 Then
+             contMain.edtName.SetResultLabel("1","error","이름을 입력해주시기 바랍니다.","contMain")
+             Exit Sub
+        Else
+            '이름 공백 체크
+            sStr = Len(contMain.edtName.Caption)
+            sRplStr = Len(replace(contMain.edtName.caption, " " , ""))
+            If sStr <> sRplStr Then
+                contMain.edtName.SetResultLabel("1","error","이름을 확인해주시기 바랍니다.(공백 불가)","contMain")
+                Exit Sub
+             End If
+        End If
+
+       contMain.edtName.SetResultLabel("0","complete","","contMain")
+
+        '스크롤 설정
+        '아래컨트롤이 오픈된 후에는 스크롤증가 없음
+        'If contMain.edtRcno.visible == True Then
+        If g_Cntt2 == "Y" Then
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+        Else
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 120 'HWG 'CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+        End If
+        'LES nTop = CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.edtName.top, "1"))
+
+        '항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+        contMain.lblScrollPos.top = nContResize
+        '스크롤사이즈 자동조정
+        contMain.SetScrollAutoSize()
+        '현재 스크롤위치 설정
+        contMain.scroll_pos = nTop
+
+        '주민등록번호 Show
+        g_Cntt2 = "Y"  '스크롤설정 체크용 변수 설정
+        contMain.edtRcno.visible = True
+
+        '주민등록번호 입력키보드 자동보이기
+        If contMain.edtRcno.caption == "" Or contMain.edtRcno.caption == null Then
+            '일반키패드(단말지원)->보안키패드(내부) 자동오픈에 따른 오류방지
+            '일반키패드에서 입력완료가 아닌 키패드외부 선택에 따라 키패드가 닫힌상태에서 뒤로가기(업무종료시키는 경우)시
+            '입력완료로 판단되어 화면은 안내페이지로 돌아가지만 보안키패드가 올라왔다가 앱이 죽는 현상 발생
+            If g_Back_Flag <> "Y" Then
+                contMain.edtRcno.SetShowKeypad(True)
+            End If
+        End If
+    End If
+End Sub
+'============================================================================
+Sub contMain_edtRcno_OnEditComplete() '주민등록번호
+    nTop = 0
+    nContResize = 0
+
+    If contMain.edtRcno.caption ~= "" Or contMain.edtRcno.caption ~= null Then
+        '13자리 입력체크
+        nLen = contMain.edtRcno.pwdlen
+    'Form.ShowAlert("nLen", nLen)
+        If CInt(nLen) < 13  Or CInt(nLen) > 13 Then
+            contMain.edtRcno.SetResultLabel("1","error","주민등록번호 13자리를 입력해주세요.","contMain")
+            Exit Sub
+        End If
+
+        contMain.edtRcno.SetResultLabel("0","complete","","contMain")
+
+        '스크롤 설정
+        '아래컨트롤이 오픈된 후에는 스크롤증가 없음
+        'If contMain.cmbMcco.visible == True Then
+        If g_Cntt3 == "Y" Then
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+        Else
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 90 'HWG 'CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+        End If
+        'LES nTop = CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+
+        '항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+        contMain.lblScrollPos.top = nContResize
+        '스크롤사이즈 자동조정
+        contMain.SetScrollAutoSize()
+        '현재 스크롤위치 설정
+        contMain.scroll_pos = nTop
+
+        '통신사 Show
+         g_Cntt3 = "Y"  '스크롤설정 체크용 변수 설정
+        contMain.cmbMcco.visible = True
+        '통신사 Default설정
+'        Select Case g_sz_HPCo
+'            Case "45003","4500","45011"   'SK
+'                contMain.cmbMcco.currentindex = "0"
+'            Case "45002","45004","45008"  'KT
+'                contMain.cmbMcco.currentindex = "1"
+'            Case "45006"          'LG U+
+'                contMain.cmbMcco.currentindex = "2"
+'            Case Else         '알뜰폰(코드 알수 없음)
+'                contMain.cmbMcco.currentindex = "0"
+'        End Select
+
+        'LES
+        '통신사 -리스트 자동보이기
+        'If contMain.cmbMcco.cbkeydata == "" Or contMain.cmbMcco.cbkeydata == null Then
+		Form.SetTimerEvent2(5, 1, 0.8)
+	
+		if contMain.cmbMcco.cbkeydata == "" Or contMain.cmbMcco.cbkeydata == null then
+			contMain.cmbMcco.Setstatus("focus")
+		end if
+	
+    else
+	    contMain.edtRcno.SetResultLabel("1","error","주민등록번호 13자리를 입력해주세요.","contMain")
+    End If
+End Sub
+'============================================================================
+Sub contMain_cmbMcco_OnEditComplete(iIndex)  '통신사
+    g_UnAble = "N"
+    nTop = 0
+    nContResize = 0
+
+    If iIndex ~= "" Or iIndex ~= null Then
+    'V0005 : 알뜰폰 제한 처리 제거.
+'        If g_sz_SubNmetBswrGb == "1" Or g_sz_SubNmetBswrGb == 1 Then  '계좌개설
+'    	       '통신사확인 0.SKT 1.KT 2.LGU+ 3.SK알뜰 4.KT알뜰 5.LG알뜰
+'            nIdx = contMain.cmbMcco.currentindex	
+'            '개발서버인 경우, 
+'            If (g_nDev == "1" Or g_nDev == 1) Then
+'                '테스트Skip아닌 경우에는 알뜰폰 선택 불가
+'                If CInt(chkSkip.checkstate) == 0 Then
+'                    If (nIdx == "3" Or nIdx == 3) Or (nIdx == "4" Or nIdx == 4) Or (nIdx == "5" Or nIdx == 5) Then
+'                        Form.MsgBox("알림", "알뜰폰을 이용한 휴대폰인증으로는 비대면계좌개설이 불가합니다. 고객님의 안전한 금융거래를 위해 영업점에 내점하시어 개설을 부탁드립니다.", "MCCO", 6)  '6.close/cancel
+'                        Exit Sub
+'                    End If
+'                End If
+'
+'            '운영서버_알뜰폰 불가
+'            Else
+'                If (nIdx == "3" Or nIdx == 3) Or (nIdx == "4" Or nIdx == 4) Or (nIdx == "5" Or nIdx == 5) Then
+'                    Form.MsgBox("알림", "알뜰폰을 이용한 휴대폰인증으로는 비대면계좌개설이 불가합니다. 고객님의 안전한 금융거래를 위해 영업점에 내점하시어 개설을 부탁드립니다.", "MCCO", 6)  '6.close/cancel
+'                    Exit Sub
+'                End If
+'            End If
+'        End If
+
+        '스크롤 설정
+        '아래컨트롤이 오픈된 후에는 스크롤증가 없음
+        'If contMain.edtHPNo.visible == True Then
+        If g_Cntt4 == "Y" Then
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+        Else
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 90 'HWG 'CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+        End If
+        'LES nTop = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+
+        '항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+        contMain.lblScrollPos.top = nContResize
+        '스크롤사이즈 자동조정
+        contMain.SetScrollAutoSize()
+        '현재 스크롤위치 설정
+        contMain.scroll_pos = nTop
+
+        '휴대폰번호 Show
+        g_Cntt4 = "Y"  '스크롤설정 체크용 변수 설정
+        contMain.edtHPNo.visible = True
+        '휴대폰번호 Default 설정
+'        contMain.edtHPNo.caption = "010"
+'        If Left(g_sz_HPNo,1) == "P" Then
+'            If Len(g_sz_HPNo) == 12 Then '###-####-####
+'                contMain.edtHPNo.caption =  Mid(hpNum,2,3)..Mid(g_sz_HPNo,5,4)..Right(g_sz_HPNo,4)
+'            Else  '11자리
+'                contMain.edtHPNo.caption =  Mid(hpNum,2,3).. Mid(g_sz_HPNo,5,3)..Right(g_sz_HPNo,4)
+'            End If
+'        End If
+
+        '휴대폰번호 -입력키보드 자동보이기
+        If contMain.edtHPNo.caption == "" Or contMain.edtHPNo.caption == null Then
+			'통신사 콤보 cbtype = 5 로 바꾼 후 아래 setshowkeypad가 안 먹히는듯 하여 타이머로 변경
+			Form.SetTimerEvent2(50, 1, 0.1)
+			
+			
+'            contMain.edtHPNo.SetShowKeypad(True)
+        End If
+    End If
+End Sub
+'============================================================================
+Sub contMain_edtHPNo_OnEditComplete()   '휴대폰번호
+    nTop = 0
+    nContResize = 0
+
+    If contMain.edtHPNo.caption ~= "" Or contMain.edtHPNo.caption ~= null Then
+        '10자리 미만 또는 11자리 초과 또는 '0xx'가 아닌경우 입력시
+        If Mid(contMain.edtHPNo.caption, 1, 2) ~= "01" Then
+            contMain.edtHPNo.SetResultLabel("1","error","정확한 휴대폰번호를 입력해 주세요.","contMain")
+            Exit Sub
+        ElseIf Len(Trim(contMain.edtHPNo.caption)) < 10 Then
+            contMain.edtHPNo.SetResultLabel("1","error","정확한 휴대폰번호를 입력해 주세요.","contMain")
+            Exit Sub
+        ElseIf Len(Trim(contMain.edtHPNo.caption)) > 11 Then
+            contMain.edtHPNo.SetResultLabel("1","error","정확한 휴대폰번호를 입력해 주세요.","contMain")
+            Exit Sub
+        End If
+
+        contMain.edtHPNo.SetResultLabel("0","complete","","contMain")
+
+        '스크롤 설정
+        '아래컨트롤이 오픈된 후에는 스크롤증가 없음
+        'If contMain.btnCtcnAgrm.visible == True Then
+        If g_Cntt5  == "Y" Then
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+        Else
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 90 'HWG 'CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+        End If
+        'LES nTop = CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+
+        '항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+        contMain.lblScrollPos.top = nContResize
+        '스크롤사이즈 자동조정
+        contMain.SetScrollAutoSize()
+        '현재 스크롤위치 설정
+        contMain.scroll_pos = nTop
+
+        '약관동의  Show
+        g_Cntt5 = "Y"  '스크롤설정 체크용 변수 설정
+        contMain.btnCtcnAgrm.visible = True
+        contMain.chkCtcnAgrm.visible = True
+        contMain.imgAthnShow.visible = True
+
+        '약관동의 -키보드선택 없음
+    End If
+End Sub
+'============================================================================
+Sub contMain_chkCtcnAgrm_OnChange(sCheckState)  '약관동의
+    nTop = 0
+    nContResize = 0
+
+    If sCheckState == "1" Or sCheckState == 1 Then
+        'contMain.chkCtcnAgrm.chkbtnimage = "check_square_on.png"
+
+        '스크롤 설정
+        '아래컨트롤이 오픈된 후에는 스크롤증가 없음
+        'If contMain.edtAthnNo.visible == True Then
+        If g_Cntt6 == "Y" Then
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+        Else
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 90 'HWG 'CInt(Form.calcUnResize(contMain.edtAthnNo.top, "1"))
+        End If
+        'LES nTop = CInt(Form.calcUnResize(contMain.edtAthnNo.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+
+        '항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+        contMain.lblScrollPos.top = nContResize
+        '스크롤사이즈 자동조정
+        contMain.SetScrollAutoSize()
+        '현재 스크롤위치 설정
+        contMain.scroll_pos = nTop
+
+        '약관동의시 -> 인증번호 자동 발송(최초 1번만)
+       'If contMain.btnAthnRetry.visible == False Then
+        If g_Frst_YN == "Y" Then
+            contMain_btnAthnRetry_OnClick()
+        Else
+           g_Frst_YN = "N"
+        End If
+
+        '인증항목 show
+        g_Cntt6 = "Y"  '스크롤설정 체크용 변수 설정
+        contMain.edtAthnNo.visible    = True
+        contMain.edtAthnNo.enable     = True
+        contMain.lblAthnTime.visible  = True
+        contMain.lblAthnTime.bringFront("1")  '인증유효시간을 제일앞단으로 위치시킴
+        'contMain.btnAthnRetry.visible = True  '최초 인증번호 요청시에는 활성화 안함
+        'contMain.btnAthnRetry.enable  = False        
+    Else
+        'contMain.chkCtcnAgrm.chkbtnimage = "check_square_off.png"
+
+	   '휴대폰인증중 약관해지된 경우, 재요청하도록 유도 -----------------------
+	   '타이머이벤트 종료
+	   User_Stop_Timer()
+	   '3분타이머 초기화
+        InitCountTimer()
+        '인증번호 재요청버튼 Show
+        contMain.edtAthnNo.caption    = ""
+        contMain.edtAthnNo.enable     = False
+        contMain.btnAthnRetry.visible = True
+        contMain.btnAthnRetry.enable  = True
+	
+    End If
+End Sub
+'============================================================================
+Sub contMain_edtAthnNo_OnEditComplete()  '인증번호
+    If contMain.edtAthnNo.caption == "" Or contMain.edtAthnNo.caption == null Then
+        contMain.edtAthnNo.SetResultLabel("1","error","인증번호가 입력되지 않았습니다.","contMain")
+        Exit Sub
+    Else
+        If Len(Trim(contMain.edtAthnNo.caption)) == 0 Then
+            contMain.edtAthnNo.SetResultLabel("1","error","인증번호가 입력되지 않았습니다.","contMain")
+            Exit Sub
+        ElseIf Len(Trim(contMain.edtAthnNo.caption)) > 0 And Len(Trim(contMain.edtAthnNo.caption)) < 6  Then
+            contMain.edtAthnNo.SetResultLabel("1","error","인증번호를 확인해주세요.(숫자 6자리)","contMain")
+            Exit Sub
+        End If
+    End If
+
+    contMain.edtAthnNo.SetResultLabel("0","complete","","contMain")
+
+    '인증확인 요청검증
+    DATAMANAGER.RequestTranData( "obcsb_oimf_654a_1")
+End Sub
+
+
+
+
+'============================================================================
+' 휴대폰 본인인증 약관동의 Show
+'============================================================================
+'============================================================================
+Sub contMain_imgAthnShow_OnClick()
+    Form.OpenPopup("mbbdm86130_p1", "", "")
+End Sub
+
+
+
+'============================================================================
+' 휴대폰 인증번호 재요청
+'============================================================================
+'============================================================================
+Sub contMain_btnAthnRetry_OnClick()
+    nTop = 0
+    nContResize = 0
+
+   'If contMain.chkCtcnAgrm.checkstate == "0" Or contMain.chkCtcnAgrm.checkstate == 0 Then  '0.uncheck 1.check
+   '     'contMain.edtAthnNo.SetResultLabel("1","error","휴대폰 본인인증 약관동의를 하지 않으셨습니다.","contMain")
+   '    Form.ShowAlert("오류", "휴대폰 본인인증 약관동의를 하지 않으셨습니다.")
+   '    exit sub
+   'End If
+    If CheckData() = True Then
+        contMain.edtAthnNo.SetResultLabel("0","complete","","contMain")
+
+        '기존 인증번호 Clear
+        contMain.edtAthnNo.caption = ""
+        contMain.edtAthnNo.enable  = True
+
+        '타이머 초기화
+        InitCountTimer()
+
+        '기 인증처리 중인 전문정보 초기화
+        edtRqstTlmsNo.caption  = ""
+        edtVrfcTlmsNo.caption  = ""
+
+        '재요청버튼 비활성화/숨김
+        'contMain.btnAthnRetry.enable  = False
+        contMain.btnAthnRetry.visible  = False
+
+        '(TOBE)임시난수번호 생성 X -> 암호화실명번호로 처리 / 미성년자,사망자,정보노출자 체크
+        '(ASIS)임시난수번호 생성 및 미성년자,사망자,정보노출자 체크
+        DATAMANAGER.RequestTranData( "obcsb_oimf_639a" )    
+    End If
+End Sub
+
+
+
+'============================================================================
+' 테스트인증Skip
+'============================================================================
+Sub chkSkip_OnChange(sCheckState)
+    If g_nDev == "1" Or g_nDev == 1 Then  '개발서버인 경우에만 동작하도록.
+        '휴대폰 본인인증 약관동의 & 테스트인증Skip 해제한 경우, 인증처리 할수 있도록 인증요청버튼 활성화 처리
+        If contMain.chkCtcnAgrm.checkstate == "1" Or contMain.chkCtcnAgrm.checkstate == 1 Then
+           '타이머이벤트 모두 종료
+            User_Stop_Timer()
+
+            If CInt(chkSkip.checkstate) == 1 Then
+               '확인버튼 활성화
+                btnNext.visible = True
+
+                btnNext.btnimage = "btn_20.9"
+                btnNext.fgcolor = "273"
+            Else
+               '확인버튼 비활성화
+                btnNext.visible = False
+		
+                If Form.GetEnvData("common.theme") = "black" Then
+				btnNext.btnimage = "btn_27.9"
+                Else 
+				btnNext.btnimage = "btn_21.9"
+                End If
+                btnNext.fgcolor = "269"	
+            End If
+        Else
+            '확인버튼 비활성화
+            btnNext.visible = False
+	    
+            If Form.GetEnvData("common.theme") = "black" Then
+			btnNext.btnimage = "btn_27.9"
+            Else 
+			btnNext.btnimage = "btn_21.9"
+            End If
+            btnNext.fgcolor = "269"	    
+        End If
+    End If
+End Sub
+
+
+
+'============================================================================
+' TR
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+'Sta 헤더(USER_ID) 정보 처리방법 변경1
+'    If CInt(sLOGIN_TYPE) <= 1 Then '비로그인상태
+'        '처리중인 휴대폰정보로 USerID설정
+'        'DATAMANAGER.SetUserID(g_sz_HPNo)
+'        DATAMANAGER.SetUserID(Trim(contMain.edtHPNo.caption))  '본인인증한휴대폰번호로설정
+'    End If
+'Fin 
+'Sta  헤더(USER_ID) 정보 처리방법 변경2
+'    '로그인성 화면 & 비대면화면 (ex 모바일OTP관리)
+'    If g_sz_SubNmetBswrGb == "3" Or g_sz_SubNmetBswrGb == 3 Then
+'        '로그인한 ID로 재설정
+'        strUserID = Form.GetSharedData("&USER_ID", False)
+'        DATAMANAGER.SetUserID(Trim(strUserID))
+'
+'    '비로그인성 화면 & 비대면화면
+'    Else
+'        '본인인증한휴대폰번호로설정
+'        strUserID = Trim(contMain.edtHPNo.caption)
+'        If g_sz_OSType == "1" Or g_sz_OSType == 1 Then '안드로이드
+'            DATAMANAGER.SetUserID(strUserID)
+'        Else 'IOS
+'            Form.SetSharedData("&BDM_HEADER", strUserID)
+'        End If
+'    End If
+'End If
+    '로그인성 업무는 로그인한 ID로 처리, 비대면성 업무는 본인인증한 휴대폰정보로 처리(2021.04.22)
+    If CInt(sLOGIN_TYPE) <= 1 Then '비로그인상태
+        strUserID = Trim(contMain.edtHPNo.caption)
+        Form.SetSharedData("&BDM_HEADER", strUserID)
+    End If
+
+    '기체크된 인증번호체크결과 helpmsg 숨기기
+    If szTranID == "obcsb_oimf_653a" Or szTranID == "obcsb_oimf_654a_1" Or szTranID == "obcsb_oimf_655r" Then
+        contMain.edtAthnNo.SetResultLabel("0","complete","","contMain")
+    End If
+
+    '미성년자,사망자,정보노출자 체크 --------------------------------------------------------------
+    If szTranID == "obcsb_oimf_639a" Then
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"      , 0, contMain.edtRcno.caption )
+        '비대면업무신청,모바일OTP발급인경우, 당사고객여부 체크위해 '0'으로 호출
+        If (g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb == 0 ) Or (g_sz_SubNmetBswrGb == "3" Or g_sz_SubNmetBswrGb == 3) Then
+            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE" , 0, "0"  )
+        Else
+            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE" , 0, "1"  )
+        End If
+
+    '인증번호 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_653a" Then
+        '인증검증건수 초기화
+        g_nCnt = 0
+    
+        '요청전문번호/검증전문번호 초기화
+        edtRqstTlmsNo.caption = ""
+        edtVrfcTlmsNo.caption = ""
+
+        '통신사확인(인증프로그램에서 체크하는 2자리로만 매핑)
+        strRd = contMain.cmbMcco.currentindex
+        If strRd == "0" Or strRd == 0 Then
+            strRd_Key = "SK"  'SKT    -메타값 STK
+        ElseIf strRd == "1" Or strRd == 1 Then
+            strRd_Key = "KT"  'KT   -메타값 KTF
+        ElseIf strRd == "2" Or strRd == 2 Then
+            strRd_Key = "LG"  'LGU+ -메타값 LGT
+        ElseIf strRd == "3" Or strRd == 3 Then
+            strRd_Key = "AL"  'SK알뜰 -메타값 SKA
+        ElseIf strRd == "4" Or strRd == 4 Then
+            strRd_Key = "KA"  'KT알뜰 -메타값 KTA
+        ElseIf strRd == "5" Or strRd == 5 Then
+            strRd_Key = "LA"  'LGU+알뜰 -메타값 LGA
+        End If
+
+        '휴대폰번호
+        If Len(Trim(contMain.edtHPNo.caption)) == 10 Then  '###-###-####
+            strArcd = mid(Trim(contMain.edtHPNo.caption), 1, 3)
+            strTono = mid(Trim(contMain.edtHPNo.caption), 4, 3)
+            strSrno = mid(Trim(contMain.edtHPNo.caption), 7, 4)
+        Else  '###-####-####
+            strArcd = mid(Trim(contMain.edtHPNo.caption), 1, 3)
+            strTono = mid(Trim(contMain.edtHPNo.caption), 4, 4)
+            strSrno = mid(Trim(contMain.edtHPNo.caption), 8, 4)
+        End If
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS"       , 0, "N"                      )  'N.비대면
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATHN_BSWR_CLCD" , 0, "2"                      )  '전체실명번호검증을 위해 4.본인인증+생년월일 -> 2.본인인증 전문변경
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MCCO_CODE"      , 0, strRd_Key                )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SVCD"           , 0, "N10"                    )  'N10.비대면 계좌개설
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RRNO_PIP"       , 0, contMain.edtRcno.caption )  '암호화주민번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CSNM"           , 0, contMain.edtName.caption )  '고객명
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CLPH_ARCD"      , 0, strArcd                  )  '휴대폰번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CLPH_TONO"      , 0, strTono                  )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CLPH_SRNO"      , 0, strSrno                  )
+
+    '인증확인 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a" Then
+        '인증검증건수 초기화
+        'g_nCnt = 0
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS"            , 0, "3"                      )  '3.(비대면)1차 응답코드 조회
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATHN_BSWR_CLCD"      , 0, "2"                      )  '전체실명번호검증을 위해 4.본인인증+생년월일 -> 2.본인인증 전문변경
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SMS_ATHN_NO"         , 0, ""                       )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RRNO_PIP"            , 0, contMain.edtRcno.caption )  '암호화주민번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "NICE_ISTU_TLMS_MNNO" , 0, edtRqstTlmsNo.caption    )  '인증번호요청전문번호
+
+    '인증확인 요청검증 ---------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a_1" Then
+        '요청검증전문번호 초기화
+        edtVrfcTlmsNo.caption = ""
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS"            , 0, "4"                        )  '4.(비대면)2차 확인 전송
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATHN_BSWR_CLCD"      , 0, "2"                        )  '전체실명번호검증을 위해 4.본인인증+생년월일 -> 2.본인인증 전문변경
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RRNO_PIP"            , 0, contMain.edtRcno.caption   )  '암호화주민번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "NICE_ISTU_TLMS_MNNO" , 0, edtRqstTlmsNo.caption      )  '인증번호요청전문번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SMS_ATHN_NO"         , 0, contMain.edtAthnNo.caption )  '인증번호
+
+    '인증결과 검증 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_655r" Then
+        '인증검증건수 초기화
+        'g_nCnt = 0
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS"             , 0, "N"                        )  'N.비대면
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATHN_BSWR_CLCD"       , 0, "2"                        )  '전체실명번호검증을 위해 4.본인인증+생년월일 -> 2.본인인증 전문변경
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RRNO_PIP"             , 0, contMain.edtRcno.caption   )  '암호화주민번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "NICE_ISTU_TLMS_MNNO"  , 0, edtVrfcTlmsNo.caption      )  '인증번호검증전문번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SMS_ATHN_NO"          , 0, contMain.edtAthnNo.caption )  '인증번호
+
+    '단기다수계좌/대포통장 명의인 조회 -----------------------------------------
+    ElseIf szTranID == "obaci_acct_091r" Then
+        '조회전문번호 초기화
+        edt091TlmsNo1.caption = ""
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BSWR_PROS_CLS_CODE", 0, "3"                      )  '3.단기다수계좌/대포통장 명의인 조회
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CUST_CLS_CODE"     , 0, "1"                      )  '1.개인
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"          , 0, contMain.edtRcno.caption )  '암호화주민번호
+
+    '단기다수계좌/대포통장 명의인 확인 -----------------------------------------
+    ElseIf szTranID == "obaci_acct_091r_1" Then
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BSWR_PROS_CLS_CODE", 0, "4"                      )  '4.단기다수계좌/대포통장 명의인 확인
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CUST_CLS_CODE"     , 0, "1"                      )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "LNKD_TLMS_MNNO"    , 0, edt091TlmsNo1.caption    )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"          , 0, contMain.edtRcno.caption )  '암호화주민번호
+
+    '사기계좌명의인여부 조회 ---------------------------------------------------
+    ElseIf szTranID == "obaci_acct_091r_2" Then
+        '조회전문번호 초기화
+        edt091TlmsNo2.caption = ""
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BSWR_PROS_CLS_CODE", 0, "5"                      )  '5.예금계좌 개설정보 세부내역 조회
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CUST_CLS_CODE"     , 0, "1"                      )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IQRY_CLS_CODE"     , 0, "9"                      )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"          , 0, contMain.edtRcno.caption )  '암호화주민번호
+
+    '사기계좌명의인여부 확인 ---------------------------------------------------
+    ElseIf szTranID == "obaci_acct_096r" Then
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IQRY_CLS_CODE"     , 0, "2"                   )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "LNKD_TLMS_MNNO"    , 0, edt091TlmsNo2.caption )
+
+    '비대면본인인증및1원역이체관리 obcsb_nmet_102c -----------------------------
+    ElseIf szTranID == "obcsb_nmet_102c" Then
+        '통신사확인(메타유효값으로 변환)
+        strRd = contMain.cmbMcco.currentindex
+        If strRd == "0" Or strRd == 0 Then
+            strRd_Key = "SKT"
+        ElseIf strRd == "1" Or strRd == 1 Then
+            strRd_Key = "KTF"
+        ElseIf strRd == "2" Or strRd == 2 Then
+            strRd_Key = "LGT"
+        ElseIf strRd == "3" Or strRd == 3 Then
+            strRd_Key = "SKA "
+        ElseIf strRd == "4" Or strRd == 4 Then
+            strRd_Key = "KTA"
+        ElseIf strRd == "5" Or strRd == 5 Then
+            strRd_Key = "LGA"
+        End If
+
+        '휴대폰번호
+        If Len(Trim(contMain.edtHPNo.caption)) == 10 Then  '###-###-####
+            strArcd = mid(Trim(contMain.edtHPNo.caption), 1, 3)
+            strTono = mid(Trim(contMain.edtHPNo.caption), 4, 3)
+            strSrno = mid(Trim(contMain.edtHPNo.caption), 7, 4)
+        Else  '###-####-####
+            strArcd = mid(Trim(contMain.edtHPNo.caption), 1, 3)
+            strTono = mid(Trim(contMain.edtHPNo.caption), 4, 4)
+            strSrno = mid(Trim(contMain.edtHPNo.caption), 8, 4)
+        End If
+
+'        If szTranID == "obaci_acct_049c" Then
+'            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_UNIQ_NO"       , 0 , ""                 )  '(내부)채번
+'            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_STAG_CLS_CODE" , 0 , "0"                )  '0단계_휴대본인증 단계등록
+'        ElseIf szTranID == "obaci_acct_049c_1" Then
+'            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_UNIQ_NO"       , 0 , g_BDM_REG_UNIQ_NO  )
+'            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_STAG_CLS_CODE" , 0 , "R"                )  'R.취소(+새로진행) 9.취소
+'        Else
+		If szTranID == "obcsb_nmet_102c" Then
+            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "NMET_BSWR_CLCD"    , 0 , g_BDMNMETBSWRGB    )  '비대면업무구분
+            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_UNIQ_NO"       , 0 , ""                 )  '(내부)채번
+            DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BSWR_CLS_CODE"     , 0 , "1"                )  '1.본인인증
+        End If
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "RCNO_TYPE_CODE"      , 0 , "01"                     )  '실명확인번호유형코드 01.주민등록번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "RCNO_PIP"            , 0 , contMain.edtRcno.caption )  '실명확인번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CUST_ABWR_NAME"      , 0 , contMain.edtName.caption )  '고객명
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "ATHN_MTHD_CLS_CODE"  , 0 , "1"                      )  '인증방법구분코드 1.휴대폰본인인증 2.인증서인증 3.바이오인증
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "ATHN_STAT_CLS_CODE"  , 0 , "1"                      )  '인증상태구분코드 1.정상
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "MCCO_CODE"           , 0 , strRd_Key                )  '통신사코드
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CLPH_ARCD"           , 0 , strArcd                  )  '휴대폰
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CLPH_TONO"           , 0 , strTono                  )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CPNO"                , 0 , strSrno                  )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CIKEY_NO"            , 0 , g_CIKeyNo                )  'CIKEY번호
+
+    '비대면계좌개설 이어하기 조회 ----------------------------------------------
+    '비대면계업무 진행상태 조회 ----------------------------------------------
+    'ElseIf szTranID == "obaci_acct_058r" or szTranID == "obaci_acct_072r_1"Then
+    ElseIf szTranID == "obaci_acct_058r" or szTranID == "obaci_acct_058r_1" Then
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"       , 0 , contMain.edtRcno.caption )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IQRY_CLS_CODE"  , 0 , "1"                      )  '1.진행중내역조회
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CUST_ABWR_NAME" , 0 , contMain.edtName.caption )
+	
+		
+	'비대면계좌개설 이어가기 관리
+	elseif szTranID == "obaci_acct_059c" or szTranID == "obaci_acct_059c_1" then
+		if szTranID == "obaci_acct_059c" then
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_UNIQ_NO"       , 0 , g_BDM_REG_UNIQ_NO )
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_STAG_CLS_CODE"  , 0 , "R"                      )		'"R": 기존 내역 취소 후 진행
+		else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_UNIQ_NO"       , 0 , "" )
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_STAG_CLS_CODE"  , 0 , "0"                      )		'"0": 진행예정
+		end if
+		
+		'휴대폰인증정보 세팅
+		'통신사확인(메타유효값으로 변환)
+        strRd = contMain.cmbMcco.currentindex
+        If strRd == "0" Or strRd == 0 Then
+            strRd_Key = "SKT"
+        ElseIf strRd == "1" Or strRd == 1 Then
+            strRd_Key = "KTF"
+        ElseIf strRd == "2" Or strRd == 2 Then
+            strRd_Key = "LGT"
+        ElseIf strRd == "3" Or strRd == 3 Then
+            strRd_Key = "SKA "
+        ElseIf strRd == "4" Or strRd == 4 Then
+            strRd_Key = "KTA"
+        ElseIf strRd == "5" Or strRd == 5 Then
+            strRd_Key = "LGA"
+        End If
+
+        '휴대폰번호
+        If Len(Trim(contMain.edtHPNo.caption)) == 10 Then  '###-###-####
+            strArcd = mid(Trim(contMain.edtHPNo.caption), 1, 3)
+            strTono = mid(Trim(contMain.edtHPNo.caption), 4, 3)
+            strSrno = mid(Trim(contMain.edtHPNo.caption), 7, 4)
+        Else  '###-####-####
+            strArcd = mid(Trim(contMain.edtHPNo.caption), 1, 3)
+            strTono = mid(Trim(contMain.edtHPNo.caption), 4, 4)
+            strSrno = mid(Trim(contMain.edtHPNo.caption), 8, 4)
+        End If
+	
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "RCNO_TYPE_CODE"      , 0 , "01"                     )  '실명확인번호유형코드 01.주민등록번호
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "RCNO_PIP"            , 0 , contMain.edtRcno.caption )  '실명확인번호
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CUST_ABWR_NAME"      , 0 , contMain.edtName.caption )  '고객명
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "ATHN_MTHD_CLS_CODE"  , 0 , "1"                      )  '인증방법구분코드 1.휴대폰본인인증 2.인증서인증 3.바이오인증
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "ATHN_STAT_CLS_CODE"  , 0 , "1"                      )  '인증상태구분코드 1.정상
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "MCCO_CODE"           , 0 , strRd_Key                )  '통신사코드
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CLPH_ARCD"           , 0 , strArcd                  )  '휴대폰
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CLPH_TONO"           , 0 , strTono                  )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CPNO"                , 0 , strSrno                  )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CIKEY_NO"            , 0 , g_CIKeyNo                )  'CIKEY번호
+	
+	'비대면계좌개설 상품별 개설가능 체크 조회
+	elseif szTranID == "obaci_acct_400r" then
+		'(슈퍼365) -> (종합매매) -> (CMA-RP) -> (국내CFD) -> (해외CFD) -> (일임형ISA) -> (중개형ISA) -> (선물옵션) -> (해외파생) -> (종합매매-금상) -> (wrap) -> (연금저축)
+		Dim szProdYn
+		szProdYn = ""
+		If g_SAYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		If g_STOCKYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		If g_CMAYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		If g_CFDYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		If g_ACFDYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		'일임형 > 중개형
+		If g_ISAYN == "Y" Then
+			If g_ISA_PROD_TYPE == "2" Then
+				szProdYn = szProdYn & "YN"
+			Else
+			szProdYn = szProdYn & "NY"
+			End If
+		Else
+			szProdYn = szProdYn & "NN"
+		End If
+		If g_OPTNYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		If g_OVDVYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		szProdYn = szProdYn & "N"		'종합매매-금상 은 선택불가이므로 "N"으로 고정
+		If g_WRAPYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		If g_PNSNYN == "Y" Then
+			szProdYn = szProdYn & "Y"
+		Else
+			szProdYn = szProdYn & "N"
+		End If
+		
+'		Form.ShowAlert("szProdYn", szProdYn)
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"       , 0 , contMain.edtRcno.caption )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "JOIN_PROD_KEY_VAL"       , 0 , szProdYn )
+		
+		
+		if g_BDM_ISA_ACNT_OPNG_CLCD == "2" then
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "TFCT_EXUS_ACNT_YN"       , 0 , "Y" )
+		else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "TFCT_EXUS_ACNT_YN"       , 0 , "N" )
+		end if
+	
+	'단기다수개설 출금고제한 계좌조회
+	elseif szTranID == "obaci_nmet_017r" then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BSWR_CLCD"       , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"       , 0 , contMain.edtRcno.caption )
+	
+	'v0002 sta 은합회 결과값에 따라 체크 
+'	elseif szTranID == "obaci_acct_089r" or szTranID == "obaci_acct_089r_1" or szTranID == "obaci_acct_089r_2" or szTranID == "obaci_acct_089r_3" or szTranID == "obaci_acct_089r_4" then	
+'		if szTranID == "obaci_acct_089r" then
+'			DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "BSWR_PROS_CLS_CODE" , 0 , "3"			)	'업무처리구분코드
+'		else
+'			DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "BSWR_PROS_CLS_CODE" , 0 , "4"			)	'업무처리구분코드
+'		end if
+'		'v0006 일임형 ISA 추가 : 금융소득종합과세대상자인지 체크
+'		If g_ISA_PROD_TYPE == "2" Then
+'			DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "PRCD" 				, 0 , "133"			)	'상품코드 : 일임형 ISA 
+'		ElseIf g_ISA_PROD_TYPE == "3" Then
+'			DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "PRCD" 				, 0 , "140"			)	'상품코드 : 중개형 ISA '2021-12-06 kSJ
+'		End If
+'		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "TXCM_PRCD" 		, 0 , "66"			)	'은행연합회상품코드
+'		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "TXCM_TRPR_CLS_CODE" , 0 , "0" 			)	'세금우대대상자구분
+'		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "CUST_CLS_CODE" 		, 0 , "1" 			)	'고객구분코드
+'		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "RCNO_PIP" 			, 0 , g_BDM_RCNO_PIP	)	'고객실명확인번호PIP값
+    End If
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+    '오류메시지 설정
+    strSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+    If Trim(strSubMsg) ~= null And Trim(strSubMsg) ~= "" Then
+        strMsg2 = szErrMsg.."("..Trim(strSubMsg)..")"
+        strMsg = szErrMsg.."\n"..Trim(strSubMsg)
+    Else
+        strMsg2 = szErrMsg
+        strMsg = szErrMsg
+    End If
+
+    '미성년자,사망자,정보노출자 체크 -------------------------------------------
+    If szTranID == "obcsb_oimf_639a"  Then
+        '개설불가 안내 후, 종료
+        strSetErrCode = ""
+        If (g_sz_SubNmetBswrGb == "1" Or g_sz_SubNmetBswrGb == 1) Or (g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb == 0) Then  '비대면계좌개설 '비대면업무신청
+            If szErrCode == "6660" Or szErrCode == 6660 Then
+                If Trim(strSubMsg) == "미성년자는 계좌개설이 불가합니다." Then
+                    strSetErrCode = "03"
+				  CommErrClose(strSetErrCode)
+                ElseIf Trim(strSubMsg) == "개인정보노출 등록 고객" Then	'**
+                    strSetErrCode = "04"
+				  CommErrClose(strSetErrCode)
+                ElseIf Trim(strSubMsg) == "외국인 및 재외국민 계좌개설 불가" Then
+                    strSetErrCode = "05"
+			      CommErrClose(strSetErrCode)
+                ElseIf Trim(strSubMsg) == "재외국민 업무신청 불가" Then
+                    strSetErrCode = "06"
+			      CommErrClose(strSetErrCode)
+                ElseIf Trim(strSubMsg) == "주민등록 오류 고객" Then	'**
+                    strSetErrCode = "04"		    
+			      CommErrClose(strSetErrCode)
+                ElseIf Trim(strSubMsg) == "명의도용고객" Then	'**
+                    strSetErrCode = "04"		    
+				  CommErrClose(strSetErrCode)
+                Else
+                    'strSetErrCode = "00"
+			      Form.ShowAlert("오류", strMsg2)
+                End If        
+                
+            Else
+                'strSetErrCode = "00"
+                Form.ShowAlert("오류", strMsg2)
+            End If
+        Elseif (g_sz_SubNmetBswrGb == "3" Or g_sz_SubNmetBswrGb == 3) Then 
+            If szErrCode == "6660" Or szErrCode == 6660 Then
+                If Trim(strSubMsg) == "재외국민 업무신청 불가" Then
+                    strSetErrCode = "06"
+		           CommErrClose(strSetErrCode)
+                End If
+            Else
+                'strSetErrCode = "00"
+                Form.ShowAlert("오류", strMsg2)
+            End If
+        Else
+            Form.ShowAlert("오류", strMsg2)
+        End If
+        'CommErrClose(strSetErrCode)
+
+    '인증번호 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_653a" Then
+        contMain.edtAthnNo.SetResultLabel("1","error",strMsg,"contMain")
+
+        '인증번호 재요청버튼 Show
+        contMain.edtAthnNo.caption    = ""
+        contMain.edtAthnNo.enable     = False
+        contMain.btnAthnRetry.visible = True
+        contMain.btnAthnRetry.enable  = True
+
+    '인증확인 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a" Then
+        If szErrCode == "3021" Or szErrCode == 3021 Then
+            '전문미수신인경우, 인증번호 재요청(타이머 실행)
+            Form.SetTimerEvent(0, 1, 1)
+        Else
+            contMain.edtAthnNo.SetResultLabel("1","error",strMsg,"contMain")
+
+            '인증번호 재요청버튼 Show
+            contMain.edtAthnNo.caption    = ""
+            contMain.edtAthnNo.enable     = False
+            contMain.btnAthnRetry.visible = True
+            contMain.btnAthnRetry.enable  = True
+        End If
+
+    '인증확인 요청검증 ---------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a_1" Then
+        contMain.edtAthnNo.SetResultLabel("1","error",strMsg,"contMain")
+
+        '인증번호 재요청버튼 Show
+        contMain.edtAthnNo.caption    = ""
+        contMain.edtAthnNo.enable     = False
+        contMain.btnAthnRetry.visible = True
+        contMain.btnAthnRetry.enable  = True
+
+    '인증결과 검증 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_655r" Then
+        If szErrCode == "3021" Or szErrCode == 3021 Then        
+            '전문미수신인경우, 인증확인 요청검증 재요청(타이머 실행)
+            Form.SetTimerEvent(1, 1, 1)
+        Else
+            contMain.edtAthnNo.SetResultLabel("1","error",strMsg,"contMain")
+
+            '인증번호 재요청버튼 Show
+            'contMain.edtAthnNo.caption    = ""
+            'contMain.edtAthnNo.enable     = True  'False 
+            If contMain.lblAthnTime.caption == "3:00" And CInt(g_HPSec) = 180 Then
+                contMain.edtAthnNo.caption    = ""
+                contMain.edtAthnNo.enable     = True
+                contMain.btnAthnRetry.visible = True
+                contMain.btnAthnRetry.enable  = True
+            Else
+                '인증번호체크중 오류인 경우에는 인증유효시간까지 재입력가능
+                contMain.btnAthnRetry.visible = False
+                contMain.btnAthnRetry.enable  = False
+            End If
+        End If
+
+    '단기다수계좌/대포통장 명의인/사기계좌명의인 -------------------------------
+    ElseIf szTranID == "obaci_acct_091r" Or szTranID == "obaci_acct_091r_1" Or szTranID == "obaci_acct_091r_2" Or szTranID == "obaci_acct_096r" Then
+        '테스트인경우 정상처리
+        If CInt(chkSkip.checkstate) == 1 Then
+            '100.비대면계좌개설
+            If g_sz_SubNmetBswrGb == "1" Or  g_sz_SubNmetBswrGb == 1 Then
+                '비대면계좌개설 이어하기 조회
+                DATAMANAGER.RequestTranData( "obaci_acct_058r" )
+                
+                '0xx.비대면업무신청
+            ElseIf g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb == 0 Then
+                g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+                
+                '신분증촬영화면 오픈후, 종료
+                g_Opng_File = "NEXT"  '오픈할화면
+                g_Send_Data = ""      '인자정보
+                
+                NextStep()
+            End If
+        Else
+		   btnNext.enable = true	'20230419 추가
+		   
+		   btnNext.btnimage = "btn_20.9"
+		   btnNext.fgcolor = "273"
+		   
+            '개설불가 안내 후, 종료
+            'strSetErrCode = "00"
+            'CommErrClose(strSetErrCode)
+            Form.ShowAlert("오류", strMsg2)
+       End If
+
+    '비대면계좌개설 이어하기 obaci_acct_049c -----------------------------------
+    '비대면본인인증및1원역이체 obcsb_nmet_102c ---------------------------------
+    'ElseIf szTranID ==  "obaci_acct_049c" Or szTranID ==  "obcsb_nmet_102c" Then
+    ElseIf szTranID ==  "obcsb_nmet_102c" Then
+        'If szTranID == "obcsb_nmet_102c" Then
+            If szErrCode == "6660" Or szErrCode == 6660 Then
+                If Trim(strSubMsg) == "기존계좌의 고객명 상이" Then
+                    strSetErrCode = "02"
+                    CommErrClose(strSetErrCode)
+                Else
+				 btnNext.enable = true		'20230419 추가
+				 btnNext.btnimage = "btn_20.9"
+				 btnNext.fgcolor = "273"
+				 
+				 Form.ShowAlert("오류", strMsg2)
+                End If
+            Else
+	           btnNext.enable = true		'20230419 추가
+	           btnNext.btnimage = "btn_20.9"
+	           btnNext.fgcolor = "273"
+		   
+                Form.ShowAlert("오류", strMsg2)
+            End If
+        'Else
+            '개설불가 안내 후, 종료
+            'strSetErrCode = "00"
+            'CommErrClose(strSetErrCode)
+        '    Form.ShowAlert("오류", strMsg2)
+        'End If
+
+    '비대면계좌개설 이어하기 조회 ----------------------------------------------
+    '비대면업무 진행상태 조회 ----------------------------------------------
+    ElseIf szTranID ==  "obaci_acct_058r" Then
+        btnNext.enable = true	'20230419 추가
+	
+        btnNext.btnimage = "btn_20.9"
+        btnNext.fgcolor = "273"
+	
+        Form.ShowAlert("오류", strMsg2)
+
+    '비대면계좌개설 이어하기 등록_취소 -----------------------------------------
+    ElseIf szTranID == "obaci_acct_059c" or szTranID == "obaci_acct_059c_1"  Then
+        btnNext.enable = true	'20230419 추가
+	
+        btnNext.btnimage = "btn_20.9"
+        btnNext.fgcolor = "273"		
+		
+        Form.ShowAlert("오류", strMsg2)
+	
+    else
+    
+        btnNext.enable = true	'20230419 추가
+	
+        btnNext.btnimage = "btn_20.9"
+        btnNext.fgcolor = "273"		
+		
+        Form.ShowAlert("오류", strMsg2)    
+
+    End If
+
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+    '미성년자,사망자,정보노출자 체크 -------------------------------------------
+    If szTranID == "obcsb_oimf_639a" Then
+	    sDethYn = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "DETH_YN", 0)
+	    
+	    if sDethYn == "Y" then
+		    strSetErrCode = "08"
+			CommErrClose(strSetErrCode)
+	    elseIf g_sz_AthnGb == "2" Or g_sz_AthnGb == 2 Then
+            '인증서 선택 팝업창 열기
+            Form.OpenPopup(G_ATHN_FILE, "Login_Open" , "" )
+		Else
+           '테스트용 인증서 Skip
+           If CInt(chkSkip.checkstate) == 1 Then
+                '확인버튼 활성화
+                btnNext.visible = True
+		
+                btnNext.btnimage = "btn_20.9"
+                btnNext.fgcolor = "273"				
+            Else
+                '인증번호 요청
+                DATAMANAGER.RequestTranData( "obcsb_oimf_653a" )
+            End If
+		End If
+
+    '인증번호 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_653a" Then  
+        '요청전문번호 설정
+        sTemp = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "NICE_ISTU_TLMS_MNNO", 0)
+        edtRqstTlmsNo.caption = Trim(sTemp)
+
+        '인증번호 요청 타이머실행
+        Form.SetTimerEvent(0, 1, 1)
+
+    '인증확인 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a" Then
+        Form.ShowAlert("확인", "인증번호가 정상적으로 발송 되었습니다.")
+    
+        g_HPSec = 180             '인증가능시간설정
+        Form.SetTimerEvent(2, 1, 1)
+
+    '인증확인 요청검증 ---------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a_1" Then
+        '인증확인 요청전문번호 설정
+         sTemp = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "NICE_ISTU_TLMS_MNNO", 0)
+         edtVrfcTlmsNo.caption = Trim(sTemp)
+
+         '인증확인 요청검증 타이머실행
+         Form.SetTimerEvent(1, 1, 1)
+
+    '인증결과 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_655r" Then
+        g_CIKeyNo = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "CIKEY_NO", 0)
+
+        '3분 타이머 초기화
+        InitCountTimer()
+
+        '인증완료 메시지 표시
+        contMain.edtAthnNo.SetResultLabel("1","complete","인증되었습니다.","contMain")
+
+        '인증이 정상적으로 처리된 후, 정보 변경 못하도록 전체 비활성화(보안성 보완)
+        contMain.edtName.enable      = False
+        contMain.edtRcno.enable      = False
+        contMain.cmbMcco.enable      = False
+        contMain.edtHPNo.enable      = False
+        contMain.btnCtcnAgrm.enable  = False
+        contMain.chkCtcnAgrm.bringFront("1")   '(IOS)인증완료후, 비활성화를 위해 제일 앞단으로 위치 (순서주의! btnCtcnAgrm 처리후해야함)
+        contMain.chkCtcnAgrm.enable  = False
+        contMain.imgAthnShow.enable  = False
+        contMain.edtAthnNo.enable    = False
+        contMain.btnAthnRetry.enable = False
+
+        contMain.btnAthnRetry.visibe = False  '재요청버튼은 hidden
+        contMain.lblAthnTime.visibe  = False  '인증유효시간 hidden
+       
+        '확인버튼 활성화
+        btnNext.visible = True
+	
+        btnNext.btnimage = "btn_20.9"
+        btnNext.fgcolor = "273"	
+
+    '단기다수계좌/대포통장 명의인 조회 -----------------------------------------
+    ElseIf szTranID == "obaci_acct_091r" Then
+        edt091TlmsNo1.caption = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "LNKD_TLMS_MNNO", 0)
+        strCode               = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "PROS_CLS_CODE" , 0)
+        'Form.ShowAlert(szTranID, strCode)
+        If strCode == "1" Or strCode ==  1 Then  '전문전송완료
+            '단기다수계좌/대포통장 명의인 확인 타이머실행
+            g_nCnt_091_1 = 0
+            Form.SetTimerEvent(3, 1, 1)
+        Else
+            '3분 타이머 초기화
+            InitCountTimer()
+
+           '개설불가 안내 후, 종료
+            'strSetErrCode = "00"
+            'CommErrClose(strSetErrCode)
+            Form.ShowAlert("오류", "계좌개설이 불가합니다.(단기다수개설자,대포통장명의인여부 조회 오류)")    
+            Exit Sub
+        End If
+
+    '단기다수계좌/대포통장 명의인 확인 -----------------------------------------
+    ElseIf szTranID == "obaci_acct_091r_1" Then
+        strCode = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "PROS_CLS_CODE", 0)
+        'Form.ShowAlert(szTranID, strCode)
+        If strCode == "2" Or strCode == 2 Then  '조회완료
+            '대포통장명의인여부
+            g_BNK_NMPR_YN_YN = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "UI_BNKB_NMPR_YN", 0)
+
+            '단기다수개설고객 여부
+		    g_MNY_ACNT_YN = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "UI_MNY_ACNT_OPNG_CHD_YN", 0)
+            
+
+            '사기계좌명의인여부 조회
+            g_nCnt_091_1 = 0
+            DATAMANAGER.RequestTranData( "obaci_acct_091r_2" )
+        Else
+        '단기다수계좌/대포통장 명의인 확인 타이머실행
+            Form.SetTimerEvent(3, 1, 1)
+        End If
+
+    '사기계좌명의인여부 조회 ---------------------------------------------------
+    ElseIf szTranID == "obaci_acct_091r_2" Then
+        edt091TlmsNo2.caption = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "LNKD_TLMS_MNNO", 0)
+        strCode               = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "PROS_CLS_CODE" , 0)
+        'Form.ShowAlert(szTranID, strCode)
+        If strCode == "3" Or strCode == 3 Then    '3.사기계좌명의인여부 조회완료
+            '사기계좌명의인여부 확인 타이머 실행
+            g_nCnt_096 = 0
+            Form.SetTimerEvent(4, 1, 1)
+        Else
+            '3분 타이머 초기화
+            InitCountTimer()
+
+            '개설불가 안내 후, 종료
+            'strSetErrCode = "00"
+            'CommErrClose(strSetErrCode)
+            Form.ShowAlert("오류", "계좌개설이 불가합니다.(사기계좌명의인 조회 서비스 오류)")
+            Exit Sub
+        End If
+
+    '사기계좌명의인여부 확인 ---------------------------------------------------
+    ElseIf szTranID == "obaci_acct_096r" Then
+        strCode = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "PROS_CLS_CODE", 0)
+        'Form.ShowAlert(szTranID, strCode)
+        If strCode == "2" Or strCode == 2 Then    '조회완료
+            '사기계좌명의인여부 설정
+            g_FRD_NMPR_YN = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "UI_FRD_NMPR_YN", 0)
+
+            '대포통장명의인, 사기계좌명의인인 경우 계좌개설 불가
+            'If g_BNK_NMPR_YN_YN == "Y" Or g_FRD_NMPR_YN =="Y" Then
+		    If g_BNK_NMPR_YN_YN == "Y" then	'대포통장명의인
+                '3분 타이머 초기화
+                  InitCountTimer()
+
+                '개설불가 안내 후, 종료
+                strSetErrCode = "01"
+                CommErrClose(strSetErrCode)
+			elseIf g_FRD_NMPR_YN =="Y" Then		'사기계좌명의인	
+                '3분 타이머 초기화
+                  InitCountTimer()
+
+                '개설불가 안내 후, 종료
+                strSetErrCode = "07"
+                CommErrClose(strSetErrCode)			
+			Else
+                '100.비대면계좌개설
+                If g_sz_SubNmetBswrGb == "1" Or  g_sz_SubNmetBswrGb == 1 Then
+					
+                    '20230316 비대면계좌개설 개선 내용
+                    '비대면계좌개설 이어하기 조회
+                    DATAMANAGER.RequestTranData( "obaci_acct_058r" )
+            
+                '0xx.비대면업무신청
+                ElseIf g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb == 0 Then
+                    g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+            
+                    '신분증촬영화면 오픈후, 종료
+                    g_Opng_File = "NEXT"  '오픈할화면
+                    g_Send_Data = ""      '인자정보
+            
+					NextStep()
+                End If
+			End If
+        Else
+            '사기계좌명의인여부 확인 타이머 실행
+            Form.SetTimerEvent(4, 1, 1)
+        End If
+
+    '비대면계좌개설 이어하기_0단계 obaci_acct_049c -----------------------------
+    '비대면본인인증및1원역이체관리 obcsb_nmet_102c -----------------------------
+    '비대면계좌개설 이어하기 등록_취소 obaci_acct_049c_1 -----------------------
+    'ElseIf szTranID == "obaci_acct_049c" Or szTranID == "obcsb_nmet_102c" Or szTranID == "obaci_acct_049c_1"  Then
+    ElseIf szTranID == "obcsb_nmet_102c" Then
+        g_BDM_REG_UNIQ_NO = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "REG_UNIQ_NO"   , 0)  '등록고유번호
+        'If szTranID == "obcsb_nmet_102c" Then
+            g_BDM_REG_STAG_CLS_CODE = ""
+        'Else
+        '    g_BDM_REG_STAG_CLS_CODE = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "REG_STAG_CLS_CODE", 0) '등록단계구분코드
+        'End If
+
+        '공유변수 설정
+        User_SharedData_Set("")
+
+        'If szTranID == "obaci_acct_049c" Then
+            '대포통장, 사기계좌명의인여부 체크
+        '    g_BNK_NMPR_YN = ""  '대포통장명의인여부
+        '    g_FRD_NMPR_YN = ""  '사기계좌명의인여부
+        '    DATAMANAGER.RequestTranData( "obaci_acct_091r" )
+        'ElseIf szTranID == "obcsb_nmet_102c" Then
+            g_BDM_CSNO = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "CSNO", 0) '고객번호
+    
+            '0xx.비대면업무신청
+            If g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb == 0 Then
+                '대포통장, 사기계좌명의인여부 체크
+                g_BNK_NMPR_YN = ""  '대포통장명의인여부
+                g_FRD_NMPR_YN = ""  '사기계좌명의인여부
+                DATAMANAGER.RequestTranData( "obaci_acct_091r")
+            '3xx.모바일OTP
+            Else
+                g_Opng_File = "NEXT"  '오픈할화면
+                g_Send_Data = ""      '인자정보
+
+                NextStep()
+            End If
+'        ElseIf szTranID == "obaci_acct_049c_1"  Then
+'        '비대면계좌개설 이어하기 재조회후, 다음단계로
+'            g_Re_RegYN = "Y"
+'            DATAMANAGER.RequestTranData( "obaci_acct_072r" )
+        'End If
+
+	'비대면계좌개설 이어가기 관리
+	elseif szTranID == "obaci_acct_059c" then
+		'기존내역 취소후 새로 진행
+		g_Re_RegYN = "Y"
+		DATAMANAGER.RequestTranData( "obaci_acct_058r" )
+	
+	'비대면계좌개설 이어가기 관리(신규 생성)
+	elseif szTranID == "obaci_acct_059c_1" then
+		g_BDM_REG_UNIQ_NO        = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "REG_UNIQ_NO"          , 0)  '등록고유번호
+		
+'		if g_ISAYN == "Y" then
+'			DATAMANAGER.RequestTranData( "obaci_acct_089r" )
+'		else
+			'비대면계좌개설 상품별 개설가능 체크 조회
+			DATAMANAGER.RequestTranData( "obaci_acct_400r" )
+'		end if
+		
+    '비대면계좌개설 이어하기 조회 ----------------------------------------------
+    '비대면업무 진행상태 조회 ----------------------------------------------
+    'ElseIf szTranID == "obaci_acct_058r" Or szTranID == "obaci_acct_072r" Or szTranID == "obaci_acct_072r_1" Then
+    ElseIf szTranID == "obaci_acct_058r" or szTranID == "obaci_acct_058r_1" Then
+        strFlnmAgrYn             = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "FLNM_AGR_YN"          , 0)  '이름동일여부
+        g_BDM_CSNO               = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "CSNO"                 , 0)  '고객번호
+        g_BDM_EXSN_CUST_YN       = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "EXSN_CUST_YN"         , 0)  'Y.기존고객 N.신규
+        g_BDM_ISA_ACNT_YN        = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "ISA_ACNT_YN"          , 0)  'ISA(정상)계좌보유여부
+        g_BDM_DREM_YN            = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "DREM_YN"              , 0)  '임직원여부
+	
+        '이어하기, 진행상태확인용Data
+        g_BDM_LAST_BSWR_GB       = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "BSWR_CLS_CODE"        , 0)  '최근처리업무구분-1.비대면계좌개설 2.비대면업무신청
+        g_BDM_PRGS_YN            = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "PRGS_YN"              , 0)  '(계좌개설)진행중데이터여부
+        g_BDM_REG_UNIQ_NO        = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "REG_UNIQ_NO"          , 0)  '등록고유번호
+        g_BDM_LAST_STAG_CLS_CODE = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "REG_STAG_CLS_CODE"    , 0)  '최종등록단계구분코드
+        g_BDM_PRNM               = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "PRNM"                 , 0)  '상품명
+        g_BDM_OPNGCNT            = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "ACNT_OPNG_TOTAL_CSNU" , 0)  '계좌개설건수
+        g_BDM_APLTDATE           = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "APLT_DATE"            , 0)  '최초신청일
+        g_BDM_CLSNDATE           = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "APLT_CLSN_DATE"       , 0)  '신청마감일
+        g_BDM_ACNT_OPNG_CLCD     = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "ACNT_OPNG_CLCD"       , 0)  '계좌개설구분       
+		
+		'전문투자자 관련 변수 추가
+		g_BDM_PFIN_YN			  = DATAMANAGER.GetDataValue(0, szTranID ,"OutBlock1" ,"UI_PFIN_YN", 0)	'전문투자자 등록 여부
+		g_BDM_PRSN_PFIN_YN	  = DATAMANAGER.GetDataValue(0, szTranID ,"OutBlock1" ,"PRSN_PFIN_YN", 0)	'개인 전문투자자 여부
+		g_BDM_PFIN_CLS_CODE	  = DATAMANAGER.GetDataValue(0, szTranID ,"OutBlock1" ,"PFIN_CLS_CODE", 0)	'전문투자자 구분 코드
+		
+		'종합계좌 개설여부
+		gOVRL_ACNT_OPNG_YN = DATAMANAGER.GetDataValue(0, szTranID ,"OutBlock1" ,"OVRL_ACNT_OPNG_YN", 0)
+		
+        '공유변수 설정
+        User_SharedData_Set("")
+	    
+        'If (g_BDM_CONNECTING = "1" or g_BDM_CONNECTING == 1) And (szTranID == "obaci_acct_072r" Or szTranID == "obaci_acct_058r") Then 
+	   'If (g_BDM_CONNECTING <> "1" and g_BDM_CONNECTING <> 1) And (szTranID == "obaci_acct_072r" Or szTranID == "obaci_acct_058r") Then 
+'	   If (g_BDM_CONNECTING <> "1" and g_BDM_CONNECTING <> 1) And (szTranID == "obaci_acct_058r") Then 
+	   if szTranID == "obaci_acct_058r" then
+			
+            '이어하기 취소 후, 새로진행인 경우
+            If g_Re_RegYN == "Y" Then
+                g_Re_RegYN = ""
+'                g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+'
+'                '신분증촬영화면 오픈후, 종료
+'                g_Opng_File = "NEXT"    '오픈할화면
+'                g_Send_Data = ""        '인자정보
+'
+'                NextStep()
+				
+'				if g_ISAYN == "Y" then
+'					DATAMANAGER.RequestTranData( "obaci_acct_089r" )
+'				else
+					'비대면계좌개설 상품별 개설가능 체크 조회
+					DATAMANAGER.RequestTranData( "obaci_acct_400r" )
+'				end if
+				
+            Else
+                '기존고객이고, 진행중내역조회시에만 고객명체크 변수 내려옴(신규고객인 경우 Null로 내려오므로 ~Y 로 체크하면 안됨)
+                If strFlnmAgrYn == "N" Then                    
+                    'Form.ShowAlert("알림", "기존계좌의 고객명과 상이하여, 개명업무가 필요합니다.\n고객센터 또는 영업점에 사전상담 후 시도해주시기 바랍니다.")
+                   strSetErrCode = "02"
+                    CommErrClose(strSetErrCode)                    
+                    Exit Sub
+                Else
+                    '최종등록단계 0.휴대폰본인인증 1.신분증진위확인 2.개설상품선택 3.고객정보 4.1원역이체
+                    '휴대폰본인인증만 끝난경우, 이어하기여부 없이 신분증진위확인으로 바로 이어감
+                    If (g_BDM_LAST_STAG_CLS_CODE == "1" Or g_BDM_LAST_STAG_CLS_CODE == 1) Or (g_BDM_LAST_STAG_CLS_CODE == "2" Or g_BDM_LAST_STAG_CLS_CODE == 2) Or (g_BDM_LAST_STAG_CLS_CODE == "3" Or g_BDM_LAST_STAG_CLS_CODE == 3) Or (g_BDM_LAST_STAG_CLS_CODE == "4" Or g_BDM_LAST_STAG_CLS_CODE == 4) Then
+				    '2023-04-13  개설실패케이스 다시 살리기로 함...
+'                       '"4":개설 실패 케이스 - 기존 내역 취소하고 새로 진행
+'                       If (g_BDM_LAST_STAG_CLS_CODE == "4" Or g_BDM_LAST_STAG_CLS_CODE == 4) Then
+'						g_BDM_CLEAR_YN = "Y"
+'						User_SharedData_Set("")
+'						
+'						g_Re_RegYN = "Y"
+'			
+'						'비대면계좌개설 이어하기 관리(취소 후 새로 진행)
+'					    DATAMANAGER.RequestTranData("obaci_acct_059c")
+'						
+'						Exit Sub
+'                        End If
+			
+                        g_BDM_CLEAR_YN = "N"    'Y:처음부터하기 N: 이어하기
+
+                        '계좌 개설 신청 확인 popup 띄우기
+                        Form.openPopupAnimation("mbbdm86130_p2", "", "", "2")
+                    Else
+
+                        '비대면계좌개설 이어하기 관리(신규 생성)
+                        DATAMANAGER.RequestTranData( "obaci_acct_059c_1" )
+                    End If
+                End If
+            End If
+        '진행상태 확인 
+        Else   
+			If strFlnmAgrYn == "N" Then   
+                   strSetErrCode = "02"
+                    CommErrClose(strSetErrCode)                    
+                    Exit Sub
+		    else			
+			    g_Opng_File = "NEXT"  '오픈할화면
+			    g_Send_Data = ""      '인자정보
+		
+			    NextStep()
+		    end if
+        End If
+
+	'비대면계좌개설 상품별 개설가능 체크 조회
+	elseif szTranID == "obaci_acct_400r" then
+		Dim nGrpNo
+		nGrpNo = CInt(DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "GRP_NO"  , 0))
+'		Form.ShowAlert("szGrpNo", szGrpNo)
+		
+		'0: 정상
+		if nGrpNo == 0 then
+			g_BDM_CLEAR_YN = "Y"    'Y:처음부터하기 N: 이어하기
+			
+			'신분증촬영화면 오픈후, 종료
+			g_Opng_File = "NEXT"    '오픈할화면
+			g_Send_Data = ""        '인자정보
+			
+			NextStep()
+			exit sub
+		end if	
+		
+		'그 외 개설불가 사유 메시지 노출
+		if nGrpNo == 1 then
+			Form.MsgBox("안내", "채무불이행자는 계좌개설이 불가합니다.\n(선물옵션/해외파생/CFD)", "CLOSE", 6)
+		elseif nGrpNo == 2 then
+			Form.MsgBox("안내", "임직원은 개설 불가한 상품입니다.\n(선물옵션/해외파생)", "CLOSE", 6)
+		elseif nGrpNo == 3 then
+			Form.MsgBox("안내", "임직원은 국내 CFD 추가개설이 불가합니다.", "CLOSE", 6)
+		elseif nGrpNo == 4 then
+			Form.MsgBox("안내", "이미 개설된 ISA 계좌가 존재하여 추가개설이 불가합니다.", "CLOSE", 6)
+		
+		'5, 6에 해당하는 내용은 약관동의에서 내용 보여줄 연합회 서비스 돌린 후 보여줄 예정
+'		elseif nGrpNo == 5 then
+'			Form.MsgBox("안내", "ISA 계좌 보유시, 이수전용으로만 개설이 가능합니다. 이수전용 계좌로 개설하시겠습니까?", "ISA_CONTINUE", 7, "예", "아니오")
+'		elseif nGrpNo == 6 then
+'			Form.MsgBox("안내", "금융소득종합과세대상자는 ISA 가입이 불가합니다.", "CLOSE", 6)
+		elseif nGrpNo == 7 then
+			'Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자로 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 종합매매 등 개설 〉 전문투자자 등록 후 CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")
+			if g_BDM_MANG_BRCD == "1065" then
+				'v0015 메시지 변경
+				'계좌 보유 고객인경우 아닌경우 모두 전문투자자 안내페이지로 이동				
+				'Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자로 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 Super365계좌 개설 후 전문투자자 등록을 하시고, CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")
+				Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자 및 장외파생상품 거래요건이 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 Super365계좌 개설 후 전문투자자 등록을 하시고, CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")
+			else
+				'v0015 메시지 변경
+				'계좌 보유 고객인경우 아닌경우 모두 전문투자자 안내페이지로 이동				
+				'Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자로 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 종합매매계좌 개설 후 전문투자자 등록을 하시고 CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")		
+				Form.MsgBox("안내", "CFD 계좌는 당사에 전문투자자 및 장외파생상품 거래요건이 등록된 고객만 개설이 가능합니다.\n전문투자자 등록 후 다시 진행해주세요.\n\n만약, 당사에 보유계좌가 없다면 종합매매계좌 개설 후 전문투자자 등록을 하시고, CFD를 개설해 주세요.", "CFD_MSG_RESULT", 7, "등록절차 보기", "다른상품 개설")
+			end if 		
+		'v0012
+		elseif nGrpNo == 8 then
+			Form.MsgBox("고령투자자 보호제도 안내", "CFD 계좌는 투자권유 유의상품으로\n고령투자자 보호제도에 따라\n개설이 제한됩니다.\n\n고객센터 또는 가까운 영업점으로\n문의해주세요.", "CFD_MSG_RESULT2", 7, "영업점 안내", "다른상품 개설")		
+		'v0014
+		elseif nGrpNo == 9 then	
+			Form.MsgBox("안내", "진행중인 계좌개설이 있습니다.\n관리점 승인 후 추가 개설이 가능합니다.\n\n관리점 또는 고객지원센터로\n문의해주세요.", "APLT_EXIST", 7, "고객지원센터", "나중에 개설하기")		
+		'v0015
+		elseif nGrpNo == 10 then	
+			Form.MsgBox("안내", "CFD 계좌는 장외파생상품 거래요건이 등록된 고객만 개설이 가능합니다.\n장외파생상품 거래요건 등록 후 다시 진행해주세요.", "CFD_MSG_RESULT2", 7, "등록절차 보기", "다른상품 개설")
+		'v0018
+		elseif nGrpNo == 11 then
+			Form.MsgBox("안내", "임직원 매매계좌는 1개만 보유 가능합니다.\n사전승인 후 개설 가능하며\n법규준수팀으로 문의해주세요.", "CLOSE", 6)
+		'v0018
+		elseif nGrpNo == 12 then			
+			Form.MsgBox("안내", "임직원은 개설 불가한 상품입니다.", "CLOSE", 6)
+		end if
+	
+	'단기다수개설 출금고제한 계좌조회
+	elseif szTranID == "obaci_nmet_017r" then
+		Dim nCnt
+		nCnt = CInt(DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "IQRY_CSNU"  , 0))
+		'해당계좌 있으면 신분증 절차로 없으면 안내화면으로
+		if nCnt > 0 then
+			Form.OpenNextPopup("mbbdm86150", g_Send_Data, "")
+		else
+			'Form.MsgBox("안내", "이체제한계좌로 등록된 계좌가 없습니다.", "obaci_nmet_017r_NO", 6)
+			Form.MsgBox("안내", "단기다수개설 출금/고 제한된 계좌가 없습니다.", "obaci_nmet_017r_NO", 6)
+		end if
+	
+    End If	
+	'ISA 개설시 은행연합회 체크
+'	ElseIf szTranID == "obaci_acct_089r" Then
+'		Dim sCode, sOutput, sTxcmDplcAcntYn, sTxcmTrprClsCode
+'		sCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "PROS_CLS_CODE" , 0)
+'			
+'		If sCode == "2" then	'정상
+'			sTxcmDplcAcntYn = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_DPLC_ACNT_YN" , 0)	'세금우대 중복 계좌 여부  
+'			sTxcmTrprClsCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_TRPR_CLS_CODE" , 0) '금융소득종합과세대상자여부 V0005
+'
+'			if sTxcmTrprClsCode == "1" then
+'				Form.ShowAlert("알림", "금융소득종합과세대상자 ISA 가입 불가합니다.")
+'				Exit Sub
+'			End If
+'			
+'			If sTxcmDplcAcntYn == "0" OR sTxcmDplcAcntYn == "3" then 
+'				
+'				'v0006 중개형 ISA일때만 개설구분값 저장 
+'				If g_ISA_PROD_TYPE == "3" then
+'					g_BDM_ISA_ACNT_OPNG_CLCD = "1"
+'				End If
+'				
+'				'비대면계좌개설 상품별 개설가능 체크 조회
+'				DATAMANAGER.RequestTranData( "obaci_acct_400r" )
+'				
+'			ElseIf sTxcmDplcAcntYn == "1"  then 
+'				Form.ShowAlert("알림", "은행연합회 중복상태(ISA 2계좌 등)로 중복해소 필요(연합회 문의)")
+'				Exit Sub
+'			ElseIf sTxcmDplcAcntYn == "2"  then 
+'				Form.MsgBox("알림", "ISA 계좌 보유시, 이수전용으로만 개설이 가능합니다.\n\n이수전용 계좌를 개설하시겠습니까?", "ReTryPrcd2", 7, "예", "다음에 개설하기")
+'				Exit Sub			
+'			End If
+'			
+'		Else
+'			sOutput = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "LNKD_TLMS_MNNO" , 0)
+'			DATAMANAGER.SetDataValue( 0 , "obaci_acct_089r_1", "InBlock1", "LNKD_TLMS_MNNO" , 0 , sOutput)
+'			Form.SetTimerEvent( 10, 1, 1 )
+'		End If
+'	
+'	'ISA 개설시 은행연합회 체크
+'	ElseIf szTranID == "obaci_acct_089r_1" Then
+'		Dim sCode, sOutput, sTxcmDplcAcntYn, sTxcmTrprClsCode
+'		sCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "PROS_CLS_CODE" , 0)
+'			
+'		If sCode == "2" then	'정상
+'			sTxcmDplcAcntYn = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_DPLC_ACNT_YN" , 0)	'세금우대 중복 계좌 여부  
+'			sTxcmTrprClsCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_TRPR_CLS_CODE" , 0) '금융소득종합과세대상자여부 V0005
+'
+'			if sTxcmTrprClsCode == "1" then
+'				Form.ShowAlert("알림", "금융소득종합과세대상자 ISA 가입 불가합니다.")
+'				Exit Sub
+'			End If
+'
+'			If sTxcmDplcAcntYn == "0" OR sTxcmDplcAcntYn == "3" then 
+'				'v0006 중개형 ISA일때만 개설구분값 저장 
+'				If g_ISA_PROD_TYPE == "3" then
+'					g_BDM_ISA_ACNT_OPNG_CLCD = "1"
+'				End If
+'				
+'				'비대면계좌개설 상품별 개설가능 체크 조회
+'				DATAMANAGER.RequestTranData( "obaci_acct_400r" )
+'				
+'			ElseIf sTxcmDplcAcntYn == "1"  then 
+'				Form.ShowAlert("알림", "은행연합회 중복상태(ISA 2계좌 등)로 중복해소 필요(연합회 문의)")
+'				Exit Sub
+'			ElseIf sTxcmDplcAcntYn == "2"  then 
+'				Form.MsgBox("알림", "ISA 계좌 보유시, 이수전용으로만 개설이 가능합니다.\n\n이수전용 계좌를 개설하시겠습니까?", "ReTryPrcd2", 7, "예", "다음에 개설하기")
+'				Exit Sub			
+'			End If
+'			
+'		Else
+'			sOutput = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "LNKD_TLMS_MNNO" , 0)
+'			DATAMANAGER.SetDataValue( 0 , "obaci_acct_089r_2", "InBlock1", "LNKD_TLMS_MNNO" , 0 , sOutput)
+'			Form.SetTimerEvent( 11, 1, 1 )
+'		End If
+'		
+'	'ISA 개설시 은행연합회 체크
+'	ElseIf szTranID == "obaci_acct_089r_2" Then
+'		Dim sCode, sOutput, sTxcmDplcAcntYn, sTxcmTrprClsCode
+'		sCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "PROS_CLS_CODE" , 0)
+'			
+'		If sCode == "2" then	'정상
+'			sTxcmDplcAcntYn = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_DPLC_ACNT_YN" , 0)	'세금우대 중복 계좌 여부  
+'			sTxcmTrprClsCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_TRPR_CLS_CODE" , 0) '금융소득종합과세대상자여부 V0005
+'
+'			if sTxcmTrprClsCode == "1" then
+'				Form.ShowAlert("알림", "금융소득종합과세대상자 ISA 가입 불가합니다.")
+'				Exit Sub
+'			End If
+'
+'			If sTxcmDplcAcntYn == "0" OR sTxcmDplcAcntYn == "3" then 
+'				'v0006 중개형 ISA일때만 개설구분값 저장 
+'				If g_ISA_PROD_TYPE == "3" then
+'					g_BDM_ISA_ACNT_OPNG_CLCD = "1"
+'				End If
+'				
+'				'비대면계좌개설 상품별 개설가능 체크 조회
+'				DATAMANAGER.RequestTranData( "obaci_acct_400r" )
+'				
+'			ElseIf sTxcmDplcAcntYn == "1"  then 
+'				Form.ShowAlert("알림", "은행연합회 중복상태(ISA 2계좌 등)로 중복해소 필요(연합회 문의)")
+'				Exit Sub
+'			ElseIf sTxcmDplcAcntYn == "2"  then 
+'				Form.MsgBox("알림", "ISA 계좌 보유시, 이수전용으로만 개설이 가능합니다.\n\n이수전용 계좌를 개설하시겠습니까?", "ReTryPrcd2", 7, "예", "다음에 개설하기")
+'				Exit Sub			
+'			End If
+'			
+'		Else
+'			sOutput = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "LNKD_TLMS_MNNO" , 0)
+'			DATAMANAGER.SetDataValue( 0 , "obaci_acct_089r_3", "InBlock1", "LNKD_TLMS_MNNO" , 0 , sOutput)
+'			Form.SetTimerEvent( 12, 1, 1 )
+'		End If
+'		
+'	'ISA 개설시 은행연합회 체크
+'	ElseIf szTranID == "obaci_acct_089r_3" Then
+'		Dim sCode, sOutput, sTxcmDplcAcntYn, sTxcmTrprClsCode
+'		sCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "PROS_CLS_CODE" , 0)
+'			
+'		If sCode == "2" then	'정상
+'			sTxcmDplcAcntYn = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_DPLC_ACNT_YN" , 0)	'세금우대 중복 계좌 여부  
+'			sTxcmTrprClsCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_TRPR_CLS_CODE" , 0) '금융소득종합과세대상자여부 V0005
+'
+'			if sTxcmTrprClsCode == "1" then
+'				Form.ShowAlert("알림", "금융소득종합과세대상자 ISA 가입 불가합니다.")
+'				Exit Sub
+'			End If
+'
+'			If sTxcmDplcAcntYn == "0" OR sTxcmDplcAcntYn == "3" then 
+'				'v0006 중개형 ISA일때만 개설구분값 저장 
+'				If g_ISA_PROD_TYPE == "3" then
+'					g_BDM_ISA_ACNT_OPNG_CLCD = "1"
+'				End If
+'				
+'				'비대면계좌개설 상품별 개설가능 체크 조회
+'				DATAMANAGER.RequestTranData( "obaci_acct_400r" )
+'				
+'			ElseIf sTxcmDplcAcntYn == "1"  then 
+'				Form.ShowAlert("알림", "은행연합회 중복상태(ISA 2계좌 등)로 중복해소 필요(연합회 문의)")
+'				Exit Sub
+'			ElseIf sTxcmDplcAcntYn == "2"  then 
+'				Form.MsgBox("알림", "ISA 계좌 보유시, 이수전용으로만 개설이 가능합니다.\n\n이수전용 계좌를 개설하시겠습니까?", "ReTryPrcd2", 7, "예", "다음에 개설하기")
+'				Exit Sub			
+'			End If
+'			
+'		Else
+'			sOutput = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "LNKD_TLMS_MNNO" , 0)
+'			DATAMANAGER.SetDataValue( 0 , "obaci_acct_089r_4", "InBlock1", "LNKD_TLMS_MNNO" , 0 , sOutput)
+'			Form.SetTimerEvent( 13, 1, 1 )
+'		End If
+'	
+'	'ISA 개설시 은행연합회 체크
+'	ElseIf szTranID == "obaci_acct_089r_4" Then
+'		Dim sCode, sOutput, sTxcmDplcAcntYn, sTxcmTrprClsCode
+'		sCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "PROS_CLS_CODE" , 0)
+'			
+'		If sCode == "2" then	'정상
+'			sTxcmDplcAcntYn = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_DPLC_ACNT_YN" , 0)	'세금우대 중복 계좌 여부  
+'			sTxcmTrprClsCode = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "TXCM_TRPR_CLS_CODE" , 0) '금융소득종합과세대상자여부 V0005
+'
+'			if sTxcmTrprClsCode == "1" then
+'				Form.ShowAlert("알림", "금융소득종합과세대상자 ISA 가입 불가합니다.")
+'				Exit Sub
+'			End If
+'
+'			If sTxcmDplcAcntYn == "0" OR sTxcmDplcAcntYn == "3" then 
+'				'v0006 중개형 ISA일때만 개설구분값 저장 
+'				If g_ISA_PROD_TYPE == "3" then
+'					g_BDM_ISA_ACNT_OPNG_CLCD = "1"
+'				End If
+'				
+'				'비대면계좌개설 상품별 개설가능 체크 조회
+'				DATAMANAGER.RequestTranData( "obaci_acct_400r" )
+'				
+'			ElseIf sTxcmDplcAcntYn == "1"  then 
+'				Form.ShowAlert("알림", "은행연합회 중복상태(ISA 2계좌 등)로 중복해소 필요(연합회 문의)")
+'				Exit Sub
+'			ElseIf sTxcmDplcAcntYn == "2"  then 
+'				Form.MsgBox("알림", "ISA 계좌 보유시, 이수전용으로만 개설이 가능합니다.\n\n이수전용 계좌를 개설하시겠습니까?", "ReTryPrcd2", 7, "예", "다음에 개설하기")
+'				Exit Sub			
+'			End If
+'			
+'		Else
+'			Form.ShowAlert("오류", "은행연합회와 통신상태가 원활하지 않습니다.")
+'			Exit Sub
+'		End If
+'    End If
+End Sub
+
+
+
+
+'============================================================================
+' 이전단계로
+'============================================================================
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+    '안드로이드-백버튼 작동X
+    '부모창이 먼저 닫히는 오류방지를 위해 해당화면은 백버튼 작동X 처리
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+
+    If sKeyName == "Exit" Then
+        If sRet == "ok" Then  '예.ok / 아니오.no
+            Form.SetSharedData("&SCREEN_AUTH" , "") '비대면화면 권한프리
+	    
+            g_Opng_File = "HOME"  '오픈할화면
+            g_Send_Data = ""      '인자정보
+    
+            NextStep()
+        Else
+            g_Back_Flag = ""
+        End If
+
+    ElseIf sKeyName = "MCCO" Then 
+        'sRet=close/cancel
+        '알뜰폰 신청불가안내 팝업 닫힌경우, 다시 통신사 콤보리스트 오픈
+	    contMain.cmbMcco.openList()
+    
+    
+    '단기다수 출금고제한 대상 계좌 없음
+    elseif sKeyName == "obaci_nmet_017r_NO" then
+	    Form.OpenNextPopup("mbbdm85200", "", "")
+    
+    'CFD 미등록 메시지박스
+    elseif sKeyName == "CFD_MSG_RESULT" then
+	    if sRet == "ok" then
+'		    Form.OpenScreen("41000", "")
+'			Form.OpenScreen("94000", "")
+			
+			'로그인 상태에서 back되면 꼬이므로. nextpopup으로 변경함
+			'Form.OpenPopup("mbonl94000", "", "")
+			
+			Form.SetSharedData("&SCREEN_AUTH" , "")
+			
+			Form.OpenNextPopup("mbonl94000", "", "")
+	    else
+			'개설상품 선택 단계로 이동
+			Form.OpenNextPopup("mbbdm86120", "StepBack", "")
+	    end if
+    'v0015 CFD 장외파생상품 거래요건 미등록 메시지박스
+    elseif sKeyName == "CFD_MSG_RESULT2" then
+	    if sRet == "ok" then
+'		    Form.OpenScreen("41000", "")
+'			Form.OpenScreen("94000", "")
+			
+			'로그인 상태에서 back되면 꼬이므로. nextpopup으로 변경함
+			'Form.OpenPopup("mbonl94000", "", "")
+			
+			Form.SetSharedData("&SCREEN_AUTH" , "")
+			
+			'v0015 메뉴가 로그인용화면으로 변경되면서 처리방식 변경
+			Form.OpenNextPopup("mbonl94004", "", "")
+			'g_Close_Gb = "CFD_2"
+			'Form.closeform()
+	    else
+			'개설상품 선택 단계로 이동
+			Form.OpenNextPopup("mbbdm86120", "StepBack", "")
+	    end if	    
+	elseif sKeyName == "CFD_MSG_RESULT2" then
+		
+	    if sRet == "ok" then		
+		     Form.SetSharedData("&SCREEN_AUTH" , "")
+			Form.OpenFramePopup("mbonl89020", "", "")
+	    else
+			'개설상품 선택 단계로 이동
+			Form.OpenNextPopup("mbbdm86120", "StepBack", "")
+	    end if  
+	elseif sKeyName == "APLT_EXIST" then
+		if sRet == "ok" then		
+		     Form.SetSharedData("&SCREEN_AUTH" , "")
+			Form.OpenFramePopup("mbonl89020", "", "")
+	    else
+		    '화면 구성상 닫으면 바로 초기 안내화면 나옴
+		    Form.CloseForm()
+	    end if  
+	elseif sKeyName == "CLOSE" then	
+		'Form.OpenNextPopup("mbbdm86120", "", "")
+		Form.OpenNextPopup("mbbdm86120", "StepBack", "")
+    
+    '이수전용 개설여부 확인 메시지박스
+'    elseif sKeyName = "ReTryPrcd2" Then
+'	    If sRet = "no" Then  'ok.예 no.아니오
+'		    '화면 구성상 닫으면 바로 초기 안내화면 나옴
+'		    Form.CloseForm()
+'		    
+'	    ElseIf sRet = "ok" Then
+'			'v0006 중개형 ISA일때만 개설구분값 저장 
+'			'If g_BDM_ISA_PROD_TYPE == "3" then
+'			'Form.showAlert("알림" , "g_BDM_ISA_ACNT_YN" & g_BDM_ISA_ACNT_YN)
+'			if g_BDM_ISA_ACNT_YN <> "N" then
+'				g_BDM_ISA_ACNT_OPNG_CLCD = "2" '이수개설
+'			End If
+'			'jsi
+'		    '비대면계좌개설 상품별 개설가능 체크 조회
+'			DATAMANAGER.RequestTranData( "obaci_acct_400r" )
+'	    End if
+    End If
+End Sub
+'============================================================================
+Sub imgBack_OnClick()
+    g_Back_Flag = "Y"
+
+    '100.비대면계좌개설, 0xx.비대면 업무신청
+    If (g_sz_SubNmetBswrGb == "1" Or g_sz_SubNmetBswrGb == 1) Then
+	    
+	    if sRevData == "Super365Acnt" then
+		    '계좌개설 초기 페이지로 이동(슈퍼365 개설)
+		    '넘겨주는 파라미터는 웹에서 넘어올때 형식을 하드코딩해서 보냄
+		    Form.OpenNextPopup("mbbdm85100", "기타★Super365Acnt★", "")
+	    else
+		    '개설상품 선택 단계로 이동
+		    Form.OpenNextPopup("mbbdm86120", "StepBack", "")
+	    end if
+	    
+	    
+        '(진행중인~~ 이어하기~~ 있습니다)  => (  괄호내 이어가기~ 문구 삭제 By박정숙Cha
+        'Form.OpenPopup("mbbdm85100_p9" , "100" , "5")  '100.위치? 5.백그라운드회색처리
+'        Form.MsgBox("알림", "계좌개설을 중단하시겠습니까?", "Exit", "2")  '2.예/아니오
+    '0xx.비대면업무신청 3xx.모바일OTP발급 999.비대면진행상태확인
+    Else 
+        '세분화처리함 
+        'Form.OpenPopup("mbbdm85200_p9" , "100" , "5")
+        tmpMsg = ""
+        If (g_sz_SubNmetBswrGb == "3" Or g_sz_SubNmetBswrGb == 3) Then
+            tmpMsg = "모바일OTP 업무처리를 중단하시겠습니까?"
+        ElseIf (g_sz_SubNmetBswrGb == "9" Or g_sz_SubNmetBswrGb == 9) Then
+            tmpMsg = "진행상태확인 업무를 중단하시겠습니까?"
+        Else  'If (g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb == 0) Then
+            tmpMsg = "업무신청을 중단하시겠습니까?"
+        End If
+        Form.MsgBox("알림", tmpMsg, "Exit", "2")  '2.예/아니오
+    End If
+End Sub
+'============================================================================
+Sub Form_OnFormBackKeyPressed() '안드로이드전용
+    imgBack_OnClick()
+End Sub
+
+
+
+'============================================================================
+' 다음Page로
+'============================================================================
+Sub btnNext_OnClick()
+    '신분증진위확인에 넘길 공유변수 설정
+    g_BDM_NAME          = contMain.edtName.caption
+    g_BDM_RCNO_PIP      = contMain.edtRcno.caption
+    g_BDM_COMPANY_CODE  = contMain.cmbMcco.cbkeydata
+    g_BDM_HP1           = Mid(contMain.edtHPNo.caption, 1,3)
+    If Len(Trim(contMain.edtHPNo.caption)) == 10 Then '###-####
+        g_BDM_HP2   = Mid(contMain.edtHPNo.caption, 4,3)
+        g_BDM_HP3   = Mid(contMain.edtHPNo.caption, 7,4)
+    Else  '####-####
+        g_BDM_HP2   = Mid(contMain.edtHPNo.caption, 4,4)
+        g_BDM_HP3   = Mid(contMain.edtHPNo.caption, 8,4)
+    End If
+    
+    '필수항목체크
+    If CheckData() = True Then
+	    btnNext.enable = False
+	    
+		If Form.GetEnvData("common.theme") = "black" Then
+			btnNext.btnimage = "btn_27.9"
+		Else 
+			btnNext.btnimage = "btn_21.9"
+		End If
+		btnNext.fgcolor = "269"
+	    
+        '100.비대면계좌개설
+        If (g_sz_SubNmetBswrGb == "1" Or g_sz_SubNmetBswrGb == 1) Then
+			DATAMANAGER.RequestTranData("obaci_acct_091r")
+			
+
+        '0xx.비대면업무신청 3xx.모바일OTP발급
+        ElseIf (g_sz_SubNmetBswrGb == "0" Or g_sz_SubNmetBswrGb == 0) Or (g_sz_SubNmetBswrGb == "3" Or g_sz_SubNmetBswrGb == 3) Then
+            '휴대폰인증완료 등록(등록고유번호채번)
+            DATAMANAGER.RequestTranData("obcsb_nmet_102c")
+    
+        '999.비대면진행상태확인
+        Else
+            '비대면업무 진행상태확인
+            'DATAMANAGER.RequestTranData("obaci_acct_072r_1")
+'		    DATAMANAGER.RequestTranData("obaci_acct_058r")
+			
+			DATAMANAGER.RequestTranData("obaci_acct_058r_1")
+			
+        End If    
+    End If
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormClose() 
+    '화면닫기전 안드로이드-백버튼 작동Y 원복
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")    
+
+	'v0015 메뉴가 로그인용화면으로 변경되면서 처리방식 변경
+	'if g_Close_Gb == "CFD_2" then
+	'    Form.OpenNextPopup("mbonl94004", "", "")
+	'	Form.OpenScreen("94004", "")
+	'end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgInfo.setMaintainingRatio("1")
+	imgBack.setMaintainingRatio("1")
+	imgStep.setMaintainingRatio("5")
+End Sub
+
+'============================================================================
+Sub ImgInfo_OnClick()
+	Form.OpenFramePopup("mbbdm86130_p3", "", "")
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	'v0017 start
+	Form.SetTimerEvent(99, 1, 1)
+	Form.addWaitCursor()
+	
+    'v0017 다른앱 인증번호 확인후 돌아오면서 권한설정 풀리는 경우가 있어 재설정 추가(함원규대리확인)
+    '로그인여부
+    sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", False )
+
+    '비로그인상태에서만 비대면화면 권한부여
+    If CInt(sLOGIN_TYPE) <= 1 Then '비로그인상태
+        Form.SetSharedData("&SCREEN_AUTH" , "99") '비대면화면 권한부여
+    End If
+    
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_acct_091r" trcode="obaci_acct_091r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_096r" trcode="obaci_acct_096r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_653a" trcode="obcsb_oimf_653a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_654a" trcode="obcsb_oimf_654a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_655r" trcode="obcsb_oimf_655r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_639a" trcode="obcsb_oimf_639a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_654a_1" trcode="obcsb_oimf_654a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_091r_1" trcode="obaci_acct_091r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_091r_2" trcode="obaci_acct_091r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_nmet_102c" trcode="obcsb_nmet_102c" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_400r" trcode="obaci_acct_400r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_058r" trcode="obaci_acct_058r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_059c" trcode="obaci_acct_059c" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_059c_1" trcode="obaci_acct_059c" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_nmet_017r" trcode="obaci_nmet_017r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_089r" trcode="obaci_acct_089r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_089r_1" trcode="obaci_acct_089r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_089r_2" trcode="obaci_acct_089r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_089r_3" trcode="obaci_acct_089r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_089r_4" trcode="obaci_acct_089r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_058r_1" trcode="obaci_acct_058r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_acct_091r" title="예금계좌 개설정보 단기간 다수?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="381" _ulen="281" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+BSWR_PROS_CLS_CODE^업무 처리 구분 코드^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="323" _ulen="245" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+IF_FLNM^IF성명^20^0^0^0^0^0^0
+UI_MNY_ACNT_OPNG_CHD_YN^UI다수계좌개설자여부^1^0^0^0^0^0^0
+UI_BNKB_NMPR_YN^UI통장명의인여부^1^0^0^0^0^0^0
+UI_FRD_NMPR_YN^UI사기명의인여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_096r" title="단기간 다수계좌 개설여부 상세?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="172" _ulen="128" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+BSWR_PROS_CLS_CODE^업무 처리 구분 코드^1^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="265" _ulen="213" >
+
+IF_FLNM^IF성명^20^0^0^0^0^0^0
+UI_SPLM_YN^UI 추가 여부^1^0^0^0^0^0^0
+TOTAL_CSNU^총건수^8^0^7^0^0^0^0
+UI_RCMS_CSNU^UI수신건수^4^0^7^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+UI_FRD_NMPR_YN^UI사기명의인여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="20" inout="out" _len="242" _ulen="182" >
+
+KFB_TRNM_BRCD^은행연합회전송지점코드^7^0^0^0^0^0^0
+FNIN_NAME^금융기관명^40^0^0^0^0^0^0
+IF_MEMB_ACNO^IF회원계좌번호^20^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+IF_PROS_TIME^IF처리시각^15^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_653a" title="NICE 휴대폰 인증 전송 요청(NEW" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="717" _ulen="543" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_MNRC_BANK_NAME^UI입금은행명^40^0^0^0^0^0^0
+RMT_NAME^수취인명^40^0^0^0^0^0^0
+UI_TOTAL_CSNU^UI총건수^3^0^0^0^0^0^0
+UI_AMT_SMTN^UI금액합계^19^0^7^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="85" _ulen="57" >
+
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_654a" title="NICE휴대폰 인증확인 요청전송(N" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="413" _ulen="305" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+SMS_ATHN_NO^SMS인증번호^8^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="85" _ulen="57" >
+
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_655r" title="NICE 휴대폰 인증 결과검증(NEW)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="413" _ulen="305" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+SMS_ATHN_NO^SMS인증번호^8^0^0^0^0^0^0
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="129" _ulen="103" >
+
+MSG_DATA^메시지데이터^100^0^0^0^0^0^0
+RSMS_TMNU^재송신횟수^4^0^7^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_639a" title="비대면 고객 임시난수번호 생성" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="101" _ulen="77" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="98" _ulen="74" >
+
+CUST_CNVR_SRNO^고객전환일련번호^13^0^0^0^0^0^0
+DETH_YN^사망여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_nmet_102c" title="비대면본인인증및1원역이체관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="159" _ulen="117" >
+
+NMET_BSWR_CLCD^비대면업무구분코드^3^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+BSWR_CLS_CODE^업무구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="490" _ulen="362" >
+
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+ATHN_MTHD_CLS_CODE^인증방법구분코드^1^0^0^0^0^0^0
+ATHN_STAT_CLS_CODE^인증상태구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="320" _ulen="232" >
+
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+RSPN_TYPE_CODE^응답유형코드^1^0^0^0^0^0^0
+IDNTF_TORF_YN^신분증진위여부^1^0^0^0^0^0^0
+IDNTF_IMG_DATA_SIZE^신분증이미지데이터사이즈^9^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="220" _ulen="160" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_BANK_ACNO^입금은행계좌번호^30^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="125" _ulen="97" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCVN_DATE^수취일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_400r" title="비대면계좌개설 상품별 개설가능" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="167" _ulen="125" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+JOIN_PROD_KEY_VAL^가입상품키값^40^0^0^0^0^0^0
+TFCT_EXUS_ACNT_YN^이수관전용계좌여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+GRP_NO^그룹번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_058r" title="비대면계좌개설 이어가기 조회 N" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="253" _ulen="191" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="957" _ulen="717" >
+
+EXSN_CUST_YN^기존고객여부^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+FLNM_AGR_YN^성명일치여부^1^0^0^0^0^0^0
+NRML_ACNT_CNT^정상계좌수^8^0^7^0^0^0^0
+APLT_ABLE_YN^신청가능여부^1^0^0^0^0^0^0
+OVRL_ACNT_OPNG_YN^종합계좌개설여부^1^0^0^0^0^0^0
+APLY_KYC_INVT_INCL_GRAD_CODE^적용KYC투자성향등급코드^2^0^0^0^0^0^0
+ISA_ACNT_YN^ISA계좌여부^1^0^0^0^0^0^0
+DREM_YN^임직원여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN^CFD계좌보유여부^1^0^0^0^0^0^0
+UI_PFIN_YN^UI전문투자자여부^1^0^0^0^0^0^0
+PFIN_CLS_CODE^전문투자자구분코드^1^0^0^0^0^0^0
+SPCL_FNCM_TYPE_CODE^전문금융소비자유형코드^2^0^0^0^0^0^0
+PRSN_PFIN_YN^개인전문투자자여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN840^CFD계좌보유여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN156^CFD계좌보유여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN344^CFD계좌보유여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN392^CFD계좌보유여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="494" _ulen="370" >
+
+BSWR_CLS_CODE^업무구분코드^1^0^0^0^0^0^0
+PRGS_YN^진행여부^1^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+ACNT_OPNG_TOTAL_CSNU^계좌개설총건수^11^0^7^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_CLSN_DATE^신청마감일자^8^0^0^0^0^0^0
+ACNT_OPNG_CLCD^계좌개설구분코드^1^0^0^0^0^0^0
+CNFR_TRGT_CUST_CLCD^확인대상고객구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="1242" _ulen="916" >
+
+PROS_CMPT_YN^처리완료여부^1^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+SAC_ACNT_APLT_YN^슈퍼365계좌신청여부^1^0^0^0^0^0^0
+OVTR_JOIN_APLT_YN^종합매매가입신청여부^1^0^0^0^0^0^0
+CMA_RP_JOIN_APLT_YN^CMARP가입신청여부^1^0^0^0^0^0^0
+ISA_ACNT_APLT_YN^ISA계좌신청여부^1^0^0^0^0^0^0
+ISA_PROD_TYPE_CLCD^ISA상품유형구분코드^1^0^0^0^0^0^0
+ISA_JOIN_TPCD^ISA가입유형코드^2^0^0^0^0^0^0
+ISA_ACNT_OPNG_CLCD^ISA계좌개설구분코드^1^0^0^0^0^0^0
+FUTS_OPTN_ACNT_APLT_YN^선물옵션계좌신청여부^1^0^0^0^0^0^0
+OVDV_ACNT_APLT_YN^해외파생계좌신청여부^1^0^0^0^0^0^0
+DMST_CFD_ACNT_APLT_YN^국내CFD계좌신청여부^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN^해외CFD계좌신청여부^1^0^0^0^0^0^0
+PNSN_SVNG_ACNT_APLT_YN^연금저축계좌신청여부^1^0^0^0^0^0^0
+PNSN_TCTR_CLS_CODE^연금이관구분코드^1^0^0^0^0^0^0
+PNSN_CNRC_AMT^연금계약금액^19^0^7^0^0^0^0
+WRAP_ACNT_APLT_YN^WRAP계좌신청여부^1^0^0^0^0^0^0
+FNNC_TR_OBJT_CNFR_DATE^금융거래목적확인일자^8^0^0^0^0^0^0
+FNNC_TR_OBJT_CNFR_SRNO^금융거래목적확인일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="610" _ulen="450" >
+
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+UI_INVT_INCL_ACMP_YN^UI투자성향수행여부^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC투자성향등급코드^2^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC상품등급코드^2^0^0^0^0^0^0
+UNFIT_YN^부적합여부^1^0^0^0^0^0^0
+FTOT_INVT_INCL_GRAD_CODE^선물옵션투자성향등급코드^2^0^0^0^0^0^0
+FTOT_PROD_GRAD_CODE^선물옵션상품등급코드^2^0^0^0^0^0^0
+FTOT_UNFIT_YN^선물옵션부적합여부^1^0^0^0^0^0^0
+WEAK_FNNC_SMAL_VISA_YN^취약금융소비자여부^1^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="315" _ulen="247" >
+
+AML_OCKN_LRDV_CODE^AML직종대분류코드^2^0^0^0^0^0^0
+AML_OCKN_SMDV_CODE^AML직종소분류코드^6^0^0^0^0^0^0
+EDD_TR_OBJT_CODE^EDD거래목적코드^1^0^0^0^0^0^0
+EDD_TR_FNDS_SORC_CODE^EDD거래자금출처코드^2^0^0^0^0^0^0
+WRPL_NAME^직장명^40^0^0^0^0^0^0
+OCPT_NAME^직업명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_059c" title="비대면계좌개설 이어가기 NEW" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="111" _ulen="83" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="490" _ulen="362" >
+
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+ATHN_MTHD_CLS_CODE^인증방법구분코드^1^0^0^0^0^0^0
+ATHN_STAT_CLS_CODE^인증상태구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="575" _ulen="415" >
+
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+RSPN_TYPE_CODE^응답유형코드^1^0^0^0^0^0^0
+IDNTF_TORF_YN^신분증진위여부^1^0^0^0^0^0^0
+IDNTF_IMG_DATA_SIZE^신분증이미지데이터사이즈^9^0^7^0^0^0^0
+FACEID_AGRM_YN^안면인식동의여부^1^0^0^0^0^0^0
+LIVNESS_CNFR_SRNO^라이브니스확인일련번호^11^0^7^0^0^0^0
+SNMS_SRNO^송신일련번호^11^0^7^0^0^0^0
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="2729" _ulen="2015" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+CNFR_TRGT_CUST_CLCD^확인대상고객구분코드^2^0^0^0^0^0^0
+ACNT_OPNG_CLCD^계좌개설구분코드^1^0^0^0^0^0^0
+SAC_ACNT_APLT_YN^슈퍼365계좌신청여부^1^0^0^0^0^0^0
+OVTR_JOIN_APLT_YN^종합매매가입신청여부^1^0^0^0^0^0^0
+CMA_RP_JOIN_APLT_YN^CMARP가입신청여부^1^0^0^0^0^0^0
+FUTS_OPTN_ACNT_APLT_YN^선물옵션계좌신청여부^1^0^0^0^0^0^0
+OVDV_ACNT_APLT_YN^해외파생계좌신청여부^1^0^0^0^0^0^0
+WRAP_ACNT_APLT_YN^WRAP계좌신청여부^1^0^0^0^0^0^0
+DMST_CFD_ACNT_APLT_YN^국내CFD계좌신청여부^1^0^0^0^0^0^0
+ISA_ACNT_APLT_YN^ISA계좌신청여부^1^0^0^0^0^0^0
+ISA_PROD_TYPE_CLCD^ISA상품유형구분코드^1^0^0^0^0^0^0
+ISA_JOIN_TPCD^ISA가입유형코드^2^0^0^0^0^0^0
+ISA_ACNT_OPNG_CLCD^ISA계좌개설구분코드^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN^해외CFD계좌신청여부^1^0^0^0^0^0^0
+DMST_CFD_GOAL_MRKT_AGR_YN^국내CFD목표시장일치여부^1^0^0^0^0^0^0
+UI_SRNO^UI일련번호^11^0^7^0^0^0^0
+ACFD_GOAL_MRKT_AGR_YN^해외CFD목표시장일치여부^1^0^0^0^0^0^0
+ACFD_GOAL_MRKT_SRNO^해외CFD목표시장일련번호^11^0^7^0^0^0^0
+DMST_CFD_ACNT_APLT_YN1^국내CFD계좌신청여부1^1^0^0^0^0^0^0
+DMST_CFD_ACNT_APLT_YN2^국내CFD계좌신청여부2^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN1^해외CFD계좌신청여부1^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN2^해외CFD계좌신청여부2^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN3^해외CFD계좌신청여부3^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN4^해외CFD계좌신청여부4^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN5^해외CFD계좌신청여부5^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN6^해외CFD계좌신청여부6^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN7^해외CFD계좌신청여부7^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN8^해외CFD계좌신청여부8^1^0^0^0^0^0^0
+PNSN_SVNG_ACNT_APLT_YN^연금저축계좌신청여부^1^0^0^0^0^0^0
+PNSN_TCTR_CLS_CODE^연금이관구분코드^1^0^0^0^0^0^0
+PNSN_CNRC_PRD^연금계약기간^4^0^7^0^0^0^0
+PNSN_PRVS_BEGN_SCDL_DATE^연금지급개시예정일자^8^0^0^0^0^0^0
+PNSN_CNRC_AMT^연금계약금액^19^0^7^0^0^0^0
+PNSN_PRVS_BANK_CODE^연금지급은행코드^3^0^0^0^0^0^0
+PNSN_PRVS_BANK_ACNO^연금지급은행계좌번호^16^0^0^0^0^0^0
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+FNNC_TR_OBJT_CNFR_DATE^금융거래목적확인일자^8^0^0^0^0^0^0
+FNNC_TR_OBJT_CNFR_SRNO^금융거래목적확인일련번호^11^0^7^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+MNGR_EMPNO^관리자직원번호^9^0^0^0^0^0^0
+CMA_ISNT_JOIN_APLT_YN^CMA발행어음가입신청여부^1^0^0^0^0^0^0
+FACEID_ACMP_YN^안면인식수행여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock5" inout="in" _len="2870" _ulen="2092" >
+
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+OWHS_ADDR_SRNO^자택주소일련번호^5^0^7^0^0^0^0
+OWHS_REGN_ZIP^자택지역우편번호^3^0^0^0^0^0^0
+OWHS_DTL_ZIP^자택상세우편번호^3^0^0^0^0^0^0
+OWHS_POST^자택우편주소^100^0^0^0^0^0^0
+OWHS_DTAD^자택상세주소^100^0^0^0^0^0^0
+OWHS_NW_ADDR_USE_YN^자택신주소사용여부^1^0^0^0^0^0^0
+OWHS_BLDN_MNNO^자택건물관리번호^25^0^0^0^0^0^0
+CO_ADDR_SRNO^회사주소일련번호^5^0^7^0^0^0^0
+CO_REGN_ZIP^회사지역우편번호^3^0^0^0^0^0^0
+CO_DTL_ZIP^회사상세우편번호^3^0^0^0^0^0^0
+CO_POST^회사우편주소^100^0^0^0^0^0^0
+CO_DTAD^회사상세주소^100^0^0^0^0^0^0
+CO_NW_ADDR_USE_YN^회사신주소사용여부^1^0^0^0^0^0^0
+CO_BLDN_MNNO^회사건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR_SRNO^이메일주소일련번호^5^0^7^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+OWHS_CNPL_SRNO^자택연락처일련번호^5^0^7^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+CO_CNPL_SRNO^회사연락처일련번호^5^0^7^0^0^0^0
+CO_ARCD^회사지역번호^4^0^0^0^0^0^0
+CO_TONO^회사국번호^4^0^0^0^0^0^0
+CO_TELNO^회사전화번호^4^0^0^0^0^0^0
+CO_TENO^회사교환번호^4^0^0^0^0^0^0
+CLPH_CNPL_SRNO^휴대폰연락처일련번호^5^0^7^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+AML_PROD_CODE^AML상품코드^4^0^0^0^0^0^0
+AML_CHAN_TYPE_CODE^AML채널유형코드^2^0^0^0^0^0^0
+OCPT_CODE^직업코드^2^0^0^0^0^0^0
+AML_OCKN_LRDV_CODE^AML직종대분류코드^2^0^0^0^0^0^0
+AML_OCKN_SMDV_CODE^AML직종소분류코드^6^0^0^0^0^0^0
+EDD_TR_OBJT_CODE^EDD거래목적코드^1^0^0^0^0^0^0
+EDD_TR_FNDS_SORC_CODE^EDD거래자금출처코드^2^0^0^0^0^0^0
+WRPL_NAME^직장명^40^0^0^0^0^0^0
+OCPT_NAME^직업명^40^0^0^0^0^0^0
+HNDV_MTHD_CODE^교부방법코드^2^0^0^0^0^0^0
+PNSN_ERT_RPRT_INAG_TYPE_CODE^연금수익률보고서통보처유형코드^2^0^0^0^0^0^0
+UI_INVT_INCL_ACMP_YN^UI투자성향수행여부^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC투자성향등급코드^2^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC상품등급코드^2^0^0^0^0^0^0
+UNFIT_YN^부적합여부^1^0^0^0^0^0^0
+FTOT_INVT_INCL_GRAD_CODE^선물옵션투자성향등급코드^2^0^0^0^0^0^0
+FTOT_PROD_GRAD_CODE^선물옵션상품등급코드^2^0^0^0^0^0^0
+FTOT_UNFIT_YN^선물옵션부적합여부^1^0^0^0^0^0^0
+WEAK_FNNC_SMAL_VISA_YN^취약금융소비자여부^1^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+MBL_PRTY_INFR_YN^모바일우선통보여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock6" inout="in" _len="99" _ulen="75" >
+
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+UI_CNFR_PWD^UI확인비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock7" inout="in" _len="268" _ulen="196" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_BANK_ACNO^입금은행계좌번호^30^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="149" _ulen="113" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+RCVN_DATE^수취일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_nmet_017r" title="단기다수개설 출금/고 제한 계좌" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="130" _ulen="98" >
+
+BSWR_CLCD^업무구분코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="45" _ulen="37" >
+
+IQRY_CSNU^조회건수^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="100" inout="out" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_089r" title="은행연합회 한도금액 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="488" _ulen="354" >
+
+BSWR_PROS_CLS_CODE^업무 처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+TXCM_PRCD^세금우대 상품코드^2^0^0^0^0^0^0
+TXCM_TRPR_CLS_CODE^세금우대 대상자 구분 코드^1^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="506" _ulen="372" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+JOIN_LIMT_AMT^가입 한도 금액^19^0^7^0^0^0^0
+UI_SVNG_LIMT_UNSD_AMT^UI 저축 한도 미사용 금액^19^0^7^0^0^0^0
+KFB_TRNM_BRCD^은행연합회 전송 지점코드^7^0^0^0^0^0^0
+TXCM_DPLC_ACNT_YN^세금우대 중복 계좌 여부^1^0^0^0^0^0^0
+TXCM_TRPR_CLS_CODE^세금우대 대상자 구분 코드^1^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+ENTP_NAME^업체 명^40^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

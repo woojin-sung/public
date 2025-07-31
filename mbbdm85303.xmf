@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85303" scrname="바이오인증 등록실패" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="icon_error" ly_vert="153,140,70,70,1" />
+		<LABEL name="Label0" fontsize="8" fontstyle="01" caption="바이오인증 등록 실패" halign="1" ly_vert="20,230,335,26,1" />
+		<BUTTON name="Button0" caption="인증센터 가기" bgcolor="085:205216147" bgcolor2="102:216216216" fontsize="4" fontstyle="01" btnimage="btn_10.9" ly_vert="0,587,375,60,1" />
+		<LABEL name="Label1" fgcolor="000:068068068" halign="1" ly_vert="20,271,335,38,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="20,354,335,38,1" >
+			<COL_INFO ly_vert_width="335" />
+			<ROW_INFO ly_vert_height="19,19" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" caption="고객센터에 문의해주세요." impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" caption="1588-3400" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="Table1" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="20,276,335,57,1" >
+			<COL_INFO ly_vert_width="335" />
+			<ROW_INFO ly_vert_height="19,38" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" valign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" valign="0" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="690" _ulen="672" >
+
+'============================================================================
+Sub Button0_OnClick()
+'	인증센터로 이동
+	Form.SendReturnToParent("CloseForm", "1" )
+	Form.OpenScreen("90120", "")
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	ErrorMsg = Form.GetOpenLinkData()
+
+	if Instr(1, ErrorMsg, "★") > 0 then
+		Label1.visible = false
+		Table1.visible = true
+	
+		errorMsg = Split(ErrorMsg, "★")
+		
+		Table1.SetCellString(0, 0, errorMsg(0))
+		Table1.SetCellString(1, 0, errorMsg(1))
+
+	else
+		Label1.visible = true
+		Table1.visible = false
+		Label1.caption = ErrorMsg
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

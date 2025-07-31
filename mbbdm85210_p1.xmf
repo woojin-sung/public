@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="15007" scrname="약관/동의" version="2" writer="노은솔" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<EDIT name="Edit0" enable="0" imetype="0" ly_vert="0,0,375,41,1" />
+		<WEBVIEW name="web01" urlpath="about:blank" ly_vert="0,41,375,497,1" />
+		<BUTTON name="btnOk01" caption="확인" fgcolor="006:213049051" fontsize="1" btnimage="btn_pop2.9" ly_vert="0,557,375,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1627" _ulen="1509" >
+'============================================================================
+' 01.화면명 	: 약관 및 동의
+' 02.화면설명	: 비대면유선업무 HTS 약관 동의
+' 03.작성	: 2021.01.09 v0001 
+
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim	g_szName
+Dim	g_ServerMode	'1:개발기, 아니면 운영기
+Dim	g_URLheader
+Dim 	g_Key1
+Dim 	g_Key2
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	g_szName = Form.GetOpenLinkData()
+	g_ServerMode = Form.GetSharedData("&SERVER_MODE", false)
+
+	If g_ServerMode == "1" Then	'개발기
+		
+		g_URLheader = "http://testhome.imeritz.com/include/resource/comm/ctcn/pdf/"
+	Else 
+		g_URLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/"
+	End If
+	
+	web01.viewtype = 0	
+	web01.urlpath = g_URLheader & "meritz_yk_13.html" 
+			
+	Form.SetScreenName("약관확인 및 고객동의 사항")
+	Edit0.caption = "온라인서비스 이용약관"
+	
+	g_Key1 = ""
+	g_Key2 = ""
+
+End Sub
+	
+'============================================================================
+Sub btnOk01_OnClick()
+	
+	'Form.SendReturnToParent("mbbdm20010_p1", chkAgree01.checkstate.."★"..chkAgree02.checkstate)
+	Form.SendReturnToParent("mbbdm20010_p1", "1")
+	Form.CloseForm()
+	
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

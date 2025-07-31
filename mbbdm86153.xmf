@@ -1,0 +1,1381 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86153" scrname="비대면_안면인식단계" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="labTitle" fontsize="4" caption="본인확인" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_top_back_light" ly_vert="21,19,22,22,1" />
+		<IMAGE name="imgStep" autosize="1" imgpath="step01" ly_vert="245,60,108,21,1" />
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="얼굴 인증" ly_vert="20,94,300,20,1" />
+		<LABEL name="Label1" fgcolor="146:124124124" fontsize="-2" caption="신분증 사진과 얼굴 인증한 이미지를 비교하여
+본인확인을 진행합니다." valign="0" multiline="1" ly_vert="20,126,335,40,1" />
+		<BUTTON name="btnNext" caption="얼굴 인증하기 " fontsize="4" ly_vert="0,597,375,50,1" />
+		<CONTAINER name="contCtcn1" scroll_pos="0,0" ly_vert="20,244,335,178,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="imgCtcnChk" autosize="1" imgpath="check_line_n" ly_vert="20,15,20,20,1" />
+				<LABEL name="lblCtcn" fontsize="-2" caption="개인(신용)정보 처리 필수 동의
+(얼굴 인증 서비스용)" multiline="1" click="1" ly_vert="45,5,248,40,1" />
+				<IMAGE name="imgCtcnShow" imgpath="icon_arrow5_r" ly_vert="302,16,20,20,1" />
+				<IMAGE name="imgAgreeChk1" autosize="1" imgpath="check_line_n" ly_vert="42,95,20,20,1" />
+				<LABEL name="lblAgree1" fontsize="-2" caption="개인정보(얼굴 사진) 수집·이용" click="1" ly_vert="64,95,240,20,1" />
+				<IMAGE name="imgAgreeChk2" autosize="1" imgpath="check_line_n" ly_vert="42,130,20,20,1" />
+				<LABEL name="lblAgree2" fontsize="-2" caption="민감정보(사진 특징정보) 수집·이용" click="1" ly_vert="64,130,255,20,1" />
+				<LABEL name="lblText" fontsize="-2" fontstyle="01" caption="수집·이용에 관한 사항" paddinginfo="1,0,0,0" click="1" ly_vert="42,60,240,20,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="btnCtcnAll" enable="0" ly_vert="20,175,335,54,1" />
+		<IMAGE name="imgCtcnShowAll" visible="0" autosize="1" imgpath="icon_arrow_right_off.png" ly_vert="311,190,24,24,0" />
+		<IMAGE name="imgCtcnChkAll" autosize="1" imgpath="checkmenu_n" des="약관보기" ly_vert="40,192,20,20,1" />
+		<LABEL name="lblCtcnAll" fontstyle="01" caption="모두 확인하고 동의합니다." click="1" ly_vert="65,175,228,54,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="54259" _ulen="49043" >
+
+Dim g_szCheckYn
+Dim g_szCheckSubYn1
+Dim g_szCheckSubYn2
+
+Dim g_szLivnessSrno
+
+Dim g_InputTrDate
+Dim g_InputRcnoPip
+Dim g_InputSnmsSrno
+Dim g_InputHgrnSdrt
+Dim g_InputLrnkSdrt
+
+Dim g_nTrCount
+Dim g_nErrCount
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgCtcnChkAll.setMaintainingRatio("1")
+	Image1.setMaintainingRatio("1")
+	imgStep.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'뒤로가기(물리버튼) 막음
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+	
+	btnNext.enable = false
+    if Form.GetEnvData("common.theme") == "black" then
+        btnNext.btnimage = "btn_27.9"
+    else
+        btnNext.btnimage = "btn_21.9"
+    end if
+    btnNext.fgcolor = "269"
+	
+	g_nTrCount = 0
+	g_nErrCount = 0
+	
+	g_szCheckYn = "N"
+	g_szCheckSubYn1 = "N"
+	g_szCheckSubYn2 = "N"
+	
+	User_SharedData_Get()
+	
+	f_SetData()
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'개인(신용)정보처리필수동의서	
+	if sKeyName == G_STEP2_2_P2_FILE then
+		if sRet == "ok" then
+			lblCtcnAll_OnClick()
+		end if
+	elseif sKeyName == "mbbdm86153_p1" then
+		Form.OpenNextPopup("mbbdm85100", "", "")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "ABORT" and sRet == "ok" then
+		if g_BDMNMETBSWRGB == "100" then
+			Form.OpenNextPopup("mbbdm85100", "", "")
+		else
+			Form.CloseForm()
+		end if
+	
+	elseif sKeyName == "FACE_ERROR" then
+		if sRet == "ok" then
+			Form.runAlcCamera()
+		else
+			Form.OpenNextPopup("mbbdm85100", "", "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+'	Form.ShowAlert(sEventName, sParam)
+	if sEventName == "ALC_COMPLETE" then
+		g_nTrCount = 0
+		
+		DATAMANAGER.RequestTranData( "obcsb_face_003a" )
+	
+	elseif sEventName == "ALC_ERROR" then	
+		btnNext.enable = true
+					
+		btnNext.btnimage = "btn_20.9"
+		btnNext.fgcolor = "273"	
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Image1_OnClick()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'뒤로가기(물리버튼) 활성화
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'안면인식_라이브니스확인요청
+	if szTranID == "obcsb_face_003a" then
+		Dim szFaceImg, szImgLen, szStatusCd, szConfidence, szReturnCd, szReturnMsg
+		szFaceImg = Form.GetSharedData( "&RET_ALC_FACE_IMAGE", false )
+		szStatusCd = Form.GetSharedData( "&RET_ALC_STATUS_CD", false )
+		szConfidence = Form.GetSharedData( "&RET_ALC_CONFIDENCE", false )
+		szReturnCd = Form.GetSharedData( "&RET_ALC_RETURN_CODE", false )
+		szReturnMsg = Form.GetSharedData( "&RET_ALC_RETURN_MSG", false )
+		if szFaceImg <> "" and szFaceImg <> null then
+			szImgLen = Len(szFaceImg)
+		end if
+	
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "CNFR_DATE" , 0 , Form.GetSharedData("&HOST_DATE", false))
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RCNO_PIP" , 0 , g_BDM_RCNO_PIP)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "CLOT_API_NAME" , 0 , "test")
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "HTTP_STAT_CODE" , 0 , szStatusCd)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LIVNESS_RSCD" , 0 , szReturnCd)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RSPN_CODE_CNTT" , 0 , szReturnMsg)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "CONF" , 0 , szConfidence)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ATCH_FILE_SIZE" , 0 , szImgLen)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "UI_IMG_DATA" , 0 , szFaceImg)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "IDNTF_SRNO" , 0 , g_BDM_IDNTF_SRNO)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "REG_UNIQ_NO" , 0 , g_BDM_REG_UNIQ_NO)
+	
+	'금결원_안면인식진위확인요청
+	elseif szTranID == "obcsb_face_001a" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "TR_DATE" , 0 , Form.GetSharedData("&HOST_DATE", false))
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RCNO_PIP" , 0 , g_BDM_RCNO_PIP)
+'		if g_BDM_CERT_METHOD == "1" then
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "IDNTF_SRNO"			, 0 , g_BDM_IDNTF_SRNO		)
+'		else
+'			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "IDNTF_SRNO"			, 0 , g_SRNO		)
+'		end if
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LIVNESS_CNFR_SRNO" , 0 , g_szLivnessSrno)
+'		if g_ID_CARD_TYPE == "10" then		'주민등록증
+'			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "IDNF_CLS_CODE" , 0 , "1")
+'		elseif g_ID_CARD_TYPE == "11" then	'면허증
+'			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "IDNF_CLS_CODE" , 0 , "2")
+'		end if
+		'OCR 데이터면 신분증 종류 구분, 모바일신분증이면 "7" 로 고정값
+		if g_BDM_CERT_METHOD == "1" then
+			if g_ID_CARD_TYPE == "10" then
+				DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNF_CLS_CODE"		, 0 	, "1" 	 			)
+			else
+				DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNF_CLS_CODE"		, 0 	, "2" 	 			)
+			end if
+		else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNF_CLS_CODE"		, 0 	, "3" 	 			)
+		end if
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "CUST_CHAN_CLCD" , 0 , "1")
+	     DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "REG_UNIQ_NO" , 0 , g_BDM_REG_UNIQ_NO)
+	     
+	elseif szTranID == "obcsb_face_002a" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "TR_DATE" , 0 , g_InputTrDate)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RCNO_PIP" , 0 , g_InputRcnoPip)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "SNMS_SRNO" , 0 , g_InputSnmsSrno)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RPCS_TMNU" , 0 , g_nTrCount)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "HGRN_SDRT" , 0 , g_InputHgrnSdrt)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LRNK_SDRT" , 0 , g_InputLrnkSdrt)
+		
+	elseif szTranID == "obaci_acct_158a" then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATCH_FILE_SIZE"		, 0 	, g_ImgDataLen			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_IMG_DATA"		, 0 	, g_ImgData		)
+		'OCR 데이터면 신분증 종류 구분, 모바일신분증이면 "7" 로 고정값
+		if g_BDM_CERT_METHOD == "1" then
+			if g_ID_CARD_TYPE == "10" then
+				DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, "1" 	 			)
+			else
+				DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, "2" 	 			)
+			end if
+		else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, "3" 	 			)
+		end if
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_RCNO_PIP"		, 0 	, g_BDM_RCNO_PIP 		)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BRDT"				, 0 	, Right(g_BIRTH,6)			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MDAF_RCNO_PIP"		, 0 	, g_RCNO_7	 				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE"		, 0 	, "I" 				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SRNO"				, 0 	, ""	 				)
+	
+	elseif szTranID == "obaci_acct_158a_1" then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATCH_FILE_SIZE"		, 0 	, g_ImgFaceLen			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_IMG_DATA"		, 0 	, g_ImgFace		)
+		'OCR 데이터면 신분증 종류 구분, 모바일신분증이면 "7" 로 고정값
+		if g_BDM_CERT_METHOD == "1" then
+			if g_ID_CARD_TYPE == "10" then
+				DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, "1" 	 			)
+			else
+				DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, "2" 	 			)
+			end if
+		else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, "3" 	 			)
+		end if
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_RCNO_PIP"		, 0 	, g_MDAF_RCNO_PIP 		)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BRDT"				, 0 	, Right(g_BIRTH,6)			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MDAF_RCNO_PIP"		, 0 	, g_RCNO_7	 				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE"		, 0 	, "U" 				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SRNO"				, 0 	, g_SRNO	 				)
+	
+	'비대면계좌개설시 호출
+	elseif szTranID == "obcsb_nmet_102c" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "NMET_BSWR_CLCD" 		, 0 , g_BDMNMETBSWRGB	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "REG_UNIQ_NO" 		, 0 , g_BDM_REG_UNIQ_NO	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "BSWR_CLS_CODE"		, 0 , "2")	'2.신분증진위확인
+		
+		if g_BDM_CERT_METHOD == "1" then
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "OTSD_TR_UNIQ_NO"		, 0 	, "3" 	 			)
+		else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "OTSD_TR_UNIQ_NO"		, 0 	, "" 	 			)
+		end if
+'		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "OTSD_TR_UNIQ_NO"		, 0 , ""		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "TR_DATE"				, 0 , Form.GetSharedData("&HOST_DATE", false )			)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_SRNO"			, 0 , g_SRNO		)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "RSPN_TYPE_CODE"		, 0 , "0"		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_TORF_YN"		, 0 , "Y"		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_IMG_DATA_SIZE"	, 0 , 1		)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "RCNO_PIP"	, 0 , g_MDAF_RCNO_PIP		)
+		
+		'OCR 데이터면 신분증 종류 구분, 모바일신분증이면 "3" 로 고정값
+		if g_BDM_CERT_METHOD == "1" then
+			if g_ID_CARD_TYPE == "10" then
+				DATAMANAGER.SetDataValue( 0, szTranID, "InBlock3", "IDNTF_KIND_CODE"		, 0 	, "1" 	 			)
+			else
+				DATAMANAGER.SetDataValue( 0, szTranID, "InBlock3", "IDNTF_KIND_CODE"		, 0 	, "2" 	 			)
+			end if
+		else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock3", "IDNTF_KIND_CODE"		, 0 	, "3" 	 			)
+		end if
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_FLNM"	, 0 , g_NAME		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ORGL_RCNO_PIP"	, 0 , g_RCNO		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ORGL_IDNTF_FLNM"	, 0 , g_NAME		)
+		'test
+'		g_ISSU_DATE = Form.GetSharedData("&HOST_DATE", false)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ISNC_DATE"	, 0 , g_ISSU_DATE		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ORGL_ISNC_DATE"	, 0 , g_ISSU_DATE 		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "OLD_DRVN_LCNS_NO"	, 0 , ""		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ORGL_OLD_DRVN_LCNS_NO"	, 0 , ""		)
+	
+	elseif szTranID == "obaci_acct_059c" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "REG_UNIQ_NO" 		, 0 , g_BDM_REG_UNIQ_NO	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "REG_STAG_CLS_CODE"	, 0 , "1")
+		
+		Dim szMccoCode
+		If g_BDM_COMPANY_CODE == "1" Or g_BDM_COMPANY_CODE == 1 Then
+		    szMccoCode = "SKT"
+		ElseIf g_BDM_COMPANY_CODE == "2" Or g_BDM_COMPANY_CODE == 2 Then
+		    szMccoCode = "KTF"
+		ElseIf g_BDM_COMPANY_CODE == "3" Or g_BDM_COMPANY_CODE == 3 Then
+		    szMccoCode = "LGT"
+		ElseIf g_BDM_COMPANY_CODE == "5" Or g_BDM_COMPANY_CODE == 5 Then
+		    szMccoCode = "SKA "
+		ElseIf g_BDM_COMPANY_CODE == "6" Or g_BDM_COMPANY_CODE == 6 Then
+		    szMccoCode = "KTA"
+		ElseIf g_BDM_COMPANY_CODE == "7" Or g_BDM_COMPANY_CODE == 7 Then
+		    szMccoCode = "LGA"
+		End If
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "RCNO_TYPE_CODE"      , 0 , "01"                     )  '실명확인번호유형코드 01.주민등록번호
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "RCNO_PIP"            , 0 , g_BDM_RCNO_PIP )  '실명확인번호
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CUST_ABWR_NAME"      , 0 , g_BDM_NAME )  '고객명
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "ATHN_MTHD_CLS_CODE"  , 0 , "1"                      )  '인증방법구분코드 1.휴대폰본인인증 2.인증서인증 3.바이오인증
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "ATHN_STAT_CLS_CODE"  , 0 , "1"                      )  '인증상태구분코드 1.정상
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "MCCO_CODE"           , 0 , szMccoCode                )  '통신사코드
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CLPH_ARCD"           , 0 , g_BDM_HP1                  )  '휴대폰
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CLPH_TONO"           , 0 , g_BDM_HP2                  )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CPNO"                , 0 , g_BDM_HP3                  )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CIKEY_NO"            , 0 , g_BDM_CIKEY                )  'CIKEY번호
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "OTSD_TR_UNIQ_NO"		, 0 , g_OTSDTRUNIQNO		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "TR_DATE"				, 0 , Form.GetSharedData("&HOST_DATE", false )			)
+		
+		'20231102 obaci_acct_158a를 앞화면에서 호출하므로 주석처리
+'		if g_BDM_CERT_METHOD == "1" then
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_SRNO"			, 0 , g_BDM_IDNTF_SRNO		)
+'		else
+'			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_SRNO"			, 0 , g_SRNO		)
+'		end if
+'		if ChkButton0.checkstate = "1" or ChkButton0.checkstate = 1 then  'JMY TEST Skip
+'			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "RSPN_TYPE_CODE"	, 0 , "T")
+'		else
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "RSPN_TYPE_CODE"	, 0 , "0"		)
+'		end if
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_TORF_YN"		, 0 , "Y"		)
+		if g_BDM_CERT_METHOD == "1" then
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_KIND_CODE"	, 0 , "1"		)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_IMG_DATA_SIZE"	, 0 , g_FEATURE_LEN		)
+		else
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_KIND_CODE"	, 0 , "3"		)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_IMG_DATA_SIZE"	, 0 , 1		)
+		end if
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "SRNO"	, 0 , g_SRNO2		)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "SNMS_SRNO"	, 0 , g_InputSnmsSrno	)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "LIVNESS_CNFR_SRNO"		, 0 , g_szLivnessSrno		)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "FACEID_ACMP_YN"	, 0 , g_BDM_FACE_YN)
+		
+		if g_BDM_MNY_ACNT == "Y" then
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "CNFR_TRGT_CUST_CLCD"	, 0 , 	"01"	)
+		else
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "CNFR_TRGT_CUST_CLCD"	, 0 , 	"04"	)
+		end if
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "ACNT_OPNG_CLCD"	, 0 , 	"1"	)		'신규개설 
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "SAC_ACNT_APLT_YN"               , 0 , g_BDM_PRCD200			)  '슈퍼365신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVTR_JOIN_APLT_YN"              , 0 , g_BDM_PRCD100       	)  '종합매매가입신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "CMA_RP_JOIN_APLT_YN"            , 0 , g_BDM_PRCD118RP		)  'CMARP가입신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "FUTS_OPTN_ACNT_APLT_YN"         , 0 , g_BDM_PRCD101			)  '선물옵션계좌신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVDV_ACNT_APLT_YN"              , 0 , g_BDM_PRCD135			)  '해외파생계좌신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "WRAP_ACNT_APLT_YN"              , 0 , g_BDM_WRAP				)  '랩신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "DMST_CFD_ACNT_APLT_YN"          , 0 , g_BDM_PRCDCFD			)  'CFD계좌신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "ISA_ACNT_APLT_YN"               , 0 , g_BDM_PRCD133			)  'ISA계좌신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "ISA_PROD_TYPE_CLCD"				, 0 , g_BDM_ISA_PROD_TYPE			)  'ISA상품유형구분코드(2:일임형 / 3:중개형)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "ISA_JOIN_TPCD"					, 0 , "66"						)  'ISA가입유형코드
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "ISA_ACNT_OPNG_CLCD"				, 0 , g_BDM_ISA_ACNT_OPNG_CLCD		)  'ISA계좌개설구분코드(1:신규 / 2:이수)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN"			, 0 , g_BDM_PRCD137				)  '해외CFD계좌신청여부
+		
+		If g_BDM_PRCDCFD == "Y" Then
+			Dim szDMST_CFD_GOAL_MRKT_AGR_YN
+			szDMST_CFD_GOAL_MRKT_AGR_YN = ""
+			If g_BDM_GOAL_MRKT_UNFIT_YN == "Y" Then
+				szDMST_CFD_GOAL_MRKT_AGR_YN = "N"
+			ElseIf g_BDM_GOAL_MRKT_UNFIT_YN == "N" Then
+				szDMST_CFD_GOAL_MRKT_AGR_YN = "Y"
+			End If
+			
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "UI_SRNO"					, 0 , g_BDM_REG_SRNO     			)  '국내CFD목표시장일련번호
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "DMST_CFD_GOAL_MRKT_AGR_YN"	, 0 , szDMST_CFD_GOAL_MRKT_AGR_YN	)  '국내CFD목표시장일치여부
+		Else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "UI_SRNO"         			, 0 , 0							)  '국내CFD목표시장일련번호
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "DMST_CFD_GOAL_MRKT_AGR_YN"	, 0 , ""							)  '국내CFD목표시장일치여부
+		End If
+		If g_BDM_PRCD137 == "Y" Then
+			Dim szOVRS_CFD_GOAL_MRKT_AGR_YN	
+			szOVRS_CFD_GOAL_MRKT_AGR_YN = ""
+			If g_BDM_ACFD_GOAL_MRKT_UNFIT_YN == "Y" Then
+				szOVRS_CFD_GOAL_MRKT_AGR_YN = "N"
+			ElseIf g_BDM_ACFD_GOAL_MRKT_UNFIT_YN == "N" Then
+				szOVRS_CFD_GOAL_MRKT_AGR_YN = "Y"
+			End If
+			
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "ACFD_GOAL_MRKT_SRNO"         , 0 , g_BDM_ACFD_REG_SRNO     		) '해외CFD목표시장일련번호
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "ACFD_GOAL_MRKT_AGR_YN"       , 0 , szOVRS_CFD_GOAL_MRKT_AGR_YN     ) '해외CFD목표시장일치여부
+		Else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "ACFD_GOAL_MRKT_SRNO"         , 0 , 0     )  '해외CFD목표시장일련번호
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "ACFD_GOAL_MRKT_AGR_YN"       , 0 , ""    ) 	'해외CFD목표시장일치여부
+		End If
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "DMST_CFD_ACNT_APLT_YN1"          , 0 , g_BDM_DMST_CFD_ACNT_APLT_YN1		)  '국내CFD 계좌신청여부(일반)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "DMST_CFD_ACNT_APLT_YN2"          , 0 , g_BDM_DMST_CFD_ACNT_APLT_YN2		)  '국내CFD 계좌신청여부(안심)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN1"          , 0 , g_BDM_OVRS_CFD_ACNT_APLT_YN1		)  '해외CFD 계좌신청여부(미국/일반)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN2"          , 0 , g_BDM_OVRS_CFD_ACNT_APLT_YN2		)  '해외CFD 계좌신청여부(미국/안심)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN3"          , 0 , g_BDM_OVRS_CFD_ACNT_APLT_YN3		)  '해외CFD 계좌신청여부(중국/일반)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN4"          , 0 , g_BDM_OVRS_CFD_ACNT_APLT_YN4		)  '해외CFD 계좌신청여부(중국/일반)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN5"          , 0 , g_BDM_OVRS_CFD_ACNT_APLT_YN5		)  '해외CFD 계좌신청여부(홍콩/일반)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN6"          , 0 , g_BDM_OVRS_CFD_ACNT_APLT_YN6		)  '해외CFD 계좌신청여부(홍콩/일반)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN7"          , 0 , g_BDM_OVRS_CFD_ACNT_APLT_YN7		)  '해외CFD 계좌신청여부(일본/일반)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "OVRS_CFD_ACNT_APLT_YN8"          , 0 , g_BDM_OVRS_CFD_ACNT_APLT_YN8		)  '해외CFD 계좌신청여부(일본/일반)
+		
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "PNSN_SVNG_ACNT_APLT_YN"         , 0 , g_BDM_PRCD131			)  '연금저축신청여부
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "PNSN_TCTR_CLS_CODE"                        , 0 , g_BDM_PNSN_TCTR_CLS_CODE		)			'연금이관구분코드(신규/이수전용)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "PNSN_CNRC_PRD"             		        , 0 , g_BDM_PNSN_CNRC_PRD		)                 '연금계약기간
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "PNSN_PRVS_BEGN_SCDL_DATE"                  , 0 , g_BDM_PNSN_PRVS_BEGN_SCDL_DATE		)    	'연금지급개시예정일
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "PNSN_CNRC_AMT"                             , 0 , g_BDM_PNSN_CNRC_AMT				)        '연금계약금액
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "PNSN_PRVS_BANK_CODE"                       , 0 , g_BDM_PNSN_PRVS_BANK_CODE    		)    	'연금지급은행코드
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock4", "PNSN_PRVS_BANK_ACNO"                       , 0 , g_BDM_PNSN_PRVS_BANK_ACNO    		)    	'연금지급은행계좌번호
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "PROS_DATE"	, 0 , 	g_BDM_PROS_DATE	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "PROS_SRNO"	, 0 , 	g_BDM_PROS_SRNO	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "FNNC_TR_OBJT_CNFR_DATE"	, 0 , 	g_BDM_MNY_PROS_DATE	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "FNNC_TR_OBJT_CNFR_SRNO"	, 0 , 	g_BDM_MNY_PROS_SRNO	)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "ACNO"	, 0 , 		""	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "ACNO_PWD"	, 0 , 	""	)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "MANG_BRCD"	, 0 , 	g_BDM_MANG_BRCD	)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock4", "MNGR_EMPNO"	, 0 , 	g_BDM_MANG_EMPNO	)
+	
+	elseif szTranID == "obaci_acct_234a" then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_STAG_CLS_CODE"		, 0  , "1"				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_UNIQ_NO"			, 0  , g_BDM_REG_UNIQ_NO	)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATCH_FILE_SIZE"			, 0  , g_FEATURE_LEN		)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_PHTG_DATA_CNTT"		, 0  , g_FEATURE			)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'안면인식_라이브니스확인요청
+	if szTranID == "obcsb_face_003a" then
+		g_szLivnessSrno = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "LIVNESS_CNFR_SRNO" , 0 )
+		
+		Dim nHGRN_SDRT, nConfidence
+		nHGRN_SDRT = CDbl(DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "HGRN_SDRT" , 0 ))
+		nConfidence = CDbl(Form.GetSharedData( "&RET_ALC_CONFIDENCE", false ))
+'		Form.ShowAlert(nHGRN_SDRT,nConfidence)
+		if g_szLivnessSrno <> "" and g_szLivnessSrno <> null then
+			if nConfidence >= nHGRN_SDRT then
+				DATAMANAGER.RequestTranData( "obcsb_face_001a" )
+			else
+				Form.MsgBox("안내", "얼굴 기준율 미달입니다.\n다시 촬영하시거나\n다음에 개설해주시기 바랍니다.", "FACE_ERROR", 7, "다시 촬영하기", "다음에 개설하기")
+			end if
+		end if
+	
+	'금결원_안면인식진위확인요청
+	elseif szTranID == "obcsb_face_001a" then
+		g_InputTrDate = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "TR_DATE" , 0 )
+		g_InputRcnoPip = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "RCNO_PIP" , 0 )
+		g_InputSnmsSrno = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "SNMS_SRNO" , 0 )
+		g_InputHgrnSdrt = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "HGRN_SDRT" , 0 )
+		g_InputLrnkSdrt = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "LRNK_SDRT" , 0 )
+		
+		'obcsb_face_002a 최초 호출시 약간의 텀을 주고 호출
+		Form.SetTimerEvent2(2, 1, 0.5)
+		
+'		DATAMANAGER.RequestTranData( "obcsb_face_002a" )
+	
+	elseif szTranID == "obcsb_face_002a" then
+		Dim szRspCode
+		szRspCode = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "RSPN_CODE" , 0 )
+		
+		'test
+'		szRspCode = "200"
+'		Form.ShowAlert("szRspCode", szRspCode)	
+		if szRspCode <> "" and szRspCode <> null then		
+			if szRspCode == "000" then
+				g_nTrCount = 0
+				
+				if g_BDMNMETBSWRGB == "100" then
+					'OCR 촬영하는 경우 obaci_acct_158a 및 idvs_001a, 002a 등 이전 로직은 앞화면에서 수행하므로 acct_059c -> acct_234a 만 호출하여 진행
+	'				if g_BDM_CERT_METHOD == "1" then
+	'					DATAMANAGER.RequestTranData( "obaci_acct_059c" )
+	'				else
+	'					DATAMANAGER.RequestTranData( "obaci_acct_158a" )
+	'				end if
+					
+					'20231102 로직 수정 : 앞 화면에서 서비스 호출 전부 수행하고 이 화면에서는 obaci_acct_059c만 호출
+					DATAMANAGER.RequestTranData( "obaci_acct_059c" )
+				else
+					'일단.. 업무신청은 탈 일 없음
+					'업무신청은 앞화면에서 전부 수행하고 오기때문에 바로 다음단계로 이동
+					Form.OpenPopup("mbbdm86190", "", "")
+				end if
+			else
+				btnNext.enable = true
+							
+				btnNext.btnimage = "btn_20.9"
+				btnNext.fgcolor = "273"	
+				
+				g_nErrCount = g_nErrCount + 1
+				if g_nErrCount < 5 then
+					Form.MsgBox("안내", "얼굴 인증 " .. g_nErrCount .. "회 오류입니다.\n다시 촬영하시거나\n다음에 개설해주시기 바랍니다.\n연속 5회 오류 시 얼굴 인증은 제한됩니다.", "FACE_ERROR", 7, "다시 촬영하기", "다음에 개설하기")
+				else
+					Dim szMsg
+					szMsg = "신분증 사진과 얼굴 인증한 이미지가 불일치합니다.\n확인 후 다시 시도하여 주시기 바랍니다."
+					Form.OpenPopup("mbbdm86153_p1", szMsg, "")
+				end if
+			end if
+		else
+			g_nTrCount = g_nTrCount + 1
+			
+			if g_nTrCount >= 20 then
+				btnNext.enable = true
+							
+				btnNext.btnimage = "btn_20.9"
+				btnNext.fgcolor = "273"	
+				
+				Form.ShowAlert("알림", "등록에 실패하였습니다. 결제원 전문 처리중 오류")
+				g_BIORetry = 0 '초기화
+				exit sub
+			else
+'				DATAMANAGER.RequestTranData( "obcsb_face_002a" )
+				
+				Form.SetTimerEvent2(1, 1, 1.5)
+			end if
+		end if
+	
+	elseif szTranID == "obaci_acct_158a" then
+		g_SRNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "SRNO" , 0 )
+		g_BDM_IDNTF_SRNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "SRNO" , 0 )
+		g_MDAF_RCNO_PIP = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "MDAF_RCNO_PIP" , 0 )
+		
+		DATAMANAGER.RequestTranData( "obaci_acct_158a_1" )
+
+	elseif szTranID == "obaci_acct_158a_1" then
+		DATAMANAGER.RequestTranData( "obcsb_nmet_102c" )
+	
+	elseif szTranID == "obcsb_nmet_102c" then
+		g_SRNO2 = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "SRNO" , 0 )
+		
+		'계좌개설은 obaci_acct_059c 호출 후 다음단계(mbbdm86160)
+		'업무신청은 바로 다음 단계(mbbdm86190)
+		if g_BDMNMETBSWRGB == "100" then
+			DATAMANAGER.RequestTranData( "obaci_acct_059c" )
+		else
+			Form.OpenNextPopup("mbbdm86190", "" , "")
+		end if
+		
+	elseif szTranID == "obaci_acct_059c" then
+		'OCR 촬영했다면 obaci_acct_234a를 추가 호출하고 다음단계로 이동
+		if g_BDM_CERT_METHOD == "1" then
+			DATAMANAGER.RequestTranData( "obaci_acct_234a" )		
+		else
+			User_SharedData_Set("")
+			
+			Form.OpenNextPopup("mbbdm86160", "" , "")
+		end if
+		
+	elseif szTranID == "obaci_acct_234a" then
+		User_SharedData_Set("")
+		
+		Form.OpenNextPopup("mbbdm86160", "" , "")
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	btnNext.enable = true
+				
+	btnNext.btnimage = "btn_20.9"
+	btnNext.fgcolor = "273"	
+	
+	Dim szErrSub
+	szErrSub = DATAMANAGER.GetDataMsgSubText(szTranID)
+	if szErrSub <> "" and szErrSub <> null then
+		Form.ShowAlert("알림" .. szTranID, szErrMsg .. "(" .. szErrSub .. ")")
+	else
+		Form.ShowAlert("알림" .. szTranID, szErrMsg)
+	end if
+End Sub
+
+'============================================================================
+Function User_SharedData_Get()	'JMY
+
+	'진입점에서 설정되는 정보 ---------------------------------------
+	g_BDM_FRST_MAPID        	= Form.GetSharedData("BDM_FRST_MAPID"		, false)	'최초진입화면ID
+	g_BDMNMETBSWRGB         	= Form.GetSharedData("BDM_NMETBSWRGB"		, false)	'비대면업무구분
+	g_NMETBSWRGB			   	= Form.GetSharedData("BDM_NMETBSWRGB"		, false)	'비대면업무구분
+	g_mOTP_IntoClcd			= Form.GetSharedData("mOTP_IntoClcd"			, false)	'(모바일OTP)진입구분코드
+	g_BDM_CSNO   				= Form.GetSharedData("BDM_CSNO"   			, false) '고객번호
+
+	'휴대폰본인인증에서 설정되는 정보 ---------------------------------------
+	g_BDM_REG_UNIQ_NO       	= Form.GetSharedData("BDM_REG_UNIQ_NO"        , false) '등록고유번호
+	g_BDM_REG_STAG_CLS_CODE 	= Form.GetSharedData("BDM_REG_STAG_CLS_CODE"  , false) '등록단계구분코드
+	g_BDM_NAME              	= Form.GetSharedData("BDM_NAME"               , false) '이름
+	g_BDM_RCNO_PIP        	  	= Form.GetSharedData("BDM_RCNO_PIP"           , false) '주민등록번호
+	g_BDM_COMPANY_CODE   	  	= Form.GetSharedData("BDM_COMPANY_CODE"       , false) '통신사 정보
+	g_BDM_HP1             	  	= Form.GetSharedData("BDM_HP1"                , false) '휴대폰번호
+	g_BDM_HP2              	= Form.GetSharedData("BDM_HP2"                , false)
+	g_BDM_HP3               	= Form.GetSharedData("BDM_HP3"                , false)
+	g_BDM_CIKEY				= Form.GetSharedData("BDM_CI_KEY"                , false)
+	g_BDM_MNY_ACNT			= Form.GetSharedData("BDM_MNY_ACNT_YN"                , false)
+	
+	'신분증진위확인에서 설정되는 정보 ---------------------------------------
+	g_BDM_IDNTF_SRNO			= Form.GetSharedData("BDM_IDNTF_SRNO"        	, false)	'신분증일련번호
+
+	'이어하기안내용, 진행상태보기용 Data ---------------------------------------
+	g_BDM_LAST_STAG_CLS_CODE 	= Form.GetSharedData("BDM_LAST_STAG_CLS_CODE"	, false)	'최종등록단계구분코드
+	g_BDM_CLEAR_YN          	= Form.GetSharedData("BDM_CLEAR_YN"    		, false) '이어하기여부
+	g_BDM_PRNM              	= Form.GetSharedData("BDM_PRNM"         		, false) '개설상품명
+	g_BDM_APLTDATE          	= Form.GetSharedData("BDM_APLTDATE" 			, false) '신청일자
+	g_BDM_CLSNDATE          	= Form.GetSharedData("BDM_CLSNDATE" 			, false) '신청마감일자
+
+	'비대면업무구분1자리 설정
+	g_sz_SubNmetBswrGb = Mid(g_BDMNMETBSWRGB,1,1)
+	
+	'개설상품 선택 관련
+	g_BDM_PRCD100            = Form.GetSharedData("BDM_PRCD100"            , false)  '종합매매 가입여부
+    g_BDM_PRCD118RP          = Form.GetSharedData("BDM_PRCD118RP"          , false)  'CMA(증권형) 가입여부
+    g_BDM_PRCD100F           = Form.GetSharedData("BDM_PRCD100F"           , false)  '종합매매(금상전용) 가입여부
+    g_BDM_PRCD101            = Form.GetSharedData("BDM_PRCD101"            , false)  '선물옵션 가입여부
+    g_BDM_PRCD135            = Form.GetSharedData("BDM_PRCD135"            , false)  '해외파생 가입여부
+    g_BDM_PRCD133            = Form.GetSharedData("BDM_PRCD133"            , false)  'ISA 가입여부
+    g_BDM_PRCDCFD            = Form.GetSharedData("BDM_PRCDCFD"            , false)  'CFD 가입여부	
+    g_BDM_PRCD137			= Form.GetSharedData("BDM_PRCD137"			, false)	'해외CFD 가입여부
+    g_BDM_ISA_PROD_TYPE	= Form.GetSharedData("BDM_ISA_PROD_TYPE"		, false)	'ISA type
+    g_BDM_PRCD131			= Form.GetSharedData("BDM_PRCD131"		, false)	'연금저축 가입여부
+    g_BDM_ISA_ACNT_OPNG_CLCD =  Form.GetSharedData("BDM_ISA_ACNT_OPNG_CLCD"		, false)	'isa계좌개설구분코드 (1:신규/2:이수전용)
+    g_BDM_WRAP			= Form.GetSharedData("BDM_WRAP"			, false)		'랩 가입여부
+    g_BDM_PRCD200			= Form.GetSharedData("BDM_PRCD200"		, false)		'슈퍼365 가입여부
+    
+    g_BDM_REG_SRNO			= Form.GetSharedData("BDM_REG_SRNO"        , false)			'등록일련번호	'ksj 2021-07-23    
+    g_BDM_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, false)			'목표시장부적합여부'ksj 2021-07-23
+    'v0002 sta
+    g_BDM_ACFD_REG_SRNO		= Form.GetSharedData("BDM_ACFD_REG_SRNO"					, false)	'해외CFD목표시장등록일련번호	
+    g_BDM_ACFD_GOAL_MRKT_UNFIT_YN	= Form.GetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"	, false)	'해외CFD목표시장부적합여부	
+    
+    g_BDM_DMST_CFD_ACNT_APLT_YN1  = Form.GetSharedData("BDM_DMST_CFD_ACNT_APLT_YN1"           , false)		'국내CFD 계좌신청여부(일반)
+    g_BDM_DMST_CFD_ACNT_APLT_YN2  = Form.GetSharedData("BDM_DMST_CFD_ACNT_APLT_YN2"           , false)		'국내CFD 계좌신청여부(안심)
+    g_BDM_OVRS_CFD_ACNT_APLT_YN1  = Form.GetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN1"           , false)		'해외CFD 계좌신청여부(미국/일반)
+    g_BDM_OVRS_CFD_ACNT_APLT_YN2  = Form.GetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN2"           , false)		'해외CFD 계좌신청여부(미국/안심)
+    g_BDM_OVRS_CFD_ACNT_APLT_YN3  = Form.GetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN3"           , false)		'해외CFD 계좌신청여부(중국/일반)
+    g_BDM_OVRS_CFD_ACNT_APLT_YN4  = Form.GetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN4"           , false)	 	'해외CFD 계좌신청여부(중국/안심)	
+    g_BDM_OVRS_CFD_ACNT_APLT_YN5  = Form.GetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN5"           , false)		'해외CFD 계좌신청여부(홍콩/일반)
+    g_BDM_OVRS_CFD_ACNT_APLT_YN6  = Form.GetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN6"           , false)	 	'해외CFD 계좌신청여부(홍콩/안심)
+    g_BDM_OVRS_CFD_ACNT_APLT_YN7  = Form.GetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN7"           , false)		'해외CFD 계좌신청여부(일본/일반)
+    g_BDM_OVRS_CFD_ACNT_APLT_YN8  = Form.GetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN8"           , false)		'해외CFD 계좌신청여부(일본/안심)   
+    
+    g_BDM_PNSN_TCTR_CLS_CODE		= Form.GetSharedData("BDM_PNSN_TCTR_CLS_CODE"          , false)		'연금이관구분코드(신규/이수전용)
+    g_BDM_PNSN_CNRC_PRD			= Form.GetSharedData("BDM_PNSN_CNRC_PRD"           	, false)		'연금계약기관
+    g_BDM_PNSN_PRVS_BEGN_SCDL_DATE	= Form.GetSharedData("BDM_PNSN_PRVS_BEGN_SCDL_DATE"    , false)		'연금지급개시예정일
+    g_BDM_PNSN_CNRC_AMT			= Form.GetSharedData("BDM_PNSN_CNRC_AMT"           	, false)		'연금계약금액
+    g_BDM_PNSN_PRVS_BANK_CODE		= Form.GetSharedData("BDM_PNSN_PRVS_BANK_CODE"           , false)		'연금지급은행코드
+    g_BDM_PNSN_PRVS_BANK_ACNO		= Form.GetSharedData("BDM_PNSN_PRVS_BANK_ACNO"           , false)		'연금지급은행계좌번호
+    
+    g_BDM_PROS_DATE	= Form.GetSharedData("BDM_PROS_DATE"          , false)
+    g_BDM_PROS_SRNO	= Form.GetSharedData("BDM_PROS_SRNO"          , false)
+    g_BDM_MNY_PROS_DATE	= Form.GetSharedData("BDM_MNY_PROS_DATE"          , false)
+    g_BDM_MNY_PROS_SRNO	= Form.GetSharedData("BDM_MNY_PROS_SRNO"          , false)
+    
+    g_BDM_MANG_BRCD          = Form.GetSharedData("BDM_MANG_BRCD"          , false)  '관리점
+    g_BDM_MANG_EMPNO         = Form.GetSharedData("BDM_MANG_EMPNO"          , false)  '관리직원번호
+    g_BDM_CERT_METHOD                = Form.GetSharedData("BDM_CERT_METHOD"          , false)
+    g_BDM_FACE_YN					= Form.GetSharedData("BDM_FACE_YN"          , false)
+    
+    g_SRNO2						= Form.GetSharedData("BDM_SRNO2"          , false)
+    
+    'OCR 촬영 후 안면인식단계로 오는 경우를 위해 저장한 데이터
+    '이후 단계에도 같은 키값을 쓰는게 있으니 여기서 꺼내쓰고 날림 처리
+    g_OTSDTRUNIQNO				= Form.GetSharedData("BDM_OTSD_TR_UNIQ_NO"          , true)
+    
+    
+End Function
+
+'============================================================================
+Function User_SharedData_Set(gb)	'JMY
+
+    '진입점에서 설정되는 정보 ---------------------------------------
+    Form.SetSharedData("BDM_FRST_MAPID"  , g_BDM_FRST_MAPID  )	'최초진입화면ID
+    Form.SetSharedData("BDM_NMETBSWRGB"  , g_BDMNMETBSWRGB   )	'비대면업무구분
+    Form.SetSharedData("mOTP_IntoClcd"	, g_mOTP_IntoClcd   )	'(모바일OTP)진입구분코드
+    Form.SetSharedData("BDM_CSNO"  		, g_BDM_CSNO		 ) '고객번호
+
+
+    if gb == "Init" then
+		'휴대폰본인인증에서 설정되는 정보 ---------------------------------------
+		Form.SetSharedData("BDM_REG_UNIQ_NO"    		, "")	'등록고유번호
+		Form.SetSharedData("BDM_REG_STAG_CLS_CODE"	, "")	'등록단계구분코드
+		Form.SetSharedData("BDM_NAME"         		, "")	'이름
+		Form.SetSharedData("BDM_RCNO_PIP"       		, "")	'주민등록번호
+		Form.SetSharedData("BDM_COMPANY_CODE"  	 	, "")	'통신사 정보
+		Form.SetSharedData("BDM_HP1"          		, "")	'휴대폰번호
+		Form.SetSharedData("BDM_HP2"              	, "")
+		Form.SetSharedData("BDM_HP3"              	, "")
+		Form.SetSharedData("BDM_CI_KEY"              	, "")
+		Form.GetSharedData("BDM_MNY_ACNT_YN"          , g_BDM_MNY_ACNT)
+		
+		'신분증진위확인에서 설정되는 정보 ---------------------------------------
+		Form.SetSharedData("BDM_IDNTF_SRNO"          	, "")	'신분증일련번호
+
+		'이어하기안내용, 진행상태보기용 Data ---------------------------------------
+		Form.SetSharedData("BDM_LAST_STAG_CLS_CODE"	, "" )	'최종등록단계구분코드
+		Form.SetSharedData("BDM_CLEAR_YN"     		, "" )	'이어하기여부
+		Form.SetSharedData("BDM_PRNM"       			, "" )	'개설상품명
+		Form.SetSharedData("BDM_BDM_APLTDATE"   		, "" )	'신청일자
+		Form.SetSharedData("BDM_BDM_CLSNDATE"   		, "" )	'신청마감일자
+		
+		'개설상품 선택 관련
+		Form.SetSharedData("BDM_PRCD100"            , "")  '종합매매 가입여부
+		Form.SetSharedData("BDM_PRCD118RP"          , "")  'CMA(증권형) 가입여부
+		Form.SetSharedData("BDM_PRCD100F"           , "")  '종합매매(금상전용) 가입여부
+		Form.SetSharedData("BDM_PRCD101"            , "")  '선물옵션 가입여부
+		Form.SetSharedData("BDM_PRCD135"            , "")  '해외파생 가입여부
+		Form.SetSharedData("BDM_PRCD133"            , "")  'ISA 가입여부
+		Form.SetSharedData("BDM_PRCDCFD"            , "")  'CFD 가입여부	
+		Form.SetSharedData("BDM_PRCD137"			, "")	'해외CFD 가입여부
+		Form.SetSharedData("BDM_ISA_PROD_TYPE"		, "")	'ISA type
+		Form.SetSharedData("BDM_PRCD131"		, "")	'연금저축 가입여부
+		Form.SetSharedData("BDM_WRAP"			, "")		'랩 가입여부
+		Form.SetSharedData("BDM_PRCD200"		, "")		'슈퍼365 가입여부
+		
+		Form.SetSharedData("BDM_REG_SRNO"        	, "")			'등록일련번호	'ksj 2021-07-23    
+		Form.SetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, "")			'목표시장부적합여부'ksj 2021-07-23
+		Form.SetSharedData("BDM_ACFD_REG_SRNO"					, "")	'해외CFD목표시장등록일련번호	
+		Form.SetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"			, "")	'해외CFD목표시장부적합여부	
+		Form.SetSharedData("BDM_DMST_CFD_ACNT_APLT_YN1"           , "")		'국내CFD 계좌신청여부(일반)
+		Form.SetSharedData("BDM_DMST_CFD_ACNT_APLT_YN2"           , "")		'국내CFD 계좌신청여부(안심)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN1"           , "")		'해외CFD 계좌신청여부(미국/일반)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN2"           , "")		'해외CFD 계좌신청여부(미국/안심)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN3"           , "")		'해외CFD 계좌신청여부(중국/일반)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN4"           , "")	 	'해외CFD 계좌신청여부(중국/안심)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN5"           , "")		'해외CFD 계좌신청여부(홍콩/일반)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN6"           , "")	 	'해외CFD 계좌신청여부(홍콩/안심)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN7"           , "")		'해외CFD 계좌신청여부(일본/일반)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN8"           , "")		'해외CFD 계좌신청여부(일본/안심)
+		
+		Form.SetSharedData("BDM_PNSN_TCTR_CLS_CODE"          , "")		'연금이관구분코드(신규/이수전용)
+		Form.SetSharedData("BDM_PNSN_CNRC_PRD"           	, "")		'연금계약기관
+		Form.SetSharedData("BDM_PNSN_PRVS_BEGN_SCDL_DATE"    , "")		'연금지급개시예정일
+		Form.SetSharedData("BDM_PNSN_CNRC_AMT"           	, "")		'연금계약금액
+		Form.SetSharedData("BDM_PNSN_PRVS_BANK_CODE"           , "")		'연금지급은행코드
+		Form.SetSharedData("BDM_PNSN_PRVS_BANK_ACNO"           , "")		'연금지급은행계좌번호
+		
+		Form.SetSharedData("BDM_PROS_DATE"          , "")
+		Form.SetSharedData("BDM_PROS_SRNO"          , "")
+		Form.SetSharedData("BDM_MNY_PROS_DATE"          , "")
+		Form.SetSharedData("BDM_MNY_PROS_SRNO"          , "")
+		
+		Form.SetSharedData("BDM_MANG_BRCD"          , "")  '관리점
+		Form.SetSharedData("BDM_FACE_YN"          , "")	'안면인식 수행 여부
+		Form.SetSharedData("BDM_CERT_METHOD"          , "")
+		Form.SetSharedData("BDM_SRNO2"          , "")
+    else
+		'휴대폰본인인증에서 설정되는 정보 ---------------------------------------
+		Form.SetSharedData("BDM_REG_UNIQ_NO"       	, g_BDM_REG_UNIQ_NO   		)	'등록고유번호
+		Form.SetSharedData("BDM_REG_STAG_CLS_CODE"	, g_BDM_REG_STAG_CLS_CODE 	)	'등록단계구분코드
+		Form.SetSharedData("BDM_NAME"         		, g_BDM_NAME        		)	'이름
+		Form.SetSharedData("BDM_RCNO_PIP"       		, g_BDM_RCNO_PIP      		)	'주민등록번호
+		Form.SetSharedData("BDM_COMPANY_CODE"   		, g_BDM_COMPANY_CODE    	)	'통신사 정보
+		Form.SetSharedData("BDM_HP1"          		, g_BDM_HP1         		)	'휴대폰번호
+		Form.SetSharedData("BDM_HP2"              	, g_BDM_HP2       		)
+		Form.SetSharedData("BDM_HP3"              	, g_BDM_HP3       		)
+		Form.SetSharedData("BDM_CI_KEY"              	, g_BDM_CIKEY       		)
+		Form.GetSharedData("BDM_MNY_ACNT_YN"          , g_BDM_MNY_ACNT			)
+		
+		'신분증진위확인에서 설정되는 정보 ---------------------------------------
+		Form.SetSharedData("BDM_IDNTF_SRNO"          	, g_BDM_IDNTF_SRNO		)	'신분증일련번호
+
+		'이어하기안내용, 진행상태보기용 Data ---------------------------------------
+		Form.SetSharedData("BDM_LAST_STAG_CLS_CODE"	, g_BDM_LAST_STAG_CLS_CODE	)	'최종등록단계구분코드
+		Form.SetSharedData("BDM_CLEAR_YN"     		, g_BDM_CLEAR_YN      		)	'이어하기여부
+		Form.SetSharedData("BDM_PRNM"       			, g_BDM_PRNM        		)	'개설상품명
+		Form.SetSharedData("BDM_APLTDATE"     		, g_BDM_APLTDATE      		)	'신청일자
+		Form.SetSharedData("BDM_CLSNDATE"     		, g_BDM_CLSNDATE      		)	'신청마감일자
+	    
+		'개설상품 선택 관련
+		Form.SetSharedData("BDM_PRCD100"            , g_BDM_PRCD100)  '종합매매 가입여부
+		Form.SetSharedData("BDM_PRCD118RP"          , g_BDM_PRCD118RP)  'CMA(증권형) 가입여부
+		Form.SetSharedData("BDM_PRCD100F"           , g_BDM_PRCD100F)  '종합매매(금상전용) 가입여부
+		Form.SetSharedData("BDM_PRCD101"            , g_BDM_PRCD101)  '선물옵션 가입여부
+		Form.SetSharedData("BDM_PRCD135"            , g_BDM_PRCD135)  '해외파생 가입여부
+		Form.SetSharedData("BDM_PRCD133"            , g_BDM_PRCD133)  'ISA 가입여부
+		Form.SetSharedData("BDM_PRCDCFD"            , g_BDM_PRCDCFD)  'CFD 가입여부	
+		Form.SetSharedData("BDM_PRCD137"			, g_BDM_PRCD137)	'해외CFD 가입여부
+		Form.SetSharedData("BDM_ISA_PROD_TYPE"		, g_BDM_ISA_PROD_TYPE)	'ISA type
+		Form.SetSharedData("BDM_ISA_ACNT_OPNG_CLCD"   , g_BDM_ISA_ACNT_OPNG_CLCD)	'ISA 개설여부(1:신규 / 2: 이수)
+		Form.SetSharedData("BDM_PRCD131"		, g_BDM_PRCD131)	'연금저축 가입여부
+		Form.SetSharedData("BDM_WRAP"			, g_BDM_WRAP)		'랩 가입여부
+		Form.SetSharedData("BDM_PRCD200"		, g_BDM_PRCD200)		'슈퍼365 가입여부
+	    
+		Form.SetSharedData("BDM_REG_SRNO"        	, g_BDM_REG_SRNO)			'등록일련번호	'ksj 2021-07-23    
+		Form.SetSharedData("BDM_GOAL_MRKT_UNFIT_YN"	, g_BDM_GOAL_MRKT_UNFIT_YN)			'목표시장부적합여부'ksj 2021-07-23
+		Form.SetSharedData("BDM_ACFD_REG_SRNO"					, g_BDM_ACFD_REG_SRNO)	'해외CFD목표시장등록일련번호	
+		Form.SetSharedData("BDM_ACFD_GOAL_MRKT_UNFIT_YN"			, g_BDM_ACFD_GOAL_MRKT_UNFIT_YN)	'해외CFD목표시장부적합여부	
+		Form.SetSharedData("BDM_DMST_CFD_ACNT_APLT_YN1"           , g_BDM_DMST_CFD_ACNT_APLT_YN1)		'국내CFD 계좌신청여부(일반)
+		Form.SetSharedData("BDM_DMST_CFD_ACNT_APLT_YN2"           , g_BDM_DMST_CFD_ACNT_APLT_YN2)		'국내CFD 계좌신청여부(안심)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN1"           , g_BDM_OVRS_CFD_ACNT_APLT_YN1)		'해외CFD 계좌신청여부(미국/일반)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN2"           , g_BDM_OVRS_CFD_ACNT_APLT_YN2)		'해외CFD 계좌신청여부(미국/안심)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN3"           , g_BDM_OVRS_CFD_ACNT_APLT_YN3)		'해외CFD 계좌신청여부(중국/일반)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN4"           , g_BDM_OVRS_CFD_ACNT_APLT_YN4)	 	'해외CFD 계좌신청여부(중국/안심)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN5"           , g_BDM_OVRS_CFD_ACNT_APLT_YN5)		'해외CFD 계좌신청여부(홍콩/일반)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN6"           , g_BDM_OVRS_CFD_ACNT_APLT_YN6)	 	'해외CFD 계좌신청여부(홍콩/안심)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN7"           , g_BDM_OVRS_CFD_ACNT_APLT_YN7)		'해외CFD 계좌신청여부(일본/일반)
+		Form.SetSharedData("BDM_OVRS_CFD_ACNT_APLT_YN8"           , g_BDM_OVRS_CFD_ACNT_APLT_YN8)		'해외CFD 계좌신청여부(일본/안심) 
+	    
+		Form.SetSharedData("BDM_PNSN_TCTR_CLS_CODE"          , g_BDM_PNSN_TCTR_CLS_CODE)		'연금이관구분코드(신규/이수전용)
+		Form.SetSharedData("BDM_PNSN_CNRC_PRD"           	, g_BDM_PNSN_CNRC_PRD)		'연금계약기관
+		Form.SetSharedData("BDM_PNSN_PRVS_BEGN_SCDL_DATE"    , g_BDM_PNSN_PRVS_BEGN_SCDL_DATE)		'연금지급개시예정일
+		Form.SetSharedData("BDM_PNSN_CNRC_AMT"           	, g_BDM_PNSN_CNRC_AMT)		'연금계약금액
+		Form.SetSharedData("BDM_PNSN_PRVS_BANK_CODE"           , g_BDM_PNSN_PRVS_BANK_CODE)		'연금지급은행코드
+		Form.SetSharedData("BDM_PNSN_PRVS_BANK_ACNO"           , g_BDM_PNSN_PRVS_BANK_ACNO)		'연금지급은행계좌번호
+		
+		Form.SetSharedData("BDM_PROS_DATE"          , g_BDM_PROS_DATE)
+		Form.SetSharedData("BDM_PROS_SRNO"          , g_BDM_PROS_SRNO)
+		Form.SetSharedData("BDM_MNY_PROS_DATE"          , g_BDM_MNY_PROS_DATE)
+		Form.SetSharedData("BDM_MNY_PROS_SRNO"          , g_BDM_MNY_PROS_SRNO)
+		
+		Form.SetSharedData("BDM_MANG_BRCD"          , g_BDM_MANG_BRCD)  '관리점
+		Form.SetSharedData("BDM_FACE_YN"          , g_BDM_FACE_YN)	'안면인식 수행 여부
+		Form.SetSharedData("BDM_CERT_METHOD"          , g_BDM_CERT_METHOD)
+		Form.SetSharedData("BDM_SRNO2"          , g_SRNO2)
+	end if
+End Function
+
+'============================================================================
+Function f_CheckNextEnable()
+'	if g_szCheckYn == "Y" then
+	if g_szCheckSubYn1 == "Y" and g_szCheckSubYn2 == "Y" then
+		btnNext.enable = true
+					
+		btnNext.btnimage = "btn_20.9"
+		btnNext.fgcolor = "273"	
+		
+		imgCtcnChkAll.imgpath = "checkmenu_o"
+		contCtcn1.imgCtcnChk.imgpath = "check_line_o"
+	else
+		btnNext.enable = false
+		
+	    if Form.GetEnvData("common.theme") == "black" then
+		btnNext.btnimage = "btn_27.9"
+	    else
+		btnNext.btnimage = "btn_21.9"
+	    end if
+	    btnNext.fgcolor = "269"
+	    
+	    imgCtcnChkAll.imgpath = "checkmenu_n"
+		contCtcn1.imgCtcnChk.imgpath = "check_line_n"
+	end if
+End Function
+
+'============================================================================
+Function f_SetData()
+	g_ImgData = ""
+	g_ImgDataLen = 0
+	g_ImgFace = ""
+	g_ImgFaceLen = 0 
+	
+	if g_BDM_CERT_METHOD == "1" then		'실물신분증
+		g_NAME		    = Form.GetSharedData("&RET_NAME", 0)				'이름
+		g_RCNO 		    = Form.GetSharedData("&RET_JUMIN_NUM", 0 )		'암호화된 실명확인번호
+		g_ISSU_DATE	    = Form.GetSharedData("&RET_ISSU_DATE", 0)			'발급일자
+		g_BIRTH  	    = Form.GetSharedData("&RET_BIRTHDAY", 0)			'생년월일
+		
+		ImgMskData 	    = Form.GetSharedData("&RET_MASK_IMAGE_ENC" , 0)	'주민번호 마스킹이미지 
+		g_ImgData  	    = Form.GetSharedData("&RET_IMAGE_ENC", 0)			'주민번호 마스킹없는이미지
+		
+		g_ImgFace	    = Form.GetSharedData("&RET_FACE_IMAGE" , 0)		'얼굴 이미지
+		
+		g_RCNO_7		  = Form.GetSharedData("&RET_JUMIN_NUM_BACK"	, 0 ) 	'실명확인번호 뒷 7자리
+		
+		'실물 신분증은 주민등록증인지 운전면허증인지 정보 가져옴
+		g_ID_CARD_TYPE    = Form.GetSharedData("&RET_CARD_TYPE", 0)
+		
+		g_FEATURE 	  = Form.GetSharedData("&RET_FEATURE"		, 0 ) 	'특징점데이터
+		g_FEATURE_SCORE = Form.GetSharedData("&RET_FEATURE_SCORE"	, 0 ) 	'특징점 점수
+		g_FEATURE_LEN   = Form.GetSharedData("&RET_FEATURE_LEN"	, 0 ) 	'특징점데이터 길이
+		g_SERIAL    	  = Form.GetSharedData("&RET_SERIAL"			, 0 ) 	'발급번호
+		g_LISENCE_NUM   = Form.GetSharedData("&RET_LICENSE_NUM"	, 0 ) 	'신분증번호
+		
+		if ImgMskData <> "" and g_ImgData <> "" then 
+			g_ImgDataLen 	= Len(g_ImgData)
+			ImgMskDataLen = Len(ImgMskData)
+		end if
+		
+		if g_ImgFace <> "" and g_ImgFace <> null then
+			g_ImgFaceLen = Len(g_ImgFace)
+		end if
+	else									'모바일신분증
+		g_NAME		    = Form.GetSharedData("&RET_MOBILEID_NAME", 0)				'이름
+		g_RCNO 		    = Form.GetSharedData("&RET_MOBILEID_IHIDNUM", 0 )			'암호화된 실명확인번호
+		g_ISSU_DATE	    = Form.GetSharedData("&RET_MOBILEID_ISSUDE", 0)			'발급일자
+		g_BIRTH		    = Form.GetSharedData("&RET_MOBILEID_BIRTH", 0)			'생년월일
+		
+		ImgMskData 	    = Form.GetSharedData("&RET_MOBILEID_IMAGE_MASK" , 0)		'주민번호 마스킹이미지 
+		g_ImgData  	    = Form.GetSharedData("&RET_MOBILEID_IMAGE", 0)			'주민번호 마스킹없는이미지
+		g_ImgFace	    = Form.GetSharedData("&RET_MOBILEID_IMAGE_FACE", 0)			'얼굴 이미지
+		if ImgMskData <> "" and g_ImgData <> "" then
+			g_ImgDataLen 	= Len(g_ImgData)
+		end if
+		if g_ImgFace <> "" and g_ImgFace <> "" then
+			g_ImgFaceLen 	= Len(g_ImgFace)
+		end if
+		
+		g_LISENCE_NUM   = Form.GetSharedData("&RET_MOBILEID_DLNO"	, 0 ) 	'신분증번호
+		
+		g_RCNO_7		  = Form.GetSharedData("&RET_MOBILEID_IHIDNUM7"	, 0 ) 	'실명확인번호 뒷 7자리
+	end if
+End Function
+
+'============================================================================
+Sub lblCtcnAll_OnClick()
+	if g_szCheckYn == "Y" then
+		imgCtcnChkAll.imgpath = "checkmenu_n"
+		contCtcn1.imgCtcnChk.imgpath = "check_line_n"
+		contCtcn1.imgAgreeChk1.imgpath = "check_line_n"
+		contCtcn1.imgAgreeChk2.imgpath = "check_line_n"
+		
+		g_szCheckYn = "N"
+		g_szCheckSubYn1 = "N"
+		g_szCheckSubYn2 = "N"
+	else
+		imgCtcnChkAll.imgpath = "checkmenu_o"
+		contCtcn1.imgCtcnChk.imgpath = "check_line_o"
+		contCtcn1.imgAgreeChk1.imgpath = "check_line_o"
+		contCtcn1.imgAgreeChk2.imgpath = "check_line_o"
+		
+		g_szCheckYn = "Y"
+		g_szCheckSubYn1 = "Y"
+		g_szCheckSubYn2 = "Y"
+	end if
+	
+	f_CheckNextEnable()
+End Sub
+
+'============================================================================
+Sub imgCtcnChkAll_OnClick()
+	lblCtcnAll_OnClick()
+End Sub
+
+'============================================================================
+Sub imgCtcnShowAll_OnClick()
+	
+End Sub
+
+'============================================================================
+Sub contCtcn1_lblCtcn_OnClick()
+	lblCtcnAll_OnClick()
+End Sub
+
+'============================================================================
+Sub contCtcn1_imgCtcnChk_OnClick()
+	lblCtcnAll_OnClick()
+End Sub
+
+'============================================================================
+Sub contCtcn1_imgCtcnShow_OnClick()
+	Form.OpenPopup("mbbdm86140_p2", "Mndt", "")
+End Sub
+
+
+'============================================================================
+Sub Image1_OnClick()
+	if g_BDMNMETBSWRGB == "100" then
+		Form.MsgBox("알림", "계좌개설을 중단하시겠습니까?", "ABORT", 7, "예", "아니오")
+	else
+		Form.MsgBox("알림", "업무신청을 중단하시겠습니까?", "ABORT", 7, "예", "아니오")
+	end if
+End Sub
+
+'============================================================================
+Sub btnNext_OnClick()
+	btnNext.enable = false
+    if Form.GetEnvData("common.theme") == "black" then
+        btnNext.btnimage = "btn_27.9"
+    else
+        btnNext.btnimage = "btn_21.9"
+    end if
+    btnNext.fgcolor = "269"
+	
+	Form.runAlcCamera()
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if CInt(sTimerID) == 1 then
+'		Form.ShowAlert("11", g_nTrCount)
+		Form.SetTimerEvent2(1, 0, 1.5)
+		
+		DATAMANAGER.RequestTranData( "obcsb_face_002a" )
+	
+	elseif CInt(sTimerID) == 2 then
+		Form.SetTimerEvent2(2, 0, 0.5)
+		
+		DATAMANAGER.RequestTranData( "obcsb_face_002a" )
+	end if
+End Sub
+
+'============================================================================
+Sub contCtcn1_imgAgreeChk1_OnClick()
+	if g_szCheckSubYn1 == "Y" then
+		g_szCheckSubYn1 = "N"
+		
+		contCtcn1.imgAgreeChk1.imgpath = "check_line_n"
+	else
+		g_szCheckSubYn1 = "Y"
+		
+		contCtcn1.imgAgreeChk1.imgpath = "check_line_o"
+	end if
+	f_CheckNextEnable()
+End Sub
+
+'============================================================================
+Sub contCtcn1_imgAgreeChk2_OnClick()
+	if g_szCheckSubYn2 == "Y" then
+		g_szCheckSubYn2 = "N"
+		
+		contCtcn1.imgAgreeChk2.imgpath = "check_line_n"
+	else
+		g_szCheckSubYn2 = "Y"
+		
+		contCtcn1.imgAgreeChk2.imgpath = "check_line_o"
+	end if
+	f_CheckNextEnable()
+End Sub
+
+'============================================================================
+Sub contCtcn1_lblAgree1_OnClick()
+	contCtcn1_imgAgreeChk1_OnClick()
+End Sub
+
+'============================================================================
+Sub contCtcn1_lblAgree2_OnClick()
+	contCtcn1_imgAgreeChk2_OnClick()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_face_003a" trcode="obcsb_face_003a" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcsb_face_001a" trcode="obcsb_face_001a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_face_002a" trcode="obcsb_face_002a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_158a" trcode="obaci_acct_158a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_158a_1" trcode="obaci_acct_158a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_059c" trcode="obaci_acct_059c" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_nmet_102c" trcode="obcsb_nmet_102c" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_nmet_102c_1" trcode="obcsb_nmet_102c" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_234a" trcode="obaci_acct_234a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_face_003a" title="안면인식_라이브니스확인요청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="526" _ulen="402" >
+
+CNFR_DATE^확인일자^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CLOT_API_NAME^호출API명^50^0^0^0^0^0^0
+HTTP_STAT_CODE^HTTP상태코드^3^0^0^0^0^0^0
+LIVNESS_RSCD^라이브니스응답코드^10^0^0^0^0^0^0
+RSPN_CODE_CNTT^응답코드내용^100^0^0^0^0^0^0
+CONF^컨피던스^17^12^7^0^0^0^0
+ATCH_FILE_SIZE^첨부파일사이즈^11^0^7^0^0^0^0
+UI_IMG_DATA^UI이미지데이터^102400^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="193" _ulen="143" >
+
+LIVNESS_CNFR_SRNO^라이브니스확인일련번호^11^0^7^0^0^0^0
+RSLT_CLS^결과구분^1^0^0^0^0^0^0
+HGRN_SDRT^상위기준율^9^4^7^0^0^0^0
+LRNK_SDRT^하위기준율^9^4^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_face_001a" title="금결원_안면인식진위확인요청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="360" _ulen="262" >
+
+TR_DATE^거래일자^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+LIVNESS_CNFR_SRNO^라이브니스확인일련번호^11^0^7^0^0^0^0
+IDNTF_CLS_CODE^신분증구분코드^2^0^0^0^0^0^0
+CUST_CHAN_CLCD^고객채널구분코드^1^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="307" _ulen="233" >
+
+TR_DATE^거래일자^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+SNMS_SRNO^송신일련번호^11^0^7^0^0^0^0
+HGRN_SDRT^상위기준율^9^4^7^0^0^0^0
+LRNK_SDRT^하위기준율^9^4^7^0^0^0^0
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_face_002a" title="금결원_안면인식진위확인요청(송" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="258" _ulen="196" >
+
+TR_DATE^거래일자^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+SNMS_SRNO^송신일련번호^11^0^7^0^0^0^0
+RPCS_TMNU^재처리횟수^19^0^7^0^0^0^0
+HGRN_SDRT^상위기준율^9^4^7^0^0^0^0
+LRNK_SDRT^하위기준율^9^4^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="283" _ulen="213" >
+
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+NRML_YN^정상여부^1^0^0^0^0^0^0
+HNDP_TRGT_YN^수동대상여부^1^0^0^0^0^0^0
+FACEID_TR_UNIQ_NO^안면인식거래고유번호^20^0^0^0^0^0^0
+SMLR_SCOR^유사점수^8^3^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_158a" title="비대면계좌개설 신분증 등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="436" _ulen="324" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ATCH_FILE_SIZE^첨부파일사이즈^11^0^7^0^0^0^0
+UI_IMG_DATA^UI이미지데이터^102400^0^0^0^0^0^0
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+ORGL_RCNO_PIP^원실명확인번호PIP^68^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+MDAF_RCNO_PIP^변경후실명확인번호PIP^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="101" _ulen="75" >
+
+SRNO^일련번호^11^0^7^0^0^0^0
+MDAF_RCNO_PIP^변경후실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_059c" title="비대면계좌개설 이어가기 NEW" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="111" _ulen="83" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="490" _ulen="362" >
+
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+ATHN_MTHD_CLS_CODE^인증방법구분코드^1^0^0^0^0^0^0
+ATHN_STAT_CLS_CODE^인증상태구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="575" _ulen="415" >
+
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+RSPN_TYPE_CODE^응답유형코드^1^0^0^0^0^0^0
+IDNTF_TORF_YN^신분증진위여부^1^0^0^0^0^0^0
+IDNTF_IMG_DATA_SIZE^신분증이미지데이터사이즈^9^0^7^0^0^0^0
+FACEID_AGRM_YN^안면인식동의여부^1^0^0^0^0^0^0
+LIVNESS_CNFR_SRNO^라이브니스확인일련번호^11^0^7^0^0^0^0
+SNMS_SRNO^송신일련번호^11^0^7^0^0^0^0
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="2729" _ulen="2015" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+CNFR_TRGT_CUST_CLCD^확인대상고객구분코드^2^0^0^0^0^0^0
+ACNT_OPNG_CLCD^계좌개설구분코드^1^0^0^0^0^0^0
+SAC_ACNT_APLT_YN^슈퍼365계좌신청여부^1^0^0^0^0^0^0
+OVTR_JOIN_APLT_YN^종합매매가입신청여부^1^0^0^0^0^0^0
+CMA_RP_JOIN_APLT_YN^CMARP가입신청여부^1^0^0^0^0^0^0
+FUTS_OPTN_ACNT_APLT_YN^선물옵션계좌신청여부^1^0^0^0^0^0^0
+OVDV_ACNT_APLT_YN^해외파생계좌신청여부^1^0^0^0^0^0^0
+WRAP_ACNT_APLT_YN^WRAP계좌신청여부^1^0^0^0^0^0^0
+DMST_CFD_ACNT_APLT_YN^국내CFD계좌신청여부^1^0^0^0^0^0^0
+ISA_ACNT_APLT_YN^ISA계좌신청여부^1^0^0^0^0^0^0
+ISA_PROD_TYPE_CLCD^ISA상품유형구분코드^1^0^0^0^0^0^0
+ISA_JOIN_TPCD^ISA가입유형코드^2^0^0^0^0^0^0
+ISA_ACNT_OPNG_CLCD^ISA계좌개설구분코드^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN^해외CFD계좌신청여부^1^0^0^0^0^0^0
+DMST_CFD_GOAL_MRKT_AGR_YN^국내CFD목표시장일치여부^1^0^0^0^0^0^0
+UI_SRNO^UI일련번호^11^0^7^0^0^0^0
+ACFD_GOAL_MRKT_AGR_YN^해외CFD목표시장일치여부^1^0^0^0^0^0^0
+ACFD_GOAL_MRKT_SRNO^해외CFD목표시장일련번호^11^0^7^0^0^0^0
+DMST_CFD_ACNT_APLT_YN1^국내CFD계좌신청여부1^1^0^0^0^0^0^0
+DMST_CFD_ACNT_APLT_YN2^국내CFD계좌신청여부2^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN1^해외CFD계좌신청여부1^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN2^해외CFD계좌신청여부2^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN3^해외CFD계좌신청여부3^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN4^해외CFD계좌신청여부4^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN5^해외CFD계좌신청여부5^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN6^해외CFD계좌신청여부6^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN7^해외CFD계좌신청여부7^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN8^해외CFD계좌신청여부8^1^0^0^0^0^0^0
+PNSN_SVNG_ACNT_APLT_YN^연금저축계좌신청여부^1^0^0^0^0^0^0
+PNSN_TCTR_CLS_CODE^연금이관구분코드^1^0^0^0^0^0^0
+PNSN_CNRC_PRD^연금계약기간^4^0^7^0^0^0^0
+PNSN_PRVS_BEGN_SCDL_DATE^연금지급개시예정일자^8^0^0^0^0^0^0
+PNSN_CNRC_AMT^연금계약금액^19^0^7^0^0^0^0
+PNSN_PRVS_BANK_CODE^연금지급은행코드^3^0^0^0^0^0^0
+PNSN_PRVS_BANK_ACNO^연금지급은행계좌번호^16^0^0^0^0^0^0
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+FNNC_TR_OBJT_CNFR_DATE^금융거래목적확인일자^8^0^0^0^0^0^0
+FNNC_TR_OBJT_CNFR_SRNO^금융거래목적확인일련번호^11^0^7^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+MNGR_EMPNO^관리자직원번호^9^0^0^0^0^0^0
+CMA_ISNT_JOIN_APLT_YN^CMA발행어음가입신청여부^1^0^0^0^0^0^0
+FACEID_ACMP_YN^안면인식수행여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock5" inout="in" _len="2870" _ulen="2092" >
+
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+OWHS_ADDR_SRNO^자택주소일련번호^5^0^7^0^0^0^0
+OWHS_REGN_ZIP^자택지역우편번호^3^0^0^0^0^0^0
+OWHS_DTL_ZIP^자택상세우편번호^3^0^0^0^0^0^0
+OWHS_POST^자택우편주소^100^0^0^0^0^0^0
+OWHS_DTAD^자택상세주소^100^0^0^0^0^0^0
+OWHS_NW_ADDR_USE_YN^자택신주소사용여부^1^0^0^0^0^0^0
+OWHS_BLDN_MNNO^자택건물관리번호^25^0^0^0^0^0^0
+CO_ADDR_SRNO^회사주소일련번호^5^0^7^0^0^0^0
+CO_REGN_ZIP^회사지역우편번호^3^0^0^0^0^0^0
+CO_DTL_ZIP^회사상세우편번호^3^0^0^0^0^0^0
+CO_POST^회사우편주소^100^0^0^0^0^0^0
+CO_DTAD^회사상세주소^100^0^0^0^0^0^0
+CO_NW_ADDR_USE_YN^회사신주소사용여부^1^0^0^0^0^0^0
+CO_BLDN_MNNO^회사건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR_SRNO^이메일주소일련번호^5^0^7^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+OWHS_CNPL_SRNO^자택연락처일련번호^5^0^7^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+CO_CNPL_SRNO^회사연락처일련번호^5^0^7^0^0^0^0
+CO_ARCD^회사지역번호^4^0^0^0^0^0^0
+CO_TONO^회사국번호^4^0^0^0^0^0^0
+CO_TELNO^회사전화번호^4^0^0^0^0^0^0
+CO_TENO^회사교환번호^4^0^0^0^0^0^0
+CLPH_CNPL_SRNO^휴대폰연락처일련번호^5^0^7^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+AML_PROD_CODE^AML상품코드^4^0^0^0^0^0^0
+AML_CHAN_TYPE_CODE^AML채널유형코드^2^0^0^0^0^0^0
+OCPT_CODE^직업코드^2^0^0^0^0^0^0
+AML_OCKN_LRDV_CODE^AML직종대분류코드^2^0^0^0^0^0^0
+AML_OCKN_SMDV_CODE^AML직종소분류코드^6^0^0^0^0^0^0
+EDD_TR_OBJT_CODE^EDD거래목적코드^1^0^0^0^0^0^0
+EDD_TR_FNDS_SORC_CODE^EDD거래자금출처코드^2^0^0^0^0^0^0
+WRPL_NAME^직장명^40^0^0^0^0^0^0
+OCPT_NAME^직업명^40^0^0^0^0^0^0
+HNDV_MTHD_CODE^교부방법코드^2^0^0^0^0^0^0
+PNSN_ERT_RPRT_INAG_TYPE_CODE^연금수익률보고서통보처유형코드^2^0^0^0^0^0^0
+UI_INVT_INCL_ACMP_YN^UI투자성향수행여부^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC투자성향등급코드^2^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC상품등급코드^2^0^0^0^0^0^0
+UNFIT_YN^부적합여부^1^0^0^0^0^0^0
+FTOT_INVT_INCL_GRAD_CODE^선물옵션투자성향등급코드^2^0^0^0^0^0^0
+FTOT_PROD_GRAD_CODE^선물옵션상품등급코드^2^0^0^0^0^0^0
+FTOT_UNFIT_YN^선물옵션부적합여부^1^0^0^0^0^0^0
+WEAK_FNNC_SMAL_VISA_YN^취약금융소비자여부^1^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+MBL_PRTY_INFR_YN^모바일우선통보여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock6" inout="in" _len="99" _ulen="75" >
+
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+UI_CNFR_PWD^UI확인비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock7" inout="in" _len="268" _ulen="196" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_BANK_ACNO^입금은행계좌번호^30^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="149" _ulen="113" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+RCVN_DATE^수취일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_nmet_102c" title="비대면본인인증및1원역이체관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="159" _ulen="117" >
+
+NMET_BSWR_CLCD^비대면업무구분코드^3^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+BSWR_CLS_CODE^업무구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="490" _ulen="362" >
+
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+ATHN_MTHD_CLS_CODE^인증방법구분코드^1^0^0^0^0^0^0
+ATHN_STAT_CLS_CODE^인증상태구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="993" _ulen="723" >
+
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+RSPN_TYPE_CODE^응답유형코드^1^0^0^0^0^0^0
+IDNTF_TORF_YN^신분증진위여부^1^0^0^0^0^0^0
+IDNTF_IMG_DATA_SIZE^신분증이미지데이터사이즈^9^0^7^0^0^0^0
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+IDNTF_FLNM^신분증성명^100^0^0^0^0^0^0
+ORGL_RCNO_PIP^원실명확인번호PIP^68^0^0^0^0^0^0
+ORGL_IDNTF_FLNM^원신분증성명^100^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+ORGL_ISNC_DATE^원발급일자^8^0^0^0^0^0^0
+OLD_DRVN_LCNS_NO^구운전면허번호^14^0^0^0^0^0^0
+ORGL_OLD_DRVN_LCNS_NO^원구운전면허번호^14^0^0^0^0^0^0
+IDNTF_TORF_CNFR_RSCD^신분증진위확인응답코드^3^0^0^0^0^0^0
+MBL_IDNTF_TR_NO^모바일신분증거래번호^25^0^0^0^0^0^0
+MBL_IDNTF_REUS_YN^모바일신분증재사용여부^1^0^0^0^0^0^0
+MBL_IDNTF_RSLT_CODE^모바일신분증결과코드^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="220" _ulen="160" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_BANK_ACNO^입금은행계좌번호^30^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="159" _ulen="123" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCVN_DATE^수취일자^8^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_234a" title="비대면계좌개설 신분증 특징점데" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="224" _ulen="168" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+ATCH_FILE_SIZE^첨부파일사이즈^11^0^7^0^0^0^0
+UI_PHTG_DATA_CNTT^UI사진데이터내용^5120^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="111" _ulen="83" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85300" scrname="바이오인증 등록(PIN)" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,587,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="C0" vscroll="1" scroll_pos="0,0" ly_vert="0,0,375,587,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<EDIT name="Edit1" fontsize="4" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="  비밀번호를 입력해주세요." imagefilepth="input_03.9" ly_vert="20,104,335,74,1" />
+				<IMAGE name="Image1" imgpath="input_03_n.9" ly_vert="20,226,335,132,1" />
+				<LABEL name="Label0" fgcolor="000:068068068" caption="등록하실 바이오인증을 선택해주세요" ly_vert="10,198,345,18,1" />
+				<COMBO name="Combo0" enable="0" fontsize="4" popuptitle="  " imagefilepth="input_03.9" ly_vert="20,20,335,74,1" />
+				<LABEL name="LabelPin" fgcolor="000:068068068" fontsize="4" caption="PIN 인증" click="1" ly_vert="142,316,82,22,1" />
+				<LABEL name="Label2" fontsize="2" fontstyle="01" caption="이용가능 고객" ly_vert="10,406,113,20,1" />
+				<LABEL name="Label3" caption="다른 인증 수단 등록" click="1" ly_vert="203,368,152,18,1" />
+				<LABEL name="Label4" fgcolor="000:068068068" caption="메리츠 SMART 이용중인 개인고객" ly_vert="10,436,345,18,1" />
+				<LABEL name="Label5" fontsize="2" fontstyle="01" caption="이용가능한 바이오인증" ly_vert="10,474,178,20,1" />
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="3" outline="0000" designorder="1" ly_vert="10,504,345,60,1" >
+					<COL_INFO ly_vert_width="345" />
+					<ROW_INFO ly_vert_height="20,20,20" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" fgcolor="000:068068068" halign="0" line="0,0" caption="지문 : 안드로이드 6.0 이상, iOS 9.0 이상(지문인식)" impidxs="" />
+						<CELL cell_ly="0,1,0,1" fgcolor="000:068068068" halign="0" line="0,0" caption="Face ID : 아이폰 X 이상" impidxs="" />
+						<CELL cell_ly="0,2,0,2" fgcolor="000:068068068" halign="0" line="0,0" caption="PIN(간편번호) : 안드로이드 5.0 이상, iOS 9.0 이상" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<LABEL name="Label6" fontsize="2" fontstyle="01" caption="바이오인증 앱 설치" ly_vert="10,582,150,20,1" />
+				<TABLE name="Table1" insidelinecolor="102:255255255" colcount="1" rowcount="4" outline="0000" designorder="1" ly_vert="10,612,355,85,1" >
+					<COL_INFO ly_vert_width="355" />
+					<ROW_INFO ly_vert_height="20,20,20,25" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" fgcolor="000:068068068" halign="0" line="0,0" caption="바이오인증 등록 시 금융결제원 연계 앱 설치" impidxs="" />
+						<CELL cell_ly="0,1,0,1" fgcolor="000:068068068" halign="0" line="0,0" caption="안드로이드:Playstore에서 '바이오인증 공동앱' 설치" impidxs="" />
+						<CELL cell_ly="0,2,0,2" fgcolor="000:068068068" halign="0" line="0,0" caption="아이폰:AppStore에서 '바이오인증 공동앱' 설치" impidxs="" />
+						<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<IMAGE name="Image0" autosize="1" imgpath="icon_arrow_right_on" ly_vert="341,368,15,18,1" />
+				<IMAGE name="ImagePin" autosize="1" imgpath="icon_pin_off" ly_vert="153,236,70,70,1" />
+				<BUTTON name="ButtonPin" btnimage="alpha" ly_vert="20,226,335,132,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10184" _ulen="8934" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 바이오인증
+' 02. 화면설명 : 바이오인증 - 본인확인(핀) 
+' 03. 작    성 : 2021.02.08 HSZ
+'-------------------------------------------------------------------------------------------
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'메모리평문제거 (plain_rm = 0 미적용 / plain_rm = 1 적용)
+'실명확인번호 암호화 (rcno_plain_rm = 0 미적용 / rcno_plain_rm = 1 적용)
+Dim gRCNO
+Dim gCUST_ABWR_NAME
+Dim g_userID
+Dim gACNO
+Dim g_Ostype  
+
+' 메모리평문제거 적용구분값
+Dim plain_rm
+plain_rm =""
+
+' 실명확인번호 암호화 적용구분값
+Dim rcno_plain_rm
+rcno_plain_rm =""
+
+Dim g_MediaType
+g_MediaType =""
+
+Dim g_gubun	'등록/해지 구분값
+
+Dim g_NextPage '007r 서비스 완료시 다음페이지로. 0:완료X, 1:완료
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_NextPage = 0
+	'암호화 주민번호
+	gRCNO = Form.GetSharedData("BDM_RCNO_PIP", false)
+	'이름
+	gCUST_ABWR_NAME = Form.GetSharedData("BDM_NAME", false)
+	'아이디
+	g_userID = Form.GetSharedData("BDM_ELFN_ID", 0 )
+	
+	'계좌번호 
+	gACNO= Form.GetSharedData("NMET_ACNO", false )
+	szMaskAcc = Combo_AccMask(gACNO)
+	C0.Combo0.cbadddatatext  = szMaskAcc
+	
+	'에디트 컨트롤 입력항목명 생성
+	C0.Combo0.SetApplyLabel("종합계좌번호" ,0 , 267 , "left", false , 97)
+	C0.Edit1.SetApplyLabel ("  종합계좌 비밀번호" ,0 , 267 , "left", false)
+	
+	'실명확인번호 암호화(예외처리 해제)
+	g_MediaType   = Form.GetSharedData("&MEDIA_CODE"   , false)
+
+	'rcno_plain_rm = ( 0 : 미적용/ 1 : 적용)
+	rcno_plain_rm = Form.GetSharedData("&RCNO_PLAIN_RM", false)
+	
+	'plain_rm = ( 0 : 미적용/ 1 : 적용)
+	plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	
+	if rcno_plain_rm <> "1" or g_MediaType == "158" or g_MediaType == "159" then
+		'MTS메모리평문 적용유무
+		if plain_rm == "1" then
+			C0.Edit1.SetEncExcept() 		'실명확인번호 : obcsb_efif_251r 서비스와 비교 시 예외처리
+		end if
+	end if
+	
+	'계좌콤보 선택 후, 비밀번호 포커스
+	Form.SetTimerEvent(1, 1, 1)
+	C0.Combo0.enable = false
+	g_Ostype = Form.GetSharedData("&OS_TYPE", false ) 'iOS("2") Android("1") 기타("9")
+	
+	if g_Ostype == "1" then
+		C0.setScrollBarVisible("2")
+	end if
+End Sub
+'============================================================================
+Function Combo_AccMask(szAcc)
+
+	Combo_AccMask = Left(szAcc, 4)&"-"&Mid(szAcc, 5, 4)
+
+End Function
+'============================================================================
+Sub C0_ButtonPin_OnClick()
+	C0.Image1.SetStatus( "focus" )
+	C0.ImagePin.imgpath = "icon_pin_on"
+	g_gubun = "register_pin"
+	'비밀번호 체크
+	DATAMANAGER.RequestTranData( "obacp_opop_007r" )
+	if g_NextPage = 0 then
+		SetFocusNormal()
+		exit sub
+	elseif g_NextPage = 1 then
+		Form.SetTimerEvent2(2, 1, 0.1)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub C0_Combo0_OnEditComplete(iIndex)
+	cert_acno = C0.Combo0.caption
+	if cert_acno = "" or cert_acno = null then
+		Form.MsgBox( "알림", "종합계좌번호를 입력하세요.", "", "")'6 )
+	else
+'		Form.SetSharedData("CERT_ACNO" , gACNO) 
+	end if
+End Sub
+
+'============================================================================
+Sub C0_Edit1_OnEditComplete()
+	if CInt(C0.Edit1.pwdlen)< 4 then
+		Form.MsgBox("안내","최소 4자리 이상 입력해야 합니다.", "", 0)
+	end if
+	DATAMANAGER.RequestTranData( "obacp_opop_007r" )
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+'	if szTranID == "obcsb_efif_251r" then
+'		DATAMANAGER.SetDataValue( 0, "obcsb_efif_251r", "InBlock1", "ELFN_ID" , 0 , g_userID ) '사용자 ID
+'	end if
+	
+	if szTranID == "obacp_opop_007r" then
+		Dim sRCNO, sACNT_PWD
+		sRCNO = gRCNO
+		
+		'MTS메모리평문제거 적용상태일 때
+		if plain_rm == "1" then
+			sACNT_PWD = C0.Edit1.caption
+		'MTS메모리평문제거 미적용상태일 때
+		else	
+			sACNT_PWD = Form.GetEncData(C0.Edit1.caption)
+		end if
+		
+		
+		if rcno_plain_rm <> "1" or g_MediaType == "158" or g_MediaType == "159" then '고유MTS 미적용
+			DATAMANAGER.SetDataValue( 0, "obacp_opop_007r", "InBlock1", "RCNO"     , 0 , sRCNO )
+		else		
+			DATAMANAGER.SetDataValue( 0, "obacp_opop_007r", "InBlock1", "RCNO_PIP" , 0 , sRCNO )
+			'OS에 따른 구분값 추가
+			if g_Ostype = "1" then
+				ostype = "112"
+			else 
+				ostype = "111"
+			end if
+			DATAMANAGER.SetDataValue( 0, "obacp_opop_007r", "InBlock1", "RCNO"     , 0 , ostype )
+		end if
+		
+		DATAMANAGER.SetDataValue( 0, "obacp_opop_007r", "InBlock1", "ACNO" , 0 , gACNO )
+		DATAMANAGER.SetDataValue( 0, "obacp_opop_007r", "InBlock1", "ACNT_PWD" , 0 , sACNT_PWD )
+		
+	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+'	if szTranID == "obcsb_efif_251r" then
+		
+	if szTranID == "obacp_opop_007r" then
+		Dim sCSNM, sName
+		sName = gCUST_ABWR_NAME
+		sCSNM = DATAMANAGER.GetDataValue( 0, "obacp_opop_007r", "OutBlock1", "CSNM" , 0 )
+		
+		'20170103 HWG START - BIO인증시, OCSP 검증에 필요한 고객명 Shared
+		Form.SetSharedData("BIO_CSNM" , sCSNM)
+		'20170103 HWG END
+		
+		if sCSNM == null or Trim(sCSNM) == "" or (Trim(sName) ~= Trim(sCSNM)) then
+			Form.MsgBox( "알림", "고객정보가 일치하지 않습니다.", "", 6 )
+		else
+			Dim sACNT_PWD
+			
+			'MTS메모리평문제거 적용상태일 때
+			if plain_rm == "1" then
+				sACNT_PWD = C0.Edit1.caption
+			'MTS메모리평문제거 미적용상태일 때
+			else	
+				sACNT_PWD = Form.GetEncData(C0.Edit1.caption)
+			end if
+			
+			Form.SetSharedData("CERT_ACNT_PWD" , sACNT_PWD)
+
+		end if
+		g_NextPage = 1
+
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+'	if szTranID == "obcsb_efif_251r" then
+
+		
+	if szTranID == "obacp_opop_007r" then
+		Dim sSubMsg
+		sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+		
+		if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+			szErrMsg = szErrMsg.." "..sSubMsg
+		end if
+		
+		errormsg = Split(szErrMsg, ".")
+		if ubound(errormsg) = 0 then
+			Form.MsgBox( "알림", szErrMsg, "", 6 )
+		else  
+			Form.OpenPopup("mbbdm85300_p2" , szErrMsg , "5")
+		end if
+'		Form.MsgBox( "알림", szErrMsg, "", 6 )
+		g_NextPage = 0
+	end if
+End Sub
+'============================================================================
+Sub C0_Label3_OnClick()
+	'Form.SendReturnToParent("CloseForm", "1" )
+	Form.triggerEvent("#", "CloseForm", "1" )
+	Form.OpenScreen("90120", "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub C0_Image0_OnClick()
+	call C0_Label3_OnClick()
+End Sub
+'============================================================================
+Sub SetFocusNormal()
+	C0.Image1.SetStatus( "normal" )
+	C0.ImagePin.imgpath = "icon_pin_off.png"
+End Sub
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "CloseForm" then
+		Form.SendReturnToParent("CloseForm", "1" )
+		Form.CloseForm()
+	end if
+End Sub
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	If sTimerID == "1" or sTimerID == 1 then
+		'타이머중지
+		Form.SetTimerEvent(sTimerID, 0, 0)
+		C0.Combo0.currentindex = 0
+		C0.Edit1.SetStatus("focus")
+		C0.Edit1.SetShowKeypad( true )
+	elseif sTimerID == "2" or sTimerID == 2 then
+		'타이머중지
+		Form.SetTimerEvent2(sTimerID, 0, 0)
+		'바이오공동앱 설치확인
+		call Check_BioInstalled()
+	End If
+End Sub
+'============================================================================
+Sub Check_BioInstalled()
+	sRet = Form.getKftcBioInstalled()
+	if sRet == "1" then
+		'지문/얼굴정보가 단말에 등록되어있지 않아도 간편비밀번호 등록은 가능하게 처리
+		if g_gubun = "register_pin" then
+			sFingerEnrolled = "1"
+		else
+			sFingerEnrolled = Form.isTouchIDSupported()
+		end if
+		
+		if sFingerEnrolled <> "1" then
+			if g_Ostype == "2" then
+'				Form.MsgBox("바이오인증 안내", "스마트폰에 지문/얼굴정보가 등록되지 않았거나\n 바이오인증을 지원하지 않는 단말 또는 운영체제 버전입니다", "", 0 )
+'				exit sub
+				szErrMsg = "스마트폰에 지문/얼굴정보가 등록되지 않았거나"
+				sSubMsg = "바이오인증을 지원하지 않는 단말 또는 운영체제 버전입니다."
+				Form.OpenPopup("mbbdm85303", szErrMsg & "★" & sSubMsg , "")
+			else
+'				Form.MsgBox("바이오인증 안내", "스마트폰에 등록된 지문이 없습니다. 제조사가 제공하는 설정화면을 통해서 지문을 우선 등록하시기 바랍니다.", "", 0 )
+'				exit sub
+				szErrMsg = "스마트폰에 등록된 지문이 없습니다."
+				sSubMsg = "제조사가 제공하는 설정화면을 통해서 지문을 우선 등록하시기 바랍니다."
+				Form.OpenPopup("mbbdm85303", szErrMsg & "★" & sSubMsg , "")
+			end if
+		end if
+
+		Form.triggerEvent( "#", "NextStep", g_gubun) '바이오인증 구분값 메인화면으로 넘기기
+	else
+		SetFocusNormal()
+		Form.setKftcBioInstalled() '연계앱 미설치 시, 설치안내 팝업
+	end if
+End Sub
+
+'============================================================================
+'============================================================================
+Sub Form_OnFormInitBefore()
+	C0.Label0.fgcolor = 269
+	C0.Label4.fgcolor = 268
+	C0.Table0.SetCellFgColor(0, 0, 268)
+	C0.Table0.SetCellFgColor(1, 0, 268)
+	C0.Table0.SetCellFgColor(2, 0, 268)
+	C0.Table1.SetCellFgColor(0, 0, 268)
+	C0.Table1.SetCellFgColor(1, 0, 268)
+	C0.Table1.SetCellFgColor(2, 0, 268)
+	C0.LabelPin.fgcolor = 268
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacp_opop_007r" trcode="obacp_opop_007r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacp_opop_007r" title="사업자번호와 계좌번호 Login체?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="170" _ulen="126" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="37" _ulen="31" >
+
+CSNM^고객명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
