@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61010" scrname="인증서_이체" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,335,250,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="4" outline="0001" designorder="1" ly_vert="0,0,335,181,1" >
+			<COL_INFO ly_vert_width="160,175" />
+			<ROW_INFO ly_vert_height="29,66,66,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,1,0" bgcolor="066:238239240" line="0,1" caption="보안카드번호" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="Label0" fgcolor="061:188030030" fontsize="-1" fontstyle="01" mask="0,0,[,],1,,0,0,0" ly_vert="20,44,50,39,1" import="0,1,6" />
+		<LABEL name="Label1" fontsize="-2" caption="번 앞 두자리" ly_vert="54,44,100,39,1" />
+		<LABEL name="Label3" fgcolor="061:188030030" fontsize="-1" fontstyle="01" mask="0,0,[,],1,,0,0,0" ly_vert="20,107,50,39,1" import="0,1,7" />
+		<LABEL name="Label4" fontsize="-2" caption="번 뒤 두자리" ly_vert="54,107,100,39,1" />
+		<EDIT name="EditInput1" halign="1" password="1" imetype="1" maxlength="2" ly_vert="166,44,73,39,1" />
+		<EDIT name="Edit1" enable="0" caption="●●" halign="1" imetype="0" ly_vert="242,44,73,39,1" />
+		<EDIT name="Edit2" enable="0" caption="●●" halign="1" imetype="0" ly_vert="166,107,73,39,1" />
+		<EDIT name="EditInput2" halign="1" password="1" imetype="1" maxlength="2" ly_vert="242,107,73,39,1" />
+		<LABEL name="Label2" caption=" " ly_vert="0,181,335,69,1" />
+		<LABEL name="Label5" fgcolor="065:102102102" fontsize="-3" caption="공동(공인)인증서 비밀번호" ly_vert="5,196,165,39,1" />
+		<EDIT name="Edit0" password="1" imetype="0" ly_vert="168,196,147,39,1" />
+		<BUTTON name="ButtonOK" enable="0" visible="0" ly_vert="16,149,40,26,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="17027" _ulen="14441" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 이체_보안카드
+' 02. 화면설명 : 이체예정내역 보안카드 연결화면
+' 03. 작    성 : 2016.03.11 염준성
+'-------------------------------------------------------------------------------------------
+' 2020.11.06 : 정민영 : v0001 : [T2008250015] 메모리취약점 보완
+'           : - 보안카드비밀번호 컨트롤 속성 : 계좌/거래비밀번호 -> 일반비밀번호로 변경
+' 2020.11.13 : 정민영 : v0002 : [T2008250015] 실명확인번호 메모리 내 평문 노출 취약점 조치(HTS, MTS)
+'            : - obcsb_oimf_520r,obcsb_simf_000r,ohhts_ocsp_001r IO 변경분 반영
+'            : 정민영 : v0003 : [T2011240020] 공인인증서 명칭 변경('공인'단어 삭제)
+'-------------------------------------------------------------------------------------------
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRetData
+Dim g_sUserID 
+'20190905 LES START 공인인증 최대오류횟수 변경
+Dim DEF_CERT_PSWD_LIMIT_CNT
+DEF_CERT_PSWD_LIMIT_CNT = 5
+'20190905 LES END
+Dim g_plain_rm  'v0001 메모리평문적용여부
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Edit0.certname = "인증서 비밀번호 입력"	
+	EditInput1.certname = "보안카드 "&Label0.caption&Label1.caption
+	EditInput2.certname = "보안카드 "&Label3.caption&Label4.caption
+
+	g_sRetData = "cancel"
+
+	'v0001 메모리평문적용여부(0:미적용 / 1:적용)
+	g_plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	if g_plain_rm == "1" then
+	     '화면 마스킹표시/평문데이터로 설정(컨트롤속성-일반비밀번호사용 적용필수)
+		EditInput1.SetEncExcept()
+		EditInput2.SetEncExcept()
+		
+		'공인인증서비밀번호는 메인쪽에서 체크하므로 별도의 처리 없음!
+	end if 
+
+	g_sUserID = Form.GetSharedData("CERT_ID" , false)
+	if g_sUserID == null or g_sUserID == "" then
+		g_sUserID = Form.GetSharedData("&USER_ID" , false)
+	end if
+
+	'Form.SetScreenName( "보안매체 인증" )
+
+	if g_sUserID ~= null and g_sUserID ~= "" then
+		DATAMANAGER.RequestTranData( "obcsb_oimf_520r" ) '보안매체상태조회
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_oimf_520r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "INPUT_CLS" , 0 , "1" ) '전자금융ID
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+	elseif szTranID == "obcsb_simf_000r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "INPUT_CLS" , 0 , "2" ) '전자금융ID
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_IDX_NO1" , 0 , Label0.caption )		
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_IDX_NO2" , 0 , Label3.caption )
+		'v0001 값은 평문으로 전송(서비스에서 해쉬암호화처리해서 체크함)
+		'MTS메모리평문적용(g_plain_rm == "1")시에는 OnFormInit()에서 평문데이터로 설정하므로 caption으로 전송가능
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_NO1" , 0 , EditInput1.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_NO2" , 0 , EditInput2.caption )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_oimf_520r" then
+		Dim sRSLT_CLS, sSCRC_STAT_CODE
+		
+		'결과구분 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "RSLT_CLS" , 0 )
+		'보안카드상태코드 0:정상, 1:매체사고, 2:비번오류횟수초과, 6:사용등록안됨
+		sSCRC_STAT_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "SCRC_STAT_CODE" , 0 )
+	
+		if sRSLT_CLS == "0" then '보안카드
+			if sSCRC_STAT_CODE == "0" then '정상
+				'ButtonOK.enable = true
+			elseif sSCRC_STAT_CODE == "1" then '매체사고	
+				Form.MsgBox( "알림", "매체사고 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "2" then '비번오류횟수초과	
+				Form.MsgBox( "알림", "비밀번호 오류초과 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "6" then '사용등록안됨	
+				Form.MsgBox( "알림", "사용등록이 안되었습니다.", "", 6 )
+			else '그외
+				Form.MsgBox( "알림", "미지정 상태입니다.", "", 6 )
+			end if
+		end if
+		
+		EditInput1.certname = "보안카드 "&CInt(Label0.caption)&Label1.caption
+		EditInput2.certname = "보안카드 "&CInt(Label3.caption)&Label4.caption
+	elseif szTranID == "obcsb_simf_000r" then
+		Dim sRSLT_CLS, sSCRC_PWD_MSTK_TMNU
+		
+		'결과구분 0:정상 그외에러
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_simf_000r", "OutBlock1", "RSLT_CLS" , 0 )
+		'보안카드오류횟수
+		sSCRC_PWD_MSTK_TMNU = DATAMANAGER.GetDataValue( 0, "obcsb_simf_000r", "OutBlock1", "SCRC_PWD_MSTK_TMNU" , 0 )
+		
+		if sRSLT_CLS == "0" then '정상
+			if CInt(sSCRC_PWD_MSTK_TMNU) > 5 then '에러
+				Form.MsgBox( "알림", "보안카드 입력 오류 횟수 초과입니다.", "", 6 )
+			else '공인인증처리로 넘어가기
+				if Edit0.caption == null or Edit0.caption == "" then
+		           Form.MsgBox("알림", "인증서 비밀번호를 입력하세요", "", 6)
+	            else
+		           Dim sDN
+		           sDN = Form.GetSharedData("&USER_CERT_DN" , false)
+		           Form.RequestCertCommand( "ReqCheckIsValidPassword", sDN, Edit0.caption )
+	            end if
+				'g_sRetData = "ok"		
+				
+			end if
+		else
+			Dim sMsg, sSubMsg 
+			sMsg = DATAMANAGER.GetDataMsgText( szTranID )
+			sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+			Form.MsgBox( "알림", sMsg.." "..sSubMsg, "", 6 )
+		end if
+	elseif szTranID == "obcpp_logn_015a" then
+		'공인인증서 비밀번호 오류횟수
+		sMstk =  DATAMANAGER.GetDataValue( 0,"obcpp_logn_015a", "OutBlock1", "PBCR_PWD_MSTK_TMNU" ,0)
+
+		nCount = CInt(sMstk)
+		if nCount >  0 then	
+		     'Form.ShowAlert("알림", "공인인증서 비밀번호 " & tonumber(sMstk) & "회 오류입니다.\n연속 7회 오류시 접속이 제한됩니다.")	
+		   	'1. 공인인증 5회이상 초과
+			if CInt(sMstk) >= DEF_CERT_PSWD_LIMIT_CNT then
+				'Form.MsgBox( "알림",  "공인인증 비밀번호 5회 오류 초과로 앱이 종료됩니다.", "CERT_PSWD_FAIL_APP_TERMINATE", 0)
+				Form.MsgBox( "알림",  "인증 비밀번호 5회 오류 초과로 업무진행이 불가능 합니다.", "", 0)
+				Edit0.visible = False
+				Exit Sub
+			
+			'2. 공인인증 오류횟수 5회 미만
+			else
+				'Form.MsgBox( "알림",  "공인인증 비밀번호 " + CInt(sMstk) + "회 오류입니다. 5회 오류 시 앱이 종료됩니다.)", "", 0)
+				Form.MsgBox( "알림",  "인증 비밀번호 " + CInt(sMstk) + "회 오류입니다. 5회 오류 초과시 업무진행이 불가능 합니다.", "", 0)
+			end if
+		     
+   			'3. 오류횟수 공유변수 저장 (공인인증 오류횟수는 공유변수로 앱 종료전까지 모든화면이 공유)
+			Form.SetSharedData("CERT_PWD_ERR_CNT" , sMstk)
+		'-----------------------------------------------------
+		' 인증서 비밀번호 일치시
+		'-----------------------------------------------------	
+		else
+			
+			' 기존) 인증서 비밀번호가 5회 초과된 상태에서 인증서 비밀번호 일치시, 업무진행 가능
+			' 변경) 인증서 비밀번호가 5회 초과된 상태에서 인증서 비밀번호 일치시, 업무진행 불가
+			sCertErrCnt = Cint(Form.GetSharedData("CERT_PWD_ERR_CNT", false ))
+			
+			'4. 공유 오류횟수 > 최대 오류횟수 : 업무진행 불가 메세지
+			if sCertErrCnt >= DEF_CERT_PSWD_LIMIT_CNT then
+				Form.MsgBox( "알림",  "인증 비밀번호 5회 오류 초과로 업무진행이 불가능 합니다.",	""	,	0)
+				Edit0.visible = False
+				Exit Sub
+			
+			'5. 공유 오류횟수 < 최대 오류횟수 : 공유 오류횟수 초기화
+			else
+				Form.SetSharedData("CERT_PWD_ERR_CNT" , 0)
+			end if
+		end if		
+	
+	'20160516 KBC START 추가 : OCSP검증 추가
+	elseif szTranID == "ohhts_ocsp_001r" then
+	    '공인인증서 비번초기화
+	     Edit0.caption = "" 
+	
+		sStatCode =  DATAMANAGER.GetDataValue( 0,"ohhts_ocsp_001r", "OutBlock1", "STAT_CLS_CODE" ,0) '상태구분코드
+		if sStatCode == "Y" then
+			Request_obcpp_logn_015a("Y")
+			Form.triggerEvent("#", "인증서", "Success")					
+		end if
+	'20160516 KBC END	
+	end if
+End Sub
+ 
+'============================================================================
+
+
+'============================================================================
+
+
+'============================================================================
+'Sub Form_OnFormClose()	
+'	Form.SendReturnToParent( "mhetc90060_p9" , g_sRetData )
+'End Sub
+
+
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	if (EditInput1.caption == null or EditInput1.caption == "" ) or
+		(EditInput2.caption == null or EditInput2.caption == "" ) then
+		Form.MsgBox( "알림", "보안카드 번호를 입력해주세요.", "", 6 )
+	else
+		DATAMANAGER.RequestTranData( "obcsb_simf_000r" ) '보안카드정보확인
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "이체확인" then
+		if sParam == "alt" then '부가정보 팝업처리 후 곧 공인인증으로...
+			Dim sDN
+			sDN = Form.GetSharedData("&USER_CERT_DN" , false)	
+			Form.RequestCertCommand( "ReqCheckIsValidPassword", sDN, Edit0.caption )
+		else
+			if (EditInput1.caption == null or EditInput1.caption == "" ) or
+				(EditInput2.caption == null or EditInput2.caption == "" ) then
+				Form.MsgBox( "알림", "보안카드 번호를 입력해주세요.", "", 6 )
+				Exit Sub
+			elseif Edit0.caption == null or Edit0.caption == "" then
+				Form.MsgBox("알림", "인증서 비밀번호를 입력하세요", "", 6)
+				Exit Sub
+			end if
+			ButtonOK_OnClick()
+		end if    
+	end if   
+End Sub
+
+'============================================================================
+Sub Form_OnCertEvent(sType, sParam1, sParam2)
+	if sType == "RetIsCertPasswordValid" then
+		if sParam1 == "Success" then
+		
+			'20160516 KBC START 변경 : OCSP검증 추가
+			sLoginType = Form.GetSharedData( "&LOGIN_TYPE", false ) '0.권한없음 1.시세조회전용 2.공인인증로그인 3.ID+공인인증로그인
+			
+			if sLoginType == "2" or sLoginType == "3" then
+				Request_ohhts_ocsp_001r()
+			else
+				'원래소스
+				Request_obcpp_logn_015a("Y")
+				
+				'==============================================================================================
+				'20191004 LES START 공인인증 최대오류횟수 변경
+				'==============================================================================================
+				'OCSP검증 서비스만 타도 오류횟수가 초기화됨. 
+				'인증서비번이 5회초과된 경우 OCSP검증 서비스 자체를 못타게 앞단에서 막음.
+				
+				sCertErrCnt = Cint(Form.GetSharedData("CERT_PWD_ERR_CNT", false ))
+					
+				if sCertErrCnt + 1 >= DEF_CERT_PSWD_LIMIT_CNT then
+					Form.MsgBox( "알림",  "인증 비밀번호 5회 오류 초과로 업무진행이 불가능 합니다.",	""	,	0)
+					Edit0.visible = False
+					Exit Sub
+				end if
+				'==============================================================================================
+				'20191004 LES END
+				'==============================================================================================
+				
+				
+				
+				Form.triggerEvent("#", "인증서", "Success")				
+			end if
+			'20160516 KBC END
+			
+	   elseif sParam1 == "Failed" then '  비밀번호 오류	     
+			Request_obcpp_logn_015a("N")
+			Edit0.caption = ""
+	   elseif sParam1 == "Error" then ' 인증서 업승ㅁ
+			Form.ShowAlert("알림", "인증서 없습니다.\n\n다시 확인하시기 바랍니다.")
+	   end if		
+	end if
+End Sub
+
+'============================================================================
+'20160516 KBC START 추가 : OCSP검증 추가
+Sub Request_ohhts_ocsp_001r()
+	'--------------------------------------------------------
+	sUserID		= Form.GetSharedData( "&USER_ID"		, false )	'사용자ID
+	sRcNo 		= Form.GetSharedData( "&JUMIN_NUM"		, false )	'실명확인번호 v0002 메모리취약점보완이후 암호화된실명번호로 내려옴
+	sUserName 	= Form.GetSharedData( "&USER_NAME"		, false )	'고객명
+	sCsNo 		= Form.GetSharedData( "&CUST_NUM"		, false )	'고객번호
+	sCertPass 	= Edit0.caption									'인증비밀번호
+	sDN 			= Form.GetSharedData( "&USER_CERT_DN"	, false )	'DN값
+	'--------------------------------------------------------
+	
+	DATAMANAGER.SetDataValue( 0, "ohhts_ocsp_001r", "InBlock1", "USER_ID" 				, 0 , sUserID ) 	'사용자ID
+	DATAMANAGER.SetDataValue( 0, "ohhts_ocsp_001r", "InBlock1", "RCNO_PIP" 				, 0 , sRcNo) 		'실명확인번호   'v0002 RCNO->RCNO_PIP
+	DATAMANAGER.SetDataValue( 0, "ohhts_ocsp_001r", "InBlock1", "USER_NAME" 				, 0 , sUserName ) '고객명
+	DATAMANAGER.SetDataValue( 0, "ohhts_ocsp_001r", "InBlock1", "CSNO" 					, 0 , sCsNo) 		'고객번호
+	
+	sRValue = Form.GetRvalue( sDN , sCertPass)
+	DATAMANAGER.SetDataValue( 0, "ohhts_ocsp_001r", "InBlock1", "UI_R_VAL" 				, 0 , sRValue) 	'R 값	
+				
+	sSignData = Form.GetCertSignData( sDN , sCertPass)
+	DATAMANAGER.SetDataValue( 0, "ohhts_ocsp_001r", "InBlock1", "UI_ELCT_SGNT_DATA_CNTT" 	, 0 , sSignData) 	'전자서명데이타
+	
+	sSerialNum = Form.getCertSerialNumber( sDN)
+	DATAMANAGER.SetDataValue( 0, "ohhts_ocsp_001r", "InBlock1", "NTAT_SRNO" 				, 0 , sSerialNum) '인증서 일련번호
+	
+	DATAMANAGER.RequestTranData("ohhts_ocsp_001r")
+End Sub
+'20160516 KBC END
+
+'============================================================================
+Sub Request_obcpp_logn_015a(szSucs_YN)
+	'==============================================================================================
+	'20191004 LES START 공인인증 최대오류횟수 변경
+	'==============================================================================================
+	'OCSP검증 서비스만 타도 오류횟수가 초기화됨. 
+	'인증서비번이 5회초과된 경우 OCSP검증 서비스 자체를 못타게 앞단에서 막음.
+	
+	sCertErrCnt = Cint(Form.GetSharedData("CERT_PWD_ERR_CNT", false ))
+		
+	if sCertErrCnt >= DEF_CERT_PSWD_LIMIT_CNT then
+		Form.MsgBox( "알림",  "인증 비밀번호 5회 오류 초과로 업무진행이 불가능 합니다.",	""	,	0)
+		Edit0.visible = False
+		Exit Sub
+	end if
+	'==============================================================================================
+	'20191004 LES END
+	'==============================================================================================
+
+
+	szUserId = Trim(Form.GetSharedData("&USER_ID", false ))	'사용자ID	
+	DATAMANAGER.SetDataValue( 0, "obcpp_logn_015a", "InBlock1", "USER_ID" , 0 , szUserId ) '사용자ID
+	DATAMANAGER.SetDataValue( 0, "obcpp_logn_015a", "InBlock1", "SUCS_YN" , 0 , szSucs_YN) 		'성공여부	
+	DATAMANAGER.RequestTranData("obcpp_logn_015a")
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if szErrMsg ~= "" or szErrMsg ~= Null then
+		szErrMsg = szErrMsg.."("..szSubErr..")"
+	end if
+	
+	Form.ShowAlert( "알림", szErrMsg)
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	'20190905 LES START 공인인증 최대오류횟수 변경
+	if sKeyName == "CERT_PSWD_FAIL_APP_TERMINATE" then
+	   sDeviceOS = Form.GetSharedData("&OS_TYPE", False) '1.안드로이드 2.iOS
+		
+    	   if sDeviceOS = "2" then
+		  Form.restartApp()
+	   else	
+		  Form.TerminateApp()
+	   end if
+	'20190905 LES END
+	end if
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditComplete()
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_520r" trcode="obcsb_oimf_520r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_simf_000r" trcode="obcsb_simf_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_015a" trcode="obcpp_logn_015a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_ocsp_001r" trcode="ohhts_ocsp_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_520r" title="개인별보안매체상태조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="205" _ulen="157" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="614" _ulen="460" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+HTS_STPL_YN^HTS 약정 여부^1^0^0^0^0^0^0
+SCRC_STAT_CODE^보안카드 상태 코드^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT1^부가정보 확인 질문 내용1^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT2^부가정보 확인 질문 내용2^2^0^0^0^0^0^0
+ACNT_OPNG_YN^계좌 개설 여부^1^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+ELFN_ID_EXST_YN^전자금융 ID 존재 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+UI_SMRT_OTP_YN^UI스마트OTP여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_simf_000r" title="보안카드정보확인" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="540" _ulen="400" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_NO1^보안카드 번호1^68^0^0^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+SCRC_NO2^보안카드 번호2^68^0^0^0^0^0^0
+CONN_CUST_OUTS_IPAD^접속고객외부IP주소^39^0^0^0^0^0^0
+CONN_CUST_INS_IPAD^접속고객내부IP주소^39^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="118" _ulen="86" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+SCRC_PWD_MSTK_TMNU^보안카드 비밀번호 오류 횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_015a" title="MTS로그인_공인인증서 접속로그" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="64" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_ocsp_001r" title="공인인증서검증요청" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="392" _ulen="302" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_R_VAL^UIR값^96^0^0^0^0^0^0
+UI_ELCT_SGNT_DATA_CNTT^UI전자서명데이터내용^4000^0^0^0^0^0^0
+NTAT_SRNO^인증서일련번호^32^0^0^0^0^0^0
+CRPT_YN^암호화여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="210" _ulen="164" >
+
+NEW_YN^신규여부^1^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_LNGT^UI공인인증키길이^4^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_VAL^UI공인인증키값^1024^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

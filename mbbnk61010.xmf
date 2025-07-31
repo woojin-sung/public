@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61010" scrname="이체" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contAcc" scroll_pos="0,0" ly_vert="0,0,375,54,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" ly_vert="260,12,64,37,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<FORMTAB name="fmtabTran" tabcount="3" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,54,375,508,1" >
+			<PAGE name="page002866" caption="이체" linkfile="mbbnk61010_t1" loadingtype="1" />
+			<PAGE name="page005183" caption="이체결과" linkfile="mbbnk61010_t2" loadingtype="1" />
+			<PAGE name="page008771" caption="지연이체" linkfile="mbbnk61010_t3" loadingtype="1" />
+		</FORMTAB>
+		<ACCOUNT name="accTran" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,123,124,125,126,127,132,135,136,137,138,139,140,200" etcfunctions="" accpwdctl="edtPwd" hedgeacc="1" ly_vert="6,9,271,39,1" />
+		<EDIT name="edtPwd" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="283,9,86,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4903" _ulen="4691" >
+'============================================================================
+' 01. 화 면 명 : 이체
+' 02. 화면설명 : 뱅킹_이체 메인화면(61010)
+' 03. 작    성 : 2016.02.06 ~ 2016.   테스트3
+'============================================================================
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+
+
+Dim g_szAccountNumber	'계좌번호(8자리)
+Dim g_szAccountSerialNumber	'계좌일련번호(2자리)
+Dim g_szAccountPassword	'계좌비밀번호
+Dim g_szAccountName		'계좌이름
+Dim g_szData '계좌번호★일련번호★비밀번호(암호화)
+dim plain_rm 
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+'Form_OnFormInitBefore
+'============================================================================
+Sub Form_OnFormInitBefore()
+	accTran.otheridexcept = "0"
+	Dim szPopup
+	szPopup = Form.LoadConfigData( "mbbnk61010", "mbbnk61010_p1" )
+	
+	If szPopup <> "1" Then
+		Form.OpenFramePopup( "mbbnk61010_p1", "" , "")
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+     plain_rm = Form.GetSharedData("&PLAIN_RM", false )
+	szData = Form.GetOpenLinkData()
+	if szData == "1" then		'16-03-31 YCJ 당사대체완료후 지연이체 탭 선택시
+		fmtabTran.currenttab = 2
+		Exit Sub
+	end if
+	arrData = Split(szData,"★")
+	if arrData(0) <> "" then
+		accTran.caption = arrData(0)
+	end if
+	If #arrData > 1 Then
+		fmtabTran.currenttab = arrData(1)	
+	End If
+	g_szAccountNumber =  accTran.total
+	g_szAccountSerialNumber = accTran.sequence
+	g_szAccountName = contAcc.Label0.caption
+	if plain_rm = "1" then		
+		g_szAccountPassword = edtPwd.caption
+	else
+		g_szAccountPassword = Form.GetEncData(edtPwd.caption)
+	end if
+	g_szData = g_szAccountNumber & "★" & g_szAccountSerialNumber & "★" & g_szAccountPassword & "★" & g_szAccountName
+ 	Form.triggerEvent("fmtabTran." & fmtabTran.currenttabpageid, "AllAccount", g_szData)	
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub accTran_ChangeAccount()
+
+	g_szAccountNumber = accTran.total
+	g_szAccountSerialNumber = accTran.sequence
+	g_szAccountPassword = ""
+	edtPwd.caption = ""
+	g_szAccountName = contAcc.Label0.caption
+	
+	g_szData = g_szAccountNumber & "★" & g_szAccountSerialNumber & "★" & g_szAccountPassword & "★" & g_szAccountName
+	Form.triggerEvent("fmtabTran." & fmtabTran.currenttabpageid, "AllAccount", g_szData)
+
+	
+End Sub
+
+'============================================================================
+
+	
+
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam) 
+	If sEventName == "61010_COMP" then', "이체완료" &"★"& sRet &"★"& g_szData
+		if sParam <> "" then
+			tData = Split(sParam , "★" )
+			If Ubound(tData) > 0 then
+				szTab = tData(1)
+				
+				g_szData = accTran.total & "★" & accTran.sequence & "★" & g_szAccountPassword & "★" & g_szAccountName
+				
+				Select Case szTab
+				Case "1"  
+					fmtabTran.currenttab = "1"
+					Form.triggerEvent("fmtabTran.page005183", "AllAccount", g_szData) '이체결과
+					edtPwd.enable = false
+					edtPwd.caption = ""
+				Case "2"   
+					fmtabTran.currenttab = "2"
+					Form.triggerEvent("fmtabTran.page008882", "AllAccount", g_szData) '지연이체
+					edtPwd.caption = ""
+				End Select
+			End If 
+		end if 
+	End If   
+End Sub
+
+'============================================================================
+Sub fmtabTran_OnTabChanged(nCurrentTab)
+
+	if nCurrentTab == 1 then
+		'edtPwd.visible = false
+		edtPwd.enable = false
+	else
+		'edtPwd.visible = true
+		edtPwd.enable = true
+	end if
+	g_szAccountNumber = accTran.total
+	g_szAccountSerialNumber = accTran.sequence
+	g_szAccountPassword = ""
+	edtPwd.caption = ""
+	g_szAccountName = contAcc.Label0.caption
+	
+	g_szData = g_szAccountNumber & "★" & g_szAccountSerialNumber & "★" & g_szAccountPassword & "★" & g_szAccountName
+	Form.triggerEvent("fmtabTran." & fmtabTran.currenttabpageid, "AllAccount", g_szData)
+	
+End Sub
+
+'============================================================================
+Sub edtPwd_OnEditComplete()
+     if plain_rm = "1" then		
+		g_szAccountPassword = edtPwd.caption
+	 else
+	     g_szAccountPassword = Form.GetEncData(edtPwd.caption)
+	 end if
+	
+ 	Form.triggerEvent("fmtabTran." & fmtabTran.currenttabpageid, "Password", g_szAccountPassword)		
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

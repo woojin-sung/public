@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61010" scrname="바이오인증_Only" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,335,250,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label2" caption=" " ly_vert="0,181,335,69,1" />
+		<LABEL name="Label5" fgcolor="065:102102102" fontsize="-2" caption="바이오인증을 수행합니다." ly_vert="20,106,212,39,1" />
+		<BUTTON name="ButtonOK" enable="0" visible="0" ly_vert="16,149,40,26,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4578" _ulen="4318" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 이체_보안카드
+' 02. 화면설명 : 이체예정내역 보안카드 연결화면
+' 03. 작    성 : 2016.03.11 염준성
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRetData
+Dim g_sUserID
+Dim g_sBioCertYn
+Dim g_sSecCardCertYn
+Dim g_sBioTrData
+Dim g_szCertUserType
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	'EditInput1.certname = "보안카드 "&Label0.caption&Label1.caption
+	'EditInput2.certname = "보안카드 "&Label3.caption&Label4.caption
+
+	g_sBioCertYn = "N"
+	g_sSecCardCertYn = "N"
+	g_sRetData = "cancel"
+	g_sUserID = Form.GetSharedData("CERT_ID" , false)
+	if g_sUserID == null or g_sUserID == "" then
+		g_sUserID = Form.GetSharedData("&USER_ID" , false)
+	end if
+
+	g_szCertUserType = Form.GetSharedData("&CERT_USE_TYPE", 0 )
+	
+	if g_szCertUserType = "4" then
+		Label5.caption = "공동인증을 수행합니다."
+	elseif g_szCertUserType = "3" then
+		Label5.caption = "바이오인증을 수행합니다."
+	elseif g_szCertUserType = "5" then
+		Label5.caption = ""
+	end if
+	
+	'Form.SetScreenName( "보안매체 인증" )
+
+	'if g_sUserID ~= null and g_sUserID ~= "" then
+	'	DATAMANAGER.RequestTranData( "obcsb_oimf_520r" ) '보안매체상태조회
+	'end if
+	
+	g_sBioTrData = ""
+	g_sBioTrData = Form.GetSharedData("BIO_TR_MSG_1", false )
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+End Sub
+
+'============================================================================
+Sub BioCertCall()
+	sBIO_TR_CODE = "1"                                       '바이오거래유형코드 0: 인증 1: 서명 
+	sATHN_USAG_CLS_CODE = "0"								' 서명데이터 생성여부
+	
+    sTRAN_CNTT = g_sBioTrData
+    
+    if g_szCertUserType = "4" then
+	    sData = "BCHAIN_trType★"& sBIO_TR_CODE  &"★"&  sTRAN_CNTT &"★"& sATHN_USAG_CLS_CODE 
+    elseif g_szCertUserType = "5" then
+	    sData = "ATON_trType★"&  sTRAN_CNTT
+    else
+	    sData = "BIO_trType★"& sBIO_TR_CODE  &"★"&  sTRAN_CNTT &"★"& sATHN_USAG_CLS_CODE 
+    end if
+
+
+	'Form.OpenPopup("mhetc90060_p5", sData, "")
+	'MsgBox sData
+	Form.OpenFramePopup("mhetc90060_p5" , sData , "")
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	Call BioCertCall()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "이체확인" then
+		ButtonOK_OnClick()  
+	end if   
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if szErrMsg ~= "" or szErrMsg ~= Null then
+		szErrMsg = szErrMsg.."("..szSubErr..")"
+	end if
+	
+	Form.ShowAlert( "알림", szErrMsg)
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn 
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)	
+	If sKeyName == "mhetc90060_p5" Then
+		If sRet == "ok" Then
+		'MsgBox( "바이오 succ return")
+			g_sBioCertYn = "Y"
+			if g_szCertUserType = "4" then
+				Form.triggerEvent("#", "공동인증", "Success")
+			else
+				Form.triggerEvent("#", "바이오인증", "Success")
+			end if
+			
+		ElseIf sRet == "cancel" Then
+			g_sBioCertYn = "N"			
+			'Form.ShowAlert("알림", "간편인증 실패.")
+		End If
+	End If
+	
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_520r" trcode="obcsb_oimf_520r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_simf_000r" trcode="obcsb_simf_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_015a" trcode="obcpp_logn_015a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_ocsp_001r" trcode="ohhts_ocsp_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_520r" title="개인별보안매체상태조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="158" _ulen="122" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="563" _ulen="419" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+HTS_STPL_YN^HTS 약정 여부^1^0^0^0^0^0^0
+SCRC_STAT_CODE^보안카드 상태 코드^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT1^부가정보 확인 질문 내용1^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT2^부가정보 확인 질문 내용2^2^0^0^0^0^0^0
+ACNT_OPNG_YN^계좌 개설 여부^1^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+ELFN_ID_EXST_YN^전자금융 ID 존재 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_simf_000r" title="보안카드정보확인" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="493" _ulen="365" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_NO1^보안카드 번호1^68^0^0^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+SCRC_NO2^보안카드 번호2^68^0^0^0^0^0^0
+CONN_CUST_OUTS_IPAD^접속고객외부IP주소^39^0^0^0^0^0^0
+CONN_CUST_INS_IPAD^접속고객내부IP주소^39^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="118" _ulen="86" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+SCRC_PWD_MSTK_TMNU^보안카드 비밀번호 오류 횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_015a" title="MTS로그인_공인인증서 접속로그" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="64" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_ocsp_001r" title="공인인증서검증요청" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="306" _ulen="238" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_R_VAL^UIR값^96^0^0^0^0^0^0
+UI_ELCT_SGNT_DATA_CNTT^UI전자서명데이터내용^4000^0^0^0^0^0^0
+NTAT_SRNO^인증서일련번호^32^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="210" _ulen="164" >
+
+NEW_YN^신규여부^1^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_LNGT^UI공인인증키길이^4^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_VAL^UI공인인증키값^1024^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

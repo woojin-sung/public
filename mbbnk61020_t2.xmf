@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61020" scrname="은행연계입출금_출금" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,465,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label2" fgcolor="065:102102102" caption="이체가능 금액" ly_vert="0,61,110,39,1" />
+		<LABEL name="lblBnk" fontstyle="01" caption="증권계좌정보" bgcolor="066:238239240" transmode="0" ly_vert="0,9,375,39,1" />
+		<EDIT name="edtBankName" enable="0" imetype="0" hintcaption="연계은행명" ly_vert="10,166,131,39,1" />
+		<EDIT name="edtBankAcnt" enable="0" imetype="0" hintcaption="연계계좌번호" ly_vert="147,166,220,39,1" />
+		<BUTTON name="btnIqry" caption="조회" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="312,61,59,39,1" />
+		<EDIT name="edtAbleAmt" enable="0" mask="0,0,,원,0,,0,1,1,0,0" halign="2" imetype="0" recvdatafield="obacb_balc_025r.OutBlock1.DRNG_ABLE_AMT" ly_vert="147,61,159,39,1" import="0,1,5" />
+		<LABEL name="lblBankCode" visible="0" ly_vert="260,200,100,32,0" />
+		<LABEL name="lblBnk0" fontstyle="01" caption="은행계좌정보" bgcolor="066:238239240" transmode="0" ly_vert="0,112,375,39,1" />
+		<BUTTON name="btnDrng" caption="출금(증권  〉  은행)" bgcolor="214:255039039" bgcolor2="064:188030030" btnimage="btn_05.9" ly_vert="85,384,209,47,1" />
+		<BUTTON name="btnMod" caption="정정" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="312,268,59,39,1" />
+		<LABEL name="lblOutAmt01" fgcolor="065:102102102" caption="이체금액" ly_vert="0,268,100,39,1" />
+		<EDIT name="edtOutAmt01" mask="0,0,,원,0,,0,1,0,0,0" halign="2" imetype="1" ly_vert="97,268,209,39,1" />
+		<BUTTON name="btnAll" caption="전액" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="6,316,58,34,1" />
+		<BUTTON name="btn100" caption="100만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="67,316,58,34,1" />
+		<BUTTON name="btn50" caption="50만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="128,316,58,34,1" />
+		<BUTTON name="btn10" caption="10만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="189,316,58,34,1" />
+		<BUTTON name="btn5" caption="5만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="250,316,58,34,1" />
+		<BUTTON name="btn1" caption="1만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="311,316,58,34,1" />
+		<LABEL name="lblBnk1" fontstyle="01" caption="신청내역" bgcolor="066:238239240" transmode="0" ly_vert="0,220,375,39,1" />
+		<LABEL name="lblAcnm" visible="0" ly_vert="149,206,101,18,0" />
+		<LABEL name="Label4" caption=" " bgcolor="017:216216216" transmode="0" ly_vert="10,366,355,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8924" _ulen="8466" >
+'(증권 잔액조회)
+' - 증권비밀번호 불필요
+'
+'(은행 잔액조회)
+' - 은행비밀번호 필요
+'
+' (입금)
+' - 은행비밀번호 필요 & 공동인증 필요
+'
+' (출금)
+' -증권비밀번호 필요 & 공동인증 필요
+'============================================================================
+
+Dim g_szAccountNumber	'계좌번호(8자리)
+Dim g_szAccountSerialNumber	'계좌일련번호(2자리)
+Dim g_szAccountPassword	'계좌비밀번호
+Dim g_szAccountName		'계좌이름
+Dim g_szPrcd
+Dim g_szPrnm
+Dim g_szMangBrcd
+Dim g_szMangBrcdName
+Dim g_nDrngAbleAmt
+Dim g_szBankCode
+Dim g_szBankName
+Dim g_szBankAcnt
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    g_szAccountNumber       = ""
+    g_szAccountSerialNumber = ""
+    g_szAccountPassword     = ""
+    g_szAccountName         = ""
+    g_szPrcd                = ""
+    g_szPrnm                = ""
+    g_szMangBrcd            = ""
+    g_szMangBrcdName        = ""
+    g_nDrngAbleAmt          = 0
+    g_szBankCode            = ""
+    g_szBankName            = ""
+    g_szBankAcnt            = ""
+    
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+    If sEventName == "AllAccount" Or sEventName == "Password" Then '계좌전체
+    
+        Dim szList
+        szList = Split(sParam, "★")
+		
+        If UBOUND(szList) < 1 Then
+            Exit Sub
+        End If
+
+        g_szAccountNumber = szList(0)
+        g_szAccountSerialNumber = szList(1)
+	
+        If szList(2) <> "" Then
+            g_szAccountPassword = szList(2)
+        Else
+            g_szAccountPassword = ""
+        End If
+		
+        if szList(3) <> "" then
+            g_szAccountName = szList(3)
+        else
+            g_szAccountName = ""
+        end if
+
+        if szList(4) <> "" then
+            g_szPrcd = szList(4)
+        else
+            g_szPrcd = ""
+        end if
+
+        if szList(5) <> "" then
+            g_szPrnm = szList(5)
+        else
+            g_szPrnm = ""
+        end if
+	
+        if szList(6) <> "" then
+            g_szMangBrcd = szList(6)
+        else
+            g_szMangBrcd = ""
+        end if
+
+        if szList(7) <> "" then
+            g_szMangBrcdName = szList(7)
+        else
+            g_szMangBrcdName = ""
+        end if
+
+        if szList(8) <> "" then
+            g_nDrngAbleAmt = szList(8)
+        else
+            g_nDrngAbleAmt = 0
+        end if	
+
+        if szList(9) <> "" then
+            g_szBankCode = szList(9)
+        else
+            g_szBankCode = ""
+        end if
+
+        if szList(10) <> "" then
+            g_szBankName = szList(10)
+        else
+            g_szBankName = ""
+        end if
+
+        if szList(11) <> "" then
+            g_szBankAcnt = szList(11)
+        else
+            g_szBankAcnt = ""
+        end if
+
+        edtBankName.caption = g_szBankName
+        edtBankAcnt.caption = g_szBankAcnt
+        lblBankCode.caption = g_szBankCode		
+	
+        edtAbleAmt.caption  = g_nDrngAbleAmt '증권계좌잔고
+        edtOutAmt01.caption = ""             '출금금액
+	
+        If Trim(g_szBankAcnt) <> "" Then
+            btnDrng.enable = True
+        Else
+            btnDrng.enable = False
+        End If
+
+    End If
+
+End Sub
+
+'============================================================================
+Sub btnIqry_OnClick()
+    DATAMANAGER.SetDataValue(0, "obacb_balc_025r", "InBlock1", "ACNO", 0 , g_szAccountNumber)	'계좌번호
+    DATAMANAGER.RequestTranData("obacb_balc_025r")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+    If szTranID == "obtss_elbs_129r" Then
+        lblAcnm.caption = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "ACNM" , 0)
+        Form.OpenPopup( "mbbnk61020_p1" , "" , "" )
+    End If
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)	
+
+    szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+    
+    If Trim(szSubMsg) == "" Then
+        Form.ShowAlert( "알림", szErrMsg )
+    Else
+        Form.ShowAlert( "알림", szErrMsg .. "\n(" .. szSubMsg ..")")
+    End If
+    
+End Sub
+
+'============================================================================
+' btn100_OnClick - 이체금액 100만 버튼
+'============================================================================
+Sub btn100_OnClick()
+	Dim tempNum
+	tempNum = edtOutAmt01.caption
+	edtOutAmt01.caption = tempNum + 1000000
+End Sub
+
+'============================================================================
+' btn50_OnClick - 이체금액 50만 버튼
+'============================================================================
+Sub btn50_OnClick()
+	Dim tempNum
+	tempNum = edtOutAmt01.caption
+	edtOutAmt01.caption = tempNum + 500000
+End Sub
+
+'============================================================================
+' btn10_OnClick - 이체금액 10만 버튼
+'============================================================================
+Sub btn10_OnClick()
+	Dim tempNum
+	tempNum = edtOutAmt01.caption
+	edtOutAmt01.caption = tempNum + 100000
+End Sub
+
+
+'============================================================================
+' btn5_OnClick - 이체금액 5만 버튼
+'============================================================================
+Sub btn5_OnClick()
+	Dim tempNum
+	tempNum = edtOutAmt01.caption
+	edtOutAmt01.caption = tempNum + 50000
+End Sub
+
+
+'============================================================================
+' btn1_OnClick - 이체금액 1만 버튼
+'============================================================================
+Sub btn1_OnClick()
+	Dim tempNum
+	tempNum = edtOutAmt01.caption
+	edtOutAmt01.caption = tempNum + 10000
+End Sub
+
+'============================================================================
+' btnAll_OnClick - 이체금액 전액버튼
+'============================================================================
+Sub btnAll_OnClick()
+	edtOutAmt01.caption = edtAbleAmt.caption
+End Sub
+
+
+'============================================================================
+Sub btnMod_OnClick()
+	edtOutAmt01.caption =""
+End Sub
+
+'============================================================================
+Sub btnDrng_OnClick()
+
+	if Len(edtOutAmt01.caption) == 0 Or CDbl(edtOutAmt01.caption) == 0 then
+		Form.MsgBox( "알림", "이체 금액을 확인하세요.", "", 0 )
+		Exit Sub
+	end if
+	
+	if Len(edtBankAcnt.caption) == 0 then
+		Form.MsgBox( "알림", "은행계좌번호를 확인 하세요", "", 0 )
+		Exit Sub
+	end if		
+	
+	if Len(edtAbleAmt.caption) == 0 Or CDbl(edtAbleAmt.caption) == 0 then
+		Form.MsgBox( "알림", "이체가능금액을 확인하세요.", "", 0 )
+		Exit Sub
+	end if
+	
+	if CDbl(edtAbleAmt.caption) <  CDbl(edtOutAmt01.caption) then
+		Form.MsgBox( "알림", "이체 금액이 이체가능 금액보다 큽니다.", "", 0 )
+		Exit Sub
+	end if
+	
+	if Len(g_szAccountPassword) == 0 Then
+		Form.MsgBox( "알림", "비밀번호를 확인 하세요.", "", 0 )
+		Exit Sub
+	end if	
+	
+	DATAMANAGER.SetDataValue(0 , "obtss_elbs_129r" , "InBlock1" , "MNRC_BANK_CODE"     , 0 , Trim(lblBankCode.caption))
+	DATAMANAGER.SetDataValue(0 , "obtss_elbs_129r" , "InBlock1" , "JOB_TRNO"           , 0 , "031")
+	DATAMANAGER.SetDataValue(0 , "obtss_elbs_129r" , "InBlock1" , "MNRC_ACNO"          , 0 , Trim(edtBankAcnt.caption))
+	DATAMANAGER.SetDataValue(0 , "obtss_elbs_129r" , "InBlock1" , "TR_AMT"             , 0 , Trim(edtOutAmt01.caption))
+	DATAMANAGER.SetDataValue(0 , "obtss_elbs_129r" , "InBlock1" , "DRNG_ACNO"          , 0 , g_szAccountNumber)
+	DATAMANAGER.SetDataValue(0 , "obtss_elbs_129r" , "InBlock1" , "ACNT_PROD_CLS_CODE" , 0 , g_szAccountSerialNumber)
+	DATAMANAGER.SetDataValue(0 , "obtss_elbs_129r" , "InBlock1" , "PWD"                , 0 , g_szAccountPassword)
+	DATAMANAGER.SetDataValue(0 , "obtss_elbs_129r" , "InBlock1" , "RMRK"               , 0 , "")
+	DATAMANAGER.RequestTranData("obtss_elbs_129r")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+    if sKeyName = "INFO_POPUP" then
+        sData = ""
+        if sRet == "OK" then
+            sData = g_szAccountNumber & "★" & g_szAccountSerialNumber & "★" & g_szAccountName & "★" & g_szAccountPassword & "★" &
+                    edtBankName.caption & "★" & edtBankAcnt.caption & "★"& edtOutAmt01.caption  & "★" & lblBankCode.caption  & "★" & lblAcnm.caption
+            Form.OpenPopup("mbbnk61020_p3" , sData , "")
+        end if
+	
+    elseif sKeyName = "CORNFORM_POPUP" then
+    
+        if sRet == "OK" then
+            edtOutAmt01.caption = ""
+            Form.triggerEvent("#" , "CORNFORM_OK", "2")
+        end if
+	
+    end if
+    
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacb_balc_025r" trcode="obacb_balc_025r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_elbs_129r" trcode="obtss_elbs_129r" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacb_balc_025r" title="종합계좌 예수금 내역 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+IQRY_CLS_CODE^조회 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="737" _ulen="567" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+BKKP_NAME^부기 명^40^0^0^0^0^0^0
+TFAM^예수금^19^0^7^0^0^0^0
+CHECK_AMT^수표 금액^19^0^7^0^0^0^0
+DRNG_ABLE_AMT^출금 가능 금액^19^0^7^0^0^0^0
+SBSC_MARG^청약 증거금^19^0^7^0^0^0^0
+UNAM^미수금^19^0^7^0^0^0^0
+LOAN_INT_NTPD_AMT^대출 이자 미납 금액^19^0^7^0^0^0^0
+MORG_DFCN_AMT^담보 부족 금액^19^0^7^0^0^0^0
+UI_D1_AFT_TFAM^UI 1일 후 예수금^19^0^7^0^0^0^0
+UI_D2_AFT_TFAM^UI 2일 후 예수금^19^0^7^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+ACNT_PRNM^계좌상품명^100^0^0^0^0^0^0
+WTMN_ABLE_ATMT_INVT_AMT^인출가능자동투자금액^19^0^7^0^0^0^0
+WTMN_ABLE_CASH_AMT^인출가능현금금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="45" _ulen="33" >
+
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_elbs_129r" title="타행이체수취조회(지로/예약/자?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="345" _ulen="261" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+JOB_TRNO^작업단말번호^39^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TR_AMT^거래금액^19^0^7^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+ACNT_PROD_CLS_CODE^계좌상품구분코드^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+RMRK^비고^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="216" _ulen="164" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+STDL_CNFT_BRCD^입출고상대지점코드^4^0^0^0^0^0^0
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61040" scrname="정기이체_메인폼" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt01" itemcodetype="100,118,123,126,200" accpwdctl="edtPwd01" accnamectl="lblName" ly_vert="5,6,271,39,1" />
+		<EDIT name="edtPwd01" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="282,6,86,39,1" />
+		<FORMTAB name="FormTab0" tabcount="3" tabwidthtype="1" tabheadheight="35" autosave="1" ly_vert="0,57,375,505,1" >
+			<PAGE name="page008258" caption="자동이체등록" linkfile="mbbnk61040_t1" loadingtype="1" />
+			<PAGE name="page003289" caption="등록내역조회/해지" linkfile="mbbnk61040_t2" loadingtype="1" />
+			<PAGE name="page002914" caption="처리내역조회     " linkfile="mbbnk61040_t3" loadingtype="1" />
+		</FORMTAB>
+		<LABEL name="lblName" ly_vert="420,66,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4005" _ulen="3799" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 정기이체
+' 02. 화면설명 : 정기이체_메인폼
+' 03. 작    성 : 16.03.08
+' 04. 수    정 : 2020.09.21. 장원혁 v001 메모리 평문 제거
+'                2022.04.28. 장원혁 v002 자동완성 비밀번호 clear
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szAccountNumber	'계좌번호(8자리)
+Dim g_szAccountSerialNumber	'계좌일련번호(2자리)
+Dim g_szAccountPassword	'계좌비밀번호
+Dim g_szAccountName		'계좌이름
+Dim g_szData '계좌번호★일련번호★비밀번호(암호화)
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	g_szAccountNumber = acnt01.total
+	g_szAccountSerialNumber = acnt01.sequence
+	g_szAccountName = lblName.caption
+	'g_szAccountPassword = Form.GetEncData(edtPwd01.caption) v001
+	'v001 sta ****************
+	plain_rm = Form.GetSharedData("&PLAIN_RM" , false)
+	If plain_rm = "1" Then
+	    g_szAccountPassword = edtPwd01.caption
+	Else
+	    g_szAccountPassword = Form.GetEncData(edtPwd01.caption)
+	End If 
+	'v001 fin ****************
+	g_szData = g_szAccountNumber & "★" & g_szAccountSerialNumber & "★" & g_szAccountPassword & "★" & g_szAccountName
+ 	Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "AllAccount", g_szData)
+	edtPwd01.caption = "" 'v002
+End Sub
+
+
+'============================================================================
+' FormTab0_OnTabChanged
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+
+	g_szData = g_szAccountNumber & "★" & g_szAccountSerialNumber & "★" & g_szAccountPassword & "★" & g_szAccountName
+	' 트리거 이벤트
+	Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "AllAccount", g_szData)
+'	Form.ShowAlert("g_szData", g_szData)
+End Sub
+
+
+'============================================================================
+' acnt01_ChangeAccount
+'============================================================================
+Sub acnt01_ChangeAccount()
+	g_szAccountNumber = acnt01.total
+	g_szAccountSerialNumber = acnt01.sequence
+	g_szAccountPassword = ""
+	edtPwd01.caption = ""
+	g_szAccountName = lblName.caption
+	
+	g_szData = g_szAccountNumber & "★" & g_szAccountSerialNumber & "★" & g_szAccountPassword & "★" & g_szAccountName
+
+	Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "AllAccount", g_szData)
+
+End Sub
+
+
+'============================================================================
+' edtPwd01_OnEditComplete
+'============================================================================
+Sub edtPwd01_OnEditComplete()
+	'g_szAccountPassword = Form.GetEncData(edtPwd01.caption) v001 주석처리
+	'v001 sta ********************
+	plain_rm = Form.GetSharedData("&PLAIN_RM" , false )
+	If plain_rm = "1" Then
+	    g_szAccountPassword = edtPwd01.caption
+	Else
+	    g_szAccountPassword = Form.GetEncData(edtPwd01.caption)
+	End If
+	'v001 fin ********************
+	
+	Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "Password", g_szAccountPassword)
+
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

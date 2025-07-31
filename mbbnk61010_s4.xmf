@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61010" scrname="간편인증_이체" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,335,250,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label5" fgcolor="065:102102102" fontsize="1" fontstyle="01" caption="간편인증으로 이체가능 하십니다." ly_vert="41,99,275,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2344" _ulen="2212" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 이체_간편인증
+' 02. 화면설명 : 이체예정내역 간편인증 연결화면
+' 03. 작    성 : 2016.08.29 최일규
+' 2020.11.13 : 정민영 : v0001 : [T2008250015] 실명확인번호 메모리 내 평문 노출 취약점 조치(HTS, MTS)
+'            : - obcsb_oimf_520r,obcsb_simf_000r 미사용TR삭제
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRetData
+Dim g_spad_sID
+Dim g_sDN
+Dim g_spad_sCertSerialNo
+Dim g_spad_sCusNo
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_sRetData = "cancel"
+	g_spad_sID = Form.GetSharedData("&USER_ID" , false)
+	
+	g_sDN = Form.GetSharedData("&USER_CERT_DN" , false)
+	g_spad_sCertSerialNo = Form.GetAutoCertSerialNumber( g_sDN )
+End Sub
+
+'============================================================================
+'Sub Form_OnFormClose()	
+'	Form.SendReturnToParent( "mbbnk61010_s4" , g_sRetData )
+'End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "이체확인" then
+		
+		g_spad_sID = Form.GetSharedData("&USER_ID" , false)
+		g_sDN = Form.GetSharedData("&USER_CERT_DN" , false)
+		g_spad_sCertSerialNo = Form.GetAutoCertSerialNumber( g_sDN )
+		g_spad_sCusNo = Form.GetSharedData("&CUST_NUM" , false)
+	
+		sParam = "3" & "★" & g_spad_sID & "★" & g_spad_sCertSerialNo & "★" & g_spad_sCusNo
+		Form.requestOneShotPad("reqPush", sParam, "")
+	end if
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_logn_015a" trcode="obcpp_logn_015a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_logn_015a" title="MTS로그인_공인인증서 접속로그" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="64" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

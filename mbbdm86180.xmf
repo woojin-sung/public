@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86180" scrname="계좌비밀번호입력" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container1Step" vscroll="1" ly_vert="0,84,375,501,1" scroll_ly_vert="0,84,375,501,1" >
+			<CONTROL_INFO>
+				<EDIT name="Edit1" imetype="0" ly_vert="425,102,355,68,1" />
+				<LABEL name="Label0" fontsize="8" fontstyle="01" caption="신규계좌 비밀번호 입력" halign="1" ly_vert="0,62,375,26,1" />
+				<LABEL name="Label1" fontsize="2" caption="사용하실 계좌비밀번호를 입력해주세요" halign="1" ly_vert="10,108,326,20,1" />
+				<EDIT name="EdtPwReal" visible="0" password="2" imetype="1" maxlength="4" minlength="4" ly_vert="8,5,262,34,0" />
+				<IMAGE name="Image1" autosize="1" imgpath="icon_question" ly_vert="325,109,18,18,1" />
+				<IMAGE name="PwdFail0" visible="0" autosize="1" imgpath="pwd_red" ly_vert="118,159,20,20,0" />
+				<IMAGE name="PwdFail1" visible="0" autosize="1" imgpath="pwd_red" ly_vert="156,159,20,20,0" />
+				<IMAGE name="PwdFail2" visible="0" autosize="1" imgpath="pwd_red" ly_vert="194,159,20,20,0" />
+				<IMAGE name="PwdFail3" visible="0" autosize="1" imgpath="pwd_red" ly_vert="232,159,20,20,0" />
+				<IMAGE name="PwdInsert0" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="118,159,20,20,0" />
+				<IMAGE name="PwdInsert1" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="156,159,20,20,0" />
+				<IMAGE name="PwdInsert2" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="194,159,20,20,0" />
+				<IMAGE name="PwdInsert3" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="232,159,20,20,0" />
+				<IMAGE name="Pwdbasic0" autosize="1" imgpath="pwd_gray" ly_vert="118,159,20,20,1" />
+				<IMAGE name="Pwdbasic1" autosize="1" imgpath="pwd_gray" ly_vert="156,159,20,20,1" />
+				<IMAGE name="Pwdbasic2" autosize="1" imgpath="pwd_gray" ly_vert="194,159,20,20,1" />
+				<IMAGE name="Pwdbasic3" autosize="1" imgpath="pwd_gray" ly_vert="232,159,20,20,1" />
+				<BUTTON name="Button0" btnimage="alpha" ly_vert="19,137,332,73,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="Label2" fontsize="4" caption="계좌 비밀번호 입력" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="ImgF" resize="0011" autosize="1" imgpath="step03" ly_vert="245,60,108,21,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_top_back_light" ly_vert="21,19,22,22,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12800" _ulen="11888" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 계좌비밀번호 입력
+' 02. 화면설명 : 계좌비밀번호 입력
+' 03. 작    성 : 2021.01.22 김유경
+' 04. 수    정 :  
+'-------------------------------------------------------------------------------------------
+'****************************************************************************
+' EdtPwReal : 실제 비밀번호 인증 과정 구현하는 에디트
+' EdtPwFake : 사용자에게 보여지는 비밀번호입력 에디트 
+'****************************************************************************
+
+Dim nCnt
+
+Dim gWRPL_TELNO
+Dim gCLPH_TELNO
+Dim gOWHS_TELNO
+
+Dim CloseFlag
+CloseFlag = 0
+
+Dim g_OsType
+
+Dim gRCNO
+Dim gRegUniqNo
+Dim gPW_PIP
+Dim gCNFR_PW_PIP
+
+Dim g_CharFlag 'iOS의 경우 키패드의 취소와 입력완료를 구분할 수 없어서 Flag 값으로 구분
+Dim g_CountSave
+
+Dim gPageID
+	gPageID = "2"
+
+'************************* 참고 ********************************************
+'취소버튼과 입력완료 버튼이 OnEditChar에 동일하게 "2"로 떨어집니다.
+'입력완료의 경우에만 OnEditComplete()을 탑니다.
+'***************************************************************************
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	
+	g_OsType = Form.GetSharedData("&OS_TYPE", False)
+
+	nCnt = 0	
+	
+	Container1Step.Button0.imagefilepth   = "alpha"
+	Container1Step.Image0.imagefilepth    = "icon_top_back_light"
+	
+	Container1Step.EdtPwReal.SetApplyLabel("숫자입력"	,0 , 76 , "left" , true) '호출해야 정상작동
+	Form.SetTimerEvent2(1, 1, 0.5) '1초뒤 보안키패드 활성화
+	
+	'휴대폰번호
+	HP1 = Form.GetSharedData("BDM_HP1" , false )
+	HP2 = Form.GetSharedData("BDM_HP2" , false )
+	HP3 = Form.GetSharedData("BDM_HP3" , false )
+	gCLPH_TELNO = HP1 & HP2 & HP3
+	
+	gWRPL_TELNO = Form.GetSharedData("BDM_WRPLNUM", false )
+	gOWHS_TELNO = Form.GetSharedData("BDM_OWHSNUM", false )
+	
+	gWRPL_TELNO = replace(gWRPL_TELNO,"-","")
+	gOWHS_TELNO = replace(gOWHS_TELNO,"-","")
+	
+	gRCNO = Form.GetSharedData("BDM_RCNO_PIP"  , false ) '주민등록번호
+	gRegUniqNo  = Form.GetSharedData("BDM_REG_UNIQ_NO" , false ) '등록고유번호
+	
+	gPW_PIP     = Form.GetSharedData("BDM_PW_PIP"      , false ) '비밀번호
+	gCNFR_PW_PIP= Form.GetSharedData("BDM_CNFR_PW_PIP" , false ) '비밀번호확인
+	
+'	If g_OsType == "2" Then
+'		Container1Step.EdtPwReal.setHideCancel(true) 'iOS 취소버튼 제거
+'	End If
+
+	'20230421 이어가기 상태 조회용으로 추가함
+	DATAMANAGER.RequestTranData("obaci_acct_058r")
+
+End Sub
+
+'============================================================================
+Sub Container1Step_EdtPwReal_OnEditComplete()
+
+	'입력완료 시에만 타게끔(취소는 안타고)
+	if g_DeviceOS == "2"  then
+		g_CharFlag = "N"
+		PasswordInsert()
+		
+	end if
+	
+	'비밀번호 재입력
+	Form.SetSharedData("BDM_PW_PIP", Container1Step.EdtPwReal.caption ) '비밀번호
+	Form.SetSharedData("BDM_PW_PIP_ARIA", Container1Step.EdtPwReal.caption2 ) '비밀번호
+			
+	DATAMANAGER.RequestTranData("obaci_nmet_011r") '키패드 입력완료 시 검증 TR Call
+End Sub
+'===========================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	If szTranID = "obaci_nmet_011r" Then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "PROS_CLS_CODE"  , 0 , "1")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "PWD_PIP"        , 0 , Container1Step.EdtPwReal.caption2)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "WRPL_TELNO"     , 0 , gWRPL_TELNO)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "CLPH_TELNO"     , 0 , gCLPH_TELNO)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "OWHS_TELNO"     , 0 , gOWHS_TELNO)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RCNO_PIP"       , 0 , gRCNO      )
+	elseIf szTranID = "obaci_acct_058r" Then	
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RCNO_PIP"	 	 , 0 , gRCNO      )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "IQRY_CLS_CODE"     , 0 , "2"		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "REG_UNIQ_NO"		 , 0 , gRegUniqNo	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "REG_STAG_CLS_CODE" , 0 , gPageID	)	
+	End If
+End Sub 
+
+'===========================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim gProsClsCode , gRsltCode
+	
+	If szTranID = "obaci_nmet_011r" Then
+		gProsClsCode = ""
+		gRsltCode    = ""
+		
+		gProsClsCode	= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "PROS_CLS_CODE" , 0)
+		gRsltCode	= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "IF_RSLT_CODE"  , 0)
+		
+		If gProsClsCode == "1" and TRIM(gRsltCode) <> "00" Then
+			
+			Form.OpenPopup("mbbdm86180_p1", gRsltCode , "" )
+			'Container1Step.EdtPwReal.caption = ""
+			'nCnt = 0
+			'PasswordFail()
+			'Form.SetTimerEvent2(3, 1, 0.5) '2021.03.31. 오류 시 키패드
+			
+		Else '비밀번호 입력 성공시
+			
+			Call PasswordInsert()
+			
+			Form.SetTimerEvent2(2, 1, 0.5) '1초뒤 화면 넘어감
+	
+		End If
+	elseIf szTranID = "obaci_acct_058r" Then	
+		sPrgsYn		= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock2" , "PRGS_YN"  	  , 0)
+		
+		'20230421 이어가기 비정상 종료처리 추가
+		if sPrgsYn == "N" then
+			Form.MsgBox("안내", "이미 개설이 완료되었거나\n취소가 된 경우에는\n이어하기가 불가합니다.", "PrgsExit", 6)
+			Exit Sub
+		end if		
+	End If
+End Sub 
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	
+	szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+	if len(trim(szSubErr)) == 0 then
+		Form.ShowAlert("알림", szErrMsg)
+	else
+		Form.ShowAlert("알림", szErrMsg.."("..szSubErr..")" )
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+
+	If sTimerID == "1" or sTimerID == 1 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.5)
+	
+		Container1Step.EdtPwReal.SetShowKeypad(True)
+		
+	ElseIf sTimerID == "2" or sTimerID == 2 then 
+		
+		Form.SetTimerEvent2(sTimerID, 0, 0.5)
+				
+		CloseFlag = 1
+		Form.OpenNextPopup("mbbdm86181" , "" , "" )
+		
+	ElseIf sTimerID == "3" or sTimerID == 3 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.5)
+			
+		Container1Step.EdtPwReal.SetShowKeypad(True)
+	End If
+	
+End Sub
+
+'============================================================================
+'패스워드 글자 개수 카운트
+'============================================================================
+Sub Container1Step_EdtPwReal_OnEditChar(CharCode)
+
+	Select Case CharCode
+	
+	Case "0"
+		
+		'입력값 4초과할 때 초과 카운팅 방지
+		if nCnt == 4 then
+			nCnt = 4
+		else
+			nCnt = nCnt + 1
+		end if
+		
+	Case "1"
+		
+		'입력값 없을 때 마이너스 카운팅 방지
+		if nCnt == 0 then
+			nCnt = 0
+		else
+			nCnt = nCnt - 1
+		end if
+	Case "2" '취소/입력완료
+		nCnt = 0
+	End Select
+
+	PasswordInsert()	
+End Sub
+
+'============================================================================
+'사용자에게 보여지는 패스워드 모양 삽입 함수
+'============================================================================
+Function PasswordInsert()
+	
+	'입력완료일 시에 따로 개수 세이브해서 UI보이기
+	if g_CharFlag = "N" then
+		nCnt = g_CountSave
+		g_CharFlag = ""
+	end if
+	
+	Select Case nCnt
+	
+	Case 0
+		Container1Step.Pwdbasic0.visible = true	
+		Container1Step.Pwdbasic1.visible = true	
+		Container1Step.Pwdbasic2.visible = true	
+		Container1Step.Pwdbasic3.visible = true	
+
+		Container1Step.PwdInsert0.visible = false	
+		Container1Step.PwdInsert1.visible = false	
+		Container1Step.PwdInsert2.visible = false	
+		Container1Step.PwdInsert3.visible = false	
+
+	Case 1
+		Container1Step.Pwdbasic0.visible = false	
+		Container1Step.Pwdbasic1.visible = true	
+		Container1Step.Pwdbasic2.visible = true	
+		Container1Step.Pwdbasic3.visible = true	
+
+		Container1Step.PwdInsert0.visible = true
+		Container1Step.PwdInsert1.visible = false	
+		Container1Step.PwdInsert2.visible = false	
+		Container1Step.PwdInsert3.visible = false		
+	Case 2	
+		Container1Step.PwdInsert0.visible = true	
+		Container1Step.PwdInsert1.visible = true
+		Container1Step.Pwdbasic2.visible = true	
+		Container1Step.Pwdbasic3.visible = true	
+		
+		Container1Step.Pwdbasic0.visible = false	
+		Container1Step.Pwdbasic1.visible = false
+		Container1Step.PwdInsert2.visible = false	
+		Container1Step.PwdInsert3.visible = false	
+	Case 3
+		Container1Step.PwdInsert0.visible = true	
+		Container1Step.PwdInsert1.visible = true	
+		Container1Step.PwdInsert2.visible = true
+		Container1Step.Pwdbasic3.visible = true	
+		Container1Step.Pwdbasic0.visible = false	
+		Container1Step.Pwdbasic1.visible = false	
+		Container1Step.Pwdbasic2.visible = false	
+		Container1Step.PwdInsert3.visible = false
+	Case 4
+		Container1Step.PwdInsert0.visible = true	
+		Container1Step.PwdInsert1.visible = true	
+		Container1Step.PwdInsert2.visible = true	
+		Container1Step.PwdInsert3.visible = true
+		Container1Step.Pwdbasic0.visible = false	
+		Container1Step.Pwdbasic1.visible = false	
+		Container1Step.Pwdbasic2.visible = false	
+		Container1Step.Pwdbasic3.visible = false		
+	Case else
+		Form.ShowAlert("알림", "4자리를 입력해주세요.")
+	End Select
+	
+	Container1Step.PwdFail0.visible = false
+	Container1Step.PwdFail1.visible = false
+	Container1Step.PwdFail2.visible = false
+	Container1Step.PwdFail3.visible = false
+End Function
+
+'============================================================================
+Sub Container1Step_Button0_OnClick()
+	Container1Step.EdtPwReal.SetShowKeypad(True)
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.MsgBox("알림", "계좌개설을 중단하시겠습니까?\n진행 중인 계좌개설은 추후 '이어가기'로 이어서 진행하실 수 있습니다.", "ABORT", 7, "예", "아니오")
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName = "mbbdm86180_p1_end" Then
+		Container1Step.EdtPwReal.caption = ""
+		nCnt = 0
+		'PasswordFail()	
+		PasswordInsert()
+		Container1Step.EdtPwReal.SetShowKeypad(True)
+	End If
+End Sub
+
+'============================================================================
+Sub Container1Step_Image1_OnClick()
+	Form.OpenPopup("mbbdm86180_p2", "" , "" )
+End Sub
+
+'============================================================================
+'인증 실패 UI
+'============================================================================
+Function PasswordFail()
+	Container1Step.PwdFail0.visible = True
+	Container1Step.PwdFail1.visible = True
+	Container1Step.PwdFail2.visible = True
+	Container1Step.PwdFail3.visible = True
+	Container1Step.Pwdbasic0.visible = false		
+	Container1Step.Pwdbasic1.visible = false		
+	Container1Step.Pwdbasic2.visible = false		
+	Container1Step.Pwdbasic3.visible = false		
+	Container1Step.PwdInsert0.visible = false	
+	Container1Step.PwdInsert1.visible = false	
+	Container1Step.PwdInsert2.visible = false	
+	Container1Step.PwdInsert3.visible = false	
+End Function
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgF.setMaintainingRatio("5")
+	Image0.setMaintainingRatio("1")
+	Container1Step.Image1.setMaintainingRatio("1")
+	
+	Container1Step.PwdFail0.setMaintainingRatio("1")
+	Container1Step.PwdFail1.setMaintainingRatio("1")
+	Container1Step.PwdFail2.setMaintainingRatio("1")
+	Container1Step.PwdFail3.setMaintainingRatio("1")
+	Container1Step.Pwdbasic0.setMaintainingRatio("1")		
+	Container1Step.Pwdbasic1.setMaintainingRatio("1")		
+	Container1Step.Pwdbasic2.setMaintainingRatio("1")		
+	Container1Step.Pwdbasic3.setMaintainingRatio("1")		
+	Container1Step.PwdInsert0.setMaintainingRatio("1")	
+	Container1Step.PwdInsert1.setMaintainingRatio("1")	
+	Container1Step.PwdInsert2.setMaintainingRatio("1")	
+	Container1Step.PwdInsert3.setMaintainingRatio("1")	
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Image0_OnClick()
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "ABORT" and sRet == "ok" then
+		Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")	
+		
+'		Form.CloseForm()
+		
+		Form.OpenNextPopup("mbbdm85100", "", "")
+	elseif sKeyName == "PrgsExit" then	
+		Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")	
+		
+'		Form.CloseForm()		
+		Form.OpenNextPopup("mbbdm85100", "", "")	
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_nmet_011r" trcode="obaci_nmet_011r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_058r" trcode="obaci_acct_058r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_nmet_011r" title="비대면업무_비밀번호 체크" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="442" _ulen="334" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PWD_PIP^비밀번호PIP^68^0^0^0^0^0^0
+CNFR_PWD_PIP^확인비밀번호PIP^68^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+WRPL_TELNO^직장전화번호^15^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+LOGN_ID^로그인ID^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="97" _ulen="77" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+IF_RSLT_CODE^IF결과코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_058r" title="비대면계좌개설 이어가기 조회 N" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="253" _ulen="191" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="957" _ulen="717" >
+
+EXSN_CUST_YN^기존고객여부^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+FLNM_AGR_YN^성명일치여부^1^0^0^0^0^0^0
+NRML_ACNT_CNT^정상계좌수^8^0^7^0^0^0^0
+APLT_ABLE_YN^신청가능여부^1^0^0^0^0^0^0
+OVRL_ACNT_OPNG_YN^종합계좌개설여부^1^0^0^0^0^0^0
+APLY_KYC_INVT_INCL_GRAD_CODE^적용KYC투자성향등급코드^2^0^0^0^0^0^0
+ISA_ACNT_YN^ISA계좌여부^1^0^0^0^0^0^0
+DREM_YN^임직원여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN^CFD계좌보유여부^1^0^0^0^0^0^0
+UI_PFIN_YN^UI전문투자자여부^1^0^0^0^0^0^0
+PFIN_CLS_CODE^전문투자자구분코드^1^0^0^0^0^0^0
+SPCL_FNCM_TYPE_CODE^전문금융소비자유형코드^2^0^0^0^0^0^0
+PRSN_PFIN_YN^개인전문투자자여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN840^CFD계좌보유여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN156^CFD계좌보유여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN344^CFD계좌보유여부^1^0^0^0^0^0^0
+CFD_ACNT_HLDN_YN392^CFD계좌보유여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="494" _ulen="370" >
+
+BSWR_CLS_CODE^업무구분코드^1^0^0^0^0^0^0
+PRGS_YN^진행여부^1^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+REG_STAG_CLS_CODE^등록단계구분코드^1^0^0^0^0^0^0
+ACNT_OPNG_TOTAL_CSNU^계좌개설총건수^11^0^7^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_CLSN_DATE^신청마감일자^8^0^0^0^0^0^0
+ACNT_OPNG_CLCD^계좌개설구분코드^1^0^0^0^0^0^0
+CNFR_TRGT_CUST_CLCD^확인대상고객구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="1242" _ulen="916" >
+
+PROS_CMPT_YN^처리완료여부^1^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+SAC_ACNT_APLT_YN^슈퍼365계좌신청여부^1^0^0^0^0^0^0
+OVTR_JOIN_APLT_YN^종합매매가입신청여부^1^0^0^0^0^0^0
+CMA_RP_JOIN_APLT_YN^CMARP가입신청여부^1^0^0^0^0^0^0
+ISA_ACNT_APLT_YN^ISA계좌신청여부^1^0^0^0^0^0^0
+ISA_PROD_TYPE_CLCD^ISA상품유형구분코드^1^0^0^0^0^0^0
+ISA_JOIN_TPCD^ISA가입유형코드^2^0^0^0^0^0^0
+ISA_ACNT_OPNG_CLCD^ISA계좌개설구분코드^1^0^0^0^0^0^0
+FUTS_OPTN_ACNT_APLT_YN^선물옵션계좌신청여부^1^0^0^0^0^0^0
+OVDV_ACNT_APLT_YN^해외파생계좌신청여부^1^0^0^0^0^0^0
+DMST_CFD_ACNT_APLT_YN^국내CFD계좌신청여부^1^0^0^0^0^0^0
+OVRS_CFD_ACNT_APLT_YN^해외CFD계좌신청여부^1^0^0^0^0^0^0
+PNSN_SVNG_ACNT_APLT_YN^연금저축계좌신청여부^1^0^0^0^0^0^0
+PNSN_TCTR_CLS_CODE^연금이관구분코드^1^0^0^0^0^0^0
+PNSN_CNRC_AMT^연금계약금액^19^0^7^0^0^0^0
+WRAP_ACNT_APLT_YN^WRAP계좌신청여부^1^0^0^0^0^0^0
+FNNC_TR_OBJT_CNFR_DATE^금융거래목적확인일자^8^0^0^0^0^0^0
+FNNC_TR_OBJT_CNFR_SRNO^금융거래목적확인일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="610" _ulen="450" >
+
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+UI_INVT_INCL_ACMP_YN^UI투자성향수행여부^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC투자성향등급코드^2^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC상품등급코드^2^0^0^0^0^0^0
+UNFIT_YN^부적합여부^1^0^0^0^0^0^0
+FTOT_INVT_INCL_GRAD_CODE^선물옵션투자성향등급코드^2^0^0^0^0^0^0
+FTOT_PROD_GRAD_CODE^선물옵션상품등급코드^2^0^0^0^0^0^0
+FTOT_UNFIT_YN^선물옵션부적합여부^1^0^0^0^0^0^0
+WEAK_FNNC_SMAL_VISA_YN^취약금융소비자여부^1^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="315" _ulen="247" >
+
+AML_OCKN_LRDV_CODE^AML직종대분류코드^2^0^0^0^0^0^0
+AML_OCKN_SMDV_CODE^AML직종소분류코드^6^0^0^0^0^0^0
+EDD_TR_OBJT_CODE^EDD거래목적코드^1^0^0^0^0^0^0
+EDD_TR_FNDS_SORC_CODE^EDD거래자금출처코드^2^0^0^0^0^0^0
+WRPL_NAME^직장명^40^0^0^0^0^0^0
+OCPT_NAME^직업명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

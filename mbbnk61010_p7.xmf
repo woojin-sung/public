@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61010" scrname="빠른이체 등록" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,188,45,1" />
+		<BUTTON name="btnEnroll" caption="등록" fgcolor="061:188030030" btnimage="btn_pop2.9" ly_vert="188,562,187,45,1" />
+		<ACCOUNT name="accQuick" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,200" ly_vert="129,60,236,39,1" />
+		<LABEL name="Label1" fgcolor="065:102102102" caption="빠른이체명" ly_vert="6,15,96,39,1" />
+		<EDIT name="edtQname" fonttype="3" imetype="0" maxlength="20" hintcaption="최대 10글자 이내" ly_vert="129,15,236,39,1" />
+		<LABEL name="Label2" fgcolor="065:102102102" caption="출금계좌" ly_vert="6,60,100,39,1" />
+		<LABEL name="Label0" fgcolor="065:102102102" caption="이체금액" ly_vert="6,105,100,39,1" />
+		<EDIT name="edtAmt" mask="0,0,, 원,0,,0,1,0,0,0" halign="2" imetype="1" maxlength="11" ly_vert="129,105,162,39,1" />
+		<BUTTON name="btnReset" caption="정정" fgcolor="004:000000000" bgcolor="097:255255255" btnimage="btn_02.9" ly_vert="297,105,68,39,1" />
+		<BUTTON name="btnAll" enable="0" visible="0" caption="전액" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="6,150,58,34,0" />
+		<BUTTON name="btn100" caption="100만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="59,150,58,34,1" />
+		<BUTTON name="btn50" caption="50만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="121,150,58,34,1" />
+		<BUTTON name="btn10" caption="10만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="183,150,58,34,1" />
+		<BUTTON name="btn5" caption="5만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="245,150,58,34,1" />
+		<BUTTON name="btn1" caption="1만" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="307,150,58,34,1" />
+		<LABEL name="Label5" border="1" ly_vert="10,199,355,1,1" />
+		<BUTTON name="btnRecent" enable="0" visible="0" caption="최근이체" fgcolor="061:188030030" btnimage="btn_04.9" ly_vert="203,215,78,39,0" />
+		<BUTTON name="btnAppoint" enable="0" visible="0" caption="입금지정" fgcolor="061:188030030" btnimage="btn_04.9" ly_vert="287,215,78,39,0" />
+		<LABEL name="Label4" fgcolor="065:102102102" caption="입금기관" ly_vert="6,215,82,39,1" />
+		<EDIT name="edtBank" enable="0" fonttype="3" imetype="0" maxlength="30" imagefilepth="combo_03.9" ly_vert="129,215,183,39,1" />
+		<LABEL name="Label7" fgcolor="065:102102102" caption="입금계좌" ly_vert="6,260,82,39,1" />
+		<EDIT name="edtAcnt" imetype="1" hintcaption="입금계좌번호" ly_vert="129,260,236,39,1" />
+		<BUTTON name="Button6" enable="0" visible="0" caption="조회" ly_vert="297,305,68,39,0" />
+		<LABEL name="Label6" fgcolor="065:102102102" caption="내 통장 표시" ly_vert="6,305,90,39,1" />
+		<EDIT name="edtMytip" fgcolor="096:102102102" fonttype="3" imetype="0" maxlength="20" hintcaption="최대 10글자 이내" ly_vert="129,305,236,39,1" />
+		<LABEL name="Label8" fgcolor="065:102102102" caption="받는 분 표시" ly_vert="6,350,96,39,1" />
+		<EDIT name="edtRcvTip" fonttype="3" imetype="0" maxlength="20" hintcaption="최대 10글자 이내" ly_vert="129,350,236,39,1" />
+		<IMAGE name="imgSearch" imgpath="icon_main_10" ly_vert="277,219,32,32,1" />
+		<BUTTON name="btnOften" caption="자주" fgcolor="061:188030030" btnimage="btn_04.9" ly_vert="318,215,51,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11232" _ulen="10430" >
+'============================================================================
+' 01. 화 면 명 : 빠른이체 등록 팝업
+' 02. 화면설명 : 이체_빠른이체 등록 화면 
+' 03. 작    성 : 2016.02.19 ~ 2016.04.  테스트3
+'============================================================================
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_szACNO	'계좌번호 (8)
+Dim g_szASNO    '일련번호 (2) 
+Dim g_szUserJumin		'실명확인번호(주민번호)
+Dim g_szUserNum			'고객번호
+Dim g_szIRow			'선택된 행의 인덱스
+Dim g_szCom             '기관코드
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Check_Data()
+'============================================================================
+Function Check_Data()
+    If edtQname.caption == ""  Then
+	   Form.ShowAlert( "알림" , "빠른이체명을 입력하십시오!")
+	   return False
+	End If
+    szAcnt = Form.GetCtlProp("accQuick", "caption")
+    If Len(szAcnt) < 10 Then
+	    Form.ShowAlert( "알림" , "출금계좌번호를 확인하십시오!")
+	    return False
+	End If
+	If edtAmt.caption == ""  Then
+	   Form.ShowAlert( "알림" , "이체금액을 확인하십시오!")
+	   return False
+	End If
+	If edtAcnt.caption == ""  Then
+	   Form.ShowAlert( "알림" , "입금계좌번호를 확인하십시오!")
+	   return False
+	End If
+End Function
+'============================================================================
+' Cal_Btn(nAdd)
+'============================================================================
+Function Cal_Btn(nAdd)	
+   Dim nAmt
+   if Trim(edtAmt.caption) == "" then
+      nAmt = 0
+   else 
+      nAmt = CDbl(edtAmt.caption)
+   end if
+   edtAmt.caption = nAmt + nAdd
+End Function   
+'============================================================================
+'TR_Inquiry(g_szGbn)
+'============================================================================
+Function TR_Inquiry(g_szGbn)
+     g_szACNO = Form.GetCtlProp("accQuick", "total")
+     g_szASNO = Form.GetCtlProp("accQuick", "sequence")
+     g_szAccIn = edtAcnt.caption
+     
+     if g_szGbn == "Out" then	'타행 조회
+        
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "MNRC_BANK_CODE", 0 , g_szCom)	'입금은행코드
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "MNRC_ACNO" , 0 ,g_szAccIn)	'입금계좌번호
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "TR_AMT" , 0 ,  edtAmt.caption)		'거래금액
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "DRNG_ACNO" , 0 , g_szACNO)	'출금계좌번호
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "ACNT_PROD_CLS_CODE" , 0 , g_szASNO)	'계좌상품구분코드
+		DATAMANAGER.SetDataValue(0,  "obtss_elbs_129r", "InBlock1", "JOB_TRNO", 0 , "031")	'작업단말번호(기본값)
+		DATAMANAGER.RequestTranData("obtss_elbs_129r")
+	 
+	 else	'당행조회
+	    DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "CNFT_ACNO", 0 , Left(g_szAccIn, 8))	'상대계좌번호
+		DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "CNFT_ASNO" , 0 , Right(g_szAccIn, 2))	'상대계좌일련번호	
+	    DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "ACNO" , 0 , g_szACNO)	'계좌번호
+	    DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "ASNO" , 0 , g_szASNO)	'계좌일련번호
+	    DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "USE_YN" , 0 , "N")	'사용여부(기본값)			
+	    DATAMANAGER.RequestTranData("obrtd_drng_025r")
+     end if
+End Function 
+
+Function Open_Confirm()
+    Dim szData
+	' I★이체명★받는분★출금계좌번호★계좌명★이체금액★은행코드★기관명★입금계좌★내통장표시★받는분표시 
+	szData = "I"													' 구분 I:등록 D:삭제
+	szData = szData & "★" & edtQname.caption	
+	szData = szData & "★" & g_szInName	
+	szData = szData & "★" & Form.GetCtlProp("accQuick", "caption")			' 계좌번호
+	szData = szData & "★" & Form.GetCtlProp("accQuick", "accountname")		' 계좌명
+	szData = szData & "★" & edtAmt.caption					' 금액
+	szData = szData & "★" & g_szCom									' 코드
+	szData = szData & "★" & edtBank.caption		' 기관명	
+	szData = szData & "★" & edtAcnt.caption				' 입금계좌
+	szData = szData & "★" & edtMytip.caption					' 내통장표시
+	szData = szData & "★" & edtRcvTip.caption				' 받는분표시
+	
+	
+	' 등록확인팝업 오픈
+	Form.OpenPopup("mbbnk61010_p8", szData , "")
+End Function
+    
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	szValue = Form.GetOpenLinkData()
+	Form.SetCtlProp("accQuick", "caption", szValue)
+    accQuick_ChangeAccount()
+    edtBank.caption = "메리츠"
+    g_szCom = "287"
+'    Form.PostLinkData('sKey, sValue)
+
+End Sub
+
+
+
+
+'============================================================================
+' Form_OnPopupReturn
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbbnk61010_p8" then
+		if sRet == "ok" then
+'			btnSearch_OnClick()
+            Form.SendReturnToParent("등록" , sRet)
+            Form.CloseForm()
+		end if
+	ElseIf sKeyName == "61010_OFTEN" then
+	   If sRet <> "" then
+	      tData = Split(sRet, "★")
+	      'edtReceiver.caption = tData(3)
+	      edtAcnt.caption = Replace(tData(2),"-","")
+	      edtBank.caption = tData(4)
+	      g_szCom = tData(1)
+	   End If	
+	ElseIf sKeyName == "이체기관" then
+	   If sRet <> "" then
+	      tData1 = Split(sRet, "★")
+	      edtBank.caption = tData1(1)
+	      g_szCom = tData1(0)
+	   End If   
+	end if
+End Sub
+'============================================================================
+Sub btnReset_OnClick()
+	edtAmt.caption = 0
+End Sub
+
+'============================================================================
+Sub btnAll_OnClick()
+	edtAmt.caption = edtAble.caption
+	
+End Sub
+
+'============================================================================
+Sub btnReset_OnClick()
+	edtAmt.caption = 0
+End Sub
+
+
+'============================================================================
+Sub btn1_OnClick()
+	Call Cal_Btn(10000)
+End Sub
+
+
+'============================================================================
+Sub btn10_OnClick()
+	Call Cal_Btn(100000)
+End Sub
+
+
+'============================================================================
+Sub btn100_OnClick()
+	Call Cal_Btn(1000000)
+End Sub
+
+
+'============================================================================
+Sub btn5_OnClick()
+	Call Cal_Btn(50000)
+End Sub
+
+
+
+'============================================================================
+Sub btn50_OnClick()
+	Call Cal_Btn(500000)
+End Sub
+'============================================================================
+Sub btnOften_OnClick()
+	szAcnt = Form.GetCtlProp("accQuick", "caption")
+'	szAcno = Form.GetCtlProp("accQuick", "total")
+    If Len(szAcnt) < 10 Then
+	    Form.ShowAlert("알림", "계좌번호를 확인하십시오!")
+	    return False
+	End If
+'	Form.OpenCommonDialog("mbbnk60810.xmf", sParam1, sParam2)
+    Form.OpenPopup("mbbnk61010_p4" , szAcnt  , "")
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnEnroll_OnClick()
+    temp = Check_Data()
+    if temp = false then
+       exit Sub
+    end if 
+    if g_szCom =="287" then
+        call TR_Inquiry("In")
+	else 
+	    call TR_Inquiry("Out") 
+	end if    
+    
+'	DATAMANAGER.RequestTranData( "obtss_elbs_200a" )
+End Sub
+
+'============================================================================
+Sub accQuick_ChangeAccount()
+	g_szACNO = Form.GetCtlProp("accQuick", "total")
+	g_szACNO = Form.GetCtlProp("accQuick", "sequence")
+End Sub
+
+'============================================================================
+Sub btnRecent_OnClick()
+	szAcnt = Form.GetCtlProp("accQuick", "caption")
+'	szAcno = Form.GetCtlProp("accQuick", "total")
+    If Len(szAcnt) < 10 Then
+	    Form.ShowAlert("알림", "계좌번호를 확인하십시오!")
+	    return False
+	End If
+	Form.SetSharedData("61010_p5" , 0)
+    Form.OpenPopup("mbbnk61010_p5" , szAcnt  , "")
+End Sub
+
+'============================================================================
+Sub btnAppoint_OnClick()
+	szAcnt = Form.GetCtlProp("accQuick", "caption")
+'	szAcno = Form.GetCtlProp("accQuick", "total")
+    If Len(szAcnt) < 10 Then
+	    Form.ShowAlert("알림", "계좌번호를 확인하십시오!")
+	    return False
+	End If
+	Form.SetSharedData("61010_p5" , 1)
+    Form.OpenPopup("mbbnk61010_p5" , szAcnt  , "")
+End Sub
+
+'============================================================================
+Sub imgSearch_OnClick()
+	Form.OpenPopup("mbbnk61010_p3" , "" ,"")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obrtd_drng_025r" then
+	   g_szInName = DATAMANAGER.GetDataValue( 0, "obrtd_drng_025r", "OutBlock1", "RMT_NAME" , 0 )
+	elseif szTranID == "obtss_elbs_129r" then
+	   g_szInName = DATAMANAGER.GetDataValue( 0, "obtss_elbs_129r", "OutBlock1", "ACNM", 0 )
+	end if	
+	Call Open_Confirm()
+End Sub
+
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Form.MsgBox("알림", szErrMsg, 0, 0)
+End Sub
+
+'============================================================================
+Sub edtMytip_OnEditComplete()
+	szLen = Form.GetByteLength(edtMytip.caption)
+
+	if CDbl( szLen ) > 20 then
+		Form.MsgBox("알림", "한글10자, 영문/숫자 20자까지 입력가능", "keypadok", 0)
+		edtMyTip.caption = ""
+	end if	
+End Sub
+
+'============================================================================
+Sub edtRcvTip_OnEditComplete()
+	szLen = Form.GetByteLength(edtRcvTip.caption)
+
+	if CDbl( szLen ) > 20 then
+		Form.MsgBox("알림", "한글10자, 영문/숫자 20자까지 입력가능", "keypadok", 0)
+		edtRcvTip.caption = ""
+	end if	
+End Sub
+
+'============================================================================
+Sub edtQname_OnEditComplete()
+	szLen = Form.GetByteLength(edtQname.caption)
+
+	if CDbl( szLen ) > 20 then
+		Form.MsgBox("알림", "한글10자, 영문/숫자 20자까지 입력가능", "keypadok", 0)
+		edtQname.caption = ""
+	end if	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obrtd_drng_025r" trcode="obrtd_drng_025r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_elbs_129r" trcode="obtss_elbs_129r" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obrtd_drng_025r" title="수취인 조회 (당행이체)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="240" _ulen="176" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+USE_YN^사용여부^1^0^0^0^0^0^0
+CNFT_ACNO^상대계좌번호^8^0^0^0^0^0^0
+CNFT_ASNO^상대계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="44" _ulen="36" >
+
+RMT_NAME^수취인명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_elbs_129r" title="타행이체수취조회(지로/예약/자?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="345" _ulen="261" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+JOB_TRNO^작업단말번호^39^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TR_AMT^거래금액^19^0^7^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+ACNT_PROD_CLS_CODE^계좌상품구분코드^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+RMRK^비고^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="216" _ulen="164" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+STDL_CNFT_BRCD^입출고상대지점코드^4^0^0^0^0^0^0
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

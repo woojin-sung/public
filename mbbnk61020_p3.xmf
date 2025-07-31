@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61020" scrname="은행개설입출금 내역확인-출금" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fgcolor="063:255255255" fontsize="5" caption="이체예정내역확인" bgcolor="064:188030030" transmode="0" halign="1" ly_vert="0,0,375,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_main_03" ly_vert="343,8,24,24,1" />
+		<BUTTON name="Button0" caption="확인" fgcolor="061:188030030" btnimage="btn_etc9.9" ly_vert="187,601,187,45,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="3" designorder="1" ly_vert="10,48,353,105,1" >
+			<COL_INFO ly_vert_width="111,242" />
+			<ROW_INFO ly_vert_height="35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,1,0" bgcolor="066:238239240" caption="출금계좌" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" halign="0" caption="출금계좌" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="0" mask="1,0,,,1,####-####-##,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" halign="0" caption="예금주" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="Table1" insidelinecolor="102:255255255" colcount="2" rowcount="4" designorder="1" ly_vert="10,162,353,140,1" >
+			<COL_INFO ly_vert_width="111,242" />
+			<ROW_INFO ly_vert_height="35,35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,1,0" bgcolor="066:238239240" caption="입금계좌" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" halign="0" caption="입금계좌" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" halign="0" caption="예금주" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:102102102" halign="0" caption="이체금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,3,1,3" halign="0" mask="0,0,,원,0,,0,1,0,0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LINKFORM name="LinkForm0" ly_vert="21,310,335,250,1" />
+		<BUTTON name="Button1" caption="취소" fgcolor="004:000000000" btnimage="btn_etc8.9" ly_vert="0,601,187,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="18049" _ulen="16463" >
+'============================================================================
+' ㅇ 증권 잔액조회 : 증권비밀번호 불필요
+' ㅇ 은행 잔액조회 : 은행비밀번호 필요
+' ㅇ 입금 : 은행비밀번호 필요 & 공동인증 필요
+' ㅇ 출금 : 증권비밀번호 필요 & 공동인증 필요
+'
+' 2024.07.10. 임종현 v001 : 토스뱅크 은행  출금시 공동인증 생략
+'============================================================================
+
+Dim g_szAccountNumber 
+Dim g_szAccountSerialNumber
+Dim g_szAccountName
+Dim g_szPass
+Dim g_szBankCode
+Dim g_szBankAcc
+Dim g_sName
+Dim g_sAmt
+Dim g_szCertUserType
+Dim g_szUserId
+Dim g_szTrMsg
+Dim g_sOtpTrMsg
+Dim g_mSBValue
+Dim g_mOTPInfo
+Dim g_mOTPData
+
+Dim g_tactLmtAmt_Day   'TOSS 이체한도 (누적)
+Dim g_tactLmtAmt_Total  'TOSS 이체한도 (총)
+
+'============================================================================
+Sub imgClose_OnClick()
+
+    Form.SendReturnToParent( "CORNFORM_POPUP" , "CANCEL" )
+    Form.CloseForm()
+    
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	    
+    'v001
+    if g_szBankCode == "092" then
+    
+	    DATAMANAGER.RequestTranData("obrtp_comn_017r") '이체한도확인
+    
+'	    Form.triggerEvent("LinkForm0", "이체확인" , "")
+'		
+'	    If g_szCertUserType == "3" Or g_szCertUserType == "4" Or g_szCertUserType == "5" Then '메리츠 사설인증 or 바이오인증
+'	        Form.OpenFramePopup("mhetc90060_p5" , g_szTrMsg , "")
+'	    End If
+	    
+    else
+	    Form.triggerEvent("LinkForm0", "이체확인" , "")
+	    
+	    If g_szCertUserType == "5" Then
+		    DATAMANAGER.RequestTranData("obcsb_oimf_638r") '보안매체유형조회
+	    End If
+    end if
+
+    
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+    Form.SendReturnToParent( "CORNFORM_POPUP" , "CANCEL" )
+    Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    szData = Form.GetOpenLinkData()
+    szList = Split(szData, "★")
+	
+    If UBOUND(szList) < 1 Then
+        Exit Sub
+    End if
+	
+    g_szCertUserType = Form.GetSharedData("&CERT_USE_TYPE" , False)
+    g_szUserId       = Form.GetSharedData("&USER_ID"       , False)
+    
+    g_szAccountNumber       = szList(0)
+    g_szAccountSerialNumber = szList(1)
+    g_szAccountName         = szList(2)
+    g_szPass                = szList(3)
+    g_szBankAcc             = szList(5)
+    g_szBankCode            = szList(7) '은행코드
+    g_sName                 = szList(8) '수취인명
+    g_sAmt                  = szList(6)
+
+    Table0.SetCellString(1, 1, g_szAccountNumber & g_szAccountSerialNumber) '계좌번호
+    Table0.SetCellString(2, 1, g_szAccountName)
+	
+    Table1.SetCellString(1, 1, szList(4) & " " & g_szBankAcc)
+    Table1.SetCellString(2, 1, g_sName )
+    Table1.SetCellString(3, 1, g_sAmt)'이체금액
+    
+    g_sOtpTrMsg = szList(4)  & "#" & g_szBankAcc & "#" & g_sName & "#" & FormatNumber(CDbl(g_sAmt), 0, 0, 0, -1) & "원#"
+    
+    If g_szCertUserType == "3" Then '바이오
+        g_szTrMsg = "BIO_trType★1★이체예정내역\n" & "입금기관 : " & szList(4) & "\n" & "입금계좌 : " & g_szBankAcc & "\n" & "예금주명 : " & g_sName & "\n" & "이체금액 : " & FormatNumber(CDbl(g_sAmt), 0, 0, 0, -1) & "원\n★0"
+    ElseIf g_szCertUserType == "4" Then '바이오
+        g_szTrMsg = "BCHAIN_trType★1★이체예정내역\n" & "입금기관 : " & szList(4) & "\n" & "입금계좌 : " & g_szBankAcc & "\n" & "예금주명 : " & g_sName & "\n" & "이체금액 : " & FormatNumber(CDbl(g_sAmt), 0, 0, 0, -1) & "원\n★0"
+    ElseIf g_szCertUserType == "5" Then '메리츠 사설인증데이터 Set
+        g_szTrMsg = "ATON_trType★이체예정내역\n" & "입금기관 : " & szList(4) & "\n" & "입금계좌 : " & g_szBankAcc & "\n" & "예금주명 : " & g_sName & "\n" & "이체금액 : " & FormatNumber(CDbl(g_sAmt), 0, 0, 0, -1) & "원\n"
+    Else
+        g_szTrMsg = ""
+    End if
+    
+    if g_szBankCode <> "092" then
+	    DATAMANAGER.RequestTranData("obcsb_oimf_638r") '보안매체유형조회
+    end if 
+    
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+    
+    If szTranID == "obcsb_oimf_638r" Then '보안매체유형조회
+    
+        szScrcOtpClsCode = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "SCRC_OTP_CLS_CODE" , 0)
+	
+        If szScrcOtpClsCode == "9" Then '기타오류
+            Form.MsgBox("알림", "인증오류가 발생했습니다." , "" , 6)
+            Exit Sub	
+        End If
+
+        If g_szCertUserType == "0" Then '공동인증서
+	
+            Select Case szScrcOtpClsCode '보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 4:mOTP, 9:에러
+                Case "0"
+                    LinkForm0.linkfile = "mbbnk61010_s1"  '공인인증서_보안카드화면
+                Case "1"
+                    LinkForm0.linkfile = "mbbnk61010_s3"  '공인인증서만
+                Case "2"	
+                    LinkForm0.linkfile = "mbbnk61010_s3"  '공인인증서만
+                Case "3"
+                    Form.SetSharedData("OTP_TR_MSG_1" , g_sOtpTrMsg) '링크폼에서 사용할 Shared변수 세팅
+                    LinkForm0.linkfile = "mbbnk61010_s2"  '공인인증서_일반/스마트OTP
+                Case "4"
+                    LinkForm0.linkfile = "mbbnk61010_suo" '공인인증서_mOTP
+            End Select	
+
+        ElseIf g_szCertUserType == "1" Then '간편인증
+	
+            Select Case szScrcOtpClsCode '보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 4:mOTP, 9:에러
+                Case "0"
+                    LinkForm0.linkfile = "mbbnk61010_s5"  '간편인증_보안카드
+                Case "1"
+                    LinkForm0.linkfile = "mbbnk61010_s7"  '간편인증만
+                Case "2"
+                    LinkForm0.linkfile = "mbbnk61010_s7"  '간편인증만		    
+                Case "3"
+                    Form.SetSharedData("OTP_TR_MSG_1" , g_sOtpTrMsg) '링크폼에서 사용할 Shared변수 세팅		
+                    LinkForm0.linkfile = "mbbnk61010_s6"  '간편인증_OTP
+                Case "4"
+                    LinkForm0.linkfile = "mbbnk61010_sso" '간편인증_mOTP
+            End Select
+	    
+        Else '그 외(사설인증 및 바이오인증)
+
+            Select Case szScrcOtpClsCode '보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 4:mOTP, 9:에러
+                Case "0"
+                    Form.OpenPopupAnimation("seccardcheckpopup" , " " , "" , "2") '보안카드 인증
+                Case "1"
+                    Form.OpenFramePopup("mhetc90060_p5" , g_szTrMsg , "")
+                Case "2"
+                    Form.OpenFramePopup("mhetc90060_p5" , g_szTrMsg , "")		    
+                Case "3"
+                    Form.SetSharedData("OTP_TR_AUTH_MSG" , g_sOtpTrMsg)	  '팝업에서 사용할 Shared변수 세팅		    
+                    Form.OpenPopupAnimation("otpcheckpopup" , " " , "" , "2") '일반/스마트OTP 인증
+                Case "4"
+                    Form.OpenPopupAnimation("otpcheckpopup" , " " , "" , "2") 'mOTP 인증
+            End Select	
+	    
+        End If
+	
+    End If
+    
+    If szTranID == "obtsd_asou_060a" OR  szTranID == "obtss_elbs_133u"  Then
+    
+        Form.MsgBox("알림", "전송되었습니다.\n이체결과를 확인하세요." , "" , 0)
+        Form.SendReturnToParent("CORNFORM_POPUP" , "OK")
+        Form.CloseForm()
+
+    End If    
+    
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+    If szTranID == "obcsb_oimf_638r" Then '보안매체유형조회
+    
+        DATAMANAGER.SetDataValue(0 , szTranID , "InBlock1" , "PROS_CLS"     , 0 , "1"              ) '1.일반입출금
+        DATAMANAGER.SetDataValue(0 , szTranID , "InBlock1" , "ELFN_ID"      , 0 , g_szUserId       )
+        DATAMANAGER.SetDataValue(0 , szTranID , "InBlock1" , "ACNO"         , 0 , g_szAccountNumber)
+        DATAMANAGER.SetDataValue(0 , szTranID , "InBlock1" , "RRNO"         , 0 , ""               )
+        DATAMANAGER.SetDataValue(0 , szTranID , "InBlock1" , "MAC_ADDR"     , 0 , ""               ) '휴대폰 MAC주소
+        DATAMANAGER.SetDataValue(0 , szTranID , "InBlock1" , "DISK_SERL_NO" , 0 , ""               ) 'PC 디스크일련번호
+        DATAMANAGER.SetDataValue(0 , szTranID , "InBlock1" , "RRNO_PIP"     , 0 , ""               )    
+    
+    End If
+
+    If szTranID == "obrtp_comn_017r" Then '출납_이체누적금액조회
+	DATAMANAGER.SetDataValue(0,  "obrtp_comn_017r", "InBlock1", "RCPY_DATE"                     , 0 ,Form.GetSharedData("&HOST_DATE", false)  )'출납일자       
+	DATAMANAGER.SetDataValue(0,  "obrtp_comn_017r", "InBlock1", "ACNO"                              , 0 , g_szAccountNumber                                  )'계좌번호  
+	DATAMANAGER.SetDataValue( 0, "obrtp_comn_017r" , "InBlock1" , "ODER_CHAN_TYPE_CLS_CODE" , 0 , "020" )
+    End If
+
+    If szTranID == "obrtp_comn_018r" Then '출납_이체한도조회
+        DATAMANAGER.SetDataValue(0,  "obrtp_comn_018r", "InBlock1", "TACT_CLS_CODE"             , 0 , "03"    )'이체구분코드 (즉시이체-은행) 
+        DATAMANAGER.SetDataValue(0,  "obrtp_comn_018r", "InBlock1", "ACNO"                              , 0 , g_szAccountNumber  )'계좌번호  
+        DATAMANAGER.SetDataValue(0,  "obrtp_comn_018r" ,"InBlock1" , "ODER_CHAN_TYPE_CLS_CODE" , 0 , "020" )
+    End If
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+    szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+    If Trim(szSubMsg) == "" Then
+        szTotalMsg = szErrMsg
+    Else
+        szTotalMsg = szErrMsg .. "\n(" .. szSubMsg .. ")"
+    End If
+    
+    If szTranID == "obtsd_asou_060a"  OR  szTranID == "obtss_elbs_133u"  Then
+        Form.MsgBox( "알림", szTotalMsg, "", 0 )
+	Button0.enable = false
+    End If
+
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam) '링크폼 인증(보안매체 + 전자서명)처리 완료 시
+
+    If sEventName == "인증서" Then
+    
+        If sParam == "Success" Then
+            TR_Inquiry()  
+        End If
+	
+    ElseIf sEventName == "보안카드" Then
+        If sParam == "Success" Then
+            TR_Inquiry()
+        End If
+    ElseIf sEventName == "간편인증" Then
+    
+        If sParam == "Success" Then
+            Button0_OnClick()
+        End If
+	
+    ElseIf sEventName == "바이오인증" Or sEventName == "공동인증" Then
+    
+        If sParam == "Success" Then
+            TR_Inquiry()		
+        End If
+	
+    ElseIf sEventName == "간편인증OTP" Then
+    
+        If sParam == "Success" Then
+            TR_Inquiry()
+        End If
+	
+    ElseIf sEventName == "mOTP_GenReq" Then
+	
+	    Form.requestMOTP("MOTP_REQ_OTP_ENC", sParam , "61010p0")
+	    
+    End If
+    
+End Sub
+
+'============================================================================ 
+Sub Form_OnTriggerEventMOTP(sEventName, sParam) 'Form.requestMOTP 호출 시 발생 이벤트
+
+    If sEventName == "MOTP_GET_VERSION_RETURN_61010p0" Then
+        g_mSBValue = Split(sParam , "★") 'resultcode★resultMsg★mSBVersion
+		
+        If g_mSBValue[0] <> "00000" Then
+            Form.MsgBox( "알림", g_mSBValue(1), "close", 6 )
+        Else
+            Form.SetSharedData( "mOTP_MsbVrsn" , g_mSBValue[2] )
+        End If
+		
+    ElseIf sEventName == "MOTP_GETINFO_RETURN_61010p0" Then
+		
+        g_mOTPInfo = Split(sParam , "★") 'resultcode★resultMsg★otpAlias(일련번호)
+		
+        If g_mOTPInfo[0] <> "00000" Then
+            Form.MsgBox( "알림", g_mOTPInfo(1), "close", 6 )
+        Else
+            Form.SetSharedData( "mOTP_OTPSrno" , g_mOTPInfo(2) )
+        End If
+
+    ElseIf sEventName == "MOTP_REQ_OTP_ENC_RETURN_61010p0" Then
+
+        g_mOTPData = Split(sParam , "★")
+		
+        If g_mOTPData[0] <> "00000" Then
+            Form.MsgBox( "알림", g_mOTPData(1), "close", 6 )
+        Else
+            Form.SetSharedData( "mOTP_SrnoGen" , g_mOTPData[2])
+            Form.triggerEvent("LinkForm0" , "mOTP_Gen" , "Success")
+        End If
+	
+    End If
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+    If sKeyName == "보안카드" Or sKeyName == "OTP" Then '보안매체인증
+    
+        If sRet == "Success" Then
+            Form.OpenFramePopup("mhetc90060_p5" , g_szTrMsg , "")
+        End If
+	
+    End If
+    
+    If sKeyName == "mhetc90060_p5" Then '전자서명인증
+    
+        szData = Split(sRet, ";")
+        If szData(0) == "ok" or sRet == "ok" Then
+	    if g_szBankCode == "092" then
+	        TR_Inquiry_TOSS()
+	    else
+	        TR_Inquiry()
+	    end if 
+            
+        End If
+	
+    End If
+	
+End Sub
+
+'============================================================================
+Sub TR_Inquiry()
+
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "JOB_CLS_CODE"   , 0 , "0"                    ) '작업구분코드			
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "ACNO"           , 0 , g_szAccountNumber      ) '계좌번호
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "ASNO"           , 0 , g_szAccountSerialNumber) '계좌번호	
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "PWD"            , 0 , g_szPass               ) '비밀번호
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "TACT_BANK_CODE" , 0 , g_szBankCode           ) '은행코드
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "BANK_ACNO"      , 0 , g_szBankAcc            ) '은행계좌번호
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "TACT_AMT"       , 0 , g_sAmt                 ) '이체금액
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "TACT_CLS_CODE"  , 0 , "03"                   ) '이체구분코드
+    DATAMANAGER.SetDataValue(0 , "obtsd_asou_060a" , "InBlock1" , "RMT_NAME"       , 0 , g_sName                ) '수취인명
+
+    DATAMANAGER.RequestTranData("obtsd_asou_060a")
+	
+End Sub
+
+'============================================================================
+Sub TR_Inquiry_TOSS()
+
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "MNRC_BANK_CODE"                     , 0 , g_szBankCode       )'입금은행코드
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "JOB_TRNO"                                  , 0 , "031"                     ) '단말번호
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "MNRC_ACNO"                              , 0 , g_szBankAcc         )'입금계좌번호
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "TR_AMT"                                     , 0 , g_sAmt                  )'출금액
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "DRNG_ACNO"                               , 0 , g_szAccountNumber         )  '출금계좌
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "ACNT_PROD_CLS_CODE"              , 0 , g_szAccountSerialNumber  ) '출금계좌일련번호
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "RMRK"                                         , 0 , ""                               )'비고
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "RMT_NAME"                                , 0 , g_sName                    )'수취인명
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "FEE"                                            , 0 , 0                                )'수수료
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "STDL_CNFT_BRCD"                       , 0 , ""                              ) '타행지점코드
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "CLNT_INFO_CNTT"                       , 0 , ""                               )'의뢰인정보내용
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "PMPP_INFO_CNTT"                       , 0 , ""                              ) '받는분통장표기	
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "TACT_CLS_CODE"                        , 0 , "03"                            ) '이체구분코드 (즉시이체-은행)
+    DATAMANAGER.SetDataValue(0, "obtss_elbs_133u" , "InBlock1" , "DRNG_ACNT_BNKB_EXRS_CNTT"  , 0 , ""                               ) '내통장표기
+	
+    DATAMANAGER.RequestTranData("obtss_elbs_133u")
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	    
+    If szTranID == "obrtp_comn_017r"  Then
+    	    g_tactLmtAmt_Day = DATAMANAGER.GetDataValue(0 , "obrtp_comn_017r" , "OutBlock1" , "TR_AMT" , 0)
+	    
+	    DATAMANAGER.RequestTranData("obrtp_comn_018r")
+    End If    
+    
+    
+    If szTranID == "obrtp_comn_018r"  Then
+        g_tactLmtAmt_Total = DATAMANAGER.GetDataValue(0 , "obrtp_comn_018r" , "OutBlock1" , "D1_TACT_LIMT_AMT" , 0)
+
+        If CDbl(g_tactLmtAmt_Total) < CDbl(g_tactLmtAmt_Day) + CDBL(g_sAmt) Then
+	    Form.MsgBox("알림", "1일 이체한도 초과입니다." , "" , 0)
+	    Form.CloseForm()
+	    Exit Sub
+	End If
+	
+	Form.triggerEvent("LinkForm0", "이체확인" , "")
+		
+	If g_szCertUserType == "3" Or g_szCertUserType == "4" Or g_szCertUserType == "5" Then '메리츠 사설인증 or 바이오인증
+	    Form.OpenFramePopup("mhetc90060_p5" , g_szTrMsg , "")
+	else
+		    Form.MsgBox("알림", "1일 zzz." , "" , 0)
+
+	End If
+	    
+	    
+    End If    
+
+
+    
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtsd_asou_060a" trcode="obtsd_asou_060a" compress="1" encryption="1" inputcheck="1" digitalsign="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_638r" trcode="obcsb_oimf_638r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_elbs_133u" trcode="obtss_elbs_133u" inputcheck="1" useattr="0" />
+			<TRAN tranid="obrtp_comn_017r" trcode="obrtp_comn_017r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obrtp_comn_018r" trcode="obrtp_comn_018r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtsd_asou_060a" title="이체_이체출금및취소" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="419" _ulen="315" >
+
+JOB_CLS_CODE^작업구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+TR_SRNO^거래일련번호^11^0^7^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+TACT_BANK_CODE^이체은행코드^3^0^0^0^0^0^0
+BANK_ACNO^은행계좌번호^16^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+RMT_NAME^수취인명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="296" _ulen="228" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+TACT_BANK_NAME^이체은행명^30^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+TFAM_PRRM^예수금전잔^19^0^7^0^0^0^0
+TFAM_NWRM^예수금금잔^19^0^7^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+RCPY_SRNO^출납일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_638r" title="전자금융사기예방 고객조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="376" _ulen="290" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="30" inout="in" _len="330" _ulen="242" >
+
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+DRNG_ASNO^출금계좌일련번호^2^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+MNRC_ASNO^입금계좌일련번호^2^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1142" _ulen="840" >
+
+TERM_DSGT_STPL_YN^단말지정약정여부^1^0^0^0^0^0^0
+SPLM_ATHN_STPL_YN^추가인증약정여부^1^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TLPH_SRNO^자택전화일련번호^4^0^0^0^0^0^0
+WRPL_TLPH_ARCD^직장전화지역번호^4^0^0^0^0^0^0
+WRPL_TLPH_TONO^직장전화국번호^4^0^0^0^0^0^0
+WRPL_TLPH_SRNO^직장전화일련번호^4^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+ACML_TR_PBMN^누적거래대금^19^0^7^0^0^0^0
+UI_SPLM_YN^UI추가여부^1^0^0^0^0^0^0
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+REG_YN^등록여부^1^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+UI_CUST_ATHN_NO^UI고객인증번호^6^0^0^0^0^0^0
+UI_CUST_ATHN_NO2^UI고객인증번호2^6^0^0^0^0^0^0
+SVC_ECPT_CLS_CODE^서비스예외구분코드^1^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="10" inout="out" _len="309" _ulen="243" >
+
+TERM_NAME^단말명^30^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+REG_EMPNO^등록직원번호^9^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="111" _ulen="85" >
+
+TOTAL_TACT_AMT^총이체금액^19^0^7^0^0^0^0
+SECU_MDIA_EXLS_YN^보안매체제외여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_elbs_133u" title="소액결제_전자금융 타행이체(카?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="699" _ulen="523" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+JOB_TRNO^작업단말번호^39^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TR_AMT^거래금액^19^0^7^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+ACNT_PROD_CLS_CODE^계좌상품구분코드^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+RMRK^비고^100^0^0^0^0^0^0
+RMT_NAME^수취인명^40^0^0^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+STDL_CNFT_BRCD^입출고상대지점코드^4^0^0^0^0^0^0
+CLNT_INFO_CNTT^의뢰인정보내용^100^0^0^0^0^0^0
+PMPP_INFO_CNTT^출금인정보내용^100^0^0^0^0^0^0
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+DRNG_ACNT_BNKB_EXRS_CNTT^출금계좌통장표시내용^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="412" _ulen="310" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+TR_SRNO^거래일련번호^11^0^7^0^0^0^0
+RCPY_SRNO^출납일련번호^11^0^7^0^0^0^0
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+SMCD_NAME^적요코드명^100^0^0^0^0^0^0
+TLMS_TRNM_HOUR^전문전송시간^6^0^0^0^0^0^0
+DELY_TACT_YN^지연이체여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="332" _ulen="244" >
+
+LNKD_BANK_CLS_CODE^연계은행구분코드^1^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+TACT_LNKD_ISTU_CODE^이체연계기관코드^3^0^0^0^0^0^0
+TACT_STND_TR_CODE^이체표준거래코드^6^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="90" _ulen="70" >
+
+TFAM_PRRM^예수금전잔^19^0^7^0^0^0^0
+TFAM_NWRM^예수금금잔^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrtp_comn_017r" title="출납_이체누적금액조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="147" _ulen="111" >
+
+RCPY_DATE^출납일자^8^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ODER_CHAN_TYPE_CLS_CODE^주문채널유형구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="244" _ulen="180" >
+
+TR_AMT^거래금액^19^0^7^0^0^0^0
+EASY_TACT_ACML_AMT^간편이체누적금액^19^0^7^0^0^0^0
+EASY_TACT_OTCO_ACML_AMT^간편이체타사누적금액^19^0^7^0^0^0^0
+EXLS_ACNT_TACT_ACML_AMT^제외계좌이체누적금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrtp_comn_018r" title="출납_이체한도조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="157" _ulen="117" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+ODER_CHAN_TYPE_CLS_CODE^주문채널유형구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="249" _ulen="185" >
+
+T1_TACT_LIMT_AMT^1회이체한도금액^19^0^7^0^0^0^0
+D1_TACT_LIMT_AMT^1일이체한도금액^19^0^7^0^0^0^0
+EASY_TACT_LIMT_AMT^간편이체한도금액^19^0^7^0^0^0^0
+EXLS_ACNT_TACT_LIMT_AMT^제외계좌이체한도금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
