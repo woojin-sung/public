@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="81001" scrname="예외 계좌 추가" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,329,260,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="예외 계좌 추가" bgcolor="064:188030030" border="1" ly_vert="-1,0,334,50,1" />
+		<LABEL name="Label1" fontsize="-2" fontstyle="01" caption="입금기관" ly_vert="5,61,125,39,1" />
+		<LABEL name="Label2" fontsize="-2" fontstyle="01" caption="계좌번호" ly_vert="5,110,98,39,1" />
+		<LABEL name="Label3" fontsize="-2" fontstyle="01" caption="수취인계좌명" ly_vert="5,159,90,39,1" />
+		<EDIT name="edtBankName" enable="0" imetype="0" ly_vert="140,160,101,39,1" />
+		<EDIT name="edtBank" enable="0" fonttype="3" imetype="0" maxlength="30" ly_vert="141,62,183,39,1" />
+		<IMAGE name="imgSearch" imgpath="icon_main_10" ly_vert="289,66,32,32,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="293,14,24,24,1" />
+		<BUTTON name="btnName" caption="수취인확인" fgcolor="004:000000000" fontsize="-2" btnimage="btn_02.9" ly_vert="248,159,77,39,1" />
+		<BUTTON name="btn0" caption="등록" fontsize="-2" btnimage="btn_01.9.png" ly_vert="121,209,87,41,1" />
+		<EDIT name="edtAcnt" imetype="1" maxlength="16" ly_vert="140,111,185,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="13456" _ulen="12210" >
+'============================================================================
+' 01. 화 면 명 : 지연이체서비스_지연이체서비스신청
+' 02. 화면설명 : 지연이체서비스_예외 계좌 추가 팝업
+' 03. 작    성 : 2016.06.29 : 김유경
+' 2020.03.16 : 정민영: v0001 : [T2003040024] 종금영업종료 및 사명 변경
+' 2020.09.16 : 권오상 : v002 : T2008250015 : 메모리평문 취약점 수정
+' 2021.02.22 : 장원혁 : v003 : T2011170001 : 모바일OTP 적용
+'============================================================================
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_szOpenData
+Dim g_sUserID		     '사용자ID
+Dim g_szPW			'비밀번호
+Dim g_acno
+Dim g_szList			'계좌번호와 비밀번호
+Dim SelfAcc			'본인계좌여부
+Dim AccExst			'계좌번호 유효여부
+DIm g_cls
+Dim	g_PlainRm 'v002
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' TR_Inquiry
+'============================================================================
+Function TR_Inquiry(szTranID )
+	if szTranID == "obpds_srvc_411a" then	'지연이체 서비스 약정 조회
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "PROS_CLS_CODE"	 , 0 ,"U"		    		)	'처리구분코드(U:예외계좌추가)
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "SVCD"	 		 , 0 ,"069"		    		)	'서비스코드
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "SVC_MANG_UNIT_CODE", 0 ,"01"		    		)	'01: 고객
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "CONT_CLS_CODE"	 , 0 ,"4"		    		)	'4 : 온라인
+'		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "ACNO"	  	 	 , 0 ,g_szList(0)			)	'계좌번호
+'		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "ACNT_PWD"	 	 , 0 ,g_szList(1)			)	'비밀번호 
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "ACNO"	  	 	 , 0 ,g_acno			)	'계좌번호
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "ACNT_PWD"	 	 , 0 ,g_szPW			)	'비밀번호 
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "BANK_CODE"	 	 , 0 ,g_szCom		    		)	'은행코드
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "TACT_BANK_ACNO"	 , 0 ,edtAcnt.caption 		)	'계좌번호
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_411a", "InBlock1", "TACT_BANK_ACNM"	 , 0 ,edtBankName.caption   )	'수취인명
+		DATAMANAGER.RequestTranData("obpds_srvc_411a")
+	elseif szTranID == "obcsb_oimf_638r" then
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_638r", "InBlock1", "ELFN_ID" , 0 , g_sUserID)
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_638r", "InBlock1", "SVCD" , 0 , "000")'기본 '200'  등록 '400'
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_638r", "InBlock1", "UI_TERM_IDNT_KEY" , 0 , Form.GetDeviceID())	'UI단말식별키
+		DATAMANAGER.RequestTranData("obcsb_oimf_638r")
+	end if	
+End Function
+'****************************************************************************
+
+'============================================================================
+' Form_OnPopupReturn
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName == "이체기관" then
+	   If sRet <> "" then
+	      tData1 = Split(sRet, "★")
+	      edtBank.caption = tData1(1)
+	      g_szCom = tData1(0)
+	   End If   
+	end if
+	
+	if sKeyName == "mhetc90060_p8" then	'추가인증 
+		if sRet == "ok" then	'추가인증성공 -> 보안매체조회 및 인증
+			Call TR_Inquiry("obcsb_oimf_638r")	
+		else
+			Form.CloseForm( )
+			exit sub
+		end if
+	end if
+	
+	if sKeyName == "mhetc90060_p9" then	'보안카드(보안매체1)
+		if sRet == "ok" then			'성공
+			'Call SendReg()		
+			Form.OpenFramePopup("mhetc90060_p5" , "" , "")
+		else 					'실패
+			exit sub
+		end if	
+	end if
+	
+	
+	if sKeyName == "mhetc90060_pa" then	'부가정보인증
+		if sRet == "ok" then			'성공
+			'Call SendReg()	
+			Form.OpenFramePopup("mhetc90060_p5" , "" , "")
+		else 					'실패
+			exit sub
+		end if
+	end if
+	
+	
+	if sKeyName == "mhetc90060_pb" then	'일반/스마트OTP
+		if sRet == "ok" then			'성공
+			'Call SendReg()	
+			Form.OpenFramePopup("mhetc90060_p5" , "" , "")
+		else						'실패		
+			exit sub
+		end if	
+	end if
+	
+	if sKeyName == "mhetc90060_motp" then	'일반/스마트OTP v003
+		if sRet == "ok" then			'성공
+			'Call SendReg()	
+			Form.OpenFramePopup("mhetc90060_p5" , "" , "")
+		else						'실패		
+			exit sub
+		end if	
+	end if
+	
+	if sKeyName == "mhetc90060_p5" then	'공인인증서 성공여부;비밀번호
+		Dim szTempData
+		szTempData = Split(sRet, ";")	'성공여부, 비밀번호
+		if szTempData(0) == "ok" then		'성공
+			'Call TR_Inquiry("obpds_srvc_411a")
+			Call SendReg()
+		else						'실패
+			exit sub
+		end if
+		
+	end if
+	
+	'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)									
+'	if sKeyName == "mhetc90190_p1" then										
+'		'if sRet == "ok" then									
+'		'end if
+'	end if 	
+End Sub
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v002
+
+	edtBank.caption = "메리츠"  'v0001 메리츠종금->메리츠
+	g_szCom = "287"
+	g_szOpenData = Form.GetOpenLinkData()
+	g_szList = Split(g_szOpenData, "★")
+	
+	if UBOUND(g_szList) < 1 then
+		Exit Sub
+	End if
+	
+	g_acno = g_szList(0)
+	
+'	g_szPW = Form.GetEncData(g_szList(1)) 'v002
+	'v002
+	If g_PlainRm = "1" Then '보안모듈 적용
+		g_szPW = g_szList(1) 'v002
+	Else
+		g_szPW = Form.GetEncData(g_szList(1)) 'v002
+	End If
+
+	g_sUserID = Form.GetSharedData("CERT_ID" , false)
+	if g_sUserID == null or g_sUserID == "" then
+		g_sUserID = Form.GetSharedData("&USER_ID" , false)
+	end if
+End Sub
+'============================================================================
+Sub imgSearch_OnClick()
+	Form.OpenPopup("mbbnk61010_p3" , "" ,"")
+End Sub 
+'============================================================================
+' imgClose_OnClick
+'============================================================================
+Sub imgClose_OnClick()
+	Form.SendReturnToParent("예외계좌추가", "succ") '20160713
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub btnName_OnClick()
+	if g_szCom == "287" then	'메리츠당행조회
+		DATAMANAGER.SetDataValue(0, "obacp_opop_071r", "InBlock1", "TACT_BANK_ACNO", 0 ,edtAcnt.caption)		'계좌번호
+		DATAMANAGER.SetDataValue(0, "obacp_opop_071r", "InBlock1", "ACNO"		  , 0 ,g_szList(0)    )		'계좌번호
+		DATAMANAGER.RequestTranData("obacp_opop_071r")
+	else
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "MNRC_BANK_CODE"	 , 0 ,g_szCom		    )	'은행코드
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "MNRC_ACNO"	  	 , 0 ,edtAcnt.caption )	'입금계좌번호
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "TR_AMT"		  	 , 0 ,"1"		    )	'거래금액
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "DRNG_ACNO"	  	 , 0 ,g_szList(0)		)	'출금계좌번호
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "ACNT_PROD_CLS_CODE", 0 ,"01"			)	'계좌상품구분코드
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "JOB_TRNO"		 , 0 ,"031"			)	'작업단말번호
+		DATAMANAGER.RequestTranData("obtss_elbs_129r")
+	end if
+End Sub
+
+'============================================================================
+' 등록 버튼 클릭
+'============================================================================
+Sub btn0_OnClick()
+	if edtAcnt.caption = "" or edtBankName.caption = "" Then
+		Form.MsgBox( "알림", "계좌명 조회를 실행해주세요.", "", 6 )
+	else
+		Form.OpenFramePopup("mhetc90060_p8" , "bank_update" , "")
+	end if
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obacp_opop_071r" then	'당사 조회
+		SelfAcc = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "SELF_ACNT_YN" 		 , 0 )		    '본인계좌여부 
+		AccExst = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "ACNT_EXST_CNFR_CODE" , 0 )		    '계좌번호 유효
+		
+		if AccExst = "00" Then
+			edtAcnt.caption 		= ""
+			edtBankName.caption    = ""
+			szSubErr = DATAMANAGER.GetDataMsgSubText( "obacp_opop_071r" )
+			'Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+			Form.ShowAlert( "알림" , szSubErr)
+		end if
+		
+		if SelfAcc =  "Y" Then
+			edtAcnt.caption 		= ""
+			edtBankName.caption    = ""
+			Form.ShowAlert( "알림" , "당사 본인계좌는 자동 등록 처리 됩니다.")
+		end if
+		
+		edtBankName.caption = Trim(DATAMANAGER.GetDataValue(0, "obacp_opop_071r", "OutBlock1", "CSNM" , 0)) '수취인명
+			
+	elseif szTranID == "obtss_elbs_129r" then	'타사 조회
+		edtBankName.caption = Trim(DATAMANAGER.GetDataValue(0, "obtss_elbs_129r", "OutBlock1", "ACNM" , 0)) '수취인명
+	elseif szTranID == "obpds_srvc_411a" then	'타사 조회
+		Form.ShowAlert("알림", "예외계좌가 등록되었습니다.")
+	     edtBank.caption = "메리츠"  'v0001 메리츠종금->메리츠
+		edtAcnt.caption = ""
+		edtBankName.caption = ""
+		Form.SendReturnToParent("예외계좌추가", "succ")
+		Form.CloseForm()		
+	elseif szTranID == "obcsb_oimf_638r" then				
+		if DATAMANAGER.GetDataValue(0, "obcsb_oimf_638r", "OutBlock1", "SCRC_OTP_CLS_CODE" , 0) == "0" then		'보안카드
+			Form.OpenFramePopup( "mhetc90060_p9" , "" , sPosInfo)											'공인인증서_보안카드화면
+		elseif DATAMANAGER.GetDataValue(0, "obcsb_oimf_638r", "OutBlock1", "SCRC_OTP_CLS_CODE" , 0) == "1" then	'부가정보
+			Form.OpenFramePopup( "mhetc90060_pa" , "" , sPosInfo)											'공인인증서_부가정보
+		elseif DATAMANAGER.GetDataValue(0, "obcsb_oimf_638r", "OutBlock1", "SCRC_OTP_CLS_CODE" , 0) == "2" then	'보안매체없음
+			'Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 이용단말등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+			RegisterOTP() '2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+		elseif DATAMANAGER.GetDataValue(0, "obcsb_oimf_638r", "OutBlock1", "SCRC_OTP_CLS_CODE" , 0) == "3" then	'OTP
+			Form.OpenFramePopup( "mhetc90060_pb" , "" , sPosInfo)											'공인인증서_일반/스마트OTP
+		elseif DATAMANAGER.GetDataValue(0, "obcsb_oimf_638r", "OutBlock1", "SCRC_OTP_CLS_CODE" , 0) == "4" then	'mOTP v003
+              Form.OpenPopup( "mhetc90060_motp" , "motp_success" , "" )
+		else																							'오류
+			Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+		end if
+	end if
+End Sub  
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+
+	if szTranID == "obpds_srvc_411a" then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( "obpds_srvc_411a" )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+		'g_nSuccesCount = 0
+	end if
+	
+	if szTranID == "obacp_opop_071r" then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( "obacp_opop_071r" )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+		edtAcnt.caption 		= ""
+		edtBankName.caption    = ""
+		'g_nSuccesCount = 0
+	end if
+	if szTranID == "obtss_elbs_129r" then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( "obtss_elbs_129r" )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+		'g_nSuccesCount = 0
+	end if
+	
+	if szTranID == "obcsb_oimf_638r" then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( "obcsb_oimf_638r" )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+		'g_nSuccesCount = 0
+	end if
+End Sub 
+
+'============================================================================
+' SendReg
+'============================================================================
+Function SendReg()
+	Call TR_Inquiry("obpds_srvc_411a")		
+End Function 
+'============================================================================
+Sub edtAcnt_OnEditChar(CharCode)
+	edtBankName.caption    = ""
+End Sub
+
+'============================================================================
+'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+'============================================================================
+Sub RegisterOTP()
+	'계좌번호★주민번호(필수아님)★Y/N( 모바일OTP/타기관OTP 발급 완료 후 인증 처리 진행여부를 판단함)★Y/N(처리 완료시 화면닫기)	
+	Form.OpenPopup("mhetc90190_p1", g_acno &"★"& "" &"★"& "N" &"★"& "Y", "")	
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacp_opop_071r" trcode="obacp_opop_071r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_elbs_129r" trcode="obtss_elbs_129r" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_411a" trcode="obpds_srvc_411a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_638r" trcode="obcsb_oimf_638r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacp_opop_071r" title="개별계좌 기준 계좌명 유효성 조" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="129" _ulen="97" >
+
+TACT_BANK_ACNO^이체은행계좌번호^16^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="265" _ulen="199" >
+
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌상태코드^1^0^0^0^0^0^0
+SELF_ACNT_YN^본인계좌여부^1^0^0^0^0^0^0
+ACNT_EXST_CNFR_CODE^계좌존재확인코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_elbs_129r" title="타행이체수취조회(지로/예약/자?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="345" _ulen="261" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+JOB_TRNO^작업단말번호^39^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TR_AMT^거래금액^19^0^7^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+ACNT_PROD_CLS_CODE^계좌상품구분코드^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+RMRK^비고^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="216" _ulen="164" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+STDL_CNFT_BRCD^입출고상대지점코드^4^0^0^0^0^0^0
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_411a" title="지연이체 서비스 약정 등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" occurs="100" inout="in" _len="609" _ulen="449" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+SVC_MANG_UNIT_CODE^서비스관리단위코드^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+TACT_BANK_ACNO^이체은행계좌번호^16^0^0^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+TACT_BANK_ACNM^이체은행계좌명^40^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="172" _ulen="128" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_638r" title="전자금융사기예방 고객조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="376" _ulen="290" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="30" inout="in" _len="330" _ulen="242" >
+
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+DRNG_ASNO^출금계좌일련번호^2^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+MNRC_ASNO^입금계좌일련번호^2^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1142" _ulen="840" >
+
+TERM_DSGT_STPL_YN^단말지정약정여부^1^0^0^0^0^0^0
+SPLM_ATHN_STPL_YN^추가인증약정여부^1^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TLPH_SRNO^자택전화일련번호^4^0^0^0^0^0^0
+WRPL_TLPH_ARCD^직장전화지역번호^4^0^0^0^0^0^0
+WRPL_TLPH_TONO^직장전화국번호^4^0^0^0^0^0^0
+WRPL_TLPH_SRNO^직장전화일련번호^4^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+ACML_TR_PBMN^누적거래대금^19^0^7^0^0^0^0
+UI_SPLM_YN^UI추가여부^1^0^0^0^0^0^0
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+REG_YN^등록여부^1^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+UI_CUST_ATHN_NO^UI고객인증번호^6^0^0^0^0^0^0
+UI_CUST_ATHN_NO2^UI고객인증번호2^6^0^0^0^0^0^0
+SVC_ECPT_CLS_CODE^서비스예외구분코드^1^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="10" inout="out" _len="309" _ulen="243" >
+
+TERM_NAME^단말명^30^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+REG_EMPNO^등록직원번호^9^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="111" _ulen="85" >
+
+TOTAL_TACT_AMT^총이체금액^19^0^7^0^0^0^0
+SECU_MDIA_EXLS_YN^보안매체제외여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

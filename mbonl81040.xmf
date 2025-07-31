@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="81040" scrname="금융거래 정보제공 동의(장외파생 거래)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acntList" itemcodetype="136,137" etcfunctions="" accpwdctl="editPswd" totalacc="1" ly_vert="6,9,271,39,1" />
+		<EDIT name="edtPswd" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" hintcaption="비밀번호" ly_vert="283,9,86,39,1" />
+		<TABLE name="tblState" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="0,57,375,39,1" >
+			<COL_INFO ly_vert_width="120,255" />
+			<ROW_INFO ly_vert_height="39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" caption="동의여부" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnOK" caption="동의" btnimage="btn_05.9" ly_vert="100,508,175,44,1" />
+		<CHKBUTTON name="chkView0" chkcaption=" 금융거래정보이용·제공 동의서" unchkcaption=" 금융거래정보이용·제공 동의서" ly_vert="5,116,243,32,1" />
+		<BUTTON name="btnView0" caption="내용보기" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="283,116,86,32,1" />
+		<CHKBUTTON name="chkView1" ly_vert="5,169,21,32,1" />
+		<BUTTON name="btnChk1" visible="0" caption="금융투자업규정 제5-50조의3(거래정보의 보고)에
+의해 금융투자회사는 CFD 거래 당사자에 관한
+정보(고객정보, 계약조건, 가치평가 및 담보 관련
+정보 등)를 한국거래소에 보고할 의무가 있으며,
+이를 준수하기 위해 고객분들께 금융거래정보
+이용제공 동의서를 받고자 합니다.
+이에 동의하시겠습니까?" fgcolor="004:000000000" btnimage="alpha" halign="0" ly_vert="30,168,335,140,0" />
+		<LABEL name="Label0" caption="(장외파생 거래)" ly_vert="24,136,157,30,1" />
+		<LABEL name="Label1" fontstyle="01" caption="E-mail" ly_vert="15,350,72,32,1" />
+		<EDIT name="edtMail" imetype="0" ly_vert="91,348,269,36,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="17210" _ulen="15508" >
+'--===========================================================================
+' 01. 화 면 명 : 금융거래 정보제공 동의(CFD 거래)
+' 02. 화면설명 : 금융거래 정보제공 동의(CFD 거래)
+' 03. 작    성 : 2022.01.03 김수진
+' 04. 수    정 : 
+'   2022.12.15 : 양현정 : v001 : 서버분기처리
+'   2023.08.30 : 전상일 : v002 : 문구변경
+'   2023.10.20 : 전상일 : v003 : 서버분기처리 3-> 0
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szPlain_rm		'메모리 평문적용 여부
+Dim g_szCustClsCode	'고객구분코드 
+Dim g_ServerMode		'v0001 서버확인
+Dim g_bInputMail
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'===========================================================================
+' f_GetPWCkeck() : 계좌비밀번호 입력체크함수
+'===========================================================================
+Function f_GetPWCkeck()
+	Dim szACNT_PWD 
+	szACNT_PWD = Form.GetCtlProp( "edtPswd", "caption" )
+	
+	If szACNT_PWD == null or szACNT_PWD == "" Then
+		Form.MsgBox( "알림", "비밀번호를 입력해주세요.", "", 6 )	
+		return true
+	End If
+	
+	return false
+End Function	
+
+'===========================================================================
+' f_ValidCkeck()() : 유효성 검사
+'===========================================================================
+Function f_ValidCkeck()
+	If btnOK.caption == "동의" Then 'v002 등록-> 동의
+		If chkView0.chksilence == "0" Then
+			Form.MsgBox( "알림", "금융거래 정보제공 동의서에 동의하셔야 합니다.", "", 6 )	
+			return false
+		End If
+		
+		'2023.01.05 chkView1 개인/법인 둘 다 체크
+'		If g_szCustClsCode == "1" Then
+			If chkView1.chksilence == "0" Then
+				Form.MsgBox( "알림", "금융거래 정보제공 동의를 확인하여 주십시오.", "", 6 )	
+				return false
+			End If
+'		End If
+	End If
+End Function	
+
+'============================================================================
+' f_ClearData() : 초기화
+'============================================================================
+Function f_ClearData()
+	tblState.SetCellString( 0, 1, "" )
+	chkView0.chksilence = "0"
+	chkView1.chksilence = "0"
+	g_bInputMail = false
+	edtMail.caption = ""
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()    
+	f_ClearData()
+	edtPswd.caption = ""
+	g_szCustClsCode = ""
+	btnOK.caption = "동의" 'v002
+	
+	'메모리평문적용여부(0:미적용 / 1:적용)
+	g_szPlain_rm 		= Form.GetSharedData("&PLAIN_RM", false)
+	
+	'타이틀이 너무 길어서 추가해달라고 함.
+	Form.SetTitleCaption("금융거래정보이용제공동의(장외파생거래)")
+	
+	g_ServerMode = Form.GetSharedData("&SERVER_MODE", false)	'v001
+	
+	g_bInputMail = false
+	
+	'고객정보조회
+	DATAMANAGER.RequestTranData("obcsb_acif_000r")	
+End Sub
+'============================================================================
+' Form_OnRefresh()
+'============================================================================
+Sub Form_OnRefresh()
+	f_ClearData()
+	edtPswd.caption = ""
+	g_szCustClsCode = ""
+	btnOK.caption = "동의" 'v002
+	
+	'고객정보조회
+	DATAMANAGER.RequestTranData("obcsb_acif_000r")
+End Sub
+
+'============================================================================
+' acntList_ChangeAccount() : 다른 계좌로 변경 되었을때 초기화
+'============================================================================
+Sub acntList_ChangeAccount()
+	f_ClearData()
+	edtPswd.caption = "" 
+	g_szCustClsCode = ""
+	btnOK.caption = "동의" 'v002
+	
+	'고객정보조회
+	DATAMANAGER.RequestTranData("obcsb_acif_000r")
+End Sub
+'============================================================================
+' edtPswd_OnEditComplete() : 비밀번호 입력완료시 초기화 및 등록내역 조회
+'============================================================================
+Sub edtPswd_OnEditComplete()
+	f_ClearData()
+	
+    '금융거래 정보제공 동의내역조회
+	DATAMANAGER.RequestTranData("obcsb_acif_077r")	
+End Sub
+
+'============================================================================
+' BtnOK_OnClick() : 신청
+'============================================================================
+Sub btnOK_OnClick()
+	'계좌비밀번호 입력체크함수
+	If f_GetPWCkeck() Then
+		Exit Sub
+	End If
+	
+	'동의확인체크
+	If f_ValidCkeck() == false Then
+		Exit Sub
+	End If
+	
+	'이메일체크(등록할때만 체크)
+	If btnOK.caption == "동의" Then 'v002
+		If edtMail.caption == "" Or edtMail.caption == null Then
+			Form.ShowAlert("알림", "제공내역 통보를 위해 이메일을 입력 바랍니다.")
+			Exit Sub
+		End If
+	End If
+	
+    '금융거래정보제공 동의/거부내역 등록
+	DATAMANAGER.RequestTranData("obcsb_acif_078a")
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn(sKeyName, sRet) 
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName = "mbonl82020_p6" Then
+		If sRet == "금융거래 정보제공 동의서" Then
+			chkView0.chksilence = "1"
+		End If
+	End If
+End Sub
+
+'============================================================================
+' chkView0_OnChange() : 금융거래 정보제공 동의서
+'============================================================================
+Sub chkView0_OnChange(sCheckState)
+	If f_GetPWCkeck() Then
+		chkView0.chksilence = "0"
+		Exit Sub
+	End if
+	
+	If sCheckState == "1" Then
+		chkView0.chksilence = "0"
+		
+		Dim szURL 
+		If g_ServerMode == "1" Then	'v001 운영  v003 : 서버분기처리 3-> 0
+			szURL = "http://testhome.imeritz.com/include/resource/comm/ctcn/pdf/meritz_cfd_agree.pdf"
+		else
+			szURL = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_cfd_agree.pdf"
+		end if
+		
+		Form.SetSharedData("OPEN_URL", szURL )
+		Form.OpenFramePopup("mbonl82020_p6" , "금융거래 정보제공 동의서" , "") 
+	End If
+End Sub
+'============================================================================
+' btnView0_OnClick() : 금융거래 정보제공 동의서
+'============================================================================
+Sub btnView0_OnClick()
+	If f_GetPWCkeck() Then
+		chkView0.chksilence = "0"
+		Exit Sub
+	End if
+
+	Dim szURL 
+	If g_ServerMode == "1" Then	'v001 운영  v003 : 서버분기처리 3-> 0
+		szURL = "http://testhome.imeritz.com/include/resource/comm/ctcn/pdf/meritz_cfd_agree.pdf"
+	else
+		szURL = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_cfd_agree.pdf"
+	end if
+	
+	Form.SetSharedData("OPEN_URL", szURL )
+	Form.OpenFramePopup("mbonl82020_p6" , "금융거래 정보제공 동의서" , "") 
+End Sub
+
+'============================================================================
+' btnChk1_OnClick(): 동의 체크 (개인고객일 경우만)
+'============================================================================
+Sub btnChk1_OnClick()
+	If chkView1.chksilence = "0" Then
+		chkView1.chksilence = "1"
+	Else
+		chkView1.chksilence = "0"
+	End If
+End Sub
+
+'============================================================================
+Sub edtMail_OnEditComplete()
+	If Len(Trim(edtMail.caption)) > 0 Then
+		Dim tSplit
+		tSplit = Split(edtMail.caption, "@")
+		If UBound(tSplit) > 0 Then
+			If Str_Chk_Email(edtMail.caption, "EMAIL") == False then		
+				Form.ShowAlert("알림", "이메일을 확인하세요.")
+				edtMail.caption = ""
+				
+				Exit Sub
+			End If
+			
+			Dim tCheck
+			tCheck = Split(tSplit[1], ".")
+			If tCheck[0] == "yahoo" Or tCheck[0] == "hotmail" Then
+				Form.ShowAlert("알림", "야후코리아(yahoo.co.kr), 핫메일(hotmail.com)\n계정은 사용이 불가합니다.")
+				edtMail.caption = ""
+				
+				Exit Sub
+			End If
+		Else
+			Form.ShowAlert("알림", "이메일을 확인하세요.")
+			edtMail.caption = ""
+		End If
+	End If
+End Sub
+
+'****************************************************************************
+'               		D  A  T  A  M  A  N  A  G  E  R               
+'****************************************************************************
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 데이터 통신에 필요한 인풋 데이터 세팅
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	Dim szACNT_PWD 
+	If g_szPlain_rm == "1" Then  			'MTS메모리평문 적용상태일때
+	    szACNT_PWD = edtPswd.caption
+	Else  								'MTS메모리평문 미적용상태일때
+	    szACNT_PWD = Form.GetEncData(edtPswd.caption)
+	End If
+	
+	'고객정보조회
+	If szTranID == "obcsb_acif_000r" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE" 	, 0 , "I" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO" 			, 0 , acntList.total )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD" 		, 0 , szACNT_PWD )
+	'금융거래 정보제공 동의내역조회
+	ElseIf szTranID == "obcsb_acif_077r" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO" 			, 0 , acntList.total )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD" 		, 0 , szACNT_PWD )
+	'금융거래정보제공 동의/거부내역 등록
+	ElseIf szTranID == "obcsb_acif_078a" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CONT_CLS_CODE" 	, 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO" 			, 0 , acntList.total )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD" 		, 0 , szACNT_PWD )	
+		If btnOK.caption = "동의" Then 'v002
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE" 	, 0 , "1" )
+		Else
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE" 	, 0 , "2" )
+		End If
+	
+	'고객연락처정보조회
+	ElseIf szTranID == "obcsb_acad_002r" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CONT_CLS_CODE" 	, 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO" 	, 0 , acntList.total )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD" 	, 0 , szACNT_PWD )
+	
+	'법인계좌통보처정보조회
+	ElseIf szTranID == "obaci_acct_095r" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO" 	, 0 , acntList.total )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD" 	, 0 , szACNT_PWD )
+	
+	'고객연락처단건처리
+	ElseIf szTranID == "obcsb_acad_123a" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CONT_CLS_CODE" 	, 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE" 	, 0 , "I" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO" 	, 0 , acntList.total )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "EMAIL_ADDR" 	, 0 , edtMail.caption )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "INAG_TYPE_CODE" 	, 0 , "21" )
+	End If
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 수신 완료
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'고객정보조회
+	If szTranID == "obcsb_acif_000r" Then
+		g_szCustClsCode = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "CUST_CLS_CODE" , 0 )
+		
+		'2023.01.05 개인/법인 상관없이 체크박스 2개 전부 노출
+'		If g_szCustClsCode == "1" Then
+			chkView1.visible = true
+			btnChk1.visible = true
+'		Else
+'			chkView1.visible = false
+'			btnChk1.visible = false	
+'			
+'			'법인인 경우 중간 여백을 줄이기 위해 이메일 영역 위치 조정
+'			Label1.top = 180
+'			edtMail.top = 178
+'		End If
+		
+	ElseIf szTranID == "obcsb_acif_077r" Then
+		If DATAMANAGER.GetDataCount( 0, szTranID, "OutBlock1" ) > 0 Then
+			Dim szAgrmValdYN
+			szAgrmValdYN = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "AGRM_VALD_YN" , 0 )
+			
+			If szAgrmValdYN == "Y" Then
+				tblState.SetCellString( 0, 1, "동의" )
+				btnOK.caption = "거부"
+			Else
+				tblState.SetCellString( 0, 1, "미동의" )
+				btnOK.caption = "동의" 'v002
+			End If
+		Else
+			tblState.SetCellString( 0, 1, "미동의" )
+			btnOK.caption = "동의" 'v002
+		End If
+		
+		'이메일 조회
+		If g_szCustClsCode == "1" Then
+			'고객연락처정보조회
+			DATAMANAGER.RequestTranData( "obcsb_acad_002r" )
+		Else
+			'법인계좌통보처정보조회
+			DATAMANAGER.RequestTranData( "obaci_acct_095r" )
+		End If
+		
+	'금융거래정보제공 동의/거부내역 등록
+	ElseIf szTranID == "obcsb_acif_078a" Then
+		Dim szMsg, szSubMsg
+		szMsg = DATAMANAGER.GetDataMsgText( szTranID )
+		szSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+		
+		If szSubMsg ~= null and Trim(szSubMsg) ~= "" Then
+			szMsg = szSubMsg.." "..szMsg
+		end if
+		Form.ShowAlert("알림", szMsg)
+		
+		'obcsb_acad_002r 또는 obaci_acct_095r 에서 조회된 이메일이 없어 직접 입력해서 진행하는 경우
+		'obcsb_acad_123a 를 호출
+		
+		'고객연락처단건처리
+		If g_bInputMail Then
+			DATAMANAGER.RequestTranData( "obcsb_acad_123a" )
+		Else
+			f_ClearData()
+		    '금융거래 정보제공 동의내역조회
+			DATAMANAGER.RequestTranData("obcsb_acif_077r")
+		End If
+		
+		
+	'고객연락처정보조회
+	ElseIf szTranID == "obcsb_acad_002r" Then
+		Dim nCnt
+		nCnt = DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1")
+		If CInt(nCnt) > 0 Then
+			Dim szEmail
+			For i = 0 To nCnt - 1 
+				szEmail = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "EMAIL_ADDR" , i)
+				If szEmail <> "" And szEmail <> null Then
+					edtMail.caption = szEmail
+					edtMail.enable = false
+					Exit For
+				End If
+			Next
+			
+			If edtMail.caption == "" Or edtMail.caption == null Then
+				'이미 사용가능 상태이지만 확인 겸 처리
+				edtMail.caption = ""
+				edtMail.enable = true
+				
+				g_bInputMail = true
+			End If
+		End If
+		
+	'법인계좌통보처정보조회
+	ElseIf szTranID == "obaci_acct_095r" Then
+		Dim nCnt
+		nCnt = DATAMANAGER.GetDataCount(0, szTranID , "OutBlock2")
+		If CInt(nCnt) > 0 Then
+			Dim szEmail, szInagType
+			For i = 0 To nCnt - 1 
+				szInagType = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock2" , "INAG_TYPE_CODE" , i)
+				szEmail = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock2" , "UI_ADDR" , i)
+				If szInagType == "21" Then
+					If szEmail <> "" And szEmail <> null Then
+						edtMail.caption = szEmail
+						edtMail.enable = false
+						Exit For
+					End If
+				End If
+			Next
+			If edtMail.caption == "" Or edtMail.caption == null Then
+				'이미 사용가능 상태이지만 확인 겸 처리
+				edtMail.caption = ""
+				edtMail.enable = true
+				
+				g_bInputMail = true
+			End If
+		End If
+	
+	'고객연락처단건처리
+	ElseIf szTranID == "obcsb_acad_123a" Then
+		f_ClearData()
+	    '금융거래 정보제공 동의내역조회
+		DATAMANAGER.RequestTranData("obcsb_acif_077r")
+	End If
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	If szSubMsg <> null and Trim(szSubMsg) <> "" Then
+		szErrMsg = szErrMsg & "(" & szSubMsg & ")" 
+	end if
+	
+	If szTranID == "obcsb_acif_078a" Then
+		Form.ShowAlert( "알림", szErrMsg )
+	End if
+End Sub
+
+'============================================================================
+' 이메일-한글체크 v0006
+'============================================================================
+Function Str_Chk_Email(str, sGubn)
+	dim i				'루프용 
+	dim chk_n, chk_c, chk_t
+    
+	chk_n = 0 '숫자
+	chk_c = 0 '영어
+	chk_t = 0 '특수문자
+    
+	For i = 1 to Len(str)
+		nAscii = Asc(Mid(str, i, 1))
+		
+	    '48~57 : 0~9
+	    '65~90 : A~Z
+	    '97~122: a~z
+		If nAscii >=48 and nAscii <=57 Then 
+		    chk_n = 1 	
+		Elseif   (nAscii >=65 and nAscii <=90) or ( nAscii >=97 and nAscii <=122) Then
+		    chk_c = 1 
+		Elseif   (nAscii >=33 and nAscii <=47) or ( nAscii >=58 and nAscii <=64)  or ( nAscii >=91 and nAscii <=96)  or ( nAscii >=123 and nAscii <=126) Then
+		    chk_t = 1 
+		Else 
+		   If nAscii <> 32 Then 'space	
+			   return False
+		   End If
+		End if 		    
+	Next
+	
+	return True
+End Function
+
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_077r" trcode="obcsb_acif_077r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcsb_acif_000r" trcode="obcsb_acif_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_078a" trcode="obcsb_acif_078a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acad_002r" trcode="obcsb_acad_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_095r" trcode="obaci_acct_095r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acad_123a" trcode="obcsb_acad_123a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_077r" title="금융거래정보제공동의내역조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="83" _ulen="63" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="516" _ulen="398" >
+
+MANG_BRCD^관리지점^4^0^0^0^0^0^0
+BRNM^지점명^80^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNM^계좌명^40^0^0^0^0^0^0
+AGRM_RFUS_CLCD^동의거부구분코드^1^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+AGRM_VALD_YN^동의유효여부^1^0^0^0^0^0^0
+PROS_EMPNO^처리직원번호^9^0^0^0^0^0^0
+EMPL_NAME^직원명^40^0^0^0^0^0^0
+PROS_TRNO^처리단말번호^39^0^0^0^0^0^0
+PROS_YMDH^처리일시^19^0^0^0^0^0^0
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_000r" title="고객정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2185" _ulen="1655" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_CNFR_YN^고객 확인 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호 유형 코드^2^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+RLNM_ASCT_NO^실명 조합 번호^20^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+PSPR_NO^여권 번호^10^0^0^0^0^0^0
+CONO^법인등록번호^13^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인 구분 코드^2^0^0^0^0^0^0
+CNSG_YN^수탁 여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC 전문 투자자 여부^1^0^0^0^0^0^0
+KYC_SPCL_INVR_RGNO^KYC 전문 투자자 등록번호^20^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+SSTS_YN^공매도 여부^1^0^0^0^0^0^0
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+CNSG_RFUS_REAS_CODE^수탁 거부 사유 코드^3^0^0^0^0^0^0
+STA_DATE^시작 일자^8^0^0^0^0^0^0
+FIN_DATE^종료 일자^8^0^0^0^0^0^0
+BRTH_CTCD^출생국가코드^3^0^0^0^0^0^0
+AMRC_YN^미국인여부^1^0^0^0^0^0^0
+AML_BSTP_LRDV_CODE^AML업종대분류코드^2^0^0^0^0^0^0
+AML_BSTP_SMDV_CODE^AML업종소분류코드^5^0^0^0^0^0^0
+GIIN^GIIN^20^0^0^0^0^0^0
+LSTN_YN^상장여부^1^0^0^0^0^0^0
+DSTC_DATE^파기일자^8^0^0^0^0^0^0
+OVRS_TXPM_CHD_YN^해외납세자여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_078a" title="금융거래정보제공동의내역등록(C" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="224" _ulen="168" >
+
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="383" _ulen="293" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+AGRM_RFUS_CLCD^동의거부구분코드^1^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+AGRM_VALD_YN^동의유효여부^1^0^0^0^0^0^0
+PROS_EMPNO^처리직원번호^9^0^0^0^0^0^0
+EMPL_NAME^직원명^40^0^0^0^0^0^0
+PROS_TRNO^처리단말번호^39^0^0^0^0^0^0
+PROS_YMDH^처리일시^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acad_002r" title="고객연락처정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="206" _ulen="158" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="973" _ulen="731" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+ADDR_REG_DATE^주소 등록 일자^8^0^0^0^0^0^0
+SNBC_YN^반송 여부^1^0^0^0^0^0^0
+SNBC_CANC_REAS_CODE^반송해지사유코드^2^0^0^0^0^0^0
+SNBC_CANC_REAS_NAME^반송해지사유명^40^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총 반송 횟수^4^0^7^0^0^0^0
+CNNT_SNBC_TMNU^연속 반송 횟수^4^0^7^0^0^0^0
+REGN_ZIP^지역 우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세 우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일 주소^200^0^0^0^0^0^0
+INAG_RCTF_REAS_CODE^통보처 정정 사유 코드^1^0^0^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="30" inout="out" _len="427" _ulen="323" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+UI_CUST_TELNO^UI고객전화번호^40^0^0^0^0^0^0
+CNPL_REG_DATE^연락처 등록 일자^8^0^0^0^0^0^0
+ARCD^지역번호^4^0^0^0^0^0^0
+TONO^국번호^4^0^0^0^0^0^0
+TELNO^전화번호^4^0^0^0^0^0^0
+TENO^교환번호^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="950" _ulen="700" >
+
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물 통보처 일련번호^4^0^7^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물 통보처 일련번호^4^0^7^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_SRNO^운용 보고서 통보처 일련번호^4^0^7^0^0^0^0
+STPL_YN^약정 여부^1^0^0^0^0^0^0
+SNDN_YN^발송 여부^1^0^0^0^0^0^0
+PRFN_CNPL_CLCD^선호연락처구분코드^2^0^0^0^0^0^0
+TRUST_CLS_CODE^신탁 구분 코드^1^0^0^0^0^0^0
+FUND_RMND_RCMS_CLS_CODE^펀드잔고수신구분코드^1^0^0^0^0^0^0
+UI_ITEM_NAME1^UI항목명1^40^0^0^0^0^0^0
+UI_ITEM_NAME2^UI항목명2^40^0^0^0^0^0^0
+UI_ITEM_NAME3^UI항목명3^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MBL_PRTY_INFR_YN^모바일우선통보여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="476" _ulen="350" >
+
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock9" inout="out" _len="432" _ulen="316" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="232" _ulen="164" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+INAG_TYPE_CODE^통보처유형코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처일련번호^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_095r" title="법인계좌 통보처 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="84" _ulen="64" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="321" _ulen="243" >
+
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+UI_TRGT_SRNO^UI대상일련번호^11^0^7^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+UI_TRGT_SRNO1^UI대상일련번호1^11^0^7^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_ITEM_NAME^UI항목명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="283" _ulen="215" >
+
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+ZIP^우편번호^6^0^0^0^0^0^0
+UI_ADDR^UI 주소^210^0^0^0^0^0^0
+INFR_TRGT_SRNO^통보대상일련번호^11^0^7^0^0^0^0
+UI_CUST_TELNO^UI 고객 전화번호^40^0^0^0^0^0^0
+INAG_SRNO^통보처일련번호^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acad_123a" title="고객 연락처 단건 처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="564" _ulen="420" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처유형코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="58" _ulen="46" >
+
+UI_PROS_ABLE_YN^UI처리가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

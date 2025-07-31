@@ -1,0 +1,634 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="80001" scrname="금융투자소득세_신청" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" bgcolor="052:255255255" itemcodetype="100,102,105,106,107,108,112,118,131,132,138,140,200" etcfunctions="" accpwdctl="edtPswd" totalacc="1" hedgeacc="1" ly_vert="10,10,355,35,1" />
+		<BUTTON name="btnReg" caption="신청하기" fontsize="2" fontstyle="01" btnimage="btn_01.9" ly_vert="20,506,335,45,1" />
+		<TAB name="tabType" tabheadheight="36" tabwidthtype="1" tabcount="2" ly_vert="15,58,345,36,1" >
+			<PAGE name="0" caption="상장주식 등 (1호)" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="0" caption="기타 (2호)" >
+				<CONTROL_INFO/>
+			</PAGE>
+		</TAB>
+		<LABEL name="Label0" fontsize="1" fontstyle="01" caption="기본공제 적용 연도" ly_vert="10,114,300,22,1" />
+		<COMBO name="cmbPeriod" ly_vert="257,109,90,32,1" />
+		<LABEL name="lblTitle" fontsize="1" fontstyle="01" caption="상장주식 등 금융투자소득 기본공제" ly_vert="10,159,300,22,1" />
+		<IMAGE name="Image0" imgpath="input_01_n.9" ly_vert="15,193,345,188,1" />
+		<TABLE name="tblData" insidelinecolor="102:255255255" colcount="2" rowcount="6" outline="0000" transmode="1" designorder="1" ly_vert="15,199,345,175,1" >
+			<COL_INFO ly_vert_width="187,158" />
+			<ROW_INFO ly_vert_height="25,25,20,35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="146:124124124" halign="0" line="0,0" caption="기본공제한도" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" fgcolor="146:124124124" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="146:124124124" halign="0" line="0,0" caption="공제금액" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" fgcolor="146:124124124" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,0" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" halign="0" line="0,0" caption="신청 가능 한도" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,3,1,3" fgcolor="067:049081150" halign="2" line="0,0" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="0,0" caption="신청금액" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,4,1,4" halign="2" line="0,0" fontsize="-1" mask="0,0,,,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,5,0,5" halign="0" line="0,0" caption="차기연도 이월여부" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,5,1,5" halign="2" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="edtAbleAmt" enable="0" mask="0,0,,원,0,,0,1,1,0,0" halign="2" imetype="0" maxlength="0" ly_vert="1000,272,163,30,1" />
+		<BUTTON name="btnSwitch" visible="0" ly_vert="1000,346,55,20,0" />
+		<IMAGE name="imgToolTip1" imgpath="icon_question.png" ly_vert="269,159,16,16,1" />
+		<IMAGE name="imgToolTip2" imgpath="icon_question.png" ly_vert="146,347,16,16,1" />
+		<LABEL name="Label1" bgcolor="102:216216216" transmode="0" ly_vert="25,258,325,1,1" />
+		<LABEL name="lblLen" visible="0" ly_vert="151,133,100,32,0" />
+		<LABEL name="lblNoTarget" fgcolor="146:124124124" fontsize="-1" caption="금융투자소득세 기본공제
+신청 대상이 아니에요" transmode="0" halign="1" multiline="1" click="1" ly_vert="1000,55,375,342,1" />
+		<EDIT name="edtAmt" mask="0,0,,원,0,,0,1,1,0,0" halign="2" imetype="1" ly_vert="189,306,163,30,1" />
+		<LABEL name="lblMove" fgcolor="067:049081150" fontsize="-2" caption="당사 신청내역 보기 〉" halign="2" click="1" ly_vert="227,386,138,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11735" _ulen="10402" >
+
+Dim g_szPwd
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'이미지 비율 유지
+	imgToolTip1.setMaintainingRatio("1")
+	imgToolTip2.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'Label 스타일 적용
+	lblTitle.changeTextAttr(0, 4, 67, 1, true)
+	
+	'버튼 스위치 적용
+	btnSwitch.setApplySwitch("OFF", "ON", 269, 261, 286, 289)
+	btnSwitch.switchindex = "1"
+	
+'	'연도콤보세팅(시행년도인 2022부터 현재년도 + 1년까지 세팅)
+'	Dim nNowYear
+'	nNowYear = CInt(Left(Form.GetSharedData( "&HOST_DATE", false ), 4))
+'	For i = nNowYear to Left(nNowYear,4) + 1
+'		cmbPeriod.cbadddatatext = i & "`" & i & "년"
+'	Next
+'	
+	Dim szMode
+	szMode = Form.GetSharedData("&SERVER_MODE", False )
+	
+	'연도콤보세팅
+	Dim nNowYear
+	nNowYear = CInt(Left(Form.GetSharedData("&HOST_DATE", false), 4))
+	If szMode == "1" Or szMode == 1 Then		'테스트
+		For i = 2021 to nNowYear+1
+			cmbPeriod.cbadddatatext = i & "`" & i & "년"
+		Next
+	Else									'운영
+		'혹시 모르니 예외처리
+		If nNowYear == 2022 Then
+			nNowYear = 2023
+		End If
+		For i = 2023 to nNowYear+1
+			cmbPeriod.cbadddatatext = i & "`" & i & "년"
+		Next
+	End If
+	cmbPeriod.cbkeydata = nNowYear
+	
+	'금투세 기본공제 신청가능 여부 체크
+	DATAMANAGER.RequestTranData( "obacp_comm_007r" )
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName == "CORRECT_PWD" And sRet <> "" And sRet <> Null Then
+'		Form.ShowAlert(sKeyName, sRet)
+		Dim tData
+		tData = Split(sRet, "★")
+		If UBOUND(tData) > 0 Then
+			g_szPwd = tData[0]
+			
+			'금융투자소득 기본공제 관리
+			DATAMANAGER.RequestTranData( "obcsb_fiin_002a" )
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	If sKeyName == "REG_COMPLETE" Then
+		If sRet == "ok" Then
+			'메시지박스 닫고 데이터 재조회
+			f_ClearData()
+			f_SetTextStyle()
+			
+			'금융투자소득 기본공제 조회
+			DATAMANAGER.RequestTranData( "obcsb_fiin_001r" )
+			
+		ElseIf sRet == "no" Then
+			'메시지박스 닫고 신청내역화면으로 이동
+			Form.OpenScreen("80002" , "")
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'금투세 기본공제 신청가능 여부 체크
+	If szTranID == "obacp_comm_007r" Then
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNO" , 0 , acnt0.total)
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNT_PWD" , 0 , "")
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "IQRY_CLS_CODE" , 0 , "9")
+	
+	'금융투자소득 기본공제 조회
+	ElseIf szTranID == "obcsb_fiin_001r" Then
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNO" , 0 , acnt0.total)
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNT_PWD" , 0 , "")
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "TXTN_APLY_YEAR" , 0 , cmbPeriod.cbkeydata)
+		'"0":전체, "1":상장주식 등, "2":기타
+		If CInt(tabType.currenttab) == 0 Then
+			DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "BSDD_APLY_CLCD" , 0 , "1") 
+		Else
+			DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "BSDD_APLY_CLCD" , 0 , "2") 
+		End If
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "BSDD_BSWR_CODE" , 0 , "200")
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "SCTY_INFO_IQRY_YN" , 0 , "L")
+	
+	'금융투자소득 기본공제 관리
+	ElseIf szTranID == "obcsb_fiin_002a" Then
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNO" , 0 , acnt0.total)
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNT_PWD" , 0 , g_szPwd)
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "BSDD_BSWR_CODE" , 0 , "210")	'"210":등록
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "TXTN_APLY_YEAR" , 0 , cmbPeriod.cbkeydata)
+		If CInt(tabType.currenttab) == 0 Then
+			DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "BSDD_APLY_CLCD" , 0 , "1")
+		Else
+			DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "BSDD_APLY_CLCD" , 0 , "2")
+		End If
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "BSDD_APLT_AMT" , 0 , edtAmt.caption )
+		If btnSwitch.switchindex == "0" Then
+			DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "CROV_YN" , 0 , "N")
+		Else
+			DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "CROV_YN" , 0 , "Y")
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'금투세 기본공제 신청가능 여부 체크
+	If szTranID == "obacp_comm_007r" Then
+		Dim szCustDetlClsCode, szRsdtClsCode
+		szCustDetlClsCode = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "CUST_DETL_CLS_CODE" , 0)
+		szRsdtClsCode = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "RSDT_CLS_CODE" , 0)
+		
+		'고객세부분류가 01(개인)이고, 거주자구분코드가 1(거주)인 경우만 대상 
+		If szCustDetlClsCode == "01" And szRsdtClsCode == "1" Then
+			lblNoTarget.left = 1000
+			
+			'안드로이드에서 스위치 버튼 레이아웃이 위로 겹쳐져서 따로 처리
+			btnSwitch.left = 294
+			
+			f_ClearData()
+			f_SetTextStyle()
+			
+			'금융투자소득 기본공제 조회
+			DATAMANAGER.RequestTranData( "obcsb_fiin_001r" )
+		Else
+			Form.ShowAlert("알림", "금융투자소득세 기본공제 신청대상이 아닙니다.")
+			lblNoTarget.left = 0
+			
+			'안드로이드에서 스위치 버튼 레이아웃이 위로 겹쳐져서 따로 처리
+			btnSwitch.left = 1000
+		End If
+	
+	'금융투자소득 기본공제 조회
+	ElseIf szTranID == "obcsb_fiin_001r" Then
+		Dim szStckAmt, szStckAbleAmt, szStckLmtAmt, szEtcAmt, szEtcAbleAmt, szEtcLmtAmt
+		szStckAmt = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "STTP_AMT" , 0)
+		szStckAbleAmt = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "STCK_ABLE_AMT" , 0)
+		szStckLmtAmt = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "STCK_LIMT_AMT" , 0)
+		
+		szEtcAmt = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ETC_AMT" , 0)
+		szEtcAbleAmt = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ETC_ABLE_AMT" , 0)
+		szEtcLmtAmt = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ETC_LIMT_AMT" , 0)
+		
+		If CInt(tabType.currenttab) == 0 Then
+			tblData.SetCellString(0, 1, "50000000")
+			tblData.SetCellString(1, 1, szStckAmt)
+			tblData.SetCellString(3, 1, szStckAbleAmt)
+'			edtAbleAmt.caption = szStckAbleAmt
+		Else
+			tblData.SetCellString(0, 1, "2500000")
+			tblData.SetCellString(1, 1, szEtcAmt)
+			tblData.SetCellString(3, 1, szEtcAbleAmt)
+'			edtAbleAmt.caption = szEtcAbleAmt
+		End If
+		edtAmt.caption = "0"
+	
+	'금융투자소득 기본공제 관리
+	ElseIf szTranID == "obcsb_fiin_002a" Then
+		Dim szTlmsNo
+		szTlmsNo = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FIIN_TLMS_NO" , 0)
+		
+		Form.MsgBox("안내", "금융투자소득 기본공제금액 신청이 완료되었습니다.", "REG_COMPLETE", 7, "확인", "신청내역 보기")
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	If szSubMsg <> "" And szSubMsg <> Null Then
+		Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+	Else
+		Form.ShowAlert("알림", szErrMsg)
+	End If
+End Sub
+
+'============================================================================
+Function f_ClearData()
+	tblData.SetCellString(0, 1, "")
+	tblData.SetCellString(1, 1, "")
+	tblData.SetCellString(3, 1, "")
+'	edtAbleAmt.caption = ""
+	edtAmt.caption = ""
+	g_szPwd = ""
+End Function	
+
+'============================================================================
+Function f_SetTextStyle()
+	Dim szText
+	If CInt(tabType.currenttab) == 0 Then
+		szText = "상장주식 등 금융투자소득 기본공제"
+		lblTitle.caption = szText
+		lblTitle.changeTextAttr(0, 4, 67, 1, true)
+		imgToolTip1.left = 269
+	Else
+		szText = "기타 금융투자소득 기본공제"
+		lblTitle.caption = szText
+		lblTitle.changeTextAttr(0, 2, 67, 1, true)
+		imgToolTip1.left = 218
+	End If
+End Function 
+
+'============================================================================
+Sub btnReg_OnClick()
+	'신청 서비스 호출 전 데이터 체크
+	'신청금액 미입력 체크
+	If edtAmt.caption == "" Or edtAmt.caption == Null Then
+		Form.ShowAlert("알림", "신청금액을 입력해 주세요.")
+		Exit Sub
+	End If
+	
+	'한도보다 큰 금액 입력 체크
+	Dim szAmt, szAbleAmt
+	szAmt = CInt(edtAmt.caption)
+'	szAbleAmt = CInt(edtAbleAmt.caption)
+	szAbleAmt = CInt(tblData.GetCellString(3, 1))
+	If szAmt > szAbleAmt Then
+		Form.ShowAlert("알림", "신청가능한도 확인 후 다시 입력해 주세요.")
+		Exit Sub
+	End If
+	
+	'계좌비밀번호 입력 후 신청 서비스 호출
+	Form.openPopupAnimation("pwdcheckpopup", acnt0.total & "☆0" , "", "2")
+End Sub
+
+'============================================================================
+Sub tabType_OnTabChanged(nCurrentTab)
+	f_ClearData()
+	f_SetTextStyle()
+	
+	'금융투자소득 기본공제 조회
+	DATAMANAGER.RequestTranData( "obcsb_fiin_001r" )
+End Sub
+
+'============================================================================
+Sub imgToolTip2_OnClick()
+	Dim szText, nLen
+	szText = "내년에도 동일하게 한도가 적용되요\n·신청한 기본공제금액이 내년에도 동일하게 자동 적용됩니다."
+	
+	lblLen.caption = szText
+	nLen = lblLen.getLen(szText)
+	
+	imgToolTip2.openToolTip(szText, 290, 85, 1)
+	imgToolTip2.changeToolTipTextAttr(18, CInt(nLen) - 18, 62, -4, false)
+End Sub
+
+'============================================================================
+Sub imgToolTip1_OnClick()
+	Dim szText, nLen
+	If CInt(tabType.currenttab) == 0 Then
+		szText = "상장주식 등 총 한도 : 연간 합계 5천만원\n·국내상장주식등(증권시장 양도분), 공모국내주식형적격펀드(국내상장주식에 2/3 이상 투자, 국내주식형ETF 포함), K-OTC 중소,중견기업 주식"
+		
+		lblLen.caption = szText
+		nLen = lblLen.getLen(szText)
+		
+		imgToolTip1.openToolTip(szText, 320, 110, 2)
+		imgToolTip1.changeToolTipTextAttr(24, CInt(nLen) - 24, 62, -4, false)
+	Else
+		szText = "기타 총 한도 : 연간 합계 250만원\n·해외주식, 비상장주식, 기타펀드, 파생결합증권, 파생상품, 채권 등"
+		
+		lblLen.caption = szText
+		nLen = lblLen.getLen(szText)
+		
+		imgToolTip1.openToolTip(szText, 300, 85, 2)
+		imgToolTip1.changeToolTipTextAttr(22, CInt(nLen) - 22, 62, -4, false)
+	End If
+End Sub
+
+'============================================================================
+Sub cmbPeriod_OnEditComplete(iIndex)
+	f_ClearData()
+	f_SetTextStyle()
+	
+	'금융투자소득 기본공제 조회
+	DATAMANAGER.RequestTranData( "obcsb_fiin_001r" )
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName == "INFO_CLICK" Then
+		Form.OpenFramePopup("mbonl80001_p1" , "" , "")
+	End If
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+	f_ClearData()
+	f_SetTextStyle()
+	
+	'금투세 기본공제 신청가능 여부 체크
+	DATAMANAGER.RequestTranData( "obacp_comm_007r" )
+End Sub
+
+'============================================================================
+Sub lblMove_OnClick()
+	Form.OpenScreen("80002" , "")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_fiin_001r" trcode="obcsb_fiin_001r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcsb_fiin_002a" trcode="obcsb_fiin_002a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_comm_007r" trcode="obacp_comm_007r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_fiin_001r" title="금융투자소득 기본공제 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="306" _ulen="222" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+TXTN_APLY_YEAR^과세적용년도^4^0^0^0^0^0^0
+BSDD_APLY_CLCD^기본공제적용구분코드^1^0^0^0^0^0^0
+BSDD_BSWR_CODE^기본공제업무코드^3^0^0^0^0^0^0
+SCTY_INFO_IQRY_YN^협회정보조회여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="323" _ulen="249" >
+
+CUST_FULL_NAME^고객풀명^100^0^0^0^0^0^0
+STCK_LIMT_AMT^주식한도금액^19^0^7^0^0^0^0
+ETC_LIMT_AMT^기타한도금액^19^0^7^0^0^0^0
+STCK_ABLE_AMT^주식가능금액^19^0^7^0^0^0^0
+ETC_ABLE_AMT^기타가능금액^19^0^7^0^0^0^0
+STTP_AMT^주식형금액^19^0^7^0^0^0^0
+ETC_AMT^기타금액^20^6^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="10" inout="out" _len="642" _ulen="480" >
+
+ONLN_PROS_YN^온라인처리여부^1^0^0^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+PROS_BRNM^처리지점명^40^0^0^0^0^0^0
+PROS_EMPL_NAME^처리직원명^40^0^0^0^0^0^0
+TXTN_APLY_YEAR^과세적용년도^4^0^0^0^0^0^0
+BSDD_APLY_CLCD^기본공제적용구분코드^1^0^0^0^0^0^0
+BSDD_REG_AMT^기본공제등록금액^19^0^7^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_HOUR^신청시간^6^0^0^0^0^0^0
+CROV_YN^이월여부^1^0^0^0^0^0^0
+INFO_MOD_YN^정보변경여부^1^0^0^0^0^0^0
+THCO_MNNO^당사관리번호^25^0^0^0^0^0^0
+CNCL_ABLE_YN^취소가능여부^1^0^0^0^0^0^0
+SCTY_MNNO^협회관리번호^25^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="45" _ulen="35" >
+
+PAGE_NO^페이지번호^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_fiin_002a" title="금융투자소득 기본공제 관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="713" _ulen="525" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+BSDD_BSWR_CODE^기본공제업무코드^3^0^0^0^0^0^0
+TXTN_APLY_YEAR^과세적용년도^4^0^0^0^0^0^0
+BSDD_APLY_CLCD^기본공제적용구분코드^1^0^0^0^0^0^0
+BSDD_APLT_AMT^기본공제신청금액^19^0^7^0^0^0^0
+CROV_YN^이월여부^1^0^0^0^0^0^0
+INFO_DEL_YN^정보삭제여부^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+BTCH_PROS_YN^배치처리여부^1^0^0^0^0^0^0
+THCO_MNNO^당사관리번호^25^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+SCTY_MNNO^협회관리번호^25^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+LAST_REG_YN^최종등록여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="66" _ulen="46" >
+
+FIIN_TLMS_NO^금융투자소득전문번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_comm_007r" title="종합계좌 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+IQRY_CLS_CODE^조회 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1568" _ulen="1182" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_VLNT_ORGT_CLS_CODE^UI 임의 단체 구분 코드^3^0^0^0^0^0^0
+MDIA_KIND_CODE^매체 종류 코드^2^0^0^0^0^0^0
+MDIA_STAT_CLS_CODE^매체 상태 구분 코드^2^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+TXTN_CUST_TYPE_CODE^과세 고객 유형 코드^1^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+PROS_DATE^처리 일자^8^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+BKKP_NAME^부기 명^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+ACNT_MEMO_CNTT^계좌 메모 내용^600^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+SNBC_YN^반송 여부^1^0^0^0^0^0^0
+STPL_YN^약정 여부^1^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인구분코드^2^0^0^0^0^0^0
+RNMC_DATE^실명확인일자^8^0^0^0^0^0^0
+UNCL_OCRN_DATE^미수발생일자^8^0^0^0^0^0^0
+CANC_DATE^미수해지일자^8^0^0^0^0^0^0
+BDCR_CLCD^신용불량구분코드^1^0^0^0^0^0^0
+DRVT_ODER_ABLE_CODE^파생주문가능코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="1343" _ulen="999" >
+
+OPNG_BRCD^개설 지점코드^4^0^0^0^0^0^0
+RGBF_CUST_GRAD_CODE^직전고객등급코드^2^0^0^0^0^0^0
+ISNC_DATE^발급 일자^8^0^0^0^0^0^0
+ISNC_TIMS^발급 회차^4^0^7^0^0^0^0
+MDIA_SRNO^매체 일련번호^16^0^7^0^0^0^0
+OPNG_DATE^개설 일자^8^0^0^0^0^0^0
+CLSR_DATE^폐쇄 일자^8^0^0^0^0^0^0
+INTG_DATE^통합 일자^8^0^0^0^0^0^0
+UNIQ_TRUST_CLS_CODE^고유 신탁 구분 코드^1^0^0^0^0^0^0
+TRST_ACNT_CLS_CODE^자사주 계좌 구분 코드^1^0^0^0^0^0^0
+BOND_SELN_WTHL_CMSN_YN^채권 매도 원천징수 위임 여부^1^0^0^0^0^0^0
+WTHL_CMSN_YN^원천징수 위임 여부^1^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+TRTX_TXTN_YN^거래세 과세 여부^1^0^0^0^0^0^0
+DVDN_TXTN_YN^배당 과세 여부^1^0^0^0^0^0^0
+USFE_TXTN_YN^이용료 과세 여부^1^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌 상태 코드^1^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+ORST_ASCT_YN^우리사주 조합 여부^1^0^0^0^0^0^0
+RGSL_SGNT_CLS_NAME^인감서명구분명^40^0^0^0^0^0^0
+RGSL_REG_DATE^인감등록일자^8^0^0^0^0^0^0
+PLRL_NMPR_YN^복수명의인여부^1^0^0^0^0^0^0
+TFCT_PROS_STAT_CODE^이수관처리상태코드^1^0^0^0^0^0^0
+VRTL_ACNO^가상계좌번호^16^0^0^0^0^0^0
+UI_ACNT_PRNM^UI계좌상품명^60^0^0^0^0^0^0
+FRCR_STPL_YN^외화약정여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="1970" _ulen="1466" >
+
+OWHS_ZIP^자택 우편번호^6^0^0^0^0^0^0
+WRPL_ZIP^직장 우편번호^6^0^0^0^0^0^0
+ZIP^우편번호^6^0^0^0^0^0^0
+UI_OWHS_POST^UI 자택 우편주소^100^0^0^0^0^0^0
+UI_OWHS_DTAD^UI 자택 상세주소^100^0^0^0^0^0^0
+UI_CO_POST^UI 회사 우편주소^100^0^0^0^0^0^0
+UI_CO_DTAD^UI 회사 상세주소^100^0^0^0^0^0^0
+UI_ETC_POST^UI 기타 우편주소^100^0^0^0^0^0^0
+UI_ETC_DTAD^UI 기타 상세주소^100^0^0^0^0^0^0
+EMAIL_ADDR^이메일 주소^200^0^0^0^0^0^0
+UI_OWHS_TONO^UI 자택 국번호^4^0^0^0^0^0^0
+UI_OWHS_ARCD^UI 자택 지역번호^4^0^0^0^0^0^0
+UI_OWHS_TELNO^UI 자택 전화번호^4^0^0^0^0^0^0
+WHOL_TELNO^전체전화번호^16^0^0^0^0^0^0
+UI_CO_ARCD^UI 회사 지역번호^4^0^0^0^0^0^0
+UI_CO_TONO^UI 회사 국번호^4^0^0^0^0^0^0
+UI_CO_TELNO^UI 회사 전화번호^4^0^0^0^0^0^0
+UI_CO_TENO^UI 회사 교환번호^4^0^0^0^0^0^0
+UI_WHOL_CO_TLPH_NO^UI전체회사전화번호^20^0^0^0^0^0^0
+CLPH_ARCD^휴대폰 지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰 국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+WHOL_CPNO^전체휴대폰번호^16^0^0^0^0^0^0
+FAX_ARCD^팩스 지역번호^4^0^0^0^0^0^0
+FAX_TONO^팩스 국번호^4^0^0^0^0^0^0
+FXNO^팩스번호^4^0^0^0^0^0^0
+WHOL_FXNO^전체팩스번호^16^0^0^0^0^0^0
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+CHCR_INAG_TYPE_CODE^체크카드 통보처 유형 코드^2^0^0^0^0^0^0
+FUND_RMND_RCMS_CLS_CODE^펀드잔고수신구분코드^1^0^0^0^0^0^0
+TRUST_CLS_CODE^신탁 구분 코드^1^0^0^0^0^0^0
+SNDN_YN^발송 여부^1^0^0^0^0^0^0
+INAG_DSGT_TRGT_YN^통보처 지정 대상 여부^1^0^0^0^0^0^0
+UI_CLPH_PRFN_YN^UI휴대폰선호여부^1^0^0^0^0^0^0
+UI_OWHS_TLPH_PRFN_YN^UI자택전화선호여부^1^0^0^0^0^0^0
+UI_WRPL_TLPH_PRFN_YN^UI직장전화선호여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" occurs="30" inout="out" _len="933" _ulen="681" >
+
+PXPR_TYPE_NAME^대리인 유형 명^40^0^0^0^0^0^0
+PXPR_NAME^대리인 명^40^0^0^0^0^0^0
+PXPR_RCNO^대리인 실명확인번호^13^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+WHOL_TELNO^전체 전화번호^16^0^0^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+ACNT_PXPR_RLTS_CODE^계좌 대리인 관계 코드^2^0^0^0^0^0^0
+UI_PXPR_NTNT_CTCD^UI대리인국적국가코드^3^0^0^0^0^0^0
+UI_PXPR_ABRD_ADDR^UI대리인국외주소^200^0^0^0^0^0^0
+UI_PXPR_NCNO^UI대리인국가번호^5^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_ARCD^UI대리인국외전화지역번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_SRNO^UI대리인국외전화일련번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_TONO^UI대리인국외전화국번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TENO^UI대리인국외교환번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_WHOL_TELNO^UI대리인국외전체전화번호^16^0^0^0^0^0^0
+PXPR_RCNO_PIP^대리인실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock6" inout="out" _len="172" _ulen="132" >
+
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+FAX_ARCD^팩스 지역번호^4^0^0^0^0^0^0
+FAX_TONO^팩스 국번호^4^0^0^0^0^0^0
+FXNO^팩스번호^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="709" _ulen="519" >
+
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+TCTR_BRCD^이관 지점코드^4^0^0^0^0^0^0
+TFCT_APLT_DATE^이수관 신청 일자^8^0^0^0^0^0^0
+KYC_DVPD_EPMD_CODE^KYC파생상품유의코드^2^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+PROS_DATE^최종수행일자^8^0^0^0^0^0^0
+RPPR_NAME^대표자 명^40^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+PFIN_VLDT_STA_DATE^전문투자자효력시작일자^8^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+PFIN_CLS_CODE^전문투자자구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock8" inout="out" _len="324" _ulen="240" >
+
+UI_SNML_ZIP^UI발송물우편번호^6^0^0^0^0^0^0
+UI_SNML_POST^UI발송물우편주소^100^0^0^0^0^0^0
+UI_SNML_DTAD^UI발송물상세주소^100^0^0^0^0^0^0
+UI_MAIL_ZIP^UI우편물우편번호^6^0^0^0^0^0^0
+UI_MAIL_POST^UI우편물우편주소^100^0^0^0^0^0^0
+UI_MAIL_DTAD^UI우편물상세주소^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="257" _ulen="185" >
+
+PXPR_RCNO^대리인 실명확인번호^13^0^0^0^0^0^0
+CNPL_SRNO^연락처 일련번호^4^0^7^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+CUST_RLTS_CODE^고객 관계 코드^2^0^0^0^0^0^0
+PXPR_RCNO_PIP^대리인실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

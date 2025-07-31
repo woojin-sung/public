@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="81010" scrname="고객투자성향진단_목표시장체크" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnCancel" caption="가입중단" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,557,187,50,1" />
+		<BUTTON name="btnOK" caption="유의사항 숙지 및 가입진행" fgcolor="061:188030030" btnimage="btn_pop2.9.png" ly_vert="187,557,188,50,1" />
+		<LABEL name="Label0" caption="고객님께서 선택하신 상품은" ly_vert="5,15,205,32,1" />
+		<LABEL name="Label1" fgcolor="128:188030030" fontstyle="01" caption="고난도 금융투자상품" ly_vert="193,15,164,32,1" />
+		<LABEL name="Label3" caption="에 해당합니다. 고객님의 투자성향 정보" ly_vert="5,35,272,32,1" />
+		<LABEL name="Label4" fgcolor="146:124124124" fontsize="-1" caption="(금융투자" ly_vert="263,35,69,32,1" />
+		<LABEL name="Label5" fgcolor="146:124124124" fontsize="-1" caption="상품에 대한 지식과 경험, 손실감내능력, 위험추구성향," ly_vert="5,55,364,32,1" />
+		<LABEL name="Label7" caption="를 고려하여 판단한 결과" ly_vert="181,75,175,32,1" />
+		<LABEL name="Label8" fgcolor="007:030080200" caption="고객님께서는 당사가 설정한" ly_vert="5,95,205,32,1" />
+		<LABEL name="Label9" fgcolor="128:188030030" fontstyle="01" caption="이 상품의 판매대상" ly_vert="193,95,163,32,1" />
+		<LABEL name="Label10" fgcolor="128:188030030" fontstyle="01" caption="고객(목표시장)에 해당하지 않습니다." ly_vert="5,115,345,32,1" />
+		<LABEL name="Label11" caption="판매 대상고객에 해당하지 않더라도 상품가입은 가" ly_vert="5,160,350,32,1" />
+		<LABEL name="Label12" caption="능하나, 이 경우" ly_vert="5,180,147,32,1" />
+		<LABEL name="Label13" fgcolor="128:188030030" fontstyle="01" caption="더욱 각별한 투자판단이 필요합니다." ly_vert="108,180,294,32,1" />
+		<LABEL name="Label14" caption="이 점을 유의하시어 투자여부를 신중히 고려하시기" ly_vert="5,235,350,32,1" />
+		<LABEL name="Label15" fgcolor="128:188030030" fontstyle="01" caption="※ 고난도 금융투자상품이란?" ly_vert="5,320,250,32,1" />
+		<LABEL name="Label16" caption="최대 원금손실 가능금액이 원금의 100분의 20을 초" ly_vert="5,340,365,32,1" />
+		<LABEL name="Label17" caption="과하고 기초자산의 특성, 손익구조 등을 투자자가" ly_vert="5,360,364,32,1" />
+		<LABEL name="Label18" caption="이해하기 어려운 금융투자상품" ly_vert="5,380,350,32,1" />
+		<LABEL name="Label6" fgcolor="146:124124124" fontsize="-1" caption="투자예상기간, 보유가능기간)" ly_vert="5,75,190,32,1" />
+		<LABEL name="Label110" caption="바랍니다." ly_vert="5,255,350,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4187" _ulen="3905" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 고객투자성향진단
+' 02. 화면설명 : 고객투자성향진단_목표시장체크
+' 03. 작    성 : 2021.05.01 정우희 
+' 04. 수    정 : 
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_szScrNo 	'호출한 화면번호
+
+Dim g_szRetData 
+Dim g_szKYC_INVT_INCL_GRAD_CODE 	'KYC투자성향등급코드
+Dim g_szKYC_PROD_GRAD_CODE 		'KYC상품등급코드
+Dim g_szKYC_DVPD_EPMD_CODE 		'KYC파생상품유의코드
+Dim g_szKYC_DRVT_PROS_YN 			'KYC파생처리여부
+Dim g_szDVPD_GRAD_CODE 			'파생상품등급코드
+Dim	g_szAlertTitle			'알림타이틀
+Dim g_szRet
+
+g_szRet	=	"CANCEL"
+g_szAlertTitle	=	"알림"
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+'setItemSetting: 각 업무에 따라 입력값 세팅
+'============================================================================
+Function	setGlobalItems(szInput)
+	g_szScrNo	=	getListItem(szInput, 0)
+	
+	g_szKYC_INVT_INCL_GRAD_CODE 	=	getListItem(szInput, 1)
+	g_szKYC_PROD_GRAD_CODE 		=	getListItem(szInput, 2)
+	g_szKYC_DVPD_EPMD_CODE 		=	getListItem(szInput, 3)
+	g_szKYC_DRVT_PROS_YN 		=	getListItem(szInput, 4)
+	g_szDVPD_GRAD_CODE 			=	getListItem(szInput, 5)
+
+End Function
+
+
+'============================================================================
+'해당하는 값의 아이템을 리턴
+'============================================================================
+Function getListItem(szInput, nIdx)
+	dim szList
+	
+	if szInput = "" then
+		return 
+	else
+		szList = split(szInput, "★")
+		if szList <> "" then
+			return szList(nIdx)
+		else
+			return
+		end if 
+	end if 
+	
+end function
+
+
+'===========================================================================
+' 숫자 리턴함수
+'===========================================================================
+Function GetTonumber(sNum)
+	Dim nDbl
+	nDbl = 0
+	
+	if sNum == null or Trim(sNum) == "" then
+		return nDbl
+	end if
+	
+	nDbl = CDbl(sNum)
+	
+	return nDbl
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_sRetData = "cancel"
+'	
+	Form.SetScreenName("고난도 금융투자상품 가입 유의사항 안내")
+'	dim szLinkedData	
+'	szLinkedData = Form.GetOpenLinkData( )
+'	if szLinkedData = "" then
+'		Form.ShowAlert(g_szAlertTitle, "입력값이 없습니다.")
+'	else
+'		setGlobalItems(szLinkedData)
+'	end if 
+
+End Sub
+
+
+'============================================================================
+'btnOK_OnClick
+'============================================================================
+Sub btnOK_OnClick()
+	Form.SendReturnToParent("mbonl81010_p8" , "OK")
+	g_szRet	=	"OK"
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'btnCancel_OnClick
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.SendReturnToParent("mbonl81010_p8" , "CANCEL")
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+
+	if	g_szRet	<>	"OK"	then
+		Form.SendReturnToParent("mbonl81010_p8" , "CANCEL")
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

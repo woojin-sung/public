@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="81020" scrname="개인신용정보이용동의_안내팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="-2,-2,379,564,1" />
+		<BUTTON name="ButtonOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3174" _ulen="2894" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 개인신용정보이용동의
+' 02. 화면설명 : 개인신용정보이용동의_안내팝업
+' 03. 작    성 : 2016.01.22 김보라
+' 04. 수	   정 : 2017.11.28 윤유정 : 팝업창 타이틀 변경 v0001
+'                2019.05.03 장원혁 : 파일명, 파일경로 업데이트 v0002
+'			: 2020.03.31 김유경 : 약관 URL 변경 v0003
+'             : 2021.05.28 김수진 : url 변경(필수, 선택 요약/상세)
+'  2023.03.14 : V004 : 양현정 : 테스트url링크 수정
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_sRevData
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_sRevData = Form.GetOpenLinkData()
+	
+	'v0001 sta
+	Dim sServerMode, sURLheader
+	sServerMode = Form.GetSharedData("&SERVER_MODE", false)
+	If sServerMode == "1" Then	'개발기
+		'sURLheader = "http://211.201.184.87/include/resource/comm/ctcn/pdf/"   'v0002
+		sURLheader = "http://testhome.imeritz.com/include/resource/comm/ctcn/pdf/"    'V004
+	Else
+		sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/"    'v0002
+	End If
+	
+	
+	'v0001 fin
+	
+	if g_sRevData == null or g_sRevData == "" then
+		Exit Sub
+	end if
+	
+	if g_sRevData == "page0_common_sum" then
+		
+		Form.SetScreenName("개인(신용)정보 요약동의서") 'v0001
+			
+		WebView0.urlpath = sURLheader & "crinoferagrm8.pdf" 'v0002
+		
+	elseif g_sRevData == "page0_common_detail" then
+	
+		Form.SetScreenName("개인(신용)정보 상세동의서")
+		
+		WebView0.urlpath = sURLheader & "crinoferagrm9.pdf" 'v0001
+		
+	elseif g_sRevData == "page1_common_sum" then
+	
+		Form.SetScreenName("개인(신용)정보 요약동의서")
+		
+		WebView0.urlpath = sURLheader & "crinoferagrm10.pdf" 'v0002
+		
+	elseif g_sRevData == "page1_common_detail" then	
+	
+		Form.SetScreenName("개인(신용)정보 상세동의서")
+		
+		WebView0.urlpath = sURLheader & "crinoferagrm11.pdf" 'v0001
+	end if
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.SendReturnToParent( "mbonl81020_t3" , "cancel;" & g_sRevData )
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	Form.SendReturnToParent( "mbonl81020_t3" , "ok;" & g_sRevData )
+	Form.CloseForm( )
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

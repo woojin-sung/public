@@ -1,0 +1,1825 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="81010" scrname="고객투자성향진단_공통프로세스팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="4" designorder="1" ly_vert="400,142,375,100,1" >
+			<COL_INFO ly_vert_width="125,125,125" />
+			<ROW_INFO ly_vert_height="25,25,25,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" caption="처리여부" impidxs="" />
+				<CELL cell_ly="1,0,1,0" caption="투자성향등급" impidxs="" />
+				<CELL cell_ly="2,0,2,0" caption="상품등급" impidxs="" />
+				<CELL cell_ly="0,1,0,1" import="0,1,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" import="0,1,1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" import="0,1,2" impidxs="" />
+				<CELL cell_ly="0,2,0,2" caption="파생상품유의코드" impidxs="" />
+				<CELL cell_ly="1,2,1,2" caption="파생처리여부" impidxs="" />
+				<CELL cell_ly="2,2,2,2" caption="파생상품등급" impidxs="" />
+				<CELL cell_ly="0,3,0,3" import="0,1,3" impidxs="" />
+				<CELL cell_ly="1,3,1,3" import="0,1,4" impidxs="" />
+				<CELL cell_ly="2,3,2,3" import="0,1,5" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="74972" _ulen="61052" >
+'============================================================================
+' 01.화면명 	: 고객투자성향진단 공통프로세스
+' 02.화면설명	: 고객투자성향진단 공통프로세스
+' 03.작성	: 2016.02.16
+' 04.수정     : 2016.11.10 주식 공모주청약 관련 프로세스 추가 v002
+'             : 2017.03.23 : 신재영 : ELS/DLS 공모주 청약 자가진단 프로세스 추가 v003
+'             : 2017.07.06 : 김동구 : CME/EUREX야간거래신청 자가진단 프로세스 추가 v004
+'             : 2017.12.21 : 윤유정 : 해외주식, 해외파생ETF 자가진단 프로세스 추가 v005
+'								  국내/해외파생ETF 보완조치 로직 추가 
+'		     : 2018.02.12 : 윤유정 : ETP 약정일 경우 계좌일련번호 셋팅 제외 v006
+'		     : 2018.03.14 : 김유경 : 변동성ETN거래신청 추가 v007
+'			: 2020.01.23 : 조승행 : 집합투자증권 위임인계좌 비적합대상 추가매수 불가 v008 
+' 			: 2020.10.12  : 정민영 : v009 : [T2008250015] 메모리취약점 보완
+'			: 2021.04.30 : 정우희 : v010 집합투자증권 가입시 숙려여부 체크 / 목표시장 체크
+'             : 2021.06.16 : 김인택 : v011
+'             : 2021.08.02 : 정효영 : v012
+'             : 2021.08.12 : 정효영 : v013
+' 2021.08.31 : 정민영 : v014 : 투자권유 희망여부 확인서 추가(5등급 상품개설)
+' 2021.09.10 : 김인택 : v015 : 투자권유 희망여부 확인서 추가(5등급 상품개설)
+' 2021.12.23 : 김수진 : v016 : K-OTC 거래신청 추가
+' 2022.03.15 : 김유경 : obcsb_acif_792a IO 추가
+' 2022.03.25 : 김수진 : v017 펀드매매> 신규매수탭 금융상품 일련번호 Shared 값 obcsb_acif_792a input으로 셋팅
+' 2022.04.20 : 김성수 : v018 소수점 거래 추가
+' 2022.07.22 : 임동군 : v019 미스터리쇼핑 결과에 따른 비대면채널 펀드신규매수 프로세스 개선
+'                                     펀드신규매수시 투자성금융투자상품 확인서 확인 후 공인인증서 수행
+' 2022.08-15 : 신극수 : v020 : Wrap 비대면 계약 [계좌전환]
+' 2023.06.19 : 양현정 : v021 : CMA전환신청관련 수정
+' 2023.08.04 : 강희승 : v022 해외주식 소수점 거래신청 시 투자성향 skip
+' 2023.11.22 : 권오상 : v023 mbonl81010_s1 -> mbonl81010_s2 모두 변경
+' 2023.12.04 : 고승연 : v024 : [T2310260012] 상품등급변경 적용
+' 2024.07.23 : 정우희 : v025 : 자동이체약정 적정(적합)성 원칙 적용
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim  szProsYN     'v011 
+dim	g_szScrno	'화면번호
+dim	g_szAcno		'계좌번호
+dim	g_szAsno		'계좌일련번호
+dim	g_szBswr		'KYC업무분류코드(KYC_BSWR_DIV_COE)
+dim	g_szDiv		'업무분류코드(BSWR_DIV_CODE)
+dim	g_szISCD		'종목코드
+dim	g_szPasswd	'패스워드
+dim	g_szKspKdq	'유가증권시장 및 코스닥시작 상장증권 매매함
+dim	g_szAlertTitle'안내창 타이틀
+dim	g_szSvcd      '서비스코드
+dim	g_szProcTc    '처리구분 1:700r과 2:713r 분기용  
+
+g_szAlertTitle	=	"알림"
+'For obcsb_acif_703a INPUT------from obcsb_acif_700a -----------------------
+Dim g_szKYC_INVT_INCL_GRAD_CODE 	'KYC투자성향등급코드
+Dim g_szKYC_PROD_GRAD_CODE 			'KYC상품등급코드
+Dim g_szKYC_DVPD_EPMD_CODE		 	'KYC파생상품유의코드
+Dim g_szKYC_DRVT_PROS_YN 			'KYC파생처리여부
+Dim g_szDVPD_GRAD_CODE 			'파생상품등급코드
+
+Dim g_szKYC_INVT_RCMD_CLS_CODE  	'KYC투자권유구분코드 v011
+Dim g_szAPRT_SRNM_PROD_YN            '적정성상품여부 v011
+Dim g_szRSLT_CLS                     '결과구분 v020
+' v003 for obcsb_acif_760a input from mbonl81010_p6/7
+Dim g_szSfdiAcmpYn
+Dim g_szExnTlmsCnfrYn
+
+Dim g_szTrgtYn
+Dim g_szSelfDigReturn
+'v008
+Dim g_szSelfacctyn				'본인계좌여부
+Dim g_plain_rm  					'v009 메모리평문적용여부
+Dim g_szOPNG_PRCD					'v014
+
+'21.08.12 JHY (v013)
+Dim g_szCustCode '고객구분코드
+'Dim g_szPfinYn '전문금융소비자 여부
+Dim g_isOpenPopup '전문금융소비자 목표시장 설문팝업 오픈
+g_isOpenPopup = false
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+'setItemSetting: 각 업무에 따라 입력값 세팅
+'============================================================================
+Function	setItemSetting(szInput)
+	g_szScrno	=	getListItem(szInput, 0)
+
+	g_szAcno=""
+	g_szAsno=""
+	g_szBswr=""
+	g_szDiv=""
+	g_szIscd=""
+	g_szPasswd=""
+	g_szKspKdq=""
+	g_szSvcd=""
+	
+	'온라인계좌개설,	
+	'			 화면번호★상세구분★유가증권체크★ACNO★PASSWD
+	'	  종합매매: 84010★0★유가증권체크★ACNO★PASSWD
+	'	  CMA(RP) : 84010★1★" "★ACNO★PASSWD
+	'	  선물옵션: 84010★2★" "★ACNO★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl84010_t2.xmf	84010★0★금상전용구분★ACNO★PWD	온라인계좌개설_종합매매계좌개설
+	'mbonl84010_t4.xmf	84010★1★★ACNO★PWD				온라인계좌개설_CMA계좌개설
+	'mbonl84010_t7.xmf	84010★0★0★ACNO★PWD				온라인계좌개설_ISA계좌개설
+	'mbonl89030.xmf		84010★1★★ACNO★PWD				CMA 계좌 전환 신청
+	if	g_szScrno	=	"84010"	then
+		
+		'v014 종합매매: 84010★0★유가증권체크(1)종합매매구분(1)★ACNO★PASSWD
+		'g_szKspKdq 
+		tmpStr = getListItem(szInput,2)
+		'Form.ShowAlert("테스트", tmpStr)
+		g_szKspKdq = Mid(tmpStr,1,1)  '1.유가증권체크 0.유가증권미체크
+	
+		g_szAcno	=	getListItem(szInput,3)
+		g_szPasswd =	getListItem(szInput,4)
+
+		g_szBswr	=	"03"
+		
+		if	getListItem(szInput,1)	=	"0"	then			'종합매매계설
+			g_szDiv	=	"01004"
+			'v014
+			'v015 '1.금융상품전용체크 0.금융상품전용미체크
+			
+			'Form.ShowAlert("tmpStr", Mid(tmpStr,2,1))
+			If Mid(tmpStr,2,1) = "1" Then   
+			    g_szOPNG_PRCD = "10F"	'금상전용
+			    g_szDiv	=	"01052" '금융상품전용계좌 'v015	
+			Elseif Mid(tmpStr,2,1) = "0" Then  
+			    g_szOPNG_PRCD = "100"
+			Else 'v015 ISA계좌
+			    g_szOPNG_PRCD = "133" 
+			End If
+		elseif	getListItem(szInput,1)	=	"1"	then		'CMA(RP)
+			'v015 g_szDiv	=	"17052"
+			g_szDiv	=	"01045"  'v015
+			g_szOPNG_PRCD = "118"	'v014
+		elseif	getListItem(szInput,1)	=	"2"	then		'선물옵션
+			g_szDiv	=	"01005"
+			g_szOPNG_PRCD = "101"	'v014
+		end if
+		
+
+	'파생상품ETF거래신청
+	'			 화면번호★ACNO★PASSWD
+	'			 88000★ACNO★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl88000.xmf		88000★ACNO★PWD★054		파생상품ETF거래신청
+	'mbonl88000_p2.xmf	88000★ACNO★PWD★054		자동해지 보완처리
+	elseif	g_szScrno	=	"88000"	then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szPasswd =	getListItem(szInput,2)
+		g_szSvcd = getListItem(szInput,3) 'v005
+		
+		'v005
+'		g_szBswr	=	"02"
+'		g_szDiv	=	"17127"
+		if g_szSvcd = "054" then
+			g_szBswr	=	"02"
+			g_szDiv	=	"17127"
+		elseif g_szSvcd = "083" then
+			g_szBswr	=	"02"
+			g_szDiv	=	"17192"
+		end if
+		
+		
+	'ELW거래신청
+	'			 화면번호★ACNO★PASSWD
+	'			 88010★ACNO★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl88010.xmf	88010★ACNO★PWD	ELW거래신청
+	elseif	g_szScrno	=	"88010"	then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szPasswd =	getListItem(szInput,2)
+		g_szBswr	=	"02"
+		g_szDiv	=	"17015"
+
+
+	'ETN거래신청
+	'			 화면번호★ACNO★PASSWD
+	'			 88020★ACNO★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl88020.xmf	88020★ACNO★PWD	ETN거래신청
+	elseif	g_szScrno	=	"88020"	then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szPasswd =	getListItem(szInput,2)
+
+		g_szBswr	=	"02"
+		g_szDiv	=	"17160"
+		
+		
+	'신용계좌개설
+	'			 화면번호★ACNO★ASNO★PASSWD
+	'			 82010★ACNO★ASNO★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl81020.xmf	81020★ACNO★ASNO★PWD		신용계좌개설
+	elseif	g_szScrno	=	"82010"	then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szAsno	=	getListItem(szInput,2)
+		g_szPasswd =	getListItem(szInput,3)
+		g_szBswr	=	"02"
+		g_szDiv	=	"16001"
+
+	'펀드매매
+	'			 화면번호★상세구분★ACNO★ASNO★ISCD★PASSWD
+	'	  신규매수: 51000★0★ACNO★ASNO★ISCD★PASSWD
+	'	  추가매수: 51000★1★ACNO★ASNO★ISCD★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbfnp51010_t1.xmf	51000★0★ACNO★ASNO★ISCD★PWD		펀드매매_신규매수탭
+	'mbfnp51010_t2.xmf	51000★1★ACNO★ASNO★ISCD★PWD		펀드매매_추가매수탭
+	elseif	g_szScrno	=	"51000"	then
+		g_szBswr	=	"01"
+		g_szAcno	=	getListItem(szInput,2)
+		g_szAsno	=	getListItem(szInput,3)
+		g_szIscd	=	getListItem(szInput,4)
+'		g_szPasswd =	getListItem(szInput,5)	'비밀번호 사용 안함. 20230509 EK. 
+
+
+		if	getListItem(szInput,1)	=	"0"	then			'신규매수
+			g_szDiv	=	"01010"
+		elseif	getListItem(szInput,1)	=	"1"	then		'추가매수
+			g_szDiv	=	"13005"
+		end if
+	
+
+	'ELS/ DLS청약	
+	'			 화면번호★ACNO★ASNO★ISCD★PASSWD
+	'			 53000★ACNO★ASNO★ISCD★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbfnp53000_p1.xmf	53000★0★ACNO★ASNO★ISCD★PWD		ELS/DLS청약_청약신청팝업
+	elseif	g_szScrno	=	"53000"	then
+		g_szBswr	=	"01"
+		g_szAcno	=	getListItem(szInput,1)
+		g_szAsno	=	getListItem(szInput,2)
+		g_szIscd	=	getListItem(szInput,3)
+		g_szPasswd =	getListItem(szInput,4)
+
+		g_szDiv	=	"15008"
+	'공모주청약-주식 v002	
+	'			 화면번호★ACNO★ASNO★ISCD★PASSWD
+	'			 83110★ACNO★ASNO★ISCD★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl83110_p2.xmf	83110★0★ACNO★ASNO★ISCD★PWD		공모주청약_청약신청팝업
+	elseif	g_szScrno	=	"83110"	then
+	     g_szBswr	=	"04"
+		g_szAcno	=	getListItem(szInput,1)
+		g_szAsno	=	getListItem(szInput,2)
+		g_szIscd	=	getListItem(szInput,3)
+		g_szPasswd =	getListItem(szInput,4)
+
+		g_szDiv	=	"15006" 
+
+	'CME/EUREX야간거래신청 추가 v004	
+	'			 화면번호★ACNO★ASNO★PASSWD★SVCD
+	'			 87040★ACNO★ASNO★PASSWD★SVCD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl87040_t1.xmf	87040_t1★ACNO★ASNO★PWD★075		CME 야간거래 신청/해지
+	'mbonl87040_t2.xmf	87040_t2★ACNO★ASNO★PWD★076		EUREX 야간거래 신청/해지
+	elseif	g_szScrno	=	"87040_t1" or g_szScrno	=	"87040_t2"	then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szAsno	=	getListItem(szInput,2)
+		g_szPasswd =	getListItem(szInput,3)
+		g_szSvcd =	getListItem(szInput,4)
+		g_szBswr	=	"02"
+		
+		if g_szSvcd = "075" then
+			g_szDiv	=	"17178"
+		elseif g_szSvcd = "076" then
+			g_szDiv	=	"17180"
+		end if	
+	
+	'해외주식, 해외파생ETF 거래신청 추가 v005
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl88000_p2.xmf	87050★ACNO★★PWD★083		자동해지 보완처리
+	'mbonl87051.xmf		87051★ACNO★ASNO★PWD★082		해외주식 거래신청
+	'mbonl87050.xmf		87050★ACNO★ASNO★PWD★083		해외ETP 거래신청
+	elseif	g_szScrno	=	"87050" or g_szScrno	=	"87051"	then
+		g_szAcno	=	getListItem(szInput,1)
+		'g_szAsno	=	getListItem(szInput,2) 'v006
+		g_szPasswd =	getListItem(szInput,3)
+		g_szSvcd =	getListItem(szInput,4)
+		g_szBswr	=	"02"
+		
+		if g_szSvcd = "082" then
+			g_szAsno	=	getListItem(szInput,2)
+			g_szDiv	=	"17190"
+		elseif g_szSvcd = "083" then
+			g_szAsno	=	""
+			g_szDiv	=	"17192"
+		end if
+	
+	'2023.05.23  해외주식/ETP 거래신청--------------------------------------------------- 
+	'mbonl87057_p1.xmf 87057_1★ACNO★ASNO★PWD★083 해외주식 거래신청
+	'mbonl87057_p1.xmf 87057_2★ACNO★ASNO★PWD★083 해외주식 거래, 해외ETP 거래신청
+	'mbonl87057_p1.xmf 87057_3★ACNO★ASNO★PWD★082 해외ETP 거래신청		
+	elseif g_szScrno = "87057_1" or  g_szScrno = "87057_2" or g_szScrno = "87057_3" then
+		g_szAcno	=	getListItem(szInput,1)
+		'g_szAsno	=	getListItem(szInput,2) 'v006
+		g_szPasswd =	getListItem(szInput,3)
+		g_szSvcd =	getListItem(szInput,4)
+		g_szBswr	=	"02"
+		
+		if g_szSvcd = "082" then
+			g_szAsno	=	getListItem(szInput,2)
+			g_szDiv	=	"17190"
+		elseif g_szSvcd = "083" then
+			g_szAsno	=	""
+			g_szDiv	=	"17192"
+		end if
+	'------------------------------------------------------------------------------------
+	'v018 해외주식 소수점 거래
+	'mbonl87056.xmf 87052_1★ACNO★ASNO★PWD★086 해외주식 소수점 신청
+	'mbonl87056.xmf 87052_2★ACNO★ASNO★PWD★086 해외주식 소수점, 해외ETP 거래신청
+	'mbonl87056.xmf 87052_3★ACNO★ASNO★PWD★086 해외주식 거래, 해외주식 소수점 거래,해외ETP 거래신청
+	'mbonl87056.xmf 87052_4★ACNO★ASNO★PWD★086 해외주식 거래, 해외주식 소수점 거래
+	'v022
+	'elseif	g_szScrno = "87052_1" or g_szScrno = "87052_2" or g_szScrno	= "87052_3" or g_szScrno = "87052_4"	then
+	'	g_szAcno	=	getListItem(szInput,1)
+	'	g_szPasswd =	getListItem(szInput,3)
+	'	g_szSvcd =	getListItem(szInput,4)
+	'	g_szBswr	=	"02"
+		
+	'	if g_szSvcd = "079" then
+	'		g_szAsno	=	getListItem(szInput,2)
+	'		g_szDiv	=	"17213"
+	'	end if
+	elseif	g_szScrno = "87052_2" then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szPasswd =	getListItem(szInput,3)
+		g_szSvcd =	getListItem(szInput,4)
+		g_szBswr	=	"02"
+		
+		if g_szSvcd = "083" then
+			g_szAsno	=	getListItem(szInput,2)
+			g_szDiv	=	"17192"
+		end if
+		
+	elseif g_szScrno = "87052_4" then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szPasswd =	getListItem(szInput,3)
+		g_szSvcd =	getListItem(szInput,4)
+		g_szBswr	=	"02"
+		
+		if g_szSvcd = "082" then
+			g_szAsno	=	getListItem(szInput,2)
+			g_szDiv	=	"17190"
+		end if
+		
+     elseif g_szScrno = "87052_3" then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szPasswd =	getListItem(szInput,3)
+		g_szSvcd =	getListItem(szInput,4)
+		g_szBswr	=	"02"
+
+		if g_szSvcd = "083" then
+			g_szAsno	=	getListItem(szInput,2)
+			g_szDiv	=	"17192"
+		end if
+		
+	'v007 변동성ETN거래신청
+	'화면번호★ACNO★PASSWD
+	'88021★ACNO★PASSWD
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl88021.xmf	88021★ACNO★PWD		변동성ETN거래신청
+	elseif	g_szScrno	=	"88021"	then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szPasswd =	getListItem(szInput,2)
+	
+		g_szBswr	=	"02"
+		g_szDiv	=	"17194"
+
+	'v016 K-OTC 거래신청
+	'화면번호★ACNO★PASSWD	
+	'88050★ACNO★PASSWD	
+	'v009 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	'mbonl88050.xmf	88050★ACNO★PWD		K-OTC 거래신청
+	elseif	g_szScrno	=	"88050"	then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szPasswd =	getListItem(szInput,2)
+		
+		g_szBswr	=	"02"
+		g_szDiv	=	"17148"
+	'v020 Wrap계좌전환
+	'화면번호★ACNO★ASNO★PASSWD	
+	elseif	g_szScrno	=	"57090"	then 
+		g_szAcno	=	getListItem(szInput,1)
+		g_szAsno	=	getListItem(szInput,2)
+		g_szPasswd =	getListItem(szInput,3)
+		
+		g_szBswr	=	"03"
+		g_szDiv	=	"01020"
+		
+	'v021
+	elseif	g_szScrno	=	"89030"	then
+		g_szAcno	=	getListItem(szInput,1)
+		g_szAsno	=	getListItem(szInput,2) 
+		g_szPasswd =	getListItem(szInput,3)
+		g_szSvcd =	getListItem(szInput,4)
+		g_szBswr	=	"02"
+		
+		if g_szSvcd = "06" then			
+			g_szDiv	=	"17226"	'06:RP형 - 17226 CMA계좌전환(RP)
+		elseif g_szSvcd = "08" then		
+			g_szDiv	=	"17227"  '08:MMW형 - 17227 CMA계좌전환(MMW)
+		elseif g_szSvcd = "09" then	
+			g_szDiv	=	"17228"  '09:발행어음형 - 17228 CMA계좌전환(발행어음)
+		end if		
+	'KEK.투자성향 공통팝업 테스트_20240111
+	elseif	g_szScrno	=	"90201"	then
+		g_szAcno	=	getListItem(szInput,2)
+		g_szAsno	=	getListItem(szInput,3)
+		g_szIscd	=	getListItem(szInput,4)
+		
+		g_szBswr	=	"01"
+		g_szDiv	=	"13005"
+	'KEK.투자성향 공통팝업 테스트_20240111
+	'v025
+	elseif	g_szScrno	=	"51020"	then
+		g_szBswr	=	"01"
+		g_szAcno	=	getListItem(szInput,2)
+		g_szAsno	=	getListItem(szInput,3)
+		g_szIscd	=	getListItem(szInput,4)
+		
+		g_szDiv	=	"17058" '자동이체약정
+		
+	
+	end if
+End Function
+
+
+'============================================================================
+'해당하는 값의 아이템을 리턴
+'============================================================================
+Function getListItem(szInput, nIdx)
+	dim szList
+	
+	if szInput = "" then
+		return 
+	else
+		szList = split(szInput, "★")
+		if szList <> "" then
+			return szList(nIdx)
+		else
+			return
+		end if 
+	end if 
+
+end function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	
+	dim szLinkedData
+	Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+
+	'v009 메모리평문적용여부(0:미적용 / 1:적용)
+	g_plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	
+	szLinkedData = Form.GetOpenLinkData( )
+
+	if len(szLinkedData) <= 6 then
+		Form.ShowAlert("안내", "입력값이 없습니다.")
+	else
+		setItemSetting(szLinkedData)
+		
+		if	g_szScrno <> null		and		len(trim(g_szScrno))  > 4 	then
+		
+			'KEK.투자성향 공통팝업 테스트_20240111 ( g_szScrno = "90201"추가)
+			if	g_szScrno	=	"53000"	or	g_szScrno	=	"90201"	then					'ELS 일때 791r로 투자자금 원금보존확인
+				DATAMANAGER.RequestTranData("obcsb_acif_791r")
+			
+			'21.08.17 JHY START (v013)
+			'펀드 매매일때, 전문금융투자자여부 먼저 알기 위해 005r -> 721r (-> 신규매수일시 791r) -> 700r
+			'v025추가
+			elseif	g_szScrno	="51000" or g_szScrno	="51020" then
+				DATAMANAGER.RequestTranData("obacp_comm_005r")	
+			'21.08.17 JHY END (v013)
+			
+			elseif	g_szScrno	=	"84010"			then				'개설시엔 무조건 설문
+			    'v009 g_szPasswd값 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+				Form.OpenPopup("mbonl81010_s2" , g_szAcno & "★" &  g_szPasswd, sPosInfo)
+			elseif	g_szScrno	=	"57090"			then				'v020 Wrap계좌전환
+				DATAMANAGER.RequestTranData("obcsb_acif_713r") ' 당일투자성향 존재여부 확인
+			else
+				DATAMANAGER.RequestTranData("obcsb_acif_700r")			'온라인계좌개설이 아니면 투자성향등급조회를 통한 루트
+			end	if
+		end	if
+	end if 
+
+	
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if	szTranID	=	"obcsb_acif_700r"	then				'투자성향등급조회
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "ACNO"				, 0, g_szAcno)
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "ASNO"				, 0, g_szAsno)
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "KYC_BSWR_DIV_CODE"	, 0, g_szBswr)
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "BSWR_DIV_CODE"		, 0, g_szDiv)
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "ISCD"				, 0, g_szIscd)
+	elseif	szTranID	=	"obcsb_acif_713r"	then			'투자성향등급정보체크
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "ACNO"				, 0, g_szAcno)
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "ASNO"				, 0, g_szAsno)
+		'v015 DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "BSWR_DOMN_CLCD"		, 0, "02")
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "BSWR_DOMN_CLCD"		, 0, "01") 'v015 공통모듈을 타도록 
+		'v014 실제 개설되는 상품으로 매핑
+		'DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "PRCD"				, 0, "100")
+		If g_szOPNG_PRCD = "100" Or g_szOPNG_PRCD = "10F" Then
+		    DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "PRCD"			, 0, "100")
+		ElseIf g_szOPNG_PRCD = "118" Then
+		    DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "PRCD"			, 0, "118")
+		    DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "ISSU_TYPE_CODE"   , 0, "06"  )  '06.RP - 온라인CMA개설은 RP만 가능
+		End If
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "KYC_BSWR_DIV_CODE"	, 0, g_szBswr)
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_713r", "InBlock1", "BSWR_DIV_CODE"		, 0, g_szDiv)
+	elseif	szTranID	=	"obcsb_acif_791r"	then
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_791r", "InBlock1", "ACNO"				, 0, g_szAcno)
+	elseif	szTranID	=	"obcsb_acif_762r"	then '  v003 자가진단시행 필요여부 조회
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_762r", "InBlock1", "ACNO"				, 0, g_szAcno) '계좌번호
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_762r", "InBlock1", "ISSU_TYPE_CODE"		, 0, "08"    ) '종목유형코드
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_762r", "InBlock1", "ISCD"				, 0, g_szIscd) '종목코드
+	
+	'21.08.13 JHY START (v013)
+	'전문투자자 정보 조회 (목표시장 설문 팝업 1번 자동 세팅)
+	elseif	szTranID	=	"obacp_comm_005r"	then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "IQRY_CLS_CODE" , 0, "1") '조회구분코드
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO" , 0, g_szAcno) '계좌번호
+	
+	elseif	szTranID	=	"obcsb_acif_721r"	then
+		Dim szJumin
+		szJumin = Form.GetSharedData("&JUMIN_NUM", false )
+
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RCNO_PIP" , 0, szJumin) '실명번호PIP
+		
+	'21.08.13 JHY END (v013)
+	
+	end if
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'v011 dim	szProsYN		'700r 리턴값
+	
+	'---------------------------------------------------------------------------------------------------------------------
+	'A:투자성향진단필요				-->해당관련 서브 팝업실행후 재진단 정상여부에따라분기	--> Y: 다시서비스호출
+	'B:투자성향진단필요(유효)															--> N: "N"리턴
+	'M:취약금융소비자 정보없음
+	'P:투자성향진단필요(파생)
+	'C:원금보존 투자자금 정보없음
+	
+	'D:원금보존 투자자금 가입불가 상품	-->해당관련 팝업실행후								--> "N"리턴					
+	'S:취약자가입불가
+	'T:고령자최초가입자가입불가
+	'U:초고령자온라인파생가입불가
+	'V:고령자 당일 파생신청
+	
+	'N:정상																			--> "Y"리턴
+	'X:전문투자자
+	
+	'Y:비적합동의필요				-->해당관련 서브 팝업실행후 재진단 정상여부에따라 분기		--> Y: "Y"리턴
+	'																				--> N: "N"리턴
+	'E:고령자투자보호안내																--> N: "N"리턴 (16.03.29 김인택과장님)
+	'---------------------------------------------------------------------------------------------------------------------
+	'---------------------------------------------------------------------------------------------------------------------
+	'종합매매계좌 개설시 (프로세스 추가, 16.03.10 김인택과장님)
+	'N:정상, X:전문투자자	--> obcsb_acif_713r 호출		--> S : 취약금융소비자 투자보호
+	'												--> Y : 비적합처리
+	'												--> N : 정상처리
+	'---------------------------------------------------------------------------------------------------------------------
+	
+	if	szTranID	=	"obcsb_acif_700r"	then
+	     g_szProcTc = "1"
+		szProsYN	=	""
+		g_szKYC_INVT_INCL_GRAD_CODE= "" 'KYC투자성향등급코드
+		g_szKYC_PROD_GRAD_CODE	= "" 'KYC상품등급코드
+		g_szKYC_DVPD_EPMD_CODE	= "" 'KYC파생상품유의코드
+		g_szKYC_DRVT_PROS_YN 	= "" 'KYC파생처리여부
+		g_szDVPD_GRAD_CODE	= "" '파생상품등급코드
+		g_szCAFU_TRGT_YN		= "" '숙려대상여부 v010
+		g_szGOAL_MRKT_TRGT_YN 	= "" '목표시장대상여부 v010
+		g_szGOAL_MRKT_UNFIT_YN = "" '목표시장부적합여부 v010
+		
+		
+		
+		szProsYN	=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "PROS_YN", 0)
+		g_szKYC_INVT_INCL_GRAD_CODE	=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_INVT_INCL_GRAD_CODE", 0)
+		g_szKYC_PROD_GRAD_CODE		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_PROD_GRAD_CODE", 0)
+		g_szKYC_DVPD_EPMD_CODE		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_DVPD_EPMD_CODE", 0)
+		g_szKYC_DRVT_PROS_YN		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_DRVT_PROS_YN", 0)
+		g_szDVPD_GRAD_CODE		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "DVPD_GRAD_CODE", 0)
+		g_szCAFU_TRGT_YN			=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "CAFU_TRGT_YN", 0) 'v010 숙려대상
+		g_szGOAL_MRKT_TRGT_YN		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "GOAL_MRKT_TRGT_YN", 0) 'v010 목표시장대상여부
+		g_szGOAL_MRKT_UNFIT_YN		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "GOAL_MRKT_UNFIT_YN", 0) 'v010 목표시장부적합여부
+		g_szAPRT_SRNM_PROD_YN		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "APRT_SRNM_PROD_YN", 0) 'KYC투자권유구분코드 v011
+		g_szKYC_INVT_RCMD_CLS_CODE 	=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_INVT_RCMD_CLS_CODE", 0) '적정성상품여부 v011
+
+'		Form.ShowAlert(szTranID, g_szAPRT_SRNM_PROD_YN)		
+		
+		Form.SetSharedData("KYC_INVT_INCL_GRAD_CODE"	, g_szKYC_INVT_INCL_GRAD_CODE)
+		Form.SetSharedData("KYC_PROD_GRAD_CODE"		, g_szKYC_PROD_GRAD_CODE)
+		Form.SetSharedData("KYC_DVPD_EPMD_CODE"		, g_szKYC_DVPD_EPMD_CODE)
+		Form.SetSharedData("KYC_DRVT_PROS_YN"		, g_szKYC_DRVT_PROS_YN)
+		Form.SetSharedData("DVPD_GRAD_CODE"			, g_szDVPD_GRAD_CODE)
+		Form.SetSharedData("CAFU_TRGT_YN"			, g_szCAFU_TRGT_YN) 'v010 숙려대상여부
+		Form.SetSharedData("KYC_INVT_RCMD_CLS_CODE"	, g_szKYC_INVT_RCMD_CLS_CODE) 'v011
+		
+		'21.08.02 JHY START
+		Dim szHgdtYN, szOldtYN, szInfoYN, szUnfitYN
+		szHgdtYN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "HGDT_PROD_YN", 0)
+		szOldtYN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CAFU_OLDT_YN", 0)
+		szInfoYN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "INFO_REFS_YN", 0)
+		szUnfitYN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "UNFIT_YN", 0)
+		
+		Form.SetSharedData("700r_HGDT_PROD_YN", szHgdtYN) '고난도상품여부
+		Form.SetSharedData("700r_CAFU_OLDT_YN", szOldtYN) '숙려고령자여부
+		Form.SetSharedData("700r_INFO_REFS_YN", szInfoYN) '정보미제공여부
+		Form.SetSharedData("700r_UNFIT_YN", szUnfitYN) '부적합여부
+		'21.08.02 JHY END		
+		
+
+		g_szSelfacctyn = TRIM(Form.GetAccountInfo(g_szAcno & g_szAsno, "selfacctyn"))
+		
+		'2022.10.21. 위임인 투자권유 불원 시 매수제어
+		if	(TRIM(g_szDiv) = "13005" and TRIM(g_szSelfacctyn) = "N") and ( TRIM(g_szKYC_INVT_RCMD_CLS_CODE) = "3" or TRIM(g_szKYC_INVT_RCMD_CLS_CODE) = "4") 	then
+			Form.ShowAlert("확인", "위임인의 투자성향이 투자권유 미희망이거나, 해당 상품의 투자에 부적합(부적정)하여 매수가 불가능합니다.")
+			Form.CloseForm( )
+			Exit Sub
+		end if
+
+		'v011
+		if ( szProsYN	=	"N"	or	szProsYN	=	"Y" ) and (g_szKYC_INVT_RCMD_CLS_CODE = "3" or g_szKYC_INVT_RCMD_CLS_CODE = "4")	then			'전문금융소비자가 아니면서 가입가능하고 투자권유불원이면
+			'KEK.투자성향 공통팝업 테스트_20240111 ( g_szScrno = "90201"추가)
+			'v025 자동이체약정 추가
+			if g_szScrno = "51000" or g_szScrno = "90201" or g_szScrno="51020" then
+				Form.OpenPopup("mbonl81010_p23", g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+												 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+												 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" & g_szKYC_INVT_RCMD_CLS_CODE
+							, sPosInfo)	
+			
+			else
+			    Form.OpenFramePopup("mbonl81010_p10" , g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+												 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+												 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" & g_szKYC_INVT_RCMD_CLS_CODE
+							, sPosInfo)
+			end if
+		else
+		    Call KYC_CHECK_PROD()
+		end if
+
+'v011
+'		if	szProsYN	=	"N"	or	szProsYN	=	"X"	then			'정상, 전문투자자	
+'			'v003
+'			if g_szDiv	=	"15008" then
+'				SelfDigPross()
+'			else
+'				Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+'				Form.CloseForm()
+'			end if
+'		elseif	szProsYN	=	"A"	then
+'			Form.MsgBox("고객투자성향등급 확인안내", "고객님의 투자성향등급 정보가 없습니다. 해당 정보가 없으면 상품가입이 불가합니다. 투자성향등급을 확인하고 상품에 가입하시겠습니까?", "PROSYN_A", "1")
+'		
+'		elseif	szProsYN	=	"B"	then
+'			Form.MsgBox("고객투자성향등급 재확인안내", "고객님의 투자성향등급이 정보미제공 또는 기간 만료되어 재확인하셔야 합니다.", "PROSYN_B", "1")
+'		
+'		elseif	szProsYN	=	"M"	then
+'			Form.MsgBox("고객투자성향등급 취약금융소비자 투자보호 안내", "고객님의 취약금융소비자 정보가 없습니다. 해당 정보가 없으면 상품가입이 불가합니다. 투자성향등급을 확인하고 상품에 가입하시겠습니까?", "PROSYN_M", "1")
+'		
+'		elseif	szProsYN	=	"P"	then
+'			Form.MsgBox("정보 미제공에 대한 안내", "해당 금융투자상품은 고객의 투자성향 미확인시 가입할 수 없습니다. 고객의 투자위험성향에 적합한 안전한 금융상품 투자를 위하여 투자성향을 확인 해 주시기 바랍니다.", "PROSYN_P", "6")
+'		
+'		elseif	szProsYN	=	"C"	then
+'			Form.MsgBox("투자자금 원금보존 확인" , "이번에 투자되는 자금이 단기간내 사용처가 정해져 있는등( 예: 6개월 이내에 전세자금으로 활용될 자금)의 이유로 원금 보존을 추구하는 자금입니까?", "PROSYN_C", "2")
+'		
+'		elseif	szProsYN	=	"D"	then
+'			Form.MsgBox("원금보존 위험 상품 안내" , "고객님은 금융투자자금 원금보존을 선택하였습니다. 투자자보호를 위해 파생상품 및 위험등급 1~3등급 상품가입이 제한됩니다.", "PROSYN_D", "6")
+'
+'		elseif	szProsYN	=	"S"	then
+'			Form.MsgBox("취약금융소비자 투자보호 안내" , "고객님은 취약금융소비자입니다. 투자자보호를 위해 투자성향보다 위험등급이 한단계를 초과한 상품가입이 불가합니다.", "PROSYN_S", "6")
+'
+'		elseif	szProsYN	=	"T"	then
+'			Form.MsgBox("고령자 투자보호 안내" , "고객님은 파생상품 관련 투자경험이 없는 고령자(만 65세 이상)입니다. 투자성향등급을 재확인하고 파생상품 신청을 하시겠습니까?", "PROSYN_T", "1")
+'
+'		elseif	szProsYN	=	"U"	then
+'			Form.MsgBox("초고령자 투자보호 안내" , "초고령자(만 80세 이상) 고객님께서는 파생상품 온라인 가입이 제한됩니다.", "PROSYN_U", "6")
+'
+'		elseif	szProsYN	=	"V"	then
+'			Form.MsgBox("고령자 투자보호 안내" , "고객님은 파생상품관련 투자경험이 없는 고령자(만 65세 이상)입니다. 투자숙려제도에 따라서 익영업일부터는 5일 이내에 가입이 가능합니다. 단, 초고령자(만 80세 이상)고객님께서는 파생상품 온라인 가입이 제한됩니다.", "PROSYN_V", "6")
+'
+'		elseif	szProsYN	=	"Y"	then
+'			'v008 sta
+'			if g_szDiv = "13005" then
+'				g_szSelfacctyn = Form.GetAccountInfo(g_szAcno & g_szAsno, "selfacctyn")
+'				'본인계좌 아니며 비적합대상의 경우 추매 불가
+'				if g_szSelfacctyn = "N" then
+'					Form.ShowAlert("확인", "위임인의 투자성향보다 해당 상품의 투자위험도가 높습니다. 위임인이 직접 추가 매수하거나, 위임인이 투자성향을 재확인 후 대리인이 매수하시기 바랍니다.")
+'					Form.CloseForm( )
+'					Exit Sub
+'				else
+'					Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+'													g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+'													g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+'									, sPosInfo)
+'				end if
+'			'v008 fin	
+'			else
+'				Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+'													g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+'													g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+'									, sPosInfo)
+'			end if
+'					     		
+'		elseif	szProsYN	=	"E"	then
+'			Form.MsgBox("고령자 투자보호안내" , "고객보호를 위해 투자권유 유의상품의 가입이 제한됩니다.", "PROSYN_E", "6")
+'		else	
+'			Form.ShowAlert(g_szAlertTitle, "정의되지 않은 리턴값입니다. :"  & szProsYN)
+'			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+'			Form.CloseForm()
+'		end if
+	
+	elseif	szTranID	=	"obcsb_acif_792a"	then
+		DATAMANAGER.RequestTranData("obcsb_acif_700r")		'제대로 등록되면 PROS_YN : C 가 나오지 않음.
+	
+	elseif	szTranID	=	"obcsb_acif_715a"	then
+		Form.MsgBox("고령자 투자보호 안내" , "고객님은 파생상품관련 투자경험이 없는 고령자(만 65세 이상)입니다. 투자숙려제도에 따라서 익영업일부터는 5일 이내에 가입이 가능합니다. 단, 초고령자(만 80세 이상)고객님께서는 파생상품 온라인 가입이 제한됩니다.", "PROSYN_T2", "6")
+	
+	elseif	szTranID	=	"obcsb_acif_713r"	then
+		g_szProcTc = "2" 'v011
+		szProsYN						=    DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "PROS_YN", 0)
+		
+		g_szKYC_INVT_INCL_GRAD_CODE		= 	DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "KYC_INVT_INCL_GRAD_CODE", 0)
+		g_szKYC_DVPD_EPMD_CODE			= 	DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "KYC_DVPD_EPMD_CODE", 0)
+		g_szKYC_PROD_GRAD_CODE			= 	DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "KYC_PROD_GRAD_CODE", 0)
+		g_szKYC_DRVT_PROS_YN			=	DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "KYC_DRVT_PROS_YN", 0)
+		g_szDVPD_GRAD_CODE			=	DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "DVPD_GRAD_CODE", 0)
+		g_szAPRT_SRNM_PROD_YN			=	DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "APRT_SRNM_PROD_YN", 0) 'KYC투자권유구분코드 v011
+		g_szKYC_INVT_RCMD_CLS_CODE 		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "KYC_INVT_RCMD_CLS_CODE", 0) '적정성상품여부 v011
+		g_szRSLT_CLS 					= 	DATAMANAGER.GetDataValue(0, "obcsb_acif_713r", "OutBlock1", "RSLT_CLS", 0) '결과구분 v020
+		
+'		Form.ShowAlert(szTranID, g_szAPRT_SRNM_PROD_YN)
+		
+		'v020 Wrap계좌전환 체크로직 추가
+		if g_szScrno	=	"57090" then
+		    Call KYC_CHECK_WRAP()
+		'v011
+		elseif ( szProsYN	=	"N"	or	szProsYN	=	"Y" ) and (g_szKYC_INVT_RCMD_CLS_CODE = "3" or g_szKYC_INVT_RCMD_CLS_CODE = "4")	then			'전문금융소비자가 아니면서 가입가능하고 투자권유불원이면
+		    'v014 온라인계좌개설 분리
+
+             If g_szScrno = "84010" Then  
+		        Form.OpenFramePopup("mbonl81010_p10" , g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" & 
+											 g_szBswr	& "★" & g_szDiv	& "★" & g_szOPNG_PRCD&g_szKspKdq & szProsYN & "★" & 'v015 부적합인경우 투자권유 확인서도 주식매매로 수정하기 위해 szProsYN 추가
+											 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" & g_szKYC_INVT_RCMD_CLS_CODE
+					     	, sPosInfo)
+		    'KEK.투자성향 공통팝업 테스트_20240111 (90201 추가)
+		    'v025
+		    Elseif g_szScrno = "51000" or g_szScrno = "90201"  or g_szScrno = "51020" then				
+				Form.OpenPopup("mbonl81010_p23", g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+												 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+												 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" & g_szKYC_INVT_RCMD_CLS_CODE
+							, sPosInfo)
+				
+		    Else
+			    Form.OpenFramePopup("mbonl81010_p10" , g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+											 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+											 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" & g_szKYC_INVT_RCMD_CLS_CODE
+					     	, sPosInfo)
+		    End If
+		else
+		    Call KYC_CHECK_AC()
+		end if
+		
+		
+'		if	szProsYN	= 	"S"	then						'취약금융소비자투자보호
+'			Form.MsgBox("취약금융소비자 투자보호 안내" , "고객님은 취약금융소비자입니다. 투자자보호를 위해 투자성향보다 위험등급이 한단계를 초과한 상품가입이 불가합니다.", "PROSYN_S", "6")
+'		elseif	szProsYN	=	"Y"	then					'비적합처리
+'			Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+'												g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+'												g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+'					     	, sPosInfo)	
+'		elseif	szProsYN	=	"N"	then					'정상처리
+'			'v003
+'			if g_szDiv	=	"15008" then
+'				SelfDigPross()
+'			else
+'				Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+'				Form.CloseForm()
+'			end if
+'		end	if
+		
+	elseif	szTranID	=	"obcsb_acif_791r"	then				'펀드매매, ELS, DLS 일시
+		szInvr_YN= DATAMANAGER.GetDataValue(0, "obcsb_acif_791r", "OutBlock1", "KYC_SPCL_INVR_YN" , 0)
+	
+		if	trim(szInvr_YN)	=	NULL		or		trim(szInvr_YN)	<>	"Y"	then			'전문투자자아닐시	팝업
+			if g_szScrno == "51000" and g_szDiv	=	"01010" then	'펀드매매 > 신규매수 : 원금보존 바텀팝업으로 변경.
+				Form.openPopupAnimation("mbonl81010_p22" , "" , "", "2")
+			'KEK.투자성향 공통팝업 테스트_20240111 (90201 추가)
+			elseif g_szScrno = "90201" Then
+				Form.openPopupAnimation("mbonl81010_p22" , "" , "", "2")
+			else
+				Form.MsgBox("투자자금 원금보존 확인" , "이번에 투자되는 자금이 단기간내 사용처가 정해져 있는등( 예: 6개월 이내에 전세자금으로 활용될 자금)의 이유로 원금 보존을 추구하는 자금입니까?", "PROSYN_C", "2")
+			end if
+		else
+			DATAMANAGER.RequestTranData("obcsb_acif_700r")	
+		end	if
+		
+	elseif	szTranID	=	"obcsb_acif_762r"	then	' v003		
+		g_szTrgtYn = DATAMANAGER.GetDataValue(0, "obcsb_acif_762r", "OutBlock1", "TRGT_YN" , 0)
+		If g_szTrgtYn == "Y" Then
+			Form.MsgBox("파생결합증권 투자경험 확인" , "6개월내 파생결합증권에 투자한 경험이 있습니까?", "PROSYN_F", "2")
+		elseif g_szTrgtYn == "N" Then
+			Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+			Form.CloseForm()
+		End if
+	
+	
+	'21.08.13 JHY START (v013)
+	'전문투자자 정보 조회 (목표시장 설문 팝업 1번 자동 세팅)
+	elseif szTranID = "obacp_comm_005r" Then
+		g_szCustCode 	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CUST_CLS_CODE" , 0) '고객구분코드
+
+		DATAMANAGER.RequestTranData("obcsb_acif_721r")
+	
+	elseif	szTranID	=	"obcsb_acif_721r"	then
+		Dim szPfinYn, szPfinCls, szSpclFncmType, szStartDate, szFinalDate, szCancelDate, szToday
+		
+		szPfinYn = "N"
+		
+		szPfinCls		= Trim(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PFIN_CLS_CODE" , 0)) '전문투자자구분코드
+		szSpclFncmType	= Trim(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "SPCL_FNCM_TYPE_CODE" , 0)) '전문금융소비자유형코드
+		szStartDate		= Trim(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PFIN_VLDT_STA_DATE" , 0)) '효력시작일자
+		szFinalDate		= Trim(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PFIN_VLDT_FIN_DATE" , 0)) '효력종료일자		
+		szCancelDate		= Trim(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CANC_DATE" , 0)) '해지일자	
+		
+		szToday = Trim(Form.GetSharedData( "&HOST_DATE" , false ))
+ 
+		if szSpclFncmType == "01" or szSpclFncmType == "02" or szSpclFncmType == "03" then
+			if szPfinCls = "1" then
+				szPfinYn = "Y"
+			else
+				if tonumber(szStartDate) <> NULL and tonumber(szFinalDate) <> NULL then
+					if tonumber(szStartDate) <=  tonumber(szToday) and tonumber(szToday) <=  tonumber(szFinalDate) then
+						szPfinYn = "Y"
+					end if
+				end if
+			end if
+		end if
+		
+		'목표시장 오픈 할지 말지 여부 ( 1인 경우는 당연이라 설문 안해도 유형이라 전문금융소비자여부랑 팝업여는 여부 다름.)
+		'위 조건문과 합치려다가 szSpclFncmType 조건에서 차이날 수도 있을꺼같아 아래에 따로
+		if tonumber(szStartDate) <> NULL and tonumber(szFinalDate) <> NULL and g_szScrno	<> "51020"then
+			if szPfinCls <> "1" and szCancelDate == "30000101" and tonumber(szStartDate) <=  tonumber(szToday) and tonumber(szToday) <=  tonumber(szFinalDate) then
+				g_isOpenPopup = true
+			end if
+		end if
+		
+'		
+		'설문지 고객유형 자동설정(2.개인전문투자자->4.당연->3.전환가능->1.일반 순으로 체크)
+		Dim szCusType
+		szCusType = "1"
+		
+		if g_szCustCode == "1" and szPfinYn == "Y" then
+			szCusType = "2"
+		
+		else
+			if szPfinYn == "Y" then
+				if szPfinCls == "1" then
+					szCusType = "4"
+				else
+					szCusType = "3"
+				end if
+			else
+				szCusType = "1"
+			end if
+		end if
+		
+		Form.SetSharedData("obcsb_acif_831r_HGDT_TYPE" , "02")
+		Form.SetSharedData("obcsb_acif_831r_ISCD" , g_szIscd)
+		Form.SetSharedData("obcsb_acif_831r_SALE_CLS_CODE" , "2")
+		Form.SetSharedData("obcsb_acif_831r_INFO_CLS_CODE" , "1")
+		Form.SetSharedData("obcsb_acif_721r_CLS_CODE" , szPfinCls)
+		Form.SetSharedData("obcsb_acif_721r_STA_DATE" , szStartDate)
+		Form.SetSharedData("obcsb_acif_721r_FIN_DATE" , szFinalDate)
+		Form.SetSharedData("obcsb_acif_831r_CUST_TYPE" , szCusType)
+		
+		'펀드매매(신규가입)일때 791r로 투자자금 원금보존확인
+		if g_szDiv == "01010"	then
+			DATAMANAGER.RequestTranData("obcsb_acif_791r")
+			
+		'추가매수일때	
+		'v025 17058 자동이체약정
+		elseif g_szDiv == "13005" or g_szDiv == "17058"  then
+			DATAMANAGER.RequestTranData("obcsb_acif_700r")
+		end if
+	'21.08.13 JHY END (v013)
+	
+	end	if
+	
+	
+End Sub
+
+
+'============================================================================
+'Form_OnMsgBoxClose
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+
+	'v009 g_szPasswd값 주의! g_plain_rm=="1" 메모리평문 적용시 암호화된비밀번호로/메모리평문 미적용시에는 평문비밀번호로 넘어옴
+	
+	if sKeyName = "PROSYN_A" then						'KYC 정보없음
+		if sRet = "ok" then							'예
+			Form.OpenPopup("mbonl81010_s2" , g_szAcno & "★" &  g_szPasswd, sPosInfo)
+		else 									'아니오
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if
+		
+	elseif sKeyName = "PROSYN_B" then					'KYC유효기간 초과
+		if sRet = "ok" then							'예
+			Form.OpenPopup("mbonl81010_s2" , g_szAcno & "★" &  g_szPasswd , sPosInfo)
+		else 									'아니오
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if
+		
+	elseif sKeyName = "PROSYN_M" then					'취약금융정보없음
+		if sRet = "ok" then							'예
+			Form.OpenPopup("mbonl81010_s2" , g_szAcno & "★" &  g_szPasswd , sPosInfo)
+		else 									'아니오
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if
+	
+	elseif sKeyName = "PROSYN_P" Then
+		if sRet = "ok" then
+			Form.OpenPopup("mbonl81010_s2" , g_szAcno & "★" &  g_szPasswd , sPosInfo)
+		Else
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		End If
+	elseif sKeyName = "PROSYN_1" then					'정보미제공가입제한 '21.08.24 JHY SATRT : PROS_YN 1인 경우 추가
+		'Form.CloseForm()
+		Form.OpenPopup("mbonl81010_s2" , g_szAcno & "★" &  g_szPasswd , sPosInfo)
+
+				
+	elseif sKeyName = "PROSYN_C" then					'투자자금원금보존 확인		
+		if sRet = "ok" then							'예
+			'v017 sta 다른 화면에 영향있을지도 모르니 펀드매매 > 신규매수로 조건
+			if g_szDiv == "01010"	then
+				Dim szFNPR_JOIN_SRNO
+				szFNPR_JOIN_SRNO = Form.GetSharedData( "MBFNP51010_T1_FNPRJOINSRNO", false )
+				DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_SRNO", 0, szFNPR_JOIN_SRNO)
+				DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_DETL_SRNO", 0, "00001")
+			End If
+			'v017 end 
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "ACNO", 0, g_szAcno)
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "ASNO", 0, g_szAsno)
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "PRNC_PRSV_YN" , 0, "Y")
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "MOD_REAS_RMRK", 0, "")
+			
+			DATAMANAGER.RequestTranData("obcsb_acif_792a")
+		elseif sRet = "no" then						'아니오
+			'v017 sta 다른 화면에 영향있을지도 모르니 펀드매매 > 신규매수로 조건
+			if g_szDiv == "01010"	then
+				Dim szFNPR_JOIN_SRNO
+				szFNPR_JOIN_SRNO = Form.GetSharedData( "MBFNP51010_T1_FNPRJOINSRNO", false )
+				DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_SRNO", 0, szFNPR_JOIN_SRNO)
+				DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_DETL_SRNO", 0, "00001")
+			End If
+			'v017 end 
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "ACNO", 0, g_szAcno)
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "ASNO", 0, g_szAsno)
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "PRNC_PRSV_YN", 0, "N")
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "MOD_REAS_RMRK", 0, "")
+			
+			DATAMANAGER.RequestTranData("obcsb_acif_792a")
+		else	
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if
+			
+	elseif sKeyName = "PROSYN_D" then					'원금보존위험상품안내
+		'상품가입 불가
+		if g_szDiv == "01010"	then
+			Form.OpenScreen("51000" , "")
+			Form.CloseForm()
+			Exit Sub
+		end if
+	
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+		
+	elseif sKeyName = "PROSYN_S" then					'취약금융소비자투자보호안내
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+		
+	elseif sKeyName = "PROSYN_T" then					'고령자 투자보호안내 1
+		
+		if sRet = "ok" then							'확인
+			DATAMANAGER.SetDataValue(0,  "obcsb_acif_715a", "InBlock1", "ACNO", 0, g_szAcno )			'계좌번호
+			DATAMANAGER.SetDataValue(0,  "obcsb_acif_715a", "InBlock1", "CNSH_CLS_CODE", 0 , "07" )		'확인서구분코드
+			DATAMANAGER.SetDataValue(0,  "obcsb_acif_715a", "InBlock1", "CUST_CNFR_YN", 0 , "Y" )		'고객확인여부
+			DATAMANAGER.RequestTranData("obcsb_acif_715a")
+		else
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")	'취소 와 MsgBoxClose
+			Form.CloseForm()
+		end if
+		
+	elseif sKeyName = "PROSYN_T2" then					'고령자 투자보호안내 2
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+		
+	elseif sKeyName = "PROSYN_U" then					'초고령자온라인파생가입불가
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+		
+	elseif sKeyName = "PROSYN_V" then					'고령자 당일 파생신청 투자숙려안내
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+		
+	elseif sKeyName = "PROSYN_E" then					'고령자투자보호안내
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif sKeyName = "PROSYN_F" then					'v003 자가진단표 문제풀이
+		if sRet = "ok" then '파생경험 있음
+			Form.OpenPopup("mbonl81010_p7" , g_szAcno &"★"&g_szAsno&"★"&g_szIscd&"★"&"Y"&"★"&"N", "N")
+		else  '파생경험 없음
+			Form.OpenPopup("mbonl81010_p6" , g_szAcno &"★"&g_szAsno&"★"&g_szIscd&"★"&"N", "N")
+		end if
+	end if 
+	
+End Sub
+
+
+'============================================================================
+'Form_OnPopupReturn
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+'Form.ShowAlert( "Form_OnPopupReturn", "["..sKeyName.."]["..sRet.."]" )
+	if	sKeyName = "mbonl81010_s2"	then							'투자성향설문체크
+	
+		if	sRet = "OK"		then									'투자성향등록완료
+		
+			if	g_szScrno	=	"84010"	then						'계좌개설이고 
+			
+				'v014 : 투자권유 희망여부 확인서 추가(5등급 상품개설)
+				'if	g_szKspKdq =		"1"	then						'유가증권 코스닥 매매함
+				
+				'Form.ShowAlert("테스트",  g_szOPNG_PRCD)
+				
+				If g_szOPNG_PRCD = "100" Or g_szOPNG_PRCD = "10F" Or g_szOPNG_PRCD = "118" Then
+					DATAMANAGER.RequestTranData("obcsb_acif_713r")
+				else
+					Form.SendReturnToParent("KYCCHK_RETURN" , "Y")	'등록처리후 결과 Y 리턴
+					Form.CloseForm()
+				end	if
+				
+			else
+				DATAMANAGER.RequestTranData("obcsb_acif_700r")		'투자성향 PROS_YN 변경에 따라 재판단함.
+			end	if
+			
+		else														'투자성향등록취소
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if
+	elseif	sKeyName = "mbonl81010_p2"		then						'고위험거래확인팝업
+
+		if	sRet	=	"CANCEL"	then		'취소버튼
+			'v003
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		elseif sRet	=	"OK"	then		'확인버튼
+			'v025 자동이체약정 추가
+			if g_szScrno = "51000" or  g_szScrno = "51020" then		
+				if g_szDiv = "13005" then
+					Form.SetSharedData("FUND_PAGE_SET"	, "51040")	'mbonl81010_p24 에서 가입중단시 51040으로 이동
+				'v025
+				elseif g_szScrno = "51020" then
+					Form.SetSharedData("FUND_PAGE_SET"	, "51020")	'mbonl81010_p24 에서 가입중단시 51020으로 이동
+				else 
+					Form.SetSharedData("FUND_PAGE_SET"	, "51000")	'mbonl81010_p24 에서 가입중단시 51000으로 이동
+				end if
+				
+				Form.OpenPopup("mbonl81010_p24", g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+												 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+												 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" &
+												 g_szKYC_DVPD_EPMD_CODE		& "★" & g_szKYC_DRVT_PROS_YN 	& "★" & g_szDVPD_GRAD_CODE
+							, sPosInfo)		
+			elseif g_szScrno = "82010" then	
+				Form.OpenPopup("mbonl81010_p24", g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+												 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+												 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" &
+												 g_szKYC_DVPD_EPMD_CODE		& "★" & g_szKYC_DRVT_PROS_YN 	& "★" & g_szDVPD_GRAD_CODE
+							, sPosInfo)	
+			'KEK.투자성향 공통팝업 테스트_20240111 (90201 추가)
+			elseif g_szScrno = "90201"   Then
+				Form.SetSharedData("FUND_PAGE_SET"	, "90000")	'mbonl81010_p24 에서 가입중단시 90000으로 이동
+				
+				Form.OpenPopup("mbonl81010_p24", g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+												 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+												 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" &
+												 g_szKYC_DVPD_EPMD_CODE		& "★" & g_szKYC_DRVT_PROS_YN 	& "★" & g_szDVPD_GRAD_CODE
+							, sPosInfo)	
+			'KEK.투자성향 공통팝업 테스트_20240111 (90201 추가)
+			
+			else		
+				'21.08.26 JHY 변경 : 박미선 대리님 요청으로 해당 팝업 타이틀 중간에 짤리지 않게 타이틀 생성했으므로 openpopup으로 변경
+				Form.OpenPopup("mbonl81010_p3" , g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+												 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+												 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" &
+												 g_szKYC_DVPD_EPMD_CODE		& "★" & g_szKYC_DRVT_PROS_YN 	& "★" & g_szDVPD_GRAD_CODE
+							, sPosInfo)	
+				'Form.CloseForm()
+			end if
+		end if
+	elseif	sKeyName = "mbonl81010_p3"	or sKeyName = "mbonl81010_p24"	then						'고위험거래가입팝업
+
+		if	sRet	=	"CANCEL"	then		'취소버튼
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		elseif sRet	=	"OK"	then		'확인버튼
+
+'		        '[v019] 22.07.22 임동군 수정
+'		        ' 펀드신규의 경우 부적정금융투자상품 확인서 '확인' 후 인증서를 띄운다(고객서명 확인)
+'                        IF  g_szDiv == "01010"  THEN
+			If g_szScrno = "51000" or g_szScrno = "51020" then				'23.06.27 추가매수 추가 / v001 자동이체약정추가
+				Form.OpenFramePopup("mhetc90060_p5" , "" , sPosInfo)
+			ELSE
+'				IF g_szAPRT_SRNM_PROD_YN = "Y" and g_szDiv <> "17192" THEN '적정성대상상품이라면
+				IF g_szAPRT_SRNM_PROD_YN = "Y" THEN '적정성대상상품이라면
+					Form.OpenFramePopup("mbonl81010_p11" , g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+                                                              g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+                                                              g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" &
+                                                              g_szKYC_DVPD_EPMD_CODE		& "★" & g_szKYC_DRVT_PROS_YN 	& "★" & g_szDVPD_GRAD_CODE
+								, sPosInfo)	
+				ELSE
+					IF g_szDiv  =  "15008"  THEN
+						SelfDigPross()
+					ELSE
+						CHECK_GOAL_MRKT_TRGT()
+					END IF
+				END IF
+			END IF
+
+			'v011
+			'Form.ShowAlert("테스트", g_szAPRT_SRNM_PROD_YN) 
+			'[v019] 22.07.22 임동군 ( ..) 주석처리 start
+			'----------------------------------------------------------------------------------
+			'if g_szAPRT_SRNM_PROD_YN = "Y" then '적정성대상상품이라면
+			'	Form.OpenFramePopup("mbonl81010_p11" , g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+			'									 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+			'									 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" &
+			'									 g_szKYC_DVPD_EPMD_CODE		& "★" & g_szKYC_DRVT_PROS_YN 	& "★" & g_szDVPD_GRAD_CODE
+			'					, sPosInfo)	
+			'else
+			'	if g_szDiv	=	"15008" then
+			'		SelfDigPross()
+			'	else
+			'		'21.08.17 JHY START (v013)
+			'		 CHECK_GOAL_MRKT_TRGT()
+			'		'21.08.17 JHY END (v013)
+			'	end if
+			'end if
+			'----------------------------------------------------------------------------------
+			'[v019] 22.07.22 임동군 ('' ) 주석처리 end
+
+		end if
+	elseif	sKeyName = "mbonl81010_p7"		then	 ' v003 자가진단문제 해석팝업
+		if	sRet	=	"OK"	then		'확인버튼
+			Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+		elseif	sRet	=	"CANCEL"	then
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		end if
+		Form.CloseForm()
+	elseif	sKeyName = "mbonl81010_p6"	then 'v003 자가진단문제 풀이팝업
+		if	sRet	=	"OK"	then ' 계좌번호★계좌일련번호★종목코드★파생경험★문제풀이여부
+			Form.OpenPopup("mbonl81010_p7" , g_szAcno &"★"&g_szAsno&"★"&g_szIscd&"★"&"N"&"★"&"Y", "N")
+		elseif sRet	=	"CANCEL"	then
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if
+	elseif	sKeyName = "mbonl81010_p10" or sKeyName = "mbonl81010_p23"	then 'v011 투자권유 희망여부 확인서
+		if	sRet	=	"OK"	then 
+		     if g_szProcTc = "1" then
+				Call KYC_CHECK_PROD()
+			elseif g_szProcTc = "2" then
+				Call KYC_CHECK_AC()
+			end if
+		elseif sRet	=	"CANCEL"	then
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if	
+	elseif	sKeyName = "mbonl81010_p11"	then 'v011 적정성판단보고서
+		if	sRet	=	"OK"	then 
+			if g_szDiv	=	"15008" then
+				SelfDigPross()
+			else
+				'21.08.17 JHY START (v013)
+				 CHECK_GOAL_MRKT_TRGT()
+				'21.08.17 JHY END (v013)
+			end if
+		elseif sRet	=	"CANCEL"	then
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if	
+		
+	elseif sKeyName == "close_mbfnp51010_p12" then
+		if	sRet	=	"OK"	then		'확인버튼
+			Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+		elseif	sRet	=	"CANCEL"	then
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		end if
+		
+		Form.CloseForm()
+		
+	'21.08.26 JHY START(v013)
+	elseif sKeyName == "close_mbfnp51010_p13" then
+		if	sRet	=	"OK"	then		'확인버튼
+			Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+		elseif	sRet	=	"CANCEL"	then
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		end if
+		
+		Form.CloseForm()
+	'21.08.26 JHY END(v013)
+	' [v019] 22.07.22 임동군 추가
+	' 인증서 정상리턴 처리 추가.
+	' 부적정 투자상품 확인서 '확인'시 로직과 동일하게 넣음
+	elseif	sKeyName	==	"mhetc90060_p5"	then	
+
+		IF    sRet    <>    "cancel"    THEN
+		    IF    g_szAPRT_SRNM_PROD_YN  =  "Y"  THEN '적정성대상상품이라면
+				Form.OpenFramePopup("mbonl81010_p11" , g_szScrno	& "★" & g_szAcno	& "★" & g_szAsno & "★" &
+												 g_szBswr	& "★" & g_szDiv	& "★" & g_szISCD & "★" &
+												 g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE & "★" &
+												 g_szKYC_DVPD_EPMD_CODE		& "★" & g_szKYC_DRVT_PROS_YN 	& "★" & g_szDVPD_GRAD_CODE
+								, sPosInfo)
+			ELSE
+
+				IF  g_szDiv  =  "15008"  THEN
+					SelfDigPross()
+				ELSEIF g_szScrno = "51020" THEN 
+					'v001 자동이체약정은 목표시장체크 X
+					Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+					Form.CloseForm()
+				ELSE
+					 CHECK_GOAL_MRKT_TRGT()
+				END IF
+			END IF
+		ELSE
+
+			
+             ' 취소를 하였거나 X 표시 눌렀을때는 KYC체크폼을 닫는다.
+		    ' 하지 않으면 신규매수 화면에 락이걸린다.		    
+		    Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		    Form.CloseForm()
+
+		END IF
+		
+	elseif	sKeyName	==	"mbonl81010_p22_agree"	then
+		if sRet == "Y" then
+			'상품가입 불가
+			if g_szDiv == "01010"	then
+				Dim szFNPR_JOIN_SRNO
+				szFNPR_JOIN_SRNO = Form.GetSharedData( "MBFNP51010_T1_FNPRJOINSRNO", false )
+				DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_SRNO", 0, szFNPR_JOIN_SRNO)
+				DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_DETL_SRNO", 0, "00001")
+			End If
+			'v017 end 
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "ACNO", 0, g_szAcno)
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "ASNO", 0, g_szAsno)
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "PRNC_PRSV_YN" , 0, "Y")
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "MOD_REAS_RMRK", 0, "")
+			
+			DATAMANAGER.RequestTranData("obcsb_acif_792a")		
+		elseif sRet == "N" then
+			'v017 sta 다른 화면에 영향있을지도 모르니 펀드매매 > 신규매수로 조건
+			if g_szDiv == "01010"	then
+				Dim szFNPR_JOIN_SRNO
+				szFNPR_JOIN_SRNO = Form.GetSharedData( "MBFNP51010_T1_FNPRJOINSRNO", false )
+				DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_SRNO", 0, szFNPR_JOIN_SRNO)
+				DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_DETL_SRNO", 0, "00001")
+			End If
+			'v017 end 
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "ACNO", 0, g_szAcno)
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "ASNO", 0, g_szAsno)
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "PRNC_PRSV_YN", 0, "N")
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_792a", "InBlock1", "MOD_REAS_RMRK", 0, "")
+			
+			DATAMANAGER.RequestTranData("obcsb_acif_792a")
+		else	
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if
+		
+	elseif sKeyName == "errMsgBox"  Then 
+		if sRet = "Right" then				
+			'투자성향재진단 화면 연결
+			Form.OpenFramePopup("mbonl81010" , "" , "")
+		else
+			Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+			Form.CloseForm()
+		end if	
+	end if
+End Sub
+
+
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	'21.08.23 JHY START : 721r 에서 일반투자자인 경우 여기로 에러 들어와 다음 진행 안되므로 이 경우에는 뒤에 로직 탈 수 있도록
+	if szTranID == "obcsb_acif_721r" and szErrCode == "5820"  then	
+		'펀드매매(신규가입)일때 791r로 투자자금 원금보존확인
+		if g_szDiv == "01010"	then
+			DATAMANAGER.RequestTranData("obcsb_acif_791r")
+			
+		'추가매수일때	
+		'v025. 자동이체약정
+		elseif g_szDiv == "13005" or g_szDiv == "17058" then
+			DATAMANAGER.RequestTranData("obcsb_acif_700r")
+		end if
+		
+	else
+		Form.ShowAlert(g_szAlertTitle, szErrMsg & "(" & szSubMsg & ")")
+		
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	end if
+	'21.08.23 JHY END
+End Sub
+
+
+'============================================================================
+'v003 자가진단 프로세스
+'============================================================================
+Function SelfDigPross()
+	DATAMANAGER.RequestTranData("obcsb_acif_762r") ' 자가진단표 수행 대상여부 확인
+End Function
+
+'============================================================================
+' 21.08.17 JHY 추가
+' CHECK_GOAL_MRKT_TRGT() : 목표시장 체크 팝업
+'============================================================================
+Function CHECK_GOAL_MRKT_TRGT()
+
+	if g_szGOAL_MRKT_TRGT_YN == "Y" then
+		if g_isOpenPopup == true then
+			Form.OpenPopupAnimation("mbfnp51010_p12", g_szAcno & "★" & g_szAsno, "","2") '목표시장 비교 설문 팝업
+			
+		else
+			'21.08.26 JHY START : 다른 화면에 영향이 있을 수도 있어, 신규인 경우만 있던것에 추가 매수 넣고, 밑에 닫는 부분은 그대로 유지
+			if g_szDiv	==	"01010" or g_szDiv	== "13005" then
+				Form.OpenPopup("mbfnp51010_p13" , g_szGOAL_MRKT_UNFIT_YN , "")
+								
+			else
+				Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+				Form.CloseForm()
+			end if
+		end if
+	else
+		Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+		Form.CloseForm()
+	end if
+End Function
+
+'============================================================================
+'v011 투자성향 비교 프로세스
+'============================================================================
+Sub KYC_CHECK_PROD()
+	
+	if	szProsYN	=	"N"	or	szProsYN	=	"X"	then			'정상, 전문투자자	
+		'v003
+		if g_szDiv	=	"15008" then
+			SelfDigPross()
+		else
+			'21.08.17 JHY START (v013)
+			CHECK_GOAL_MRKT_TRGT()
+			'21.08.17 JHY END (v013)
+		end if
+		
+	elseif	szProsYN	=	"A"	then
+		Form.MsgBox("고객투자성향등급 확인안내", "고객님의 투자성향등급 정보가 없습니다. 해당 정보가 없으면 상품가입이 불가합니다. 투자성향등급을 확인하고 상품에 가입하시겠습니까?", "PROSYN_A", "1")
+	
+	elseif	szProsYN	=	"B"	then
+		Form.MsgBox("고객투자성향등급 재확인안내", "고객님의 투자성향등급이 정보미제공 또는 기간 만료되어 재확인하셔야 합니다.", "PROSYN_B", "1")
+	
+	elseif	szProsYN	=	"M"	then
+		Form.MsgBox("고객투자성향등급 취약금융소비자 투자보호 안내", "고객님의 취약금융소비자 정보가 없습니다. 해당 정보가 없으면 상품가입이 불가합니다. 투자성향등급을 확인하고 상품에 가입하시겠습니까?", "PROSYN_M", "1")
+	
+	elseif	szProsYN	=	"P"	then		'
+		Form.MsgBox("안내", "투자자 정보가 제공되어야 \n가입하실 수 있습니다.\n투자성향진단 후 신청해주세요.\n(투자자정보 [제공]선택 필수)", "PROSYN_P", 7, "투자성향 진단", "취소")
+		
+	elseif	szProsYN	=	"C"	then
+		Form.MsgBox("투자자금 원금보존 확인" , "이번에 투자되는 자금이 단기간내 사용처가 정해져 있는등( 예: 6개월 이내에 전세자금으로 활용될 자금)의 이유로 원금 보존을 추구하는 자금입니까?", "PROSYN_C", "2")
+	
+	' v024
+	' 문구수정 1~3등급 -> 1~4등급
+	elseif	szProsYN	=	"D"	then
+		Form.MsgBox("원금보존 위험 상품 안내" , "고객님은 금융투자자금 원금보존을 선택하였습니다. 투자자보호를 위해 파생상품 및 위험등급 1~4등급 상품가입이 제한됩니다.", "PROSYN_D", "6")
+
+	elseif	szProsYN	=	"S"	then
+		Form.MsgBox("취약금융소비자 투자보호 안내" , "고객님은 취약금융소비자입니다. 투자자보호를 위해 투자성향보다 위험등급이 한단계를 초과한 상품가입이 불가합니다.", "PROSYN_S", "6")
+
+	elseif	szProsYN	=	"T"	then
+		Form.MsgBox("고령자 투자보호 안내" , "고객님은 파생상품 관련 투자경험이 없는 고령자(만 65세 이상)입니다. 투자성향등급을 재확인하고 파생상품 신청을 하시겠습니까?", "PROSYN_T", "1")
+
+	elseif	szProsYN	=	"U"	then
+		Form.MsgBox("초고령자 투자보호 안내" , "초고령자(만 80세 이상) 고객님께서는 파생상품 온라인 가입이 제한됩니다.", "PROSYN_U", "6")
+
+	elseif	szProsYN	=	"V"	then
+		Form.MsgBox("고령자 투자보호 안내" , "고객님은 파생상품관련 투자경험이 없는 고령자(만 65세 이상)입니다. 투자숙려제도에 따라서 익영업일부터는 5일 이내에 가입이 가능합니다. 단, 초고령자(만 80세 이상)고객님께서는 파생상품 온라인 가입이 제한됩니다.", "PROSYN_V", "6")
+	elseif	szProsYN	=	"Y"	then
+		'v008 sta
+		if g_szDiv = "13005" then
+		
+			'KEK.투자성향 공통팝업 테스트_20240111 51000 / 90201 분기추가
+			if	g_szScrno	=	"51000"	then
+				'본인계좌 아니며 비적합대상의 경우 추매 불가
+				if g_szSelfacctyn = "N" then
+					Form.ShowAlert("확인", "위임인의 투자성향이 투자권유 미희망이거나, 해당 상품의 투자에 부적합(부적정)하여 매수가 불가능합니다.")
+					Form.CloseForm( )
+					Exit Sub
+				else
+					Form.SetSharedData("FUND_PAGE_SET"	, "51040")	'mbonl81010_p2 에서 가입중단시 51040으로 이동
+			
+					'펀드추가매수시(MY자산현황 포함)
+					Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+													g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+													g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+									, sPosInfo)
+				end if
+			'v025 자동이체약정
+			elseif g_szScrno = "51020" then
+				Form.SetSharedData("FUND_PAGE_SET"	, "51020")	'mbonl81010_p2 에서 가입중단시 51020으로 이동
+			
+				'펀드자동이체약정
+				Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+												g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+												g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+								, sPosInfo)
+			
+			else
+				Form.SetSharedData("FUND_PAGE_SET"	, "90201")	'mbonl81010_p2 에서 가입중단시 51040으로 이동
+		
+				'펀드추가매수시(MY자산현황 포함)
+				Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+												g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+												g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+								, sPosInfo)	
+			end If 
+			'KEK.투자성향 공통팝업 테스트_20240111
+			
+		'v008 fin	
+		else
+		
+			'펀드신규매수시
+			if g_szDiv = "13005" then
+				Form.SetSharedData("FUND_PAGE_SET"	, "51000")	'mbonl81010_p2 에서 가입중단시 51000으로 이동
+			end if
+		
+			Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+												g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+												g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+								, sPosInfo)
+		end if
+						
+	elseif	szProsYN	=	"E"	then
+		Form.MsgBox("고령자 투자보호안내" , "고객보호를 위해 투자권유 유의상품의 가입이 제한됩니다.", "PROSYN_E", "6")
+		
+	'21.08.24 JHY START (v013)
+	elseif	szProsYN	=	"1"	then
+'		Form.MsgBox("정보 미제공에 대한 안내" , "정보미제공 가입불가 (고난도상품)", "PROSYN_1", "6")
+		Dim szAlertData, szTitle
+		szTitle = "투자자정보 미제공 안내"
+		g_ErrMsgText = "고객님의 투자정보가 확인되지 않아\n해당 금융상품을 가입할 수 없습니다. \n고객님의 성향에 적합한 금융상품 투자를\n위하여 투자성향 등록 후 진행해 주세요."
+		szAlertData = "2".."★"..szTitle.."★"..g_ErrMsgText.."★".."errMsgBox".."★".."취소".."★".."투자성향 등록"
+		
+		Form.OpenPopup("mbfnp51000_p15", szAlertData, "")
+		
+	'21.08.24 JHY END (v013)
+	'숙려대상가입불가상품 (2024.01.12)
+	elseif	szProsYN	=	"2"	then
+		Form.ShowAlert("확인", "숙려대상고객은 가입이 불가능한 상품입니다.")
+		Form.CloseForm( )
+		Exit Sub
+	else	
+		Form.ShowAlert(g_szAlertTitle, "정의되지 않은 리턴값입니다. :"  & szProsYN)
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	end if
+End Sub
+
+Sub KYC_CHECK_AC()
+     
+	if	szProsYN	= 	"S"	then						'취약금융소비자투자보호
+		Form.MsgBox("취약금융소비자 투자보호 안내" , "고객님은 취약금융소비자입니다. 투자자보호를 위해 투자성향보다 위험등급이 한단계를 초과한 상품가입이 불가합니다.", "PROSYN_S", "6")
+	elseif	szProsYN	=	"Y"	then					'비적합처리
+		Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+											g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+											g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+					, sPosInfo)	
+	elseif	szProsYN	=	"N" or szProsYN	=	"X" then					'정상처리
+		'v003
+		if g_szDiv	=	"15008" then
+			SelfDigPross()
+		else
+			Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+			Form.CloseForm()
+		end if
+	end	if
+End Sub
+'============================================================================
+'v020 Wrap 계좌전환 체크
+'============================================================================
+Sub KYC_CHECK_WRAP()
+	Form.SetSharedData("KYC_INVT_INCL_GRAD_CODE"	, g_szKYC_INVT_INCL_GRAD_CODE)
+	Form.SetSharedData("KYC_PROD_GRAD_CODE"		, g_szKYC_PROD_GRAD_CODE)
+	Form.SetSharedData("KYC_DVPD_EPMD_CODE"		, g_szKYC_DVPD_EPMD_CODE)
+	Form.SetSharedData("KYC_DRVT_PROS_YN"		, g_szKYC_DRVT_PROS_YN)
+	Form.SetSharedData("DVPD_GRAD_CODE"			, g_szDVPD_GRAD_CODE)
+	Form.SetSharedData("KYC_INVT_RCMD_CLS_CODE"	, g_szKYC_INVT_RCMD_CLS_CODE)
+	
+	if g_szRSLT_CLS <> "0" then
+		Form.MsgBox("투자성향진단" , "투자성향진단 후 거래하시기 바랍니다.", "PROSYN_S", "6")
+	end if 
+	
+	if	szProsYN	= 	"Y"	then	'투자성향 등급 확인 팝업
+		Form.OpenFramePopup("mbonl81010_p2" ,	g_szScrno  & "★" &  
+											g_szKYC_INVT_INCL_GRAD_CODE	& "★" & g_szKYC_PROD_GRAD_CODE	& "★" &
+											g_szKYC_DVPD_EPMD_CODE 	& "★" & g_szKYC_DRVT_PROS_YN	& "★" & g_szDVPD_GRAD_CODE
+							, sPosInfo)
+	elseif	szProsYN	= 	"P"	then	 
+		Form.MsgBox("안내", "투자자 정보가 제공되어야 \n가입하실 수 있습니다.\n투자성향진단 후 신청해주세요.\n(투자자정보 [제공]선택 필수)", "PROSYN_P", 7, "투자성향 진단", "취소")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif	szProsYN	= 	"A"	then	 
+		Form.MsgBox("고객투자성향등급 확인안내", "고객님의 투자성향등급 정보가 없습니다. 해당 정보가 없으면 상품가입이 불가합니다. 투자성향등급을 확인하고 상품에 가입하시겠습니까?", "PROSYN_A", "1")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif	szProsYN	= 	"B" 	then	 
+		Form.MsgBox("고객투자성향등급 재확인안내", "고객님의 투자성향등급이 정보미제공 또는 기간 만료되어 재확인하셔야 합니다.", "PROSYN_B", "1")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif	szProsYN	= 	"S"	then	 
+		Form.MsgBox("취약금융소비자 투자보호 안내" , "고객님은 취약금융소비자입니다. 투자자보호를 위해 투자성향보다 위험등급이 한단계를 초과한 상품가입이 불가합니다.", "PROSYN_S", "6")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif	szProsYN	= 	"T"	then	 
+		Form.MsgBox("고령자 투자보호 안내" , "고객님은 파생상품 관련 투자경험이 없는 고령자(만 65세 이상)입니다. 투자성향등급을 재확인하고 파생상품 신청을 하시겠습니까?", "PROSYN_T", "1")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif	szProsYN	= 	"V"	then	 
+		Form.MsgBox("고령자 투자보호 안내" , "고객님은 파생상품관련 투자경험이 없는 고령자(만 65세 이상)입니다. 투자숙려제도에 따라서 익영업일부터는 5일 이내에 가입이 가능합니다. 단, 초고령자(만 80세 이상)고객님께서는 파생상품 온라인 가입이 제한됩니다.", "PROSYN_V", "6")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif	szProsYN	= 	"M"	then	 
+		Form.MsgBox("고객투자성향등급 취약금융소비자 투자보호 안내", "고객님의 취약금융소비자 정보가 없습니다. 해당 정보가 없으면 상품가입이 불가합니다. 투자성향등급을 확인하고 상품에 가입하시겠습니까?", "PROSYN_M", "1")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif	szProsYN	= 	"E"	then	 
+		Form.MsgBox("고령자 투자보호안내" , "고객보호를 위해 투자권유 유의상품의 가입이 제한됩니다.", "PROSYN_E", "6")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	elseif	szProsYN	= 	"H"	then	 
+		Form.MsgBox("고령자 투자보호안내" , "고객보호를 위해 투자권유 유의상품의 가입이 제한됩니다.", "PROSYN_E", "6")
+		Form.SendReturnToParent("KYCCHK_RETURN" , "N")
+		Form.CloseForm()
+	end if
+	
+
+	Form.SendReturnToParent("KYCCHK_RETURN" , "Y")
+	Form.CloseForm()
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_700r" trcode="obcsb_acif_700r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_792a" trcode="obcsb_acif_792a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_713r" trcode="obcsb_acif_713r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_715a" trcode="obcsb_acif_715a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_791r" trcode="obcsb_acif_791r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_762r" trcode="obcsb_acif_762r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_721r" trcode="obcsb_acif_721r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_comm_005r" trcode="obacp_comm_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_700r" title="투자성향고객등급상품등급비교" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="253" _ulen="193" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+KYC_BSWR_DIV_CODE^KYC 업무 분류 코드^2^0^0^0^0^0^0
+BSWR_DIV_CODE^업무 분류 코드^5^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="825" _ulen="617" >
+
+PROS_YN^처리 여부^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC 상품 등급 코드^2^0^0^0^0^0^0
+KYC_DVPD_EPMD_CODE^KYC파생상품유의코드^2^0^0^0^0^0^0
+KYC_DRVT_PROS_YN^KYC 파생 처리 여부^1^0^0^0^0^0^0
+DVPD_GRAD_CODE^파생상품등급코드^1^0^0^0^0^0^0
+CAFU_TRGT_YN^숙려대상여부^1^0^0^0^0^0^0
+HGDT_PROD_YN^고난도상품여부^1^0^0^0^0^0^0
+CAFU_OLDT_YN^숙려고령자여부^1^0^0^0^0^0^0
+INFO_REFS_YN^정보미제공여부^1^0^0^0^0^0^0
+UNFIT_YN^부적합여부^1^0^0^0^0^0^0
+GOAL_MRKT_TRGT_YN^목표시장대상여부^1^0^0^0^0^0^0
+GOAL_MRKT_UNFIT_YN^목표시장부적합여부^1^0^0^0^0^0^0
+APRT_SRNM_PROD_YN^적정성상품여부^1^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_792a" title="고객_투자자금 원금 보존여부 등" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="309" _ulen="221" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRNC_PRSV_YN^원금보존여부^1^0^0^0^0^0^0
+MOD_REAS_RMRK^변경사유비고^500^0^0^0^0^0^0
+FNPR_JOIN_SRNO^금융상품가입일련번호^13^0^0^0^0^0^0
+FNPR_JOIN_DETL_SRNO^금융상품가입세부일련번호^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="50" _ulen="38" >
+
+REG_SRNO^등록일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_713r" title="고객 투자성향 등급정보 체크(계" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="491" _ulen="367" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+BSWR_DOMN_CLCD^업무영역구분코드^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+ISSU_TYPE_CODE^종목유형코드^2^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+UI_PLRL_JOIN_YN^UI복수가입여부^1^0^0^0^0^0^0
+BSWR_DIV_CODE^업무분류코드^5^0^0^0^0^0^0
+KYC_BSWR_DIV_CODE^KYC업무분류코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="494" _ulen="376" >
+
+RSLT_CLS^결과구분^1^0^0^0^0^0^0
+PROS_YN^처리여부^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC투자성향등급코드^2^0^0^0^0^0^0
+KYC_DVPD_EPMD_CODE^KYC파생상품유의코드^2^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC상품등급코드^2^0^0^0^0^0^0
+KYC_DRVT_PROS_YN^KYC파생처리여부^1^0^0^0^0^0^0
+DVPD_GRAD_CODE^파생상품등급코드^1^0^0^0^0^0^0
+APRT_SRNM_PROD_YN^적정성상품여부^1^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_715a" title="확인서 이력등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="285" _ulen="207" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+CNSH_CLS_CODE^확인서구분코드^2^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+CUST_CNFR_YN^고객확인여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_791r" title="고객_계좌번호로 전문투자자 여?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="208" _ulen="156" >
+
+KYC_SPCL_INVR_YN^KYC전문투자자여부^1^0^0^0^0^0^0
+PRNC_PRSV_YN^원금보존여부^1^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+UI_PFIN_YN^UI전문투자자여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_762r" title="고객_자가진단시행 필요여부 조?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="122" _ulen="94" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ISSU_TYPE_CODE^종목유형코드^2^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+TRGT_YN^대상여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_721r" title="전문투자자정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="160" _ulen="120" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1334" _ulen="948" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_FULL_NAME^고객풀명^100^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+PFIN_CLS_CODE^전문투자자구분코드^1^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+PFIN_DSGT_DATE^전문투자자지정일자^8^0^0^0^0^0^0
+VLDT_STA_DATE^효력시작일자^8^0^0^0^0^0^0
+VLDT_FIN_DATE^효력종료일자^8^0^0^0^0^0^0
+PFIN_VLDT_STA_DATE^전문투자자효력시작일자^8^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+PFIN_DSGT_APLT_DATE^전문투자자지정신청일자^8^0^0^0^0^0^0
+PFIN_FA_AMT^전문투자자금융자산금액^19^0^7^0^0^0^0
+GNRL_INVR_CNVR_REAS_CNTT^일반투자자전환사유내용^100^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+OTCO_ISTU_CODE^타사기관코드^5^0^0^0^0^0^0
+ISTU_CLCD^기관구분코드^1^0^0^0^0^0^0
+TORF_CNFR_YN^진위확인여부^1^0^0^0^0^0^0
+TORF_CNFR_EMPNO^진위확인직원번호^9^0^0^0^0^0^0
+TORF_CNFR_DATE^진위확인일자^8^0^0^0^0^0^0
+TORF_CNFR_HOUR^진위확인시간^6^0^0^0^0^0^0
+SPCL_FNCM_TYPE_CODE^전문금융소비자유형코드^2^0^0^0^0^0^0
+FNCM_GRP_CODE^금융소비자그룹코드^1^0^0^0^0^0^0
+FNCM_GRP_DETL_CODE^금융소비자그룹세부코드^2^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_comm_005r" title="계좌기준 고객정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="126" _ulen="94" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1107" _ulen="815" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CUST_GRAD_CODE^고객등급코드^2^0^0^0^0^0^0
+BDCR_CLCD^신용불량구분코드^1^0^0^0^0^0^0
+DRVT_ODER_ABLE_CODE^파생주문가능코드^2^0^0^0^0^0^0
+CBSC_GRAD_CODE^CB스코어등급코드^2^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌상태코드^1^0^0^0^0^0^0
+BKKP_NAME^부기명^40^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+INDV_MANG_BRCD^개별관리지점코드^4^0^0^0^0^0^0
+JOIN_RCMD_EMPNO^가입권유직원번호^9^0^0^0^0^0^0
+MANG_EMPNO^관리직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리직원명^40^0^0^0^0^0^0
+LNKD_BANK_CLS_CODE^연계은행구분코드^1^0^0^0^0^0^0
+OLD_PRCD^구상품코드^3^0^0^0^0^0^0
+ONLN_RNMC_DATE^온라인실명확인일자^8^0^0^0^0^0^0
+JOIN_BRCD^가입지점코드^4^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

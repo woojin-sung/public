@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="81001" scrname="지연이체 서비스 신청/해지" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="1,56,375,504,1" >
+			<PAGE name="page000860" caption="지연이체 서비스 신청" linkfile="mbonl81001_t1" loadingtype="1" />
+			<PAGE name="page003986" caption="예외계좌 등록" linkfile="mbonl81001_t2" loadingtype="1" />
+		</FORMTAB>
+		<EDIT name="edtPW" halign="1" password="2" imetype="1" maxlength="8" hintcaption="비밀번호" ly_vert="283,9,86,39,1" />
+		<ACCOUNT name="acnt0" fontsize="-2" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,135,136,137,138,139,200" etcfunctions="" accpwdctl="edtPW" totalacc="1" ly_vert="6,9,271,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4926" _ulen="4636" >
+'============================================================================
+' 01. 화 면 명 : 지연이체 서비스 신청/해지
+' 02. 화면설명 : 지연이체 서비스 폼탭
+' 03. 작    성 : 2016.06.22 : 김유경
+'============================================================================
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_szData  '계좌번호 & 비밀번호
+Dim g_Acno    '계좌번호
+Dim g_TabType '폼탭
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	edtPW.caption = ""
+	g_szData = acnt0.total & "★" & ""
+	
+	FormTab0.currenttab = "0"	
+	g_TabType = CInt(FormTab0.currenttab)
+	
+	if g_TabType == 0 then
+	   Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "서비스신청", g_szData)
+	else
+	   Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "예외계좌등록", g_szData) 
+	end if   
+End Sub
+
+'============================================================================
+' FormTab0_OnTabChanged - 탭 변경할 때 조회
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	g_szData = acnt0.total & "★" & edtPW.caption
+	
+	g_TabType = CInt(FormTab0.currenttab)
+
+	if g_TabType == 0 then
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "서비스신청", g_szData)
+	elseif g_TabType == 1 then
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "예외계좌등록", g_szData)
+	end if
+	
+	edtPW.caption = ""
+End Sub
+'============================================================================
+' edtPW_OnEditComplete()
+'============================================================================
+Sub edtPW_OnEditComplete()
+		
+	g_szData = acnt0.total & "★" & edtPW.caption & "★" & "No"			'계좌번호 & 비밀번호
+	
+	if edtPW.caption == "" or edtPW.caption == Null then
+		szData = acnt0.total & "★" & "" & "★" & "No"			'계좌번호 & 비밀번호
+	end if
+	
+	g_TabType = CInt(FormTab0.currenttab)
+	
+	if g_TabType == 0 then
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "서비스신청", g_szData)
+	elseif g_TabType == 1 then
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "예외계좌등록", g_szData)
+	end if
+End Sub
+'============================================================================
+Sub acnt0_ChangeAccount()
+	
+	g_szData = acnt0.total & "★" & edtPW.caption  '계좌번호 & 비밀번호
+	
+	g_TabType = CInt(FormTab0.currenttab)
+	
+	if g_TabType == 0 then
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "서비스신청", g_szData)
+	elseif g_TabType == 1 then
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "예외계좌등록", g_szData)
+	end if
+	
+	edtPW.caption = ""
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID)
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+' 일단 주석처리
+'	Dim szErr, szSubErr
+'	
+'	if szTranID == "obpds_srvc_412r" then
+'		if DATAMANAGER.GetDataValue( 0 , "obpds_srvc_412r", "OutBlock1", "SUCS_YN" , 0) == "Y" then
+'			g_CustNum = Form.GetSharedData("&CUST_NUM", false )
+'			
+'			g_szData = g_CustNum & "★" & tbl0.GetCellString( 0, 1) 
+'		
+'			if g_nFmtabIndex == 0 then
+'				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "계좌추가", g_szData)
+'			else
+'				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "계좌해지", g_szData)
+'			end if
+'		else
+'			szErr = DATAMANAGER.GetDataMsgText( "obcsb_efif_162r" )
+'			szSubErr = DATAMANAGER.GetDataMsgSubText( "obcsb_efif_162r" )
+'			Form.MsgBox("알림", szErr.."("..szSubErr..")" , 0, 6)
+'			edtPW.caption = ""
+'		end if
+'	end if
+End Sub 
+
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+'	if sEventName == "Reset" then
+'		edtPW.caption = ""
+'	elseif sEventName == "Reset1" then
+'		edtPW.caption = ""
+'	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	
+	FormTab0_OnTabChanged(nCurrentTab)
+	
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_412r" trcode="obpds_srvc_412r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_411a" trcode="obpds_srvc_411a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_412r" title="지연이체 서비스 약정 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="167" _ulen="125" >
+
+SVCD^서비스코드^3^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="190" _ulen="144" >
+
+TACT_BANK_ACNO^이체은행계좌번호^16^0^0^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+TACT_BANK_ACNM^이체은행계좌명^40^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="218" _ulen="162" >
+
+STPL_YN^약정여부^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+STPL_STAT_CLS_CODE^약정상태구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="179" _ulen="131" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+TACT_BANK_ACNO^이체은행계좌번호^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_411a" title="지연이체 서비스 약정 등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" occurs="100" inout="in" _len="609" _ulen="449" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+SVC_MANG_UNIT_CODE^서비스관리단위코드^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+TACT_BANK_ACNO^이체은행계좌번호^16^0^0^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+TACT_BANK_ACNM^이체은행계좌명^40^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="172" _ulen="128" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

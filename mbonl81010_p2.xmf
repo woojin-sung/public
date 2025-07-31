@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="81010" scrname="고객투자성향진단_고위험거래팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,557,187,50,1" />
+		<BUTTON name="btnOK" caption="확인" fgcolor="061:239059036" btnimage="btn_pop2.9.png" ly_vert="187,557,188,50,1" />
+		<LABEL name="lbl1" fgcolor="128:188030030" caption="그래도 거래를 진행하시겠습니까?" valign="0" ly_vert="0,161,375,32,1" />
+		<TABLE name="Table1" insidelinecolor="102:255255255" colcount="2" rowcount="2" designorder="1" ly_vert="0,69,375,70,1" >
+			<COL_INFO ly_vert_width="139,236" />
+			<ROW_INFO ly_vert_height="35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" halign="0" caption="고객님의투자성향" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" halign="0" caption="상품 투자위험도" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="lblTypA2" fgcolor="128:188030030" fontstyle="01" autofontsize="1" ly_vert="145,70,225,32,1" />
+		<LABEL name="lblTypA5" fgcolor="128:188030030" fontstyle="01" autofontsize="1" ly_vert="145,105,225,32,1" />
+		<TABLE name="Table2" insidelinecolor="102:255255255" colcount="2" rowcount="2" outline="0000" designorder="1" ly_vert="0,10,377,50,1" >
+			<COL_INFO ly_vert_width="162,215" />
+			<ROW_INFO ly_vert_height="25,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="고객님의 투자성향보다 " impidxs="" />
+				<CELL cell_ly="1,0,1,0" fgcolor="128:188030030" halign="0" line="0,0" caption="가입희망상품의 투자위험도가 " paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="128:188030030" halign="0" line="0,0" caption="높습니다." impidxs="" />
+				<CELL cell_ly="1,1,1,1" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7865" _ulen="7041" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 고객투자성향진단
+' 02. 화면설명 : 고객투자성향진단_고위험거래확인팝업
+' 03. 작    성 : 2016.02.17	
+' 04. 수    정 : 2016.11.10 주식 공모주청약 관련 프로세스 추가 v002 
+'                2017.07.11 CME/EUREX 약정 추가 v003
+'                2017.12.21 윤유정 :  해외주식, 해외파생ETF 약정 추가 v004
+'		      : 2018.03.14 : 김유경 : 변동성ETN거래신청 추가 v005
+'		      : 2021.12.27 : 김수진 : K-OTC거래신청 추가 v006
+'		      : 2022.04.21 : 김성수 : 해외주식 소수점 거래 신청 추가 v007
+'		      : 2022.07.01 : 임동군 : 집투신규개설시 버튼명 변경 v008
+'		      : 2022.09.16 : 신극수 : Wrap비대면 계약 개발 v009
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_szScrNo 	'호출한 화면번호
+
+Dim g_szRetData 
+Dim g_szKYC_INVT_INCL_GRAD_CODE 	'KYC투자성향등급코드
+Dim g_szKYC_PROD_GRAD_CODE 		'KYC상품등급코드
+Dim g_szKYC_DVPD_EPMD_CODE 		'KYC파생상품유의코드
+Dim g_szKYC_DRVT_PROS_YN 			'KYC파생처리여부
+Dim g_szDVPD_GRAD_CODE 			'파생상품등급코드
+Dim	g_szAlertTitle			'알림타이틀
+Dim g_szRet
+
+g_szRet	=	"CANCEL"
+g_szAlertTitle	=	"알림"
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+'setItemSetting: 각 업무에 따라 입력값 세팅
+'============================================================================
+Function	setGlobalItems(szInput)
+	g_szScrNo	=	getListItem(szInput, 0)
+	
+	g_szKYC_INVT_INCL_GRAD_CODE 	=	getListItem(szInput, 1)
+	g_szKYC_PROD_GRAD_CODE 		=	getListItem(szInput, 2)
+	g_szKYC_DVPD_EPMD_CODE 		=	getListItem(szInput, 3)
+	g_szKYC_DRVT_PROS_YN 		=	getListItem(szInput, 4)
+	g_szDVPD_GRAD_CODE 			=	getListItem(szInput, 5)
+
+End Function
+
+
+'============================================================================
+'해당하는 값의 아이템을 리턴
+'============================================================================
+Function getListItem(szInput, nIdx)
+	dim szList
+	
+	if szInput = "" then
+		return 
+	else
+		szList = split(szInput, "★")
+		if szList <> "" then
+			return szList(nIdx)
+		else
+			return
+		end if 
+	end if 
+	
+end function
+
+
+'===========================================================================
+' 숫자 리턴함수
+'===========================================================================
+Function GetTonumber(sNum)
+	Dim nDbl
+	nDbl = 0
+	
+	if sNum == null or Trim(sNum) == "" then
+		return nDbl
+	end if
+	
+	nDbl = CDbl(sNum)
+	
+	return nDbl
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	dim szLinkedData
+	g_sRetData = "cancel"
+	
+	Form.SetScreenName("투자성향대비 고위험거래 확인")
+	
+	szLinkedData = Form.GetOpenLinkData( )
+	
+
+	if szLinkedData = "" then
+		Form.ShowAlert(g_szAlertTitle, "입력값이 없습니다.")
+	else
+		setGlobalItems(szLinkedData)
+	end if 
+	
+	
+	'신용계좌개설		'펀드
+	'2017.07.11 CME/EUREX 약정 추가 v003	
+	'2017.12.21 082 해외주식, 083 해외파생ETF 약정 추가 v004
+	'2018.03.14 084 변동성ETN거래신청 약정 추가 v005 (g_szScrNo == "88021")
+	'2021.12.27 K-OTC 거래신청 약정 추가 v006 (g_szScrNo == "88050")
+	'2022.04.21 해외주식 소수점 약정 추가 v007 (g_szScrNo == "87056_1~4")
+	'v009
+	'KEK.투자성향 공통팝업 테스트_20240111
+	if	g_szScrNo == "82010"	or  g_szScrNo == "51000"	or  g_szScrNo == "88010"	or  g_szScrNo == "88000"  or  g_szScrNo == "88020"  or  g_szScrNo == "88021" or g_szScrNo == "88050" 
+		or  g_szScrNo == "53000" 	or g_szScrNo == "84010" or g_szScrNo == "83110" or g_szScrNo == "87040_t1" or g_szScrNo == "87040_t2" or g_szScrNo == "87050" or g_szScrNo == "87051" 
+		or g_szScrNo == "87052_1" or g_szScrNo == "87052_2" or g_szScrNo == "87052_3" or g_szScrNo == "87052_4" or g_szScrNo == "57090" or g_szScrNo == "88060" or  g_szScrNo == "90201"	'v002 공모주청약-주식 추가
+		or g_szScrNo == "87057_1" or g_szScrNo == "87057_2" or g_szScrNo == "87057_3"  '2023.05.23  해외주식/ETP 거래신청
+		or g_szScrNo == "51020" then 
+	
+		szGRAD_NAME	= Form.GetMetaData("상품등급코드"		, g_szKYC_INVT_INCL_GRAD_CODE)
+		szKYC_GRAD_NAME = Form.GetMetaData("KYC투자성향등급코드"	, g_szKYC_INVT_INCL_GRAD_CODE)
+		szPROD_NAME 	= Form.GetMetaData("상품등급코드"		, g_szKYC_PROD_GRAD_CODE)
+		szKYC_PROD_NAME = Form.GetMetaData("KYC상품등급코드"		, g_szKYC_PROD_GRAD_CODE)
+		
+		'Form.ShowAlert("test", szGRAD_NAME &".." & szKYC_GRAD_NAME &".."& szPROD_NAME & ".." & szKYC_PROD_NAME )
+		
+'		lblTypA2.caption = GetTonumber(g_szKYC_INVT_INCL_GRAD_CODE).."등급 "..szGRAD_NAME.."("..szKYC_GRAD_NAME..")"
+		lblTypA2.caption = szKYC_GRAD_NAME
+		
+'		if g_szKYC_INVT_INCL_GRAD_CODE == "01" then
+'			lblTypA2.fgcolor = "378"
+'		elseif g_szKYC_INVT_INCL_GRAD_CODE == "02" then
+'			lblTypA2.fgcolor = "384"
+'		elseif g_szKYC_INVT_INCL_GRAD_CODE == "03" then
+'			lblTypA2.fgcolor = "385"
+'		elseif g_szKYC_INVT_INCL_GRAD_CODE == "04" then
+'			lblTypA2.fgcolor = "386"
+'		elseif g_szKYC_INVT_INCL_GRAD_CODE == "05" then
+'			lblTypA2.fgcolor = "383"
+'		end if
+		
+		
+		'lblTypA5.caption = GetTonumber(g_szKYC_PROD_GRAD_CODE).."등급 "..szPROD_NAME.."("..szKYC_PROD_NAME..")"
+		lblTypA5.caption = szKYC_PROD_NAME .. " (" .. GetTonumber(g_szKYC_PROD_GRAD_CODE).."등급)"
+		
+		lblTypA2.fgcolor = 144
+		lblTypA5.fgcolor = 144
+	'파생ELW/ETF/ETN/ELS
+	
+	end if
+
+        ' v008
+	IF g_szScrNo == "51000" THEN
+	    btnCancel.caption = "가입중단"
+	    btnOK.caption       = "가입진행"
+	END IF
+
+End Sub
+
+
+'============================================================================
+'btnOK_OnClick
+'============================================================================
+Sub btnOK_OnClick()
+	Form.SendReturnToParent("mbonl81010_p2" , "OK")
+	g_szRet	=	"OK"
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'btnCancel_OnClick
+'============================================================================
+Sub btnCancel_OnClick()
+	'20220712 ITGEN START
+	'  신규매수인경우(화면번호가 51000에서 호출된 경우 "가입중단" ) 51000화면 실행
+	if g_szScrNo == "51000" then
+		szOpenScreen = Form.GetSharedData("FUND_PAGE_SET")
+		if szOpenScreen = "51040" then
+			'	추가매수인경우 가입중단시 잔고로 이동 '2023.06.29 이수정과장 요청으로 추가!
+			Form.OpenScreen("51040" , "")
+		else
+			Form.OpenScreen("51000" , "")
+		end if
+	end if
+	
+	Form.SendReturnToParent("mbonl81010_p2" , "CANCEL")
+	Form.CloseForm()
+	Exit Sub
+	'20220712 ITGEN END
+End Sub
+
+
+'============================================================================
+'Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+
+	if	g_szRet	<>	"OK"	then
+		Form.SendReturnToParent("mbonl81010_p2" , "CANCEL")
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

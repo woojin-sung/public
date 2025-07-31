@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="82020" scrname="담보대출신청_약관설명서" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="-2,-2,379,564,1" />
+		<BUTTON name="ButtonOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1881" _ulen="1823" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 담보대출신청
+' 02. 화면설명 : 담보대출신청_약관설명서
+' 03. 작    성 : 2016.02.26 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRevData
+Dim g_sRetData 
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_sRevData = Form.GetOpenLinkData()
+	
+	if g_sRevData == null or Trim(g_sRevData) == "" then
+		Exit Sub
+	end if
+	
+	Form.SetScreenName(g_sRevData)
+	g_sRetData = "cancel"
+	
+	Dim sURL
+	sURL = Form.GetSharedData("OPEN_URL", true )
+	WebView0.urlpath = sURL
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbonl82020_p6" , g_sRetData)
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	g_sRetData = g_sRevData
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

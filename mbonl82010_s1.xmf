@@ -1,0 +1,1528 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="82010" scrname="신용거래약정S" version="2" writer="이아영" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<EDIT name="EditPW" visible="0" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="283,9,86,39,0" />
+		<LABEL name="lblErrorText" halign="1" multiline="1" ly_vert="25,220,325,100,1" />
+		<LINKFORM name="lnkSub" linkfile="mbonl82010_s2" visible="0" ly_vert="0,48,375,514,0" />
+		<BUTTON name="btnError" visible="0" fontsize="-1" btnimage="btn_10.9" ly_vert="80,320,215,40,0" />
+		<ACCOUNT name="Account0" itemcodetype="100,105,119,200" etcfunctions="" finaceexcept="1" ly_vert="6,9,363,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="43095" _ulen="36613" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 신용거래약정
+' 02. 화면설명 : 신용거래약정
+' 03. 작    성 : 2022.09.04 이아영
+' 04. 수    정 : 2023.03.16 v001 이학록 : 취약금융소비자 제어로직 추가
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_bAddAct
+Dim g_szAnxtAprt_Yn '부적정여부 (Y,N)
+Dim g_szMoveScreen
+Dim g_szCsnm
+Dim g_szCustClsCd
+
+Dim g_szKYC_INVT_INCL_GRAD_CODE'KYC투자성향등급코드
+Dim g_szKYC_PROD_GRAD_CODE	'KYC상품등급코드Dim 
+Dim g_szKYC_DVPD_EPMD_CODE	'KYC파생상품유의코드
+Dim g_szKYC_DRVT_PROS_YN 	'KYC파생처리여부
+Dim g_szDVPD_GRAD_CODE	'파생상품등급코드
+Dim g_szCAFU_TRGT_YN	'숙려대상여부 v010
+Dim g_szGOAL_MRKT_TRGT_YN 	'목표시장대상여부 v010
+Dim g_szGOAL_MRKT_UNFIT_YN  '목표시장부적합여부 v010
+Dim g_szKYC_INVT_RCMD_CLS_CODE 'KYC투자권유구분코드 v011
+Dim g_szAPRT_SRNM_PROD_YN
+
+Dim g_szContinueFlag
+Dim g_Account0
+Dim g_szProsYN
+
+'for TEST
+'Dim g_bFirst 
+'g_bFirst = "1"
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "Init" then	
+		g_bAddAct = true
+		DATAMANAGER.RequestTranData("oblon_basc_803r")
+		
+	elseif sEventName  == "InitChange" then
+		if trim(sParam) ~= "" then
+			Dim tParam
+			tParam = Split(sParam, "★")
+			
+			if tParam[0] == "Add" then
+				g_bAddAct = true
+			else	
+				g_bAddAct = false
+			end if
+			
+			Account0.caption = tParam[1]
+		end if
+		
+	elseif sEventName == "CORRECT_PWD" then
+		if nil ~= sParam and "" ~= sParam then
+			EditPW.encdata = sParam
+		end if
+		
+	elseif sEventName == "NextView" then
+		if trim(sParam) ~= "" then
+			Form.OpenPopup("mbonl82010_p3" , sParam , "")
+			
+		end if
+	end if 
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "CORRECT_PWD" then
+		if nil ~= sRet and "" ~= sRet then
+			Dim tPwd
+			tPwd = Split(sRet, "★") '"nPwdLen★sEncPwd(암호화된 비밀번호)"
+			
+			if UBOUND(tPwd) > 0 then
+				EditPW.pwdlen = tPwd(1)
+				EditPW.caption = tPwd(0)
+			end if
+			
+			Dim szSendData
+			szSendData = Account0.caption.."☆"..EditPW.caption
+			Form.triggerEvent("lnkSub", "PwdComplete", szSendData)
+		end if
+		
+	elseif sKeyName == "mbonl82010_p3" then
+		Form.triggerEvent("#", "End", "")
+	
+	elseif sKeyName == "kyc" then
+		if sRet == "Right" then
+			szData = setKycSharedData("mbonl93500")
+			Form.OpenFramePopup("mbonl93500" , szData , "") '대출 KYC 설문 메인
+			'Form.OpenOverlapPopup("mbonl93500" , szData, 500, 500)
+		end if 
+	'LHR수정 투자성향진단 추가
+	elseif sKeyName == "투자성향" then
+		if sRet == "Right" then
+			'Form.OpenScreen("81010" , "")
+			Form.OpenFramePopup("mbonl81010" , "mbonl88060" , "")
+		end if
+	elseif sKeyName == "투자성향확인서" then
+		if sRet == "Right" then
+			Dim sSendData
+			szAct = Account0.caption
+			sSendData = "82010★" & Left(szAct, 8) & "★" & Right(szAct, 2) & "★"
+			
+			Form.OpenPopup("mbonl81010_p1" , sSendData , "")
+		end if
+	elseif sKeyName == "kyc_report" then
+		if sRet == "Right" then
+			setKycSharedData("mbonl93503")
+			Form.OpenPopup("mbonl93503" , "" , "") '대출 KYC 부적합 보고서
+		end if 
+		
+	'적정성 여부 확인 MsgBox
+	elseif sKeyName == "kyc_check" then	'적정성 여부 확인
+		'확인
+		if g_szAnxtAprt_Yn = "Y" Then	'부적정
+			DATAMANAGER.RequestTranData("oblon_basc_103r")
+		end if
+		
+		
+	elseif sKeyName = "mbonl93500" Then
+		g_szAnxtAprt_Yn = sRet	'부적정여부
+		if g_szAnxtAprt_Yn = "N" then	'부적정여부 리턴: 적정			
+		    Dim szAlertData
+			szAlertData = "1".."★".."부적정여부 : [적정]. 계속 진행하세요".."★".."kyc_check".."★".."확인".."★".."확인"
+			Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+		elseif g_szAnxtAprt_Yn = "Y" then	'부적정여부 리턴: 부적정
+			Dim szAlertData
+			szAlertData = "1".."★".."부적정여부 : [부적정]".."★".."kyc_check".."★".."확인".."★".."확인"
+			Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+		end If
+		
+		DATAMANAGER.RequestTranData("oblon_basc_103r")
+		
+	'부적정보고서 리턴
+	elseif sKeyName = "mbonl93503" Then
+		'대출_고객정보 확인서 징구 여부 관련 조회로 처음부터 체크한다. 
+		DATAMANAGER.RequestTranData("oblon_basc_103r")
+		
+	elseif sKeyName == "2047" or sKeyName == "3247" or sKeyName == "3249" or sKeyName == "3251" or sKeyName == "3253" 
+		   or sKeyName == "3255" or sKeyName == "3257" or sKeyName == "3259" or sKeyName == "3265" or sKeyName == "3263"
+		   or sKeyName == "8997" then
+		   
+		'고객지원센터 이동
+		if sRet == "Right" then
+			Form.OpenScreen("89020" , "")
+		end if 
+		
+	elseif sKeyName == "3267" then
+		
+		'휴대폰정보 등록하기 이동
+		if sRet == "Right" then
+			'Form.OpenScreen("81000" , "")
+			'Form.OpenFramePopup("mbonl81000" , "" , "")
+			Form.OpenFramePopup("mbonl81000" , "" , "")
+		end if 
+	'LHR 투자성KYC 추가
+	elseif sKeyName == "KYCCHK_RETURN" then
+		if sRet == "Y" then
+			lnkSub.visible = "1"
+			lblErrorText.visible = "0"
+			btnError.visible = "0"
+			'Form.MsgBox( "알림", "약관 및 설명서 내 최소담보유지비율(고객별/종목군별/신용거래융자유형별 적용)에 대한 내용을 충분히 숙지하여 주시기 바랍니다.", "exec", 0 )
+			DATAMANAGER.RequestTranData( "obcsb_acad_002r" ) '연락처조회
+		else
+			lnkSub.visible = "0"
+			lblErrorText.visible = "1"
+			if trim(btnError.caption) <> "" then
+				btnError.visible = "1"
+			else
+				btnError.visible = "0"
+			end if
+			
+			
+'			Dim szAlertData
+'			
+'			if g_szContinueFlag == "1" then
+'				szAlertData = "2".."★".."투자자정보[미제공] 상태입니다.".."★".."투자성향확인서".."★".."취소".."★".."계속 진행"
+'			elseif g_szContinueFlag == "2" then
+'				szAlertData = "2".."★".."고객님의 투자성향보다\n위험도가 높은 상품입니다.".."★".."투자성향확인서".."★".."취소".."★".."계속 진행"
+'			end if
+'			
+'			g_szMoveScreen = "81010_p1"
+'			Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+		end if
+	elseif sKeyName = "mbonl81000" then
+		if sRet == "ok" then
+			'DATAMANAGER.RequestTranData( "obcsb_acad_002r" ) '연락처조회
+			DATAMANAGER.RequestTranData( "oblon_basc_810r" )
+		end if
+		
+	elseif sKeyName == "mbfnp51000_p8" then	'고객투자성향안내팝업		
+		if sRet == "NEXT_mbfnp51000_p8" then
+			
+			if ( g_szProsYN	=	"N"	or	g_szProsYN	=	"Y" ) and (g_szKYC_INVT_RCMD_CLS_CODE = "3" or g_szKYC_INVT_RCMD_CLS_CODE = "4") then			
+				Dim sSendData
+				szAct = Account0.caption
+				sSendData = "82010★" & Left(szAct, 8) & "★" & Right(szAct, 2) & "★"				
+				Form.OpenPopup("mbonl81010_p1" , sSendData , "")						
+				
+			elseif g_szProsYN = "N" or g_szProsYN = "X" then
+				Dim sSendData
+				szAct = Account0.caption
+				sSendData = "82010★" & Left(szAct, 8) & "★" & Right(szAct, 2) & "★"
+				lblErrorText.caption = ""
+				btnError.caption = ""
+				Form.OpenPopup("mbonl81010_p1" , sSendData , "")
+				
+			elseif g_szProsYN = "Y" then
+				Dim szAlertData
+				'Account0.caption = g_Account0
+				
+				lblErrorText.caption = "고객님의 투자성향보다\n위험도가 높은 상품입니다."
+				lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = "계속 진행"
+				szAlertData = "2".."★".."고객님의 투자성향보다\n위험도가 높은 상품입니다.".."★".."투자성향확인서".."★".."취소".."★".."계속 진행"
+				g_szContinueFlag = "2"
+				g_szMoveScreen = "81010_p1"
+				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+			end if
+		else
+			Form.triggerEvent("#", "End", "")
+		end if
+	end if
+End Sub
+
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	'2021.03.17 : 대출KYC
+	if sKeyName == "kyc" then
+		if sRet == "ok" then			
+			szData = setKycSharedData("mbonl93500")
+			Form.OpenFramePopup("mbonl93500" , szData , "") '대출 KYC 설문 메인
+		End if
+	'적정성 여부 확인 MsgBox
+	elseif sKeyName == "kyc_check" then	'적정성 여부 확인
+		'확인
+		if g_szAnxtAprt_Yn = "Y" Then	'부적정
+			DATAMANAGER.RequestTranData("oblon_basc_103r")
+		end if
+	elseif sKeyName == "kyc_report" then
+		if sRet == "ok" then
+			setKycSharedData("mbonl93503")
+			Form.OpenPopup("mbonl93503" , "" , "") '대출 KYC 부적합 보고서
+		end if
+	end if
+End Sub
+
+'============================================================================
+' setKycSharedData : 파일 오픈 공유데이터 설정 : 대출KYC : 2021.03.17
+'============================================================================
+Function setKycSharedData(fileName)
+	
+	'MTS 메모리평문 적용유무 (0:미적용 / 1:적용)
+	szPlainRm = Form.GetSharedData("&PLAIN_RM", false)
+	Dim szAct
+	szAct = Account0.caption
+	
+	'MTS 메모리평문 적용
+	if szPlainRm = "1" Then
+		szPwd = Form.GetCtlProp( "EditPW", "caption" )	'비밀번호
+	'MTS메모리평문 미적용
+	else
+		szPwd = Form.GetCtlProp( "EditPW", "encdata" )
+	end if
+	
+	'대출 KYC MTS_메인
+	if fileName = "mbonl93500" Then
+		szAcno = Left(szAct, 8)        '계좌번호
+		szCsnm = g_szCsnm			    	'고객명
+		g_szData = szAcno & "||" & szPwd & "||" & szCsnm & "||" & g_szCustClsCd & "||" & "01" ' 01은 신용
+		  
+	'대출성 상품 적정성 판단 보고서(MTS)
+	elseif fileName = "mbonl93503" Then	
+		'보고서는 Shared Memory로 통신한다.
+		szAcno = Left(szAct, 8)        '계좌번호
+		szCsnm = g_szCsnm			    	'고객명
+		szBswrdivcode = "16001"		'해외주식 대출약정'
+		Form.SetSharedData( "mbonl93503_acno" 	  		, szAcno )
+		Form.SetSharedData( "mbonl93503_acnopwd" 		, szPwd )
+		Form.SetSharedData( "mbonl93503_csnm"             , szCsnm )
+		Form.SetSharedData( "mbonl93503_loan_type_code"   , "01" ) '신용01
+		Form.SetSharedData( "mbonl93503_bswr_div_code"    , szBswrdivcode )
+		Form.SetSharedData( "mbonl93503_cont_cls_code"    , "4" )
+	end if
+
+	return g_szData
+End Function
+
+'============================================================================
+Sub Account0_ChangeAccount()
+	lnkSub.linkfile = ""
+	DATAMANAGER.RequestTranData("oblon_basc_803r")
+End Sub
+'
+'============================================================================
+' 비밀번호 입력
+'============================================================================
+Sub EditPW_OnEditComplete()	
+'	Form.triggerEvent("lnkSub", "PwdComplete", "")
+End Sub
+
+'============================================================================
+Sub EditPW_OnClick()
+	Dim sValue
+	sValue = Account0.caption.."☆2"
+	Form.openPopupAnimation("pwdcheckpopup", sValue ,"","2")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim szAct	
+	Dim sACNT_PWD
+	Dim plain_rm
+	
+	szAct = Account0.caption
+	plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	'MTS메모리평문 적용상태일때
+	if plain_rm == "1" then
+		sACNT_PWD = EditPW.caption
+	'MTS메모리평문 미적용상태일때
+	else
+		sACNT_PWD = Form.GetEncData(EditPW.caption)
+	end if
+
+	if szTranID == "oblon_basc_803r" then
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_803r", "InBlock1", "ACNO" , 0 , Left(szAct, 8) )
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_803r", "InBlock1", "ASNO" , 0 , Right(szAct, 2) )
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_803r", "InBlock1", "ACNT_PWD" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_803r", "InBlock1", "PROS_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_803r", "InBlock1", "CONT_CLS_CODE" , 0 , "4" ) 'v001	
+
+	elseif szTranID == "oblon_basc_810r" then
+		g_szMoveScreen = ""
+	
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO" , 0 , Left( szAct, 8))
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ASNO" , 0 , Right(szAct, 2))
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "LOAN_TYPE_CODE" , 0 , "01" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE" , 0 , "8" ) 'v001
+
+	'2021.03.17 대출_고객정보 확인서 징구 여부 관련 조회
+	elseif szTranID == "obcsb_acif_000r" Then '계좌 정보 조회 for 대출KYC
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "PROS_CLS_CODE" , 0 , "I" 			 )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "ACNO" 		   , 0 , Left( szAct, 8))
+		
+	elseif szTranID == "oblon_basc_103r" then		
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_103r", "InBlock1", "ACNO" 		   , 0 , Left( szAct, 8)  )	'계좌번호
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_103r", "InBlock1", "BSWR_DIV_CODE" , 0 , "16001" )	'대출약정
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_103r", "InBlock1", "LOAN_TYPE_CODE", 0 , "01" )	'신용
+		
+	elseif szTranID == "obcsb_acad_002r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_acad_002r", "InBlock1", "ACNO" , 0 , Left(szAct, 8) )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acad_002r", "InBlock1", "PWD" , 0 , sACNT_PWD )
+		
+	elseif szTranID == "obaci_acct_095r" then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO"     , 0 , Left(szAct, 8) )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD" , 0 , sACNT_PWD )
+	elseif szTranID == "obcsb_acad_120r" then
+		DATAMANAGER.SetDataValue(0, "obcsb_acad_120r", "InBlock1", "ACNO" , Left(szAct, 8))
+	elseif szTranID == "obacp_comm_007r" then
+		DATAMANAGER.SetDataValue(0, "obacp_comm_007r", "InBlock1", "ACNO" , Left(szAct, 8))
+		DATAMANAGER.SetDataValue(0, "obacp_comm_007r", "InBlock1", "ACNT_PWD" , sACNT_PWD)
+		DATAMANAGER.SetDataValue(0, "obacp_comm_007r", "InBlock1", "IQRY_CLS_CODE" , "9")
+	'LHR 수정
+	elseif szTranID == "obcsb_acif_700r" then
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "ACNO"				, 0, Left(szAct, 8))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "ASNO"				, 0, Right(szAct, 2))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "KYC_BSWR_DIV_CODE"	, 0, "02")
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_700r", "InBlock1", "BSWR_DIV_CODE"		, 0, "16001")
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)	
+	Dim szAct
+	szAct = Account0.caption
+	if szTranID == "oblon_basc_803r" then
+		Dim szRegDate		
+		Dim sUI_PROD_OPNG_YN1 
+		Dim sUI_PROD_OPNG_YN2
+		Dim sLoanType
+		Dim szDejuDate
+		Dim szUI_COND
+		
+		szRegDate = DATAMANAGER.GetDataValue( 0, "oblon_basc_803r", "OutBlock1", "REG_DATE", 0 ) 
+		sUI_PROD_OPNG_YN1 = DATAMANAGER.GetDataValue( 0, "oblon_basc_803r", "OutBlock2", "UI_PROD_OPNG_YN1" , 0 ) 'SMS		
+		sUI_PROD_OPNG_YN2 = DATAMANAGER.GetDataValue( 0, "oblon_basc_803r", "OutBlock2", "UI_PROD_OPNG_YN2" , 0 ) 'E-mail		
+		sLoanType = DATAMANAGER.GetDataValue( 0, "oblon_basc_803r", "OutBlock1", "MORG_APLY_FORM_CODE" , 0 ) '신용융자/대주코드		
+		szDejuDate = DATAMANAGER.GetDataValue( 0,"oblon_basc_803r", "OutBlock1", "STLN_STUP_DATE", 0 ) '대주일자
+		szUI_COND = DATAMANAGER.GetDataValue( 0, "oblon_basc_803r", "OutBlock1", "UI_COND_RSLT_CLS_VAL", 0 ) '유통융자 담보활용 동의 신청 여부
+		
+		Dim szTrData
+		szTrData = sLoanType.."★"..sUI_PROD_OPNG_YN1.."★"..sUI_PROD_OPNG_YN2.."★"..szRegDate.."★"..szDejuDate.."★"..szUI_COND
+	
+		lnkSub.linkfile = "mbonl82010_s2"
+		'LHR 수정
+		lnkSub.visible = "0"
+		Dim szSendData
+		szSendData = Account0.caption.."☆"..EditPW.caption.."☆"..szTrData
+		
+		Form.triggerEvent("lnkSub", "InitData", szSendData)
+		
+		if g_bAddAct == false then
+			g_bAddAct = true
+			DATAMANAGER.RequestTranData( "obcsb_acif_000r" )
+		else
+			'LHR TEST
+			Dim sSendData
+			Dim szAct
+			szAct = Account0.caption
+			sSendData = "82010★" & Left(szAct, 8) & "★" & Right(szAct, 2) & "★"
+			
+			'Form.OpenPopup("mbonl81010_p1" , sSendData , "")
+			DATAMANAGER.RequestTranData("oblon_basc_810r")
+		end if
+	
+	elseif szTranID == "oblon_basc_810r" then
+		Dim szLoanYn
+		szLoanYn = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "LOAN_ABLE_YN" , 0 )
+		
+		if szLoanYn == "Y" then
+			DATAMANAGER.RequestTranData( "obcsb_acif_000r" )
+			
+		else		
+			Dim szErrMsg
+			Dim sSubMsg 
+			Dim szErrCode
+			
+			sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+			szErrMsg = DATAMANAGER.GetDataMsgText( szTranID )
+			szErrCode = DATAMANAGER.GetDataMsgCode( szTranID )
+			
+			if trim(sSubMsg) ~= "" then
+				szErrMsg = szErrMsg.." "..sSubMsg
+			end if
+			
+			Form.ShowAlert(szTranID, "["..szErrCode.."]"..szErrMsg)
+		end if 
+
+	'2021.03.17 : 대출KYC
+	elseif szTranID == "obcsb_acif_000r" Then
+		g_szCsnm      = DATAMANAGER.GetDataValue( 0, "obcsb_acif_000r", "OutBlock1", "CUST_FULL_NAME" , 0 ) 
+		g_szCustClsCd = DATAMANAGER.GetDataValue( 0, "obcsb_acif_000r", "OutBlock1", "CUST_CLS_CODE" , 0 )
+		'대출_고객정보 확인서 징구 여부 관련 조회
+		DATAMANAGER.RequestTranData("oblon_basc_103r")
+		
+		
+	elseif szTranID == "oblon_basc_103r" then	
+		Dim szCase
+		szCase = DATAMANAGER.GetDataValue( 0, "oblon_basc_103r", "OutBlock1", "PROS_YN" , 0 )
+
+		SELECT CASE szCase
+		    Case "Y"	'처리가능
+			    '처리가능한 경우 기존대로 실행하면 됨.
+'			    Cont0.ButtonOK.enable = True
+				'LHR 마지막에 보이도록 수정
+				'lnkSub.visible = "1"
+				'lblErrorText.visible = "0"
+				'btnError.visible = "0"
+				
+				'LHR 투자성향진단 추가
+				'DATAMANAGER.RequestTranData( "obcsb_acad_002r" ) '연락처조회
+				DATAMANAGER.RequestTranData("obcsb_acif_700r")
+			
+		    Case "1"	'미등록
+			    '고객정보확인서 등록하도록 화면 open
+'			    Form.MsgBox("알림", "고객정보확인서 미등록 고객입니다. 확인하시겠습니까?" , "kyc", 1)
+			    
+			    lblErrorText.caption = "신용공여 고객정보확인 등록 후\n신청 가능합니다."
+			    lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = " 신용공여 고객정보확인서 등록"
+				g_szMoveScreen = "93500"
+			    
+			    Dim szAlertData
+			    szAlertData = "2".."★".."신용공여 고객정보확인 등록 후\n신청 가능합니다.".."★".."kyc".."★".."취소".."★".."등록하기"
+				
+			    Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+				
+		    Case "2"	'고객정보 확인서 만기경과
+'			    Form.MsgBox("알림", "고객정보확인서 만기경과 고객입니다. 확인하시겠습니까?" , "kyc", 1)
+
+				lblErrorText.caption = "신용공여 고객정보확인서\n만기가 경과되었습니다.\n재등록 후 신청 가능합니다."
+			    lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = " 신용공여 고객정보확인서 등록"
+				g_szMoveScreen = "93500"
+			    
+			    Dim szAlertData
+				szAlertData = "2".."★".."신용공여 고객정보확인서\n만기가 경과되었습니다.\n재등록 후 신청 가능합니다.".."★".."kyc".."★".."취소".."★".."등록하기"
+				
+				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+			    
+		    Case "3"	'대출약정을 위한 설문 미응답
+'			    Form.MsgBox("알림", "고객정보확인서 설문 미응답 고객입니다. 확인하시겠습니까?" , "kyc", 1)
+			    
+			    'lblErrorText.caption = "신용공여 고객정보확인 등록 후\n신청 가능합니다."
+			    lblErrorText.caption = "고객정보확인서 설문 항목 중 대출용도를\n약정 유형에 맞춰서 등록해주세요."
+			    lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = "신용공여 고객정보확인서 등록"
+				g_szMoveScreen = "93500"
+			    
+			    Dim szAlertData
+			    'LHR 수정
+				'szAlertData = "2".."★".."고객정보확인서 설문 미응답 고객입니다.\n확인하시겠습니까?".."★".."kyc".."★".."취소".."★".."등록하기"
+				szAlertData = "2".."★".."고객정보확인서 설문 항목 중 대출용도를\n약정 유형에 맞춰서 등록해주세요.".."★".."kyc".."★".."취소".."★".."등록하기"
+				
+				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+			    
+		    Case "4"	'부적정확인서 발급필요
+'			    Form.MsgBox("알림", "부적정확인서를 발급합니다." , "kyc_report", 1)
+			    
+			    lblErrorText.caption = "부적정확인서를 발급합니다."
+			    lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = "부적정확인서 발급"
+				g_szMoveScreen = "mbonl93503"
+			    
+			    Dim szAlertData
+				szAlertData = "2".."★".."부적정확인서를 발급합니다.".."★".."kyc_report".."★".."취소".."★".."발급하기"
+				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+		END SELECT
+		'기존로직 실행	
+		
+		
+	elseif szTranID == "obcsb_acad_002r" then		
+		Dim nCnt 
+		Dim szCustClsCode
+		
+		nCnt = tonumber(DATAMANAGER.GetDataCount( 0, "obcsb_acad_002r", "OutBlock1" )	)	
+		if nCnt > 0 then
+			for i = 0 to nCnt-1
+				Dim sINAG_TYPE_CODE
+				Dim sEMAIL_ADDR
+				Dim szSRNO
+				
+				sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "INAG_TYPE_CODE" , i )	
+				if sINAG_TYPE_CODE == "21" then 'E-mail
+					sEMAIL_ADDR = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "EMAIL_ADDR" , i )	
+					szSRNO = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "INAG_SRNO" , i )	
+					Form.triggerEvent("lnkSub", "SetEmailInfo", sEMAIL_ADDR.."★"..szSRNO)
+					Exit for '첫번째껄 세팅후 out
+				end if
+			next
+		end if
+		
+		szCustClsCode = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock5", "CUST_CLS_CODE" , 0 )
+		If szCustClsCode = "2" Then '법인
+			'DATAMANAGER.RequestTranData( "obaci_acct_095r" ) '법인연락처조회	     
+			'DATAMANAGER.RequestTranData( "obacp_comm_007r" ) '법인연락처조회
+			DATAMANAGER.RequestTranData( "obcsb_acad_120r" ) '법인연락처조회
+		else
+'			개인
+
+			Dim nCnt
+			nCnt = tonumber(DATAMANAGER.GetDataCount( 0, "obcsb_acad_002r", "OutBlock3" )	)	
+			if nCnt > 0 then
+				for i = 0 to nCnt-1
+					Dim  sINAG_TYPE_CODE
+					Dim szSRNO
+					
+					sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "INAG_TYPE_CODE" , i )	
+					
+					if sINAG_TYPE_CODE == "13" then '휴대폰번호
+						Dim sARCD
+						Dim sTONO
+						Dim sTELNO
+						
+						sARCD = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "ARCD" , i )
+						sTONO = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TONO" , i )
+						sTELNO = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TELNO" , i )
+						szSRNO = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "INAG_SRNO" , i )	
+
+						Form.triggerEvent("lnkSub", "SetPhoneInfo", sARCD&"-"&sTONO&"-"&sTELNO.."★"..szSRNO)
+						
+						Exit for '첫번째껄 세팅후 out - 박정숙과장이 seq=1인걸 세팅해달라 함.
+					end if
+				next
+			end if	
+		end if
+		
+	     
+	'20160811 법인통보처TR추가에 따른 처리 추가
+'	elseif szTranID == "obaci_acct_095r" then	 	     
+'		Dim nCnt 
+'		nCnt = tonumber(DATAMANAGER.GetDataCount( 0, szTranID, "OutBlock2" )		)
+'		if nCnt > 0 then
+'			for i = 0 to nCnt-1
+'				Dim sINAG_TYPE_CODE
+'				Dim szSRNO
+'				
+'				sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "INAG_TYPE_CODE" , i )
+'				
+'				if sINAG_TYPE_CODE == "13" then '휴대폰번호
+'					Dim sCustTelNo
+'					sCustTelNo = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "UI_CUST_TELNO" , i )	
+'					szSRNO = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "INAG_SRNO" , i )	
+'					Form.triggerEvent("lnkSub", "SetPhoneInfo", sCustTelNo.."★"..szSRNO)
+'					
+'					Exit for '박정숙과장요청. #22007 법인계좌 통보처 관리에 등록된 휴대폰 번호
+'				end if
+'			next
+'		end if
+	elseif szTranID == "obcsb_acad_120r" then
+		Dim sCustTelNo
+		Dim szSrno
+		
+		tmpArcd = DATAMANAGER.GetDataValue(0, "obcsb_acad_120r", "OutBlock1", "CLPH_ARCD", 0)
+		tmpTono = DATAMANAGER.GetDataValue(0, "obcsb_acad_120r", "OutBlock1", "CLPH_TONO", 0)
+		tmpTelno = DATAMANAGER.GetDataValue(0, "obcsb_acad_120r", "OutBlock1", "CLPH_TELNO", 0)
+		szSRNO = DATAMANAGER.GetDataValue(0, "obcsb_acad_120r", "OutBlock1", "UI_CLPH_CNPL_SRNO", 0)
+		
+		if trim(tmpArcd) <> "" or trim(tmpTono) <> "" or trim(tmpTelno) <> "" then
+			sCustTelNO = tmpArcd.."-"..tmpTono.."-"..tmpTelno
+		else
+			sCustTelNo = ""
+		end if
+		
+		Form.triggerEvent("lnkSub", "SetPhoneInfo", sCustTelNo.."★"..szSRNO)
+	elseif szTranID == "obacp_comm_007r" then	     
+		Dim sCustTelNo
+		Dim szSrno
+		
+		szSrno = ""
+		sCustTelNo = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock3", "WHOL_CPNO", 0)
+		
+		Form.triggerEvent("lnkSub", "SetPhoneInfo", sCustTelNo.."★"..szSRNO)
+	'LHR 투자성향진단 추가
+	elseif szTranID == "obcsb_acif_700r" then
+		Dim szProsYN
+		
+		g_szKYC_INVT_INCL_GRAD_CODE= "" 'KYC투자성향등급코드
+		g_szKYC_PROD_GRAD_CODE	= "" 'KYC상품등급코드
+		g_szKYC_DVPD_EPMD_CODE	= "" 'KYC파생상품유의코드
+		g_szKYC_DRVT_PROS_YN 	= "" 'KYC파생처리여부
+		g_szDVPD_GRAD_CODE	= "" '파생상품등급코드
+		g_szCAFU_TRGT_YN		= "" '숙려대상여부 v010
+		g_szGOAL_MRKT_TRGT_YN 	= "" '목표시장대상여부 v010
+		g_szGOAL_MRKT_UNFIT_YN = "" '목표시장부적합여부 v010
+		g_szGOAL_MRKT_UNFIT_YN = "" '목표시장부적합여부 v010
+		
+		szProsYN	=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "PROS_YN", 0)
+		g_szProsYN=   DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "PROS_YN", 0)
+		g_szKYC_INVT_INCL_GRAD_CODE	=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_INVT_INCL_GRAD_CODE", 0)
+		g_szKYC_PROD_GRAD_CODE		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_PROD_GRAD_CODE", 0)
+		g_szKYC_DVPD_EPMD_CODE		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_DVPD_EPMD_CODE", 0)
+		g_szKYC_DRVT_PROS_YN		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_DRVT_PROS_YN", 0)
+		g_szDVPD_GRAD_CODE		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "DVPD_GRAD_CODE", 0)
+		g_szCAFU_TRGT_YN			=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "CAFU_TRGT_YN", 0) 'v010 숙려대상
+		g_szGOAL_MRKT_TRGT_YN		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "GOAL_MRKT_TRGT_YN", 0) 'v010 목표시장대상여부
+		g_szGOAL_MRKT_UNFIT_YN		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "GOAL_MRKT_UNFIT_YN", 0) 'v010 목표시장부적합여부
+		g_szAPRT_SRNM_PROD_YN		=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "APRT_SRNM_PROD_YN", 0) 'KYC투자권유구분코드 v011
+		g_szKYC_INVT_RCMD_CLS_CODE 	=	DATAMANAGER.GetDataValue(0, "obcsb_acif_700r", "OutBlock1", "KYC_INVT_RCMD_CLS_CODE", 0) '적정성상품여부 v011
+		
+		Form.SetSharedData("KYC_INVT_INCL_GRAD_CODE"	, g_szKYC_INVT_INCL_GRAD_CODE)
+		Form.SetSharedData("KYC_PROD_GRAD_CODE"		, g_szKYC_PROD_GRAD_CODE)
+		Form.SetSharedData("KYC_DVPD_EPMD_CODE"		, g_szKYC_DVPD_EPMD_CODE)
+		Form.SetSharedData("KYC_DRVT_PROS_YN"		, g_szKYC_DRVT_PROS_YN)
+		Form.SetSharedData("DVPD_GRAD_CODE"			, g_szDVPD_GRAD_CODE)
+		Form.SetSharedData("CAFU_TRGT_YN"			, g_szCAFU_TRGT_YN) 'v010 숙려대상여부
+		Form.SetSharedData("KYC_INVT_RCMD_CLS_CODE"	, g_szKYC_INVT_RCMD_CLS_CODE) 'v011
+		
+		Dim szHgdtYN, szOldtYN, szInfoYN, szUnfitYN
+		szHgdtYN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "HGDT_PROD_YN", 0)
+		szOldtYN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CAFU_OLDT_YN", 0)
+		szInfoYN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "INFO_REFS_YN", 0)
+		szUnfitYN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "UNFIT_YN", 0)
+		
+		Form.SetSharedData("700r_HGDT_PROD_YN", szHgdtYN) '고난도상품여부
+		Form.SetSharedData("700r_CAFU_OLDT_YN", szOldtYN) '숙려고령자여부
+		Form.SetSharedData("700r_INFO_REFS_YN", szInfoYN) '정보미제공여부
+		Form.SetSharedData("700r_UNFIT_YN", szUnfitYN) '부적합여부
+'msgbox szProsYN		
+''for TEST	
+'if g_bFirst == "1" then
+'g_bFirst = "0"
+'szProsYN = "A"		
+'end if 
+		Dim szAlertData
+		if ( szProsYN	=	"N"	or	szProsYN	=	"Y" ) and (g_szKYC_INVT_RCMD_CLS_CODE = "3" or g_szKYC_INVT_RCMD_CLS_CODE = "4")	then			'전문금융소비자가 아니면서 가입가능하고 투자권유불원이면
+				'lblErrorText.caption = "투자자정보[미제공] 상태입니다."
+				lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = "계속 진행"
+				'szAlertData = "2".."★".."투자자정보[미제공] 상태입니다.".."★".."투자성향확인서".."★".."취소".."★".."계속 진행"
+				g_szContinueFlag = "1"
+				
+				g_szMoveScreen = "81010_p1"
+				'Form.OpenPopup("mbonl82010_p6", szAlertData, "")				
+				
+				g_Account0 = Left(Account0.caption, 8)			
+				Form.SetSharedData("FNP51000_P8_ACC_NO", g_Account0)	'계좌번호
+				Form.SetSharedData("FNP51000_P8_ISCD", "")			'종목코드
+				Form.SetSharedData("FNP51000_P8_PROD", "01")			'상품등급
+				
+				Form.OpenPopup("mbfnp51000_p8", "", "")	'투자성향 및 위험등급 확인 팝업 호출					
+		else
+			if szProsYN = "N" or szProsYN = "X" then
+'				Dim sSendData
+'				szAct = Account0.caption
+'				sSendData = "82010★" & Left(szAct, 8) & "★" & Right(szAct, 2) & "★"
+'				lblErrorText.caption = ""
+'				btnError.caption = ""
+'				Form.OpenPopup("mbonl81010_p1" , sSendData , "")
+
+				g_Account0 = Left(Account0.caption, 8)			
+				Form.SetSharedData("FNP51000_P8_ACC_NO", g_Account0)	'계좌번호
+				Form.SetSharedData("FNP51000_P8_ISCD", "")			'종목코드
+				Form.SetSharedData("FNP51000_P8_PROD", "01")			'상품등급
+				
+				Form.OpenPopup("mbfnp51000_p8", "", "")	'투자성향 및 위험등급 확인 팝업 호출		
+			elseif szProsYN = "A" then '투자성향등급' 없음
+				lblErrorText.caption = "투자성향 정보가 존재하지 않습니다.\n투자성향 등록 후 진행해주세요."
+				lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = "투자성향 등록"
+				szAlertData = "2".."★".."투자성향 정보가 존재하지 않습니다.\n투자성향 등록 후 진행해주세요.".."★".."투자성향".."★".."취소".."★".."등록하기"
+				
+				g_szMoveScreen = "81010"
+				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+			elseif szProsYN = "B" then '정보미제공 또는 유효기간 만료
+				lblErrorText.caption = "투자성향 만기가 경과되었습니다.\n재등록 후 진행해주세요."
+				lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = "투자성향 등록"
+				szAlertData = "2".."★".."투자성향 만기가 경과되었습니다.\n재등록 후 진행해주세요.".."★".."투자성향".."★".."취소".."★".."등록하기"
+				g_szMoveScreen = "81010"
+				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+			elseif szProsYN = "M" then '취약금융정보 없음
+				lblErrorText.caption = "투자성향 취약금융소비자\n정보가 없습니다.\n재등록 후 진행해주세요."
+				lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = "투자성향 등록"
+				szAlertData = "2".."★".."투자성향 취약금융소비자\n정보가 없습니다.\n재등록 후 진행해주세요.".."★".."투자성향".."★".."취소".."★".."등록하기"
+				g_szMoveScreen = "81010"
+				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+				
+			elseif szProsYN = "Y" then
+'				lblErrorText.caption = "고객님의 투자성향보다\n위험도가 높은 상품입니다."
+'				lnkSub.visible = "0"
+'				lblErrorText.visible = "1"
+'				btnError.visible = "1"
+'				btnError.caption = "계속 진행"
+'				szAlertData = "2".."★".."고객님의 투자성향보다\n위험도가 높은 상품입니다.".."★".."투자성향확인서".."★".."취소".."★".."계속 진행"
+'				g_szContinueFlag = "2"
+'				g_szMoveScreen = "81010_p1"
+'				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+'				'Dim sSendData
+'				'szAct = Account0.caption
+'				'sSendData = "82010★" & Left(szAct, 8) & "★" & Right(szAct, 2) & "★"				
+				
+				g_Account0 = Left(Account0.caption, 8)			
+				Form.SetSharedData("FNP51000_P8_ACC_NO", g_Account0)	'계좌번호
+				Form.SetSharedData("FNP51000_P8_ISCD", "")			'종목코드
+				Form.SetSharedData("FNP51000_P8_PROD", "01")			'상품등급
+				
+				Form.OpenPopup("mbfnp51000_p8", "", "")	'투자성향 및 위험등급 확인 팝업 호출				
+				
+				'Form.OpenPopup("mbonl81010_p1" , sSendData , "")
+			elseif szProsYN = "S" then
+				lblErrorText.caption = "취약금융소비자인 경우\n투자성향보다 위험등급이 한단계를\n초과한 상품가입이 불가합니다.\n투자성향 확인 후 진행해주세요."
+				lnkSub.visible = "0"
+				lblErrorText.visible = "1"
+				btnError.visible = "1"
+				btnError.caption = "투자성향 등록"
+				szAlertData = "2".."★".."취약금융소비자인 경우\n투자성향보다 위험등급이 한단계를\n초과한 상품가입이 불가합니다.\n투자성향 확인 후 진행해주세요.".."★".."투자성향".."★".."취소".."★".."등록하기"
+				g_szMoveScreen = "81010"
+				Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+			end if
+		end if
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg 
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if trim(sSubMsg) ~= "" then
+		sSubMsg = "("..sSubMsg..")"
+		szErrMsg = szErrMsg.."\n"..sSubMsg
+	end if
+	
+	if szTranID == "oblon_basc_810r" then
+		Dim szAlertData
+		
+		if szErrCode == "4951" then			
+			szAlertData = "1".."★".."임직원은 신용거래약정이\n불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3317" then	
+			szAlertData = "1".."★".."법인계좌는 신용거래약정이\n불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "7419" then	
+			szAlertData = "1".."★".."금융상품전용계좌는\n신용거래약정이 불가능합니다.\n다른계좌를 선택해주세요.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3311" then	
+			szAlertData = "1".."★".."신용거래약정이 불가능한 계좌입니다.\n계좌상태를 확인해주세요.\n"..sSubMsg.."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3273" then	
+			szAlertData = "1".."★".."이미 약정된 계좌입니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3323" then	
+			szAlertData = "1".."★".."신용불량자는 신용거래약정이\n불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3279" then	
+			szAlertData = "1".."★".."대출등급이 충족되지 않아\n신용거래약정이 불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "2047" then	
+			szAlertData = "2".."★".."반송계좌 보유 고객은\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"
+		elseif szErrCode == "3281" then	
+			szAlertData = "1".."★".."미수금이 있는 경우\n신용거래약정이 불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3283" then	
+			szAlertData = "1".."★".."미성년자는 신용거래약정이\n불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3247" then	
+			szAlertData = "2".."★".."안전카드 분실/훼손 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"	
+		elseif szErrCode == "3249" then	
+			szAlertData = "2".."★".."OTP 분실/훼손 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"	
+		elseif szErrCode == "3251" then	
+			szAlertData = "2".."★".."카드 분실 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"	
+		elseif szErrCode == "3253" then	
+			szAlertData = "2".."★".."체크카드 분실/훼손 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"	
+		elseif szErrCode == "3255" then	
+			szAlertData = "2".."★".."인감 분실/훼손 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"	
+		elseif szErrCode == "3257" then	
+			szAlertData = "2".."★".."사망 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"	
+		elseif szErrCode == "3259" then	
+			szAlertData = "2".."★".."질권계좌 보유 고객은 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"	
+		elseif szErrCode == "3261" then	
+			szAlertData = "1".."★".."비거주외국인은\n신용거래약정이 불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"	
+		elseif szErrCode == "3263" then	
+			szAlertData = "2".."★".."실명 미확인 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"
+		elseif szErrCode == "3265" then	
+			szAlertData = "1".."★".."금융사기이용계좌는\n신용거래약정이 불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3267" then	
+			szAlertData = "2".."★".."휴대폰 미등록 계좌는\n신용거래약정이 불가능합니다.\n휴대폰 정보 등록 후 이용해주세요.".."★"..szErrCode.."★".."확인".."★".."등록하기"
+		elseif szErrCode == "3269" then	
+			szAlertData = "1".."★".."등기임원 등록 계좌는\n신용거래약정이 불가능합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3285" then	
+			szAlertData = "1".."★".."통합증거금 약정 계좌는\n신용거래약정이 불가능합니다.\n다른 계좌를 선택해주세요.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "8996" then
+			szAlertData = "1".."★".."신용거래약정이 불가능한 계좌입니다.\n다른 계좌를 선택해주세요.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "8997" then
+			szAlertData = "2".."★".."법적 지급 금지 계좌는\n신용거래약정이 불가능합니다.\n고객지원센터로 문의해주세요.".."★"..szErrCode.."★".."확인".."★".."고객지원센터"	
+		elseif szErrCode == "3313" then
+			szAlertData = "1".."★".."소수점 거래신청계좌는\n신용거래약정이 불가합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		elseif szErrCode == "3245" then
+			szAlertData = "1".."★".."장외파생전용계좌는\n신청이 불가합니다.".."★"..szErrCode.."★".."확인".."★".."확인"
+		end if
+
+		if trim(szAlertData) == "" then
+			DIm szAlertData 
+			szAlertData = "1".."★"..szErrMsg.."★"..szErrCode.."★".."확인".."★".."확인"
+		
+			Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+			
+			lblErrorText.caption = szErrMsg
+			lblErrorText.visible = "1"
+			lnkSub.visible = "0"
+		else
+			Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+			
+			Dim tMsg
+			tMsg = Split(szAlertData, "★")		
+			lblErrorText.caption = tMsg[1]
+			lblErrorText.visible = "1"
+			lnkSub.visible = "0"
+			btnError.visible = "0"
+			
+			if trim(tMsg[4]) ~= "확인" then
+				btnError.caption = tMsg[4]
+				btnError.visible = "1"
+				g_szMoveScreen = szErrCode
+			end if
+		end if	
+		
+
+	'2021.03.17 대출KYC추가
+	elseif szTranID == "oblon_basc_103r" then
+'		Form.MsgBox( "안내", szErrMsg, "", 6 )	
+'		lblErrorText.caption = szErrMsg
+'		lblErrorText.visible = "1"
+'		lnkSub.visible = "0"
+		
+		Dim tMsg
+		DIm szAlertData 
+		szAlertData = "1".."★"..szErrMsg.."★"..szErrCode.."★".."확인".."★".."확인"
+	
+		Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+		tMsg = Split(szAlertData, "★")		
+		lblErrorText.caption = szErrMsg
+		lblErrorText.visible = "1"
+		lnkSub.visible = "0"
+	else
+		DIm szAlertData 
+		szAlertData = "1".."★"..szErrMsg.."★"..szErrCode.."★".."확인".."★".."확인"
+	
+		Form.OpenPopup("mbonl82010_p6", szAlertData, "")
+	end if
+End Sub
+
+'============================================================================
+Sub btnError_OnClick()
+	if g_szMoveScreen == "2047" or g_szMoveScreen == "3247" or g_szMoveScreen == "3249" or g_szMoveScreen == "3251" or g_szMoveScreen == "3253" 
+		   or g_szMoveScreen == "3255" or g_szMoveScreen == "3257" or g_szMoveScreen == "3259" or g_szMoveScreen == "3265" or g_szMoveScreen == "3263" 
+		   or g_szMoveScreen == "8997" then
+		   
+		'고객지원센터 이동
+		Form.OpenScreen("89020" , "")
+
+	elseif g_szMoveScreen == "3267" then
+		
+		'휴대폰정보 등록하기 이동
+		'Form.OpenScreen("82010" , "")
+		Form.OpenFramePopup("mbonl81000" , "" , "")
+		
+	elseif g_szMoveScreen == "93500" then
+		Dim szData
+		szData = setKycSharedData("mbonl93500")
+		'신용공여
+		Form.OpenFramePopup("mbonl93500" , szData , "") '대출 KYC 설문 메인
+		
+	elseif g_szMoveScreen == "mbonl93503" then
+		setKycSharedData("mbonl93503")
+		Form.OpenPopup("mbonl93503" , "" , "") '대출 KYC 부적합 보고서
+	elseif g_szMoveScreen == "81010" then
+		'Form.OpenScreen("81010" , "")
+		Form.OpenFramePopup("mbonl81010" , "mbonl88060" , "")
+	elseif g_szMoveScreen == "81010_p1" then
+		Dim sSendData
+		szAct = Account0.caption
+		sSendData = "82010★" & Left(szAct, 8) & "★" & Right(szAct, 2) & "★"
+		
+		Form.OpenPopup("mbonl81010_p1" , sSendData , "")
+	end if		
+End Sub
+
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+     '20231222 투자성향 변경 후, 변경된 투자성향으로 재조회하기 위함
+'msgbox sKey     
+	if sKey == "Change_Invest_Type"  then	
+		'LHR 투자성향진단 추가
+		DATAMANAGER.RequestTranData("obcsb_acif_700r")	
+	end if	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_000r" trcode="obcsb_acif_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="oblon_basc_103r" trcode="oblon_basc_103r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acad_002r" trcode="obcsb_acad_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_095r" trcode="obaci_acct_095r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="oblon_basc_810r" trcode="oblon_basc_810r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="oblon_basc_803r" trcode="oblon_basc_803r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_700r" trcode="obcsb_acif_700r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_comm_007r" trcode="obacp_comm_007r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acad_120r" trcode="obcsb_acad_120r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_000r" title="고객정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2185" _ulen="1655" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_CNFR_YN^고객 확인 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호 유형 코드^2^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+RLNM_ASCT_NO^실명 조합 번호^20^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+PSPR_NO^여권 번호^10^0^0^0^0^0^0
+CONO^법인등록번호^13^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인 구분 코드^2^0^0^0^0^0^0
+CNSG_YN^수탁 여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC 전문 투자자 여부^1^0^0^0^0^0^0
+KYC_SPCL_INVR_RGNO^KYC 전문 투자자 등록번호^20^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+SSTS_YN^공매도 여부^1^0^0^0^0^0^0
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+CNSG_RFUS_REAS_CODE^수탁 거부 사유 코드^3^0^0^0^0^0^0
+STA_DATE^시작 일자^8^0^0^0^0^0^0
+FIN_DATE^종료 일자^8^0^0^0^0^0^0
+BRTH_CTCD^출생국가코드^3^0^0^0^0^0^0
+AMRC_YN^미국인여부^1^0^0^0^0^0^0
+AML_BSTP_LRDV_CODE^AML업종대분류코드^2^0^0^0^0^0^0
+AML_BSTP_SMDV_CODE^AML업종소분류코드^5^0^0^0^0^0^0
+GIIN^GIIN^20^0^0^0^0^0^0
+LSTN_YN^상장여부^1^0^0^0^0^0^0
+DSTC_DATE^파기일자^8^0^0^0^0^0^0
+OVRS_TXPM_CHD_YN^해외납세자여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="oblon_basc_103r" title="대출_고객정보 확인서 징구 여부" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="136" _ulen="104" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+BSWR_DIV_CODE^업무분류코드^5^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출유형코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acad_002r" title="고객연락처정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="206" _ulen="158" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="973" _ulen="731" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+ADDR_REG_DATE^주소 등록 일자^8^0^0^0^0^0^0
+SNBC_YN^반송 여부^1^0^0^0^0^0^0
+SNBC_CANC_REAS_CODE^반송해지사유코드^2^0^0^0^0^0^0
+SNBC_CANC_REAS_NAME^반송해지사유명^40^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총 반송 횟수^4^0^7^0^0^0^0
+CNNT_SNBC_TMNU^연속 반송 횟수^4^0^7^0^0^0^0
+REGN_ZIP^지역 우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세 우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일 주소^200^0^0^0^0^0^0
+INAG_RCTF_REAS_CODE^통보처 정정 사유 코드^1^0^0^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="30" inout="out" _len="427" _ulen="323" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+UI_CUST_TELNO^UI고객전화번호^40^0^0^0^0^0^0
+CNPL_REG_DATE^연락처 등록 일자^8^0^0^0^0^0^0
+ARCD^지역번호^4^0^0^0^0^0^0
+TONO^국번호^4^0^0^0^0^0^0
+TELNO^전화번호^4^0^0^0^0^0^0
+TENO^교환번호^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="950" _ulen="700" >
+
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물 통보처 일련번호^4^0^7^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물 통보처 일련번호^4^0^7^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_SRNO^운용 보고서 통보처 일련번호^4^0^7^0^0^0^0
+STPL_YN^약정 여부^1^0^0^0^0^0^0
+SNDN_YN^발송 여부^1^0^0^0^0^0^0
+PRFN_CNPL_CLCD^선호연락처구분코드^2^0^0^0^0^0^0
+TRUST_CLS_CODE^신탁 구분 코드^1^0^0^0^0^0^0
+FUND_RMND_RCMS_CLS_CODE^펀드잔고수신구분코드^1^0^0^0^0^0^0
+UI_ITEM_NAME1^UI항목명1^40^0^0^0^0^0^0
+UI_ITEM_NAME2^UI항목명2^40^0^0^0^0^0^0
+UI_ITEM_NAME3^UI항목명3^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MBL_PRTY_INFR_YN^모바일우선통보여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="476" _ulen="350" >
+
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock9" inout="out" _len="432" _ulen="316" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="232" _ulen="164" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+INAG_TYPE_CODE^통보처유형코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처일련번호^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_095r" title="법인계좌 통보처 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="84" _ulen="64" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="321" _ulen="243" >
+
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+UI_TRGT_SRNO^UI대상일련번호^11^0^7^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+UI_TRGT_SRNO1^UI대상일련번호1^11^0^7^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_ITEM_NAME^UI항목명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="283" _ulen="215" >
+
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+ZIP^우편번호^6^0^0^0^0^0^0
+UI_ADDR^UI 주소^210^0^0^0^0^0^0
+INFR_TRGT_SRNO^통보대상일련번호^11^0^7^0^0^0^0
+UI_CUST_TELNO^UI 고객 전화번호^40^0^0^0^0^0^0
+INAG_SRNO^통보처일련번호^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="oblon_basc_810r" title="대출 약정 가능여부" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="219" _ulen="163" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출유형코드^2^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="53" _ulen="41" >
+
+LOAN_ABLE_YN^대출가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="oblon_basc_803r" title="oblon_basc_803r" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="223" _ulen="167" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="814" _ulen="598" >
+
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출유형코드^2^0^0^0^0^0^0
+LOAN_STPL_SRNO^대출약정일련번호^11^0^7^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+MORG_APLY_FORM_CODE^담보적용방식코드^1^0^0^0^0^0^0
+LOAN_CORE_MANL_CNFR_YN^대출핵심설명서확인여부^1^0^0^0^0^0^0
+STLN_TR_CNFR_YN^대주거래확인여부^1^0^0^0^0^0^0
+STLN_RISK_TR_NTIC_YN^대주위험거래고지여부^1^0^0^0^0^0^0
+CRDT_STUP_STND_AMT^신용설정기준금액^19^0^7^0^0^0^0
+CRDT_STUP_GRMN^신용설정보증금^19^0^7^0^0^0^0
+NNRD_LOAN_AMT^미상환대출금액^19^0^7^0^0^0^0
+UI_CRDT_STUP_ABLE_AMT^UI신용설정가능금액^19^0^7^0^0^0^0
+STLN_STUP_DATE^대주설정일자^8^0^0^0^0^0^0
+UI_COND_RSLT_CLS_VAL^UI조건결과구분값^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="257" _ulen="195" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+UI_PROD_OPNG_YN1^UI상품개설여부1^1^0^0^0^0^0^0
+UI_PROD_OPNG_YN2^UI상품개설여부2^1^0^0^0^0^0^0
+UI_NNPR_CORP_YN^UI비영리법인여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="221" _ulen="165" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출 유형 코드^2^0^0^0^0^0^0
+LOAN_STPL_SRNO^대출 약정 일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_700r" title="투자성향고객등급상품등급비교" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="253" _ulen="193" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+KYC_BSWR_DIV_CODE^KYC 업무 분류 코드^2^0^0^0^0^0^0
+BSWR_DIV_CODE^업무 분류 코드^5^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="825" _ulen="617" >
+
+PROS_YN^처리 여부^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC 상품 등급 코드^2^0^0^0^0^0^0
+KYC_DVPD_EPMD_CODE^KYC파생상품유의코드^2^0^0^0^0^0^0
+KYC_DRVT_PROS_YN^KYC 파생 처리 여부^1^0^0^0^0^0^0
+DVPD_GRAD_CODE^파생상품등급코드^1^0^0^0^0^0^0
+CAFU_TRGT_YN^숙려대상여부^1^0^0^0^0^0^0
+HGDT_PROD_YN^고난도상품여부^1^0^0^0^0^0^0
+CAFU_OLDT_YN^숙려고령자여부^1^0^0^0^0^0^0
+INFO_REFS_YN^정보미제공여부^1^0^0^0^0^0^0
+UNFIT_YN^부적합여부^1^0^0^0^0^0^0
+GOAL_MRKT_TRGT_YN^목표시장대상여부^1^0^0^0^0^0^0
+GOAL_MRKT_UNFIT_YN^목표시장부적합여부^1^0^0^0^0^0^0
+APRT_SRNM_PROD_YN^적정성상품여부^1^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_comm_007r" title="종합계좌 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+IQRY_CLS_CODE^조회 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1568" _ulen="1182" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_VLNT_ORGT_CLS_CODE^UI 임의 단체 구분 코드^3^0^0^0^0^0^0
+MDIA_KIND_CODE^매체 종류 코드^2^0^0^0^0^0^0
+MDIA_STAT_CLS_CODE^매체 상태 구분 코드^2^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+TXTN_CUST_TYPE_CODE^과세 고객 유형 코드^1^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+PROS_DATE^처리 일자^8^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+BKKP_NAME^부기 명^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+ACNT_MEMO_CNTT^계좌 메모 내용^600^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+SNBC_YN^반송 여부^1^0^0^0^0^0^0
+STPL_YN^약정 여부^1^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인구분코드^2^0^0^0^0^0^0
+RNMC_DATE^실명확인일자^8^0^0^0^0^0^0
+UNCL_OCRN_DATE^미수발생일자^8^0^0^0^0^0^0
+CANC_DATE^미수해지일자^8^0^0^0^0^0^0
+BDCR_CLCD^신용불량구분코드^1^0^0^0^0^0^0
+DRVT_ODER_ABLE_CODE^파생주문가능코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="1343" _ulen="999" >
+
+OPNG_BRCD^개설 지점코드^4^0^0^0^0^0^0
+RGBF_CUST_GRAD_CODE^직전고객등급코드^2^0^0^0^0^0^0
+ISNC_DATE^발급 일자^8^0^0^0^0^0^0
+ISNC_TIMS^발급 회차^4^0^7^0^0^0^0
+MDIA_SRNO^매체 일련번호^16^0^7^0^0^0^0
+OPNG_DATE^개설 일자^8^0^0^0^0^0^0
+CLSR_DATE^폐쇄 일자^8^0^0^0^0^0^0
+INTG_DATE^통합 일자^8^0^0^0^0^0^0
+UNIQ_TRUST_CLS_CODE^고유 신탁 구분 코드^1^0^0^0^0^0^0
+TRST_ACNT_CLS_CODE^자사주 계좌 구분 코드^1^0^0^0^0^0^0
+BOND_SELN_WTHL_CMSN_YN^채권 매도 원천징수 위임 여부^1^0^0^0^0^0^0
+WTHL_CMSN_YN^원천징수 위임 여부^1^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+TRTX_TXTN_YN^거래세 과세 여부^1^0^0^0^0^0^0
+DVDN_TXTN_YN^배당 과세 여부^1^0^0^0^0^0^0
+USFE_TXTN_YN^이용료 과세 여부^1^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌 상태 코드^1^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+ORST_ASCT_YN^우리사주 조합 여부^1^0^0^0^0^0^0
+RGSL_SGNT_CLS_NAME^인감서명구분명^40^0^0^0^0^0^0
+RGSL_REG_DATE^인감등록일자^8^0^0^0^0^0^0
+PLRL_NMPR_YN^복수명의인여부^1^0^0^0^0^0^0
+TFCT_PROS_STAT_CODE^이수관처리상태코드^1^0^0^0^0^0^0
+VRTL_ACNO^가상계좌번호^16^0^0^0^0^0^0
+UI_ACNT_PRNM^UI계좌상품명^60^0^0^0^0^0^0
+FRCR_STPL_YN^외화약정여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="1970" _ulen="1466" >
+
+OWHS_ZIP^자택 우편번호^6^0^0^0^0^0^0
+WRPL_ZIP^직장 우편번호^6^0^0^0^0^0^0
+ZIP^우편번호^6^0^0^0^0^0^0
+UI_OWHS_POST^UI 자택 우편주소^100^0^0^0^0^0^0
+UI_OWHS_DTAD^UI 자택 상세주소^100^0^0^0^0^0^0
+UI_CO_POST^UI 회사 우편주소^100^0^0^0^0^0^0
+UI_CO_DTAD^UI 회사 상세주소^100^0^0^0^0^0^0
+UI_ETC_POST^UI 기타 우편주소^100^0^0^0^0^0^0
+UI_ETC_DTAD^UI 기타 상세주소^100^0^0^0^0^0^0
+EMAIL_ADDR^이메일 주소^200^0^0^0^0^0^0
+UI_OWHS_TONO^UI 자택 국번호^4^0^0^0^0^0^0
+UI_OWHS_ARCD^UI 자택 지역번호^4^0^0^0^0^0^0
+UI_OWHS_TELNO^UI 자택 전화번호^4^0^0^0^0^0^0
+WHOL_TELNO^전체전화번호^16^0^0^0^0^0^0
+UI_CO_ARCD^UI 회사 지역번호^4^0^0^0^0^0^0
+UI_CO_TONO^UI 회사 국번호^4^0^0^0^0^0^0
+UI_CO_TELNO^UI 회사 전화번호^4^0^0^0^0^0^0
+UI_CO_TENO^UI 회사 교환번호^4^0^0^0^0^0^0
+UI_WHOL_CO_TLPH_NO^UI전체회사전화번호^20^0^0^0^0^0^0
+CLPH_ARCD^휴대폰 지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰 국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+WHOL_CPNO^전체휴대폰번호^16^0^0^0^0^0^0
+FAX_ARCD^팩스 지역번호^4^0^0^0^0^0^0
+FAX_TONO^팩스 국번호^4^0^0^0^0^0^0
+FXNO^팩스번호^4^0^0^0^0^0^0
+WHOL_FXNO^전체팩스번호^16^0^0^0^0^0^0
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+CHCR_INAG_TYPE_CODE^체크카드 통보처 유형 코드^2^0^0^0^0^0^0
+FUND_RMND_RCMS_CLS_CODE^펀드잔고수신구분코드^1^0^0^0^0^0^0
+TRUST_CLS_CODE^신탁 구분 코드^1^0^0^0^0^0^0
+SNDN_YN^발송 여부^1^0^0^0^0^0^0
+INAG_DSGT_TRGT_YN^통보처 지정 대상 여부^1^0^0^0^0^0^0
+UI_CLPH_PRFN_YN^UI휴대폰선호여부^1^0^0^0^0^0^0
+UI_OWHS_TLPH_PRFN_YN^UI자택전화선호여부^1^0^0^0^0^0^0
+UI_WRPL_TLPH_PRFN_YN^UI직장전화선호여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" occurs="30" inout="out" _len="933" _ulen="681" >
+
+PXPR_TYPE_NAME^대리인 유형 명^40^0^0^0^0^0^0
+PXPR_NAME^대리인 명^40^0^0^0^0^0^0
+PXPR_RCNO^대리인 실명확인번호^13^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+WHOL_TELNO^전체 전화번호^16^0^0^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+ACNT_PXPR_RLTS_CODE^계좌 대리인 관계 코드^2^0^0^0^0^0^0
+UI_PXPR_NTNT_CTCD^UI대리인국적국가코드^3^0^0^0^0^0^0
+UI_PXPR_ABRD_ADDR^UI대리인국외주소^200^0^0^0^0^0^0
+UI_PXPR_NCNO^UI대리인국가번호^5^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_ARCD^UI대리인국외전화지역번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_SRNO^UI대리인국외전화일련번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_TONO^UI대리인국외전화국번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TENO^UI대리인국외교환번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_WHOL_TELNO^UI대리인국외전체전화번호^16^0^0^0^0^0^0
+PXPR_RCNO_PIP^대리인실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock6" inout="out" _len="172" _ulen="132" >
+
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+FAX_ARCD^팩스 지역번호^4^0^0^0^0^0^0
+FAX_TONO^팩스 국번호^4^0^0^0^0^0^0
+FXNO^팩스번호^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="709" _ulen="519" >
+
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+TCTR_BRCD^이관 지점코드^4^0^0^0^0^0^0
+TFCT_APLT_DATE^이수관 신청 일자^8^0^0^0^0^0^0
+KYC_DVPD_EPMD_CODE^KYC파생상품유의코드^2^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+PROS_DATE^최종수행일자^8^0^0^0^0^0^0
+RPPR_NAME^대표자 명^40^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+PFIN_VLDT_STA_DATE^전문투자자효력시작일자^8^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+PFIN_CLS_CODE^전문투자자구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock8" inout="out" _len="324" _ulen="240" >
+
+UI_SNML_ZIP^UI발송물우편번호^6^0^0^0^0^0^0
+UI_SNML_POST^UI발송물우편주소^100^0^0^0^0^0^0
+UI_SNML_DTAD^UI발송물상세주소^100^0^0^0^0^0^0
+UI_MAIL_ZIP^UI우편물우편번호^6^0^0^0^0^0^0
+UI_MAIL_POST^UI우편물우편주소^100^0^0^0^0^0^0
+UI_MAIL_DTAD^UI우편물상세주소^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="257" _ulen="185" >
+
+PXPR_RCNO^대리인 실명확인번호^13^0^0^0^0^0^0
+CNPL_SRNO^연락처 일련번호^4^0^7^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+CUST_RLTS_CODE^고객 관계 코드^2^0^0^0^0^0^0
+PXPR_RCNO_PIP^대리인실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acad_120r" title="HTS고객연락처조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="83" _ulen="63" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2683" _ulen="1969" >
+
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용보고서통보처유형코드^2^0^0^0^0^0^0
+UI_CO_REGN_ZIP^UI회사지역우편번호^3^0^0^0^0^0^0
+UI_CO_DTL_ZIP^UI회사상세우편번호^3^0^0^0^0^0^0
+UI_CO_POST^UI회사우편주소^100^0^0^0^0^0^0
+UI_CO_DTAD^UI회사상세주소^100^0^0^0^0^0^0
+UI_CO_NW_ADDR_USE_YN^UI회사신주소사용여부^1^0^0^0^0^0^0
+UI_CO_BLDN_MNNO^UI회사건물관리번호^25^0^0^0^0^0^0
+UI_ETC_REGN_ZIP^UI기타지역우편번호^3^0^0^0^0^0^0
+UI_ETC_DTL_ZIP^UI기타상세우편번호^3^0^0^0^0^0^0
+UI_ETC_POST^UI기타우편주소^100^0^0^0^0^0^0
+UI_ETC_DTAD^UI기타상세주소^100^0^0^0^0^0^0
+UI_ETC_NW_ADDR_USE_YN^UI기타신주소사용여부^1^0^0^0^0^0^0
+UI_ETC_BLDN_MNNO^UI기타건물관리번호^25^0^0^0^0^0^0
+UI_OWHS_REGN_ZIP^UI자택지역우편번호^3^0^0^0^0^0^0
+UI_OWHS_DTL_ZIP^UI자택상세우편번호^3^0^0^0^0^0^0
+UI_OWHS_POST^UI자택우편주소^100^0^0^0^0^0^0
+UI_OWHS_DTAD^UI자택상세주소^100^0^0^0^0^0^0
+UI_OWHS_NW_ADDR_USE_YN^UI자택신주소사용여부^1^0^0^0^0^0^0
+UI_OWHS_BLDN_MNNO^UI자택건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+FAX_ARCD^팩스지역번호^4^0^0^0^0^0^0
+FAX_TONO^팩스국번호^4^0^0^0^0^0^0
+FXNO^팩스번호^4^0^0^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TELNO2^자택전화번호2^40^0^0^0^0^0^0
+CO_ARCD^회사지역번호^4^0^0^0^0^0^0
+CO_TONO^회사국번호^4^0^0^0^0^0^0
+CO_TELNO2^회사전화번호2^4^0^0^0^0^0^0
+TENO^교환번호^4^0^0^0^0^0^0
+UI_CO_ADDR_SRNO^UI회사주소일련번호^4^0^7^0^0^0^0
+UI_EMAIL_ADDR_SRNO^UI이메일주소일련번호^4^0^7^0^0^0^0
+UI_ETC_ADDR_SRNO^UI기타주소일련번호^4^0^7^0^0^0^0
+UI_OWHS_ADDR_SRNO^UI자택주소일련번호^4^0^7^0^0^0^0
+UI_CLPH_CNPL_SRNO^UI휴대폰연락처일련번호^4^0^7^0^0^0^0
+UI_CO_CNPL_SRNO^UI회사연락처일련번호^4^0^7^0^0^0^0
+UI_FAX_CNPL_SRNO^UI팩스연락처일련번호^4^0^7^0^0^0^0
+UI_OWHS_CNPL_SRNO^UI자택연락처일련번호^4^0^7^0^0^0^0
+UI_OWHS_TLPH_PRFN_YN^UI자택전화선호여부^1^0^0^0^0^0^0
+UI_WRPL_TLPH_PRFN_YN^UI직장전화선호여부^1^0^0^0^0^0^0
+UI_CLPH_PRFN_YN^UI휴대폰선호여부^1^0^0^0^0^0^0
+SNDN_YN^발송여부^1^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+TRUST_CLS_CODE^신탁구분코드^1^0^0^0^0^0^0
+UI_ITEM_NAME1^UI항목명1^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

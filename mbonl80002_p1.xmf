@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="80002" scrname="금융투자소득세_감액키패드" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgAlpha" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,162,375,486,1" />
+		<BUTTON name="btn1" caption="1" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="21,374,105,47,1" />
+		<BUTTON name="btn2" caption="2" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="126,374,114,47,1" />
+		<BUTTON name="btn3" caption="3" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="240,374,114,47,1" />
+		<BUTTON name="btn4" caption="4" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="21,421,105,47,1" />
+		<BUTTON name="btn5" caption="5" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="126,421,114,47,1" />
+		<BUTTON name="btn6" caption="6" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="240,421,114,47,1" />
+		<BUTTON name="btn7" caption="7" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="21,468,105,47,1" />
+		<BUTTON name="btn8" caption="8" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="126,468,114,47,1" />
+		<BUTTON name="btn9" caption="9" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="240,468,114,47,1" />
+		<BUTTON name="btn00" caption="00" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="21,515,105,47,1" />
+		<BUTTON name="btn0" caption="0" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="126,515,114,47,1" />
+		<BUTTON name="btnDel" caption="←" fgcolor="004:000000000" fontsize="12" btnimage="alpha" ly_vert="240,515,114,47,1" />
+		<BUTTON name="btnChange" caption="변경하기" fontsize="2" fontstyle="01" btnimage="btn_01.9" ly_vert="20,576,335,45,1" />
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="한도를 줄이시겠어요?" ly_vert="15,179,335,25,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="20,210,335,40,1" >
+			<COL_INFO ly_vert_width="335" />
+			<ROW_INFO ly_vert_height="20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="20220901" fontsize="-1" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="067:049081150" halign="0" line="0,0" caption="상장주식 등 금융투자소득" fontsize="-1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image0" imgpath="input_01_n.9" ly_vert="15,264,345,91,1" />
+		<TABLE name="tblStock" insidelinecolor="102:255255255" colcount="2" rowcount="2" outline="0000" transmode="1" designorder="1" ly_vert="15,274,345,70,1" >
+			<COL_INFO ly_vert_width="187,158" />
+			<ROW_INFO ly_vert_height="35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="신청금액" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="변경(감액)" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" fontsize="-1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="edtChangeAmt" mask="0,0,,원,0,,0,1,1,0,0" halign="2" imetype="1" maxlength="0" ly_vert="189,310,163,30,1" />
+		<EDIT name="edtPrevAmt" enable="0" mask="0,0,,원,0,,0,1,1,0,0" halign="2" imetype="0" maxlength="0" ly_vert="189,273,163,30,1" />
+		<LABEL name="lblLen" visible="0" ly_vert="97,25,100,32,0" />
+		<BUTTON name="btnAlpha" btnimage="alpha" ly_vert="183,307,174,38,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3411" _ulen="3323" >
+
+'============================================================================
+Sub Form_OnFormInit()
+	edtChangeAmt.caption = ""
+	
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	If szOpenData <> "" And szOpenData <> Null Then
+		'신청금액 세팅
+		edtPrevAmt.caption = szOpenData
+	End If
+End Sub
+
+'============================================================================
+Function f_Calc(szNum)
+	'숫자 입력
+	Dim nAmount, nNum
+	nAmount = CInt(edtChangeAmt.caption)
+	nNum = CInt(szNum)
+	
+	If szNum == "0" Or szNum == "00" Then
+		If nAmount <= 0 Then
+			Exit Function
+		Else
+			edtChangeAmt.caption = edtChangeAmt.caption & szNum
+		End If
+	Else
+		If nAmount <= 0 Then
+			edtChangeAmt.caption = szNum
+		Else
+			edtChangeAmt.caption = edtChangeAmt.caption & szNum
+		End If
+	End If
+End Function
+
+'============================================================================
+Function f_Del()
+	'숫자 삭제
+	Dim nAmount
+	nAmount = CInt(edtChangeAmt.caption)
+	
+	If nAmount <= 0 Then
+		Exit Function
+	Else
+		edtChangeAmt.caption = Left(edtChangeAmt.caption, Len(edtChangeAmt.caption) - 1)
+	End If
+	
+	If edtChangeAmt.caption == "" Or edtChangeAmt.caption == Null Then
+		edtChangeAmt.caption = "0"
+	End If
+End Function
+
+'============================================================================
+Sub btn0_OnClick()
+	f_Calc("0")
+End Sub
+
+'============================================================================
+Sub btn00_OnClick()
+	f_Calc("00")
+End Sub
+
+'============================================================================
+Sub btn1_OnClick()
+	f_Calc("1")
+End Sub
+
+'============================================================================
+Sub btn2_OnClick()
+	f_Calc("2")
+End Sub
+
+'============================================================================
+Sub btn3_OnClick()
+	f_Calc("3")
+End Sub
+
+'============================================================================
+Sub btn4_OnClick()
+	f_Calc("4")
+End Sub
+
+'============================================================================
+Sub btn5_OnClick()
+	f_Calc("5")
+End Sub
+
+'============================================================================
+Sub btn6_OnClick()
+	f_Calc("6")
+End Sub
+
+'============================================================================
+Sub btn7_OnClick()
+	f_Calc("7")
+End Sub
+
+'============================================================================
+Sub btn8_OnClick()
+	f_Calc("8")
+End Sub
+
+'============================================================================
+Sub btn9_OnClick()
+	f_Calc("9")
+End Sub
+
+'============================================================================
+Sub btnDel_OnClick()
+	f_Del()
+End Sub
+
+'============================================================================
+Sub imgAlpha_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnChange_OnClick()
+	If edtChangeAmt.caption == "" Or edtChangeAmt.caption == null Then
+		Form.ShowAlert("안내", "감액하실 금액을 확인해 주세요.")
+		Exit Sub
+	End If
+	
+	If CInt(edtChangeAmt.caption) > CInt(edtPrevAmt.caption) Or CInt(edtChangeAmt.caption) == CInt(edtPrevAmt.caption) Then
+		Form.ShowAlert("안내", "감액하실 금액을 확인해 주세요.")
+		Exit Sub
+	End If
+	
+	Form.SendReturnToParent("AMT_CHANGE" , edtChangeAmt.caption)
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,682 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="82010" scrname="신용거래약정_동의신청P" version="2" writer="이아영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="alpha128" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,263,375,384,1" />
+		<LABEL name="lblAllAgree" fgcolor="127:162162162" fontsize="2" fontstyle="01" caption="모두 확인하고, 동의합니다." click="1" ly_vert="40,295,305,22,1" />
+		<LABEL name="lblTitle" fontstyle="01" caption="약관 및 확인사항" valign="0" multiline="1" ly_vert="15,354,335,30,1" />
+		<BUTTON name="btnOk" enable="0" caption="확인" fontstyle="01" btnimage="btn_15.9" ly_vert="-2,596,380,50,1" />
+		<CHKBUTTON name="chkAllAgree" visible="0" chkbtnimage="icon_chk_off.png" unchkbtnimage="icon_chk_on.png" ly_vert="420,291,30,30,0" />
+		<LABEL name="lblLine" bgcolor="027:216216216" transmode="0" ly_vert="15,333,345,1,1" />
+		<CHKBUTTON name="chkAgree1" visible="0" chkcaption="신용거래융자 핵심설명서" unchkcaption="신용거래융자 핵심설명서" ly_vert="400,385,265,30,0" />
+		<CHKBUTTON name="chkAgree2" visible="0" chkcaption="신용거래설명서" unchkcaption="신용거래설명서" ly_vert="400,420,265,30,0" />
+		<CHKBUTTON name="chkAgree3" visible="0" chkcaption="신용거래약관" unchkcaption="신용거래약관" ly_vert="400,455,265,30,0" />
+		<CHKBUTTON name="chkAgree4" visible="0" chkcaption="개인(신용)정보 처리 동의" unchkcaption="개인(신용)정보 처리 동의" ly_vert="400,490,265,30,0" />
+		<LABEL name="Label0" fgcolor="146:124124124" fontsize="-1" caption="신용정보 조회 후 약정등록이 가능합니다." halign="1" valign="0" ly_vert="25,548,315,32,1" />
+		<IMAGE name="imgUIChk1" autosize="1" imgpath="icon_check_off" ly_vert="26,397,13,13,1" />
+		<LABEL name="lblChkText1" fgcolor="127:162162162" fontsize="-2" caption="신용거래융자 핵심설명서" click="1" ly_vert="40,395,300,20,1" />
+		<IMAGE name="imgChk1" imgpath="ic_link.9" ly_vert="303,395,47,20,1" />
+		<IMAGE name="imgUIChk2" autosize="1" imgpath="icon_check_off" ly_vert="26,432,13,13,1" />
+		<LABEL name="lblChkText2" fgcolor="127:162162162" fontsize="-2" caption="신용거래설명서" click="1" ly_vert="40,430,300,20,1" />
+		<IMAGE name="imgChk2" imgpath="ic_link.9" ly_vert="301,430,49,20,1" />
+		<IMAGE name="imgUIChk3" autosize="1" imgpath="icon_check_off" ly_vert="26,467,13,13,1" />
+		<LABEL name="lblChkText3" fgcolor="127:162162162" fontsize="-2" caption="신용거래약관" click="1" ly_vert="40,465,300,20,1" />
+		<IMAGE name="imgChk3" imgpath="ic_link.9" ly_vert="300,465,50,20,1" />
+		<IMAGE name="imgUIChk4" autosize="1" imgpath="icon_check_off" ly_vert="26,502,13,13,1" />
+		<LABEL name="lblChkText4" fgcolor="127:162162162" fontsize="-2" caption="개인(신용)정보 처리 동의" click="1" ly_vert="40,500,300,20,1" />
+		<IMAGE name="imgChk4" imgpath="ic_link.9" ly_vert="301,500,49,20,1" />
+		<IMAGE name="imgAllAgree" autosize="1" imgpath="icon_check_off" ly_vert="22,297,18,18,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="19053" _ulen="17543" >
+Dim g_tAgreeUrl 
+Dim g_tAgreeState 
+Dim g_szAct 
+Dim g_nTryCnt
+Dim g_szCRIN_IQRY_CLCD 
+Dim g_szSDRC_SRNO
+Dim g_szSDRC_CLS_CODE
+
+dim g_szUnCheckImg, g_szCheckImg'체크이미지
+dim g_szUnCheckFg, g_szCheckFg	'체크 폰트 컬러
+Dim g_szStplYN
+'============================================================================
+Sub Form_OnFormInit()
+	g_szUnCheckImg = "icon_check_off.png"
+	g_szCheckImg = "icon_check_on.png"
+	g_szUnCheckFg = "127"
+	g_szCheckFg = "4"
+
+	Dim sDev
+	sDev = Form.GetSharedData("&SERVER_MODE", False )
+	
+	If sDev == "1" Or sDev == 1 Then
+		g_tAgreeUrl = {
+		    {"https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_04.pdf", "신용거래융자 핵심설명서",  "urlpath", "N", ""},
+		    {"https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_03.pdf", "신용거래설명서", "urlpath", "N", ""},
+		    {"https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/meritz_yk_9.pdf",    "신용거래약관", "urlpath", "N", ""},
+		    {"http://211.201.184.87/include/resource/comm/ctcn/pdf/crinoferagrm8.pdf", "개인정보제공 및 활용동의", "urlpath", "N", ""}
+		}
+		
+	Else '운영
+		g_tAgreeUrl = {
+		    {"http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_04.pdf", "신용거래융자 핵심설명서",  "urlpath", "N", ""},
+		    {"http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_03.pdf", "신용거래설명서", "urlpath", "N", ""},
+		    {"http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_yk_9.pdf",    "신용거래약관", "urlpath", "N", ""},
+		    {"http://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm8.pdf", "개인정보제공 및 활용동의", "urlpath", "N", ""}
+		}
+	End If
+	
+	g_tAgreeState = {"0", "0", "0", "0"}
+	tOpenData = Form.GetOpenLinkData()
+	tData1 = Split(tOpenData,"★")
+	
+	g_szAct = tData1[0]
+	g_szStplYN = tData1[1]
+	g_nTryCnt = 0
+	g_szCRIN_IQRY_CLCD =   "TR01"
+	g_szSDRC_SRNO = ""
+	g_szSDRC_CLS_CODE = "1"
+	
+	if g_szStplYN == "Y" then
+		imgUIChk4.visible = 0
+		lblChkText4.visible = 0
+		imgChk4.visible = 0
+	end if
+	
+	Form.SetSharedData("mbonl82010_p2_Account" , g_szAct)
+
+'	DATAMANAGER.RequestTranData("obcsb_acif_556r")
+End Sub
+
+'============================================================================
+Sub chkAllAgree_OnChange(sCheckState)
+	if sCheckState == "1" then
+		chkAllAgree.chksilence = "0"
+		
+		Dim szAllData
+		
+		if g_szStplYN == "Y" then tCnt = 2
+		else tCnt = 3 end if
+		for i=0 to tCnt
+			Dim szData
+			if g_tAgreeState[i] == "0" then
+				'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+				szData = g_tAgreeUrl[i][1].."★"..g_tAgreeUrl[i][0].."★"..g_tAgreeUrl[i][2].."★"..g_tAgreeUrl[i][3].."★"..g_tAgreeUrl[i][4].."★"..(i+1).."★".."0"
+				if szAllData == "" or szAllData == null then
+					szAllData = szData
+				else
+					szAllData = szAllData.."☆"..szData
+				end if
+			end if
+		next
+    
+		if #szAllData > 0 then
+			Form.OpenPopup( "mbonl82010_p4" ,  szAllData , "" )
+		end if
+	else
+		g_tAgreeState = {"0", "0", "0", "0"}
+		
+		f_AllAgreeCheck()
+		
+	end if
+End Sub
+
+
+'============================================================================
+Sub imgAllAgree_OnClick()
+	if chkAllAgree.checkstate == "1" then
+		chkAllAgree.checkstate = "0"
+		chkAllAgree_OnChange("0")
+	else
+		chkAllAgree.checkstate = "1"
+		chkAllAgree_OnChange("1")
+	end if
+End Sub
+
+'============================================================================
+Sub lblAllAgree_OnClick()
+	if chkAllAgree.checkstate == "1" then
+		chkAllAgree.checkstate = "0"
+		chkAllAgree_OnChange("0")
+	else
+		chkAllAgree.checkstate = "1"
+		chkAllAgree_OnChange("1")
+	end if
+End Sub
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbonl82010_p4" then
+	    if trim(sRet) ~= "" and trim(sRet) ~= nil and sRet ~= "close" then
+			Dim tReturnData
+			Dim nCnt
+			
+			tReturnData = Split(sRet, "☆")			 
+			nCnt = #tReturnData
+			for i = 0 to nCnt - 1
+				Dim nIndex      
+				nIndex = tonumber(tReturnData[i]) - 1
+				g_tAgreeState[nIndex] = "1"
+			next
+			
+			f_AllAgreeCheck()
+	    end if	
+	end if
+	
+End Sub
+
+
+Function f_AllAgreeCheck()
+	Dim nAll
+	nAll = 0
+	for i = 0 to #g_tAgreeState - 1
+	
+		Form.SetCtlProp("chkAgree"..i+1, "chksilence", g_tAgreeState[i])		
+		
+		if g_tAgreeState[i] == "1" then
+			Form.SetCtlProp("imgUIChk"..i+1, "imgpath", g_szCheckImg)
+			Form.SetCtlProp("lblChkText"..i+1, "fgcolor", g_szCheckFg)
+		
+			nAll = nAll + 1
+		else
+			Form.SetCtlProp("imgUIChk"..i+1, "imgpath", g_szUnCheckImg)
+			Form.SetCtlProp("lblChkText"..i+1, "fgcolor", g_szUnCheckFg)
+		end if
+	next
+	
+	if g_szStplYN == "Y" then tCnt = 3
+	else tCnt = 4 end if
+
+	if nAll == tCnt then
+		imgAllAgree.imgpath = g_szCheckImg
+		lblAllAgree.fgcolor = g_szCheckFg
+	
+		chkAllAgree.chksilence = "1"
+		btnOk.enable = "1"
+	else
+		imgAllAgree.imgpath = g_szUnCheckImg
+		lblAllAgree.fgcolor = g_szUnCheckFg
+	
+		chkAllAgree.chksilence = "0"
+		btnOk.enable = "0"
+	end if
+
+End Function
+
+'============================================================================
+Sub chkAgree1_OnChange(sCheckState)
+	if sCheckState == "1" then
+		chkAgree1.chksilence = "0"
+
+		'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+		Dim szAllData
+		szAllData = g_tAgreeUrl[0][1].."★"..g_tAgreeUrl[0][0].."★"..g_tAgreeUrl[0][2].."★"..g_tAgreeUrl[0][3].."★"..g_tAgreeUrl[0][4].."★".."1".."★".."0"
+		
+	     Form.OpenPopup( "mbonl82010_p4" ,  szAllData , "" )
+	else
+		Dim nIdex
+		nIdex = 0
+		g_tAgreeState[nIdex] = "0"
+		f_AllAgreeCheck()
+	end if
+End Sub
+
+
+'============================================================================
+Sub imgUIChk1_OnClick()
+	if chkAgree1.checkstate == "0" then
+		chkAgree1.checkstate = "1"
+		chkAgree1_OnChange("1")
+	else
+		chkAgree1.checkstate = "0"
+		chkAgree1_OnChange("0")
+	end if 
+End Sub
+
+'============================================================================
+Sub lblChkText1_OnClick()
+	if chkAgree1.checkstate == "0" then
+		chkAgree1.checkstate = "1"
+		chkAgree1_OnChange("1")
+	else
+		chkAgree1.checkstate = "0"
+		chkAgree1_OnChange("0")
+	end if 
+End Sub
+
+'============================================================================
+Sub imgChk1_OnClick()
+	chkAgree1.checkstate = "1"
+	chkAgree1_OnChange("1")
+End Sub
+
+'============================================================================
+Sub chkAgree2_OnChange(sCheckState)
+	if sCheckState == "1" then
+		chkAgree2.chksilence = "0"
+
+		'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+		Dim szAllData
+		szAllData = g_tAgreeUrl[1][1].."★"..g_tAgreeUrl[1][0].."★"..g_tAgreeUrl[1][2].."★"..g_tAgreeUrl[1][3].."★"..g_tAgreeUrl[1][4].."★".."2".."★".."0"
+	     Form.OpenPopup( "mbonl82010_p4" ,  szAllData , "" )
+	else
+		Dim nIdex
+		nIdex = 1
+		g_tAgreeState[nIdex] = "0"
+		f_AllAgreeCheck()
+	end if
+End Sub
+
+'============================================================================
+Sub imgUIChk2_OnClick()
+	if chkAgree2.checkstate == "0" then
+		chkAgree2.checkstate = "1"
+		chkAgree2_OnChange("1")
+	else
+		chkAgree2.checkstate = "0"
+		chkAgree2_OnChange("0")
+	end if
+End Sub
+
+'============================================================================
+Sub lblChkText2_OnClick()
+	if chkAgree2.checkstate == "0" then
+		chkAgree2.checkstate = "1"
+		chkAgree2_OnChange("1")
+	else
+		chkAgree2.checkstate = "0"
+		chkAgree2_OnChange("0")
+	end if
+End Sub
+
+'============================================================================
+Sub imgChk2_OnClick()
+	chkAgree2.checkstate = "1"
+	chkAgree2_OnChange("1")
+End Sub
+
+'============================================================================
+Sub chkAgree3_OnChange(sCheckState)
+	if sCheckState == "1" then
+		chkAgree3.chksilence = "0"
+
+		'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+		Dim szAllData 
+		szAllData = g_tAgreeUrl[2][1].."★"..g_tAgreeUrl[2][0].."★"..g_tAgreeUrl[2][2].."★"..g_tAgreeUrl[2][3].."★"..g_tAgreeUrl[2][4].."★".."3".."★".."0"
+	     Form.OpenPopup( "mbonl82010_p4" ,  szAllData , "" )
+	else
+		Dim nIdex
+		nIdex = 2
+		g_tAgreeState[nIdex] = "0"
+		f_AllAgreeCheck()
+	end if
+End Sub
+
+'============================================================================
+Sub imgUIChk3_OnClick()
+	if chkAgree3.checkstate == "0" then
+		chkAgree3.checkstate = "1"
+		chkAgree3_OnChange("1")
+	else
+		chkAgree3.checkstate = "0"
+		chkAgree3_OnChange("0")
+	end if
+End Sub
+
+'============================================================================
+Sub lblChkText3_OnClick()
+	if chkAgree3.checkstate == "0" then
+		chkAgree3.checkstate = "1"
+		chkAgree3_OnChange("1")
+	else
+		chkAgree3.checkstate = "0"
+		chkAgree3_OnChange("0")
+	end if
+End Sub
+
+'============================================================================
+Sub imgChk3_OnClick()
+	chkAgree3.checkstate = "1"
+	chkAgree3_OnChange("1")
+End Sub
+
+'============================================================================
+Sub chkAgree4_OnChange(sCheckState)
+	if sCheckState == "1" then
+		chkAgree4.chksilence = "0"
+
+		'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+		Dim szAllData
+		szAllData = g_tAgreeUrl[3][1].."★"..g_tAgreeUrl[3][0].."★"..g_tAgreeUrl[3][2].."★"..g_tAgreeUrl[3][3].."★"..g_tAgreeUrl[3][4].."★".."4".."★".."0"
+	     Form.OpenPopup( "mbonl82010_p4" ,  szAllData , "" )
+	else
+		Dim nIdex
+		if g_szStplYN == "Y" then tCnt = 2
+		else tCnt = 3 end if
+		nIdex = tCnt
+		g_tAgreeState[nIdex] = "0"
+		f_AllAgreeCheck()
+	end if
+End Sub
+
+'============================================================================
+Sub imgUIChk4_OnClick()
+	if chkAgree4.checkstate == "0" then
+		chkAgree4.checkstate = "1"
+		chkAgree4_OnChange("1")
+	else
+		chkAgree4.checkstate = "0"
+		chkAgree4_OnChange("0")
+	end if
+End Sub
+
+'============================================================================
+Sub lblChkText4_OnClick()
+	if chkAgree4.checkstate == "0" then
+		chkAgree4.checkstate = "1"
+		chkAgree4_OnChange("1")
+	else
+		chkAgree4.checkstate = "0"
+		chkAgree4_OnChange("0")
+	end if
+End Sub
+
+'============================================================================
+Sub imgChk4_OnClick()
+	chkAgree4.checkstate = "1"
+	chkAgree4_OnChange("1")
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub btnOk_OnClick()
+	'LHR 수정
+	'개인(신용)정보제공동의 처리 추가
+	'최초 계좌개설 및 신용약정 고객의 경우.. 신용제공정보동의가 없으므로 호출.
+	DATAMANAGER.RequestTranData("obaci_acct_255a")
+	'DATAMANAGER.RequestTranData("obcsb_nice_010r")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_nice_010r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_nice_010r", "InBlock1", "SDRC_CLS_CODE" , 0 , g_szSDRC_CLS_CODE ) '송신
+		DATAMANAGER.SetDataValue( 0, "obcsb_nice_010r", "InBlock1", "BSWR_CLS_CODE", 0 , "1" ) '개설
+		DATAMANAGER.SetDataValue( 0, "obcsb_nice_010r", "InBlock1", "CRIN_IQRY_CLCD", 0 , g_szCRIN_IQRY_CLCD ) '- >TR01 로 조회하고 정상이면 SA25로 조회함
+		DATAMANAGER.SetDataValue( 0, "obcsb_nice_010r", "InBlock1", "ACNO", 0 , Left(g_szAct,8) )		
+		DATAMANAGER.SetDataValue( 0, "obcsb_nice_010r", "InBlock2", "SDRC_SRNO", 0 , g_szSDRC_SRNO ) '-> 처음엔 “”  ->LabelSDRCSRNO.captio
+	elseif szTranID == "obaci_acct_255a" then				
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_255a", "InBlock1", "CONT_CLS_CODE" , 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_255a", "InBlock1", "SNOT_EMPNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_255a", "InBlock1", "ACNO" , 0 , Left( g_szAct, 8) )
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_255a", "InBlock1", "ASNO" , 0 , Right( g_szAct, 2) )
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_255a", "InBlock1", "ISCD" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_255a", "InBlock1", "RMND_SRNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_255a", "InBlock1", "CRDT_AGRM_BSWR_KIND_CLCD" , 0 , "013") 'g_sKindCode
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_255a", "InBlock1", "AGRM_RQCL_DOCU_CLCD" , 0 , "1" ) '요약1, 상세2, 둘다3
+		
+		'필수동의(공통)
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock2", "PROS_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock2", "UI_COMN_AGRM_YN1" , 0 , "Y")'수집이용 고유식별번호
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock2", "UI_COMN_AGRM_YN2" , 0 , "Y")'수집이용 개인신용정보
+		
+		'필수동의(수집/이용 상품별)
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock3", "PROS_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock3", "UI_COMN_AGRM_YN1" , 0 , "Y" )'수집이용_신용공여/미수/파생상품 고유식별번호
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock3", "UI_COMN_AGRM_YN2" , 0 , "Y" )'수집이용_신용공여/미수/파생상품 개인신용정보
+		
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock4", "PROS_CLS_CODE" , 0 , "0" )
+'		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock4", "UI_COMN_AGRM_YN1" , 0 , "0" )'수집이용_비과세종합저축/ISA/연금저축 고유식별번호
+'		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock4", "UI_COMN_AGRM_YN2" , 0 , "0" )'수집이용_비과세종합저축/ISA/연금저축 민감정보
+'		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock4", "UI_COMN_AGRM_YN3" , 0 , "0" )'수집이용_비과세종합저축/ISA/연금저축 개인신용정보
+		
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock5", "PROS_CLS_CODE" , 0 , "0" )
+'		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock5", "UI_COMN_AGRM_YN1" , 0 , "0" )'수집이용_해외주식/해외파생/해외금융/EUREX 개인신용정보
+'		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock5", "UI_COMN_AGRM_YN2" , 0 , "0" )'수집이용_해외주식/해외파생/해외금융/EUREX 개인신용정보
+
+		'필수동의(제공 상품별)
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock6", "PROS_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock6", "UI_COMN_AGRM_YN1" , 0 , "Y" )'제공_신용공여/미수/파생상품 고유식별번호
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock6", "UI_COMN_AGRM_YN2" , 0 , "Y" )'제공_신용공여/미수/파생상품 개인신용정보
+		
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock7", "PROS_CLS_CODE" , 0 , "0" )
+'		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock7", "UI_COMN_AGRM_YN1" , 0 , "0" )'제공_해외주식/해외파생/해외금융/EUREX 고유식별번호
+'		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock7", "UI_COMN_AGRM_YN2" , 0 , "0" )'제공_해외주식/해외파생/해외금융/EUREX 개인신용정보
+
+		'필수동의(조회 상품별)
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock8", "PROS_CLS_CODE" , 0 ,"1" )
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock8", "UI_COMN_AGRM_YN1" , 0 , "Y" )'조회_신용공여/미수/파생상품 고유식별번호
+		DATAMANAGER.SetDataValue(0, "obaci_acct_255a", "InBlock8", "UI_COMN_AGRM_YN2" , 0 , "Y" )'조회_신용공여/미수/파생상품 개인신용정보 
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_nice_010r" then
+
+		Dim sRSLT_CLS
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_nice_010r", "OutBlock1", "RSLT_CLS" , 0 )		
+		
+		' RSLT_CLS = '0' : 전문 전송하지 않아도 되는 정상적인 경우
+		' RSLT_CLS = '1' : 전문 송신한 경우
+		' RSLT_CLS = '2' : 전문 송신 후 응답 대기 중
+		' RSLT_CLS = '3' : 전문 수신 결과 정상 응답			
+		if sRSLT_CLS == "0" or sRSLT_CLS == "3" then '정상/전문수신결과정상응답			
+			if g_szCRIN_IQRY_CLCD == "TR01" then '첫번째호출후재호출				
+				g_szCRIN_IQRY_CLCD = "SA25"					
+				g_szSDRC_CLS_CODE = "1"
+				
+				DATAMANAGER.RequestTranData( "obcsb_nice_010r" ) '고객정보확인조회		
+				
+			elseif g_szCRIN_IQRY_CLCD == "SA25" then '두번째호출후 실질적인업무처리			
+				g_szSDRC_SRNO = DATAMANAGER.GetDataValue( 0, "obcsb_nice_010r", "OutBlock2", "SDRC_SRNO" , 0 )		
+						
+				Form.MsgBox( "알림", "고객의 신용정보 조회가 완료되었습니다.", szTranID, 6 )				
+				
+			end if
+			
+		elseif sRSLT_CLS == "1" or sRSLT_CLS == "2" then			
+			g_szSDRC_SRNO = DATAMANAGER.GetDataValue( 0, "obcsb_nice_010r", "OutBlock2", "SDRC_SRNO" , 0 )		
+			
+			g_nTryCnt = g_nTryCnt+1			
+			
+			if g_nTryCnt < 20 then				
+				g_szSDRC_CLS_CODE = "2"
+				
+				DATAMANAGER.RequestTranData( "obcsb_nice_010r" ) '고객정보확인조회			
+			else				
+				g_nTryCnt = 0	
+				
+				Form.MsgBox( "알림", "신용 정보 조회 실패입니다.\n다시 확인해주세요.", "", 6 )				
+			end if 			
+		end if
+	elseif szTranID == "obaci_acct_255a" then
+		tProsDate =  DATAMANAGER.GetDataValue( 0, "obaci_acct_255a", "OutBlock1", "PROS_DATE" , 0 )
+		tProsSrno =  DATAMANAGER.GetDataValue( 0, "obaci_acct_255a", "OutBlock1", "PROS_SRNO" , 0 )
+		Form.SetSharedData("255a_PROS_DATE" , tProsDate)
+		Form.SetSharedData("255a_PROS_SRNO" , tProsSrno)
+		
+		DATAMANAGER.RequestTranData("obcsb_nice_010r")
+	end if
+End Sub
+'
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "obcsb_nice_010r" then
+		Form.SendReturnToParent("mbonl82010_p2" , "Ok")
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgAllAgree.setMaintainingRatio("1")
+	imgUIChk1.setMaintainingRatio("1")
+	imgUIChk2.setMaintainingRatio("1")
+	imgUIChk3.setMaintainingRatio("1")
+	imgUIChk4.setMaintainingRatio("1")
+	imgChk1.setMaintainingRatio("1")
+	imgChk2.setMaintainingRatio("1")
+	imgChk3.setMaintainingRatio("1")
+	imgChk4.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSub
+	szSub = DATAMANAGER.GetDataMsgSubText( szTranID)
+	
+	if trim(szSub) <> "" then
+		szErrMsg = szErrMsg.."\n"..szSub		
+	end if
+	
+	Form.ShowAlert("알림", szErrMsg)
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_nice_010r" trcode="obcsb_nice_010r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_255a" trcode="obaci_acct_255a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_nice_010r" title="신용정보조회(개설/대출/해지)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="347" _ulen="249" >
+
+SDRC_CLS_CODE^송수신구분코드^1^0^0^0^0^0^0
+BSWR_CLS_CODE^업무구분코드^1^0^0^0^0^0^0
+CRIN_IQRY_CLCD^신용정보조회구분코드^4^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="54" _ulen="40" >
+
+SDRC_SRNO^송수신일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="43" _ulen="35" >
+
+RSLT_CLS^결과구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="346" _ulen="250" >
+
+SDRC_CLS_CODE^송수신구분코드^1^0^0^0^0^0^0
+CRIN_IQRY_CLCD^신용정보조회구분코드^4^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+SDRC_SRNO^송수신일련번호^11^0^7^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="204" _ulen="150" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+BDCR_CLCD^신용불량구분코드^1^0^0^0^0^0^0
+DRVT_ODER_ABLE_CODE^파생주문가능코드^2^0^0^0^0^0^0
+CBSC_GRAD_CODE^CB스코어등급코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_255a" title="계좌_계좌신용정보관리(2021년개" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="474" _ulen="348" >
+
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+RMND_SRNO^잔고일련번호^3^0^0^0^0^0^0
+CRDT_AGRM_BSWR_KIND_CLCD^신용동의업무종류구분코드^3^0^0^0^0^0^0
+AGRM_RQCL_DOCU_CLCD^동의징구서류구분코드^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+GRP_NAME^그룹명^30^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="162" _ulen="126" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="162" _ulen="126" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="216" _ulen="168" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN3^UI공통동의여부3^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock5" inout="in" _len="162" _ulen="126" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock6" inout="in" _len="162" _ulen="126" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock7" inout="in" _len="162" _ulen="126" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock8" inout="in" _len="162" _ulen="126" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock9" inout="in" _len="440" _ulen="332" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN3^UI공통동의여부3^1^0^0^0^0^0^0
+PBLT_TLPH_RCMS_YN^홍보전화수신여부^1^0^0^0^0^0^0
+PBLT_SMS_RCMS_YN^홍보SMS수신여부^1^0^0^0^0^0^0
+PBLT_EMAIL_RCMS_YN^홍보이메일수신여부^1^0^0^0^0^0^0
+PRML_RCMS_YN^홍보물수신여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="89" _ulen="69" >
+
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="81011" scrname="계좌미보유_투자성향진단_완료팝업" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnOk" caption="확인" fontsize="4" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+		<LABEL name="Label3" fontsize="8" fontstyle="01" caption="투자성향 진단이
+완료되었습니다." halign="1" multiline="1" ly_vert="20,195,335,58,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_ok.png" ly_vert="153,105,70,70,1" />
+		<IMAGE name="ImgValid" visible="0" autosize="1" imgpath="icon_invest_1.png" ly_vert="122,293,130,94,0" />
+		<LABEL name="lblText1" visible="0" caption="고객님의 투자성향은" ly_vert="34,402,146,32,0" />
+		<LABEL name="lblGradeName" visible="0" fgcolor="006:213049051" halign="1" ly_vert="184,402,95,32,0" />
+		<LABEL name="lblText2" visible="0" caption="입니다." ly_vert="271,402,57,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1909" _ulen="1785" >
+'============================================================================
+' 01.화면명 	: 계좌미보유고객용_투자성향진단_완료팝업
+' 02.화면설명	: 
+' 03.작성	: 2021.06.04
+' 04.수정	: 
+'============================================================================
+
+''****************************************************************************
+''               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+''****************************************************************************
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+    Dim szOpenData
+    szOpenData = Form.GetOpenLinkData()   
+    
+    if szOpenData <> "" then
+	    ImgValid.visible = true
+	    lblText1.visible = true
+	    lblGradeName.visible = true
+	    lblText2.visible = true	 
+	    
+	    lblGradeName.caption = szOpenData
+	    
+	    if szOpenData == "고수익지향형" then
+		    ImgValid.imgpath = "icon_invest_grade_5.png"
+	    
+	    elseif szOpenData == "성장지향형" then
+		    ImgValid.imgpath = "icon_invest_grade_4.png"
+		    
+	    elseif szOpenData == "중립형" then
+		    ImgValid.imgpath = "icon_invest_grade_3.png"
+		    
+	    elseif szOpenData == "안정지향형" then
+		    ImgValid.imgpath = "icon_invest_grade_2.png"
+		    
+	    elseif szOpenData == "이자소득형" then
+		    ImgValid.imgpath = "icon_invest_grade_1.png"
+	    
+	    else
+		    ImgValid.imgpath = "icon_error.png"
+		    lblGradeName.caption = "정보미제공"
+	    end if
+    end if
+End Sub
+
+'============================================================================
+' btnOk_OnClick() : 팝업닫기
+'============================================================================
+Sub btnOk_OnClick()
+    Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
