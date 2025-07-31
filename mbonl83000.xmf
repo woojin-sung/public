@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="83000" scrname="권리예정내역" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,602,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" fontsize="-1" itemcodetype="100,102,105,106,107,108,113,117,119,131,132,138,139,140,200" etcfunctions="" accpwdctl="edtPW" delegate="1" ly_vert="10,45,355,40,1" />
+		<EDIT name="edtPW" halign="1" password="2" imetype="1" maxlength="8" hintcaption="비밀번호" ly_vert="283,49,86,39,1" />
+		<FORMTAB name="fmtab0" currenttab="3" tabcount="4" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="1,91,375,512,1" >
+			<PAGE name="page001696" caption="청약신청" linkfile="mbonl83010" loadingtype="1" />
+			<PAGE name="page005089" caption="청약취소/내역" linkfile="mbonl83010" loadingtype="1" />
+			<PAGE name="page004730" caption="입출금·고" linkfile="mbonl83000_t1" loadingtype="1" />
+			<PAGE name="page000243" caption="유상/매수청구" linkfile="mbonl83000_t2" loadingtype="1" />
+		</FORMTAB>
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_main_01" ly_vert="10,15,25,20,1" />
+		<LABEL name="lblTitle" fontsize="3" caption="유상청약 신청/조회" multiline="1" paddinginfo="1,0,0,0" click="1" ly_vert="39,10,235,30,1" />
+		<COMBO name="Combo0" visible="0" cbinputdatatext="유상청약 신청/조회
+반대의사/매수청구 신청" popuptitle="메뉴를 선택해 주세요." ly_vert="1110,80,111,32,0" />
+		<COMBO name="Combo1" visible="0" cbinputdatatext="보유주식권리(국내/해외)
+보유CFD권리(국내/해외)
+전체권리일정조회(국내/해외)" popuptitle="메뉴를 선택해 주세요." ly_vert="1120,90,111,32,0" />
+		<IMAGE name="imgInfo" imgpath="icon_notice.png" ly_vert="341,15,22,22,1" />
+		<IMAGE name="ImgMenu" autosize="1" imgpath="icon_arrow_down2.png" ly_vert="220,15,23,18,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8448" _ulen="7984" >
+'============================================================================
+' 01. 화 면 명 : 권리예정내역
+' 02. 화면설명 : 권리예정내역
+' 03. 작    성 : 2022. 09. 20. 신극수
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_szData			'계좌번호,일련번호
+Dim g_nTabIndex		'탭 Indexr
+Dim g_gbn
+Dim g_szScreenNo
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	g_nTabIndex = CInt(fmtab0.currenttab)
+	'edtPW.visible = false
+	edtPW.enable = false
+	edtPW.visible= false 'v0001
+	g_szData = acnt0.total & "★" & acnt0.sequence & "★" & ""
+	Dim szScreenNo, szTab
+	g_szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+	'Form.MsgBox( "알림", g_szScreenNo, "", 6 )
+	if g_szScreenNo == "83010" then
+		imgInfo.visible = 1
+		ImgMenu.left = 218
+		lblTitle.caption = "유상청약 신청/조회"
+		SetAcno()
+		fmtab0.currenttab = 0
+		Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약신청", g_szData )
+		'fmtab0.deletePageIndex(2)
+		'fmtab0.deletePageIndex(2)
+		fmtab0.deletepage = "page004730" 
+		fmtab0.deletepage = "page000243" 
+		g_gbn = 1
+'	elseif g_szScreenNo == "83000" then
+'		imgInfo.visible = 1
+'		ImgMenu.left = 248
+'		lblTitle.caption = "보유주식권리(국내/해외)"
+'		fmtab0.currenttab = 2
+'		Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "입출고", g_szData )
+'		'fmtab0.deletePageIndex(0)
+'		'fmtab0.deletePageIndex(0)
+'		fmtab0.deletepage = "page001696" 
+'		fmtab0.deletepage = "page005089" 
+'		g_gbn = 2
+	else
+		imgInfo.visible = 1
+		Select Case g_nTabIndex
+		Case 0
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약신청", g_szData )
+		Case 1
+		    fmtab0.currenttab = 1
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약취소/내역", g_szData )
+		Case 2
+		    fmtab0.currenttab = 2
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "입출고", g_szData )
+		Case 3
+		    fmtab0.currenttab = 3
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "유상/매수청구", g_szData )
+		end Select
+		
+	end if
+	
+	
+	szOpen = Form.GetOpenLinkData()
+
+	' ----------------------------------------------------------------------
+	' 다른화면에서 화면오픈시
+	' ----------------------------------------------------------------------	
+	if szOpen <> "" then
+		tData = Split(szOpen, "★")
+		
+		
+		' 폼탭변경(0:청약신청, 1:청약취소/내역)
+		if tData(0) = "0" then
+			fmtab0.currenttab = 0
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약신청", g_szData )
+		elseif tData(0) = "1" then
+			fmtab0.currenttab = 1
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약취소/내역", g_szData )
+		end if 
+		'fmtab0.deletePageIndex(2)
+		'fmtab0.deletePageIndex(2)
+		fmtab0.deletepage = "page004730" 
+		fmtab0.deletepage = "page000243" 
+		g_gbn = 1
+	end if 
+		
+	fmtab0.tabheadheight = 0
+End Sub
+'============================================================================
+' SetAcno()
+'============================================================================
+Sub SetAcno()
+	szCurAcc = Form.GetSharedData("ACNO_83010")
+
+	nCnt = Cint(acnt0.accountcount)
+	For i = 0 to nCnt - 1
+		szCompAcc = acnt0.getAccountByIndex(i)
+		
+		if szCurAcc == szCompAcc then
+			acnt0.currentindex = i
+			g_szData = acnt0.total & "★" & acnt0.sequence & "★" & ""
+			Exit For
+		end if
+	Next
+End sub
+'============================================================================
+' fmtab0_OnTabChanged(nCurrentTab)
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	
+	g_nTabIndex = nCurrentTab
+	g_szData = acnt0.total & "★" & acnt0.sequence & "★" & edtPW.caption
+	
+	Select Case g_nTabIndex
+		Case 0
+			if g_gbn = 1 then
+				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약신청", g_szData )
+			else 
+				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "입출고", g_szData )
+			end if
+		Case 1
+		    fmtab0.currenttab = 1
+			if g_gbn = 1 then
+				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약취소/내역", g_szData )
+			else
+				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "유상/매수청구", g_szData )
+			end if
+	end Select
+End Sub
+'============================================================================
+' acnt0_ChangeAccount()
+'============================================================================
+Sub acnt0_ChangeAccount()
+
+	g_nTabIndex = CInt(fmtab0.currenttab)
+	edtPW.caption = ""
+	
+	g_szData = acnt0.total & "★" & acnt0.sequence & "★" & ""
+	
+	Select Case g_nTabIndex
+		Case 0
+			if g_gbn = 1 then
+				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약신청", g_szData )
+			else 
+				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "입출고", g_szData )
+			end if
+		Case 1
+			if g_gbn = 1 then
+				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약취소/내역", g_szData )
+			else
+				Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "유상/매수청구", g_szData )
+			end if
+	end Select
+End Sub
+'============================================================================
+' edtPW_OnEditComplete()
+'============================================================================
+Sub edtPW_OnEditComplete()
+	
+	g_szData = acnt0.total & "★" & acnt0.sequence & "★" & edtPW.caption
+	
+	Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "청약취소", g_szData )
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	
+	fmtab0_OnTabChanged(g_nTabIndex)
+	
+End Sub
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "INFO_CLICK" then '유의사항
+		Form.OpenFramePopup("mbonl83010_p4", "", "")
+	end if
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.OpenPrevScreen() 
+End Sub
+
+'============================================================================
+Sub imgInfo_OnClick()
+    'Form.OpenPopup("mbonl83000_p2" , "" , "")	
+    Form.OpenPopup("mbonl83010_p6" , "" , "")	
+End Sub
+
+'20230907 KKM START 일반청약 메뉴의 화면들로 전환
+'============================================================================
+Sub lblTitle_OnClick()
+	ImgMenu_OnClick()
+End Sub
+
+'============================================================================
+Sub ImgMenu_OnClick()
+	'ImgMenu.imgpath = "icon_arrow_up2.png"
+	if g_szScreenNo == "83010" then
+		Combo0.currentindex = 0
+		Combo0.OpenList()	
+	else
+		Combo1.OpenList()	
+	end if 
+End Sub
+
+'============================================================================
+Sub Combo0_OnEditComplete(iIndex)
+	if iIndex == 1 then   '반대의사/매수청구 신청
+		Form.CloseForm()
+		Form.OpenScreen("83140" , "")
+	else ''유상청약 신청/조회
+		ImgMenu.imgpath = "icon_arrow_down2.png"
+	end if 
+End Sub
+
+'============================================================================
+Sub Combo1_OnEditComplete(iIndex)
+	if iIndex == 1 then  '보유CFD권리(국내/해외)
+		Form.CloseForm()
+		Form.OpenScreen("13402" , "")
+	elseif iIndex == 2 then ' 전체권리일정조회(국내/해외)
+		Form.CloseForm()
+		Form.OpenScreen("16402" , "")
+	else '보유주식권리(국내/해외)
+		ImgMenu.imgpath = "icon_arrow_down2.png"
+	end if 	
+End Sub
+'20230907 KKM END 
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBackPress.setMaintainingRatio("1")	
+	ImgMenu.setMaintainingRatio("1")	
+	imgInfo.setMaintainingRatio("1")	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

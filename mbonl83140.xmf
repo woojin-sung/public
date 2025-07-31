@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="83140" scrname="반대의사/매수청구" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="3" tabwidthtype="1" tabheadheight="36" ly_vert="0,58,375,504,1" >
+			<PAGE name="page002816" caption="반대의사" linkfile="mbonl83140_t1" />
+			<PAGE name="page006680" caption="매수청구" linkfile="mbonl83140_t2" />
+			<PAGE name="page001971" caption="신청내역/취소" linkfile="mbonl83140_t3" />
+		</FORMTAB>
+		<ACCOUNT name="acnt0" itemcodetype="100,102,105,107,131,132,138,139,140,200" accpwdctl="EdtPswd" ly_vert="6,9,271,39,1" />
+		<EDIT name="EdtPswd" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="283,9,86,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1490" _ulen="1490" >
+--===========================================================================
+Function f_SendTriggerEvent()
+	if acnt0.caption <> "" and acnt0.caption <> null then
+		Form.triggerEvent( "FormTab0."&FormTab0.currenttabpageid, "REQ", acnt0.total&acnt0.sequence)
+	end if
+End Function
+'============================================================================
+Sub Form_OnFormInit()
+	f_SendTriggerEvent()
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+	f_SendTriggerEvent()
+End Sub
+
+'============================================================================
+Sub EdtPswd_OnEditComplete()
+	f_SendTriggerEvent()
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	f_SendTriggerEvent()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "OPEN_TAB1_REG_POPUP" then
+		if sParam <> "" and sParam <> null then
+			Form.OpenFramePopup("mbonl83140_p1", sParam, "")
+		end if
+	elseif sEventName == "OPEN_TAB2_REG_POPUP" then
+		if sParam <> "" and sParam <> null then
+			Form.OpenFramePopup("mbonl83140_p2", sParam, "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "REG_FIN" then
+		f_SendTriggerEvent()
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

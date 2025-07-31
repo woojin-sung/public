@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="82110" scrname="대주거래약정M" version="2" writer="이아영" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="lnkMain" ly_vert="0,0,375,562,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5684" _ulen="5374" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 신용거래약정
+' 02. 화면설명 : 신용거래약정
+' 03. 작    성 : 2022.09.04 이아영
+' 04. 수    정 : 
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_bContract  '대출구분 (01:신용)
+Dim g_szTrData
+
+
+'============================================================================
+Sub Form_OnFormInit()
+'	DATAMANAGER.RequestTranData( "oblon_basc_811r" ) '신용약정조회
+	DATAMANAGER.RequestTranData( "obsap_acif_999a" ) '금융상품 일련번호 GET
+	g_FinCustomer = "N"
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "End" then
+		lnkMain.linkfile = ""
+		DATAMANAGER.RequestTranData( "oblon_basc_811r" )
+		
+	elseif sEventName == "Change" then
+		if trim(sParam) ~= "" then
+			lnkMain.linkfile = "mbonl82110_s1"
+			Form.triggerEvent("lnkMain", "InitChange", sParam) '등록여부, 기본형투자형, SMS, Email	
+		end if	
+	
+	elseif sEventName == "ChangeView" then
+		if trim(sParam) ~= "" then
+			lnkMain.linkfile = "mbonl82110_s1"
+			Form.triggerEvent("lnkMain", "ChangeAccount", sParam) '등록여부, 기본형투자형, SMS, Email	
+		end if
+	elseif sEventName == "FormClose" then
+		Form.OpenMainMenuWithindex(2,2,0)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "oblon_basc_811r" then
+		Dim szID
+		szID = Form.GetSharedData("&USER_ID", false )
+	
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ELFN_ID" , 0 , szID)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "LOAN_TYPE_CODE" , 0 , "11")
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IQRY_CLS_CODE" , 0 , "2" )
+	elseif szTranID	= "obsap_acif_999a" then
+	
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "oblon_basc_811r" then	
+		Dim nCnt
+		nCnt = CInt(DATAMANAGER.GetDataCount(0, "oblon_basc_811r", "OutBlock1"))
+		if nCnt > 0 then
+			g_bContract = true
+		else
+			g_bContract = false
+		end if 
+		
+	
+		if g_bContract == true then
+			lnkMain.linkfile = "mbonl82110_s6"
+			Form.triggerEvent("lnkMain", "Init", "") 
+		else	
+			lnkMain.linkfile = "mbonl82110_s1"
+			Form.triggerEvent("lnkMain", "Init", "")'g_szTrData) '등록여부, 기본형투자형, SMS, Email	
+		end if
+		
+'		Dim szRegDate
+'		szRegDate = DATAMANAGER.GetDataValue( 0, "oblon_basc_811r", "OutBlock1", "REG_DATE", 0 ) 
+'		
+'		if trim(szRegDate) == "" or trim(szRegDate) == "N" then
+'			btnBottom.caption = "신용거래약정 신청"
+'			g_bContract = false
+'		else
+'			btnBottom.caption = "신청정보 보기"
+'			g_bContract = true
+'		end if
+'		
+'		Dim sUI_PROD_OPNG_YN1 
+'		Dim sUI_PROD_OPNG_YN2
+'		Dim sLoanType
+'		Dim szDejuDate
+'		Dim szUI_COND
+'		
+'		sUI_PROD_OPNG_YN1 = DATAMANAGER.GetDataValue( 0, "oblon_basc_811r", "OutBlock2", "UI_PROD_OPNG_YN1" , 0 ) 'SMS		
+'		sUI_PROD_OPNG_YN2 = DATAMANAGER.GetDataValue( 0, "oblon_basc_811r", "OutBlock2", "UI_PROD_OPNG_YN2" , 0 ) 'E-mail		
+'		sLoanType = DATAMANAGER.GetDataValue( 0, "oblon_basc_811r", "OutBlock1", "MORG_APLY_FORM_CODE" , 0 ) '신용융자/대주코드		
+'		szDejuDate = DATAMANAGER.GetDataValue( 0,"oblon_basc_811r", "OutBlock1", "STLN_STUP_DATE", 0 ) '대주일자
+'		szUI_COND = DATAMANAGER.GetDataValue( 0, "oblon_basc_811r", "OutBlock1", "UI_COND_RSLT_CLS_VAL", 0 ) '유통융자 담보활용 동의 신청 여부
+'		
+'		g_szTrData = sLoanType.."★"..sUI_PROD_OPNG_YN1.."★"..sUI_PROD_OPNG_YN2.."★"..szRegDate.."★"..szDejuDate.."★"..szUI_COND
+	elseif szTranID	= "obsap_acif_999a" then
+		Dim szFnprJoinSrno
+		szFnprJoinSrno = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "FNPR_JOIN_SRNO", 0)		'금융상품일련번호
+		
+		Form.SetSharedData( "FNPR_JOIN_SRNO", szFnprJoinSrno )
+		Form.SetSharedData( "LoanYN", "Y" )
+		Form.OpenPopup("mbonl81010_p20" , "" , "")	
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg 
+	
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if trim(sSubMsg) ~= "" then
+		szErrMsg = szErrMsg.."\n"..sSubMsg
+	end if
+	
+	Form.ShowAlert("알림", szErrMsg)
+
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData( "FNPR_JOIN_SRNO", "" )
+End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "Show_mbonl81010" then
+		if sRet == "ok" then
+			Form.OpenPopup("mbonl81010_p20" , "" , "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbonl81010_p20_CLOSE" then
+		if sRet == "NEXT_mbonl81010_p20" then	
+			g_FinCustomer = "Y"
+				DATAMANAGER.RequestTranData( "oblon_basc_811r" ) '신용약정조회
+		elseif sRet == "CANCEL_mbonl81010_p20" then
+			g_FinCustomer = "N"
+			Form.MsgBox("알림", "전문, 일반 금융소비자를 확인 바랍니다.", "Show_mbonl81010", "1")
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="oblon_basc_803r" trcode="oblon_basc_803r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="oblon_basc_810r" trcode="oblon_basc_810r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="oblon_basc_811r" trcode="oblon_basc_811r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obsap_acif_999a" trcode="obsap_acif_999a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="oblon_basc_803r" title="oblon_basc_803r" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="223" _ulen="167" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="814" _ulen="598" >
+
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출유형코드^2^0^0^0^0^0^0
+LOAN_STPL_SRNO^대출약정일련번호^11^0^7^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+MORG_APLY_FORM_CODE^담보적용방식코드^1^0^0^0^0^0^0
+LOAN_CORE_MANL_CNFR_YN^대출핵심설명서확인여부^1^0^0^0^0^0^0
+STLN_TR_CNFR_YN^대주거래확인여부^1^0^0^0^0^0^0
+STLN_RISK_TR_NTIC_YN^대주위험거래고지여부^1^0^0^0^0^0^0
+CRDT_STUP_STND_AMT^신용설정기준금액^19^0^7^0^0^0^0
+CRDT_STUP_GRMN^신용설정보증금^19^0^7^0^0^0^0
+NNRD_LOAN_AMT^미상환대출금액^19^0^7^0^0^0^0
+UI_CRDT_STUP_ABLE_AMT^UI신용설정가능금액^19^0^7^0^0^0^0
+STLN_STUP_DATE^대주설정일자^8^0^0^0^0^0^0
+UI_COND_RSLT_CLS_VAL^UI조건결과구분값^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="257" _ulen="195" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+UI_PROD_OPNG_YN1^UI상품개설여부1^1^0^0^0^0^0^0
+UI_PROD_OPNG_YN2^UI상품개설여부2^1^0^0^0^0^0^0
+UI_NNPR_CORP_YN^UI비영리법인여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="221" _ulen="165" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출 유형 코드^2^0^0^0^0^0^0
+LOAN_STPL_SRNO^대출 약정 일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="oblon_basc_810r" title="대출 약정 가능여부" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="219" _ulen="163" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출유형코드^2^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="53" _ulen="41" >
+
+LOAN_ABLE_YN^대출가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="oblon_basc_811r" title="신용 약정여부 및 약정계좌 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="142" _ulen="110" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출유형코드^2^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="591" _ulen="447" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+LOAN_TYPE_CODE^대출유형코드^2^0^0^0^0^0^0
+LOAN_STPL_SRNO^대출약정일련번호^11^0^7^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+MORG_APLY_FORM_CODE^담보적용방식코드^1^0^0^0^0^0^0
+STLN_STUP_DATE^대주설정일자^8^0^0^0^0^0^0
+UI_COND_RSLT_CLS_VAL^UI조건결과구분값^1^0^0^0^0^0^0
+UI_PROD_OPNG_YN1^UI상품개설여부1^1^0^0^0^0^0^0
+UI_PROD_OPNG_YN2^UI상품개설여부2^1^0^0^0^0^0^0
+UI_INPR_NAME^UI개별상품명^80^0^0^0^0^0^0
+CRDT_STPL_YN^신용약정여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="424" _ulen="326" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+STPL_AMT^약정금액^19^0^7^0^0^0^0
+FEE_AMT^수수료금액^19^0^7^0^0^0^0
+LOAN_STPL_YN^대출약정여부^1^0^0^0^0^0^0
+UI_MOD_DATE1^UI변경일자1^8^0^0^0^0^0^0
+SELN_ASCR_STPL_YN^매도담보대출약정여부^1^0^0^0^0^0^0
+UI_MOD_DATE2^UI변경일자2^8^0^0^0^0^0^0
+UI_PROD_OPNG_YN1^UI상품개설여부1^1^0^0^0^0^0^0
+UI_PROD_OPNG_YN2^UI상품개설여부2^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="42" _ulen="34" >
+
+STPL_YN^약정여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obsap_acif_999a" title="금융상품가입일련번호 채번" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="54" _ulen="42" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="68" _ulen="48" >
+
+FNPR_JOIN_SRNO^금융상품가입일련번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

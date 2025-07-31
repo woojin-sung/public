@@ -1,0 +1,710 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="83010" scrname="유상청약(예약)_알림" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image3" autosize="1" imgpath="alpha128" ly_vert="-1,-1,377,596,1" />
+		<IMAGE name="Image1" imgpath="popup_bg.9" ly_vert="0,340,375,331,1" />
+		<BUTTON name="btnBGUP" btnimage="alpha" ly_vert="0,0,376,339,1" />
+		<BUTTON name="btnBGUP0" btnimage="alpha" ly_vert="380,363,376,282,1" />
+		<BUTTON name="btnOkWide" enable="0" caption="확인" btnimage="btn_15.9" ly_vert="-5,602,385,47,1" />
+		<CHKBUTTON name="chk1" enable="0" fontsize="-2" chkcaption="  투자설명서" unchkcaption="  투자설명서" chkbtnimage="icon_check_on" unchkbtnimage="icon_check_off" ly_vert="376,448,320,20,1" />
+		<CHKBUTTON name="chkAllAgree" enable="0" fontsize="2" fontstyle="01" chkcaption="  필수 확인사항 동의" unchkcaption="  필수 확인사항 동의" chkbtnimage="icon_check_on" unchkbtnimage="icon_check_off" ly_vert="376,401,267,22,1" />
+		<LABEL name="Label19" bgcolor="111:103103103" transmode="0" border="1" ly_vert="10,389,355,1,1" />
+		<IMAGE name="Image0" imgpath="ic_link.9" ly_vert="314,402,32,20,1" />
+		<CHKBUTTON name="chk2" enable="0" fontsize="-2" chkcaption="  유상증자 참여제한 규제안내" unchkcaption="  유상증자 참여제한 규제안내" chkbtnimage="icon_check_on" unchkbtnimage="icon_check_off" ly_vert="377,499,320,20,1" />
+		<IMAGE name="Image2" imgpath="ic_link.9" ly_vert="314,435,32,20,1" />
+		<IMAGE name="imgAllAgree" imgpath="icon_check_off" ly_vert="22,356,18,18,1" />
+		<LABEL name="lblAllAgree" fgcolor="127:162162162" fontsize="2" fontstyle="01" caption="모두 확인하고, 동의합니다." click="1" ly_vert="40,354,305,22,1" />
+		<IMAGE name="imgUIChk1" autosize="1" imgpath="icon_check_off" ly_vert="25,407,13,13,1" />
+		<LABEL name="lblChkText1" fgcolor="127:162162162" fontsize="-2" caption="투자설명서" click="1" ly_vert="39,405,300,20,1" />
+		<IMAGE name="imgChk1" imgpath="ic_link.9" ly_vert="513,445,49,20,1" />
+		<IMAGE name="imgUIChk2" autosize="1" imgpath="icon_check_off" ly_vert="25,437,13,13,1" />
+		<LABEL name="lblChkText2" fgcolor="127:162162162" fontsize="-2" caption="유상증자 참여제한 규제안내" click="1" ly_vert="39,435,300,20,1" />
+		<IMAGE name="imgChk2" imgpath="ic_link.9" ly_vert="513,500,51,20,1" />
+		<LABEL name="Label1" fontsize="-2" caption="안내사항" multiline="1" fonttype="3" ly_vert="8,456,365,141,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="26908" _ulen="23359" >
+--===========================================================================
+--===========================================================================
+'v001: 전상일 : 2024.03.20 : 다중 클릭시 보안매체 재검색
+'============================================================================
+dim g_szData
+dim g_szContent
+dim g_szType
+Dim g_Chk1		'체크버튼0 체크상태
+Dim g_Chk2		'체크버튼1 체크상태
+dim g_szUnCheckImg, g_szCheckImg'체크이미지
+dim g_szUnCheckFg, g_szCheckFg	'체크 폰트 컬러
+dim g_FileName '문서명
+dim g_szRsevYn '예약청약여부
+dim g_INVT_RFP_CRTN_YN '투자설명서여부
+dim g_szOsType '1.안드로이드 2.iOS
+Dim g_tAgreeState 
+Dim g_sGubunCode
+Dim g_reSSO '다중 클릭시 보안매체 재검색
+g_reSSO = 0
+Dim sACNO
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.setMaintainingRatio("1")
+	Image2.setMaintainingRatio("1")
+	'contA.Image5.setMaintainingRatio("1")
+	
+	imgAllAgree.setMaintainingRatio("1")
+	imgUIChk1.setMaintainingRatio("1")
+	imgUIChk2.setMaintainingRatio("1")
+	'imgUIChk3.setMaintainingRatio("1")
+	imgChk1.setMaintainingRatio("1")
+	imgChk2.setMaintainingRatio("1")
+	'imgChk3.setMaintainingRatio("1")
+	g_szOsType 	= Form.GetSharedData("&OS_TYPE", False) '1.안드로이드 2.iOS
+End Sub
+
+Sub Form_OnFormInit()
+	g_szUnCheckImg = "icon_check_off.png"
+	g_szCheckImg = "icon_check_on.png"
+	g_szUnCheckFg = "127"
+	g_szCheckFg = "4"
+	
+	g_szData = Form.GetOpenLinkData()
+	'Form.ShowAlert("", g_szData)
+	
+	'g_szList(0) :계좌번호★
+	'g_szList(1) :계좌일련번호★
+	'g_szList(2) :권리구분코드★
+	'g_szList(3) :종목명★ 0
+	
+	'g_szList(4) :청약단가★ 1
+	'g_szList(5) :청약가능금액★ 2
+	'g_szList(6) :본배정수량★ 3
+	
+	'g_szList(7) :초과배정수량★ 4
+	'g_szList(8) :문서명★5
+	'g_szList(9) :종목코드★6
+	
+	'g_szList(10):권리기준일자★7
+	'g_szList(11):총배정수량★8
+	'g_szList(12):배정금액★ 9
+	
+	'g_szList(13):초과배정수량★ 10
+	'g_szList(14):초과배정금액★ 11
+	'g_szList(15):투자설명서★ 12
+	
+	'g_szList(16):총청약금액★ 16
+	'g_szList(17):신청구분★
+	
+	'g_szList(18):청약수량★
+	'g_szList(19):청약금액★
+	'g_szList(20):초과청약수량★
+	'g_szList(21):초과청약금액★
+	
+	g_szList = Split(g_szData, "★")
+	
+	btnOkWide.visible = true
+	'btnOkWide.btnimage = "btn_blue_bg_02.9.png"
+	'btnOkWide.fgcolor = "16"
+		
+	if UBound(g_szList) > 17 then
+		g_INVT_RFP_CRTN_YN = g_szList(15)
+		'Form.ShowAlert( "알림" , g_INVT_RFP_CRTN_YN )
+	
+		if g_INVT_RFP_CRTN_YN == "Y" then '투자설명서 있을을경우 Y
+		
+		else '투자설명서 없을경우 X
+			chk1.checkstate 	= TRUE
+			chkAllAgree.checkstate 	= FALSE
+			Form.SetCtlProp("imgUIChk1", "imgpath", g_szCheckImg) '투자설명서 읽음처리
+			Form.SetCtlProp("lblChkText1", "fgcolor", g_szCheckFg) '투자설명서 읽음처리
+			imgUIChk1.visible 	= FALSE '투자설명서 체크박스 숨김처리
+			lblChkText1.visible 	= FALSE '투자설명서 텍스트 숨김처리
+			Image0.visible 		= FALSE '투자설명서 이미지 숨김처리
+			imgUIChk2.top 		= 407 '유상증자 참여제한 규제안내 체크박스 투자설명서 위치로 이동
+			lblChkText2.top 		= 405 '유상증자 참여제한 규제안내 텍스트 투자설명서 위치로 이동
+			Image2.top 			= 402 '유상증자 참여제한 규제안내 이미지 투자설명서 위치로 이동
+		end if
+		
+		g_FileName = g_szList(8)
+		
+		g_szRsevYn = g_szList(17) '예약청약여부
+		call USER_Notice()
+	end if
+	
+	SetRequestData()
+End Sub
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 보안매체 처리하기 위한 TR 입력
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	if szTranID == "obcsb_oimf_625r" then
+		Dim sDeviceID, sACNO, sACNO_PWD
+		
+		sDeviceID = Form.GetDeviceID()
+		sACNO = g_szList(0)
+		
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PROS_CLS_CODE" , 0 , "5" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "REG_CLCD" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "DRNG_ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_BANK_CODE" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_ACNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "TACT_AMT" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "UI_TERM_IDNT_KEY" , 0 , sDeviceID )
+	End If
+	
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID)
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim szVolume
+	
+	if szTranID == "obcsb_oimf_625r" then	'보안인증
+		Dim sSPLM_ATHN_NCSR_YN 
+		sSPLM_ATHN_NCSR_YN = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_625r", "OutBlock1", "SPLM_ATHN_NCSR_YN" , 0 )
+		g_sGubunCode = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_625r", "OutBlock2", "SCRC_OTP_CLS_CODE" , 0 )
+		
+'		'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+'		Select Case g_sGubunCode
+'			Case "0"
+'				Form.OpenFramePopup( "mhetc90060_p9" , "" , sPosInfo)		'공인인증서_보안카드화면
+'			Case "1"
+'				Form.OpenFramePopup( "mhetc90060_pa" , "" , sPosInfo)		'공인인증서_부가정보
+'			Case "2"	
+'				Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 사고등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+'			Case "3"
+'				Form.OpenFramePopup( "mhetc90060_pb" , "" , sPosInfo)		'공인인증서_일반/스마트OTP
+'			Case "4"
+'				Form.OpenPopup( "mhetc90060_motp" , "motp_success" , "")		'공인인증서_일반/스마트OTP
+'			Case "9"
+'				Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+'		End Select
+		if g_reSSO > 1 then
+			Form.openPopupAnimation("pwdcheckpopup", sACNO & "☆0" ,"","2")
+		end if 
+	elseif szTranID == "obrgt_stsb_201a" or szTranID == "obrgt_stsb_101a" then			'유상청약 처리후
+		'Form.ShowAlert( "알림" , "정상처리 되었습니다." )
+		'Form.CloseForm()					'청약신청이 끝나면 화면 종료
+		'Form.openPopupAnimation("mbonl83010_p3",g_szData, "","2")
+		Form.openPopup("mbonl83010_p3",g_szData, "")
+		'Form.OpenFramePopup( "mbonl83010_p3" , "" , sPosInfo)
+	end if
+End Sub
+
+'============================================================================
+Sub btnBGUP_OnClick()
+	g_szData = ""
+	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'Form.SendReturnToParent("POPUP1" , g_szData)
+End Sub
+'============================================================================
+
+'============================================================================
+
+'============================================================================
+Sub btnOkWide_OnClick()
+	g_reSSO = g_reSSO + 1 
+	'g_szList(0) :계좌번호★
+	'g_szList(1) :계좌일련번호★
+	'g_szList(2) :권리구분코드★
+	'g_szList(3) :종목명★ 0
+	
+	'g_szList(4) :청약단가★ 1
+	'g_szList(5) :청약가능금액★ 2
+	'g_szList(6) :본배정수량★ 3
+	
+	'g_szList(7) :초과배정수량★ 4
+	'g_szList(8) :문서명★5
+	'g_szList(9) :종목코드★6
+	
+	'g_szList(10):권리기준일자★7
+	'g_szList(11):총배정수량★8
+	'g_szList(12):배정금액★ 9
+	
+	'g_szList(13):초과배정수량★ 10
+	'g_szList(14):초과배정금액★ 11
+	'g_szList(15):투자설명서★ 12
+	
+	'g_szList(16):총청약금액★ 16
+	'g_szList(17):신청구분★
+	
+	'g_szList(18):청약수량★
+	'g_szList(19):청약금액★
+	'g_szList(20):초과청약수량★
+	'g_szList(21):초과청약금액★
+	'Form.openPopupAnimation("mbonl83010_p2",g_szData, "","2")
+	
+	
+	
+	sACNO = g_szList(0) & g_szList(1)
+	if g_reSSO > 1 then
+		SetRequestData()
+	else
+		Form.openPopupAnimation("pwdcheckpopup", sACNO & "☆0" ,"","2")
+	end if
+End Sub
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "CORRECT_PWD" then
+		g_tData = ""
+		if sRet <> "" And sRet <> Null then
+			g_tData = Split(sRet, "★")
+			
+			if UBOUND(g_tData) > 0 then
+				'CALL GoSubs()
+				'Form.OpenFramePopup( "mhetc90060_p5" , "" , sPosInfo)		'공인인증서_비밀번호입력 풀팝업	> test skip
+				SetSecurityOpen()
+			end if
+		end if
+	elseif sKeyName == "mhetc90060_p9" or sKeyName == "mhetc90060_pa" or sKeyName == "mhetc90060_pb"  or sKeyName == "mhetc90060_motp" then
+		if sRet == "ok" then
+			Form.OpenFramePopup( "mhetc90060_p5" , "" , sPosInfo)		'공인인증서_비밀번호입력 풀팝업	> test skip
+		end if 				
+	elseif sKeyName == "mhetc90060_p5" then 							'							> test skip
+		if sRet ~= "cancel" then									'							> test skip
+			'청약실행																		> test skip
+	
+			Call GoSubs()
+'			Form.ShowAlert("Test", "청약실행ㄱ")
+		end if
+	elseif sKeyName == "mbonl83010_p5" then
+		'Form.ShowAlert( "알림" , sKeyName&""&sRet )
+	    if trim(sRet) ~= "" and trim(sRet) ~= nil and sRet ~= "close" then
+			f_AllAgreeCheck()
+		elseif trim(sRet) ~= "" and trim(sRet) ~= nil and sRet = "close" then
+			g_Chk1 = 0 '초기화
+			g_Chk2 = 0 '초기화
+	    end if	
+	    
+	'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)									
+	elseif sKeyName == "mhetc90190_p1" then										
+		'if sRet == "ok" then									
+		'end if
+	end if
+End Sub
+'============================================================================
+Function f_AllAgreeCheck()	
+	if g_Chk1 = 1	then
+		chk1.checkstate = 1
+		Form.SetCtlProp("imgUIChk1", "imgpath", g_szCheckImg)
+		Form.SetCtlProp("lblChkText1", "fgcolor", g_szCheckFg)
+	else 
+		chk1.checkstate = 0
+		Form.SetCtlProp("imgUIChk1", "imgpath", g_szUnCheckImg)
+		Form.SetCtlProp("lblChkText1", "fgcolor", g_szUnCheckFg)
+	end if 
+	if g_Chk2 = 1	then
+		chk2.checkstate = 1
+		Form.SetCtlProp("imgUIChk2", "imgpath", g_szCheckImg)
+		Form.SetCtlProp("lblChkText2", "fgcolor", g_szCheckFg)
+	else
+		chk2.checkstate = 0
+		Form.SetCtlProp("imgUIChk2", "imgpath", g_szUnCheckImg)
+		Form.SetCtlProp("lblChkText2", "fgcolor", g_szUnCheckFg)
+	end if 
+	
+	check_staus()
+End Function
+'============================================================================
+' GoSubs() : 청약 신청처리
+'============================================================================
+Function GoSubs()
+	if g_szRsevYn = "N" then '청약
+	'	Form.ShowAlert("1", "1")
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "RGHT_TYPE_CODE" , 0 , g_szList(2) )			
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "ACNO" , 0 , g_szList(0) )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "ASNO" , 0 , g_szList(1) )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "ACNT_PWD" , 0 , g_tData(0) )
+		
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "ISCD" , 0 , g_szList(9) )'tbl1.GetCellString( 0 , 0) )				'종목코드
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "RGHT_STND_DATE" , 0 , g_szList(10) )'tbl1.GetCellString( 1 , 0) )		'권리기준일자
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "ASGM_QTY" , 0 , g_szList(6) )'tbl1.GetCellString( 2 , 0) )			'배정수량
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "ASGM_AMT" , 0 , g_szList(12) )'tbl1.GetCellString( 3 , 0) )			'배정금액
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "SBSC_QTY" , 0 , g_szList(18) )			'청약수량
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "SBSC_AMT" , 0 , g_szList(19) )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "EXCS_SBSC_QTY" , 0 , g_szList(20) )		'초과청약수량
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "EXCS_SBSC_AMT" , 0 , g_szList(21))		'초과청약금액
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "EXCS_ASGM_QTY" , 0 , g_szList(13) )'tbl1.GetCellString( 1 , 1) )		'초과배정수량
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "EXCS_ASGM_AMT" , 0 , g_szList(14) )'tbl1.GetCellString( 2 , 1) )		'초과배정금액
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "SSTS_CHCK_LIST_CLS_CODE" , 0 , "Y" )
+		
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "CONT_CLS_CODE" , 0 , "4" )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "JOB_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_201a", "InBlock1", "RSEV_YN" , 0 , "N" )'
+		
+		if g_INVT_RFP_CRTN_YN == "Y" then '투자설명서 있을을경우 Y
+			DATAMANAGER.SetDataValue( 0, "obrgt_stsb_201a" , "InBlock1" , "INVT_MANL_RECV_CNFR_YN" , 0 , "Y" )		    
+		else '투자설명서 없을경우 X
+			DATAMANAGER.SetDataValue( 0,"obrgt_stsb_201a" , "InBlock1" , "INVT_MANL_RECV_CNFR_YN" , 0 , "X" ) '
+		end if
+	
+	
+		DATAMANAGER.RequestTranData("obrgt_stsb_201a")
+	elseif g_szRsevYn = "Y" then'예약청약
+	'	Form.ShowAlert("1", "1")
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "RGHT_TYPE_CODE" , 0 , g_szList(2) )			
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "ACNO" , 0 , g_szList(0) )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "ASNO" , 0 , g_szList(1) )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "ACNT_PWD" , 0 , g_tData(0) )
+		
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "ISCD" , 0 , g_szList(9) )'tbl1.GetCellString( 0 , 0) )				'종목코드
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "RGHT_STND_DATE" , 0 , g_szList(10) )'tbl1.GetCellString( 1 , 0) )		'권리기준일자
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "ASGM_QTY" , 0 , g_szList(6) )'tbl1.GetCellString( 2 , 0) )			'배정수량
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "ASGM_AMT" , 0 , g_szList(12) )'tbl1.GetCellString( 3 , 0) )			'배정금액
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "SBSC_QTY" , 0 , g_szList(18) )			'청약수량
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "SBSC_AMT" , 0 , g_szList(19) )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "EXCS_SBSC_QTY" , 0 , g_szList(20) )		'초과청약수량
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "EXCS_SBSC_AMT" , 0 , g_szList(21))		'초과청약금액
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "EXCS_ASGM_QTY" , 0 , g_szList(13) )'tbl1.GetCellString( 1 , 1) )		'초과배정수량
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "EXCS_ASGM_AMT" , 0 , g_szList(14) )'tbl1.GetCellString( 2 , 1) )		'초과배정금액
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "SSTS_CHCK_LIST_CLS_CODE" , 0 , "Y" )
+		
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "CONT_CLS_CODE" , 0 , "4" )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "JOB_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0 , "obrgt_stsb_101a", "InBlock1", "RSEV_YN" , 0 , "Y" )'
+		
+		if g_INVT_RFP_CRTN_YN == "Y" then '투자설명서 있을을경우 Y
+			DATAMANAGER.SetDataValue( 0, "obrgt_stsb_101a" , "InBlock1" , "INVT_MANL_RECV_CNFR_YN" , 0 , "Y" )		    
+		else '투자설명서 없을경우 X
+			DATAMANAGER.SetDataValue( 0,"obrgt_stsb_101a" , "InBlock1" , "INVT_MANL_RECV_CNFR_YN" , 0 , "X" ) '
+		end if
+	
+	
+		DATAMANAGER.RequestTranData("obrgt_stsb_101a")
+	end if 
+
+End Function
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim subMsg
+	
+	
+	if szTranID == "obrgt_stsb_201a" then
+		subMsg = DATAMANAGER.GetDataMsgSubText( "obrgt_stsb_201a" )
+		'Form.MsgBox("알림", szErrMsg&"\n("&subMsg&")", 0, 6)
+		Form.MsgBox("알림", subMsg, 0, 6)
+	elseif szTranID == "obrgt_stsb_101a" then
+		subMsg = DATAMANAGER.GetDataMsgSubText( "obrgt_stsb_101a" )
+		Form.MsgBox("알림", subMsg, 0, 6)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub check_staus()
+	'Form.MsgBox("알림", chk2.checkstate & chk1.checkstate, 0 , 6)
+	if chk2.checkstate = "1" and chk1.checkstate = "1" then
+		chkAllAgree.checkstate = 1
+		btnOkWide.enable = true
+		Form.SetCtlProp("imgAllAgree", "imgpath", g_szCheckImg)
+		Form.SetCtlProp("lblAllAgree", "fgcolor", g_szCheckFg)
+	else 
+		chkAllAgree.checkstate = 0
+		btnOkWide.enable = false
+		Form.SetCtlProp("imgAllAgree", "imgpath", g_szUnCheckImg)
+		Form.SetCtlProp("lblAllAgree", "fgcolor", g_szUnCheckFg)
+	end if 
+	
+	'g_Chk1 = 0 '초기화
+	'g_Chk2 = 0 '초기화
+End Sub
+
+'============================================================================
+Sub chk1_OnChange(sCheckState)
+	dim szAllData
+	if chk1.checkstate == "0" then '체크상태가 0 -> 1 변경일때
+		FileName = g_szList(8)'DATAMANAGER.GetDataValue( 0 , "obrgt_stsb_205r", "OutBlock1", "DOCU_NAME" , 0)
+		
+		if Len(Trim(FileName)) > 0 Then
+			nType = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+			if nType == "0" then
+				'Form.OpenPdfViewer( "http://home.imeritz.com/include/ocw/"& FileName, "투자설명서")	'운영계 주소
+				g_tAgreeUrl = {{"http://home.imeritz.com/include/ocw/"& FileName, "투자설명서", "urlpath", "N", ""}}
+			elseif nType == "1" then
+				'Form.OpenPdfViewer( "http://home.imeritz.com/include/ocw/RGT20220905A220100.pdf", "투자설명서")	'운영계 주소
+				'g_tAgreeUrl = {{"http://home.imeritz.com/include/ocw/RGT20220905A220100.pdf", "투자설명서", "urlpath", "N", ""}}
+				g_tAgreeUrl = {{"http://home.imeritz.com/include/ocw/"& FileName, "투자설명서", "urlpath", "N", ""}}
+				
+			end if
+			
+			i = 0
+			'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+			szData = g_tAgreeUrl[i][1].."★"..g_tAgreeUrl[i][0].."★"..g_tAgreeUrl[i][2].."★"..g_tAgreeUrl[i][3].."★"..g_tAgreeUrl[i][4].."★"..(i+1).."★".."0"
+			if szAllData == "" or szAllData == nil then
+				szAllData = szData
+			else
+				szAllData = szAllData.."☆"..szData
+			end if
+			
+			if #szAllData > 0 then
+				Form.OpenPopup( "mbonl83010_p5" ,  szAllData , "" )
+			end if
+			
+			
+		else
+			'파일없음
+			Form.MsgBox("알림", "해당 종목은 투자설명서가 없습니다!.", 0 , 6)
+			Exit Sub'v0002
+		end if
+		g_Chk1 = 1
+	else
+		g_Chk1 = 0
+		f_AllAgreeCheck()
+	end if 
+	
+End Sub
+'============================================================================
+Sub imgUIChk1_OnClick()
+	chk1_OnChange("0")
+End Sub
+
+'============================================================================
+Sub lblChkText1_OnClick()
+	chk1_OnChange("0")
+End Sub
+'============================================================================
+Sub chk2_OnChange(sCheckState)
+	Dim szAllData
+	if chk2.checkstate == "0" then '체크상태가 0 -> 1 변경일때
+		g_tAgreeUrl = {{"https://home.imeritz.com/include/resource/comm/ctcn/pdf/paid-in-capital-increase-regulation-info.pdf", "유상증자 참여제한 규제 안내", "urlpath", "N", ""}}
+		
+		i = 0
+		'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+		szData = g_tAgreeUrl[i][1].."★"..g_tAgreeUrl[i][0].."★"..g_tAgreeUrl[i][2].."★"..g_tAgreeUrl[i][3].."★"..g_tAgreeUrl[i][4].."★"..(i+1).."★".."0"
+		if szAllData == "" or szAllData == nil then
+			szAllData = szData
+		else
+			szAllData = szAllData.."☆"..szData
+		end if
+		
+		if #szAllData > 0 then
+			Form.OpenPopup( "mbonl83010_p5" ,  szAllData , "" )
+		end if	
+		g_Chk2 = 1
+		if Len(Trim(g_FileName)) = 0 Then
+		g_Chk1 = 1
+		end if 
+	else
+		g_Chk2 = 0
+		f_AllAgreeCheck()
+	end if 
+End Sub
+'============================================================================
+Sub imgUIChk2_OnClick()
+	chk2_OnChange("0")
+End Sub
+
+'============================================================================
+Sub lblChkText2_OnClick()
+	chk2_OnChange("0")
+End Sub
+
+
+'============================================================================
+Sub lblAllAgree_OnClick()
+	imgAllAgree_OnClick()
+End Sub
+
+'============================================================================
+Sub imgAllAgree_OnClick()
+	Dim szAllData
+	if chkAllAgree.checkstate == "0" then '체크상태가 0 -> 1 변경일때
+		if Len(Trim(g_FileName)) > 0 Then
+		    FileName = g_szList(8)'DATAMANAGER.GetDataValue( 0 , "obrgt_stsb_205r", "OutBlock1", "DOCU_NAME" , 0)
+			nType = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+			if nType == "0" then
+				g_tAgreeUrl = {
+					       {"http://home.imeritz.com/include/ocw/"& FileName, "투자설명서", "urlpath", "N", ""},
+						   {"https://home.imeritz.com/include/resource/comm/ctcn/pdf/paid-in-capital-increase-regulation-info.pdf", "유상증자 참여제한 규제 안내", "urlpath", "N", ""},
+						 }
+			elseif nType == "1" then
+				g_tAgreeUrl = {
+					       '{"http://home.imeritz.com/include/ocw/RGT20220905A220100.pdf", "투자설명서", "urlpath", "N", ""},
+					       {"http://home.imeritz.com/include/ocw/"& FileName, "투자설명서", "urlpath", "N", ""},
+						   {"https://home.imeritz.com/include/resource/comm/ctcn/pdf/paid-in-capital-increase-regulation-info.pdf", "유상증자 참여제한 규제 안내", "urlpath", "N", ""},
+						 }
+			end if
+			i = 0
+			for i=0 to 1
+				'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+				szData = g_tAgreeUrl[i][1].."★"..g_tAgreeUrl[i][0].."★"..g_tAgreeUrl[i][2].."★"..g_tAgreeUrl[i][3].."★"..g_tAgreeUrl[i][4].."★"..(i+1).."★".."0"
+				if szAllData == "" or szAllData == nil then
+					szAllData = szData
+				else
+					szAllData = szAllData.."☆"..szData
+				end if
+			next 
+		else
+			g_tAgreeUrl = {{"https://home.imeritz.com/include/resource/comm/ctcn/pdf/paid-in-capital-increase-regulation-info.pdf", "유상증자 참여제한 규제 안내", "urlpath", "N", ""}}
+			i = 0
+			'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+			szData = g_tAgreeUrl[i][1].."★"..g_tAgreeUrl[i][0].."★"..g_tAgreeUrl[i][2].."★"..g_tAgreeUrl[i][3].."★"..g_tAgreeUrl[i][4].."★"..(i+1).."★".."0"
+			if szAllData == "" or szAllData == nil then
+				szAllData = szData
+			else
+				szAllData = szAllData.."☆"..szData
+			end if
+		end if 
+		
+		if #szAllData > 0 then
+			Form.OpenPopup( "mbonl83010_p5" ,  szAllData , "" )
+		end if
+	
+		g_Chk1 = 1	
+		g_Chk2 = 1	
+	else
+		g_Chk1 = 0
+		g_Chk2 = 0	
+		f_AllAgreeCheck()
+	end if
+End Sub
+
+'============================================================================
+Sub USER_Notice()
+	If g_szRsevYn = "N" Then '예약청약여부
+		if g_szOsType = "2" then '1.안드로이드 2.iOS
+			Label1.caption = "  · 청약 기간 중에만 조회 및 청약 신청/취소가 가능합니다.\n\n  · 청약 일정에 따라 청약 신청 및 취소 시간이 상이 하오니, \n    유의하여 주시기 바랍니다. \n    - 청약일 08:00 ~ 17:00 \n    - 청약종료일 08:00 ~ 14:00"
+		else
+			Label1.caption = "  · 청약 기간 중에만 조회 및 청약 신청/취소가 가능합니다.\n\n  · 청약 일정에 따라 청약 신청 및 취소 시간이 상이 하오니, \n     유의하여 주시기 바랍니다.\n     - 청약일 08:00 ~ 17:00\n     - 청약종료일 08:00 ~ 14:00"
+		end if 
+	ElseIf g_szRsevYn = "Y" then
+'		Label1.caption = "1. 예약청약기간 중에만 조회 및 청약신청(취소)이 가능합니다\n\n2. 청약가능시간\n    · 본청약일 5영업일전 ~ 본청약전일까지 08:00~17:00"
+		if g_szOsType = "2" then '1.안드로이드 2.iOS
+			Label1.caption = "  · 유상청약대금은 청약 시작일 8시에 출금 되오니,\n    정상 출금 여부를 꼭 확인하시기 바랍니다. \n\n  · 예약청약기간 중에만 조회 및 청약 신청/취소가\n    가능합니다. \n\n  · '출금가능금액' 범위 내에서 청약대금이 출금되며,\n    계좌 상태 및 증거금 부족 등의 사유로 미처리 될 \n    경우 청약 증거금 입금 후 청약 신청하시기 바랍니다."
+		else
+			Label1.caption = "  · 유상청약대금은 청약 시작일 8시에 출금 되오니,\n     정상 출금 여부를 꼭 확인하시기 바랍니다.\n\n  · 예약청약기간 중에만 조회 및 청약 신청/취소가\n     가능합니다.\n\n  · '출금가능금액' 범위 내에서 청약대금이 출금되며,\n     계좌 상태 및 증거금 부족 등의 사유로 미처리 될\n     경우 청약 증거금 입금 후 청약 신청하시기 바랍니다."
+		end if 
+	End If
+End sub
+'============================================================================
+' 보안매체별 화면오픈
+'============================================================================
+Function SetSecurityOpen()
+	'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+	Select Case g_sGubunCode
+		Case "0"
+			Form.OpenFramePopup( "mhetc90060_p9" , "" , sPosInfo)		'공인인증서_보안카드화면
+		Case "1"
+			Form.OpenFramePopup( "mhetc90060_pa" , "" , sPosInfo)		'공인인증서_부가정보
+		Case "2"	
+			'Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 사고등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+			RegisterOTP() '2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+		Case "3"
+			Form.OpenFramePopup( "mhetc90060_pb" , "" , sPosInfo)		'공인인증서_일반/스마트OTP
+		Case "4"
+			Form.OpenPopup( "mhetc90060_motp" , "motp_success" , "")		'공인인증서_일반/스마트OTP
+		Case "9"
+			Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+	End Select
+End Function
+'===========================================================================
+' 조회함수
+'===========================================================================
+Function SetRequestData()
+	DATAMANAGER.RequestTranData( "obcsb_oimf_625r" ) '보안매체조회
+End Function
+
+'============================================================================
+'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+'============================================================================
+Sub RegisterOTP()
+	'계좌번호★주민번호(필수아님)★Y/N( 모바일OTP/타기관OTP 발급 완료 후 인증 처리 진행여부를 판단함)★Y/N(처리 완료시 화면닫기)	
+	Form.OpenPopup("mhetc90190_p1", g_szList(0) &"★"& "" &"★"& "N" &"★"& "Y", "")	
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_625r" trcode="obcsb_oimf_625r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obrgt_stsb_201a" trcode="obrgt_stsb_201a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obrgt_stsb_101a" trcode="obrgt_stsb_101a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_625r" title="추가인증대상조회(스마트폰)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="358" _ulen="272" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+REG_CLCD^등록구분코드^1^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="213" _ulen="165" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="67" _ulen="51" >
+
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrgt_stsb_201a" title="유상청약처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="941" _ulen="707" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+RGHT_TYPE_CODE^권리 유형 코드^2^0^0^0^0^0^0
+JOB_CLS_CODE^작업 구분 코드^1^0^0^0^0^0^0
+RSEV_YN^예약 여부^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+RGHT_STND_DATE^권리 기준 일자^8^0^0^0^0^0^0
+ASGM_QTY^배정 수량^19^0^7^0^0^0^0
+ASGM_AMT^배정 금액^19^0^7^0^0^0^0
+SBSC_QTY^청약 수량^19^0^7^0^0^0^0
+SBSC_AMT^청약 금액^19^0^7^0^0^0^0
+SNOT_EMPNO^파출 직원번호^9^0^0^0^0^0^0
+EXCS_ASGM_QTY^초과배정수량^19^0^7^0^0^0^0
+EXCS_ASGM_AMT^초과배정금액^19^0^7^0^0^0^0
+EXCS_SBSC_QTY^초과청약수량^19^0^7^0^0^0^0
+EXCS_SBSC_AMT^초과청약금액^19^0^7^0^0^0^0
+INVT_MANL_RECV_CNFR_YN^투자설명서수령확인여부^1^0^0^0^0^0^0
+SSTS_CHCK_LIST_CLS_CODE^공매도체크리스트구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrgt_stsb_101a" title="유상예약청약처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="895" _ulen="673" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+RGHT_TYPE_CODE^권리 유형 코드^2^0^0^0^0^0^0
+JOB_CLS_CODE^작업 구분 코드^1^0^0^0^0^0^0
+RSEV_YN^예약 여부^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+RGHT_STND_DATE^권리 기준 일자^8^0^0^0^0^0^0
+ASGM_QTY^배정 수량^19^0^7^0^0^0^0
+ASGM_AMT^배정 금액^19^0^7^0^0^0^0
+SBSC_QTY^청약 수량^19^0^7^0^0^0^0
+SBSC_AMT^청약 금액^19^0^7^0^0^0^0
+EXCS_ASGM_QTY^초과배정수량^19^0^7^0^0^0^0
+EXCS_ASGM_AMT^초과배정금액^19^0^7^0^0^0^0
+EXCS_SBSC_QTY^초과청약수량^19^0^7^0^0^0^0
+EXCS_SBSC_AMT^초과청약금액^19^0^7^0^0^0^0
+INVT_MANL_RECV_CNFR_YN^투자설명서수령확인여부^1^0^0^0^0^0^0
+SSTS_CHCK_LIST_CLS_CODE^공매도체크리스트구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
