@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="63010" scrname="간편이체 동의 팝업" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image0" imgpath="popup_bg.9" ly_vert="0,403,375,244,1" />
+		<BUTTON name="btnConfirm" caption="확인" bgcolor="049:000000000" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+		<LABEL name="Label0" fontstyle="01" caption="간편해진 이체를 이용해보세요." halign="1" ly_vert="0,415,375,57,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="3" outline="0000" designorder="1" ly_vert="0,490,375,81,1" >
+			<COL_INFO ly_vert_width="375" />
+			<ROW_INFO ly_vert_height="27,27,27" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" caption="비밀번호만 입력해도 1일 500만원까지" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" caption="이체가 가능해졌습니다." impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" caption="간편이체를 이용하시겠어요?" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2743" _ulen="2479" >
+--===========================================================================
+--===========================================================================
+
+Dim g_szCustNo '고객번호
+
+'============================================================================
+Sub Form_OnFormInit()
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "N") '안드로이드 뒤로가기 동작 비활성화
+	g_szCustNo = Form.GetSharedData("&CUST_NUM", false ) '고객번호
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'간편이체 동의 처리
+	if szTranID == "obpds_srvc_185a" then
+		DATAMANAGER.SetDataValue (0, szTranID, "InBlock1", "PROS_CLS_CODE" , 0, "1"  ) '4:조회 1:처리
+		DATAMANAGER.SetDataValue (0, szTranID, "InBlock1", "CSNO" , 0, g_szCustNo  )
+		DATAMANAGER.SetDataValue (0, szTranID, "InBlock1", "SVCD" , 0, "058"  )
+		DATAMANAGER.SetDataValue (0, szTranID, "InBlock1", "SVC_SRNO" , 0, ""  )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'간편이체 동의 처리
+    if szTranID == "obpds_srvc_185a" then
+        Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y") '안드로이드 뒤로가기 동작 활성화
+        Form.SendReturnToParent("SIMPLE_SUCCESS" , "Y")
+        Form.CloseForm()
+    end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	'간편이체 동의 처리
+	if szTranID == "obpds_srvc_185a" then
+		Form.MsgBox("알림", "간편이체약정등록 오류", "", 6)
+
+		Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y") '안드로이드 뒤로가기 동작 활성화
+		Form.SendReturnToParent("SIMPLE_SUCCESS" , "N") '간편이체약정실패
+		Form.CloseForm()
+		
+	end if
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+'    본 화면은 배경을 터치해도 화면이 꺼지지 않음
+End Sub
+
+'============================================================================
+Sub btnConfirm_OnClick()
+	DATAMANAGER.RequestTranData("obpds_srvc_185a")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y") '안드로이드 뒤로가기 동작 활성화
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+
+    If sKey == "&LOGIN_AUTH" Then
+        
+        If sValue == "0" Or sValue == "1" Then
+            Form.CloseForm()
+        End If
+    
+    End If
+
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_185a" trcode="obpds_srvc_185a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_185a" title="온라인_간편이체 동의처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="484" _ulen="364" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="137" _ulen="103" >
+
+STPL_YN^약정여부^1^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="344" _ulen="264" >
+
+AGRM_DATE^동의일자^8^0^0^0^0^0^0
+AGRM_RFUS_CLCD^동의거부구분코드^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+PROS_SCR_COD^처리화면코드^30^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

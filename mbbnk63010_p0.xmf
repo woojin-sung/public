@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="63010" scrname="이용기기지정안내" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image0" imgpath="popup_bg.9" ly_vert="0,408,375,279,1" />
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="이용기기 지정 안내" halign="1" ly_vert="0,420,375,57,1" />
+		<BUTTON name="btnCancel" caption="닫기" fgcolor="100:102102102" bgcolor="049:000000000" fontsize="1" fontstyle="01" btnimage="btn_27.9" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnConfirm" caption="등록 후 이체하기" bgcolor="049:000000000" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="187,597,188,50,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="3" outline="0000" designorder="1" ly_vert="0,490,375,81,1" >
+			<COL_INFO ly_vert_width="375" />
+			<ROW_INFO ly_vert_height="27,27,27" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" caption="[지정기기만 이용] 약정 고객은" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" caption="미지정 기기에서는 이체 불가합니다." impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" caption="현재 접속 기기를 등록 하시겠습니까?" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1468" _ulen="1456" >
+--===========================================================================
+--===========================================================================
+Dim g_SuccYn
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_SuccYn = "N"
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnConfirm_OnClick()
+	Form.OpenFramePopup("mbonl86011" , "mbbnk63010" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+    Form.SendReturnToParent("TERM_REG_SUCC" , g_SuccYn)
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "63010_CLOSE" then
+	    If sRet == "Y" Then '단말지정성공
+	        g_SuccYn= "Y"
+	        Form.CloseForm()
+	    End If
+		
+	end If
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+
+    If sKey == "&LOGIN_AUTH" Then
+        
+        If sValue == "0" Or sValue == "1" Then
+            Form.CloseForm()
+        End If
+    
+    End If
+
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_185a" trcode="obpds_srvc_185a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_185a" title="온라인_간편이체 동의처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="432" _ulen="322" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="137" _ulen="103" >
+
+STPL_YN^약정여부^1^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="292" _ulen="222" >
+
+AGRM_DATE^동의일자^8^0^0^0^0^0^0
+AGRM_RFUS_CLCD^동의거부구분코드^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+PROS_SCR_COD^처리화면코드^30^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="62030" scrname="다른 금융기관 계좌 조회 팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,407,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,375,50,1" />
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="다른 금융기관 계좌 조회" bgcolor="064:188030030" halign="1" ly_vert="-8,7,380,46,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="340,14,24,24,1" />
+		<BUTTON name="btnTr" caption="이체" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="43,330,81,39,1" />
+		<BUTTON name="btnList" caption="거래조회" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="151,330,81,39,1" />
+		<BUTTON name="btnMang" caption="계좌관리" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="262,330,81,39,1" />
+		<LABEL name="Label1" caption="계좌번호" ly_vert="15,68,67,32,1" />
+		<LABEL name="Label2" caption="계좌별명" ly_vert="15,108,67,32,1" />
+		<LABEL name="Label3" caption="계좌개설일" ly_vert="15,148,82,32,1" />
+		<LABEL name="Label4" caption="만기일" ly_vert="15,188,82,32,1" />
+		<LABEL name="Label5" caption="최종입출금일" ly_vert="15,228,95,32,1" />
+		<LABEL name="Label6" fgcolor="010:213049051" caption="출금계좌 동의" ly_vert="15,268,106,32,1" />
+		<EDIT name="EdtAc" imetype="0" ly_vert="154,69,203,32,1" />
+		<EDIT name="EdtAcAl" imetype="0" ly_vert="154,107,203,32,1" />
+		<EDIT name="EdtAcOpenD" mask="1,0,,,1,####-##-##,0,1,1" imetype="0" ly_vert="154,146,203,32,1" />
+		<EDIT name="EdtCloD" mask="1,0,,,1,####-##-##,0,1,1" imetype="0" ly_vert="153,185,203,32,1" />
+		<EDIT name="EdtCurrTrD" mask="1,0,,,1,####-##-##,0,1,1" imetype="0" ly_vert="154,226,203,32,1" />
+		<EDIT name="EdtAgr" imetype="0" ly_vert="154,266,203,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3276" _ulen="3044" >
+'===========================================================================
+' 화 면 명: 다른 금융기관 계좌 조회 팝업
+' 화면설명: 
+' 작    성: 2020.10.12 송기영
+' 수    정:
+'===========================================================================
+'***************************************************************************
+'     G L O B A L   V A R I A B L E
+'***************************************************************************
+Dim g_szID         '사용자 아이디
+Dim g_szList
+
+Dim g_szAcno
+Dim g_szAccd
+Dim g_szAcnm
+Dim g_szAgree
+
+'===========================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	EdtAc.enable = "0"
+	EdtAcAl.enable = "0"
+	EdtAcOpenD.enable = "0"
+	EdtCloD.enable = "0"
+	EdtCurrTrD.enable = "0"
+	EdtAgr.enable = "0"
+End Sub
+
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.SendReturnToParent( "INFO_POPUP" , "CANCEL" )
+	Form.CloseForm()
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	Dim szData
+	szData = Form.GetOpenLinkData()
+	g_szList = Split(szData, "★")
+
+	if UBOUND(g_szList) < 1 THEN
+		EXIT SUB
+	END IF
+
+	EdtAc.caption = g_szList(0)
+	EdtAcAl.caption = g_szList(1)
+	EdtAcOpenD.caption = g_szList(2)
+	EdtCloD.caption = g_szList(3)
+	EdtCurrTrD.caption = g_szList(4)
+	
+	g_szAcno = g_szList(0)
+	g_szAccd = g_szList(8)
+	g_szAcnm = g_szList(7)
+	g_szAgree = g_szList(5)
+	
+	if g_szList(5) = "Y" then	'출금계좌 동의
+		EdtAgr.caption = "동의"  
+	else 					'출금계좌 미동의
+		EdtAgr.caption = "미동의"
+	end if
+	
+	' 입출금, 종합계좌 탭인경우
+	if g_szList(6) = "mbbnk62030_t1" or  g_szList(6) = "mbbnk62030_t2" then
+		if g_szList(5) = "Y" then	'출금계좌 동의
+			btnTr.enable = "1"	'이체버튼 활성화
+		else 					'출금계좌 미동의
+			btnTr.enable = "0"	'이체버튼 활성화
+		end if
+		
+	' 예적금 탭인경우
+	elseif g_szList(6) = "mbbnk62030_t3" then
+		btnTr.enable = "0"
+		
+	' 수익증권 탭인경우
+	elseif g_szList(6) = "mbbnk62030_t4" then
+		btnList.enable = "0"
+		btnTr.enable = "0"
+	end if
+End Sub
+
+
+'============================================================================
+Sub btnList_OnClick()
+	Form.OpenScreen("62031", g_szAcno & "★" & g_szAcnm & "★" & g_szAccd)
+	
+End Sub
+
+
+
+'============================================================================
+Sub btnTr_OnClick()
+	sz_data = "mbbnk62030" & "★" &  g_szAccd & "★" & g_szAcno  & "★" & g_szAcnm & "★" & g_szAgree
+	Form.OpenScreen("62020", sz_data)
+End Sub
+
+
+
+'============================================================================
+Sub btnMang_OnClick()
+	Form.OpenScreen("62032", g_szAcno & "★" & g_szAcnm & "★" & g_szAccd)
+End Sub
+
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError (szTranID , szErrCode , szErrMsg)
+	
+	Dim SubMsg
+	
+	SubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if SubMsg = "" then
+		Form.MsgBox("알림", szErrMsg, 0)	
+	else
+		Form.MsgBox("알림", szErrMsg & "(" & SubMsg & ")", 0)
+	end if
+	
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtss_opnf_008r" trcode="obtss_opnf_008r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtss_opnf_008r" title="오픈뱅킹_타행계좌내역조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="227" _ulen="171" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+OPN_ACNT_KIND_CODE^오픈뱅킹계좌종류코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+SNMS_YN^송신여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="50" inout="out" _len="873" _ulen="665" >
+
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+BANK_NAME^은행명^40^0^0^0^0^0^0
+BANK_ACNO^은행계좌번호^16^0^0^0^0^0^0
+OPN_TIMS_NO^오픈뱅킹회차번호^3^0^0^0^0^0^0
+DRNG_ACNT_ALS^출금계좌별명^50^0^0^0^0^0^0
+DRNG_AGRM_YN^출금동의여부^1^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+OPN_ACNT_KIND_CODE^오픈뱅킹계좌종류코드^1^0^0^0^0^0^0
+UI_ITEM_NAME001^UI항목명001^40^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+API_TLMS_CLCD^API전문구분코드^3^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+APLT_STAT_CODE^신청상태코드^1^0^0^0^0^0^0
+UI_ITEM_NAME002^UI항목명002^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="80" _ulen="64" >
+
+SORT_SEQ^정렬순서^4^0^7^0^0^0^0
+IQRY_SEQ^조회순서^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

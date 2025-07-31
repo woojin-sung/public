@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61090" scrname="외화대체출금 계좌목록" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,331,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label10" fontsize="2" fontstyle="01" caption="입금계좌 선택" bgcolor="064:188030030" halign="1" ly_vert="1,1,309,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+		<GRID name="GrdAcntList" colcount="2" ly_vert="0,56,309,276,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-2" mask="1,0,,,1,####-####-##,0,1,1" halign="1" />
+				<LABEL name="th_cell0" caption="계좌번호" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-2" />
+				<LABEL name="th_cell1" caption="상품명" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO initrowcount="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="120,188" ly_vert_visible="0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="120" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="188" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2179" _ulen="2137" >
+'===========================================================================
+' 외화대체출금 계좌목록 팝업화면
+' 2023.02.28 장원혁 신규작성
+
+Dim g_szAcno
+Dim g_szAsno
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    szAcnt = Form.GetOpenLinkData()
+    
+    g_szAcno = Mid(szAcnt,1,8)
+    g_szAsno = Mid(szAcnt,9,2)
+    
+    DATAMANAGER.RequestTranData("obpds_srvc_182r")
+    
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+    If szTranID == "obpds_srvc_182r" Then
+
+        For i = 0 To DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1") - 1
+            szAcno = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ACNO" , i)
+            szAsno = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ASNO" , i)
+            szPrnm = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "PRNM" , i)
+	    
+            GrdAcntList.AddRow()
+	    
+            GrdAcntList.SetCellData("bd_cell0" , i , szAcno .. szAsno)
+            GrdAcntList.SetCellData("bd_cell1" , i , szPrnm)
+	    
+        Next
+        
+    End If
+    
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+    If szTranID == "obpds_srvc_182r" Then
+    
+        DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "IQRY_CLS_CODE" , 0 , "1")
+        DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "IQRY_CSNU"     , 0 , 0)
+        DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNO"          , 0 , g_szAcno)
+        DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ASNO"          , 0 , g_szAsno)
+	
+    End If
+    
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+    Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub GrdAcntList_OnClickUp(lRow, szCellID)
+
+    szSelectAcnt = GrdAcntList.GetCellData("bd_cell0" , lRow)
+    Form.SendReturnToParent("MNRC_ACNT" , szSelectAcnt)
+    Form.CloseForm()
+    
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_182r" trcode="obpds_srvc_182r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_182r" title="외화대체계좌 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="165" _ulen="125" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+IQRY_CSNU^조회건수^11^0^7^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="100" _ulen="72" >
+
+CNFT_ACNO^상대계좌번호^8^0^0^0^0^0^0
+CNFT_ASNO^상대계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="143" _ulen="109" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="168" _ulen="132" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

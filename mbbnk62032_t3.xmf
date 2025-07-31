@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="62032" scrname="다른 금융기관 계좌관리_이메일변경" version="2" writer="아이티젠 관리자" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,526,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnMod" caption="변경" btnimage="btn_01.9" ly_vert="118,386,150,44,1" />
+		<LABEL name="Label1" fontstyle="01" caption="현재 이메일주소" ly_vert="13,35,128,32,1" />
+		<LABEL name="Label0" fontstyle="01" caption="변경할 이메일주소" ly_vert="13,86,139,32,1" />
+		<EDIT name="edtEmailAddr1" enable="0" imetype="0" maxlength="200" recvdatafield="obtss_opnf_011a.OutBlock1.EMAIL_ADDR" ly_vert="175,30,166,39,1" import="0,1,2" />
+		<EDIT name="edtEmailAddr2" imetype="3" maxlength="0" ly_vert="175,82,166,38,1" />
+		<LABEL name="Label2" fgcolor="146:124124124" fontsize="-3" caption="* 오픈뱅킹 이용계좌의 금융거래정보제공사실 통보를 위한 정보로 " ly_vert="12,150,354,23,1" />
+		<LABEL name="Label3" fgcolor="146:124124124" fontsize="-3" caption="  당사 고객정보는 변경되지 않으오니, 유의하시기 바랍니다." ly_vert="14,167,339,23,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6644" _ulen="6060" >
+'===========================================================================
+' 화 면 명: 다른 금융기관 계좌관리_계좌별명
+' 화면설명: 
+' 작    성: 2020.10.12 송기영
+' 수    정:
+'===========================================================================
+' 2021.10.08. 김효준 v001 : 오픈뱅킹_이용재동의여부 조회&등록 추가
+'============================================================================
+'***************************************************************************
+'     G L O B A L   V A R I A B L E
+'***************************************************************************
+Dim g_szID         '사용자 아이디
+
+Dim DrngEmail
+Dim BankCode
+Dim BankAcno
+Dim OpnTimsNo
+ 
+Dim g_NxetPrgsYn '다음진행여부 v001
+Dim g_AgrmYn     '재동의여부   v001
+Dim g_ProsAbleYn '처리가능여부 v001
+Dim g_recv_data  '수신데이터   v001
+'============================================================================
+Sub Form_OnFormInit()
+
+     g_szID = Form.GetSharedData("&USER_ID", false )
+     
+	'v001
+	if Form.GetSharedData("62000_AGRMYN_SKIP" , false) = "Y" THEN
+	    '정상진행
+	else	
+		DATAMANAGER.RequestTranData( "obtss_opnf_047r" ) '오픈뱅킹_이용재동의여부조회
+	end if
+End Sub
+
+
+'v001
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID)
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+		
+	if szTranID == "obtss_opnf_047r" then	'오픈뱅킹_이용재동의여부조회
+		DATAMANAGER.SetDataValue( 0, "obtss_opnf_047r", "InBlock1", "PROS_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "obtss_opnf_047r", "InBlock1", "ELFN_ID"       , 0 , g_szID )
+	end if
+	
+	if szTranID == "obtss_opnf_048a" then	'오픈뱅킹_이용재동의여부관리
+		DATAMANAGER.SetDataValue( 0, "obtss_opnf_048a", "InBlock1", "PROS_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "obtss_opnf_048a", "InBlock1", "ELFN_ID"       , 0 , g_szID )
+		DATAMANAGER.SetDataValue( 0, "obtss_opnf_048a", "InBlock1", "AGRM_YN"       , 0 , "Y")
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	If szTranID = "obtss_opnf_011a" Then 
+	
+		nCount = DATAMANAGER.GetDataCount(0, "obtss_opnf_011a", "OutBlock1")
+		
+		if nCount > 0 then
+			Form.MsgBox("알림", "이메일 변경이 완료되었습니다.", "", 0)	
+		End if
+	elseif szTranID == "obtss_opnf_047r" then 'v001
+	    g_NxetPrgsYn  = ""
+	    g_AgrmYn      = DATAMANAGER.GetDataValue( 0, "obtss_opnf_047r", "OutBlock1" , "AGRM_YN"      , 0 ) '재동의여부
+	    g_ProsAbleYn  = DATAMANAGER.GetDataValue( 0, "obtss_opnf_047r", "OutBlock1" , "PROS_ABLE_YN" , 0 ) '처리가능여부
+
+	    '처리가능여부가 Y인경우 SharedData 등록후 다른화면에서 다시호출안하게함
+	    If g_ProsAbleYn = "Y" Then
+	    
+		    Form.SetSharedData("62000_AGRMYN_SKIP", "Y")
+	    End If
+	    
+	    If g_AgrmYn = "Y" Then
+		    Form.OpenPopup("mbbnk62000_p1" , ""  , "")
+		    g_NxetPrgsYn = "N" '팝업호출시도 일단 진행불가 > Form_OnPopupReturn 다시판단
+	    ElseIf g_AgrmYn = "N" Then
+	        g_NxetPrgsYn = "Y"
+	    ElseIf g_AgrmYn = "R" Then
+	        Form.MsgBox( "알림", "5년경과시 재가입 절차가 진행됩니다.", "", 6 )
+	        g_NxetPrgsYn = "N"
+	    End If
+	    
+        '다음진행 불가시 비활성화
+         If g_NxetPrgsYn = "N" Then
+	 
+			Form_Enable(False)
+		Else
+		    '정상진행
+	    End If
+	elseif szTranID == "obtss_opnf_048a" then 'v001
+		'정상진행
+	End If  
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError (szTranID , szErrCode , szErrMsg)
+	Dim SubMsg
+	
+	SubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if SubMsg = "" then
+		Form.MsgBox("알림", szErrMsg, 0)	
+	else
+		Form.MsgBox("알림", szErrMsg & "(" & SubMsg & ")", 0)
+	end if
+End Sub
+
+
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam) : 트리거에서 입력받은 계좌번호를 사용하여 입력 세팅
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	Dim szList
+	
+	if sEventName == "mbbnk62032_t3" then
+		g_szData = sParam
+		szList = Split(sParam, "★")
+		
+		if UBOUND(szList) < 1 then
+			exit sub
+		end if
+		
+		DrngEmail = szList(0)
+		BankCode = szList(1)
+		BankAcno = szList(2)
+		OpnTimsNo = szList(3)
+
+		edtEmailAddr1.caption = DrngEmail
+	end if
+End Sub
+
+
+
+'============================================================================
+Sub btnMod_OnClick()
+
+	DATAMANAGER.SetDataValue( 0, "obtss_opnf_011a", "InBlock1", "PROS_CLS_CODE" , 0 ,  "1" )
+	DATAMANAGER.SetDataValue( 0, "obtss_opnf_011a", "InBlock1", "ELFN_ID", 0 , g_szID)
+	DATAMANAGER.SetDataValue( 0, "obtss_opnf_011a", "InBlock1", "BANK_CODE", 0 , BankCode )
+	DATAMANAGER.SetDataValue( 0, "obtss_opnf_011a", "InBlock1", "BANK_ACNO", 0 , BankAcno )
+	DATAMANAGER.SetDataValue( 0, "obtss_opnf_011a", "InBlock1", "OPN_TIMS_NO", 0 , OpnTimsNo )
+	DATAMANAGER.SetDataValue( 0, "obtss_opnf_011a", "InBlock1", "EMAIL_ADDR", 0 , edtEmailAddr2.caption)
+	
+	DATAMANAGER.RequestTranData("obtss_opnf_011a")
+	
+	Form.triggerEvent("#", "mbbnk62032_t3", edtEmailAddr2.caption)
+	
+End Sub
+
+'v001
+'============================================================================
+' Form_OnPopupReturn
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	If sKeyName == "mbbnk62000_p1" then
+	     
+		If sRet == "Y" then 'Y:재동의 N:취소
+		
+			Form_Enable(True)
+			
+			DATAMANAGER.RequestTranData( "obtss_opnf_048a" )
+		Else
+		     '취소시도 처리가능여부값에 따라 진행
+			If g_ProsAbleYn = "Y" Then
+				
+				Form_Enable(True)			
+			Else
+			
+				Form_Enable(False)
+			End If
+		End If
+	End If
+     
+End Sub
+
+
+'v001
+'============================================================================
+' Form_Enable
+'============================================================================
+Function Form_Enable(EnableYn)
+    if EnableYn = True then
+    
+		btnMod.enable         = True '편집
+		edtEmailAddr2.enable  = True '변경할이메일주소
+				
+    elseif EnableYn = False then
+    
+		btnMod.enable         = False '편집
+		edtEmailAddr2.enable  = False '변경할이메일주소
+    end if
+End Function
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtss_opnf_011a" trcode="obtss_opnf_011a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_opnf_047r" trcode="obtss_opnf_047r" compress="1" encryption="1" />
+			<TRAN tranid="obtss_opnf_048a" trcode="obtss_opnf_048a" compress="1" encryption="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtss_opnf_011a" title="오픈뱅킹_타행계좌이메일변경" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="305" _ulen="231" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+BANK_ACNO^은행계좌번호^16^0^0^0^0^0^0
+OPN_TIMS_NO^오픈뱅킹회차번호^3^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="174" _ulen="128" >
+
+API_TLMS_CLCD^API전문구분코드^3^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_opnf_047r" title="오픈뱅킹_이용재동의여부조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="126" _ulen="98" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="89" _ulen="69" >
+
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+PROS_ABLE_YN^처리가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_opnf_048a" title="오픈뱅킹_이용재동의여부관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="162" _ulen="126" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

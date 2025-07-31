@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="63010" scrname="단말등록 안내 팝업" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image0" imgpath="popup_bg.9" ly_vert="0,378,375,259,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="5" outline="0000" designorder="1" ly_vert="1,452,375,116,1" >
+			<COL_INFO ly_vert_width="375" />
+			<ROW_INFO ly_vert_height="27,27,8,27,27" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" caption="비밀번호만 입력해도 이체가 가능해졌어요." impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" caption="(1일 500만원 한도)" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" caption="보안강화 및 본인확인을 위해" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,0" caption="이용기기 지정 후 이용하시겠어요?" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="간편해진 이체를 이용해보세요." halign="1" ly_vert="0,390,375,57,1" />
+		<BUTTON name="btnCancel" caption="나중에 이용하기" fgcolor="100:102102102" bgcolor="049:000000000" fontsize="1" fontstyle="01" btnimage="btn_27.9" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnConfirm" caption="등록 후 시작하기" bgcolor="049:000000000" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="187,597,188,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1533" _ulen="1533" >
+--===========================================================================
+--===========================================================================
+
+Dim g_SuccYn
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_SuccYn = "N"
+	
+	saveDate = Form.GetSharedData("&HOST_DATE", false )
+	Form.SaveConfigData("NoticeSetting", "notice_simpletrans", saveDate)
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnConfirm_OnClick()
+	Form.OpenFramePopup("mbonl86011" , "mbbnk63010" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+    Form.SendReturnToParent("TERM_REG_SIMPLE_SUCCESS" , g_SuccYn)
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "63010_CLOSE" then
+	    g_SuccYn = "Y"
+		Form.CloseForm()
+	end If
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+
+    If sKey == "&LOGIN_AUTH" Then
+        
+        If sValue == "0" Or sValue == "1" Then
+            Form.CloseForm()
+        End If
+    
+    End If
+
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

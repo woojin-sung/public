@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61080" scrname="자주쓰는은행계좌등록_등록" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,318,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label1" fgcolor="065:102102102" fontsize="-2" caption="금융기관" ly_vert="25,65,100,39,1" />
+		<COMBO name="cmbBank" enable="0" visible="0" ly_vert="324,75,190,39,0" />
+		<LABEL name="Label2" fgcolor="065:102102102" fontsize="-2" caption="입금계좌" ly_vert="25,110,100,39,1" />
+		<LABEL name="Label3" fgcolor="065:102102102" fontsize="-2" caption="수취인" ly_vert="25,155,100,39,1" />
+		<LABEL name="Label4" fgcolor="065:102102102" fontsize="-2" caption="계좌별칭" ly_vert="25,200,100,39,1" />
+		<EDIT name="edtAccount" enable="0" imetype="1" hintcaption="계좌번호 직접 입력" ly_vert="102,110,182,39,1" />
+		<BUTTON name="btnAccountSearch" caption="조회" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="227,155,56,39,1" />
+		<EDIT name="edtRmtName" enable="0" imetype="0" ly_vert="102,155,120,39,1" />
+		<EDIT name="edtNickName" fonttype="3" imetype="0" maxlength="20" hintcaption="최대 10자 입력 가능" ly_vert="102,200,182,39,1" />
+		<BUTTON name="btnEnroll" caption="등록" fontstyle="01" btnimage="btn_01.9" ly_vert="157,254,127,39,1" />
+		<EDIT name="edtRmtName2" enable="0" fonttype="3" imetype="0" ly_vert="102,155,182,39,1" />
+		<BUTTON name="btnModify" visible="0" caption="수정" fontstyle="01" btnimage="btn_01.9" ly_vert="157,254,127,39,0" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" fontstyle="01" btnimage="btn_02.9" ly_vert="25,254,127,39,1" />
+		<EDIT name="edtBank" enable="0" fonttype="3" imetype="0" hintcaption="금융기관 선택" clearall="0" ly_vert="102,65,182,39,1" />
+		<IMAGE name="Image0" imgpath="icon_main_10" ly_vert="251,68,32,32,1" />
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="자주쓰는 계좌등록" bgcolor="064:197070070" halign="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+		<ACCOUNT name="Account0" visible="0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,200" etcfunctions="" ly_vert="356,147,150,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="14160" _ulen="13092" >
+'============================================================================
+' 01. 화 면 명 : 자주쓰는은행계좌등록_등록
+' 02. 화면설명 : 자주쓰는은행계좌등록_등록
+' 03. 작    성 : 2016.02.18 ~ 최지희
+'============================================================================
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim szData, szList
+Dim g_szUserJumin	'실명인증번호(주민번호)
+Dim g_szSerialNumber	'일련번호
+Dim g_szBankCode		'은행코드
+Dim g_szRnDel		'사용여부
+Dim g_blReady
+
+g_blReady = false
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' TR_Inquiry
+'============================================================================
+Function TR_Inquiry(szTranID)
+    if szTranID == "obrtp_tact_001a" then	'등록
+	
+        DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "BSWR_CLCD"     , 0 , "01"     ) '01. 자주쓰는계좌
+        DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "CRNC_CLS_CODE" , 0 , "1"      ) '1. 원화
+        DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "ACNO"          , 0 , szList(9))
+		
+		if g_szBankCode <> "287" then
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "ONCO_OTCO_CLS_CODE" , 0 , "2")	'자타사구분코드
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "BANK_CODE", 0 , g_szBankCode)	'은행코드
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "BANK_USE_ACNO" , 0 , edtAccount.caption)	'은행사용계좌번호
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "BANK_ACNM", 0 , edtRmtName.caption)	'은행계좌명(수취인계좌명)
+		else
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "ONCO_OTCO_CLS_CODE" , 0 , "1")	'자타사구분코드
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "CNFT_ACNO" , 0 , Left(edtAccount.caption, 8))	'상대계좌번호
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "CNFT_ASNO", 0 , Right(edtAccount.caption, 2))	'상대계좌일련번호
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "USER_NAME", 0 , edtNickName.caption )	'사용자명(계좌별)
+		end if
+
+		DATAMANAGER.SetDataValue(0, "obrtp_tact_001a", "InBlock1", "USER_NAME" , 0 , edtNickName.caption)	'사용자명(계좌별칭)
+		
+		DATAMANAGER.RequestTranData("obrtp_tact_001a")
+	end if
+	
+	if szTranID == "obrtd_drng_025r" then	'수취인 조회
+		DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "ACNO" , 0 , szList(4) )'"30076921")	'계좌번호
+		DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "ASNO" , 0 , szList(2) )'"01")	'계좌일련번호
+		DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "USE_YN" , 0 , "N")	'사용여부(기본값)
+		DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "CNFT_ACNO", 0 , Left(edtAccount.caption, 8))	'상대계좌번호
+		DATAMANAGER.SetDataValue(0, "obrtd_drng_025r", "InBlock1", "CNFT_ASNO" , 0 , Right(edtAccount.caption, 2))	'상대계좌일련번호		
+		
+		DATAMANAGER.RequestTranData("obrtd_drng_025r")
+	end if
+	
+	if szTranID == "obtss_elbs_129r" then	'타행이체수취조회
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "MNRC_BANK_CODE", 0 , g_szBankCode)	'입금은행코드
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "MNRC_ACNO" , 0 , edtAccount.caption)	'입금계좌번호
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "TR_AMT" , 0 , "1")		'거래금액
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "DRNG_ACNO" , 0 , szList(4) )	'출금계좌번호
+		DATAMANAGER.SetDataValue(0, "obtss_elbs_129r", "InBlock1", "ACNT_PROD_CLS_CODE" , 0 , szList(2) )	'계좌상품구분코드
+		DATAMANAGER.SetDataValue(0,  "obtss_elbs_129r", "InBlock1", "JOB_TRNO", 0 , "031")	'작업단말번호(기본값)
+		DATAMANAGER.RequestTranData("obtss_elbs_129r")
+	end if
+	
+	if szTranID == "obrtp_tact_004a" then	'자주쓰는계좌변경
+		DATAMANAGER.SetDataValue(0,  "obrtp_tact_004a", "InBlock1", "RCNO", 0 , g_szUserJumin)	'실명확인번호
+		DATAMANAGER.SetDataValue(0, "obrtp_tact_004a", "InBlock1", "SRNO" , 0 , g_szSerialNumber)	'일련번호
+		if g_szBankCode == "287" then	'자타사구분코드
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_004a", "InBlock1", "ONCO_OTCO_CLS_CODE" , 0 , "1")
+		else
+			DATAMANAGER.SetDataValue(0, "obrtp_tact_004a", "InBlock1", "ONCO_OTCO_CLS_CODE" , 0 , "2")
+		end if
+		DATAMANAGER.SetDataValue(0,  "obrtp_tact_004a", "InBlock1", "ACNO", 0 , Account0.total)	'계좌번호
+		DATAMANAGER.SetDataValue(0, "obrtp_tact_004a", "InBlock1", "BANK_ACNM" , 0 , edtRmtName2.caption)	'은행수취계좌명
+		DATAMANAGER.SetDataValue(0, "obrtp_tact_004a", "InBlock1", "USER_NAME" , 0 , edtNickName.caption)	'계좌별칭
+		DATAMANAGER.SetDataValue(0, "obrtp_tact_004a", "InBlock1", "USE_ABLE_YN" , 0 , g_szRnDel )'"Y")				'사용가능여부
+		DATAMANAGER.SetDataValue(0, "obrtp_tact_004a", "InBlock1", "PROS_CLS" , 0 , "U" )'"Y")				'사용가능여부
+		DATAMANAGER.RequestTranData("obrtp_tact_004a")
+	end if
+End Function
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' imgClose_OnClick
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnEnroll_OnClick
+'============================================================================
+Sub btnEnroll_OnClick()
+	
+	if g_blReady == false then
+		Form.MsgBox("알림", "수취인 확인을 해주시기 바랍니다.", "", 0)
+	else
+		TR_Inquiry("obrtp_tact_001a")
+	end if
+End Sub
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	g_szUserJumin = ""	'실명인증번호(주민번호)
+	g_szSerialNumber = ""	'일련번호
+	g_szBankCode = ""		'은행코드
+	g_szRnDel = ""		'사용여부
+	
+	szData =  Form.GetOpenLinkData()
+	' enroll(modify)★주민번호★일련번호★은행명★계좌번호★수취인계좌명★계좌별칭★은행코드★사용여부
+	szList = Split(szData, "★")
+	if UBOUND(szList) < 1 then
+		exit sub
+	end if
+	
+	if szList(0) == "enroll" then
+		
+		lblTitle.caption = "자주쓰는 계좌등록" 
+		g_blReady = false
+		cmbBank.enable = false
+
+		edtBank.enable = false
+		edtAccount.enable = true
+		edtRmtName.visible = true
+		edtBank.enable = false
+		edtRmtName.enable = false
+		edtRmtName2.visible = false
+		btnAccountSearch.visible = true
+		btnEnroll.visible = true
+		btnModify.visible = false
+		
+		DATAMANAGER.RequestTranData( "obcpp_code_015r")
+		
+	elseif szList(0) == "modify" then
+		
+		lblTitle.caption = "자주쓰는 계좌수정" 
+		g_blReady = true
+		cmbBank.enable = false
+
+		edtBank.enable = false
+		Image0.visible = false
+		edtAccount.enable = false
+		edtRmtName.visible = false
+		edtRmtName2.visible = true
+		edtRmtName2.enable = false
+		btnAccountSearch.visible = false
+		btnEnroll.visible = false
+		btnModify.visible = true
+		
+		g_szUserJumin = szList(1)
+		g_szSerialNumber = szList(2)
+		edtBank.caption = szList(3)
+		edtAccount.caption = szList(4)
+		edtRmtName.caption = szList(5)
+		edtRmtName2.caption = szList(5)
+		edtNickName.caption = szList(6)
+		g_szBankCode = szList(7)
+		g_szRnDel = szList(8)
+		
+	elseif szList(0) == "link" then
+		
+		lblTitle.caption = "자주쓰는 계좌등록" 
+		g_blReady = true
+		cmbBank.enable = false
+		
+		edtBank.enable = false
+		Image0.visible = false
+		edtAccount.enable = false
+		edtRmtName.visible = false
+		edtRmtName2.visible = true
+		btnAccountSearch.visible = false
+		btnEnroll.visible = true
+		btnModify.visible = false
+		
+		g_szUserJumin = szList(1)
+		g_szSerialNumber = szList(2)
+		edtBank.caption = szList(3)
+		edtAccount.caption = szList(4)
+		edtRmtName.caption = szList(5)
+		edtRmtName2.caption = szList(5)
+		edtNickName.caption = szList(6)
+		g_szBankCode = szList(7)
+		g_szRnDel = szList(8)
+		
+	end if
+
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	if szTranID == "obrtp_tact_001a" then	'자주쓰는계좌등록조회
+		Form.MsgBox("알림", "자주쓰는계좌가 등록되었습니다.", "enrollok", 0)		
+	end if
+	 
+	if szTranID == "obrtd_drng_025r" then '수취인 조회
+		if Trim(DATAMANAGER.GetDataValue(0, "obrtd_drng_025r", "OutBlock1", "RMT_NAME", 0)) <> "" then
+			g_blReady = true
+			edtRmtName.caption = DATAMANAGER.GetDataValue(0, "obrtd_drng_025r", "OutBlock1", "RMT_NAME", 0)
+		else
+			g_blReady = false
+		end if
+	end if
+	
+	if szTranID == "obtss_elbs_129r" then
+		if DATAMANAGER.GetDataValue(0, "obtss_elbs_129r", "OutBlock1", "ACNM" , 0) <> "" then
+			g_blReady = true
+			edtRmtName.caption = DATAMANAGER.GetDataValue(0, "obtss_elbs_129r", "OutBlock1", "ACNM" , 0)
+		else
+			g_blReady = false
+		end if
+	end if
+	
+	if szTranID == "obrtp_tact_004a" then	'자주쓰는계좌등록조회
+		Form.MsgBox("알림", "자주쓰는계좌가 수정되었습니다.", "modifyok", 0)	
+	end if
+	
+	if szTranID == "obcpp_code_015r" then	'자주쓰는계좌등록조회
+		
+		nCnt = DATAMANAGER.GetDataCount( 0, "obcpp_code_015r", "OutBlock1")
+		For i=0 to nCnt -1
+		    szCd = DATAMANAGER.GetDataValue( 0 , "obcpp_code_015r", "OutBlock1", "BANK_CODE", i )
+		    szNm = DATAMANAGER.GetDataValue( 0 , "obcpp_code_015r", "OutBlock1", "BANK_NAME", i )
+			
+			cmbBank.cbadddatatext = szCd & "`" & szNm
+		Next
+		
+		'메리츠 기본갑 셋팅 이호철
+		cmbBank.cbkeydata = "287"
+		g_szBankCode = "287"
+		
+		edtBank.caption = cmbBank.caption
+		
+	end if
+	
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+    szSubErr = DATAMANAGER.GetDataMsgSubText(szTranID)
+
+    If Trim(szSubErr) == "" Then
+        Form.ShowAlert("알림", szErrMsg)
+    Else
+        Form.ShowAlert("알림", szErrMsg .. "\n(" .. szSubErr .. ")")
+    End If
+End Sub
+
+
+'============================================================================
+' btnAccountSearch_OnClick  - 조회버튼 클릭
+'============================================================================
+Sub btnAccountSearch_OnClick()
+	if g_szBankCode == "287" then
+		if Len(edtAccount.caption) < 10 then
+			Form.MsgBox("알림", "계좌번호와 계좌일련번호를 입력 해주시기 바랍니다.", "", 0)
+		else
+			TR_Inquiry("obrtd_drng_025r")
+		end if
+	else
+		TR_Inquiry("obtss_elbs_129r")
+	end if
+		
+End Sub
+
+
+'============================================================================
+' btnCancel_OnClick - 취소버튼
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+''============================================================================
+'' edtNickName_OnEditComplete
+''============================================================================
+'Sub edtNickName_OnEditComplete()
+'	if CInt(Form.GetByteLength(edtNickName.caption)) > 20 then
+'		Form.MsgBox("알림", "한글10자, 영문/숫자 20자까지 입력가능", "keypadok", 0)
+'		Form.ShowAlert("뭔가?", edtNickName.caption & " " & Left(edtNickName.caption,20))
+'		'edtNickName.caption = Left(edtNickName.caption,20)
+'	end if
+'End Sub
+'
+'============================================================================
+' Form_OnMsgBoxClose
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "enrollok" then
+		if sRet == "close" then
+			Form.CloseForm()
+			Form.SendReturnToParent("mbbnk61080_p1" , "ok")
+		end if
+	end if
+	
+	if sKeyName == "modifyok" then
+		if sRet == "close" then
+			Form.CloseForm()
+			Form.SendReturnToParent("mbbnk61080_p1" ,"ok")
+		end if
+	end if
+End Sub
+
+
+'============================================================================
+' btnModify_OnClick - 수정버튼 클릭
+'============================================================================
+Sub btnModify_OnClick()
+	TR_Inquiry("obrtp_tact_004a")
+End Sub
+
+'============================================================================
+Sub cmbBank_OnEditComplete(iIndex)
+	
+'	g_szBankCode = cmbBank.cbkeydata
+	
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.OpenPopup("mbbnk61010_p3" , "", "")
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName == "이체기관" then
+	   If sRet <> "" then
+	      tData1 = Split(sRet, "★")
+	      edtBank.caption = tData1(1)
+	      g_szBankCode = tData1(0)
+	      
+	      edtAccount.caption = ""
+	      edtRmtName.caption = ""
+	      edtNickName.caption = ""
+	      
+	   End If   
+	End If   
+End Sub
+
+'============================================================================
+Sub edtNickName_OnEditComplete()
+	szLen = Form.GetByteLength(edtNickName.caption)
+
+	if CDbl( szLen ) > 20 then
+		Form.MsgBox("알림", "한글10자, 영문/숫자 20자까지 입력가능", "keypadok", 0)
+		edtNickName.caption = ""
+		Exit Sub
+	end if
+	
+	btnEnroll.enable = true
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obrtp_tact_001a" trcode="obrtp_tact_001a" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obrtd_drng_025r" trcode="obrtd_drng_025r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_elbs_129r" trcode="obtss_elbs_129r" inputcheck="1" useattr="0" />
+			<TRAN tranid="obrtp_tact_004a" trcode="obrtp_tact_004a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_code_015r" trcode="obcpp_code_015r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obrtp_tact_001a" title="자주쓰는계좌등록 처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="526" _ulen="396" >
+
+BSWR_CLCD^업무구분코드^2^0^0^0^0^0^0
+CRNC_CLS_CODE^통화구분코드^1^0^0^0^0^0^0
+ONCO_OTCO_CLS_CODE^자사타사구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+BANK_USE_ACNO^은행사용계좌번호^20^0^0^0^0^0^0
+BANK_ACNM^은행계좌명^40^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+CNFT_ACNO^상대계좌번호^8^0^0^0^0^0^0
+CNFT_ASNO^상대계좌일련번호^2^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+BIC_CODE^BIC코드^11^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="51" _ulen="39" >
+
+IQRY_SRNO^조회일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrtd_drng_025r" title="수취인 조회 (당행이체)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="288" _ulen="212" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+USE_YN^사용여부^1^0^0^0^0^0^0
+CNFT_ACNO^상대계좌번호^8^0^0^0^0^0^0
+CNFT_ASNO^상대계좌일련번호^2^0^0^0^0^0^0
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="44" _ulen="36" >
+
+RMT_NAME^수취인명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_elbs_129r" title="타행이체수취조회(지로/예약/자?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="345" _ulen="261" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+JOB_TRNO^작업단말번호^39^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TR_AMT^거래금액^19^0^7^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+ACNT_PROD_CLS_CODE^계좌상품구분코드^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+RMRK^비고^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="216" _ulen="164" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+STDL_CNFT_BRCD^입출고상대지점코드^4^0^0^0^0^0^0
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrtp_tact_004a" title="자주쓰는계좌변경 처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="514" _ulen="388" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+ONCO_OTCO_CLS_CODE^자사타사구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+BANK_ACNM^은행계좌명^40^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+USE_ABLE_YN^사용가능여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_code_015r" title="은행명 조회(모바일 인터페이스" realdata="0" dessvr="9" >
+				<TRBLOCK name="OutBlock1" occurs="70" inout="out" _len="80" _ulen="66" >
+
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+BANK_NAME^은행명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="63010" scrname="바로출금서비스_약관동의" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,373,375,274,1" />
+		<BUTTON name="btnAllChk" btnimage="alpha" ly_vert="4,423,370,38,1" />
+		<IMAGE name="imgUIAllChk" autosize="1" imgpath="icon_chk_off.png" ly_vert="20,432,13,13,1" />
+		<LABEL name="lblUnderLine" bgcolor="027:216216216" transmode="0" ly_vert="14,468,347,1,1" />
+		<IMAGE name="imgChk0" imgpath="ic_link.9" ly_vert="20,520,342,20,1" />
+		<IMAGE name="imgChk1" imgpath="ic_link.9" ly_vert="20,555,342,20,1" />
+		<LABEL name="lblChkText0" fgcolor="127:162162162" caption="바로출금서비스 약관" ly_vert="35,520,300,20,1" />
+		<IMAGE name="imgUIChk0" autosize="1" imgpath="icon_chk_off" ly_vert="20,522,13,13,1" />
+		<IMAGE name="imgUIChk1" autosize="1" imgpath="icon_chk_off.png" ly_vert="20,557,13,13,1" />
+		<LABEL name="lblChkText1" fgcolor="127:162162162" caption="바로출금서비스 설명서" ly_vert="35,555,300,20,1" />
+		<LABEL name="lblAllText" fontsize="2" fontstyle="01" caption="모두 확인하고, 동의합니다." ly_vert="33,423,326,35,1" />
+		<LABEL name="Label0" fontstyle="01" caption="약관 및 확인사항" ly_vert="10,480,167,32,1" />
+		<LABEL name="lblTitle1" fontsize="1" caption="바로출금서비스 신청" halign="1" ly_vert="20,387,335,25,1" />
+		<BUTTON name="BtnContinue" caption="신청하기" fontsize="2" ly_vert="0,597,375,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9476" _ulen="8738" >
+'============================================================================
+' 01. 화 면 명 : 보유주식 수익 서비스 약관 동의 팝업
+' 02. 화면설명 : 보유주식 수익 서비스 약관 동의 팝업
+' 03. 작    성 : 2022.08.02 양현정
+' 04. 수    정 : 
+'
+'============================================================================
+
+Dim g_sRetData 					'리턴데이터
+Dim g_szTheme                  		'테마구분  white/black
+dim g_szUnCheckImg, g_szCheckImg	'체크이미지
+dim g_szUnCheckFg, g_szCheckFg		'체크 폰트 컬러
+Dim g_ChkAll						'전체동의여부
+Dim g_Chk1						'첫번째 약관
+Dim g_Chk2						'두번째 약관
+Dim g_ServerMode
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+'f_sGetURLTitle(iIdx) : 각 동의체크 별 타이틀 리턴
+'============================================================================
+Function f_sGetURLTitle(iIdx)
+	Dim szTitle
+	Select Case iIdx
+		Case 1
+			szTitle = "바로출금서비스 약관"
+		Case 2
+			szTitle = "바로출금서비스 설명서"
+	End Select
+	return szTitle
+End Function
+
+'============================================================================
+'f_sGetURL(iIdx) : 각 동의체크 별 안내팝업 URL 리턴
+'============================================================================
+Function f_sGetURL(iIdx)		
+	dim sURLheader, sURL
+	Select Case iIdx
+		Case 1
+			'"바로출금서비스 약관"
+			If g_ServerMode == "1" Then	'개발기
+				sURLheader = "http://testhome.imeritz.com/include/resource/comm/ctcn/files/"
+			Else
+				sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/files/"
+			End If
+			sURL = sURLheader & "meritz_yk_52.pdf"
+		Case 2
+			'"바로출금서비스 설명서"
+			If g_ServerMode == "1" Then	'개발기
+				sURLheader = "http://testhome.imeritz.com/include/resource/comm/ctcn/files/"
+				'Form.Toast(0, "해당 약관 URL 아직 없음", 0)
+			Else
+				sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/files/"
+			End If
+			sURL = sURLheader & "meritz_ts_52.pdf"
+	End Select
+	return sURL
+End Function
+
+'============================================================================
+'f_OpenChkPopup(iIdx) : 각 동의체크 별 안내팝업 호출
+'============================================================================
+Function f_OpenChkPopup(iIdx)
+	if iIdx == 0 then
+		szURL = f_sGetURL(1) & "★" & f_sGetURL(2)
+		szTitle = f_sGetURLTitle(1) & "★" & f_sGetURLTitle(2)
+			
+		'팝업 호출
+		if szURL <> "" then
+			Form.OpenPopup("mbonl88024_p7" , szURL&"♥"&szTitle, "")
+		end if		
+	else
+		Form.SetSharedData("OPEN_URL", f_sGetURL(iIdx) )
+		Form.OpenFramePopup("mbonl82020_p6" , f_sGetURLTitle(iIdx), "")	
+	end if
+End Function
+
+'============================================================================
+'f_SetBtnRegEnable() : 신청 처리 버튼 상태 결정
+'============================================================================
+Function f_SetBtnRegEnable()
+
+	g_ChkAll = "0"	
+	imgUIAllChk.imgpath = g_szUnCheckImg
+	lblAllText.fgcolor  = g_szUnCheckFg			
+	
+
+	if g_Chk1 <> "1" then
+		BtnContinue.enable = false
+		
+		if g_szTheme == "black" then
+			BtnContinue.btnimage = "btn_27.9"
+		else
+			BtnContinue.btnimage = "btn_21.9"
+		end if
+		BtnContinue.fgcolor = "269"
+		
+		if g_Chk2 <> "1" then
+			imgUIAllChk.imgpath = g_szUnCheckImg
+			lblAllText.fgcolor  = g_szUnCheckFg	
+		end if
+		
+		Exit Function	
+	end if
+	
+	if g_Chk2 <> "1" then
+		BtnContinue.enable = false
+		
+		if g_szTheme == "black" then
+			BtnContinue.btnimage = "btn_27.9"
+		else
+			BtnContinue.btnimage = "btn_21.9"
+		end if
+		BtnContinue.fgcolor = "269"
+
+		if g_Chk1 <> "1" then
+			imgUIAllChk.imgpath = g_szUnCheckImg
+			lblAllText.fgcolor  = g_szUnCheckFg	
+		end if
+		Exit Function	
+	end if	
+	
+	g_ChkAll = "1"	
+	imgUIAllChk.imgpath = g_szCheckImg
+	lblAllText.fgcolor  = g_szCheckFg			
+	
+	'신청가능
+	BtnContinue.enable = true
+	
+	BtnContinue.btnimage = "btn_20.9"
+	BtnContinue.fgcolor = "273"
+	
+	'BtnContinue.imgpath = "btn_01.9"
+	
+End Function
+
+'============================================================================
+'각 체크 별 기능 동작
+'============================================================================
+Function f_SetChkState(iIdx, bValue)
+
+	'전체동의
+	if iIdx == 0 then
+	
+		if bValue == true then	
+		
+			g_ChkAll = "1"	
+			imgUIAllChk.imgpath = g_szCheckImg
+			lblAllText.fgcolor  = g_szCheckFg			
+		
+			g_Chk1 = "1"	
+			imgUIChk0.imgpath   = g_szCheckImg
+			lblChkText0.fgcolor = g_szCheckFg
+			
+			g_Chk2 = "1"	
+			imgUIChk1.imgpath   = g_szCheckImg
+			lblChkText1.fgcolor = g_szCheckFg			
+		else
+			g_ChkAll = "0"	
+			imgUIAllChk.imgpath = g_szUnCheckImg
+			lblAllText.fgcolor  = g_szUnCheckFg			
+			
+			g_Chk1 = "0"
+			imgUIChk0.imgpath   = g_szUnCheckImg
+			lblChkText0.fgcolor = g_szUnCheckFg
+			
+			g_Chk2 = "0"
+			imgUIChk1.imgpath   = g_szUnCheckImg
+			lblChkText1.fgcolor = g_szUnCheckFg			
+		end if	
+	
+	'약관동의
+	elseif iIdx == 1 then
+	
+		if bValue == true then	
+			g_Chk1 = "1"	
+			imgUIChk0.imgpath   = g_szCheckImg
+			lblChkText0.fgcolor = g_szCheckFg
+		else
+			g_Chk1 = "0"
+			imgUIChk0.imgpath   = g_szUnCheckImg
+			lblChkText0.fgcolor = g_szUnCheckFg
+		end if		
+	
+	'핵심설명서 동의
+	elseif iIdx == 2 then
+	
+		if bValue == true then	
+			g_Chk2 = "1"	
+			imgUIChk1.imgpath   = g_szCheckImg
+			lblChkText1.fgcolor = g_szCheckFg
+		else
+			g_Chk2 = "0"
+			imgUIChk1.imgpath   = g_szUnCheckImg
+			lblChkText1.fgcolor = g_szUnCheckFg
+		end if		
+		
+	end if
+	
+	'신청버튼 활성화 여부
+	f_SetBtnRegEnable()	
+	
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+Sub Form_OnFormInitBefore()
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v005
+	
+	g_szUnCheckImg 	= "icon_chk_on.png"
+	g_szCheckImg 		= "icon_chk_off.png"
+	g_szUnCheckFg 	= "127"
+	g_szCheckFg 		= "4"	
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	'안드로이드-백버튼 작동Y
+	'부모창(mbonl88024) 백버튼N 상태에서 팝업오픈 되므로 백버튼 동작하도록 설정	
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+	g_ServerMode = Form.GetSharedData("&SERVER_MODE", false)
+
+    '테마구분 white/black
+	g_szTheme = Form.GetEnvData("common.theme")
+	
+	if g_szTheme == "black" then
+		BtnContinue.btnimage = "btn_27.9"
+	else
+		BtnContinue.btnimage = "btn_21.9"
+	end if
+	BtnContinue.fgcolor = "269"
+
+	'초기화..	
+	f_SetChkState(0, false)	
+	
+	g_sRetData = "cancel"
+	
+	'신청가능
+	BtnContinue.enable = false	
+
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbonl82020_p6" then
+		If sRet == "바로출금서비스 약관" Then
+			f_SetChkState(1, true)
+		ElseIf sRet == "바로출금서비스 설명서" Then
+			f_SetChkState(2, true)
+		End If		
+		
+	elseif sKeyName == "mbonl88024_p7" then	'전체동의
+		'전체동의 팝업
+		'if sRet == "mbonl87056_p1_All" then		
+		if sRet == "AGREE" then		
+			f_SetChkState(0, true)
+		elseif sRet == "cancel" then	
+			f_SetChkState(0, false)
+		end if			
+	end if
+End Sub
+
+'============================================================================
+Sub BtnContinue_OnClick()
+	if g_Chk1 = "1" and g_Chk2 = "1" then
+		g_sRetData = "ok"			
+	else
+		g_sRetData = "cancel"		
+	end if 
+	
+	Form.CloseForm()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'화면닫기전 안드로이드-백버튼 작동N 원복(부모화면에서 호출했던 상태로)
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+
+	Form.SendReturnToParent( "mbbnk63010_p14" , g_sRetData )	
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'여백클릭시 꺼지도록 함
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 약관 띄움
+'============================================================================
+Sub imgChk0_OnClick()	
+	if CInt(g_Chk1) == 1 then
+		f_SetChkState(1, false)
+	else
+		f_OpenChkPopup(1)
+	end if		
+End Sub
+
+'============================================================================
+' 핵심설명서 띄움
+'============================================================================
+Sub imgChk1_OnClick()	
+	if CInt(g_Chk2) == 1 then
+		f_SetChkState(2, false)
+	else
+		f_OpenChkPopup(2)
+	end if	
+End Sub
+
+'============================================================================
+' 필수약관에 모두 동의 클릭
+'============================================================================
+Sub btnAllChk_OnClick()
+	if CInt(g_ChkAll) == 1 then
+		f_SetChkState(0, false)		
+	else
+		f_OpenChkPopup(0)
+	end if		
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_168a" trcode="obpds_srvc_168a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_168a" title="주식대여 서비스 약정" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="652" _ulen="478" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+SVC_MANG_UNIT_CODE^서비스관리단위코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+INFR_MTHD_CLCD^통보방법구분코드^1^0^0^0^0^0^0
+SPF_ISSU_HLDN_YN^특정종목보유여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="123" _ulen="91" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

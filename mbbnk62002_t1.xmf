@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="62000" scrname="오픈뱅킹 서비스 이용약관 및 설명서" version="2" writer="성주혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,374,607,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,561,187,45,1" />
+		<BUTTON name="BtnOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,561,188,45,1" />
+		<CHKBUTTON name="ChkButton0" fgcolor="029:255212175" fontstyle="01" ly_vert="9,484,20,50,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="-1,-1,375,560,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1984" _ulen="1876" >
+'============================================================================
+' 01.화면명 	: 오픈뱅킹 서비스 이용약관
+' 02.화면설명	: 오픈뱅킹 서비스 이용약관
+' 03.작성	: 2020.10.07
+' 04.수정	: 
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim	g_szRet	'리턴값
+g_szRet	=	"0"
+
+Dim g_URLheader
+Dim g_ServerMode
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_ServerMode = Form.GetSharedData("&SERVER_MODE", false)
+	
+	If g_ServerMode == "1" Then	'개발기
+		g_URLheader = "http://testhome.imeritz.com/include/resource/comm/ctcn/pdf/"
+	Else
+		g_URLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/"
+	End If
+	WebView0.viewtype = 0
+	WebView0.urlpath = g_URLheader & "openbanking_info.html"	
+	
+	Form.SetScreenName("오픈뱅킹서비스 이용약관 및 설명서")
+	
+End Sub
+
+
+
+'============================================================================
+'BtnOK_OnClick
+'============================================================================
+Sub BtnOK_OnClick()
+	g_szRet	=	"1"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'BtnCancel_OnClick
+'============================================================================
+Sub BtnCancel_OnClick()
+	g_szRet	=	"0"
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("MBBNK62002_T1" , g_szRet)
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

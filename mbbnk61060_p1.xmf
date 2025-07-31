@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61060" scrname="입출금내역_상세팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<TABLE name="tbl0" insidelinecolor="102:255255255" colcount="2" rowcount="11" designorder="1" ly_vert="0,0,375,605,1" >
+			<COL_INFO ly_vert_width="125,250" />
+			<ROW_INFO ly_vert_height="55,55,55,55,55,55,55,55,55,55,55" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="거래일시" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" mask="1,0,,,1,####/##/## ##:##:##,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="계좌번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" mask="1,0,,,1,####-############,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="적요명" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="거래구분" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,3,1,3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="거래금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,4,1,4" mask="0,0,,원,0,,0,1,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,5,0,5" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="수수료" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,5,1,5" mask="0,0,,원,0,,0,1,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,6,0,6" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="상대계좌번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,6,1,6" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,7,0,7" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="거래상대명" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,7,1,7" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,8,0,8" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="잔액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,8,1,8" mask="0,0,,원,0,,0,1,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,9,0,9" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="처리자" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,9,1,9" mask="1,0,,,1,,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,10,0,10" fgcolor="096:102102102" bgcolor="066:240240240" halign="0" caption="거래번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,10,1,10" mask="0,1,,,1,,0,0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2893" _ulen="2765" >
+'============================================================================
+' 01. 화 면 명 : 입출금내역_상세팝업
+' 02. 화면설명 : 입출금내역_상세팝업
+' 03. 작    성 : 2016. 02. 24. 유창재
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_ComboIndex		'콤보선택 Index값
+Dim g_szList			'
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+''============================================================================
+'' SetTr() : TR 입력값 세팅, 조회 요청
+''============================================================================
+'Function SetTr()
+'
+'	DATAMANAGER.SetDataValue( 0 , "obrtp_tran_008r", "InBlock1", "ACNO" , 0 , szList(0))
+'	DATAMANAGER.SetDataValue( 0 , "obrtp_tran_008r", "InBlock1", "ASNO" , 0 , szList(1))
+'	DATAMANAGER.SetDataValue( 0 , "obrtp_tran_008r", "InBlock1", "IQRY_STA_DATE" , 0 , szList(2))
+'	DATAMANAGER.SetDataValue( 0 , "obrtp_tran_008r", "InBlock1", "IQRY_FIN_DATE" , 0 , szList(3))
+'	
+'	DATAMANAGER.RequestTranData( "obrtp_tran_008r" )
+'End Function
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData
+	
+	szData = Form.GetOpenLinkData()
+	
+	Form.SetScreenName("입출금내역")
+	
+	szList = Split(szData, "★")
+	
+	if UBOUND(szList) < 1 then
+		Exit sub
+	End if
+
+	for i = 0 to 10
+		tbl0.SetCellString( i , 1, Trim(szList(i)))
+	next
+
+'	SetTr()
+	
+End Sub
+
+''============================================================================
+'Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+'	
+'	if szTranID == "obrtp_tran_008r" then
+'		for i = 0 to DATAMANAGER.GetDataCount( 0 , "obrtp_tran_008r", "OutBlock1")
+'			if DATAMANAGER.GetDataValue( 0 , "obrtp_tran_008r", "OutBlock1", "MNRC_AMT" , i) == "0000000000000000000" then			'입출금 구분을 위한 조건
+'
+'				tbl0.SetCellString( 3, 1 , "출금")
+'				tbl0.SetCellBgColor( 3, 1, "11")
+'				tbl0.SetCellString( 4, 1, DATAMANAGER.GetDataValue( 0 , "obrtp_tran_008r", "OutBlock1", "DRNG_AMT" , i))
+'				tbl0.SetCellBgColor( 4, 1, "11")
+'			else
+'				tbl0.SetCellString( 3, 1, "입금")
+'				tbl0.SetCellBgColor( 3, 1, "10")
+'				tbl0.SetCellString( 4, 1, DATAMANAGER.GetDataValue( 0 , "obrtp_tran_008r", "OutBlock1", "MNRC_AMT" , i))
+'				tbl0.SetCellBgColor( 4, 1, "10")
+'			end if
+'		
+'		next
+'	end if
+'	
+'End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

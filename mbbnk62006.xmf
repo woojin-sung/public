@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="62000" scrname="휴대폰 본인인증" version="2" writer="성주혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="5" outline="0101" designorder="1" ly_vert="0,0,375,327,1" >
+			<COL_INFO ly_vert_width="130,86,159" />
+			<ROW_INFO ly_vert_height="35,96,40,105,51" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,2,0" fgcolor="096:102102102" bgcolor="066:238239240" line="0,1" caption="이동통신사" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,1" impidxs="" />
+				<CELL cell_ly="1,1,2,1" halign="0" line="0,1" impidxs="" />
+				<CELL cell_ly="0,2,2,2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,1" impidxs="" />
+				<CELL cell_ly="1,3,1,3" line="0,1" impidxs="" />
+				<CELL cell_ly="2,3,2,3" line="0,1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,1" impidxs="" />
+				<CELL cell_ly="1,4,1,4" line="0,1" impidxs="" />
+				<CELL cell_ly="2,4,2,4" line="0,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<RADIOGROUP name="RadioGroup0" buttonsnumber="6" initselectionuse="1" initselection="0" ly_vert="6,41,363,84,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="SKT" selforecolor="004:000000000" position="0,0,121,39" />
+				<RADIO no="1" text="KT" selforecolor="004:000000000" position="121,0,121,39" />
+				<RADIO no="2" text="LG U+" selforecolor="004:000000000" position="242,0,121,39" />
+				<RADIO no="3" text="SKT 알뜰폰" selforecolor="004:000000000" position="0,45,121,39" />
+				<RADIO no="4" text="KT 알뜰폰" selforecolor="004:000000000" position="121,45,121,39" />
+				<RADIO no="5" text="LG U+ 알뜰폰" selforecolor="004:000000000" position="242,45,121,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<CHKBUTTON name="ChkButton0" chkcaption="전체 약관 동의" unchkcaption="전체 약관 동의" ly_vert="6,172,134,39,1" />
+		<BUTTON name="ButtonView" caption="상세보기" fgcolor="004:000000000" fontsize="-2" btnimage="btn_02.9" ly_vert="133,179,65,23,1" />
+		<LABEL name="Label0" fontsize="-1" caption="- 개인정보수집/이용동의" ly_vert="8,206,177,32,1" />
+		<LABEL name="Label1" fontsize="-1" caption="- 서비스이용약관동의" ly_vert="184,205,177,32,1" />
+		<LABEL name="Label2" fontsize="-1" caption="- 고유식별정보처리동의" ly_vert="8,234,177,32,1" />
+		<LABEL name="Label3" fontsize="-1" caption="- 통신사이용약관동의" ly_vert="185,234,177,32,1" />
+		<BUTTON name="ButtonRequest" caption="인증번호 전송" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="242,279,127,39,1" />
+		<EDIT name="EditInput" enable="0" halign="1" imetype="1" maxlength="6" ly_vert="6,279,230,39,1" />
+		<LABEL name="Label4" caption="휴대폰 번호" ly_vert="7,136,100,32,1" />
+		<EDIT name="Edit0" imetype="1" maxlength="3" ly_vert="105,136,75,32,1" />
+		<EDIT name="Edit1" imetype="1" maxlength="4" ly_vert="185,136,85,32,1" />
+		<EDIT name="Edit2" imetype="1" maxlength="4" ly_vert="275,136,85,32,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+		<BUTTON name="ButtonOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10188" _ulen="9444" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 오픈뱅킹 휴대폰 본인인증
+' 02. 화면설명 : 오픈뱅킹 휴대폰 본인인증 (범용사용 가능)
+' 03. 작    성 : 2016.01.25 성주혁
+' 2021.01.19 : 정민영 : v0001 : obcsb_oimf_653a 변경IO 적용
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRetData
+Dim g_sUserID 	'고객ID
+Dim g_sUserName 	'고객명
+Dim g_sUserRCNO 	'고객주민번호
+Dim g_sSMSSeqNo 	'SMS인증전문일련번호
+Dim g_sSMSSeqNo1 	'SMS인증전문일련번호
+Dim g_nTryCnt  	'SMS/ARS인증검증요청횟수
+Dim G_AGREE_FILE 	'개인정보수집이용제공동의풀팝업
+Dim g_sCiKey		'CIKEY 번호
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sTemp, sRevData
+	sRevData = Form.GetOpenLinkData()
+	g_sUserID = Form.GetSharedData("&USER_ID" , false)
+	g_sUserName = Form.GetSharedData("&USER_NAME" , false)
+	g_sUserRCNO = Form.GetSharedData("&JUMIN_NUM" , false)
+	g_nTryCnt = 0
+	g_sSMSSeqNo = ""
+	g_sSMSSeqNo1 = ""
+	g_sRetData = "cancel"
+	G_AGREE_FILE = "mbonl81000_p6"
+	
+	Form.SetScreenName("휴대폰 본인인증")
+	
+	DATAMANAGER.RequestTranData( "obcsb_oimf_638r" ) '전자금융사기예방고객종합조회
+End Sub
+
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_oimf_638r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_638r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+	elseif szTranID == "obcsb_oimf_653a" then
+		'1:본인확인 2:본인확인+SMS인증  3:SMS인증
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "ATHN_BSWR_CLCD" , 0 , "4" )
+		if RadioGroup0.currentindex == "0" then 'SKT
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "MCCO_CODE" , 0 , "SKT" )
+		elseif RadioGroup0.currentindex == "1" then 'KT
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "MCCO_CODE" , 0 , "KT " )
+		elseif RadioGroup0.currentindex == "2" then 'LG U+
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "MCCO_CODE" , 0 , "LGT" )
+		elseif RadioGroup0.currentindex == "3" then 'SKT 알뜰폰
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "MCCO_CODE" , 0 , "AL " )
+		elseif RadioGroup0.currentindex == "4" then 'KT 알뜰폰
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "MCCO_CODE" , 0 , "KAL" )
+		elseif RadioGroup0.currentindex == "5" then 'LG U+ 알뜰폰
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "MCCO_CODE" , 0 , "LAL" )
+		end if		
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "CLPH_ARCD" , 0 , Edit0.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "CLPH_TONO" , 0 , Edit1.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "CLPH_SRNO" , 0 , Edit2.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_653a", "InBlock1", "SVCD" , 0 , "000" )
+	
+	elseif szTranID == "obcsb_oimf_654a" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a", "InBlock1", "PROS_CLS" , 0 , "2" )
+		'1:본인확인 2:본인확인+SMS인증  3:SMS인증
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a", "InBlock1", "ATHN_BSWR_CLCD" , 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a", "InBlock1", "NICE_ISTU_TLMS_MNNO" , 0 , g_sSMSSeqNo )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a", "InBlock1", "SMS_ATHN_NO" , 0 , EditInput.caption )
+	elseif szTranID == "obcsb_oimf_654a_1" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a_1", "InBlock1", "PROS_CLS" , 0 , "1" )
+		'1:본인확인 2:본인확인+SMS인증  3:SMS인증
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a_1", "InBlock1", "ATHN_BSWR_CLCD" , 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a_1", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a_1", "InBlock1", "NICE_ISTU_TLMS_MNNO" , 0 , g_sSMSSeqNo )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_654a_1", "InBlock1", "SMS_ATHN_NO" , 0 , "" )
+	elseif szTranID == "obcsb_oimf_655r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_655r", "InBlock1", "ATHN_BSWR_CLCD" , 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_655r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_655r", "InBlock1", "SMS_ATHN_NO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_655r", "InBlock1", "NICE_ISTU_TLMS_MNNO" , 0 , g_sSMSSeqNo1 )
+		
+	end if
+	
+	
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_oimf_638r" then
+		'Dim CLPH_ARCD, CLPH_TONO, CLPH_SRNO
+		'CLPH_ARCD = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_638r", "OutBlock1", "CLPH_ARCD" , 0 )
+		'CLPH_TONO = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_638r", "OutBlock1", "CLPH_TONO" , 0 )
+		'CLPH_SRNO = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_638r", "OutBlock1", "CLPH_SRNO" , 0 )
+		
+		'Table0.SetCellString( 6, 1, CLPH_ARCD..CLPH_TONO..CLPH_SRNO )
+	elseif szTranID == "obcsb_oimf_653a" then
+		g_sSMSSeqNo = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_653a", "OutBlock1", "NICE_ISTU_TLMS_MNNO" , 0 )
+		
+		Form.SetTimerEvent( 0 , 1, 1)
+
+	elseif szTranID == "obcsb_oimf_654a" then
+		g_sSMSSeqNo1 = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_654a", "OutBlock1", "NICE_ISTU_TLMS_MNNO" , 0 )
+
+		Form.SetTimerEvent( 1 , 1, 1)
+	elseif szTranID == "obcsb_oimf_654a_1" then
+		g_sSMSSeqNo1 = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_654a_1", "OutBlock1", "NICE_ISTU_TLMS_MNNO" , 0 )
+	elseif szTranID == "obcsb_oimf_655r" then
+		g_sCiKey	    = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_655r"	, "OutBlock1", "CIKEY_NO" , 0 )
+
+		g_sRetData = "ok" & "★" & g_sCiKey
+		'Form.SendReturnToParent("mbbnk62006", szData)
+		Form.CloseForm( )
+
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+		szErrMsg = szErrMsg.." "..sSubMsg
+	end if
+	
+	if szTranID == "obcsb_oimf_654a_1" then			'16-03-15 YCJ 수정
+		if szErrCode == "3021" then
+			Form.SetTimerEvent( 0 , 1, 1)
+		else
+			Form.MsgBox( "알림", szErrMsg, "", 6 )
+		end if
+	elseif szTranID == "obcsb_oimf_655r" then
+		if szErrCode == "3021" then
+			Form.SetTimerEvent( 1 , 1, 1)
+		else
+			Form.MsgBox( "알림", szErrMsg, "", 6 )
+		end if
+	elseif szTranID == "obcsb_oimf_653a" then
+		Form.ShowAlert( "알림", szErrMsg)
+	end if
+
+End Sub
+
+
+'============================================================================
+Sub ButtonView_OnClick()
+	Form.OpenFramePopup(G_AGREE_FILE , "" , "")
+	
+End Sub
+
+'============================================================================
+Sub ButtonRequest_OnClick()
+	if Edit0.caption == "" or Edit1.caption == "" or Edit2.caption == "" then
+		Form.MsgBox( "알림", "전화번호를 입력해주세요.", "", 6 )
+		Exit Sub
+	end if
+	
+	if ChkButton0.chksilence == "0" then
+		Form.MsgBox( "알림", "본인명의 인증서비스를 위한 약관에 전체 동의가 필요합니다. ", "", 6 )
+		Exit Sub
+	end if
+	
+	g_nTryCnt = 0
+	g_sSMSSeqNo = ""
+	g_sSMSSeqNo1 = ""
+	EditInput.enable = true
+	DATAMANAGER.RequestTranData( "obcsb_oimf_653a" ) ''인증번호요청조회
+End Sub
+'============================================================================
+Sub ButtonOK_OnClick()
+	if ChkButton0.chksilence == "0" then
+		Form.MsgBox( "알림", "본인명의 인증서비스를 위한 약관에 전체 동의가 필요합니다.", "", 6 )
+		Exit Sub
+	end if
+	
+	if g_sSMSSeqNo == "" then
+		Form.MsgBox( "알림", "[인증번호 전송]을 실행해 주세요.", "", 6 )
+		Exit Sub
+	end if
+	
+	if EditInput.caption == "" then
+		Form.MsgBox( "알림", "인증번호를 입력하세요.", "", 6 )
+		Exit Sub
+	end if
+	
+	g_nTryCnt = 0
+	DATAMANAGER.RequestTranData( "obcsb_oimf_654a" ) '613a인증확인요청
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbbnk62006" , g_sRetData)
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == G_AGREE_FILE then
+		if sRet == "ok" then
+			ChkButton0.chksilence = "1"
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	
+	if sTimerID == 0 or sTimerID == "0" then
+		Form.SetTimerEvent( 0 , 0, 1)
+		g_nTryCnt = g_nTryCnt+1
+		if g_nTryCnt > 40 then			'4~50초 정도만 적용해놓음
+			Form.ShowAlert( "알림", "본인인증확인에 실패하였습니다. 다시 시도하여 주시기 바랍니다.")
+			Exit Sub
+		end if
+			
+		DATAMANAGER.RequestTranData( "obcsb_oimf_654a_1" ) '613a인증확인요청
+	
+	elseif sTimerID == 1 or sTimerID == "1" then
+		Form.SetTimerEvent( 1 , 0, 1)
+		g_nTryCnt = g_nTryCnt+1
+		if g_nTryCnt > 40 then			'4~50초 정도만 적용해놓음
+			Form.ShowAlert( "알림", "본인인증확인에 실패하였습니다. 다시 시도하여 주시기 바랍니다.")
+			Exit Sub
+		end if
+			
+		DATAMANAGER.RequestTranData( "obcsb_oimf_655r" ) '인증번호확인요청
+	
+	end if	
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditChar(CharCode)
+	if #CharCode >=3 then
+		Edit1.SetShowKeypad( true )
+	end if
+End Sub
+
+'============================================================================
+Sub Edit1_OnEditChar(CharCode)
+	if #CharCode >=4 then
+		Edit2.SetShowKeypad( true )
+	end if
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_608r" trcode="obcsb_oimf_608r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_638r" trcode="obcsb_oimf_638r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_653a" trcode="obcsb_oimf_653a" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcsb_oimf_654a" trcode="obcsb_oimf_654a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_655r" trcode="obcsb_oimf_655r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_654a_1" trcode="obcsb_oimf_654a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_608r" title="전자금융사기예방 고객조회 종합" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="277" _ulen="213" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="30" inout="in" _len="330" _ulen="242" >
+
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+DRNG_ASNO^출금계좌일련번호^2^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+MNRC_ASNO^입금계좌일련번호^2^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1050" _ulen="772" >
+
+TERM_DSGT_STPL_YN^단말지정약정여부^1^0^0^0^0^0^0
+SPLM_ATHN_STPL_YN^추가인증약정여부^1^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TLPH_SRNO^자택전화일련번호^4^0^0^0^0^0^0
+WRPL_TLPH_ARCD^직장전화지역번호^4^0^0^0^0^0^0
+WRPL_TLPH_TONO^직장전화국번호^4^0^0^0^0^0^0
+WRPL_TLPH_SRNO^직장전화일련번호^4^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+ACML_TR_PBMN^누적거래대금^19^0^7^0^0^0^0
+UI_SPLM_YN^UI추가여부^1^0^0^0^0^0^0
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+REG_YN^등록여부^1^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+UI_CUST_ATHN_NO^UI고객인증번호^6^0^0^0^0^0^0
+UI_CUST_ATHN_NO2^UI고객인증번호2^6^0^0^0^0^0^0
+SVC_ECPT_CLS_CODE^서비스예외구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="10" inout="out" _len="257" _ulen="201" >
+
+TERM_NAME^단말명^30^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+REG_EMPNO^등록직원번호^9^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_638r" title="전자금융사기예방 고객조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="376" _ulen="290" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="30" inout="in" _len="330" _ulen="242" >
+
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+DRNG_ASNO^출금계좌일련번호^2^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+MNRC_ASNO^입금계좌일련번호^2^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1142" _ulen="840" >
+
+TERM_DSGT_STPL_YN^단말지정약정여부^1^0^0^0^0^0^0
+SPLM_ATHN_STPL_YN^추가인증약정여부^1^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TLPH_SRNO^자택전화일련번호^4^0^0^0^0^0^0
+WRPL_TLPH_ARCD^직장전화지역번호^4^0^0^0^0^0^0
+WRPL_TLPH_TONO^직장전화국번호^4^0^0^0^0^0^0
+WRPL_TLPH_SRNO^직장전화일련번호^4^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+ACML_TR_PBMN^누적거래대금^19^0^7^0^0^0^0
+UI_SPLM_YN^UI추가여부^1^0^0^0^0^0^0
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+REG_YN^등록여부^1^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+UI_CUST_ATHN_NO^UI고객인증번호^6^0^0^0^0^0^0
+UI_CUST_ATHN_NO2^UI고객인증번호2^6^0^0^0^0^0^0
+SVC_ECPT_CLS_CODE^서비스예외구분코드^1^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="10" inout="out" _len="309" _ulen="243" >
+
+TERM_NAME^단말명^30^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+REG_EMPNO^등록직원번호^9^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="111" _ulen="85" >
+
+TOTAL_TACT_AMT^총이체금액^19^0^7^0^0^0^0
+SECU_MDIA_EXLS_YN^보안매체제외여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_653a" title="NICE 휴대폰 인증 전송 요청(NEW" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="717" _ulen="543" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_MNRC_BANK_NAME^UI입금은행명^40^0^0^0^0^0^0
+RMT_NAME^수취인명^40^0^0^0^0^0^0
+UI_TOTAL_CSNU^UI총건수^3^0^0^0^0^0^0
+UI_AMT_SMTN^UI금액합계^19^0^7^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="85" _ulen="57" >
+
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_654a" title="NICE휴대폰 인증확인 요청전송(N" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="413" _ulen="305" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+SMS_ATHN_NO^SMS인증번호^8^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="85" _ulen="57" >
+
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_655r" title="NICE 휴대폰 인증 결과검증(NEW)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="413" _ulen="305" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+SMS_ATHN_NO^SMS인증번호^8^0^0^0^0^0^0
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="129" _ulen="103" >
+
+MSG_DATA^메시지데이터^100^0^0^0^0^0^0
+RSMS_TMNU^재송신횟수^4^0^7^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

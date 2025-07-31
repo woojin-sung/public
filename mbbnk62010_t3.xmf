@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="62010" scrname="메리츠로잔액모으기 4단계" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,768,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="입금계좌" ly_vert="18,100,84,32,1" />
+		<LABEL name="Label1" caption="입금금액" ly_vert="18,142,84,32,1" />
+		<GRID name="Grid0" colcount="3" ly_vert="0,199,375,149,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" autofontsize="1" />
+				<LABEL name="th_cell0" caption="출금계좌" halign="1" />
+				<LABEL name="bd_cell1" mask="0,0,,,0,,0,1,1" halign="2" autofontsize="1" />
+				<LABEL name="th_cell1" caption="출금액" halign="1" />
+				<LABEL name="bd_cell2" halign="1" autofontsize="1" />
+				<LABEL name="th_cell2" caption="결과" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" initrowcount="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="177,104,93" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="177" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="104" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="93" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell2" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="Label3" fontstyle="01" caption="성공 0건," ly_vert="27,374,68,32,1" />
+		<LABEL name="Label4" fgcolor="006:213049051" fontstyle="01" caption="실패 0건" ly_vert="109,374,68,32,1" />
+		<LABEL name="Label5" caption="처리 완료되었습니다." ly_vert="191,374,178,32,1" />
+		<LABEL name="Label6" caption="이체 결과를 확인하시기 바랍니다." ly_vert="27,401,325,32,1" />
+		<BUTTON name="BtnCncl" caption="처음으로" fgcolor="095:000000000" bgcolor="000:255255255" ly_vert="130,462,114,39,1" />
+		<LABEL name="LblTitle2" fontstyle="01" caption="잔액모으기 이체결과" ly_vert="6,35,363,32,1" />
+		<LABEL name="LblAcnt" halign="2" autofontsize="1" ly_vert="98,100,249,32,1" />
+		<LABEL name="LblMnrcAmt" halign="2" autofontsize="1" ly_vert="98,142,249,32,1" />
+		<IMAGE name="Image0" imgpath="title_4step_cut_04_on.png" ly_vert="6,6,363,30,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2857" _ulen="2749" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 오픈뱅킹_한번에 잔액 모으기 1단계
+' 02. 화면설명 : 한번에 잔액 모으기 1단계
+' 03. 작    성 : 2020.10.12 장원혁
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'전역 변수 선언
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    szAcnt = Form.GetSharedData("mbbnk62010_MNRC_ACNO" , False )
+    
+    LblAcnt.caption = szAcnt
+
+    Dim szList
+
+    szData = Form.GetSharedData("mbbnk62010_MultiRowData" , False)
+       
+    szList = Split(szData, "●")
+    If UBOUND(szList) < 1 then
+        Exit Sub
+    End If
+    
+    MNRC_AMT = 0
+    
+    For i = 0 To 4
+        CurrentData = Split(szList(i),"★")
+        'If UBOUND(szList(i)) < 1 then
+            'Exit Sub
+        'End If
+        Grid0.AddRow()
+        Grid0.SetCellData("bd_cell0" , i , CurrentData(0))
+        Grid0.SetCellData("bd_cell1" , i , CurrentData(1))
+	
+        MNRC_AMT = MNRC_AMT + Grid0.GetCellData("bd_cell1", i)
+	
+    Next
+    
+    LblMnrcAmt.caption = FormatNumber(MNRC_AMT, 0) & "원"
+    
+    szData = Form.GetSharedData("mbbnk62010_RSLT_CODE" , False )
+
+    CurrentData = Split(szData,"★")
+    If UBOUND(CurrentData) < 1 then
+       Exit Sub
+    End If
+
+    Grid0.SetCellData("bd_cell2" , 0 , CurrentData(0))
+    Grid0.SetCellData("bd_cell2" , 1 , CurrentData(1))
+    Grid0.SetCellData("bd_cell2" , 2 , CurrentData(2))
+    Grid0.SetCellData("bd_cell2" , 3 , CurrentData(3))
+    Grid0.SetCellData("bd_cell2" , 4 , CurrentData(4))
+    
+    SUCC_CNT = 0
+    FAIL_CNT = 0
+    
+    For i = 0 To 4 
+        If Grid0.GetCellData("bd_cell2" , i) = "정상" Then
+	        SUCC_CNT = SUCC_CNT + 1
+        ElseIf TRIM(Grid0.GetCellData("bd_cell2" , i)) <> "" Then
+	        FAIL_CNT = FAIL_CNT + 1
+        End If
+    Next
+    
+    Label3.Caption = "성공 " & SUCC_CNT & "건"
+    Label4.Caption = "실패 " & FAIL_CNT & "건"
+    
+End Sub
+
+'============================================================================
+Sub BtnCncl_OnClick()
+     Form.SendReturnToParent("CLOSE_YN" , "Y")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("CLOSE_YN" , "Y")
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obrtp_sptx_001r" trcode="obrtp_sptx_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obrtp_sptx_002a" trcode="obrtp_sptx_002a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obrtp_sptx_001r" title="부동산펀드 잔여한도 및 사용현?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="111" _ulen="83" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="295" _ulen="219" >
+
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+UI_TXCM_JOIN_AMT^UI세금우대가입금액^11^0^7^0^0^0^0
+UI_TXCM_USE_AMT^UI세금우대사용금액^11^0^7^0^0^0^0
+UI_TXCM_RMNN_AMT^UI세금우대잔여금액^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="385" _ulen="279" >
+
+JOIN_LIMT_AMT^가입한도금액^19^0^7^0^0^0^0
+UI_SVNG_LIMT_UNSD_AMT^UI저축한도미사용금액^19^0^7^0^0^0^0
+KFB_TRNM_BRCD^은행연합회전송지점코드^7^0^0^0^0^0^0
+TXCM_DPLC_ACNT_YN^세금우대중복계좌여부^1^0^0^0^0^0^0
+TXCM_TRPR_CLS_CODE^세금우대대상자구분코드^1^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+ENTP_NAME^업체명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="257" _ulen="189" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+UI_TXCM_JOIN_AMT^UI세금우대가입금액^11^0^7^0^0^0^0
+UI_TXCM_USE_AMT^UI세금우대사용금액^11^0^7^0^0^0^0
+UI_TXCM_RMNN_AMT^UI세금우대잔여금액^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="45" _ulen="33" >
+
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrtp_sptx_002a" title="부동산펀드 은행연합회 세금우대" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="255" _ulen="191" >
+
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+JOB_CLS_CODE^작업구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+APLT_LIMT_AMT^신청한도금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+NRML_YN^정상여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

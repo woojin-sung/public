@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="62010" scrname="메리츠로잔액모으기 2단계" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,789,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label2" fgcolor="006:213049051" fontsize="-1" fontstyle="01" caption="알려드립니다." ly_vert="18,180,298,23,1" />
+		<LABEL name="Label3" fgcolor="147:000000000" fontsize="-1" caption="- 오픈뱅킹 이용등록된 여러 계좌에서 한 번에 출금하여" ly_vert="18,213,341,23,1" />
+		<LABEL name="Label4" fgcolor="147:000000000" fontsize="-1" caption="메리츠증권의 본인 계좌로 모을 수 있습니다." ly_vert="28,230,303,23,1" />
+		<LABEL name="Label5" fgcolor="147:000000000" fontsize="-1" caption="- 다른 금융기관의 계좌를 선택하여 모으실 금액을" ly_vert="18,247,341,23,1" />
+		<LABEL name="Label6" fgcolor="147:000000000" fontsize="-1" caption="입력하시기 바랍니다." ly_vert="28,264,341,23,1" />
+		<LABEL name="Label7" fgcolor="147:000000000" fontsize="-1" caption="- 계좌 선택은 최대 5개까지 가능합니다." ly_vert="18,281,341,23,1" />
+		<LABEL name="Label8" fgcolor="147:000000000" fontsize="-1" caption="- 한번에 모으기 1일 최대한도는 1,000만원입니다." ly_vert="18,298,341,23,1" />
+		<COMBO name="Account" ly_vert="36,97,302,39,1" />
+		<LABEL name="LblTitle2" fontstyle="01" caption="입금계좌" ly_vert="6,35,363,32,1" />
+		<BUTTON name="BtnCnfr" caption="확인" fontstyle="01" btnimage="btn_05.9" ly_vert="192,409,114,39,1" />
+		<BUTTON name="BtnCncl" caption="취소" fgcolor="095:000000000" bgcolor="000:255255255" ly_vert="68,409,114,39,1" />
+		<IMAGE name="Image0" imgpath="title_4step_cut_02_on.png" ly_vert="6,6,363,30,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3329" _ulen="3245" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 오픈뱅킹_한번에 잔액 모으기 2단계
+' 02. 화면설명 : 한번에 잔액 모으기 2단계
+' 03. 작    성 : 2020.10.12 장원혁
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'전역 변수 선언
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    Form.SetSharedData("CLOSE_YN" , "Y")
+    loginID = Form.GetSharedData("&USER_ID", false )
+    DATAMANAGER.SetDataValue(0, "obcsb_efif_021r" , "InBlock1" , "IQRY_CLS_CODE" , 0 , "2")
+    DATAMANAGER.SetDataValue(0, "obcsb_efif_021r" , "InBlock1" , "ELFN_ID"       , 0 , loginID)
+    DATAMANAGER.SetDataValue(0, "obcsb_efif_021r" , "InBlock1" , "VLTN_ACMP_YN"  , 0 , "N")
+    DATAMANAGER.RequestTranData("obcsb_efif_021r")
+    
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+    If szTranID = "obcsb_efif_021r" Then
+    
+        USER_NAME = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "CUST_ABWR_NAME" , 0)
+	   Form.SetSharedData("mbbnk62010_USER_NAME" , USER_NAME)
+       
+        For i = 0 To DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1") - 1
+	
+            SELF_ACNT_YN = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "SELF_ACNT_YN"  , i)
+	    
+            If SELF_ACNT_YN == "Y" Then
+	    
+                ACNO      = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "REG_ACNO"  , i)
+                ASNO      = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "REG_ASNO"  , i)
+                PRCD_NAME = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "UI_INPR_NAME" , i)
+	    
+                Form.SetCtlProp("Account", "cbadddatatext", Left(ACNO,4) & "-" & Right(ACNO,4) & "-" & ASNO & " " & PRCD_NAME)	    
+	    
+            End If
+	    
+        Next
+	  
+    End If
+    
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+    If sKeyName = "CLOSE_YN" Then
+        If sRet = "Y" Then
+            Form.SendReturnToParent("CLOSE_YN" , "Y")
+            Form.CloseForm()
+        End If
+    End If
+    
+End Sub
+
+'============================================================================
+Sub BtnCnfr_OnClick()
+    Form.SetSharedData("mbbnk62010_MNRC_ACNO" , Account.caption)
+
+    Form.OpenFramePopup("mbbnk62010_t2" , "" , "")
+End Sub
+
+'============================================================================
+Sub BtnCncl_OnClick()
+    Form.SendReturnToParent("CLOSE_YN" , "Y")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("CLOSE_YN" , "Y")
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_efif_021r" trcode="obcsb_efif_021r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_efif_021r" title="HTS사용등록계좌정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="228" _ulen="172" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+VLTN_ACMP_YN^평가수행여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="350" inout="out" _len="1143" _ulen="859" >
+
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+REG_ACNO^등록 계좌번호^8^0^0^0^0^0^0
+REG_ASNO^등록 계좌일련번호^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+REG_DATE^등록 일자^8^0^0^0^0^0^0
+SCR_EXRS_YN^화면 표시 여부^1^0^0^0^0^0^0
+SELF_ACNT_YN^본인 계좌 여부^1^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+PRCD_NAME^상품코드 명^40^0^0^0^0^0^0
+PROD_CLS_NAME^상품 구분 명^40^0^0^0^0^0^0
+INPR_BKKP_NAME^개별상품부기명^40^0^0^0^0^0^0
+IQRY_PRTY_RANK^조회우선순위^11^0^7^0^0^0^0
+VLTN_AMT^평가금액^19^0^7^0^0^0^0
+DRNG_ABLE_AMT^출금가능금액^19^0^7^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+FNPR_EXUS_YN^금융상품전용여부^1^0^0^0^0^0^0
+ISSU_DETL_DVCD^종목세부분류코드^2^0^0^0^0^0^0
+UI_INPR_NAME^UI개별상품명^80^0^0^0^0^0^0
+OLD_PRCD^구상품코드^3^0^0^0^0^0^0
+INVT_TRGT_RSTC_YN^투자대상제한여부^1^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌상태코드^1^0^0^0^0^0^0
+UI_BANK_OPNG_YN^UI은행개설여부^1^0^0^0^0^0^0
+LNKD_BANK_CLS_CODE^연계은행구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

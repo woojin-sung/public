@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="61100" scrname="대체출고_전자서명/보안매체팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,557,187,50,1" />
+		<LINKFORM name="LinkForm0" ly_vert="20,10,335,250,1" />
+		<BUTTON name="btnOK" caption="확인" btnimage="btn_20.9" ly_vert="186,557,190,51,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="14114" _ulen="12610" >
+'--===========================================================================
+' 01. 화 면 명 : 당사/타사대체출고_잔고조회/추가 팝업
+' 02. 화면설명 : 당사/타사대체출고_잔고조회/추가 팝업
+' 03. 작    성 : 2022.03.28 김수진 
+' 04. 수    정 : 
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szCertUserType
+Dim g_szMdiaSkipYn
+
+Dim g_szSpinCertYn
+Dim g_szBioCertYn
+
+Dim g_szOtpTrMsg
+Dim g_szBioTrMsg
+Dim g_szWithdrawAcntNo		'출금계좌번호
+Dim g_szBankName			'입금계좌은행명
+Dim g_szRcvnAcntNo		'입금계좌번호
+Dim g_szRcvnAcntName		'입금계좌명
+Dim g_szPswd				'비밀번호
+Dim g_szType 				'당사/타사구분값
+Dim g_szFee				'수수료
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	
+	DIm szData, tList
+	szData = Form.GetOpenLinkData()
+	tList = Split(szData, "★")
+	
+	If UBOUND(tList) < 1 Then
+		Exit Sub
+	End If
+	
+	g_szType             	= tList(0) '당사/타사구분값
+	g_szWithdrawAcntNo   	= tList(1) '출고계좌번호
+	g_szBankName    		= tList(2) '입고계좌은행명
+	g_szRcvnAcntNo       	= tList(3) '입고계좌번호
+	g_szRcvnAcntName     	= tList(4) '입고계좌명
+	g_szFee				= tList(5) '수수료
+	g_szPswd             	= tList(6) '비밀번호
+'	g_szTrAmt		   	= tList(6) '출고금액 ?? < 확인필요
+	
+	if g_szFee == "" or g_szFee == null then
+		g_szFee = "0"
+	end if
+	
+	If g_szType == "3" Then
+		Form.SetScreenName("당사대체출고")
+	Else
+		Form.SetScreenName("타사대체출고")
+	End If
+
+	
+	g_szCertUserType = Form.GetSharedData("&CERT_USE_TYPE", 0 )
+	'보안매체 skip 여부
+	g_szMdiaSkipYn = ""
+	g_szMdiaSkipYn = Form.GetSharedData("61050_SMDIA_SKIP" , TRUE)    
+	g_szSpinCertYn = "N"
+	g_szBioCertYn = "N"    
+
+	g_szOtpTrMsg = ""
+'	g_szOtpTrMsg = g_szBankName & "#" & g_szRcvnAcntNo & "#" & g_szRcvnAcntName & "#" & FormatNumber(CDbl(g_szTrAmt), 0, 0, 0, -1) & "원#"
+	g_szOtpTrMsg = g_szBankName & "#" & g_szRcvnAcntNo & "#" & g_szRcvnAcntName 
+	Form.SetSharedData("OTP_TR_MSG_1" , g_szOtpTrMsg)
+	
+	'3 -bio 인증 '4 - 공동인증 5-메리츠사설인증
+	if g_szCertUserType == "3" OR g_szCertUserType == "4" OR g_szCertUserType == "5"  Then	
+		g_szBioTrMsg = ""
+'		g_szBioTrMsg = "대체출고내역\n" & "출고기관 : " & "메리츠증권" & "\n" & "입금계좌 : " & g_szRcvnAcntNo & "\n" & "예금주명 : " & g_szRcvnAcntName & "\n" & "이체금액 : " & FormatNumber(CDbl(g_szTrAmt), 0, 0, 0, -1) & "원\n" 
+		g_szBioTrMsg = "대체출고내역\n" & "출고기관 : " & g_szBankName & "\n" & "입금계좌 : " & g_szRcvnAcntNo & "\n" & "예금주명 : " & g_szRcvnAcntName 
+		Form.SetSharedData("BIO_TR_MSG_1" , g_szBioTrMsg)
+	End if
+	
+	DATAMANAGER.RequestTranData("obcsb_oimf_625r")
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn 
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	' 간편인증 보안매체 추가
+	'==================
+	If sKeyName == "mhetc90060_p9" Then	'보안카드(보안매체1)
+		If sRet == "ok" Then			'성공
+			Form.OpenPopup("mhetc90060_px", "", "")	
+		Else 					'실패
+			Exit Sub
+		End If	
+	End If	
+	
+	if sKeyName == "mhetc90060_pb" Then	'일반/스마트OTP
+		if sRet == "ok" Then			'성공
+			Form.OpenPopup("mhetc90060_px", "", "")
+		Else						'실패		
+			Exit Sub
+		End If
+	End If
+	'==================
+	
+	if sKeyName == "mhetc90060_p5" Then	'공인인증서 성공여부;비밀번호
+		Dim szTempData
+		Form.ShowAlert("알림",sRet)
+		szTempData = Split(sRet, ";")	'성공여부, 비밀번호
+		if szTempData(0) == "ok" Then		'성공
+			Form.SendReturnToParent( "mbbnk61100_p4" , "ok" )
+			Form.CloseForm( )
+		Else						'실패
+			Exit Sub
+		End If
+	End If
+	
+	If sKeyName == "mhetc90060_px" Then
+		If sRet == "ok" Then
+			Form.SendReturnToParent( "mbbnk61100_p4" , "ok" )
+			Form.CloseForm( )
+		ElseIf sRet == "cancel" Then
+			'Form.ShowAlert("알림", "간편인증 실패.")
+		End If
+	End If
+		
+	'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)									
+	if sKeyName == "mhetc90190_p1" then
+        Form.CloseForm()
+		'if sRet == "ok" then
+			'Form.SendReturnToParent("mbbnk61100_p4" , "Error")
+		'end if
+	end If
+End Sub
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	'각 링크폼에서 보냄
+	if sEventName == "인증서" Then  'v0001 mbbnk61010_s1~9,sa,sb 공인인증서->인증서 변경
+		if sParam == "Success" Then
+			Form.SendReturnToParent("mbbnk61100_p4" , "ok")
+			Form.CloseForm( )
+		Else
+			Form.SendReturnToParent("mbbnk61100_p4" , "Error")
+			Form.CloseForm( )
+		End If
+	ElseIf sEventName == "보안카드" Then
+		if sParam == "Success" Then
+			Form.SendReturnToParent("mbbnk61100_p4" , "ok")
+			Form.CloseForm( )
+		Else
+			Form.SendReturnToParent("mbbnk61100_p4" , "Error")
+			Form.CloseForm( )
+		End If
+	ElseIf sEventName == "간편인증" Then
+		if sParam == "Success" Then
+			btnOK_OnClick()
+		end if
+	ElseIf sEventName == "바이오인증" OR sEventName == "공동인증" OR sEventName == "사설인증" Then
+		if sParam == "Success" Then
+			Form.SendReturnToParent("mbbnk61100_p4" , "ok")
+			Form.CloseForm( )
+		Else
+			Form.SendReturnToParent("mbbnk61100_p4" , "Error")
+			Form.CloseForm( )
+		End If
+	ElseIf sEventName == "간편인증OTP" Then
+		if sParam == "Success" Then
+			Form.SendReturnToParent("mbbnk61100_p4" , "ok")
+			Form.CloseForm( )
+		Else
+			Form.SendReturnToParent("mbbnk61100_p4" , "Error")
+			Form.CloseForm( )
+		End If
+	ElseIf sEventName == "mOTP_GenReq" Then 
+	    Form.requestMOTP("MOTP_REQ_OTP_ENC", sParam , "61010p0") 
+	End If
+End Sub
+
+'============================================================================
+'Form.requestMOTP로 호출하면 여기로 리턴됨
+'============================================================================
+Sub Form_OnTriggerEventMOTP(sEventName, sParam)
+
+	If  sEventName == "MOTP_GET_VERSION_RETURN_61010p0" Then
+		g_mSBValue = Split(sParam,"★")		'resultcode★resultMsg★mSBVersion
+
+		If g_mSBValue[0] <> "00000" Then
+			Form.MsgBox( "알림", g_mSBValue(1), "close", 6 )
+		Else
+			Form.SetSharedData( "mOTP_MsbVrsn" , g_mSBValue[2] )
+		End If
+		
+	Elseif sEventName == "MOTP_GETINFO_RETURN_61010p0" Then
+		
+		g_mOTPInfo  = Split(sParam,"★")    'resultcode★resultMsg★otpAlias(일련번호)
+		
+		If g_mOTPInfo[0] <> "00000" Then
+			'Form.MsgBox( "알림", g_mOTPInfo(1), "close", 6 ) JWH 주석처리 20240322
+		    RegisterOTP() 'JWH 20240322
+		Else
+			Form.SetSharedData( "mOTP_OTPSrno" , g_mOTPInfo(2) )
+		End If
+		
+		'메인처리는 일련번호 다중처리 가능하게 되어있지만, 1개만 받는 것으로 생각
+		'g_mOTPAlias = Split(g_mOTPInfo[2],"#")
+			
+	Elseif sEventName == "MOTP_REQ_OTP_ENC_RETURN_61010p0" Then
+
+		g_mOTPData = Split(sParam,"★")
+		
+		If g_mOTPData[0] <> "00000" Then
+			Form.MsgBox( "알림", g_mOTPData(1), "close", 6 )
+		Else
+			Form.SetSharedData( "mOTP_SrnoGen" , g_mOTPData[2] )
+			Form.triggerEvent("LinkForm0", "mOTP_Gen" , "Success")
+		End If
+	End If
+	
+End Sub
+
+'============================================================================
+' btnCancel_OnClick - 취소
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnEnroll_OnClick - 등록
+'============================================================================
+Sub btnOK_OnClick()
+	Form.triggerEvent("LinkForm0", "이체확인" , "")
+End Sub
+
+
+'****************************************************************************
+'               		D  A  T  A  M  A  N  A  G  E  R               
+'****************************************************************************
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 데이터 통신에 필요한 인풋 데이터 세팅
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'보안매체확인
+	if szTranID == "obcsb_oimf_625r" THEN		
+		Dim szDeviceID
+		szDeviceID = Form.GetDeviceID()
+		
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PROS_CLS_CODE" 	, 0 , "5" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "REG_CLCD" 		, 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "DRNG_ACNO" 		, 0 , g_szWithdrawAcntNo )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PWD" 			, 0 , g_szPswd )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_BANK_CODE" 	, 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_ACNO" 		, 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "TACT_AMT" 		, 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "UI_TERM_IDNT_KEY" , 0 , szDeviceID )
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 수신 완료
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+		if szTranID == "obcsb_oimf_625r" then
+		Dim szGubunCode
+		szGubunCode = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_625r", "OutBlock2", "SCRC_OTP_CLS_CODE" , 0 )
+		Select Case szGubunCode
+			Case "1"
+				Form.ShowAlert( "알림", "부가정보만 존재할경우 처리가 불가능합니다.")
+				Form.SendReturnToParent("mbbnk61100_p4" , "Error")
+				Form.CloseForm( )
+			Case "2"	
+'				Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 사고등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+'				Form.SendReturnToParent("mbbnk61100_p4" , "Error")
+'				Form.CloseForm( )
+				RegisterOTP() '2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+			Case "9"
+				Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+				Form.SendReturnToParent("mbbnk61100_p4" , "Error")
+				Form.CloseForm( )
+		End Select
+		
+		'보안매체제외인경우
+		if g_szMdiaSkipYn	 = "Y" Then
+			'간편비번 only
+			if g_szCertUserType = "1" Then
+				LinkForm0.linkfile = "mbbnk61010_s7"
+				Exit Sub
+			Elseif g_szCertUserType = "3" Then		'바이오 only
+				LinkForm0.linkfile = "mbbnk61010_sb"
+				Exit Sub
+			End if
+			
+		End if
+		
+		'공인인증서 보안매체
+		'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+		if g_szCertUserType <> "1" AND g_szCertUserType <> "3"  AND g_szCertUserType <> "4" Then
+			Select Case szGubunCode
+				Case "0"
+					LinkForm0.linkfile = "mbbnk61010_s1"						'공인인증서_보안카드화면
+				Case "3"	
+					LinkForm0.linkfile = "mbbnk61010_s2"						'공인인증서_일반/스마트OTP
+				Case "4"
+					LinkForm0.linkfile = "mbbnk61010_suo"					'공인인증서_mOTP
+			End Select
+		End if
+		
+		'간편인증 보안매체
+		'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+		if g_szCertUserType == "1" Then
+			Select Case szGubunCode
+				Case "0"
+					LinkForm0.linkfile = "mbbnk61010_s5" ' 간편인증_보안카드
+				Case "3"
+					LinkForm0.linkfile = "mbbnk61010_s6" ' 간편인증_OTP
+				Case "4"
+					LinkForm0.linkfile = "mbbnk61010_sso" ' 간편인증_mOTP
+			End Select
+		End if
+		
+		'바이오인증 보안매체 추가 2023.06.12 5:메리츠사설인증추가
+		'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러		
+		if g_szCertUserType == "3" OR g_szCertUserType == "4" OR g_szCertUserType == "5"  then
+			Select Case szGubunCode
+				Case "0"
+					LinkForm0.linkfile = "mbbnk61010_s8" ' 바이오인증_보안카드
+				Case "3"
+					LinkForm0.linkfile = "mbbnk61010_s9" ' 바이오인증_OTP
+				Case "4"
+					LinkForm0.linkfile = "mbbnk61010_sbo" ' 바이오인증_mOTP
+			End Select
+		end if
+		
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if szErrMsg ~= "" or szErrMsg ~= null then
+		szErrMsg = szErrMsg.."("..szSubErr..")"
+	end if
+	
+	Form.ShowAlert( "알림", szErrMsg)
+	Form.SendReturnToParent( "Error" , "")
+
+End Sub
+
+'============================================================================
+'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+'============================================================================
+Sub RegisterOTP()
+	'계좌번호★주민번호(필수아님)★Y/N( 모바일OTP/타기관OTP 발급 완료 후 인증 처리 진행여부를 판단함)★Y/N(처리 완료시 화면닫기)	
+	'출고계좌번호
+	Form.OpenPopup("mhetc90190_p1", g_szWithdrawAcntNo &"★"& "" &"★"& "N" &"★"& "Y", "")	
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_625r" trcode="obcsb_oimf_625r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_625r" title="추가인증대상조회(스마트폰)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="358" _ulen="272" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+REG_CLCD^등록구분코드^1^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="213" _ulen="165" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="67" _ulen="51" >
+
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="63010" scrname="출금계좌선택 팝업" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image0" imgpath="popup_bg.9" ly_vert="0,327,375,320,1" />
+		<GRID name="grdList" colcount="4" ly_vert="20,396,335,250,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_total" valign="2" fonttype="2" />
+				<LABEL name="bd_amt" fontsize="-2" mask="0,0,,원,0,,0,1,0,1,0" halign="2" valign="0" />
+				<LABEL name="bd_prnm" fontsize="-2" valign="0" />
+				<LABEL name="bd_cell2" halign="2" />
+				<LABEL name="bd_prcd" halign="2" />
+				<LABEL name="bd_asno" halign="2" />
+				<LABEL name="bd_acno" halign="2" />
+				<LABEL name="bd_cell1" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="160,175,70,70" ly_vert_visible="0,0,1,1" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="160" ly_vert_visible="0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_total" cell_ly="0,0,0,0" line="0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_prnm" cell_ly="0,1,0,1" line="0,1" import="0,1,3" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="175" ly_vert_visible="0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" line="0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_amt" cell_ly="0,1,0,1" line="0,1" import="0,1,4" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_prcd" cell_ly="0,0,0,0" line="0,0" import="0,1,2" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_asno" cell_ly="0,1,0,1" line="0,0" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_acno" cell_ly="0,0,0,0" line="0,0" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell1" cell_ly="0,1,0,1" line="0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_total" rangecellid="bd_total" hlcolorcellid="bd_total" />
+		</GRID>
+		<LABEL name="Label0" fontsize="4" fontstyle="01" caption="선택해주세요" halign="1" ly_vert="0,345,375,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3174" _ulen="3096" >
+--===========================================================================
+--===========================================================================
+
+Dim g_szUserID '고객아이디
+Dim g_szACNO
+Dim g_szASNO
+Dim isNext
+'============================================================================
+Sub Form_OnFormInit()
+	g_szUserID = Form.GetSharedData("&USER_ID", false) '고객아이디
+	
+	szTotalAcc = Form.GetOpenLinkData()
+	g_szACNO = Left(szTotalAcc,8)
+	g_szASNO = Right(szTotalAcc,2)
+	
+	DATAMANAGER.RequestTranData( "obacp_comm_064r" )
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "obacp_comm_064r" then
+	     DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "IQRY_CSNU" , 0 , 10)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ELFN_ID" , 0 , g_szUserID)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ACNO" , 0 , g_szACNO)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ASNO" , 0 , g_szASNO)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'내계좌 조회
+	if szTranID == "obacp_comm_064r" then
+		nCnt = grdList.rowcount
+
+		For i=0 to nCnt-1
+			szAcno = grdList.GetCellData( "bd_acno", i)
+			szAsno = grdList.GetCellData( "bd_asno", i)
+			grdList.SetCellData( "bd_total", i, Left(szAcno,4).."-"..Right(szAcno,4).."-"..szAsno)
+
+		Next
+		
+         if isNext == "1" or isNext == true then
+             Form.Toast(0, "조회가 계속됩니다. 화면을 위로 드래그해주세요.", 0)
+	    end if
+	    
+	end if
+	
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubErr = Trim(DATAMANAGER.GetDataMsgSubText( szTranID ))
+	
+	if szSubErr <> "" and szSubErr <> null then
+		szErrMsg = szErrMsg.."("..szSubErr..")"
+	end if
+	
+	Form.MsgBox( "알림", szErrMsg, "", 6 )
+End Sub
+
+'============================================================================
+Sub grdList_OnClickUp(lRow, szCellID)
+	szAcno = grdList.GetCellData( "bd_acno", lRow)
+	szAsno = grdList.GetCellData( "bd_asno", lRow)
+	szPrnm = grdList.GetCellData( "bd_prnm", lRow)
+	szAmt = grdList.GetCellData( "bd_amt", lRow)
+	
+	szData = szAcno..szAsno.."★"..szPrnm.."★"..szAmt
+	
+	Form.SendReturnToParent("mbbnk63010_p4" , szData)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub grdList_OnScrollEnd()
+	isNext = DATAMANAGER.IsMoreNextData("obacp_comm_064r")
+	if isNext == "1" or isNext == true then
+		DATAMANAGER.RequestNextData("obacp_comm_064r")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+
+    If sKey == "&LOGIN_AUTH" Then
+        
+        If sValue == "0" Or sValue == "1" Then
+            Form.CloseForm()
+        End If
+    
+    End If
+
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacp_comm_064r" trcode="obacp_comm_064r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacp_comm_064r" title="출금계좌번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="156" _ulen="120" >
+
+IQRY_CSNU^조회건수^11^0^7^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="10" inout="out" _len="353" _ulen="261" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+DRNG_ABLE_AMT^출금가능금액^19^0^7^0^0^0^0
+SELN_ASCR_AMT^매도담보대출금액^19^0^7^0^0^0^0
+SELN_ASCR_STPL_YN^매도담보대출약정여부^1^0^0^0^0^0^0
+LOAN_INTRT^대출이자율^9^4^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="42" _ulen="34" >
+
+SEQ_NO^순서번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
