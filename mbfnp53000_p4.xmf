@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="53000" scrname="ELS/DLS청약_상세보기_기준가조회" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" colcount="2" ly_vert="0,57,375,550,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" mask="1,0,,,1,####-##-##,0,1,1,0,0" halign="1" />
+				<LABEL name="th_cell0" fontsize="-2" caption="일자" halign="1" />
+				<LABEL name="th_cell1" fontsize="-2" caption="기준가" halign="1" />
+				<LABEL name="bd_cell1" mask="0,0,,,0,,2,1,1,0,0" halign="1" autofontsize="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" initrowcount="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="185,190" ly_vert_visible="0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="185" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="29" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" line="0,1" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="39" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,1" import="1,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="190" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="29" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" line="0,1" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="39" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" line="0,1" import="1,1,6" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="lblTitle" fontsize="2" bgcolor="038:255255255" transmode="0" halign="1" ly_vert="0,0,375,57,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2521" _ulen="2393" >
+'============================================================================
+' 01. 화 면 명 : ELS/DLS청약_상세보기_기준가조회	
+' 02. 화면설명 : ELS/DLS청약_청약완료상품탭_상세보기_기준가조회
+' 03. 작    성 : 2016. 03. 15. 유창재
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_szData
+Dim g_szList
+Dim g_szTitle		'제목
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInit()
+	
+	Form.SetScreenName( "기준가 조회" )
+	
+	g_szData = Form.GetOpenLinkData()
+	
+	g_szList = Split( g_szData, "★")
+	if UBOUND(g_szList) < 1 then
+		Exit Sub
+	end if
+	
+	g_szTitle = g_szList(3) & g_szList(4)
+	
+	lblTitle.caption = g_szTitle
+	
+	DATAMANAGER.RequestTranData( "obfno_otiq_040r" )
+	
+End Sub
+''============================================================================
+'Sub Form_OnTriggerEvent(sEventName, sParam)
+'	
+'	if sEventName == "mbfnp53000_p4" then
+'		g_szData = sParam
+'	end if
+'	
+'	g_szList = Split( g_szData, "★")
+'	if UBOUND(g_szList) < 1 then
+'		Exit Sub
+'	end if
+'	
+'	DATAMANAGER.RequestTranData( "obfno_otiq_040r" )
+'	
+'End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	if szTranID == "obfno_otiq_040r" then
+		DATAMANAGER.SetDataValue( 0 , "obfno_otiq_040r", "InBlock1", "OTC_FUND_ISCD" , 0 , g_szList(0) )		'펀드 종목 코드
+		DATAMANAGER.SetDataValue( 0 , "obfno_otiq_040r", "InBlock1", "STA_DATE" , 0 , g_szList(1) )		'시작일자
+		DATAMANAGER.SetDataValue( 0 , "obfno_otiq_040r", "InBlock1", "FIN_DATE" , 0 , g_szList(2) )		'종료일자
+	end if
+	
+End Sub
+
+
+
+'============================================================================
+Sub Grid0_OnScrollEnd()
+	if DATAMANAGER.IsMoreNextData("obfno_otiq_040r") == true then
+		DATAMANAGER.RequestNextData( "obfno_otiq_040r" )
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obsim_exsv_001r" trcode="obsim_exsv_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obfno_otiq_040r" trcode="obfno_otiq_040r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obsim_exsv_001r" title="장외파생 종목 코드 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock0" inout="in" _len="255" _ulen="195" >
+
+BSWR_CLS_CODE^업무 구분 코드^1^0^0^0^0^0^0
+ISSU_CLS_CODE^종목 구분 코드^2^0^0^0^0^0^0
+TR_OBJT_CODE^거래 목적 코드^1^0^0^0^0^0^0
+ACNT_ASGM_YN^계좌 배정 여부^1^0^0^0^0^0^0
+PROD_KIND_CODE^상품 종류 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock1" inout="in" _len="99" _ulen="77" >
+
+ISCD_NAME^종목코드 명^40^0^0^0^0^0^0
+IQRY_CLS_CODE^조회 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="156" _ulen="118" >
+
+IQRY_CLS_CODE^조회 구분 코드^1^0^0^0^0^0^0
+CLRD_TYPE_CODE^조기상환 유형 코드^2^0^0^0^0^0^0
+ISCD_NAME^종목코드 명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="132" _ulen="104" >
+
+PROD_CLS_CODE^상품 구분 코드^2^0^0^0^0^0^0
+RDMP_YN^상환 여부^1^0^0^0^0^0^0
+PBLC_TIMS^발행 회차^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="52" _ulen="40" >
+
+FUND_ISCD^펀드 종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="171" _ulen="133" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+ISCD_NAME^종목코드 명^40^0^0^0^0^0^0
+ACNT_ASGM_YN^계좌 배정 여부^1^0^0^0^0^0^0
+PBLC_DATE^발행 일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="79" _ulen="63" >
+
+PBLC_DATE^발행 일자^8^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obfno_otiq_040r" title="OTC 당사/KBP공시기준가조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="106" >
+
+OTC_FUND_ISCD^OTC펀드종목코드^12^0^0^0^0^0^0
+STA_DATE^시작 일자^8^0^0^0^0^0^0
+FIN_DATE^종료 일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="766" _ulen="576" >
+
+STND_DATE^기준 일자^8^0^0^0^0^0^0
+PBLC_TIMS^발행 회차^4^0^7^0^0^0^0
+OTC_FUND_ISCD^OTC펀드종목코드^12^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+KOR_ISSU_ABWR_NAME^한글 종목 약어 명^40^0^0^0^0^0^0
+ESTI_AFT_PBNT_SDPR^산정후공시기준가^20^6^7^0^0^0^0
+ESTI_AFT_VLTN_SDPR^산정후평가기준가^20^6^7^0^0^0^0
+KBP_OTC_SDPR^한국채권평가OTC기준가^28^9^7^0^0^0^0
+KOREA_CRDT_VLTN_OTC_SDPR^한국신용평가OTC기준가^28^9^7^0^0^0^0
+THER_OTC_SDPR^이론OTC기준가^28^9^7^0^0^0^0
+RMS_VLTN_OTC_SDPR^RMS평가OTC기준가^28^9^7^0^0^0^0
+NICE_PBNT_SDPR^한국신용정보공시기준가^20^9^7^0^0^0^0
+FNP_PBNT_SDPR^FN자산평가공시기준가^20^9^7^0^0^0^0
+UI_ITSL_VLTN_PRC^UI자체평가가격^20^6^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="97" _ulen="77" >
+
+STND_DATE^기준 일자^8^0^0^0^0^0^0
+OTC_FUND_ISCD^OTC펀드종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

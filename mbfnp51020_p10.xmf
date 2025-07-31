@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51020" scrname="펀드자동이체신청_개별약관확인" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="36" ly_vert="0,0,375,562,1" >
+			<PAGE name="page003086" caption="요약동의서" linkfile="empty.xmf" />
+			<PAGE name="page008580" caption="상세동의서" linkfile="empty.xmf" />
+		</FORMTAB>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="-2,-2,379,564,1" />
+		<BUTTON name="ButtonOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+		<BUTTON name="ButtonOK0" caption="확인" bgcolor="289:255255255" bgcolor2="233:102101101" fontsize="1" btnimage="btn_26.9" ly_vert="0,547,375,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3750" _ulen="3584" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 담보대출신청
+' 02. 화면설명 : 담보대출신청_약관설명서
+' 03. 작    성 : 2016.02.26 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRevData
+Dim g_sRetData
+
+Dim g_nTimerSec
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_sRevData = Form.GetOpenLinkData()
+
+	if g_sRevData == null or Trim(g_sRevData) == "" then
+		Exit Sub
+	end if
+	
+	Form.SetScreenName(g_sRevData)
+	g_sRetData = "cancel"
+	
+	Dim sURL
+	sURL = Form.GetSharedData("OPEN_URL", true )
+	
+	'분리과세하이일드인 경우 약관 별도처리
+	if g_sRevData == "개인(신용)정보 수집ㆍ이용ㆍ제공 동의" then
+		FormTab0.visible = 1
+		WebView0.top = 45
+		WebView0.height = 562-45
+		
+		Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "1")	'디폴트는 요약동의서
+		WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm4.pdf"
+
+		ButtonOK.visible		= false
+		ButtonCancel.visible	= false
+		ButtonOK0.visible		= true
+	else
+		WebView0.urlpath = sURL
+		
+		g_nTimerSec = 5
+		
+		ButtonOK.enable 		= false
+		ButtonOK.visible		= true
+		ButtonCancel.visible	= true
+		ButtonOK0.visible		= false
+		
+	    ButtonOK.caption = g_nTimerSec
+	    Form.SetTimerEvent(500, 1, 1)
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	sTimerID = CInt(sTimerID)
+	If sTimerID == 500 Then
+		If g_nTimerSec == 1 Then
+			Form.SetTimerEvent(500, 0, 1)
+			
+			ButtonOK.caption = "확인"
+			ButtonOK.enable = true	
+		
+		Else
+			g_nTimerSec = g_nTimerSec - 1
+			ButtonOK.caption = g_nTimerSec
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	if nCurrentTab == "0" or nCurrentTab == 0 then
+		Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "1")
+		
+		'요약동의서
+		WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm4.pdf"
+	else
+		Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "2")
+		
+		'상세동의서
+		WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm5.pdf"
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbfnp51020_p10" , g_sRetData)
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	g_sRetData = g_sRevData
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ButtonOK0_OnClick()
+	g_sRetData = g_sRevData
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

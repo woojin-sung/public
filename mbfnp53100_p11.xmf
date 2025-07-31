@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="53100" scrname="MY ELS/DLS 수량입력팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="GridBank" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="-1,0,375,639,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="input_03_n.9" ly_vert="0,358,375,300,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_close" ly_vert="340,371,15,15,1" />
+		<BUTTON name="btnPlus0" caption="0" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="1,586,94,62,1" />
+		<BUTTON name="btnPlus00" caption="00" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="95,586,94,62,1" />
+		<BUTTON name="btnPlus000" caption="000" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="189,586,94,62,1" />
+		<BUTTON name="btnPlus1" caption="1" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="1,400,94,62,1" />
+		<BUTTON name="btnPlus2" caption="2" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="95,400,94,62,1" />
+		<BUTTON name="btnPlus3" caption="3" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="189,400,94,62,1" />
+		<BUTTON name="btnPlus4" caption="4" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="1,462,94,63,1" />
+		<BUTTON name="btnPlus5" caption="5" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="95,462,94,63,1" />
+		<BUTTON name="btnPlus6" caption="6" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="189,462,94,63,1" />
+		<BUTTON name="btnPlus7" caption="7" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="1,524,94,62,1" />
+		<BUTTON name="btnPlus8" caption="8" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="95,524,94,62,1" />
+		<BUTTON name="btnPlus9" caption="9" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="189,524,94,62,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="수량 입력" bgcolor="064:239059036" halign="1" autofontsize="1" ly_vert="0,359,375,40,1" />
+		<BUTTON name="btnBack" btnimage="btn_keypad3.9.png" ly_vert="283,400,91,62,1" />
+		<BUTTON name="btnClear" caption="C" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="283,462,91,62,1" />
+		<BUTTON name="btnConfirm" caption="확인" fgcolor="128:188030030" fontsize="6" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="283,524,91,124,1" />
+		<LABEL name="LblClose" click="1" ly_vert="323,364,42,30,1" />
+		<LABEL name="edtPrc" fontsize="2" fontstyle="01" mask="0,0,,주,0,,0,1,0,0,0" halign="1" ly_vert="30,314,310,37,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7572" _ulen="7498" >
+
+' 20160317 가격 Max : 7 (전요셉과장)
+
+'============================================================================
+' 화 면 명 : 수량 입력창
+' 화면설명 : ELS/DLS 중도환매 신청 시
+' 작    성 : 
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szCd, g_szMk, g_szUnit, g_szType, g_szReceive, g_szopenPrc
+g_szCd, g_szMk, g_szUnit, g_szType, g_szReceive = "", "", "", "", ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+' Calc_Plus
+'============================================================================
+Function Calc_Plus(nPlus)
+	Dim szPrc
+	
+	if g_szReceive == "1" then
+		g_szReceive = ""
+		edtPrc.caption = nPlus
+	else
+		szPrc = edtPrc.caption
+		
+	'	if Trim(szPrc) == "" then
+	'		szPrc = 0
+	'	end if	
+		szPrc = szPrc & nPlus
+		Sum_Prc(szPrc)
+	end if
+	
+	Form.SendReturnToParent("CLEAR_POPUP" , "")
+End Function
+
+'============================================================================
+' Calc_Zero
+'============================================================================
+Function Calc_Zero(szPlus)
+	Dim szPrc
+
+	if g_szReceive == "1" then
+		g_szReceive = ""
+		edtPrc.caption = ""
+	else
+		szPrc = edtPrc.caption	
+		
+		if Len(edtPrc.caption) > 0 then
+			szPrc = edtPrc.caption & szPlus
+			
+			Sum_Prc(szPrc)
+		end if
+	end if
+	
+	Form.SendReturnToParent("CLEAR_POPUP" , "")
+End Function
+
+'============================================================================
+' Sum_Prc
+'============================================================================
+Function Sum_Prc(szData)
+	'if Len(szData) < 16 then
+	if Len(szData) < 12 then		' Max 11
+		edtPrc.caption = szData
+	end if
+	
+End Function	
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpen
+
+	'Form.SetScreenName("가격입력기")
+	szOpen = Form.GetOpenLinkData()
+	
+	if Trim(szOpen) <> "" then
+		tData = int(szOpen)
+		g_szopenPrc = tData
+'		g_szReceive = "1"
+		edtPrc.caption = tData
+'		g_szCd   = tData(1)
+'		g_szMk   = tData(2)
+'		g_szUnit = tData(3)
+'		g_szType = tData(4)
+'		edtHigh.caption = tData(5)
+'		edtLow.caption  = tData(6)
+'		
+	else
+		g_szReceive = "1"
+		tData = 0
+	end if
+
+End Sub
+
+'============================================================================
+' btnPlus1_OnClick
+'============================================================================
+Sub btnPlus1_OnClick()
+	Calc_Plus(1)
+End Sub
+
+'============================================================================
+' btnPlus2_OnClick
+'============================================================================
+Sub btnPlus2_OnClick()
+	Calc_Plus(2)
+End Sub
+
+'============================================================================
+' btnPlus3_OnClick
+'============================================================================
+Sub btnPlus3_OnClick()
+	Calc_Plus(3)
+End Sub
+
+
+'============================================================================
+' btnPlus4_OnClick
+'============================================================================
+Sub btnPlus4_OnClick()
+	Calc_Plus(4)
+End Sub
+
+'============================================================================
+' btnPlus5_OnClick
+'============================================================================
+Sub btnPlus5_OnClick()
+	Calc_Plus(5)
+End Sub
+
+'============================================================================
+' btnPlus6_OnClick
+'============================================================================
+Sub btnPlus6_OnClick()
+	Calc_Plus(6)
+End Sub
+
+'============================================================================
+' btnPlus7_OnClick
+'============================================================================
+Sub btnPlus7_OnClick()
+	Calc_Plus(7)
+End Sub
+
+'============================================================================
+' btnPlus8_OnClick
+'============================================================================
+Sub btnPlus8_OnClick()
+	Calc_Plus(8)
+End Sub
+
+'============================================================================
+' btnPlus9_OnClick
+'============================================================================
+Sub btnPlus9_OnClick()
+	Calc_Plus(9)
+End Sub
+
+'============================================================================
+' btnPlus0_OnClick
+'============================================================================
+Sub btnPlus0_OnClick()
+	Calc_Zero("0")
+End Sub
+
+'============================================================================
+' btnPlus00_OnClick
+'============================================================================
+Sub btnPlus00_OnClick()
+	Calc_Zero("00")
+End Sub
+
+'============================================================================
+' btnPlus000_OnClick
+'============================================================================
+Sub btnPlus000_OnClick()
+	Calc_Zero("000")
+End Sub
+
+'============================================================================
+' btnBack_OnClick
+'============================================================================
+Sub btnBack_OnClick()
+	Dim nLen
+	nLen = Len(edtPrc.caption)
+
+	if nLen <> 0 then
+		szPrc = Left(edtPrc.caption, nLen-1)
+		edtPrc.caption = szPrc
+	end if
+	
+	g_szReceive = ""
+End Sub
+
+'============================================================================
+' btnClear_OnClick
+'============================================================================
+Sub btnClear_OnClick()
+	edtPrc.caption = ""
+End Sub
+
+'============================================================================
+' btnConfirm_OnClick
+'============================================================================
+Sub btnConfirm_OnClick()
+	szPrc = edtPrc.caption
+'	if Trim(szPrc) <> "" then
+'		szPrc = edtPrc.caption
+'		szMod = szPrc Mod 1000
+'		szPrc = szPrc-szMod
+	Form.SendReturnToParent("PRC_POPUP", szPrc)
+	Form.CloseForm()
+	
+End Sub
+
+'============================================================================
+' LblClose_OnClick : 닫기
+'============================================================================
+Sub LblClose_OnClick()
+	if g_szopenPrc <> "" and g_szopenPrc <> null then
+		Form.SendReturnToParent("PRC_POPUP", g_szopenPrc)
+	end if
+						
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_OnRefresh()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' BtnClose_OnClick : 닫기
+'============================================================================
+Sub BtnClose_OnClick()
+	if g_szopenPrc <> "" and g_szopenPrc <> null then
+		Form.SendReturnToParent("PRC_POPUP", g_szopenPrc)
+	end if
+						
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

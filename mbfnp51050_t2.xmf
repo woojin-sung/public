@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51050" scrname="펀드실질수익률보고서" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,476,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fontstyle="01" caption="펀드실질수익률보고서" paddinginfo="1,0,0,0" ly_vert="20,30,227,32,1" />
+		<IMAGE name="ImgQ1A1" autosize="1" imgpath="btn_line_n.9" ly_vert="30,70,315,36,1" />
+		<LABEL name="LblQ1A1" caption="온라인(직접) 조회" halign="1" ly_vert="30,71,315,36,1" />
+		<IMAGE name="ImgQ1A2" autosize="1" imgpath="btn_line_n.9" ly_vert="30,115,150,36,1" />
+		<LABEL name="LblQ1A2" caption="알림톡(SMS)" halign="1" ly_vert="30,115,150,36,1" />
+		<IMAGE name="ImgQ1A3" autosize="1" imgpath="btn_line_n.9" ly_vert="195,115,150,36,1" />
+		<LABEL name="LblQ1A3" caption="이메일" halign="1" ly_vert="195,115,150,36,1" />
+		<IMAGE name="ImgQ1A4" autosize="1" imgpath="btn_line_n.9" ly_vert="30,160,150,36,1" />
+		<LABEL name="LblQ1A4" caption="자택" halign="1" ly_vert="30,160,150,36,1" />
+		<IMAGE name="ImgQ1A5" autosize="1" imgpath="btn_line_n.9" ly_vert="195,160,150,36,1" />
+		<LABEL name="LblQ1A5" caption="직장" halign="1" ly_vert="195,160,150,36,1" />
+		<LABEL name="lblLine" bgcolor="241:209209209" transmode="0" ly_vert="0,215,375,5,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="3" outline="0000" designorder="1" ly_vert="-1,230,375,101,1" >
+			<COL_INFO ly_vert_width="20,12,343" />
+			<ROW_INFO ly_vert_height="33,35,33" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="042:255255255" line="0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" bgcolor="042:255255255" valign="0" line="0,0" caption="·" fontsize="2" fontstyle="01" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="2,0,2,0" bgcolor="042:255255255" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" bgcolor="042:255255255" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" bgcolor="042:255255255" valign="0" line="0,0" caption="·" fontsize="-1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="2,1,2,1" fgcolor="128:188030030" bgcolor="042:255255255" valign="0" halign="0" line="0,0" fontsize="-2" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="042:255255255" line="0,0" impidxs="" />
+				<CELL cell_ly="1,2,1,2" bgcolor="042:255255255" valign="0" line="0,0" caption="·" fontsize="-1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="2,2,2,2" fgcolor="128:188030030" bgcolor="042:255255255" valign="0" halign="0" line="0,0" fontsize="-2" paddinginfo="1,0,0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="Label1" fontsize="-2" caption="보고서 신청/변경 내역은 차후 발송예정일부터 적용됩니다." valign="0" multiline="1" paddinginfo="1,0,0,0" ly_vert="30,231,310,40,1" />
+		<LABEL name="Label2" fontsize="-2" caption="펀드실질투자수익률 보고서 통보처는 종합계좌 단위로 관리되며, 월 1회 발송됩니다. " valign="0" multiline="1" paddinginfo="1,0,0,0" ly_vert="30,265,310,40,1" />
+		<LABEL name="Label3" fontsize="-2" caption="통보지 주소 변경은 고객연락처 변경에서 가능합니다. " valign="0" multiline="1" paddinginfo="1,0,0,0" ly_vert="30,300,310,40,1" />
+		<LABEL name="lblChangeAddr" halign="1" click="1" ly_vert="0,335,375,26,1" />
+		<BUTTON name="btnOK" caption="변경하기" btnimage="btn_01.9" ly_vert="-3,426,381,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7897" _ulen="7449" >
+Dim g_szAcno
+Dim g_szAsno
+
+Dim g_szACTL_ERT_RPRT_INAG_TYPE_CODE '실질수익률보고서통보처유형코드
+
+Dim unPressedImgPath 
+Dim PressedImgPath
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'v0002 메모리평문적용여부(0:미적용 / 1:적용)
+	g_plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	
+	unPressedImgPath = "btn_line_n.9.png"
+	PressedImgPath   = "btn_line_o.9.png"
+
+	lblChangeAddr.caption = "연락처변경 바로가기 >"
+	lblChangeAddr.fgcolor = "67"
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	If sEventName == "INIT_SCREEN" And sParam <> "" And sParam <> null Then
+
+		g_szAcno = Left(sParam, 8)
+		g_szAsno = Right(sParam, 2)
+		
+		DATAMANAGER.RequestTranData("obcsb_acad_106r")
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'==============================================
+	'*********** 계좌비번 수신 ************
+	'==============================================
+	if sKeyName = "CORRECT_PWD" then
+
+		if sRet <> "" then
+			Dim szAcnt
+			
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+'			if g_szSavePwd == "0" then
+'				contInput.edtPwdIcon.imgpath = "icon_save_password_n.9"
+'			else
+'				contInput.edtPwdIcon.imgpath = "icon_save_password_o.9"
+'			end if
+			
+			tData = Split(sRet, "★")
+	
+			if UBOUND(tData) > 0 then
+				Form.SetCtlProp("#edtPassword", "pwdlen", tData(1))
+				Form.SetCtlProp("#edtPassword", "caption", tData(0))
+				
+				DATAMANAGER.RequestTranData("obcsb_acad_107a")
+			end if			
+		end if
+	End If	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName = "RELOAD" then	
+		'통보처 재조회
+		DATAMANAGER.RequestTranData("obcsb_acad_106r")
+	end if
+End Sub
+
+'============================================================================
+Sub lblChangeAddr_OnClick()
+	Dim sSendData, sTabIdx
+	sSendData = ""
+'	if g_szNotiFlag == "talk" then
+'		sTabIdx = "0"
+'	elseif g_szNotiFlag == "email" then
+		sTabIdx = "1"
+'	end if
+'	sSendData = contInput.cmbAccount.total..";"..contInput.edtPassword.caption..";"..sTabIdx
+	Form.OpenFramePopup("mbonl81000" , sSendData , "")
+End Sub
+
+'============================================================================
+Sub ImgQ1A1_OnClick()
+	SetCheckAnswer("1", "1")
+End Sub
+
+'============================================================================
+Sub ImgQ1A2_OnClick()
+	SetCheckAnswer("1", "2")
+End Sub
+
+'============================================================================
+Sub ImgQ1A3_OnClick()
+	SetCheckAnswer("1", "3")
+End Sub
+
+'============================================================================
+Sub ImgQ1A4_OnClick()
+	SetCheckAnswer("1", "4")
+End Sub
+
+'============================================================================
+Sub ImgQ1A5_OnClick()
+	SetCheckAnswer("1", "5")
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	Dim sSendData
+	sSendData = g_szAcno & g_szAsno & "☆" & "0"
+	'비밀번호 팝업 띄움..	
+	Form.openPopupAnimation("pwdcheckpopup",sSendData,"","2")	
+End Sub
+
+'============================================================================
+Function SetCheckAnswer(szQNum, szAnswerNum)
+	Dim nQNum, nTIdx ' 문항번호, 테이블 인덱스
+	nQNum = CDbl(szQNum)
+	nTIdx = nQNum - 1
+
+	nAnswerCnt = 5
+
+	if szAnswerNum == "1" then
+		g_szACTL_ERT_RPRT_INAG_TYPE_CODE = "51"	'온라인(직접)조회 = 수신거부
+	elseif szAnswerNum == "2" then
+		g_szACTL_ERT_RPRT_INAG_TYPE_CODE = "31"	'알림톡(SMS)
+	elseif szAnswerNum == "3" then
+		g_szACTL_ERT_RPRT_INAG_TYPE_CODE = "21"	'이메일
+	elseif szAnswerNum == "4" then
+		g_szACTL_ERT_RPRT_INAG_TYPE_CODE = "01"	'자택
+	elseif szAnswerNum == "5" then
+		g_szACTL_ERT_RPRT_INAG_TYPE_CODE = "02"	'직장
+	end if
+	
+'	ShowAlert("u", g_szACTL_ERT_RPRT_INAG_TYPE_CODE)
+	
+	Select case nQNum
+	    ' 버튼형 답변
+	    case 1
+		    for j = 1 to CDbl(nAnswerCnt)
+			    if j == CDbl(szAnswerNum) then
+				    Form.SetCtlProp("ImgQ" & nQNum & "A" & j, "imgpath", PressedImgPath)
+			    else
+				    Form.SetCtlProp("ImgQ" & nQNum & "A" & j, "imgpath", unPressedImgPath)
+			    end if
+		    next
+    End Select
+End Function
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "obcsb_acad_106r" then	
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNO" , 0 , g_szAcno)	'계좌번호
+	
+	elseif szTranID = "obcsb_acad_107a" then	
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "PROS_CLS_CODE" , 0 , "U" )	'처리구분코드
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "CONT_CLS_CODE" , 0 , "4" )	'접촉구분코드
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNO"	 		, 0 , g_szAcno )	'계좌번호
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACTL_ERT_RPRT_INAG_TYPE_CODE" , 0 , g_szACTL_ERT_RPRT_INAG_TYPE_CODE )	'실질수익률보고서통보처유형코드		
+		'v0002 컨트롤매핑->스크립트 변경
+		if g_plain_rm == "1" then
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNT_PWD" , 0 , Form.GetCtlProp("#edtPassword", "caption"))	'비밀번호
+		else
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNT_PWD" , 0 , Form.GetCtlProp("#edtPassword", "encdata"))			
+		end if
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "CSNO"	 				, 0 , g_szAcno )	'고객번호
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "CUST_TYPE_CODE"			, 0 , g_szAcno )	'고객유형코드
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "MGRI_RPRT_INAG_SRNO"	, 0 , g_szAcno )	'운용보고서통보처일련번호
+		
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "obcsb_acad_106r" then	
+		szACTL_ERT_RPRT_INAG_TYPE_CODE = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1", "ACTL_ERT_RPRT_INAG_TYPE_CODE", 0)	'실질수익률보고서통보처유형코드
+
+		'버튼 초기화
+	    for j = 1 to 5
+		    Form.SetCtlProp("ImgQ1A" & j, "imgpath", unPressedImgPath)
+	    next
+'ShowAlert("q", szACTL_ERT_RPRT_INAG_TYPE_CODE)
+		If szACTL_ERT_RPRT_INAG_TYPE_CODE == "51" then 	'수신거부
+			ImgQ1A1.imgpath = PressedImgPath
+			
+		ElseIf szACTL_ERT_RPRT_INAG_TYPE_CODE == "31" then 	'알림톡
+			ImgQ1A2.imgpath = PressedImgPath
+			
+		ElseIf szACTL_ERT_RPRT_INAG_TYPE_CODE == "21" then 	'E-mail
+			ImgQ1A3.imgpath = PressedImgPath
+			
+		elseIf szACTL_ERT_RPRT_INAG_TYPE_CODE == "01" then 		'자택
+			ImgQ1A4.imgpath = PressedImgPath
+			
+		ElseIf szACTL_ERT_RPRT_INAG_TYPE_CODE == "02" then 	'직장
+			ImgQ1A5.imgpath = PressedImgPath
+		else 	
+			ImgQ1A1.imgpath = unPressedImgPath
+			ImgQ1A2.imgpath = unPressedImgPath
+			ImgQ1A3.imgpath = unPressedImgPath
+			ImgQ1A4.imgpath = unPressedImgPath
+			ImgQ1A5.imgpath = unPressedImgPath
+		End If
+		
+	elseif szTranID = "obcsb_acad_107a" then	
+		Form.MsgBox("안내", "통보처 변경이 완료되었습니다.", "RELOAD", 0)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if szTranID = "obcsb_acad_106r" then
+		ImgQ1A1.imgpath = unPressedImgPath
+		ImgQ1A2.imgpath = unPressedImgPath
+		ImgQ1A3.imgpath = unPressedImgPath
+		ImgQ1A4.imgpath = unPressedImgPath
+		ImgQ1A5.imgpath = unPressedImgPath
+	end if 
+	
+	'Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+	'Form.ShowAlert("알림", szSubMsg)
+	'DATAMANAGER.RequestTranData("obcsb_acad_106r")	'통보처 재조회
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acad_107a" trcode="obcsb_acad_107a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acad_106r" trcode="obcsb_acad_106r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acad_107a" title="실질수익률보고서통보연락처관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="508" _ulen="370" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACTL_ERT_RPRT_INAG_TYPE_CODE^실질수익률보고서통보처유형코드^2^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객유형코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_SRNO^운용보고서통보처일련번호^4^0^7^0^0^0^0
+MGRI_INFR_YN^운용통보여부^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acad_106r" title="실질수익률보고서통보연락처조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="519" _ulen="379" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객유형코드^2^0^0^0^0^0^0
+ACTL_ERT_RPRT_INAG_TYPE_CODE^실질수익률보고서통보처유형코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_SRNO^운용보고서통보처일련번호^4^0^7^0^0^0^0
+INAG_TYPE_CODE^통보처유형코드^2^0^0^0^0^0^0
+MGRI_INFR_YN^운용통보여부^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CODE_FILE_CRTN_CLS_CODE^코드파일생성구분코드^2^0^0^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="100" inout="out" _len="778" _ulen="582" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RMND_SRNO^잔고일련번호^3^0^0^0^0^0^0
+KOR_ISNM^한글종목명^100^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+JOIN_DATE^가입일자^8^0^0^0^0^0^0
+JOIN_BRCD^가입지점코드^4^0^0^0^0^0^0
+IISC_SVNG_TYPE_CODE^집합투자증권저축유형코드^1^0^0^0^0^0^0
+FRST_BYOV_DATE^최초매수일자^8^0^0^0^0^0^0
+LAST_BYOV_DATE^최종매수일자^8^0^0^0^0^0^0
+MTRT_DATE^만기일자^8^0^0^0^0^0^0
+CNRC_PRD^계약기간^4^0^7^0^0^0^0
+CNRC_AMT^계약금액^19^0^7^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+CANC_CLS_CODE^해지구분코드^1^0^0^0^0^0^0
+MANG_EMPNO^관리직원번호^9^0^0^0^0^0^0
+RCMD_EMPNO^권유직원번호^9^0^0^0^0^0^0
+RNVS_YN^재투자여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

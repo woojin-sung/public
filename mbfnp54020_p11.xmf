@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="54020" scrname="채권주문_화면메뉴팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" autosize="1" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgQuick" autosize="1" imgpath="bg_quick.9" ly_vert="175,35,200,120,1" />
+		<TABLE name="TblQuick" insidelinecolor="102:255255255" colcount="1" rowcount="3" outline="0000" transmode="1" designorder="1" ly_vert="175,35,200,120,1" >
+			<COL_INFO ly_vert_width="200" />
+			<ROW_INFO ly_vert_height="40,40,40" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="062:255255255" bgcolor="016:255255255" halign="0" line="0,0" caption=" 장내채권 찾기" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="062:255255255" bgcolor="016:255255255" halign="0" line="0,0" caption=" 예상수익 보기" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="062:255255255" bgcolor="016:255255255" halign="0" line="0,0" caption=" SNS 공유" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1177" _ulen="1119" >
+'============================================================================
+'채권 세미팝업 화면에서 쓰는 화면메뉴 팝업
+'============================================================================
+Sub Form_OnFormInit()
+	szScr = Form.GetSharedData("&SCREEN_NO", FALSE )
+	if szScr = "54020" then	'주문화면에서는 SNS공유 삭제
+'		TblQuick.rowcount = 2
+		TblQuick.height = 80
+		imgQuick.height = 80
+	end if
+End Sub
+'============================================================================
+Sub TblQuick_OnClick(lRow , lColumn)
+	Select Case CInt(lRow)
+	Case 0
+		Form.OpenScreen("54000" , "")
+	Case 1 
+		Form.OpenPopup("mhprc54000_p5" , "popup" , "")
+	Case 2
+'		Form.OpenDialog("sharesns" , "1", "")
+		Form.SendReturnToParent("SCREEN_MENU" , "SHA_SNS")
+		Form.CloseForm()
+	End Select
+End Sub
+
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "snsshare" Then
+		Form.SendReturnToParent("sharedata" , sRet)
+	End If
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

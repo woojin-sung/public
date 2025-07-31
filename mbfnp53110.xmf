@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="53110" scrname="ELS/DLS 공지사항" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="0,0,375,562,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="887" _ulen="839" >
+
+Dim g_serverMode
+g_serverMode = ""
+'============================================================================
+Sub Form_OnFormInit()
+	g_serverMode = Form.GetSharedData("&SERVER_MODE", false)
+	
+	'웹 캐시삭제
+	WebView0.RemoveCache()
+	
+	'모바일 웹에서 어떤 OS인지 판단할 수 있음
+	if g_sDeviceOS == "1" then
+		WebView0.SetUserAgent("meritz_android")
+	elseif g_sDeviceOS == "2" then
+		WebView0.SetUseJavaScript("1")
+		WebView0.SetUserAgent("meritz_ios")
+	end if
+	
+	If g_serverMode == "1" Then	'개발기
+		sUrlpath = "https://testhome.imeritz.com/bbs/BbsMbWebList.go?bbsGrpId=bascGrp&bbsId=moneynotice_vm_mts&listCnt=10&pageNum=1&searchDiv=01&searchText="
+	else
+		sUrlpath = "https://home.imeritz.com/bbs/BbsMbWebList.go?bbsGrpId=bascGrp&bbsId=moneynotice_vm_mts&listCnt=10&pageNum=1&searchDiv=01&searchText="
+	end if
+	
+	WebView0.urlpath = sUrlpath
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

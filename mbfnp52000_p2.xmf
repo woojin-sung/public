@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="52000" scrname="발행어음매매_매수확인창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,325,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="269,0,40,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_vert="264,15,24,24,1" />
+		<TABLE name="tbl0" insidelinecolor="102:255255255" colcount="2" rowcount="5" outline="0000" designorder="1" ly_vert="15,68,279,175,1" >
+			<COL_INFO ly_vert_width="90,189" />
+			<ROW_INFO ly_vert_height="35,35,35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:255255255" halign="0" line="0,0" caption="종목" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" fontstyle="01" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:255255255" halign="0" line="0,0" caption="매수금액" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" mask="0,0,,원,0,,0,1,1" fontstyle="01" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:255255255" halign="0" line="0,0" caption="투자기간" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" line="0,0" mask="1,0,,일,1,,0,1,1" fontstyle="01" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:255255255" halign="0" line="0,0" caption="만기일자" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,3,1,3" halign="2" line="0,0" mask="1,0,,,1,####/##/##,0,1,1" fontstyle="01" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,4,1,4" line="0,0" caption="위의 주문을 처리하시겠습니까?" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnOk" caption="매수" fontstyle="01" btnimage="btn_05.9" ly_vert="154,261,124,39,1" />
+		<BUTTON name="btnCancel" caption="닫기" fgcolor="004:025025025" fontstyle="01" btnimage="btn_02.9" ly_vert="25,261,124,39,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="발행어음 매수 확인" bgcolor="092:185046046" halign="1" ly_vert="0,0,309,55,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2574" _ulen="2416" >
+'============================================================================
+' 01. 화 면 명 : 발행어음매매_매수확인창
+' 02. 화면설명 : 발행어음매매_매수확인창
+' 03. 작    성 : 2016. 03. 02. 유창재
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_szData
+Dim g_szList
+Dim g_nState			'종료시 버튼 선택 여부
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_szData = Form.GetOpenLinkData()
+	
+	g_szList = Split( g_szData, "★" )
+	
+	if UBOUND(g_szList) < 1 then
+		Exit sub
+	End if
+
+	tbl0.SetCellString( 0 , 1, g_szList(0) )			'종목
+	tbl0.SetCellString( 1 , 1, g_szList(1) )			'매수금액
+	tbl0.SetCellString( 2 , 1, g_szList(2) )			'투자기간
+	tbl0.SetCellString( 3 , 1, g_szList(3) )			'만기일자
+	
+End Sub
+'============================================================================
+' btnClose_OnClick()
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' imgClose_OnClick()
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnOk_OnClick() : 확인버튼 누를시 공인인증서 화면 열수 있게 값 지정
+'============================================================================
+Sub btnOk_OnClick()
+	Form.SendReturnToParent( "Ok" , sData )
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnCancel_OnClick()
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
