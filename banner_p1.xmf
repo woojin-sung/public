@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="배너 팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" vscroll="1" scroll_pos="0,0" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" imgpath="debit.png" ly_vert="0,0,369,1200,1" />
+				<IMAGE name="Image1" imgpath="icon_main_11" ly_vert="341,1,30,28,1" />
+				<BUTTON name="Button0" btnimage="alpha" ly_vert="0,1100,400,80,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1814" _ulen="1700" >
+'============================================================================
+'20210509 SWJ START : 비대면 이벤트 안내 배너 게시
+'============================================================================
+Dim g_LoginType, g_ScrNum 
+'============================================================================
+Sub Container0_Image1_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'Sub Container0_Label0_OnClick()
+'	sVer = Form.GetSharedData("&APP_VERSION")
+'	
+'	if sVer == "1.0.49" then 'Open 시 최초 버전 1.0.49
+'		Form.openExternalBrowser("https://play.google.com/store/apps/details?id=com.imeritz.smartmeritzact" ) 
+'	else
+'		'1.0.50이후부터 지원되는 API
+'		Form.RunSmartMeritzAct()
+'	end if
+'End Sub
+
+'============================================================================
+Sub Container0_Button0_OnClick()
+	if Cint(g_LoginType) > 1 then '로그인상태
+		Form.OpenNextPopup("banner_p0","", "")
+	else
+		Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_LoginType = Form.GetSharedData("&LOGIN_TYPE", 0 )
+	g_ScrNum = Form.GetSharedData("&SCREEN_NO",true)
+	
+	if g_ScrNum == "90100" then
+		Container0.Image1.visible = false
+		Container0.height = 525
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOG_FORCE" then
+		if sRet == "ok" then
+			Form.SetSharedData("BDM_CORPORATE", "Y")
+			Form.OpenNextPopup("mhetc90021" , "" , "")
+		else
+			Form.CloseForm()			
+		end if	
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

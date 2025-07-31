@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="71040" scrname="거래내역_유의사항" version="2" writer="신지환" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="유의사항" bgcolor="064:188030030" halign="1" ly_vert="0,0,355,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_main_11" ly_vert="331,16,24,24,1" />
+		<LABEL name="Label1" fontsize="-2" valign="0" multiline="1" ly_vert="4,61,368,389,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2095" _ulen="2069" >
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	szAcno = Form.GetSharedData("mbact71040_p2_acno", 0)
+	szAsno = Form.GetSharedData("mbact71040_p2_asno", 0)
+'	Form.MsgBox("알림1", szAcno, "", 0)
+'	Form.MsgBox("알림", szAsno, "", 0)
+	DATAMANAGER.SetDataValue(0 , "obaci_mdia_079r" , "InBlock1" , "ACNO", 0 , szAcno)
+	DATAMANAGER.SetDataValue(0 , "obaci_mdia_079r" , "InBlock1" , "ASNO", 0 , szAsno)
+	DATAMANAGER.RequestTranData("obaci_mdia_079r")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'Grid0.SetCellFgColor("bd_cell0", 0, "6")
+	'Form.msgbox("알림", MID(DATAMANAGER.GetDataValue( 0, "obaci_mdia_079r" , "OutBlock1" , "BNKB_PHR_OTPT_NAME", 0), 1, 1), "", 0)
+
+	For i=0 to 15
+		If DATAMANAGER.GetDataValue( 0, "obaci_mdia_079r" , "OutBlock1" , "BNKB_PHR_OTPT_NAME", i) <> "" Then
+			Label1.caption = Label1.caption & DATAMANAGER.GetDataValue( 0, "obaci_mdia_079r" , "OutBlock1" , "BNKB_PHR_OTPT_NAME", i)
+			
+			If i = 0 AND MID(DATAMANAGER.GetDataValue( 0, "obaci_mdia_079r" , "OutBlock1" , "BNKB_PHR_OTPT_NAME", 0), 1, 1) = "*" Then
+				szDeviceOS = Form.GetSharedData("&OS_TYPE", false)
+				if szDeviceOS == "2" then '아이폰
+					Label1.caption = Label1.caption & CHR(10) & CHR(13)
+				else
+					Label1.caption = Label1.caption & "\n" & "\n"
+				end if 
+				
+			End If
+			
+		End If
+	Next
+	
+	'Form.msgbox("알림", MID(DATAMANAGER.GetDataValue( 0, "obaci_mdia_079r" , "OutBlock1" , "BNKB_PHR_OTPT_NAME", 0), 1, 1), "", 0)
+	If MID(DATAMANAGER.GetDataValue( 0, "obaci_mdia_079r" , "OutBlock1" , "BNKB_PHR_OTPT_NAME", i), 1, 1) = "*" Then
+		Label1.ChangeTextAttr(0, 33, 1, -2, true)
+	End If
+
+	'Form.ShowAlert("아림",  DATAMANAGER.GetDataValue(0, "obaci_mdia_079r", "OutBlock1", "BNKB_PHR_OTPT_NAME" , 0))
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_mdia_079r" trcode="obaci_mdia_079r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_mdia_079r" title="계좌상품별 통장예금자보호문구" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="100" _ulen="78" >
+
+EXRS_YN^표시여부^1^0^0^0^0^0^0
+BNKB_PHR_OTPT_NAME^통장문구출력명^300^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="100" _ulen="80" >
+
+UI_INPR_NAME^UI개별상품명^80^0^0^0^0^0^0
+UI_ACNT_PRNM^UI계좌상품명^60^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="65" _ulen="49" >
+
+BNKB_PHR_OTPT_CODE^통장문구출력코드^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="9999" scrname="연합인포맥스 팝업메뉴" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,283,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnSise" caption="시세결제" fontstyle="01" btnimage="btn_01.9" ly_vert="27,150,120,55,1" />
+		<BUTTON name="btnLogin" caption="로그인
+/회원가입" fontstyle="01" btnimage="btn_01.9" ly_vert="27,80,120,55,1" />
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="해외주식 서비스" bgcolor="064:181181181" halign="1" autofontsize="1" ly_vert="142,6,116,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="yna_logo_l" ly_vert="21,15,119,23,1" />
+		<BUTTON name="btnUserInfo" caption="IMAXLITE
+회원정보" fontstyle="01" btnimage="btn_01.9" ly_vert="162,150,120,55,1" />
+		<BUTTON name="btnLogout" caption="로그아웃" fontstyle="01" btnimage="btn_01.9" ly_vert="162,80,120,55,1" />
+		<LABEL name="lblHint0" fgcolor="146:124124124" fontsize="-4" caption="* 해외주식 실시간 서비스 이용을 위해서는
+연합인포맥스 회원가입 및 로그인 하셔야 합니다." halign="1" valign="0" multiline="1" ly_vert="27,236,256,42,1" />
+		<LABEL name="lblLine0" bgcolor="178:222222222" transmode="0" ly_vert="27,220,256,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5920" _ulen="5516" >
+'============================================================================
+' 2017.10.16 -  LSS
+' 연합인포맥스 팝업메뉴 화면
+'
+' 1. 화면상의 모든 DEFINE 은 initDefine() 함수에서 처리 함.
+' 2. Edit, Button 이미지는 기존 메리츠 화면껄 씀.
+' 3.	시세결제의 경우 외부웹으로 이동 후 앱으로 돌아오면 연합인포 강제로그인 처리를 함.
+'
+' 4. 2017.10.18 - LSS : 버튼 이미지 btn02.9 -> btn_white.9 로 변경
+'============================================================================
+
+Dim g_tblDefine, g_isClose
+'============================================================================
+Sub Form_OnFormInit()
+	initDefine()
+	initDefault()
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if g_tblDefine[ "refreshExtra" ] == sKey then
+		initDefault()
+		
+		if g_isClose then
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+
+'----------------------------------------------------------------------------
+' 2017.10.16 - LSS
+' 컨트롤 함수
+'----------------------------------------------------------------------------
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnLogin_OnClick()
+	doOpenPopup("LOGIN")
+End Sub
+
+'============================================================================
+Sub btnLogout_OnClick()
+	doOpenPopup("LOGOUT")
+End Sub
+
+'============================================================================
+Sub btnSise_OnClick()
+	doOpenPopup("SISE")
+End Sub
+
+'============================================================================
+Sub btnUserInfo_OnClick()
+	doOpenPopup("USERINFO")
+End Sub
+
+'----------------------------------------------------------------------------
+' 2017.10.16 - LSS
+' 사용자 함수
+'----------------------------------------------------------------------------
+'============================================================================
+' 기본 설정된 정보들 설정
+'============================================================================
+Sub initDefine()
+	g_isClose = true
+	
+	' 20180417 HAMWG START : 테스트/운영 판별 공유변수 변경
+	g_tblDefine = {
+		[ "TEST" ] = Form.GetSharedData( "&SERVER_MODE", false ),
+		' 아이디
+		[ "USERID" ] = Form.GetEnvData( "login.session.userid_YH" ),
+		' 컨트롤 관련 속성값
+		[ "CR_ENABLE" ] = "62",
+		[ "CR_DISABLE" ] = "000:153153153",
+		[ "IMG_ENABLE" ] = "btn_01.9",
+		[ "IMG_DISABLE" ] = "btn_01.9",
+		' 연결화면
+		[ "SISE" ] = "https://paygts.einfomax.co.kr/m/MZSM/procmem/",
+		[ "USERINFO" ] = "https://paygts.einfomax.co.kr/m/MZSM/procmem2/",
+		[ "LOGIN" ] = "AspLoginView",
+		[ "LOGOUT" ] = "AspLoginProcess",
+		' 연결정보
+		[ "RELOGIN" ] = "RUN_INFOMAX_RELOGIN",
+		[ "IS_LOGIN" ] = "&IS_LOGIN_INFOMAX",
+		' 반환 이벤트
+		[ "refreshExtra" ] = "REFRESH_EXTRA_VIEW"
+	}
+	
+	' // TODO
+	' 테스트 모드인 경우 개발서버로... 추후 삭제 처리 하자
+	if CInt( g_tblDefine[ "TEST" ] ) == 1 then
+		g_tblDefine[ "SISE" ] = "https://devpaygts.einfomax.co.kr/m/MZSM/procmem/"
+		g_tblDefine[ "USERINFO" ] = "https://devpaygts.einfomax.co.kr/m/MZSM/procmem2/"
+	end if
+	' 20180417 HAMWG END
+End Sub
+
+'============================================================================
+' 기본 정보 및 컨트롤 설정
+'============================================================================
+Function initDefault()
+	Dim tData, isInfoMaxLogin,isEnable
+	tData = { "btnLogin", "btnLogout", "btnSise", "btnUserInfo" }
+	isInfoMaxLogin = Form.GetSharedData( g_tblDefine[ "IS_LOGIN" ], false ) == "1" and true or false
+	
+	For _, val in pairs( tData )
+		isEnable = isInfoMaxLogin
+		if val == tData[0] then
+			isEnable = (not isEnable)
+		end if
+		
+		swapCtlProp( isEnable, val )
+	Next
+End Function
+
+'============================================================================
+' 컨트롤 속성 변경
+'============================================================================
+Function swapCtlProp(isEnable, ctlName)
+	Form.SetCtlProp( ctlName, "enable", isEnable )
+	Form.SetCtlProp( ctlName, "fgcolor", g_tblDefine[ isEnable and "CR_ENABLE" or "CR_DISABLE" ] )
+'	Form.SetCtlProp( ctlName, "btnimage", g_tblDefine[ isEnable and "IMG_ENABLE" or "IMG_DISABLE" ] )
+	
+End Function
+
+'============================================================================
+' 화면 및 외부 웹 화면 호출
+'============================================================================
+Function doOpenPopup(szType)
+	g_isClose = true
+
+	Select Case szType
+	Case "LOGIN"
+		Form.OpenPopup( g_tblDefine[ szType ] , "" , "" )
+		Exit Function
+		
+	Case "LOGOUT"
+		Dim tData, szData
+	
+		tData = {}	
+		' 일반 = 0, 강제 = 1, 자동 = 2, 지연 = 3, 로그아웃 = 4
+		table.insert( tData, "4" )
+		table.insert( tData, g_tblDefine[ "USERID" ] )
+		table.insert( tData, "0" )
+		
+		For _, val in pairs( tData )
+			if isNull( szData ) then
+				szData = val
+			else
+				szData = szData & "★" & val
+			end if		
+		Next
+	
+		Form.OpenPopup( g_tblDefine[ szType ] , szData , "" )
+		Exit Function
+				
+	Case Else
+		if "SISE" == szType then
+			g_isClose = false
+			Form.SetSharedData( g_tblDefine[ "RELOGIN" ] , "1" )
+		end if
+	
+		Dim szUserID 
+		szUserID = Form.KBase64Decoding( g_tblDefine[ "USERID" ] )
+		szUserID = Form.AesEncoding( szUserID & "@" & os.date( "%Y%m%d" ) )
+		
+		Form.OpenExternalBrowser( g_tblDefine[ szType ] & szUserID )
+				
+	End Select	
+End Function
+
+'============================================================================
+' null 체크
+'============================================================================
+Function isNull(str)
+	if null == str or "" == str or Len(Trim(str)) <= 0 then
+		return true
+	end if
+	
+	return false
+End Function
+
+	</SCRIPT_INFO>
+</ROOT>

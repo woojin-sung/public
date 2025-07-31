@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="9999" scrname="해외주식 종목검색_가로" version="2" writer="이재원" />
+	<FORM_INFO name="Form" lyinfo="1" ly_horz="0,0,667,355,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fgcolor="062:255255255" fontsize="5" caption="종목선택" bgcolor="064:181181181" transmode="0" halign="1" ly_horz="0,0,667,39,1" />
+		<FORMTAB name="FormTab" resize="0001" tabcount="4" tabwidthtype="1" tabheadheight="39" ly_horz="0,39,667,316,1" >
+			<PAGE name="page3" caption="미국" linkfile="ItemSearchOverStockT2_h" loadingtype="1" />
+			<PAGE name="page2" caption="중국" linkfile="ItemSearchOverStockT1_h" loadingtype="1" />
+			<PAGE name="page1" caption="홍콩" linkfile="ItemSearchOverStockT0_h" loadingtype="1" />
+			<PAGE name="page4" caption="일본" linkfile="ItemSearchOverStockT3_h" loadingtype="1" />
+		</FORMTAB>
+		<IMAGE name="imgClose" imgpath="icon_main_03" ly_horz="627,5,30,30,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7294" _ulen="6908" >
+
+'============================================================================
+' 2017.10.20 -  LSS
+' 연합인포맥스 종목검색 화면
+'
+' 1. 화면상의 모든 DEFINE 은 initDefine() 함수에서 처리 함.
+'
+' 2017.10.24 - LSS
+' 1. 관심관련 내용 추가
+'============================================================================
+
+Dim g_tblDefine, g_tintrList
+'============================================================================
+Sub Form_OnFormInit()
+	initDefine()
+	initDefault()
+	SendTriggerEvent( g_tblDefine["IS_INTR"], g_tblDefine.isIntr and "1" or "0" )				'IOS에서 폼탭체인지가 시작할때 안열려서 init에서 설정
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if Null == g_tblDefine then
+		Exit Sub
+	end if
+	
+	' 수신정보 전달 시
+	if g_tblDefine["SELECT_ITEM"] == sEventName then
+		if g_tblDefine.isIntr then
+			addIntrSelectItem(sParam)
+		else
+			' 수신정보 저장 및 메인에 전달
+			initSelectItem(sParam)
+			imgClose_OnClick()
+		end if
+		
+	elseif g_tblDefine["SELECT_ITEMLIST"] == sEventName then
+		if Null <> g_tintrList and #g_tintrList > 0 then		
+			Dim szValue
+			For _, val in pairs( g_tintrList )
+				if isNull( szValue ) then
+					szValue = val
+				else
+					szValue = szValue & g_tblDefine["SPLIT"] & val
+				end if
+			Next
+			
+			SendTriggerEvent( sEventName, szValue )		
+		end if
+	end if
+End Sub
+
+'----------------------------------------------------------------------------
+' 2017.10.20 -  LSS
+' 컨트롤 함수
+'----------------------------------------------------------------------------
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+
+
+'============================================================================
+Sub FormTab_OnTabChanged(nCurrentTab)	
+	Form.SetEnvData( 1, g_tblDefine["PAGE_ID"], FormTab.currenttabpageid )
+	SendTriggerEvent( g_tblDefine["IS_INTR"], g_tblDefine.isIntr and "1" or "0" )
+End Sub
+
+'----------------------------------------------------------------------------
+' 2017.10.20 -  LSS
+' 사용자 함수
+'----------------------------------------------------------------------------
+'============================================================================
+' 기본 설정된 정보들 설정
+'============================================================================
+Sub initDefine()
+	g_tblDefine = {
+		["SPLIT"] = "★",
+		["SPLIT_INTR"] = "☆",
+		' 연결정보
+		["LINKDATA"] = "&ITEM_OVERSTOCK",
+		' 저장정보
+		["PAGE_ID"] = "item.search.pageid",
+		' 반환 이벤트
+		["IS_INTR"] = "IS_INTR",
+		["REMOVE_ITEM"] = "REMOVE_ITEM",
+		["SELECT_ITEM"] = "SELECT_ITEM",
+		["SELECT_ITEMLIST"] = "SELECT_ITEMLIST",
+		["SEND_MAIN"] = "CHANGE_ITEMCODE_OVERSTOCK",		
+		["refreshExtra"] = "REFRESH_EXTRA_VIEW"
+	}
+	
+	g_tblDefine.isIntr = false
+	
+	g_tintrList = {}	
+End Sub
+
+'============================================================================
+' 컨트롤 기본정보 설정
+'============================================================================
+Sub initDefault()
+	Dim szData
+	szData = Form.GetOpenLinkData()
+	
+	if not isNull(szData) then
+		g_tblDefine.isIntr = ("INTR" == szData) and true or false
+	end if
+	
+	if g_tblDefine.isIntr then
+		initIntrView()
+	end if
+
+	FormTab.currenttabpageid = Form.GetEnvData( g_tblDefine["PAGE_ID"] )
+End Sub
+
+'============================================================================
+' 관심종목 View 설정
+'============================================================================
+Sub initIntrView()
+	Dim tData, isVisible
+	tData = {
+		["INTR"] = { "lblIntrChoice", "btnIntrCancel", "btnIntrSave" },
+		["ETC"] = "imgClose"
+	}
+	
+	For key, val in pairs( tData )
+		isVisible = ( "INTR" == key and g_tblDefine.isIntr ) and true or ( "INTR" ~= key and (not g_tblDefine.isIntr ) and true or false )
+		if "table" == type(val) then
+			For _, subVal in pairs(val)
+				Form.SetCtlProp( subVal, "visible", isVisible )
+			Next
+		else
+			Form.SetCtlProp( val, "visible", isVisible )
+		end if
+	Next
+End Sub
+
+'============================================================================
+' 연결정보 저장
+'============================================================================
+Function initSelectItem(sParam)
+	if ( not isNull( sParam ) ) then
+		Dim tCode
+		tCode = Split( sParam, g_tblDefine["SPLIT"] )
+		if Null <> tCode and #tCode >= 1 then
+			Form.SetSharedData( g_tblDefine["LINKDATA"] , sParam )		
+			Form.SendMessageToMain( g_tblDefine["SEND_MAIN"], sParam, "" )
+			
+			' 하단바 권한을 위한 이벤트
+			Form.SendReturnToParent("ITEM_CHANGE" , sParam)
+			
+			Form.PostLinkData( g_tblDefine["refreshExtra"], "")
+		end if
+	end if
+End Function
+
+'============================================================================
+' 관심종목 선택 시 종목아이템 관리
+'============================================================================
+Function addIntrSelectItem(sParam)
+	if Null == g_tintrList then
+		g_tintrList = {}
+	end if
+	
+	if removeIntrItem( sParam ) then
+		initSelectCaption()
+		SendTriggerEvent( g_tblDefine["REMOVE_ITEM"], sParam )	
+		Exit Function
+	end if
+	
+	table.insert( g_tintrList, sParam )
+	initSelectCaption()
+End Function
+
+'============================================================================
+' 좌측상단 선택상태 Label Caption
+'============================================================================
+Sub initSelectCaption()
+	lblIntrChoice.caption = #g_tintrList > 0 and ( "선택 " & #g_tintrList ) or "선택"
+End Sub
+
+'============================================================================
+' 관심종목 선택 시 종목아이템 삭제
+'============================================================================
+Function removeIntrItem(sParam)
+	For index, val in pairs( g_tintrList )
+		if val == sParam then
+			table.remove( g_tintrList, index )
+			return true
+		end if		
+	Next
+	
+	return false
+End Function
+
+'============================================================================
+' 선택종목 리스트 String으로 전환
+'============================================================================
+Function makeIntrSelectItemToString()
+	Dim szSelectItems
+	For _, val in pairs( g_tintrList )
+		if isNull( szSelectItems ) then
+			szSelectItems = val
+		else
+			szSelectItems = szSelectItems & g_tblDefine["SPLIT_INTR"] & val
+		end if
+	Next
+	
+	return szSelectItems
+End Function
+
+'============================================================================
+' TriggerEvent
+'============================================================================
+Function SendTriggerEvent( sEventName, sParam )
+	Form.triggerEvent( "FormTab." & FormTab.currenttabpageid , sEventName, sParam )
+End Function
+
+'============================================================================
+' null 체크
+'============================================================================
+Function isNull(str)
+	if null == str or "" == str or Len(Trim(str)) <= 0 then
+		return true
+	end if
+	
+	return false
+End Function
+
+	</SCRIPT_INFO>
+</ROOT>

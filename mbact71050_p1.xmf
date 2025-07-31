@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="71050" scrname="고객자산평가 상품별잔고" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab0" tabcount="9" tabheadwidth="92" tabheadheight="40" ly_vert="-2,0,375,607,1" >
+			<PAGE name="page005444" caption="전체" linkfile="mbact71050_p2" loadingtype="1" />
+			<PAGE name="page006490" caption="주식/채권" linkfile="mbact71050_p3" loadingtype="1" />
+			<PAGE name="page001346" caption="해외주식" linkfile="mbact71050_p10" loadingtype="1" />
+			<PAGE name="page004579" caption="CMA" linkfile="mbact71050_p4" loadingtype="1" />
+			<PAGE name="page007215" caption="펀드" linkfile="mbact71050_p5" loadingtype="1" />
+			<PAGE name="page004443" caption="ELS/DLS" linkfile="mbact71050_p6" loadingtype="1" />
+			<PAGE name="page007027" caption="외화/기타상품" linkfile="mbact71050_p7" loadingtype="1" />
+			<PAGE name="page003611" caption="선물옵션" linkfile="mbact71050_p8" loadingtype="1" />
+			<PAGE name="page001868" caption="D+2예수금" linkfile="mbact71050_p9" loadingtype="1" />
+		</FORMTAB>
+		<COMBO name="cmb0" cbinputdatatext="00`전체" ly_vert="6,49,120,39,1" />
+		<CALENDAR name="cld0" dispmode="99622504" ly_vert="406,82,136,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4359" _ulen="4033" >
+'============================================================================
+' 01. 화 면 명 : 고객자산평가_상품별잔고
+' 02. 화면설명 : 고객자산평가_상품별잔고
+' 03. 작    성 : 2016. 02. 04. 유창재
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_szList			'초기폼텝Index와 계좌번호
+Dim szPassWord		'계좌비밀번호
+Dim nTabIndex			'폼텝Index			
+Dim g_szCmbAcnt		'콤보계좌들
+Dim g_szCmbIndex		'콤보 인덱스
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' SetTrigger(nIndex) : TabIndex에 따른 트리거 이벤트
+'============================================================================
+Function SetTrigger(nIndex)
+	Dim szData
+	
+	if g_szCmbIndex <> 0 then
+		szData = g_szList(2) & "○" & " " & "○" & cld0.caption & "○" & cmb0.cbkeydata	'계좌개수, 전체여부,날짜,계좌번호들
+	else
+		szData = g_szList(2) & "○" & "Y" & "○" & cld0.caption & g_szCmbAcnt	'계좌개수, 전체여부,날짜,계좌번호들
+	end if
+	
+	
+	Select Case nIndex
+		Case 0
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p2", szData )			'전체
+		Case 1
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p3", szData )			'주식/채권
+		Case 2
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p10", szData )		'해외주식
+		Case 3
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p4", szData )			'CMA
+		Case 4
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p5", szData )			'펀드
+		Case 5
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p6", szData )			'ELS/DLS
+		Case 6
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p7", szData )			'기타_RP
+		Case 7
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p8", szData )			'선물옵션
+		Case 8
+			Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "mbact71050_p9", szData )			'D+2예수금
+	End Select
+	
+End Function
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()	
+
+	Dim szData
+	
+	g_szCmbAcnt = ""
+	
+
+	szData = Form.GetOpenLinkData()
+	
+	g_szList = Split(szData, "☆")
+	
+	
+	if UBOUND(g_szList) < 1 then
+		Exit Sub
+	End if	
+
+	nTabIndex = Int(g_szList(0))
+	
+		
+	fmtab0.currenttab = Cint(g_szList(0))
+	'fmtab0.currenttab = 0
+	'Test를 위해 콤보에서 받아온 계좌번호를 콤보에 추가
+	for i = 3 to 3 + g_szList(2)
+		cmb0.cbadddatatext = g_szList(i).."`"..Left(g_szList(i),4).."-"..Right(g_szList(i),4)
+		g_szCmbAcnt = g_szCmbAcnt & "○" & g_szList(i)
+	next
+	
+	'추가한 콤보를 활성화
+	if CDbl(g_szList(0)) > 0 then
+		cmb0.currentindex = 0
+	else
+		cmb0.currentindex = g_szList(1)+1
+	end if
+	
+	szPassWord = " "
+'	szPassWord = Form.GetEncData(Form.GetSharedData("&ACCOUNT_PWD", false ))		'계좌 비밀번호
+'	Form.ShowAlert("PW", szPassWord)
+'	Form.GetSharedData("&ACCOUNT_PWD", false )
+'	Call CmbVisible(nTabIndex)	
+	Call SetTrigger(Int(g_szList(0)))
+End Sub
+'============================================================================
+' fmtab0_OnTabChanged(nCurrentTab)
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	
+	nTabIndex = nCurrentTab
+	
+	Call SetTrigger(nCurrentTab)
+	
+End Sub
+'============================================================================
+' cmb0_OnEditComplete(iIndex)
+'============================================================================
+Sub cmb0_OnEditComplete(iIndex)
+
+	g_szCmbIndex = iIndex
+
+	SetTrigger(nTabIndex)
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

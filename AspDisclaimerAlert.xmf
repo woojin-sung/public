@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="9999" scrname="연합인포맥스 Disclaimer 팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,464,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="Disclaimer" bgcolor="064:181181181" halign="1" autofontsize="1" ly_vert="0,6,309,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+		<LABEL name="lblHint0" fontsize="-3" fontstyle="01" valign="0" multiline="1" ly_vert="15,71,279,310,1" />
+		<LABEL name="lblLine0" bgcolor="178:222222222" transmode="0" ly_vert="19,382,272,1,1" />
+		<BUTTON name="btnConfirm" caption="확인" btnimage="btn_01.9" ly_vert="19,402,272,42,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3755" _ulen="3661" >
+'============================================================================
+Sub Form_OnFormInit()
+	' 나스닥 디스클레이머 추가 - 19.04.10 김경민
+	' 홍콩/상해/심천/나스닥/뉴욕/아멕스 추가
+	'HKS/SHS/SZS/NAS/NYS/AMX
+	Dim szGetData, szTextKR, szTextEN
+	szGetData = Form.GetOpenLinkData()
+	
+	if ( not isNull(szGetData) ) then
+		' 홍콩 
+		if szGetData == "HKS" then
+			szTextKR =	"" 
+						
+			szTextEN =	"HKEx infomaxtion services limited, its holding companies and/or any subsidiaies of such" &
+						"holding companies endeavour to ensure the accuracy and reilability of the information " &
+						"provided but do not guarantee its accuracy or reilability and accept no liability " &
+						"(whether in tort or contract or otherwise) for any loss or damage arising from any " &
+						"inaccuracies or omissions."
+						
+		' 상해
+		elseif szGetData == "SHS" then
+			szTextKR =	"" 
+						
+			szTextEN =	"China Investment Information Services Limited, it's holding companies and/or any subsidiary" &
+						"of such holding companies and/or its third party content provider(s) endeavor to ensure the" &
+						"accuracy and reliability of the information provided but do not guarantee its suitability," &
+						"availability, service level, timelines, accuracy or reliability and accept no liability " &
+						"(whether in tort or contract or otherwise) for any loss or damage arising from any interruption, defect, delay, " &
+						"inaccuracies or omissions."
+						
+		' 심천
+		elseif szGetData == "SZS" then
+			szTextKR =	"" 
+						
+			szTextEN =	"Although Vendor will use all reasonable endeavors to ensure the accuracy and reliability " &
+						"of its service, neither Vendor nor SSIC will be liable for any loss or damage in connection" &
+						"with the provision of failure to provide the service."
+		' 나스닥
+		elseif szGetData == "NAS" then
+			szTextKR =	"" 
+						
+			szTextEN =	"UTP Quotation Feed: provides best bid and offer(BBO0 quotes from UTP participant as well as the " &
+						"consolidated national best bid and offer (NBBO) quotes for securities listed on the " &
+						"NASDAQ Stock Market.® UTP Trade Feed:provides trade data from the UTP participants for " &
+						"securities listed on the NASDAQ Stock Market®."
+		' 뉴욕/아멕스
+		elseif szGetData == "NYS" or szGetData == "AMX" then
+			szTextKR =	"" 
+					
+			szTextEN =	
+						"CTA Tape A:Last Sale: provides trade data from the CTA participants for securities " &
+						"listed on the New York Stock Exchange \r\n" &
+						"CTA Tape A:Bid/Ask: provides best bid and offer (BBO) quotes from CTA participants " &
+						"as well as the consolidated national best bid and offer (NBBO) quotes for securities " &
+						"listed on the New York Stock Exchange. \r\n" &
+						"CTA Tape A:Last Sale: provides trade data from the CTA participants for securities listed on the " &
+						"NYSE American LLC. National best bid and offer (NBBO) quotes for securities " &
+						"listed on the NYSE American LLC."
+
+		end if
+		
+		if isNull(szTextKR) then
+			lblHint0.caption = szTextKR & "\r\n" & szTextEN
+		else
+			lblHint0.caption = szTextEN
+		end if
+		
+	end if
+End Sub
+
+'============================================================================
+Sub btnConfirm_OnClick()
+	imgClose_OnClick()
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' null 체크
+'============================================================================
+Function isNull(str)
+	if null == str or "" == str or Len(Trim(str)) <= 0 then
+		return true
+	end if
+	
+	return false
+End Function
+
+	</SCRIPT_INFO>
+</ROOT>

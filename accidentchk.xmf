@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="9999" scrname="사고여부판단" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,301,366,1" />
+	<CONTROL_INFO/>
+	<SCRIPT_INFO _len="1213" _ulen="1175" >
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim ReturnData
+	if szTranID == "obacp_opop_039r" then
+		DATAMANAGER.GetDataValue( 0 , "obacp_opop_039r", "OutBlock6", "ACDN_YN" , 0)
+					'사고여부가 Y = 출금고사고 , N = 정상
+		ReturnData = DATAMANAGER.GetDataValue( 0 , "obacp_opop_039r", "OutBlock6", "ACDN_YN" , 0) & "★" &
+			DATAMANAGER.GetDataValue( 0 , "obacp_opop_039r", "OutBlock6", "ACDN_TYPE_NAME" , 0)
+				'사고유형명
+				
+		Form.SendReturnToParent( "ACCIDENT" , ReturnData)		
+		Form.triggerEvent( "#", "ACCIDENT", ReturnData)
+		Form.CloseForm()
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	Dim szData, szList
+	
+	if sEventName == "Chk" then
+		szData = sParam
+
+		szList = Split(szData, "★")
+		
+		if UBOUND(szList) < 1 then
+			Exit Sub
+		end if
+		
+		DATAMANAGER.SetDataValue( 0, "obacp_opop_039r", "InBlock1", "ACNO" , 0 , szList(0))
+		DATAMANAGER.SetDataValue( 0, "obacp_opop_039r", "InBlock1", "ACNT_PWD" , 0 , szList(1))
+		
+		DATAMANAGER.RequestTranData( "obacp_opop_039r" )
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacp_opop_039r" trcode="obacp_opop_039r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacp_opop_039r" title="계좌 사고 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="84" _ulen="64" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="139" _ulen="109" >
+
+ACDN_YN^사고 여부^1^0^0^0^0^0^0
+ACDN_TYPE_NAME^사고 유형 명^40^0^0^0^0^0^0
+CANC_ABLE_YN^해지가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="139" _ulen="109" >
+
+ACDN_YN^사고 여부^1^0^0^0^0^0^0
+ACDN_TYPE_NAME^사고 유형 명^40^0^0^0^0^0^0
+CANC_ABLE_YN^해지가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="139" _ulen="109" >
+
+ACDN_YN^사고 여부^1^0^0^0^0^0^0
+ACDN_TYPE_NAME^사고 유형 명^40^0^0^0^0^0^0
+CANC_ABLE_YN^해지가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="139" _ulen="109" >
+
+ACDN_YN^사고 여부^1^0^0^0^0^0^0
+ACDN_TYPE_NAME^사고 유형 명^40^0^0^0^0^0^0
+CANC_ABLE_YN^해지가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="136" _ulen="106" >
+
+ACDN_YN^사고여부^1^0^0^0^0^0^0
+ACDN_TYPE_NAME^사고유형명^40^0^0^0^0^0^0
+CANC_ABLE_YN^해지가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock6" inout="out" _len="136" _ulen="106" >
+
+ACDN_YN^사고여부^1^0^0^0^0^0^0
+ACDN_TYPE_NAME^사고유형명^40^0^0^0^0^0^0
+CANC_ABLE_YN^해지가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" occurs="99" inout="out" _len="293" _ulen="227" >
+
+ACDN_YN^사고여부^1^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+UI_ACNT_PRNM^UI계좌상품명^60^0^0^0^0^0^0
+ACDN_TYPE_NAME^사고유형명^40^0^0^0^0^0^0
+CANC_ABLE_YN^해지가능여부^1^0^0^0^0^0^0
+IF_ACNO^IF계좌번호^12^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
