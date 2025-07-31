@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99010" scrname="최근본포트폴리오" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<CALENDAR name="Calendar0" dispmode="21986896" ly_vert="24,10,140,32,1" />
+		<CALENDAR name="Calendar1" dispmode="21986896" ly_vert="214,10,140,32,1" />
+		<LABEL name="Label0" fontstyle="01" caption="~" ly_vert="174,10,30,32,1" />
+		<GRID name="Grid0" colcount="4" ly_vert="10,50,354,470,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-2" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-2" halign="1" />
+				<LABEL name="bd_cell2" fontsize="-2" halign="1" />
+				<LABEL name="bd_cell3" fontsize="-4" fontstyle="01" />
+				<LABEL name="bd_cell5" fontsize="-2" halign="1" />
+				<LABEL name="bd_cell4" fontstyle="01" halign="1" />
+				<LABEL name="bd_cell6" halign="2" />
+				<LABEL name="bd_cell7" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO usetopheader="0" bordercolor="144:034034034" inlinecolor="144:034034034" />
+			<COLINFO ly_vert_width="220,90,43,70" ly_vert_visible="0,0,0,0" >
+				<COLUMN colcount="2" >
+					<SUBCOLINFO ly_vert_width="133,87" ly_vert_visible="0,0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40,40" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell1" cell_ly="1,0,1,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell3" cell_ly="0,1,1,1" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40,40" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell5" cell_ly="0,1,0,1" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="43" ly_vert_visible="0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40,40" />
+						<CELLINFO>
+							<CELL name="bd_cell4" cell_ly="0,0,0,1" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40,40" />
+						<CELLINFO>
+							<CELL name="bd_cell6" cell_ly="0,0,0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell7" cell_ly="0,1,0,1" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="Label1" fontstyle="01" caption="최근 본 포트폴리오가 없습니다." halign="1" ly_vert="70,240,240,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4628" _ulen="4400" >
+
+'============================================================================
+Sub Form_OnFormInit()
+
+Grid0.SetVisibleCol(3, 0)
+
+DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "INP_MEMB_SRNO" , 0 , 1)
+DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "DATE_FACT1" , 0 , Calendar0.caption)
+DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "DATE_FACT2" , 0 , Calendar1.caption)
+
+DATAMANAGER.RequestTranData("obcpp_intr_752r")
+tmp_cnt = 0
+Label1.visible = 0
+	
+End Sub
+
+
+
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+
+     cnt = DATAMANAGER.GetDataCount(0, "obcpp_intr_752r" ,"OutBlock1") 
+     
+     if cnt == 0 then
+     Label1.visible = 1
+     Grid0.SetDeleteRow(0)
+     end if
+	
+	'Form.MsgBox("테스트", cnt, "", "")
+	
+	for i = 0 to cnt-1
+	
+	tmp  = DATAMANAGER.GetDataValue(0, "obcpp_intr_752r", "OutBlock1", "ADCP_NAME", i) '자문사명
+	Grid0.SetCellData("bd_cell0", tmp_cnt+i, tmp)
+
+	'Grid0.SetCellData('sCellID, nRowIdx, sValue)
+	
+	tmp  = DATAMANAGER.GetDataValue(0, "obcpp_intr_752r", "OutBlock1", "PRTF_NAME", i) '포폴명
+	Grid0.SetCellData("bd_cell3", tmp_cnt+i, tmp)
+	
+	
+	tmp  = DATAMANAGER.GetDataValue(0, "obcpp_intr_752r", "OutBlock1", "INP_INVT_INCL_CLCD", i) '위험등급'
+	
+	if abs(tmp) == 1 then
+	tmp = "안정형"
+	  
+	elseif abs(tmp) == 2 then
+	tmp = "안정추구형"
+	
+	elseif abs(tmp) ==3 then
+	tmp = "중립형"
+	
+	elseif abs(tmp) == 4 then
+	tmp = "수익추구형"
+	
+	elseif abs(tmp) ==5 then
+	tmp = "고수익추구형"
+	
+	end if
+	
+	
+	Grid0.SetCellData("bd_cell1", tmp_cnt+i, tmp)
+	Grid0.SetCellFgColor("bd_cell1", tmp_cnt+i, "91")
+	
+	
+	tmp  = DATAMANAGER.GetDataValue(0, "obcpp_intr_752r", "OutBlock1", "PRTF_ID", i)
+	Grid0.SetCellData("bd_cell6", tmp_cnt+i, tmp)
+	
+	
+	Grid0.SetCellData("bd_cell4", tmp_cnt+i, "▶")
+	
+	
+	tmp  = DATAMANAGER.GetDataValue(0, "obcpp_intr_752r", "OutBlock1", "FERT", i) '수수료
+	Grid0.SetCellData("bd_cell5", tmp_cnt+i, "수수료 : "&Cint(tmp)&"%")
+	
+	
+	tmp  = DATAMANAGER.GetDataValue(0, "obcpp_intr_752r", "OutBlock1", "ANTC_ERT", i) '예상수익률
+	Grid0.SetCellData("bd_cell2", tmp_cnt+i, "수익률 : "&Cint(tmp)&"%")
+	
+	
+'	tmp  = DATAMANAGER.GetDataValue(0, "obcpp_intr_752r", "OutBlock1", "INP_RBDV_VLPN", i) '고객평점
+	
+'	if abs(tmp) == 1 then
+'	tmp = "★☆☆☆☆"
+'	  
+'	elseif abs(tmp) == 2 then
+'	tmp = "★★☆☆☆"
+'	
+'	elseif abs(tmp) ==3 then
+'	tmp = "★★★☆☆"
+'	
+'	elseif abs(tmp) == 4 then
+'	tmp = "★★★★☆"
+'	
+'	elseif abs(tmp) ==5 then
+'	tmp = "★★★★★"
+'	
+'	end if
+'	
+	
+	
+	
+	
+'	Grid0.SetCellData("bd_cell12", tmp_cnt+i, tmp)
+'	Grid0.SetCellData("bd_cell0", tmp_cnt+i, "자문사명")
+'	Grid0.SetCellData("bd_cell1", tmp_cnt+i, "포트폴리오명")
+'	Grid0.SetCellData("bd_cell2", tmp_cnt+i, "위험등급")
+'	Grid0.SetCellData("bd_cell3", tmp_cnt+i, "수수료")
+'	Grid0.SetCellData("bd_cell4", tmp_cnt+i, "예상수익률")
+'	Grid0.SetCellData("bd_cell5", tmp_cnt+i, "고객평가")
+'	
+'	
+'	Grid0.SetCellData("bd_cell6", tmp_cnt+i, "비교선택")
+'	Grid0.SetCellFgColor("bd_cell6", tmp_cnt+i, 90)
+'	
+'	Grid0.SetCellData("bd_cell13", tmp_cnt+i, "상세보기")
+'	Grid0.SetCellFgColor("bd_cell13", tmp_cnt+i, 90)
+'	
+	
+	'if tmp_cnt+i < cnt-1 then
+ 	'Grid0.AddRow()
+	
+'	else
+'	tmp_cnt = 0
+'	end if
+	
+	
+	
+	next
+	
+'	DATAMANAGER.RequestNextData("obcpp_intr_722r")
+
+
+	
+End Sub
+
+'============================================================================
+Sub Calendar0_OnEditComplete()
+
+DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "INP_MEMB_SRNO" , 0 , "1")
+DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "DATE_FACT1" , 0 , Calendar0.caption)
+DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "DATE_FACT2" , 0 , Calendar1.caption)
+	DATAMANAGER.RequestTranData("obcpp_intr_752r")
+End Sub
+
+'============================================================================
+Sub Calendar1_OnEditComplete()
+	
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "INP_MEMB_SRNO" , 0 , "1")
+DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "DATE_FACT1" , 0 , Calendar0.caption)
+DATAMANAGER.SetDataValue(0, "obcpp_intr_752r", "InBlock1", "DATE_FACT2" , 0 , Calendar1.caption)
+DATAMANAGER.RequestTranData("obcpp_intr_752r")
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	
+ tmp = Grid0.selectrow
+ prtf_id = Grid0.GetCellData("bd_cell6", tmp)
+ 
+ if szCellID == "bd_cell4" then 
+
+ Form.OpenFramePopup("mbetc99000_s19" , prtf_id , "")
+ end if
+ 
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_intr_752r" trcode="obcpp_intr_752r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_intr_752r" title="인턴A팀 히스토리 조회서비스" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="144" _ulen="110" >
+
+INP_MEMB_SRNO^인턴쉽회원일련번호^11^0^7^0^0^0^0
+DATE_FACT1^일자팩터1^8^0^0^0^0^0^0
+DATE_FACT2^일자팩터2^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="276" _ulen="206" >
+
+PRTF_NAME^포트폴리오명^40^0^0^0^0^0^0
+INP_INVT_INCL_CLCD^인턴쉽투자성향구분코드^2^0^7^0^0^0^0
+FERT^수수료율^9^4^7^0^0^0^0
+ANTC_ERT^예상수익률^14^5^7^0^0^0^0
+ADCP_NAME^자문사명^1024^0^0^0^0^0^0
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="48" _ulen="38" >
+
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

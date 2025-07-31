@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51010" scrname="펀드매매_매도신청_완료팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="icon_confirm" margin="0,0,5,0" ly_vert="150,31,74,74,1" />
+		<LABEL name="lblResult1" fontsize="4" fontstyle="01" caption="펀드 매도 신청이
+완료 되었습니다." halign="1" multiline="1" ly_vert="20,106,335,60,1" />
+		<LABEL name="lblTableTitle" fontsize="-2" fontstyle="01" caption="나의 신청현황" autofontsize="1" ly_vert="20,180,269,25,1" />
+		<TABLE name="tblInfo" outlinecolor="199:050050050" insidelinecolor="102:255255255" colcount="2" rowcount="5" outline="0100" designorder="1" ly_vert="20,216,335,190,1" >
+			<COL_INFO ly_vert_width="99,236" />
+			<ROW_INFO ly_vert_height="50,35,35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="146:124124124" halign="0" line="0,1" caption="상품명" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="146:124124124" halign="0" line="0,1" caption="신청계좌" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,1" fontsize="-2" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="146:124124124" halign="0" line="0,1" caption="매도금액(좌)" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" line="0,1" fontsize="-2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="146:124124124" halign="0" line="0,1" caption="기준가 적용일" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,3,1,3" halign="2" line="0,1" fontsize="-2" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="146:124124124" halign="0" line="0,1" caption="결제 예정일" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,4,1,4" halign="2" line="0,1" fontsize="-2" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnList" caption="주문내역 보기" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_20.9" ly_vert="187,597,188,50,1" />
+		<LABEL name="lblFndName" fontsize="-2" caption="미래에셋
+테스트펀드명" halign="2" multiline="1" ly_vert="117,217,235,50,1" />
+		<LABEL name="lblSellAmt" fontsize="-2" mask="0,0,,원,0,,0,1,0,0,0" halign="2" ly_vert="127,300,231,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2008" _ulen="1870" >
+dim	g_szRet	'리턴값
+
+g_szRet = "close"
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+
+	if szOpenData <> "" and szOpenData <> null then
+		dim tData, szProdCd, szProdText
+		tData = Split(szOpenData, "★")
+		
+		szProdCd = Form.GetAccountInfo(tData(0), "productcode")
+		szProdText = Form.GetMetaData("상품코드", szProdCd)
+		
+		'종목명 긴 경우, 멀티라인 2줄까지만 출력되도록..
+		if Len(tData(1)) > 40 then
+			lblFndName.fontsize = -2
+		else
+			lblFndName.fontsize = 0
+		end if
+		lblFndName.caption 		= tData(1)	'상품명
+
+
+		tblInfo.SetCellString( 1, 1, "["&szProdText&"] "&Left(tData(0),4)&"-"&Mid(tData(0),5,4)&"-"&Right(tData(0),2)) 	'신청계좌
+
+
+		szSellType	= tData(5)
+		if szSellType = "01" then	'금액매도
+			lblSellAmt.mask="0,0,,원,0,,0,1,0,0,0"
+		else	'좌수매도/전액매도
+			lblSellAmt.mask="0,0,,좌,0,,0,1,0,0,0"
+		end if
+		lblSellAmt.caption = tData(2)	'매도금액(좌수)
+		
+		
+		tblInfo.SetCellString( 3, 1, tData(3)) '기준가적용일
+		tblInfo.SetCellString( 4, 1, tData(4)) '결제예정일
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub btnList_OnClick()
+	'주문내역
+'	Form.OpenPopup( "mbfnp51030" , "" , "")
+	Form.OpenScreen("51030" , "")
+	Form.CloseForm()
+	Exit Sub
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbfnp51012_p2" ,  g_szRet)
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

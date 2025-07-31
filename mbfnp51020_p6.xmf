@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51020" scrname="펀드자동이체_신청내역팝업" version="2" writer="김철중" />
+	<FORM_INFO name="Form" transmode="0" acecnt="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" autosize="1" imgpath="alpha128" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,372,375,275,1" />
+		<LABEL name="LblTitle" fontsize="1" fontstyle="01" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="21,392,335,20,1" />
+		<LABEL name="LblLine" bgcolor="025:216216216" transmode="0" border="1" bordercolor="103:214214214" ly_vert="20,432,335,1,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="4" outline="0000" designorder="1" ly_vert="20,453,335,114,1" >
+			<COL_INFO ly_vert_width="75,260" />
+			<ROW_INFO ly_vert_height="28,29,29,28" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="출금계좌" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" fontsize="-1" autofontsize="1" paddinginfo="0,0,1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="이체금액" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" paddinginfo="0,0,1,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="이체기간" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" line="0,0" fontsize="-1" mask="1,0,,,1,####.## ~ ####.##,0,1,1,0,0" paddinginfo="0,0,1,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" halign="0" line="0,0" caption="이체일" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" halign="2" line="0,0" fontsize="-1" mask="0,0,,일,0,,0,0,0,0,0" paddinginfo="0,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_26.9.png" ly_vert="0,587,375,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="799" _ulen="723" >
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sOpenData, sOpenArr
+	sOpenData	= Form.GetOpenLinkData()
+	sOpenArr		= split(sOpenData, "@")
+
+	if UBOUND(sOpenArr) < 1 then
+		Form.ShowAlert("알림", "펀드자동이체 신청내역 데이터가 없습니다.")
+		Form.CloseForm()
+		
+		Exit Sub
+	end if
+	
+	sOpenArr	= split(sOpenData, "@")	' 종목명, 출금계좌, 이체금액, 이체기간, 이체일
+	
+	LblTitle.caption = sOpenArr(0)	
+	Table0.SetCellString(0, 1, sOpenArr(1))
+	Table0.SetCellString(1, 1, sOpenArr(2))
+	Table0.SetCellString(2, 1, sOpenArr(3))
+	Table0.SetCellString(3, 1, sOpenArr(4))
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

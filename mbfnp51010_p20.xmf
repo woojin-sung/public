@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51010" scrname="펀드매매_키패드" version="2" writer="아이티젠" />
+	<FORM_INFO name="GridBank" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="-1,0,375,639,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="input_03_n.9" ly_vert="0,328,375,330,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_close" ly_vert="340,341,15,15,1" />
+		<BUTTON name="btn0" caption="0" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="126,526,114,47,1" />
+		<BUTTON name="btn00" caption="00" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="21,526,105,47,1" />
+		<BUTTON name="btnPlus000" enable="0" caption="000" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="375,473,94,62,1" />
+		<BUTTON name="btn1" caption="1" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="21,385,105,47,1" />
+		<BUTTON name="btn2" caption="2" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="126,385,114,47,1" />
+		<BUTTON name="btn3" caption="3" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="240,385,114,47,1" />
+		<BUTTON name="btn4" caption="4" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="21,432,105,47,1" />
+		<BUTTON name="btn5" caption="5" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="126,432,114,47,1" />
+		<BUTTON name="btn6" caption="6" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="240,432,114,47,1" />
+		<BUTTON name="btn7" caption="7" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="21,479,105,47,1" />
+		<BUTTON name="btn8" caption="8" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="126,479,114,47,1" />
+		<BUTTON name="btn9" caption="9" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="alpha" ly_vert="240,479,114,47,1" />
+		<BUTTON name="btnBack" caption="←" fgcolor="004:000000000" fontsize="12" btnimage="alpha" ly_vert="240,526,114,47,1" />
+		<BUTTON name="btnClear" enable="0" visible="0" caption="C" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="375,409,91,62,0" />
+		<BUTTON name="btnConfirm" caption="확인" btnimage="btn_20.9" ly_vert="20,597,335,50,1" />
+		<LABEL name="LblClose" visible="0" click="1" ly_vert="323,334,42,30,0" />
+		<LABEL name="edtPrc" fontsize="8" fontstyle="01" mask="0,0,,,0,,0,1,0,0,0" bgcolor="029:255212175" halign="1" multiline="1" ly_vert="25,270,317,39,1" />
+		<LABEL name="edtInit" visible="0" fgcolor="146:124124124" fontsize="4" caption="금액을 입력해주세요" halign="1" multiline="1" ly_vert="25,270,317,39,0" />
+		<BUTTON name="btnPlus1" caption="+1만" fgcolor="004:000000000" fontsize="-4" btnimage="btn_02.9" ly_vert="35,351,57,27,1" />
+		<BUTTON name="btnPlus5" caption="+5만" fgcolor="004:000000000" fontsize="-4" btnimage="btn_02.9" ly_vert="97,351,57,27,1" />
+		<BUTTON name="btnPlus10" caption="+10만" fgcolor="004:000000000" fontsize="-4" btnimage="btn_02.9" ly_vert="159,351,57,27,1" />
+		<BUTTON name="btnPlus100" caption="+100만" fgcolor="004:000000000" fontsize="-4" btnimage="btn_02.9" ly_vert="221,351,57,27,1" />
+		<BUTTON name="btnPlusAll" caption="전액" fgcolor="004:000000000" fontsize="-4" btnimage="btn_02.9" ly_vert="283,351,57,27,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9610" _ulen="9428" >
+
+' 20160317 가격 Max : 7 (전요셉과장)
+
+'============================================================================
+' 화 면 명 : 주식주문_가격입력창
+' 화면설명 : 주식주문 가격입력시
+' 작    성 : 2016.02.15 ~ 2016.  .       ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szCd, g_szMk, g_szUnit, g_szType, g_szReceive, g_szopenPrc
+g_szCd, g_szMk, g_szUnit, g_szType, g_szReceive = "", "", "", "", ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+' Calc_Price : +, - 버튼클릭시 호가단위로 가격계산
+'============================================================================
+Function Calc_Price(nGbn)
+	Dim szPrc, szUnit, szHigh, szLow, szHyun, nResult
+	
+	g_szReceive = ""
+	szPrc  = edtPrc.caption
+
+	 ' 20160317 예외처리 추가 //////////////////////////////////////////////
+	if Trim(szPrc) <> "" then
+		if CDbl(szPrc) >= 9900000 then
+			if nGbn == 0 then
+				Exit Function
+			end if
+		end if
+	end if
+	' //////////////////////////////////////////////////////////////////////
+	
+	Sum_Prc(szPrc)
+End Function
+
+'============================================================================
+' Calc_Plus
+'============================================================================
+Function Calc_Plus(nPlus)
+	Dim szPrc
+	
+	edtInit.visible = false
+
+	if g_szReceive == "1" then
+		g_szReceive = ""
+		edtPrc.caption = nPlus
+	else
+		szPrc = edtPrc.caption
+		
+		szPrc = szPrc & nPlus
+		Sum_Prc(szPrc)
+	end if
+End Function
+
+'============================================================================
+' Calc_Zero
+'============================================================================
+Function Calc_Zero(szPlus)
+	Dim szPrc
+	
+	edtInit.visible = false
+
+	if g_szReceive == "1" then
+		g_szReceive = ""
+		edtPrc.caption = ""
+	else
+		szPrc = edtPrc.caption	
+		
+		if Len(edtPrc.caption) > 0 then
+			szPrc = edtPrc.caption & szPlus
+			
+			Sum_Prc(szPrc)
+		end if
+	end if
+End Function
+
+'============================================================================
+' Sum_Prc
+'============================================================================
+Function Sum_Prc(szData)
+	if Len(szData) < 13 then		' Max 12
+		edtPrc.caption = szData
+	end if
+End Function	
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpen
+	
+	Form.SetScreenName("가격입력기")
+	szOpen = Form.GetOpenLinkData()
+	
+	if Trim(szOpen) <> "" then
+		tData = Split(szOpen, "★")
+		
+		g_szopenPrc	= tData(0)
+		edtPrc.caption = g_szopenPrc
+
+		g_szMaxPrc	= tData(1)
+		
+'		tData = int(szOpen)
+'		g_szopenPrc = tData
+'		edtPrc.caption = tData
+
+	else
+		g_szReceive = "1"
+		tData = 0
+		
+		edtInit.visible = true
+	end if
+	
+	
+	LblClose.visible = 0	'X(닫기) 버튼.
+	imgClose.visible = 0
+	
+End Sub
+
+'============================================================================
+' btn1_OnClick
+'============================================================================
+Sub btn1_OnClick()
+	Calc_Plus(1)
+End Sub
+
+'============================================================================
+' btn2_OnClick
+'============================================================================
+Sub btn2_OnClick()
+	Calc_Plus(2)
+End Sub
+
+'============================================================================
+' btn3_OnClick
+'============================================================================
+Sub btn3_OnClick()
+	Calc_Plus(3)
+End Sub
+
+'============================================================================
+' btn4_OnClick
+'============================================================================
+Sub btn4_OnClick()
+	Calc_Plus(4)
+End Sub
+
+'============================================================================
+' btn5_OnClick
+'============================================================================
+Sub btn5_OnClick()
+	Calc_Plus(5)
+End Sub
+
+'============================================================================
+' btn6_OnClick
+'============================================================================
+Sub btn6_OnClick()
+	Calc_Plus(6)
+End Sub
+
+'============================================================================
+' btn7_OnClick
+'============================================================================
+Sub btn7_OnClick()
+	Calc_Plus(7)
+End Sub
+
+'============================================================================
+' btn8_OnClick
+'============================================================================
+Sub btn8_OnClick()
+	Calc_Plus(8)
+End Sub
+
+'============================================================================
+' btn9_OnClick
+'============================================================================
+Sub btn9_OnClick()
+	Calc_Plus(9)
+End Sub
+
+'============================================================================
+' btn0_OnClick
+'============================================================================
+Sub btn0_OnClick()
+	Calc_Zero("0")
+End Sub
+
+'============================================================================
+' btn00_OnClick
+'============================================================================
+Sub btn00_OnClick()
+	Calc_Zero("00")
+End Sub
+
+'============================================================================
+' btn000_OnClick
+'============================================================================
+Sub btn000_OnClick()
+	Calc_Zero("000")
+End Sub
+
+'============================================================================
+' btnBack_OnClick
+'============================================================================
+Sub btnBack_OnClick()
+	Dim nLen
+	nLen = Len(edtPrc.caption)
+
+	if nLen <> 0 then
+		szPrc = Left(edtPrc.caption, nLen-1)
+		edtPrc.caption = szPrc
+	else
+		'EK ADD
+		edtInit.visible = true
+	end if
+	
+	g_szReceive = ""
+End Sub
+
+'============================================================================
+' btnClear_OnClick
+'============================================================================
+Sub btnClear_OnClick()
+	edtPrc.caption = ""
+	
+	'EK ADD
+	edtInit.visible = true
+End Sub
+
+'============================================================================
+' btnConfirm_OnClick
+'============================================================================
+Sub btnConfirm_OnClick()
+	szPrc = edtPrc.caption
+	Form.SendReturnToParent("PRC_POPUP", szPrc)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' LblClose_OnClick : 닫기
+'============================================================================
+Sub LblClose_OnClick()
+	Form.SendReturnToParent("PRC_POPUP", g_szopenPrc)
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_OnRefresh()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' BtnClose_OnClick : 닫기
+'============================================================================
+Sub BtnClose_OnClick()
+	if g_szopenPrc == 0 or g_szopenPrc == "" or g_szopenPrc == null then
+		edtInit.visible = true
+	else
+		edtInit.visible = false
+	end if
+	
+	Form.SendReturnToParent("PRC_POPUP", g_szopenPrc)
+						
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+' +1만원 / 10$
+Sub btnPlus1_OnClick()
+	f_plusClicked(10000)
+End Sub
+
+'============================================================================
+' +5만원 / 50$
+Sub btnPlus5_OnClick()
+	f_plusClicked(50000)
+End Sub
+
+'============================================================================
+' +10만원 / 100$
+Sub btnPlus10_OnClick()
+	f_plusClicked(100000)
+End Sub
+
+'============================================================================
+' +100만원 / 1000$
+Sub btnPlus100_OnClick()
+	f_plusClicked(1000000)
+End Sub
+
+'============================================================================
+' 전액 클릭시
+Sub btnPlusAll_OnClick()
+	f_AllClicked()
+End Sub
+
+'============================================================================
+' 전액 클릭시
+Sub f_AllClicked()
+'	edtPrice.caption = ""
+	edtPrc.caption	= g_szMaxPrc
+'	Form.triggerEvent( "#", "keypad_all", "" )
+End Sub
+
+'============================================================================
+' +n만원 클릭시
+Sub f_plusClicked(nData)
+	Dim szPrc
+	
+	edtInit.visible = false
+
+'	if g_szReceive == "1" then
+'		g_szReceive = ""
+		edtPrc.caption = Cdbl(edtPrc.caption) + nData	'nPlus
+'	else
+'		szPrc = edtPrc.caption
+'		
+'		szPrc = szPrc & nPlus
+'		Sum_Prc(szPrc)
+'	end if
+	
+	
+'	if Len(edtPrice.caption) >= 11 then
+'		Exit sub
+'	end if
+'	
+'	edtPrice.caption = Cdbl(edtPrice.caption) + nData
+'	
+'	Form.triggerEvent( "#", "keypad_edit", edtPrice.caption )
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

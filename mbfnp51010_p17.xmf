@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51010" scrname="약관동의PDF팝업" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,335,522,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="36" ly_vert="0,0,335,522,1" >
+			<PAGE name="page003086" caption="요약동의서" linkfile="empty.xmf" />
+			<PAGE name="page008580" caption="상세동의서" linkfile="empty.xmf" />
+		</FORMTAB>
+		<WEBVIEW name="webInfo" urlpath="about:blank" ly_vert="0,0,335,522,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1961" _ulen="1871" >
+--===========================================================================
+--===========================================================================
+Dim g_sParam
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "loaddata" then
+		webInfo.loaddata = sParam
+	elseif sEventName == "urlpath" then
+		'분리과세하이일드인 경우 약관 별도처리
+		if sParam == "" then
+			FormTab0.visible = 1
+			webInfo.top = 45
+			webInfo.height = 522-45
+				
+			Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "1")	'디폴트는 요약동의서
+			webInfo.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm16.pdf"
+		elseif sParam == "CMA" then
+			g_sParam = "CMA"
+			FormTab0.visible = 1
+			webInfo.top = 45
+			webInfo.height = 522-45
+				
+			Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "1")	'디폴트는 요약동의서
+			webInfo.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm4.pdf"	
+		else
+			FormTab0.visible = 0
+			webInfo.urlpath = sParam
+		end if
+	end if
+End Sub
+
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	if nCurrentTab == "0" or nCurrentTab == 0 then
+		Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "1")
+		if g_sParam = "CMA" THEN 
+			webInfo.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm4.pdf"
+		else 
+			'요약동의서
+			webInfo.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm16.pdf"
+		end if
+	else
+		Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "2")
+		if g_sParam = "CMA" THEN 
+			webInfo.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm5.pdf"
+		else 
+			'상세동의서
+			webInfo.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm17.pdf"
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

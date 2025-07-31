@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51010" scrname="펀드매매_자동이체서비스신청팝업" version="2" writer="김철중" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" autosize="1" imgpath="alpha128" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,457,375,190,1" />
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="자동이체 서비스 신청" halign="1" ly_vert="32,467,304,30,1" />
+		<LABEL name="lblText" caption="자동이체 신청을 통해 매월 적립식으로 
+편리하게 자동투자가 가능합니다." halign="1" multiline="1" ly_vert="20,497,335,90,1" />
+		<BUTTON name="btnOk" caption="자동이체 등록" btnimage="btn_20.9.png" ly_vert="187,597,188,50,1" />
+		<BUTTON name="btnCancel" caption="나중에 하기" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,597,187,50,1" />
+		<TABLE name="tblLine" outlinecolor="038:255255255" insidelinecolor="102:255255255" colcount="1" rowcount="1" outline="1000" transmode="1" designorder="1" ly_vert="186,597,1,50,1" >
+			<COL_INFO ly_vert_width="1" />
+			<ROW_INFO ly_vert_height="50" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2287" _ulen="2071" >
+
+Dim g_szAcc
+Dim g_szAsno
+Dim g_szPswd
+Dim g_szRegno
+Dim g_szIscd
+Dim g_szKorIsnm
+
+'20240416
+Dim g_btnOk
+g_btnOk = false
+'20240416
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	
+	If szOpenData <> "" And szOpenData <> null Then
+		tData = Split(szOpenData, "★")
+
+		g_szAcc 			= tData[0]
+		g_szAsno 		= tData[1]
+		g_szPswd 		= tData[2]
+		g_szRegno 		= tData[3]
+		g_szIscd 		= tData[4]
+		g_szKorIsnm 		= tData[5]
+	end if
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	Dim szEncpwd
+	
+	'v002
+	'MTS메모리평문 적용유무
+	'plain_rm = ( 0 : 미적용 / 1: 적용)
+	plain_rm = Form.GetSharedData("&PLAIN_RM", false )
+	'MTS메모리평문 적용상태일 때
+	if plain_rm == "1" then
+		szEncpwd	=	g_szPswd
+	'MTS메모리평문 미적용상태 일 때
+	else
+		szEncpwd	=	Form.GetEncData(g_szPswd)
+	end if		
+	
+	'자동이체등록	'계좌번호 ★ 일련번호 ★ 비밀번호 ★ 잔고번호 ★ 펀드코드
+	'Form.'OpenFramePopup("mbfnp51020_p3" , g_szAcc & "★" & g_szAsno & "★" &  szEncpwd & "★" & g_szRegno & "★" & g_szIscd, sPosInfo) 'v001 펀드코드 추가
+		'Form.OpenPopup("mbfnp51020_p3" , g_szAcc & "★" & g_szAsno & "★" &  szEncpwd & "★" & g_szRegno & "★" & g_szIscd, sPosInfo) 'v001 펀드코드 추가
+		'Form.OpenPopup("mbfnp51020_p3" , g_szAcc & "★" & g_szAsno & "★" & g_szRegno & "★" & g_szIscd & "★" & g_szKorIsnm, sPosInfo) 'v001 펀드코드 추가
+	
+	'20240416
+	g_btnOk = True
+	Form.CloseForm()
+	'20240416
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'20240416
+	if g_btnOk = True then
+		Form.OpenPopup("mbfnp51020_p3" , g_szAcc & "★" & g_szAsno & "★" & g_szRegno & "★" & g_szIscd & "★" & g_szKorIsnm, sPosInfo) 'v001 펀드코드 추가
+	end if
+	'20240416
+	
+	Form.SendReturnToParent("mbfnp51010_p21", "close")
+End Sub
+
+'============================================================================
+Sub imgDim_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

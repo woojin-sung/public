@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51010" scrname="전체약관확인" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" halign="1" autofontsize="1" ly_vert="40,0,295,40,1" />
+		<IMAGE name="imgClose" imgpath="ic_close.png" ly_vert="345,10,21,21,1" />
+		<BUTTON name="btnPrev" caption="취소" fgcolor="013:051051051" btnimage="btn_25.9.png" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnNext" caption="다음" btnimage="btn_26.9.png" ly_vert="187,597,188,50,1" />
+		<LABEL name="lblCount" halign="1" ly_vert="110,572,155,20,1" />
+		<FORMTAB name="fmtab" tabcount="7" tabheadheight="0" usepg="1" ly_vert="20,45,335,522,1" >
+			<PAGE name="page0" caption="0" linkfile="mbfnp51010_p17" />
+			<PAGE name="page1" caption="1" linkfile="mbfnp51010_p17" />
+			<PAGE name="page2" caption="2" linkfile="mbfnp51010_p17" />
+			<PAGE name="page3" caption="3" linkfile="mbfnp51010_p17" />
+			<PAGE name="page4" caption="4" linkfile="mbfnp51010_p17" />
+			<PAGE name="page5" caption="5" linkfile="mbfnp51010_p17" />
+			<PAGE name="page6" caption="6" linkfile="mbfnp51010_p17" />
+		</FORMTAB>
+		<LINKFORM name="LinkForm0" linkfile="mbfnp51000_p6" ly_vert="-2,43,379,526,1" />
+		<IMAGE name="imgPrev" autosize="1" imgpath="icon_arrow3_l.png" ly_vert="20,311,24,24,1" />
+		<IMAGE name="imgNext" autosize="1" imgpath="icon_arrow3_r.png" ly_vert="329,311,24,24,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="-2,-2,379,570,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6447" _ulen="5949" >
+'============================================================================
+' 01. 화 면 명 : 약관 동의 팝업
+' 02. 화면설명 : 약관 동의 팝업
+' 03. 작    성 : 2022.10.04 양현정 (참고 mbwat61022_p4, mbonl87056_p6)
+'			   9개 약관까지 조회가능?.. FormTab 개수가 현재 9개임..(참고)
+' 04. 수    정 : 
+'
+'============================================================================
+
+Dim g_sReturnType
+Dim g_bAgree
+
+Dim g_tData, g_nStep, g_tTitle
+
+Dim g_nTimerSec
+Dim g_EnableMove
+
+Dim g_PFIN_YN
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgClose.setMaintainingRatio("1")
+	imgPrev.setMaintainingRatio("1")
+	imgNext.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'금융소비자 권리
+	LinkForm0.visible = false
+	
+	
+	g_bAgree = false
+	g_nStep = 0	
+	
+	dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+		
+	if szOpenData <> "" and szOpenData <> null then
+		
+		dim tTemp
+		tTemp = Split(szOpenData, "♥")		
+		g_tData = Split(tTemp(0), "★")			'URL경로 리스트
+		g_tTitle = Split(tTemp(1), "★")		'타이틀명 리스트
+		g_tSeperTaxYn = Split(tTemp(2), "★")	'분리과세하이일드펀드여부
+		
+		if UBound(tTemp) > 2 then			
+			g_PFIN_YN = tTemp(3)				'개인 전문투자자에 대한 보호제도 미적용 확인서 
+		end if
+		lblCount.caption = "1/"..#g_tData
+		
+	end if
+		
+	g_nTimerSec = 5
+	btnNext.btnimage = "btn_15.9"
+	g_EnableMove = false
+	btnNext.enable = false
+'	imgNext.enable = false
+	
+	if g_tData <> null and g_tData <> "" then
+		for i = 9 to 0 step -1
+			if #g_tData < i+1 then
+				fmtab.deletepage = "page"..i
+			end if
+		next
+	end if
+	
+	if g_tData <> null and g_tData <> "" then
+		if #g_tData == 1 then
+			btnNext.caption = "확인"
+		end if
+		
+		f_SetNext()
+	end if
+End Sub
+
+'============================================================================
+Sub btnPrev_OnClick()
+	Form.SetSharedData("AGRM_RQCL_DOCU_CLCD_51010" , "")
+	Form.CloseForm()
+	'f_SetPrev()
+End Sub
+
+Sub f_SetPrev()
+	if g_nStep == 1 then
+		Form.CloseForm()
+	else
+		g_nStep = g_nStep - 1
+		lblCount.caption = g_nStep.."/"..#g_tData
+		
+		if g_nStep > 1 then
+			btnPrev.caption = "이전"
+		else
+			btnPrev.caption = "취소"
+		end if
+		
+		if g_nStep < #g_tData then
+			btnNext.caption = "다음"
+		else
+			btnNext.caption = "확인"
+		end if
+		
+		f_SetUrl()
+	end if
+End Sub
+
+'============================================================================
+Sub btnNext_OnClick()
+	f_SetNext()
+End Sub
+
+Sub f_SetNext()
+	
+	if g_nStep == #g_tData then		
+		g_bAgree = true
+		
+		Form.CloseForm()
+	elseif g_tTitle(g_nStep)	== "금융소비자의 권리" then
+		g_nStep = g_nStep + 1
+		lblCount.caption = g_nStep.."/"..#g_tData
+		btnPrev.caption = "취소"
+		
+		if g_nStep < #g_tData then
+			btnNext.caption = "다음"
+		else
+			btnNext.caption = "확인"
+		end if
+		f_SetUrl()
+		g_EnableMove = TRUE
+		btnNext.btnimage = "btn_26.9"
+		btnNext.enable = true	
+	else
+		g_nStep = g_nStep + 1
+		lblCount.caption = g_nStep.."/"..#g_tData
+		
+		'if g_nStep > 1 then
+		'	btnPrev.caption = "이전"
+		'else
+			btnPrev.caption = "취소"
+		'end if
+		
+		if g_nStep < #g_tData then
+			btnNext.caption = "다음"
+		else
+			btnNext.caption = "확인"
+		end if
+		
+		g_nTimerSec = 5
+		btnNext.btnimage = "btn_15.9"
+		btnNext.enable = false
+		g_EnableMove = false
+'		imgNext.enable = false
+		
+		f_SetUrl()
+			
+	    btnNext.caption = g_nTimerSec
+	    Form.SetTimerEvent(500, 1, 1)
+	end if
+End Sub
+
+Sub f_SetUrl()
+	Dim sType, sData, sMode, sTest
+	sType = ""
+	sData = ""
+	sMode = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+	
+	if sMode == "1" then
+		sTest = "test"
+	end if
+	
+	sType = "urlpath"
+	sData = g_tData(g_nStep-1)	
+		
+	'URL 제목으로 필터링 하는 방법밖에 없어 보임.
+	if g_PFIN_YN and g_tTitle(g_nStep-1)	== "개인 전문투자자에 대한 보호제도 미적용 확인서" then		
+		WebView0.visible = true
+		Form.SetScreenName(g_tTitle(g_nStep-1))
+		WebView0.urlpath = sData
+		LinkForm0.visible = false
+		
+		'Form.SetSharedData("OPEN_URL", sData )
+		'Form.OpenFramePopup("mbfnp51010_p22" , g_tTitle(g_nStep-1)	, "")
+		
+		'Form.OpenPopup("mbbdm85131_p1", "CFD4", "")
+	elseif g_tTitle(g_nStep-1)	== "금융소비자의 권리" then
+		WebView0.visible = false
+		lblTitle.caption = g_tTitle(g_nStep-1)
+		LinkForm0.visible = true
+	else
+		WebView0.visible = false
+		lblTitle.caption = g_tTitle(g_nStep-1)
+		LinkForm0.visible = false
+
+		Form.triggerEvent("fmtab."..fmtab.currenttabpageid, sType, sData)
+	end if
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgPrev_OnClick()
+	if g_nStep > 1 then
+		if btnNext.btnimage = "btn_15.9" or g_EnableMove = false then
+			'10초 카운트가 되지 않은 상태에서 좌우 스와이프 안되도록 함.
+		else
+			f_SetPrev()
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub imgNext_OnClick()
+	if g_nStep < #g_tData then
+		if btnNext.btnimage = "btn_15.9" or g_EnableMove = false then
+			'10초 카운트가 되지 않은 상태에서 좌우 스와이프 안되도록 함.
+		else
+			f_SetNext()
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+
+	if g_bAgree == true then
+		Form.SendReturnToParent("mbfnp51010_p23", "AGREE")	'전체 확인시 호출명으로 리턴
+	else
+		Form.SendReturnToParent("mbfnp51010_p23", "cancel")
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	sTimerID = CInt(sTimerID)
+	If sTimerID == 500 Then
+		If g_nTimerSec == 1 Then
+			Form.SetTimerEvent(500, 0, 1)
+			
+			if g_nStep < #g_tData then
+				btnNext.caption = "다음"
+			else
+				btnNext.caption = "확인"
+			end if
+			g_EnableMove = TRUE
+			btnNext.btnimage = "btn_26.9"
+			btnNext.enable = true	
+'			imgNext.enable = true
+		
+		Else
+			g_nTimerSec = g_nTimerSec - 1
+			btnNext.caption = g_nTimerSec
+		End If
+	End If
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

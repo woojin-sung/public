@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51010" scrname="펀드매매_펀드추가매수확인팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,464,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<BUTTON name="btnOK" caption="매수" fontstyle="01" btnimage="btn_01.9" ly_vert="154,395,124,39,1" />
+		<BUTTON name="btnCancel" caption="닫기" fgcolor="004:000000000" fontstyle="01" btnimage="btn_02.9" ly_vert="25,395,124,39,1" />
+		<TABLE name="tbl01" insidelinecolor="102:255255255" colcount="2" rowcount="6" outline="0000" designorder="1" ly_vert="10,65,289,250,1" >
+			<COL_INFO ly_vert_width="99,190" />
+			<ROW_INFO ly_vert_height="35,35,75,35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" halign="0" line="0,0" caption="계좌번호" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" halign="0" line="0,0" caption="잔고번호" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,1,1,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" halign="0" line="0,0" caption="펀드명" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:102102102" halign="0" line="0,0" caption="저축방법" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,3,1,3" line="0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="065:102102102" halign="0" line="0,0" caption="매수신청금액" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,4,1,4" line="0,0" mask="0,0,,,0,,0,1,1" impidxs="" />
+				<CELL cell_ly="0,5,0,5" fgcolor="065:102102102" halign="0" line="0,0" caption="선취수수료" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,5,1,5" line="0,0" mask="0,0,,,0,,0,1,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="Label0" fontstyle="01" caption="위의 주문을 처리하시겠습니까?" halign="1" ly_vert="11,350,288,39,1" />
+		<IMAGE name="ImageClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="264,15,24,24,1" />
+		<LABEL name="lblFndName" fontsize="-2" multiline="1" ly_vert="111,136,186,75,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="펀드추가매수 확인" bgcolor="064:255255255" halign="1" ly_vert="0,0,309,55,1" />
+		<LABEL name="Label6" bgcolor="017:216216216" transmode="0" ly_vert="15,334,279,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5828" _ulen="5628" >
+'============================================================================
+' 01.화면명 	: 펀드매매
+' 02.화면설명	: 펀드매매_펀드추가매수 확인팝업
+' 03.작성		: 2016.02.23
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim	g_szFullAcnt		'계좌번호	
+dim	g_szRmndNo		'잔고번호
+dim	g_szRet			'팝업리턴값
+dim	g_szDealFee		'선취수수료
+dim	g_szAlertTitle	'알림타이틀
+g_szFullAcnt	= ""
+g_szRmndNo	= ""
+g_szDealFee	= "0"
+
+g_szRet	=	"cancel"
+g_szAlertTitle	=	"알림"
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+'해당하는 값의 아이템을 리턴
+'============================================================================
+Function getListItem(szInput, nIdx)
+	dim szList
+	
+	if szInput = "" then
+		return 
+	else
+		szList = split(szInput, "★")
+		if szList <> "" then
+			return szList(nIdx)
+		else
+			return
+		end if 
+	end if 
+	
+end function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	dim	szLinkedData,	szAcntName
+	dim	szAcnt,	szAsno
+	
+	szLinkedData	=""
+	szAcntName		=""
+	szAcnt		=""
+	szAsno		=""
+	
+	szLinkedData	=	Form.Form.GetOpenLinkData()
+	
+	if	len(trim(szLinkedData))	>	5	then
+		'계좌번호, 잔고번호, 펀드명, 저축방법, 매수신청금액, 추후계산 (선취수수료) 
+'		Form.OpenPopup("mbfnp51000_p5" , g_szFullAcnt & "★" &  g_szRmndNo & "★" &  g_szFndname & "★" &
+'									 g_szSaveType & "★" &  edtBuyAmt.caption  
+'									, sPosInfo)
+'	
+
+		g_szFullAcnt	=	getListItem(szLinkedData,0)
+		g_szRmndNo		=	getListItem(szLinkedData,1)
+		
+		szAcnt		=	left(g_szFullAcnt,8)
+		szAsno		=	mid(g_szFullAcnt,9,2)
+		szAcntName 	= 	Form.GetAccountInfo(szAcnt, "name")
+		
+		tbl01.SetCellString(0, 1, left(szAcnt,4) & "-" & mid(szAcnt,5,4) & "-" & szAsno & "  " & szAcntName)
+		tbl01.SetCellString(1, 1, g_szRmndNo)
+		'tbl01.SetCellString(2, 1, getListItem(szLinkedData,2))
+		lblFndName.caption	=	getListItem(szLinkedData,2)
+		tbl01.SetCellString(3, 1, getListItem(szLinkedData,3))
+		tbl01.SetCellString(4, 1, getListItem(szLinkedData,4))
+
+		DATAMANAGER.RequestTranData("obsai_deal_042r")
+	end	if
+
+End Sub
+
+'============================================================================
+'btnOK_OnClick
+'============================================================================
+Sub btnOK_OnClick()
+	g_szRet	=	"ok"
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'ImageClose_OnClick
+'============================================================================
+Sub ImageClose_OnClick()
+	g_szRet	=	"cancel"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'btnCancel_OnClick
+'============================================================================
+Sub btnCancel_OnClick()
+	g_szRet	=	"cancel"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if	szTranID	=	"obsai_deal_042r"	then
+		DATAMANAGER.ClearInputData(0, "obsai_deal_042r")
+		
+		DATAMANAGER.SetDataValue(0,"obsai_deal_042r", "InBlock1", "ACNO", 0, left(g_szFullAcnt,8))
+		DATAMANAGER.SetDataValue(0,"obsai_deal_042r", "InBlock1", "ASNO", 0, mid(g_szFullAcnt,9,2))
+		DATAMANAGER.SetDataValue(0,"obsai_deal_042r", "InBlock1", "RMND_SRNO", 0, g_szRmndNo )
+	
+		DATAMANAGER.SetDataValue(0, "obsai_deal_042r", "InBlock1", "DEAL_CLS_CODE", 0, "3")
+		DATAMANAGER.SetDataValue(0, "obsai_deal_042r", "InBlock1", "LOAN_YN", 0, "N")	
+		DATAMANAGER.SetDataValue(0, "obsai_deal_042r", "InBlock1", "RSEV_AMT", 0, tbl01.GetCellString(4, 1))	
+	end	if
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if	szTranID	=	"obsai_deal_042r"	then
+		g_szDealFee	=	DATAMANAGER.GetDataValue(0, "obsai_deal_042r", "OutBlock1", "DEAL_FEE", 0)
+		tbl01.SetCellString(5, 1, g_szDealFee)
+	end	if
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if	len(trim(szSubMsg))	>	0	then
+		Form.ShowAlert(g_szAlertTitle, szErrMsg & "(" & szSubMsg & ")")
+	else
+		Form.ShowAlert(g_szAlertTitle, szErrMsg )
+	end	if
+End Sub
+
+'============================================================================
+'Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbfnp51010_p5" , g_szRet & "★" & g_szDealFee)
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obsai_deal_042r" trcode="obsai_deal_042r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obsai_deal_042r" title="간접투자증권 매도가능 금액조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="249" _ulen="189" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RMND_SRNO^잔고 일련번호^3^0^0^0^0^0^0
+DEAL_CLS_CODE^매매 구분 코드^1^0^0^0^0^0^0
+LOAN_YN^대출 여부^1^0^0^0^0^0^0
+RSEV_AMT^예약 금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="390" _ulen="300" >
+
+DRNG_ABLE_AMT^출금 가능 금액^19^0^7^0^0^0^0
+VLTN_AMT^평가 금액^19^0^7^0^0^0^0
+DEAL_FEE^매매 수수료^19^0^7^0^0^0^0
+ATMT_TACT_APLT_YN^자동 이체 신청 여부^1^0^0^0^0^0^0
+CASH_AMT^현금 금액^19^0^7^0^0^0^0
+RP_VLTN_AMT^RP 평가 금액^19^0^7^0^0^0^0
+UI_AMT_SMTN^UI 금액 합계^19^0^7^0^0^0^0
+IISC_LOAN_ACNU^집합투자증권대출좌수^22^5^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="442" _ulen="338" >
+
+LOAN_DATE^대출 일자^8^0^0^0^0^0^0
+LOAN_SRNO^대출 일련번호^11^0^7^0^0^0^0
+REG_ACNO^등록 계좌번호^8^0^0^0^0^0^0
+REG_ASNO^등록 계좌일련번호^2^0^0^0^0^0^0
+PROS_CLS^처리 구분^1^0^0^0^0^0^0
+LOAN_QTY^대출 수량^19^0^7^0^0^0^0
+LOAN_AMT^대출 금액^19^0^7^0^0^0^0
+LOAN_RSQN^대출 잔량^13^0^7^0^0^0^0
+LOAN_BAL^대출 잔액^19^0^7^0^0^0^0
+LOAN_DTL_TYPE_CODE^대출 상세 유형 코드^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,848 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="펀드추가매수_약관동의팝업" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,380,375,269,1" />
+		<BUTTON name="BtnContinue" caption="확인" bgcolor="289:057061072" bgcolor2="233:102101101" fontsize="2" btnimage="btn_26.9" ly_vert="0,597,374,50,1" />
+		<BUTTON name="btnAllChk" btnimage="alpha" ly_vert="4,389,370,38,1" />
+		<IMAGE name="imgUIAllChk" autosize="1" imgpath="icon_chk_off.png" ly_vert="20,399,13,13,1" />
+		<LABEL name="lblUnderLine" bgcolor="143:049050052" transmode="0" ly_vert="14,430,347,1,1" />
+		<IMAGE name="imgChk0" imgpath="ic_link.9" ly_vert="20,473,342,20,1" />
+		<IMAGE name="imgChk1" imgpath="ic_link.9" ly_vert="20,503,342,20,1" />
+		<LABEL name="lblChkText0" fgcolor="127:162162162" caption="투자설명서" ly_vert="35,473,300,20,1" />
+		<IMAGE name="imgUIChk0" autosize="1" imgpath="icon_chk_off" ly_vert="20,475,13,13,1" />
+		<IMAGE name="imgUIChk1" autosize="1" imgpath="icon_chk_off.png" ly_vert="20,505,13,13,1" />
+		<LABEL name="lblChkText1" fgcolor="127:162162162" caption="간이투자설명서" ly_vert="35,503,300,20,1" />
+		<LABEL name="lblAllText" fontsize="4" fontstyle="01" caption="모두 확인하고, 동의합니다." ly_vert="33,390,326,35,1" />
+		<LABEL name="Label0" fontsize="1" fontstyle="01" caption="약관 및 확인사항" ly_vert="10,437,167,32,1" />
+		<IMAGE name="imgChk2" imgpath="ic_link.9" ly_vert="20,533,342,20,1" />
+		<IMAGE name="imgUIChk2" autosize="1" imgpath="icon_chk_off.png" ly_vert="20,535,13,13,1" />
+		<LABEL name="lblChkText2" fgcolor="127:162162162" caption="핵심(요약)상품설명서" ly_vert="35,533,300,20,1" />
+		<IMAGE name="imgChk3" visible="0" imgpath="ic_link.9" ly_vert="20,562,342,20,0" />
+		<IMAGE name="imgUIChk3" visible="0" autosize="1" imgpath="icon_chk_off.png" ly_vert="20,565,13,13,0" />
+		<LABEL name="lblChkText3" visible="0" fgcolor="127:162162162" fontsize="-1" caption="개인 전문투자자에 대한 보호제도 미적용 확인서" ly_vert="35,563,326,20,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="15498" _ulen="14254" >
+'============================================================================
+' 01. 화 면 명 : 보유주식 수익 서비스 약관 동의 팝업
+' 02. 화면설명 : 보유주식 수익 서비스 약관 동의 팝업
+' 03. 작    성 : 2022.08.02 양현정
+' 04. 수    정 : 
+'
+'============================================================================
+
+Dim g_sRetData 					'리턴데이터
+Dim g_szTheme                  		'테마구분  white/black
+dim g_szUnCheckImg, g_szCheckImg	'체크이미지
+dim g_szUnCheckFg, g_szCheckFg		'체크 폰트 컬러
+Dim g_ChkAll						'전체동의여부
+Dim g_Chk1						'첫번째 약관
+Dim g_Chk2						'두번째 약관
+Dim g_Chk3						'세번째 약관
+Dim g_Chk4						'네번째 약관
+
+Dim g_szINVT_FILE
+Dim g_szCORE_FILE
+Dim g_szPROD_FILE
+Dim g_szCO_FILE
+Dim g_szVNTR_FILE
+Dim g_szPfinCls		'전문투자자여부
+Dim g_szHgdtProdYN	'고난도상품여부
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+'f_sGetURLTitle(iIdx) : 각 동의체크 별 타이틀 리턴
+'============================================================================
+Function f_sGetURLTitle(iIdx)
+	Dim szTitle
+	Select Case iIdx
+		Case 1
+			szTitle = "투자설명서"
+		Case 2
+			szTitle = "간이투자설명서"
+		Case 3
+			szTitle = "핵심(요약)상품설명서"
+		Case 4
+			szTitle = "개인 전문투자자에 대한 보호제도 미적용 확인서"
+	End Select
+	return szTitle
+End Function
+
+'============================================================================
+'f_sGetURL(iIdx) : 각 동의체크 별 안내팝업 URL 리턴
+'============================================================================
+Function f_sGetURL(iIdx)		
+	dim sURLheader, sURL
+	If g_ServerMode == "1" Then	'개발기
+		sURLheader = "http://home.imeritz.com/include/ocw/"
+	Else
+		sURLheader = "http://home.imeritz.com/include/ocw/"
+	End If	
+	
+	Select Case iIdx
+		Case 1
+			'"'투자설명서"
+			sURL = sURLheader & g_szINVT_FILE	'"meritz_yk_51.pdf"
+		Case 2
+			'"간이설명서"
+			sURL = sURLheader & g_szCORE_FILE	'"meritz_ts_51.pdf"
+		Case 3
+			'"핵심(요약)상품설명서"
+			sURL = sURLheader & g_szPROD_FILE	'"meritz_ts_51.pdf"		
+		Case 4
+			'"개인 전문투자자에 대한 보호제도 미적용 확인서"
+			If g_ServerMode == "1" Then	'개발기
+				sURL = "https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/meritz_dna_protect_retail-pro-investor_confirmation.html"
+			else '운영
+				sURL = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_dna_protect_retail-pro-investor_confirmation.html"
+			end if
+	End Select
+	
+	return sURL
+End Function
+
+'============================================================================
+'f_OpenChkPopup(iIdx) : 각 동의체크 별 안내팝업 호출
+'============================================================================
+Function f_OpenChkPopup(iIdx)
+	if iIdx == 0 then
+		if g_szPfinCls <> "Y" then
+			szURL = f_sGetURL(1) & "★" & f_sGetURL(2) & "★" & f_sGetURL(3)
+			szTitle = f_sGetURLTitle(1) & "★" & f_sGetURLTitle(2) & "★" & f_sGetURLTitle(3)
+		else
+			szURL = f_sGetURL(1) & "★" & f_sGetURL(2) & "★" & f_sGetURL(3) & "★" & f_sGetURL(4)
+			szTitle = f_sGetURLTitle(1) & "★" & f_sGetURLTitle(2) & "★" & f_sGetURLTitle(3) & "★" & f_sGetURLTitle(4)
+		end if
+		
+		'개인전문투자자에 대한 보호제도 미적용 확인서 항목 여부
+		if szPfinYN == "Y" and szClsCode == "1" and g_szHgdtProdYN == "Y" then
+			szData = "Y"
+		else
+			szData = "N"
+		end if
+		
+		'팝업 호출
+		if szURL <> "" then
+			Form.OpenPopup("mbfnp51010_p23" , szURL&"♥"&szTitle&"♥"&"N"&"♥"&szData, "")
+		end if		
+	else
+		Form.SetSharedData("OPEN_URL", f_sGetURL(iIdx) )
+		Form.OpenFramePopup("mbfnp51010_p22" , f_sGetURLTitle(iIdx), "")	
+	end if
+End Function
+
+'============================================================================
+'f_SetBtnRegEnable() : 신청 처리 버튼 상태 결정
+'============================================================================
+Function f_SetBtnRegEnable()
+
+	g_ChkAll = "0"	
+	imgUIAllChk.imgpath = g_szUnCheckImg
+	lblAllText.fgcolor  = g_szUnCheckFg			
+	
+
+	if g_Chk1 <> "1" then
+		BtnContinue.enable = false
+		if g_Chk2 <> "1" or g_Chk3 <> "1" or g_Chk4 <> "1" then
+			imgUIAllChk.imgpath = g_szUnCheckImg
+			lblAllText.fgcolor  = g_szUnCheckFg	
+		end if
+		Exit Function	
+	end if
+	
+	if g_Chk2 <> "1" then
+		BtnContinue.enable = false
+		if g_Chk1 <> "1" or g_Chk3 <> "1" or g_Chk4 <> "1" then
+			imgUIAllChk.imgpath = g_szUnCheckImg
+			lblAllText.fgcolor  = g_szUnCheckFg	
+		end if
+		Exit Function	
+	end if	
+	
+	if g_Chk3 <> "1" then
+		BtnContinue.enable = false
+		if g_Chk1 <> "1" or g_Chk2 <> "1" or g_Chk4 <> "1" then
+			imgUIAllChk.imgpath = g_szUnCheckImg
+			lblAllText.fgcolor  = g_szUnCheckFg	
+		end if
+		Exit Function	
+	end if
+	
+	if g_szPfinCls == "Y" then
+		if g_Chk4 <> "1" then
+			BtnContinue.enable = false
+			if g_Chk1 <> "1" or g_Chk2 <> "1" or g_Chk3 <> "1" then
+				imgUIAllChk.imgpath = g_szUnCheckImg
+				lblAllText.fgcolor  = g_szUnCheckFg	
+			end if
+			Exit Function	
+		end if
+	end if
+	
+	g_ChkAll = "1"	
+	imgUIAllChk.imgpath = g_szCheckImg
+	lblAllText.fgcolor  = g_szCheckFg			
+	
+	'신청가능
+	BtnContinue.enable = true
+	
+	'BtnContinue.imgpath = "btn_01.9"
+	
+End Function
+
+'============================================================================
+'각 체크 별 기능 동작
+'============================================================================
+Function f_SetChkState(iIdx, bValue)
+
+	'전체동의
+	if iIdx == 0 then
+	
+		if bValue == true then	
+		
+			g_ChkAll = "1"	
+			imgUIAllChk.imgpath = g_szCheckImg
+			lblAllText.fgcolor  = g_szCheckFg			
+		
+			g_Chk1 = "1"	
+			imgUIChk0.imgpath   = g_szCheckImg
+			lblChkText0.fgcolor = g_szCheckFg
+			
+			g_Chk2 = "1"	
+			imgUIChk1.imgpath   = g_szCheckImg
+			lblChkText1.fgcolor = g_szCheckFg			
+			
+			g_Chk3 = "1"	
+			imgUIChk2.imgpath   = g_szCheckImg
+			lblChkText2.fgcolor = g_szCheckFg			
+			
+			if g_szPfinCls == "Y" then
+				g_Chk4 = "1"	
+				imgUIChk3.imgpath   = g_szCheckImg
+				lblChkText3.fgcolor = g_szCheckFg	
+			end if
+		else
+			g_ChkAll = "0"	
+			imgUIAllChk.imgpath = g_szUnCheckImg
+			lblAllText.fgcolor  = g_szUnCheckFg			
+			
+			g_Chk1 = "0"
+			imgUIChk0.imgpath   = g_szUnCheckImg
+			lblChkText0.fgcolor = g_szUnCheckFg
+			
+			g_Chk2 = "0"
+			imgUIChk1.imgpath   = g_szUnCheckImg
+			lblChkText1.fgcolor = g_szUnCheckFg		
+			
+			g_Chk3 = "0"	
+			imgUIChk2.imgpath   = g_szUnCheckImg
+			lblChkText2.fgcolor = g_szUnCheckFg			
+			
+			g_Chk4 = "0"	
+			imgUIChk3.imgpath   = g_szUnCheckImg
+			lblChkText3.fgcolor = g_szUnCheckFg	
+		end if	
+	
+	'투자설명서 동의
+	elseif iIdx == 1 then
+	
+		if bValue == true then	
+			g_Chk1 = "1"	
+			imgUIChk0.imgpath   = g_szCheckImg
+			lblChkText0.fgcolor = g_szCheckFg
+		else
+			g_Chk1 = "0"
+			imgUIChk0.imgpath   = g_szUnCheckImg
+			lblChkText0.fgcolor = g_szUnCheckFg
+		end if		
+	
+	'간이투자설명서 동의
+	elseif iIdx == 2 then
+	
+		if bValue == true then	
+			g_Chk2 = "1"	
+			imgUIChk1.imgpath   = g_szCheckImg
+			lblChkText1.fgcolor = g_szCheckFg
+		else
+			g_Chk2 = "0"
+			imgUIChk1.imgpath   = g_szUnCheckImg
+			lblChkText1.fgcolor = g_szUnCheckFg
+		end if		
+		
+	'핵심(요약)상품설명서 동의
+	elseif iIdx == 3 then
+	
+		if bValue == true then	
+			g_Chk3 = "1"	
+			imgUIChk2.imgpath   = g_szCheckImg
+			lblChkText2.fgcolor = g_szCheckFg
+		else
+			g_Chk3 = "0"
+			imgUIChk2.imgpath   = g_szUnCheckImg
+			lblChkText2.fgcolor = g_szUnCheckFg
+		end if		
+		
+	'"개인 전문투자자에 대한 보호제도 미적용 확인서"
+	elseif iIdx == 4 then
+	
+		if bValue == true then	
+			g_Chk4 = "1"	
+			imgUIChk3.imgpath   = g_szCheckImg
+			lblChkText3.fgcolor = g_szCheckFg
+		else
+			g_Chk4 = "0"
+			imgUIChk3.imgpath   = g_szUnCheckImg
+			lblChkText3.fgcolor = g_szUnCheckFg
+		end if	
+	end if
+	
+	'신청버튼 활성화 여부
+	f_SetBtnRegEnable()	
+	
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+Sub Form_OnFormInitBefore()
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v005
+	
+	g_szUnCheckImg 	= "icon_chk_on.png"
+	g_szCheckImg 		= "icon_chk_off.png"
+	g_szUnCheckFg 	= "127"
+	g_szCheckFg 		= "4"	
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	'안드로이드-백버튼 작동Y
+	'부모창(mbonl88024) 백버튼N 상태에서 팝업오픈 되므로 백버튼 동작하도록 설정	
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+
+    '테마구분 white/black
+	g_szTheme = Form.GetEnvData("common.theme")
+
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+
+	If szOpenData <> "" And szOpenData <> null Then
+		tData = Split(szOpenData, "★")
+		
+		g_AcntNo 		= tData[0]
+		g_AcntSeq 		= tData[1]
+		g_szShortCd		= tData[2]
+	
+		DATAMANAGER.RequestTranData("obsim_idmn_080r")	'약관 파일목록조회
+		DATAMANAGER.RequestTranData("obsim_idmn_018r")	
+		
+	end if
+	
+'	g_AcntNo 		= "18057949"	'tData[0]
+'	g_AcntSeq 		= "11"		'tData[1]
+'	g_szShortCd		= "203672"	'tData[2]
+'		
+'	DATAMANAGER.RequestTranData("obsim_idmn_080r")	'약관 파일목록조회
+
+	'초기화..	
+	f_SetChkState(0, false)	
+	
+	g_sRetData = "cancel"
+	
+	'신청가능
+	BtnContinue.enable = false	
+
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbfnp51010_p22" then
+		If sRet == "투자설명서" Then
+			f_SetChkState(1, true)
+		ElseIf sRet == "간이투자설명서" Then
+			f_SetChkState(2, true)
+		ElseIf sRet == "핵심(요약)상품설명서" Then
+			f_SetChkState(3, true)
+		ElseIf sRet == "개인 전문투자자에 대한 보호제도 미적용 확인서" Then
+			f_SetChkState(4, true)
+		End If
+
+	elseif sKeyName == "mbfnp51010_p23" then	'전체동의
+		if sRet == "AGREE" then		
+			f_SetChkState(0, true)
+		elseif sRet == "cancel" then	
+			f_SetChkState(0, false)
+		end if			
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if	szTranID =	"obsim_idmn_080r" then
+		DATAMANAGER.SetDataValue(0, "obsim_idmn_080r", "InBlock1", "ISCD"				, 0, g_szShortCd	)
+		DATAMANAGER.SetDataValue(0, "obsim_idmn_080r", "InBlock1", "MFI_ATCH_FILE_CLCD" 	, 0, "%"			)
+	elseif	szTranID	=	"obcsb_acif_791r"	then
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_791r", "InBlock1", "ACNO"				, 0, g_AcntNo)
+	elseif	szTranID	=	"obsim_idmn_018r"	then				'종목집투기본정보조회
+		DATAMANAGER.SetDataValue(0, "obsim_idmn_018r", "InBlock1", "ISCD", 0, g_szShortCd)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)	
+	if	szTranID ==	"obsim_idmn_080r" then
+		g_szINVT_FILE 	=	DATAMANAGER.GetDataValue(0,"obsim_idmn_080r", "OutBlock1", "UI_INVT_ATCH_FILE_ORTX_NAME", 0)	'투자설명서 파일명
+		g_szCORE_FILE 	=	DATAMANAGER.GetDataValue(0,"obsim_idmn_080r", "OutBlock1", "UI_CORE_ATCH_FILE_ORTX_NAME", 0)	'간이설명서 파일명
+		g_szPROD_FILE		=	DATAMANAGER.GetDataValue(0,"obsim_idmn_080r", "OutBlock1", "UI_PROD_ATCH_FILE_ORTX_NAME", 0)	'UI상품첨부파일원본명
+		g_szCO_FILE	 	=	DATAMANAGER.GetDataValue(0,"obsim_idmn_080r", "OutBlock1", "UI_CO_ATCH_FILE_ORTX_NAME", 0)		'벤처저축약관 파일명
+		g_szVNTR_FILE 	=	DATAMANAGER.GetDataValue(0,"obsim_idmn_080r", "OutBlock1", "UI_VNTR_FILE_ORTX_NAME", 0)		'벤처핵심설명서 파일명		 	 
+	elseif szTranID	=	"obcsb_acif_791r"	then				'펀드매매, ELS, DLS 일시
+		szPfinYN	 	=	DATAMANAGER.GetDataValue(0,"obcsb_acif_791r", "OutBlock1", "UI_PFIN_YN", 0)		'전문투자자여부
+		szClsCode 	=	DATAMANAGER.GetDataValue(0,"obcsb_acif_791r", "OutBlock1", "CUST_CLS_CODE", 0)	'고객구분코드
+		
+		if szPfinYN == "Y" and szClsCode == "1" and g_szHgdtProdYN == "Y" then
+			Form.SetCtlProp("lblChkText3", "visible", true)
+			Form.SetCtlProp("imgUIChk3", "visible", true)
+			Form.SetCtlProp("imgChk3", "visible", true)
+			
+			g_Chk4 = "0"
+			g_szPfinCls = "Y"
+		else
+			g_Chk4 = "1"
+			g_szPfinCls = "N"
+		end if
+	elseif szTranID	=	"obsim_idmn_018r"	then			
+		g_szHgdtProdYN	 	=	DATAMANAGER.GetDataValue(0,"obsim_idmn_018r", "OutBlock5", "HGDT_PROD_YN", 0)		'고난도상품여부
+		
+		DATAMANAGER.RequestTranData("obcsb_acif_791r")
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+End Sub
+
+'============================================================================
+Sub BtnContinue_OnClick()
+	'Form.OpenNextPopup("mbonl88024_p6", "88024", "")
+	
+	if g_Chk1 = "1" and g_Chk2 = "1" and g_Chk3 = "1" then
+		g_sRetData = "ok"			
+	else
+		g_sRetData = "cancle"		
+	end if 
+	
+	Form.CloseForm()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent( "mbfnp51011_p2" , g_sRetData )	
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'여백클릭시 꺼지도록 함
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 투자설명서 띄움
+'============================================================================
+Sub imgChk0_OnClick()	
+	if CInt(g_Chk1) == 1 then
+		f_SetChkState(1, false)
+	else
+		f_OpenChkPopup(1)
+	end if		
+End Sub
+
+'============================================================================
+' 간이투자설명서 띄움
+'============================================================================
+Sub imgChk1_OnClick()	
+	if CInt(g_Chk2) == 1 then
+		f_SetChkState(2, false)
+	else
+		f_OpenChkPopup(2)
+	end if	
+End Sub
+
+'============================================================================
+' 핵심(요약)상품설명서 띄움
+'============================================================================
+Sub imgChk2_OnClick()	
+	if CInt(g_Chk3) == 1 then
+		f_SetChkState(3, false)
+	else
+		f_OpenChkPopup(3)
+	end if	
+End Sub
+
+'============================================================================
+' 개인 전문투자자에 대한 보호제도 미적용 확인서 띄움
+'============================================================================
+Sub imgChk3_OnClick()	
+	if CInt(g_Chk4) == 1 then
+		f_SetChkState(4, false)
+	else
+		f_OpenChkPopup(4)
+	end if	
+End Sub
+
+'============================================================================
+' 필수약관에 모두 동의 클릭
+'============================================================================
+Sub btnAllChk_OnClick()
+	if CInt(g_ChkAll) == 1 then
+		f_SetChkState(0, false)		
+	else
+		f_OpenChkPopup(0)
+	end if		
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obsim_idmn_080r" trcode="obsim_idmn_080r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_791r" trcode="obcsb_acif_791r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obsim_idmn_018r" trcode="obsim_idmn_018r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obsim_idmn_080r" title="종목_집합투자증권모펀드자료파?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="120" _ulen="82" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+MFI_ATCH_FILE_CLCD^모닝스타펀드정보첨부파일구분코^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2682" _ulen="2008" >
+
+MFND_KSD_ISCD^모펀드한국예탁결제원종목코드^12^0^0^0^0^0^0
+UI_CTCN_ATCH_FILE_ORTX_NAME^UI 약관 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_INVT_ATCH_FILE_ORTX_NAME^UI 투자 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_CORE_ATCH_FILE_ORTX_NAME^UI 핵심 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_BSOP_ATCH_FILE_ORTX_NAME^UI 영업 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_PLND_ATCH_FILE_ORTX_NAME^UI 계획서 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_PRSS_ATCH_FILE_ORTX_NAME^UI 현황 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_MGRI_ATCH_FILE_ORTX_NAME^UI 운용 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_CNSG_ATCH_FILE_ORTX_NAME^UI 수탁 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_CO_ATCH_FILE_ORTX_NAME^UI 회사 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_ETC_ATCH_FILE_ORTX_NAME^UI 기타 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_BRIF_ATCH_FILE_ORTX_NAME^UI 요약 첨부 파일 원본 명^100^0^0^0^0^0^0
+UI_PROD_ATCH_FILE_ORTX_NAME^UI상품첨부파일원본명^100^0^0^0^0^0^0
+UI_RULE_ATCH_FILE_ORTX_NAME^UI규칙첨부파일원본명^100^0^0^0^0^0^0
+UI_ACNG_ATCH_FILE_ORTX_NAME^UI회계첨부파일원본명^100^0^0^0^0^0^0
+UI_RFP_ATCH_FILE_ORTX_NAME^UI제안서첨부파일원본명^100^0^0^0^0^0^0
+UI_SCAL_ATCH_FILE_ORTX_NAME^UI규모첨부파일원본명^100^0^0^0^0^0^0
+UI_VNTR_FILE_ORTX_NAME^UI벤처파일원본명^50^0^0^0^0^0^0
+UI_CTCN_ATCH_FILE_VLDT_DATE^UI약관첨부파일효력일자^8^0^0^0^0^0^0
+UI_INVT_ATCH_FILE_VLDT_DATE^UI투자첨부파일효력일자^8^0^0^0^0^0^0
+UI_CORE_ATCH_FILE_VLDT_DATE^UI핵심첨부파일효력일자^8^0^0^0^0^0^0
+UI_BSOP_ATCH_FILE_VLDT_DATE^UI영업첨부파일효력일자^8^0^0^0^0^0^0
+UI_PLND_ATCH_FILE_VLDT_DATE^UI계획서첨부파일효력일자^8^0^0^0^0^0^0
+UI_PRSS_ATCH_FILE_VLDT_DATE^UI현황첨부파일효력일자^8^0^0^0^0^0^0
+UI_MGRI_ATCH_FILE_VLDT_DATE^UI운용첨부파일효력일자^8^0^0^0^0^0^0
+UI_CNSG_ATCH_FILE_VLDT_DATE^UI수탁첨부파일효력일자^8^0^0^0^0^0^0
+UI_CO_ATCH_FILE_VLDT_DATE^UI회사첨부파일효력일자^8^0^0^0^0^0^0
+UI_ETC_ATCH_FILE_VLDT_DATE^UI기타첨부파일효력일자^8^0^0^0^0^0^0
+UI_BRIF_ATCH_FILE_VLDT_DATE^UI요약첨부파일효력일자^8^0^0^0^0^0^0
+UI_PROD_ATCH_FILE_VLDT_DATE^UI상품첨부파일효력일자^8^0^0^0^0^0^0
+UI_RULE_ATCH_FILE_VLDT_DATE^UI규칙첨부파일효력일자^8^0^0^0^0^0^0
+UI_ACNG_ATCH_FILE_VLDT_DATE^UI회계첨부파일효력일자^8^0^0^0^0^0^0
+UI_RFP_ATCH_FILE_VLDT_DATE^UI제안서첨부파일효력일자^8^0^0^0^0^0^0
+UI_SCAL_ATCH_FILE_VLDT_DATE^UI규모첨부파일효력일자^8^0^0^0^0^0^0
+UI_VNTR_FILE_VLDT_DATE^UI벤처파일효력일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_791r" title="고객_계좌번호로 전문투자자 여?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="208" _ulen="156" >
+
+KYC_SPCL_INVR_YN^KYC전문투자자여부^1^0^0^0^0^0^0
+PRNC_PRSV_YN^원금보존여부^1^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+UI_PFIN_YN^UI전문투자자여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obsim_idmn_018r" title="종목_집투 기본 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="90" _ulen="70" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="590" _ulen="442" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+KOR_ISNM^한글 종목명^100^0^0^0^0^0^0
+KOR_ISSU_ABWR_NAME^한글 종목 약어 명^40^0^0^0^0^0^0
+ENG_ISNM^영문 종목명^100^0^0^0^0^0^0
+ENG_ISSU_ABWR_NAME^영문 종목 약어 명^40^0^0^0^0^0^0
+IISC_STAT_CLS_CODE^집합투자증권상태구분코드^2^0^0^0^0^0^0
+SALE_CHAN_CLS_CODE^판매 채널 구분 코드^1^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC 상품 등급 코드^2^0^0^0^0^0^0
+ATMT_TACT_KYC_PROD_GRAD_CODE^자동 이체 KYC 상품 등급 코드^2^0^0^0^0^0^0
+ATMT_BYOV_STLM_ABLE_YN^자동매수결제가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="1311" _ulen="897" >
+
+IISC_ITCO_CODE^집합투자증권투자신탁회사코드^3^0^0^0^0^0^0
+CNSG_BANK_CODE^수탁 은행 코드^3^0^0^0^0^0^0
+IVTR_FNCD^투자신탁 펀드코드^12^0^0^0^0^0^0
+KSD_ISCD^한국예탁결제원종목코드^12^0^0^0^0^0^0
+FSS_RPRN_FNCD^금융감독원 보고 펀드코드^12^0^0^0^0^0^0
+SCTY_STND_CODE^협회 표준 코드^12^0^0^0^0^0^0
+IISC_FUND_TYPE_CODE^집합투자증권펀드유형코드^2^0^0^0^0^0^0
+IISC_ISSU_DIV_CODE^집합투자증권종목분류코드^2^0^0^0^0^0^0
+IISC_RPRC_ABLE_CLS_CODE^집합투자증권환매가능구분코드^2^0^0^0^0^0^0
+IISC_RPRC_RSTC_TYPE_CODE^집합투자증권환매제한유형코드^2^0^0^0^0^0^0
+RPRC_RSTC_PRD^환매 제한 기간^4^0^7^0^0^0^0
+IISC_SPLM_STUP_CLS_CODE^집합투자증권추가설정구분코드^2^0^0^0^0^0^0
+IISC_PRD_TYPE_CODE^집합투자증권기간유형코드^2^0^0^0^0^0^0
+BSDY_APLY_TYPE_CODE^영업일 적용 유형 코드^1^0^0^0^0^0^0
+GOAL_ERT^목표 수익률^14^5^7^0^0^0^0
+IISC_FNDC_CODE^간접투자증권 사무수탁사 코드^3^0^0^0^0^0^0
+JOIN_QLFC_CODE^가입 자격 코드^2^0^0^0^0^0^0
+DVPD_GRAD_CODE^파생상품등급코드^1^0^0^0^0^0^0
+IISC_PROD_GRAD_CODE^집합투자증권상품등급코드^2^0^0^0^0^0^0
+IISC_RPRC_PRHB_TYPE_CODE^집합투자증권환매금지유형코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="1352" _ulen="998" >
+
+SALE_STA_DATE^판매 시작 일자^8^0^0^0^0^0^0
+SALE_MTRT_DATE^판매만기일자^8^0^0^0^0^0^0
+STUP_DATE^설정 일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+STAC_DATE^결산 일자^8^0^0^0^0^0^0
+TRUST_CALC_CYCL_CODE^신탁 계산 주기 코드^1^0^0^0^0^0^0
+MKCL_AFEQ_RGLT_HOUR_CLS_CODE^장마감 이후 규제 시간 구분 코?^2^0^0^0^0^0^0
+MKCL_AFEQ_RGLT_CLS_CODE^장마감 이후 규제 구분 코드^2^0^0^0^0^0^0
+PAY_WTMN_STND_DAY^보수 인출 기준 일^2^0^0^0^0^0^0
+PAY_WTMN_CYCL_CODE^보수 인출 주기 코드^1^0^0^0^0^0^0
+BYOV_STLM_DYNU^매수결제일수^8^0^7^0^0^0^0
+RPRC_CNTG_DYNU^환매 체결 일수^8^0^7^0^0^0^0
+RPRC_PBMN_PRVS_DYNU^환매대금지급일수^8^0^7^0^0^0^0
+TR_UNIT_ACNU^거래 단위 좌수^19^0^7^0^0^0^0
+SDPR_UNIT_ACNU^기준가 단위 좌수^19^0^7^0^0^0^0
+STA_SDPR^시작 기준가^20^6^7^0^0^0^0
+IISC_SALE_TYPE_CODE^집합투자증권판매유형코드^2^0^0^0^0^0^0
+PO_PE_CLS_CODE^공모 사모 구분 코드^2^0^0^0^0^0^0
+RCRT_STA_DATE^모집 시작 일자^8^0^0^0^0^0^0
+RCRT_FIN_DATE^모집 종료 일자^8^0^0^0^0^0^0
+RCRT_LIMT_AMT^모집 한도 금액^19^0^7^0^0^0^0
+IISC_RCRT_STAT_CODE^집합투자증권모집상태코드^2^0^0^0^0^0^0
+LVTP_JOIN_YN^생계형 가입 여부^1^0^0^0^0^0^0
+IISC_ACNG_PRD_MNCN^집합투자증권회계기간월수^6^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="591" _ulen="429" >
+
+IISC_TXTN_GRP_CODE^집합투자증권과세그룹코드^2^0^0^0^0^0^0
+OVRL_SPTX_CLS_CODE^종합 분리과세 구분 코드^1^0^0^0^0^0^0
+CNVR_ABLE_YN^전환 가능 여부^1^0^0^0^0^0^0
+CNVR_DYNU^전환 일수^6^0^7^0^0^0^0
+PAYM_RSTC_INRT^납입 제한 이율^9^4^7^0^0^0^0
+MTRT_DATE_RSTC_MNCN^만기 일자 제한 월수^6^0^7^0^0^0^0
+TR_UNIT_AMT^거래 단위 금액^19^0^7^0^0^0^0
+MTFN_MIN_TR_ACNU^뮤추얼펀드 최소 거래 좌수^19^0^7^0^0^0^0
+MTFN_MIN_RMND_ACNU^뮤추얼펀드 최소 잔고 좌수^19^0^7^0^0^0^0
+TXEX_CLS_CODE^비과세 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="1669" _ulen="1191" >
+
+IISC_INVT_REGN_CLS_CODE^집합투자증권투자지역구분코드^2^0^0^0^0^0^0
+INVT_DETL_REGN_CLS_CODE^투자 세부 지역 구분 코드^2^0^0^0^0^0^0
+CTCD^국가코드^3^0^0^0^0^0^0
+RISK_ITCO_CODE^리스크 투자신탁회사 코드^2^0^0^0^0^0^0
+LSTN_ISCD^상장 종목코드^12^0^0^0^0^0^0
+LSTN_DATE^상장일자^8^0^0^0^0^0^0
+RSEV_ABLE_YN^예약 가능 여부^1^0^0^0^0^0^0
+KSD_MANG_YN^한국예탁결제원관리여부^1^0^0^0^0^0^0
+INTP_MNF_YN^적립식 주력 여부^1^0^0^0^0^0^0
+MOD_SDPR_CRTN_YN^수정 기준가 생성 여부^1^0^0^0^0^0^0
+WRAP_JOIN_ABLE_YN^WRAP 가입 가능 여부^1^0^0^0^0^0^0
+LSDH_FEE_LEVY_CLS_CODE^장기주택마련펀드 수수료 징수 ?^2^0^0^0^0^0^0
+PLAN_ABLE_YN^플랜 가능 여부^1^0^0^0^0^0^0
+FNCD^펀드코드^4^0^0^0^0^0^0
+EDCT_CLCD^교육구분코드^6^0^0^0^0^0^0
+MFND_KSD_ISCD^모펀드한국예탁결제원종목코드^12^0^0^0^0^0^0
+RNVS_SLCT_YN^재투자선택여부^1^0^0^0^0^0^0
+CLAS_CLCD^클래스구분코드^2^0^0^0^0^0^0
+STUP_RPRC_ABLE_COD^설정환매가능코드^2^0^0^0^0^0^0
+VNTR_ETPR_IVTR_YN^벤처기업투자신탁여부^1^0^0^0^0^0^0
+IISC_INVT_QLFC_CODE^집합투자증권투자자격코드^2^0^0^0^0^0^0
+HDBR_CLS_CODE^본지점구분코드^1^0^0^0^0^0^0
+UI_SCTY_PROD_DVCD^UI협회상품분류코드^20^0^0^0^0^0^0
+LVRG_YN^레버리지여부^1^0^0^0^0^0^0
+HGDT_PROD_YN^고난도상품여부^1^0^0^0^0^0^0
+INVT_PROD_YN^투자상품여부^1^0^0^0^0^0^0
+FIT_PROD_YN^적합상품여부^1^0^0^0^0^0^0
+CAFU_EXLS_YN^숙려제외여부^1^0^0^0^0^0^0
+TRNF_ABLE_YN^양도가능여부^1^0^0^0^0^0^0
+ELGB_CLCT_INVT_ORGN_CLCD^적격집합투자기구구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock6" inout="out" _len="332" _ulen="256" >
+
+INSU_LNKD_PROD_YN^보험 연계 상품 여부^1^0^0^0^0^0^0
+REBT_RATE^리베이트 비율^9^4^7^0^0^0^0
+GFMN_RATE^기부금 비율^9^4^7^0^0^0^0
+LOAN_RATE^대출 비율^9^4^7^0^0^0^0
+PROD_EXPL^상품 설명^4000^0^0^0^0^0^0
+REQ_MATR_EXPL^의뢰 사항 설명^4000^0^0^0^0^0^0
+SVC_EXPL^서비스 설명^4000^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="796" _ulen="594" >
+
+LWST_BYOV_AMT^최저매수금액^19^0^7^0^0^0^0
+HGHS_BYOV_AMT^최고매수금액^19^0^7^0^0^0^0
+MIN_JOIN_AMT^최소 가입 금액^19^0^7^0^0^0^0
+MAX_JOIN_AMT^최대 가입 금액^19^0^7^0^0^0^0
+SHRS_PRD^최단 기간^4^0^7^0^0^0^0
+LNGS_PRD^최장 기간^4^0^7^0^0^0^0
+LIMT_GRP_CLS_CODE^한도 그룹 구분 코드^2^0^0^0^0^0^0
+IISC_LIMT_TYPE_CODE^집합투자증권한도유형코드^2^0^0^0^0^0^0
+RPRC_CNTG_DYNU^환매 체결 일수^8^0^7^0^0^0^0
+PRVS_DYNU^지급일수^8^0^7^0^0^0^0
+EXPL_TRGT_CLS_NAME^설명 대상 구분 명^40^0^0^0^0^0^0
+TR_SHAP_NAME^거래 형태 명^40^0^0^0^0^0^0
+JOIN_QLFC_NAME^가입 자격 명^40^0^0^0^0^0^0
+PFIN_LWST_BYOV_AMT^전문투자자최저매수금액^19^0^7^0^0^0^0
+PFIN_HGHS_BYOV_AMT^전문투자자최고매수금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock8" occurs="30" inout="out" _len="396" _ulen="306" >
+
+IISC_PAY_CLS_CODE^집합투자증권보수구분코드^2^0^0^0^0^0^0
+APLY_DATE^적용 일자^8^0^0^0^0^0^0
+PAY_RATE^보수비율^14^6^7^0^0^0^0
+RATE^비율^10^5^7^0^0^0^0
+PAYM_RSTC_INRT^납입 제한 이율^9^4^7^0^0^0^0
+EF_BEST_DSTR_RATE^EF 최적 배분 비율^9^4^7^0^0^0^0
+FEP_ODER_LIMT_RATE^FEP 주문 한도 비율^9^4^7^0^0^0^0
+NAV_PRDY_CTRT^NAV전일대비율^9^2^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock9" occurs="20" inout="out" _len="105" _ulen="81" >
+
+SVNG_CLS_CODE^저축 구분 코드^2^0^0^0^0^0^0
+JOIN_ABLE_YN^가입 가능 여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock10" occurs="8" inout="out" _len="139" _ulen="99" >
+
+IISC_SVNG_TYPE_CODE^집합투자증권저축유형코드^1^0^0^0^0^0^0
+SPLM_PAYM_ABLE_YN^추가 납입 가능 여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock11" occurs="50" inout="out" _len="149" _ulen="113" >
+
+ENRL_ASET_CODE^편입 자산 코드^2^0^0^0^0^0^0
+ETRT_LEVL_CODE^편입 비율 수준 코드^2^0^0^0^0^0^0
+ETRT^편입 비율^9^4^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock12" occurs="4" inout="out" _len="106" _ulen="82" >
+
+TXTN_CUST_TYPE_CODE^과세 고객 유형 코드^1^0^0^0^0^0^0
+JOIN_YN^가입 여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock13" occurs="50" inout="out" _len="357" _ulen="273" >
+
+ISCO_CODE^보험회사 코드^3^0^0^0^0^0^0
+GNDR_CODE^성별 코드^2^0^0^0^0^0^0
+PMRT^보험요율^14^6^7^0^0^0^0
+APLY_DATE^적용 일자^8^0^0^0^0^0^0
+CNRT_CLS_CODE^계약자 구분 코드^2^0^0^0^0^0^0
+JOIN_STA_PRD^가입 시작 기간^4^0^7^0^0^0^0
+JOIN_FIN_PRD^가입 종료 기간^4^0^7^0^0^0^0
+PAYM_INPM^납입 보험료^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock14" occurs="30" inout="out" _len="218" _ulen="170" >
+
+JOIN_STND_CLS_CODE^가입 기준 구분 코드^1^0^0^0^0^0^0
+GNDR_CODE^성별 코드^2^0^0^0^0^0^0
+STA_AGE^시작 연령^4^0^7^0^0^0^0
+FIN_AGE^종료 연령^4^0^7^0^0^0^0
+RSTC_YN^제한 여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock15" occurs="4" inout="out" _len="181" _ulen="133" >
+
+IISC_SELN_MTHD_CODE^간접투자증권 매도 방법 코드^2^0^0^0^0^0^0
+LWST_SELN_AMT^최저 매도 금액^19^0^7^0^0^0^0
+HGHS_SELN_AMT^최고매도금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock16" inout="out" _len="1558" _ulen="1130" >
+
+OVRS_INVT_FUND_LOSS_STOF_YN^해외 투자 펀드 손실 상계 여부^1^0^0^0^0^0^0
+CDSC_APLY_YN^이연판매보수 적용 여부^1^0^0^0^0^0^0
+FUND_MVBL_ABLE_YN^펀드 이동 가능 여부^1^0^0^0^0^0^0
+CDSC_BNDL_CNVR_DATE^이연판매보수 일괄 전환 일자^8^0^0^0^0^0^0
+BYOV_RSTC_YN^매수제한여부^1^0^0^0^0^0^0
+RPRC_STND_DAY^환매 기준 일^2^0^0^0^0^0^0
+RPRC_STLM_DAY^환매 결제 일^2^0^0^0^0^0^0
+SVNG_ENCR_ABLE_YN^저축장려가능여부^1^0^0^0^0^0^0
+RNVS_NAGRM_ABLE_YN^재투자미동의가능여부^1^0^0^0^0^0^0
+PONT_INSM_FUND_YN^포인트적립펀드여부^1^0^0^0^0^0^0
+INSL_YN^부실여부^1^0^0^0^0^0^0
+OTCM_PAY_TYPE_CLCD^성과보수유형구분코드^2^0^0^0^0^0^0
+STND_ERT^기준수익률^14^5^7^0^0^0^0
+OTCM_RMRT^성과보수율^14^5^7^0^0^0^0
+OLD_ISCD^구종목코드^12^0^0^0^0^0^0
+SALE_STA_DATE^판매시작일자^8^0^0^0^0^0^0
+FXAM_SELN_ABLE_YN^정액매도가능여부^1^0^0^0^0^0^0
+MIN_MNTN_RMND^최소유지잔고^19^0^7^0^0^0^0
+ERNN_SCRT_LOAN_CLCD^수익증권대출구분코드^1^0^0^0^0^0^0
+FUND_CLAS_NAME^펀드클래스명^300^0^0^0^0^0^0
+DSTR_TYPE_CODE^배분유형코드^2^0^0^0^0^0^0
+JOIN_ABLE_ACNT_CNT^가입가능계좌수^13^0^7^0^0^0^0
+PFIN_MIN_MNTN_RMND^전문투자자최소유지잔고^19^0^7^0^0^0^0
+PFIN_JOIN_ABLE_ACNT_CNT^전문투자자가입가능계좌수^13^0^7^0^0^0^0
+MGRB_INVL_OBJT_YN^경영참여목적여부^1^0^0^0^0^0^0
+SVNG_ENCR_ACNT_SHNU_ABLE_YN^저축장려계좌매수가능여부^1^0^0^0^0^0^0
+TACT_MNRC_ABLE_YN^이체입금가능여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock17" inout="out" _len="234" _ulen="176" >
+
+CRCD^통화코드^3^0^0^0^0^0^0
+FRCR_ACNO^외화계좌번호^20^0^0^0^0^0^0
+ROND_CIPH^반올림자릿수^5^0^7^0^0^0^0
+KPNG_ISTU_CODE^보관기관코드^3^0^0^0^0^0^0
+KPNG_ISTU_KOR_NAME^보관기관한글명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

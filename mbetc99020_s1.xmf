@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99020" scrname="모의투자 상황" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="7" designorder="1" ly_vert="10,10,350,210,1" >
+			<COL_INFO ly_vert_width="79,271" />
+			<ROW_INFO ly_vert_height="30,30,30,30,30,30,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="039:242242242" caption="자문사명" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" bgcolor="039:242242242" caption="포트폴리오명" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="039:242242242" caption="가입날짜" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" mask="1,0,,,1,####-##-##,0,1,1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" bgcolor="039:242242242" caption="예상수익률" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,3,1,3" impidxs="" />
+				<CELL cell_ly="0,4,0,4" bgcolor="039:242242242" caption="최고 수익률" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,4,1,4" impidxs="" />
+				<CELL cell_ly="0,5,0,5" bgcolor="039:242242242" caption="평균 수익률" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,5,1,5" impidxs="" />
+				<CELL cell_ly="0,6,0,6" bgcolor="039:242242242" caption="최저 수익률" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,6,1,6" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="Label0" caption="[ 수익 현황 ]" ly_vert="10,240,100,32,1" />
+		<BUTTON name="Button0" caption="모의투자 해제" btnimage="btn_05.9" ly_vert="70,519,250,32,1" />
+		<CHARTEX name="ChartEx0" ly_vert="10,280,350,230,1" >
+			<DATASETTING/>
+		</CHARTEX>
+		<LABEL name="Label1" fontsize="-4" caption="(단위 : 만원)" ly_vert="280,250,70,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5372" _ulen="5234" >
+'============================================================================
+Sub Form_OnFormInit()
+
+	flag = 0
+	tmp=""
+	gTempDate =""
+	real_cnt = 0
+
+	szData = Form.GetOpenLinkData() ' 0: 가입날짜 1:최초투자금액 2:월투자금액 3:포트폴리오 아이디
+	szList = split(szData,"●")
+	
+	prtf_id = szList(3)
+	
+	
+	'Form.ShowAlert("", szData)
+	
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_722r", "InBlock2", "PRTF_ID" , 0 , prtf_id )
+	DATAMANAGER.RequestTranData("obcpp_intr_722r")
+	
+	
+	
+	
+	'DATAMANAGER.SetDataValue(0, "obcpp_intr_759r", "InBlock1", "INP_CLS_CODE" , 0 , 1 )
+	'DATAMANAGER.SetDataValue(0, "obcpp_intr_759r", "InBlock1", "PRTF_ID" , 0 , "203" )
+	'DATAMANAGER.RequestTranData("obcpp_intr_759r")
+	
+	
+	'join_date="2016-07-23"
+	'sub_date  =  datediff("d", join_date, date)
+	'Form.ShowAlert("", sub_date)
+	
+	'tmp_date =  FormatDatetime("20160801",4)
+    'tmp_date = datediff("d", "2016-07-23", date)
+	'tmp_date = replace(date,"-","") - szList(0) 
+	'Form.ShowAlert("", tmp_date)
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID == "obcpp_intr_722r" then
+	
+	tmp = DATAMANAGER.GetDataValue(0, "obcpp_intr_722r", "OutBlock1", "ADCP_NAME" , 0)
+	Table0.SetCellString(0, 1, tmp)
+	
+	tmp = DATAMANAGER.GetDataValue(0, "obcpp_intr_722r", "OutBlock1", "PRTF_NAME" , 0)
+	Table0.SetCellString(1, 1, tmp)
+	
+	
+	Table0.SetCellString(2, 1,szList(0)) ' 가입날짜
+	
+	
+	tmp = DATAMANAGER.GetDataValue(0, "obcpp_intr_722r", "OutBlock1", "ANTC_ERT" , 0)
+	Table0.SetCellString(3, 1, round(tmp,2)&"%")
+	
+	
+	tmp = DATAMANAGER.GetDataValue(0, "obcpp_intr_722r", "OutBlock1", "UI_ERT_MAX_VAL" , 0)
+	Table0.SetCellString(4, 1, round(tmp,2)&"%")
+	
+	tmp = DATAMANAGER.GetDataValue(0, "obcpp_intr_722r", "OutBlock1", "UI_ERT" , 0)
+	Table0.SetCellString(5, 1, round(tmp,2)&"%")
+	
+	tmp = DATAMANAGER.GetDataValue(0, "obcpp_intr_722r", "OutBlock1", "UI_ERT_MIN_VAL" , 0)
+	Table0.SetCellString(6, 1, round(tmp,2)&"%")
+	
+	
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_759r", "InBlock1", "INP_CLS_CODE" , 0 , 1 )
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_759r", "InBlock1", "PRTF_ID" , 0 , prtf_id)
+	DATAMANAGER.RequestTranData("obcpp_intr_759r")
+	
+	
+	elseif szTranID== "obcpp_intr_759r" then
+	
+	cnt = DATAMANAGER.GetDataCount(0, "obcpp_intr_759r", "OutBlock1" )
+	
+	'join_date="20160723"
+	join_date = Table0.GetCellString(2, 1)
+	'join_date =  Left(join_date,4)&"-"&Mid(join_date,5,2)&"-"&Right(join_date,2)
+	
+	'Form.ShowAlert("",join_date)
+	
+	'sub_date  =  datediff("d", join_date, date)
+	
+	
+	
+	'for i=cnt-sub_date to cnt-1
+	for i = 0 to cnt - 1
+	
+		if cint(join_date) < Cint(DATAMANAGER.GetDataValue(0, "obcpp_intr_759r", "OutBlock1", "PROS_DATE" , i)) then
+			
+			real_cnt = real_cnt + 1
+	
+			if i == cnt-1 then
+			tmp = DATAMANAGER.GetDataValue(0, "obcpp_intr_759r", "OutBlock1", "INP_INDT_VAL" , i)&"●"&tmp
+			gTempDate = DATAMANAGER.GetDataValue(0, "obcpp_intr_759r", "OutBlock1", "PROS_DATE" , i)&";"&gTempDate
+	
+	
+			else
+			tmp = DATAMANAGER.GetDataValue(0, "obcpp_intr_759r", "OutBlock1", "INP_INDT_VAL" , i)&"●"&tmp
+			gTempDate = DATAMANAGER.GetDataValue(0, "obcpp_intr_759r", "OutBlock1", "PROS_DATE" , i)&";"&gTempDate
+			
+			end if
+	
+	     end if
+	
+	next
+	
+
+	''ex_sz = "2016-07-23" '나중에 join_date로 바꿔줘야함.
+	
+	
+	''for i = 0 to sub_date-1
+	'for i = 0 to cnt -1 
+	'' for i = cnt-sub_date to cnt-1 
+	 'if i ==  cnt - 1 then
+	 'sub_date-1 then
+		 'gTempDate = gTempDate&dateadd("d",i,join_date)
+	'	 gTempDate = DATAMANAGER.GetDataValue(0, "obcpp_intr_759r", "OutBlock1", "PROS_DATE" , i)&";"&gTempDate
+		 
+      'else
+      'gTempDate = DATAMANAGER.GetDataValue(0, "obcpp_intr_759r", "OutBlock1", "PROS_DATE" , i)&";"&gTempDate
+	    '  gTempDate = gTempDate&dateadd("d",i,join_date)&";"
+	 
+	 'end if
+		 
+	'next
+	
+	
+	
+	gTempDate = replace(gTempDate,"-","")
+	
+	
+	'Form.ShowAlert("", gTempDate)
+	'Form.ShowAlert("", tmp)
+	
+	g_List = split(tmp,"●")
+	gData = ""
+	tmp_frst = 1000 '최초투자금액
+	n_amt = 1000 
+	
+	for i = 0 to real_cnt
+	
+		if i == 0 then			
+		n_amt = 1000 + (1000 * Cdbl(g_List(i))/100)'과거수익률'
+		
+		else
+			if n_amt < 0 and Cdbl(g_List(i)) <0 then
+				n_amt = n_amt - (n_amt * Cdbl(g_List(i))/100) 
+				
+			else 				
+				n_amt = n_amt + (n_amt * Cdbl(g_List(i))/100)
+				
+			end if
+		
+		end if
+		
+		
+		
+		gData = gData&Cstr(round(n_amt,0)-tmp_frst)&";"
+	
+	next
+	
+	'Form.ShowAlert("", gData)
+	
+	 ChartEx0.SetAccrueName("현황")
+	ChartEx0.SetAccrueData("initdata="&gTempDate)	
+	 ChartEx0.SetAccrueData("자료일자="..gTempDate)
+	ChartEx0.SetAccrueData("data1="..gData.."="..gData)
+	ChartEx0.SetShowCrossLine("true")
+	
+	ChartEx0.SetAccrueData("repaintall");
+	
+	
+	
+	
+	
+	
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+
+	DATAMANAGER.SetEventFlag("obcpp_intr_757a", "I")
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_757a", "InBlock1", "INP_MEMB_SRNO" ,0, 1)
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_757a", "InBlock1", "PRTF_ID" ,0, szList(3))
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_757a", "InBlock1", "INP_CLS_CODE" , 0,2)
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_757a", "InBlock1", "INP_YN_CODE" , 0,0)
+	
+	DATAMANAGER.RequestTranData("obcpp_intr_757a")
+	
+	Form.Toast(0,"모의투자가 해제되었습니다." , 0.5)
+	Form.CloseForm()
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_intr_759r" trcode="obcpp_intr_759r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_intr_757a" trcode="obcpp_intr_757a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_intr_722r" trcode="obcpp_intr_722r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_intr_759r" title="인턴A팀 포트폴리오 지표 조회서" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="98" _ulen="74" >
+
+INP_CLS_CODE^인턴쉽구분코드^2^0^7^0^0^0^0
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="500" inout="out" _len="183" _ulen="139" >
+
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+INP_CLS_CODE^인턴쉽구분코드^2^0^7^0^0^0^0
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+INP_INDT_VAL^인턴쉽지표값^6^2^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_intr_757a" title="인턴A팀가입내역테이블처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="487" _ulen="361" >
+
+INP_JOIN_SRNO^인턴쉽가입일련번호^11^0^7^0^0^0^0
+JOIN_DATE^가입일자^8^0^0^0^0^0^0
+MTRT_SCDL_DATE^만기예정일자^8^0^0^0^0^0^0
+PRCH_NAME^담당자명^40^0^0^0^0^0^0
+FRST_CNRC_AMT^최초계약금액^19^0^7^0^0^0^0
+SPLM_INVT_AMT^추가투자금액^20^9^7^0^0^0^0
+INP_MEMB_SRNO^인턴쉽회원일련번호^11^0^7^0^0^0^0
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+INP_CLS_CODE^인턴쉽구분코드^2^0^7^0^0^0^0
+INP_YN_CODE^인턴쉽여부코드^2^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_intr_722r" title="추천 다건 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="412" _ulen="310" >
+
+INP_CLS_CODE^인턴쉽구분코드^2^0^7^0^0^0^0
+INVT_OBJT_TYPE_NAME^투자목적유형명^40^0^0^0^0^0^0
+INP_INVT_INCL_CLCD^인턴쉽투자성향구분코드^2^0^7^0^0^0^0
+INVT_PRD_MN_CNT^투자기간개월수^4^0^7^0^0^0^0
+INVT_AMT^투자금액^19^0^7^0^0^0^0
+UI_ERT_MAX_VAL^UI수익률최대값^20^9^7^0^0^0^0
+UI_ERT^UI수익률^14^3^7^0^0^0^0
+UI_ERT_MIN_VAL^UI수익률최소값^20^9^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="48" _ulen="38" >
+
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="1356" _ulen="1028" >
+
+PRTF_NAME^포트폴리오명^40^0^0^0^0^0^0
+ADCP_NAME^자문사명^1024^0^0^0^0^0^0
+INP_INVT_INCL_CLCD^인턴쉽투자성향구분코드^2^0^7^0^0^0^0
+INP_RBDV_VLPN^인턴쉽로보어드바이저평점^8^3^7^0^0^0^0
+FERT^수수료율^9^4^7^0^0^0^0
+ANTC_ERT^예상수익률^14^5^7^0^0^0^0
+D1_ERT^1일수익률^23^6^7^0^0^0^0
+W1_ERT^1주일수익률^14^5^7^0^0^0^0
+M1_ERT^1개월수익률^23^6^7^0^0^0^0
+M3_ERT^3개월수익률^23^6^7^0^0^0^0
+UI_STDV_Y1_VAL^UI표준편차1년값^20^9^7^0^0^0^0
+UI_STDV_Y2_VAL^UI표준편차2년값^20^9^7^0^0^0^0
+UI_STDV_Y3_VAL^UI표준편차3년값^20^9^7^0^0^0^0
+UI_STDV_Y4_VAL^UI표준편차4년값^20^9^7^0^0^0^0
+UI_SHRO_Y1_VAL^UI샤프지수1년값^20^9^7^0^0^0^0
+UI_SHRO_Y2_VAL^UI샤프지수2년값^20^9^7^0^0^0^0
+UI_SHRO_Y3_VAL^UI샤프지수3년값^20^9^7^0^0^0^0
+UI_SHRO_Y4_VAL^UI샤프지수4년값^20^9^7^0^0^0^0
+Y1_ERT^1년수익률^23^6^7^0^0^0^0
+Y2_ERT^2년수익률^23^6^7^0^0^0^0
+Y3_ERT^3년수익률^23^6^7^0^0^0^0
+Y4_ERT^4년수익률^16^5^7^0^0^0^0
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+LWST_JOIN_AMT^최저가입금액^19^0^7^0^0^0^0
+CNRC_PRD^계약기간^4^0^7^0^0^0^0
+ADCP_HMPG_ADDR^자문사홈페이지주소^200^0^0^0^0^0^0
+UI_ERT_MAX_VAL^UI수익률최대값^20^9^7^0^0^0^0
+UI_ERT^UI수익률^14^3^7^0^0^0^0
+UI_ERT_MIN_VAL^UI수익률최소값^20^9^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="48" _ulen="38" >
+
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

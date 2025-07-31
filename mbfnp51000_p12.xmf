@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="51000" scrname="펀드_공통얼럿" version="2" writer="이아영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblBg" bgcolor="003:000000000" transmode="0" click="1" ly_vert="0,0,375,647,1" />
+		<CONTAINER name="cont" containerimage="alpha" scroll_pos="0,0" ly_vert="32,215,311,192,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="imgHeader" imgpath="popup_bg_2.9" ly_vert="0,0,311,142,1" />
+				<BUTTON name="btnRight" caption="확인" fontsize="2" fontstyle="01" btnimage="btn_26.9" ly_vert="156,142,156,50,1" />
+				<BUTTON name="btnLeft" caption="취소" fgcolor="004:000000000" fontsize="2" fontstyle="01" btnimage="btn_25.9" ly_vert="0,142,156,50,1" />
+				<BUTTON name="btnMid" visible="0" caption="확인" fontsize="2" fontstyle="01" btnimage="btn_22.9" ly_vert="0,142,311,50,0" />
+				<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="안내" halign="1" valign="2" ly_vert="0,0,311,43,1" />
+				<LABEL name="lblBody" fontsize="-1" caption="내용" halign="1" multiline="1" ly_vert="10,43,291,99,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1922" _ulen="1912" >
+Dim g_szSelectButton
+Dim g_szReturnKey 
+'============================================================================
+Sub Form_OnFormInit()
+	g_szSelectButton = "Close"
+	g_szReturnKey = "mbfnp51000_p2"
+	
+	lblBg.bgalpha = "100"	
+	
+	Dim szData
+	Dim tOpenData
+	szData = trim(Form.GetOpenLinkData( ))
+
+	if szData ~= "" and szData ~= "" then
+		tOpenData = Split(szData, "★")
+		if tOpenData[0] == "1" then
+			cont.btnMid.visible = "1"
+			cont.btnLeft.visible = "0"
+			cont.btnRight.visible = "0"
+			
+			cont.btnMid.caption = trim(tOpenData[4])
+			
+		elseif tOpenData[0] == "2" then
+			cont.btnMid.visible = "0"
+			cont.btnLeft.visible = "1"
+			cont.btnRight.visible = "1"
+			
+			cont.btnLeft.caption = trim(tOpenData[4])
+			cont.btnRight.caption = trim(tOpenData[5])
+			
+		end if
+		
+		cont.lblTitle.caption = trim(tOpenData[1])
+		cont.lblBody.caption = trim(tOpenData[2])
+		
+		if trim(tOpenData[3]) ~= "" and trim(tOpenData[3]) ~= nil then
+			g_szReturnKey = trim(tOpenData[3])
+		end if
+		
+	else
+'		Form.CloseForm()
+	end if 
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent( g_szReturnKey , g_szSelectButton)
+End Sub
+
+'============================================================================
+Sub lblBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub cont_btnMid_OnClick()
+	g_szSelectButton = "Mid"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub cont_btnLeft_OnClick()
+	g_szSelectButton = "Left"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub cont_btnRight_OnClick()
+	if cont.btnRight.caption = "연결하기" then
+		g_szSelectButton = "Call"
+	else
+		g_szSelectButton = "Right"
+	end if
+	Form.CloseForm()
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>
