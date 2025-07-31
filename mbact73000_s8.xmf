@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="73000" scrname="카카오제휴_고객정보입력" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label7" fontsize="4" fontstyle="01" caption="고객정보 입력" halign="1" ly_vert="0,19,375,22,1" />
+		<IMAGE name="imgBack" visible="0" autosize="1" imgpath="icon_top_back_light" ly_vert="20,18,24,24,0" />
+		<BUTTON name="BtnNext" caption="다음" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="0,589,375,60,1" />
+		<CONTAINER name="contMain" vscroll="1" scroll_pos="0,0" ly_vert="0,70,375,516,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="Label1" caption="이용등록에 필요한 고객정보를 입력해주세요." ly_vert="12,11,335,18,1" />
+				<EDIT name="edtName" fontsize="4" imetype="0" hintcaption=" " imagefilepth="input_03.9" ly_vert="20,79,335,74,1" />
+				<EDIT name="edtEngName" fontsize="4" imetype="0" hintcaption=" 영문명을 입력하세요" imagefilepth="input_03.9" ly_vert="20,163,335,74,1" />
+				<LABEL name="Label6" fontsize="2" fontstyle="01" caption="고객 정보" ly_vert="12,49,80,20,1" />
+				<EDIT name="edtPhone" fontsize="4" imetype="0" hintcaption=" " imagefilepth="input_03.9" ly_vert="20,289,335,74,1" />
+				<EDIT name="edtEmail" fontsize="4" imetype="0" hintcaption=" 이메일 주소를 입력하세요" imagefilepth="input_03.9" ly_vert="20,373,335,74,1" />
+				<LABEL name="Label0" fontsize="2" fontstyle="01" caption="연락처 정보" ly_vert="12,259,102,20,1" />
+				<LABEL name="Label3" fontsize="1" fontstyle="01" caption="우편물 통보" ly_vert="12,473,131,20,1" />
+				<RADIOGROUP name="rdoAddrType" buttonshape="1" ly_vert="20,499,335,50,1" >
+					<RADIO_INFO>
+						<RADIO no="0" text="자택" radioimage="input_03_n.9.png" position="2,2,162,46" />
+						<RADIO no="1" text="직장" radioimage="input_03_n.9.png" position="173,2,162,46" />
+					</RADIO_INFO>
+				</RADIOGROUP>
+				<IMAGE name="imgAddrBg" imgpath="input_03_n.9" ly_vert="20,560,335,100,1" />
+				<LABEL name="lblAddrLine" bgcolor="102:216216216" transmode="0" ly_vert="30,610,315,1,1" />
+				<LABEL name="lblAddr" fgcolor="146:124124124" ly_vert="30,571,315,30,1" />
+				<LABEL name="lblAddrDtl" fgcolor="146:124124124" ly_vert="30,621,315,30,1" />
+				<LABEL name="Label2" fontsize="1" fontstyle="01" caption="거래내역 통보" ly_vert="12,711,150,20,1" />
+				<RADIOGROUP name="rdoInform" fontsize="-1" buttonshape="1" buttonsnumber="4" initselectionuse="1" initselection="0" ly_vert="20,743,335,50,1" >
+					<RADIO_INFO>
+						<RADIO no="0" text="온라인조회" radioimage="input_03_n.9.png" transfervalue="99" position="0,0,81,46" />
+						<RADIO no="1" text="이메일" radioimage="input_03_n.9.png" transfervalue="21" position="85,0,81,46" />
+						<RADIO no="2" text="자택" radioimage="input_03_n.9.png" transfervalue="01" position="170,0,81,46" />
+						<RADIO no="3" text="직장" radioimage="input_03_n.9.png" transfervalue="02" position="254,0,81,46" />
+					</RADIO_INFO>
+				</RADIOGROUP>
+				<LABEL name="lblProvision" fontsize="1" fontstyle="01" caption="계약서류 제공" ly_vert="12,821,355,20,1" />
+				<RADIOGROUP name="rdoProvision" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="20,854,335,50,1" >
+					<RADIO_INFO>
+						<RADIO no="0" text="알림톡/문자" radioimage="input_03_n.9.png" position="2,2,162,46" />
+						<RADIO no="1" text="이메일" radioimage="input_03_n.9.png" position="173,2,162,46" />
+					</RADIO_INFO>
+				</RADIOGROUP>
+				<LABEL name="lblChangeAddr" fgcolor="146:124124124" fontsize="-2" caption="변경하기 〉" halign="2" click="1" ly_vert="284,666,76,20,1" />
+				<LABEL name="lblSpace" bgcolor="227:248084091" ly_vert="0,940,376,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="20287" _ulen="18967" >
+'--===========================================================================
+' 01. 화 면 명 : 카뱅후속-고객정보 입력(1/2)
+' 02. 화면설명 : 카뱅후속-고객정보 입력(1/2)
+' 03. 작    성 : 2022.12.19
+'                비대면 고객정보 입력 참고...
+'--===========================================================================
+Dim g_szRcnoPip
+Dim g_szProcCode
+Dim g_szName, g_szEngName, g_szEmail
+Dim g_szPhone1, g_szPhone2, g_szPhone3
+Dim g_szOwhsRegnZip, g_szOwhsDtlZip, g_szOwhsPost, g_szOwhsDtl, g_szOwhsNewAddr, g_szOwhsBldnMnno		'자택 주소 데이터	
+Dim g_szCoRegnZip, g_szCoDtlZip, g_szCoPost, g_szCoDtl, g_szCoNewAddr, g_szCoBldnMnno					'직장 주소 데이터
+Dim g_szFnprJoinSrno
+
+Dim g_bInformOk
+
+'============================================================================
+Sub Form_OnFormInit()
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	
+	contMain.edtName.setApplyLabel("이름" , 0 , 268 , "left" , false)
+	contMain.edtEngName.setApplyLabel("영문명" , 0 , 268 , "left" , true)
+	contMain.edtPhone.setApplyLabel("휴대폰번호" , 0 , 268 , "left" , true)
+	contMain.edtEmail.setApplyLabel("이메일 주소" , 0 , 268 , "left" , true)
+	
+	contMain.edtName.enable = false
+	contMain.edtPhone.enable = false
+	
+	BtnNext.enable = false
+	
+	contMain.edtEngName.SetUseResultLabel(true,1)
+	contMain.edtEmail.SetUseResultLabel(true,1)
+	contMain.rdoInform.SetUseResultLabel(true,1)
+	
+	f_GetSharedData()
+	
+	g_bInformOk = false
+	
+	'카카오뱅크 후속절차 대상내역 조회
+	DATAMANAGER.RequestTranData( "obaci_acct_300r" )
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+    '안드로이드-백버튼 작동X
+    '부모창이 먼저 닫히는 오류방지를 위해 해당화면은 백버튼 작동X 처리
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+    
+	'주소검색 팝업 리턴
+	If sKeyName == "mbbdm85150_p1" And sRet == "ok" Then	
+		Dim szTmpRegnZip, szTmpDtlZip, szTmpPost, szTmpDtl, szTmpBldnMnno
+		szTmpRegnZip		= Form.GetSharedData("10050_ADDRESS_REGN_ZIP", False )
+		szTmpDtlZip		= Form.GetSharedData("10050_ADDRESS_DTL_ZIP" , False )
+		szTmpPost		= Form.GetSharedData("10050_ADDRESS_POST"    , False )
+		szTmpDtl			= Form.GetSharedData("10050_ADDRESS_DTAD"    , False )
+		szTmpBldnMnno		= Form.GetSharedData("10050_ADDRESS_BLDN"    , False )
+		
+		If contMain.rdoAddrType.currentindex == "0" or contMain.rdoAddrType.currentindex == 0 Then
+			If g_szOwhsRegnZip <> szTmpRegnZip or g_szOwhsDtlZip <> szTmpDtlZip or g_szOwhsPost <> szTmpPost or g_szOwhsDtl <> szTmpDtl or g_szOwhsBldnMnno <> szTmpBldnMnno Then
+				g_szOwhsRegnZip	= Form.GetSharedData("10050_ADDRESS_REGN_ZIP", False )
+				g_szOwhsDtlZip	= Form.GetSharedData("10050_ADDRESS_DTL_ZIP" , False )
+				g_szOwhsPost 		= Form.GetSharedData("10050_ADDRESS_POST"    , False )
+				g_szOwhsDtl 		= Form.GetSharedData("10050_ADDRESS_DTAD"    , False )
+				g_szOwhsBldnMnno	= Form.GetSharedData("10050_ADDRESS_BLDN"    , False )
+				
+				contMain.lblAddr.caption = g_szOwhsPost
+				contMain.lblAddrDtl.caption = g_szOwhsDtl
+				
+				g_szOwhsNewAddr = "Y"
+			End If
+		Else
+			If g_szCoRegnZip <> szTmpRegnZip or g_szCoDtlZip <> szTmpDtlZip or g_szCoPost <> szTmpPost or g_szCoDtl <> szTmpDtl or g_szCoBldnMnno <> szTmpBldnMnno Then
+				g_szCoRegnZip		= Form.GetSharedData("10050_ADDRESS_REGN_ZIP", False )
+				g_szCoDtlZip		= Form.GetSharedData("10050_ADDRESS_DTL_ZIP" , False )
+				g_szCoPost 		= Form.GetSharedData("10050_ADDRESS_POST"    , False )
+				g_szCoDtl 		= Form.GetSharedData("10050_ADDRESS_DTAD"    , False )
+				g_szCoBldnMnno	= Form.GetSharedData("10050_ADDRESS_BLDN"    , False )
+				
+				contMain.lblAddr.caption = g_szCoPost
+				contMain.lblAddrDtl.caption = g_szCoDtl
+				
+				g_szCoNewAddr = "Y"
+			End If
+		End If
+		
+		g_bInformOk = true
+		f_BtnEnableChk()
+		
+'		Form.ShowAlert("g_szOwhsNewAddr", g_szOwhsNewAddr)
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	If sKeyName == "Exit" And sRet == "ok" Then
+'		Form.CloseForm()
+		Form.OpenNextPopup("mbact73000", "", "")
+	End If
+End Sub
+
+'============================================================================
+'Sub Form_OnFormClose()
+'	Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+'End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'카카오뱅크 후속절차 대상내역 조회
+	If szTranID == "obaci_acct_300r" Then
+		Dim szUserID
+		szUserID = Form.GetSharedData("&USER_ID", false)
+		If g_szProcCode == "3" Or g_szProcCode == 3 Then
+			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ELFN_ID" , 0 , szUserID)
+		Else
+			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RCNO_PIP" , 0 , g_szRcnoPip)
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'카카오뱅크 후속절차 대상내역 조회
+	If szTranID == "obaci_acct_300r" Then
+	
+		'로그인해서 팝업에서 넘어오는 경우 휴대폰인증을 하지 않으므로.. 조회값으로 기본값 매핑함..
+		if g_szProcCode = "3" then
+			g_szRcnoPip = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "RCNO_PIP" 	  	, 0)
+			g_szName    = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "CUST_ABWR_NAME"	, 0)
+			g_szPhone1  = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "CLPH_TONO" 		, 0)
+			g_szPhone2  = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "CLPH_TELNO" 		, 0)
+			g_szPhone3  = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "CLPH_SRNO" 		, 0)
+			
+			Form.SetSharedData("BDM_NAME"     , g_szName      )  '이름
+			Form.SetSharedData("BDM_RCNO_PIP" , g_szRcnoPip   )  '주민등록번호			
+			Form.SetSharedData("BDM_HP1"      , g_szPhone1    )  '휴대폰번호
+			Form.SetSharedData("BDM_HP2"      , g_szPhone2    )
+			Form.SetSharedData("BDM_HP3"      , g_szPhone3    )			
+		end if
+	
+		contMain.edtName.caption = g_szName
+		contMain.edtPhone.caption = g_szPhone1 & "-" & g_szPhone2 & "-" & g_szPhone3
+		
+		g_szEngName = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "CUST_ENG_NAME" , 0)
+		If g_szEngName <> "" And g_szEngName <> null Then
+			contMain.edtEngName.caption = g_szEngName
+		End If
+		
+		g_szEmail = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "EMAIL_ADDR" , 0)
+		If g_szEmail <> "" And g_szEmail <> null Then
+			contMain.edtEmail.caption = g_szEmail
+		End If
+		
+		g_szOwhsRegnZip	= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_OWHS_REGN_ZIP" , 0)
+		g_szOwhsDtlZip  	= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_OWHS_DTL_ZIP" , 0)
+		g_szOwhsPost 		= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_OWHS_POST" , 0)
+		g_szOwhsDtl 		= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_OWHS_DTAD" , 0)
+		g_szOwhsNewAddr 	= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_OWHS_NW_ADDR_USE_YN" , 0)
+		g_szOwhsBldnMnno 	= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_OWHS_BLDN_MNNO" , 0)
+		
+		g_szCoRegnZip 	= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_CO_REGN_ZIP" , 0)
+		g_szCoDtlZip 		= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_CO_DTL_ZIP" , 0)
+		g_szCoPost 		= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_CO_POST" , 0)
+		g_szCoDtl 		= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_CO_DTAD" , 0)
+		g_szCoNewAddr 	= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_CO_NW_ADDR_USE_YN" , 0)
+		g_szCoBldnMnno 	= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "UI_CO_BLDN_MNNO" , 0)
+		
+		Dim szMailTpCode
+		szMailTpCode 		= DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock2" , "MAIL_INAG_TYPE_CODE" , 0)
+		If szMailTpCode <> "" And szMailTpCode <> null Then
+			If szMailTpCode == "01" Then	'자택
+				contMain.rdoAddrType.currentindex = "0"
+				contMain.lblAddr.caption 	= g_szOwhsPost
+				contMain.lblAddrDtl.caption	= g_szOwhsDtl
+			Else							'직장
+				contMain.rdoAddrType.currentindex = "1"
+				contMain.lblAddr.caption 	= g_szCoPost
+				contMain.lblAddrDtl.caption	= g_szCoDtl
+			End If
+			g_bInformOk = True
+		Else
+			g_bInformOk = False
+		End If
+		
+		f_BtnEnableChk()
+	
+	'금융상품가입일련번호 채번
+	ElseIf szTranID == "obsap_acif_999a" Then
+		g_szFnprJoinSrno = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "FNPR_JOIN_SRNO" , 0)
+		
+		f_SetSharedData()
+		
+		'이 단계에서는 g_szProcCode가 "3"이던 아니던간에 mbact73000_s9 로 넘어감 
+		'고객확인의무 단계로 진행
+		Form.OpenNextPopup("mbact73000_s9", "", "")
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+	If szSubErr <> "" And szSubErr <> null Then
+		Form.ShowAlert("알림", szErrMsg.."("..szSubErr..")" )
+	Else
+		Form.ShowAlert("알림", szErrMsg)
+	End If
+End Sub
+
+'============================================================================
+Function f_BtnEnableChk()
+	'하단 다음버튼 활성화 체크
+	If contMain.edtEngName.caption == "" Or contMain.edtEngName.caption == null Then
+		Exit Function
+	End If
+	
+	If contMain.edtEmail.caption == "" Or contMain.edtEmail.caption == null Then
+		Exit Function
+	End If
+	
+	If CInt(contMain.rdoAddrType.currentindex) == -1 Then
+		Exit Function
+	End If
+	
+	If contMain.lblAddr.caption == "" Or contMain.lblAddr.caption == null Or contMain.lblAddrDtl.caption == "" Or contMain.lblAddrDtl.caption == null Then
+		Exit Function
+	End If
+	
+	If Not g_bInformOk Then
+		Exit Function
+	End If
+	
+	BtnNext.enable = true
+End Function 
+
+'============================================================================
+Function f_GetSharedData()
+	'이전 단계에서 저장한 필요한 데이터들 가져옴
+	g_szRcnoPip = Form.GetSharedData("BDM_RCNO_PIP", false)
+	g_szProcCode = Form.GetSharedData("KAKAO_PROS_CODE", false) 
+	g_szName = Form.GetSharedData("BDM_NAME", false)
+	g_szPhone1 = Form.GetSharedData("BDM_HP1", false)
+	g_szPhone2 = Form.GetSharedData("BDM_HP2", false)
+	g_szPhone3 = Form.GetSharedData("BDM_HP3", false)
+End Function
+
+'============================================================================
+Function f_SetSharedData()
+	Form.SetSharedData("BDM_CUST_ENG_NAME"          , g_szEngName )
+	Form.SetSharedData("BDM_EMAIL_ADDR"          , g_szEmail )
+	If CInt(contMain.rdoAddrType.currentindex) == 0 Then
+		Form.SetSharedData("BDM_MAIL_INAG_TYPE_CODE"          , "01" )
+	Else
+		Form.SetSharedData("BDM_MAIL_INAG_TYPE_CODE"          , "02" )
+	End If
+	Form.SetSharedData("BDM_OWHS_REGN_ZIP"          , g_szOwhsRegnZip )
+	Form.SetSharedData("BDM_OWHS_DTL_ZIP"          , g_szOwhsDtlZip )
+	Form.SetSharedData("BDM_OWHS_POST"          , g_szOwhsPost )
+	Form.SetSharedData("BDM_OWHS_DTAD"          , g_szOwhsDtl )
+	Form.SetSharedData("BDM_OWHS_NEW_ADDR"          , g_szOwhsNewAddr )
+	Form.SetSharedData("BDM_OWHS_BLDN_MNNO"          , g_szOwhsBldnMnno )
+	
+	Form.SetSharedData("BDM_CO_REGN_ZIP"          , g_szCoRegnZip )
+	Form.SetSharedData("BDM_CO_DTL_ZIP"          , g_szCoDtlZip )
+	Form.SetSharedData("BDM_CO_POST"          , g_szCoPost )
+	Form.SetSharedData("BDM_CO_DTAD"          , g_szCoDtl )
+	Form.SetSharedData("BDM_CO_NEW_ADDR"          , g_szCoNewAddr )
+	Form.SetSharedData("BDM_CO_BLDN_MNNO"          , g_szCoBldnMnno )
+	
+	If CInt(contMain.rdoInform.currentindex) == 0 Then
+		Form.SetSharedData("BDM_SNML_INAG_TYPE_CODE"          , "51" )
+	ElseIf CInt(contMain.rdoInform.currentindex) == 1 Then
+		Form.SetSharedData("BDM_SNML_INAG_TYPE_CODE"          , "21" )
+	ElseIf CInt(contMain.rdoInform.currentindex) == 2 Then
+		Form.SetSharedData("BDM_SNML_INAG_TYPE_CODE"          , "01" )
+	Else
+		Form.SetSharedData("BDM_SNML_INAG_TYPE_CODE"          , "02" )
+	End If
+	
+	Form.SetSharedData("BDM_FNPR_JOIN_SRNO"          , g_szFnprJoinSrno )
+	
+	If CInt(contMain.rdoProvision.currentindex) == 0 Then
+		Form.SetSharedData("BDM_HNDV_MTHD_CLCD"          , "04" )
+	Else
+		Form.SetSharedData("BDM_HNDV_MTHD_CLCD"          , "02" )
+	End If
+End Function 
+
+'============================================================================
+Sub contMain_edtEngName_OnEditComplete()
+'	If Trim(contMain.edtEngName.caption) == "" Then				
+'		contMain.edtEngName.SetResultLabel("1","error","고객영문명을 확인하세요.","contMain")
+'		contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtEngName.top, "1")) 
+'		return False
+'	Else 
+'		contMain.edtEngName.SetResultLabel("0","complete","","contMain")
+'	End If 	
+
+	'2023-02-08 필수값 체크 추가
+	if len(trim(contMain.edtEngName.caption)) == 0 then
+		contMain.edtEngName.SetResultLabel("1","error","고객영문명을 입력하세요.","contMain")
+		Exit Sub	
+	end if
+
+	If Str_Chk(contMain.edtEngName.caption, "ENG_NAME") == False then		 
+		contMain.edtEngName.SetResultLabel("1","error","고객영문명은 영문만 입력 가능합니다.","contMain")
+		Exit Sub
+	Else
+		g_szEngName = contMain.edtEngName.caption
+		
+		contMain.edtEngName.SetResultLabel("0","complete","","contMain")
+	End If
+	
+	f_BtnEnableChk()
+End Sub
+
+'============================================================================
+Sub contMain_edtEmail_OnEditComplete()
+	'contMain.edtEmail.SetResultLabel("0", "", "", "", 1)	
+	'contMain.edtEmail.SetUseResultLabel(true, 1)			
+	
+	Dim sParam, sTail, sTailTemp, sTailDetail
+	sParam  = ""
+	sTail   = ""
+	sTailTemp = ""
+	sTailDetail = ""
+
+	sParam = contMain.edtEmail.caption
+	If LEN(TRIM(sParam)) > 0 Then 
+		sTail = split(sParam, "@")
+		
+		'2021.05.01. 김유경. 개선사항 추가
+		If Str_Chk_Email(contMain.edtEmail.caption, "EMAIL") == False then		 
+			contMain.edtEmail.SetResultLabel("1","error","이메일을 확인하세요.","contMain")
+			'contMain.edtEmail.caption = ""
+			Exit Sub
+		End If
+				
+		If ubound(sTail) > 0 Then 
+			
+'			'2021.05.01. 김유경. 개선사항 추가
+'			If Str_Chk_Email(contMain.edtEmail.caption, "EMAIL") == False then		 
+'				contMain.edtEmail.SetResultLabel("1","error","이메일을 확인하세요.","contMain")
+'				Exit Sub
+'			End If
+	
+			sTailTemp = sTail[1]
+			sTailDetail = split(sTailTemp, ".")
+			
+			If sTailDetail[0] == "yahoo" or sTailDetail[0] == "hotmail" Then
+				contMain.edtEmail.SetUseResultLabel(true, 3)
+				contMain.edtEmail.SetResultLabel("1", "error","야후코리아(yahoo.co.kr), 핫메일(hotmail.com)\n계정은 사용이 불가합니다.","contMain", 3)	'v0007
+				contMain.edtEmail.caption = ""
+				Exit Sub
+			Else 
+				g_szEmail = contMain.edtEmail.caption
+				
+				contMain.edtEmail.SetResultLabel("0","complete","","contMain")
+			End If
+		End If
+	else
+		contMain.edtEmail.SetResultLabel("1","error","이메일을 입력하세요.","contMain")
+		Exit Sub	
+	End If
+	
+	f_BtnEnableChk()
+End Sub
+
+'============================================================================
+Sub contMain_rdoInform_OnClick(nIndex)
+	'거래내역 통보처 자택 또는 직장 선택시 등록 되어있는지 확인
+	If nIndex == 2 Or nIndex == 3 Then
+		If nIndex == 2 Then
+			If g_szOwhsRegnZip == "" Or g_szOwhsRegnZip == null Then
+				g_bInformOk = false
+				contMain.rdoInform.SetResultLabel("1","error","등록된 자택 정보가 없습니다.","contMain")
+				Exit Sub
+			Else
+				g_bInformOk = true
+				contMain.rdoInform.SetResultLabel("0","complete","","contMain")
+			End If
+		End If
+		
+		If nIndex == 3 Then
+			If g_szCoRegnZip == "" Or g_szCoRegnZip == null Then
+				g_bInformOk = false
+				contMain.rdoInform.SetResultLabel("1","error","등록된 직장 정보가 없습니다.","contMain")
+				Exit Sub
+			Else
+				g_bInformOk = true
+				contMain.rdoInform.SetResultLabel("0","complete","","contMain")
+			End If
+		End If
+	Else
+		g_bInformOk = true
+		contMain.rdoInform.SetResultLabel("0","complete","","contMain")
+	End If
+	
+	f_BtnEnableChk()
+End Sub
+
+'============================================================================
+Sub contMain_lblChangeAddr_OnClick()
+	'주소검색 팝업 오픈
+	If contMain.rdoAddrType.currentindex == "-1" or contMain.rdoAddrType.currentindex == -1 Then
+		Form.ShowAlert("알림", "주소지 정보 구분을 선택해주세요.")
+		Exit Sub
+	End If
+	
+	Form.OpenPopupAnimation("mbbdm85150_p1", "pass", "", "2")
+End Sub
+
+'============================================================================
+Sub contMain_rdoAddrType_OnClick(nIndex)
+	contMain.lblAddr.caption = ""
+	contMain.lblAddrDtl.caption = ""
+	
+	If nIndex == 0 Then
+		contMain.lblAddr.caption = g_szOwhsPost
+		contMain.lblAddrDtl.caption = g_szOwhsDtl
+	Else
+		contMain.lblAddr.caption = g_szCoPost
+		contMain.lblAddrDtl.caption = g_szCoDtl
+	End If
+	
+	f_BtnEnableChk()
+End Sub
+
+'============================================================================
+Sub BtnNext_OnClick()
+	'금융상품가입일련번호 채번
+	DATAMANAGER.RequestTranData( "obsap_acif_999a" )
+End Sub
+
+'============================================================================
+Sub imgBack_OnClick()
+'	Form.OpenNextPopup("mbact73000_s7", "StepBack")
+	Form.MsgBox("알림", "이용 등록을 중단하시겠습니까?\n(중단하시는 경우 처음부터 다시 진행 하셔야 합니다.)", "Exit", 1)
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.MsgBox("알림", "이용 등록을 중단하시겠습니까?\n(중단하시는 경우 처음부터 다시 진행 하셔야 합니다.)", "Exit", 1)
+End Sub
+
+'============================================================================
+Function Str_Chk(str, sGubn)
+	'한글 입력 체크
+	dim i							'루프용 
+	dim chk_n						'숫자 체크
+	dim chk_c						'영문 체크
+	dim chk_t						'특수 체크
+    
+	chk_n = 0 '숫자
+	chk_c = 0 '영어
+	chk_t = 0 '특수문자
+    
+	For i = 1 to Len(str)
+		nAscii = Asc(Mid(str, i, 1))
+		
+	    '48~57 : 0~9
+	    '65~90 : A~Z
+	    '97~122: a~z
+		If nAscii >=48 and nAscii <=57 Then 
+		    chk_n = 1 	
+		Elseif   (nAscii >=65 and nAscii <=90) or ( nAscii >=97 and nAscii <=122) Then
+		    chk_c = 1 
+		Elseif   (nAscii >=33 and nAscii <=47) or ( nAscii >=58 and nAscii <=64)  or ( nAscii >=91 and nAscii <=96)  or ( nAscii >=123 and nAscii <=126) Then
+		    chk_t = 1 
+		Else 
+		   If nAscii <> 32 Then 'space	
+			   return False
+		   End If
+		End if 		    
+	Next
+    
+	If sGubn == "ENG_NAME" then
+		If chk_n == 1 Then  
+			return False
+		End if
+	End if
+	
+	return True
+End Function 
+
+'============================================================================
+' 이메일-한글체크 v0006
+'============================================================================
+Function Str_Chk_Email(str, sGubn)
+	dim i				'루프용 
+	dim chk_n, chk_c, chk_t
+	Dim sTail, sTailTemp, sTailDetail
+	sTail = ""
+	sTailTemp = ""
+	sTailDetail = ""
+    
+	chk_n = 0 '숫자
+	chk_c = 0 '영어
+	chk_t = 0 '특수문자
+    
+	For i = 1 to Len(str)
+		nAscii = Asc(Mid(str, i, 1))
+		
+	    '48~57 : 0~9
+	    '65~90 : A~Z
+	    '97~122: a~z
+		If nAscii >=48 and nAscii <=57 Then 
+		    chk_n = 1 	
+		Elseif   (nAscii >=65 and nAscii <=90) or ( nAscii >=97 and nAscii <=122) Then
+		    chk_c = 1 
+		Elseif   (nAscii >=33 and nAscii <=47) or ( nAscii >=58 and nAscii <=64)  or ( nAscii >=91 and nAscii <=96)  or ( nAscii >=123 and nAscii <=126) Then
+		    chk_t = 1 
+		Else 
+		   If nAscii <> 32 Then 'space	
+			   return False
+		   End If
+		End if 		    
+	Next
+	
+	'2023-02-08 양현정 추가 
+	'@ 포함여부 체크
+	if Instr(str, "@") == 0 then
+		return False
+	end if
+	
+	sTail = split(str, "@")
+	If ubound(sTail) > 0 Then 
+		sTailTemp = sTail[1]
+		
+		'@ 뒤에 . 포함여부 체크, @ 바로 뒤에 . 이 와도 오류처리함
+		if InStr(sTailTemp, ".") == 0 or InStr(sTailTemp, ".") == 1 then
+			return False		
+		end if	
+		
+		sTailDetail = split(sTailTemp, ".")
+		
+		If ubound(sTailDetail) == 0 Then 
+			'. 전에 문자가 없어도 오류처리함
+			return False
+		end if
+		
+		'. 뒤에 문자가 없어도 오류처리함
+		if len(trim(sTailDetail[1])) == 0 then
+			return False
+		end if
+	end if
+	
+	return True
+End Function
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_acct_300r" trcode="obaci_acct_300r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obsap_acif_999a" trcode="obsap_acif_999a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_acct_300r" title="카카오뱅크 후속절차 대상내역 ?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="92" _ulen="72" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="163" _ulen="123" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+VALD_YN^유효여부^1^0^0^0^0^0^0
+ACNT_OPNG_DATE^계좌개설일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="1174" _ulen="868" >
+
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+UI_OWHS_REGN_ZIP^UI자택지역우편번호^3^0^0^0^0^0^0
+UI_OWHS_DTL_ZIP^UI자택상세우편번호^3^0^0^0^0^0^0
+UI_OWHS_POST^UI자택우편주소^100^0^0^0^0^0^0
+UI_OWHS_DTAD^UI자택상세주소^100^0^0^0^0^0^0
+UI_CO_REGN_ZIP^UI회사지역우편번호^3^0^0^0^0^0^0
+UI_CO_DTL_ZIP^UI회사상세우편번호^3^0^0^0^0^0^0
+UI_CO_POST^UI회사우편주소^100^0^0^0^0^0^0
+UI_CO_DTAD^UI회사상세주소^100^0^0^0^0^0^0
+TRGT_YN^대상여부^1^0^0^0^0^0^0
+ELFN_ID_EXST_YN^전자금융ID존재여부^1^0^0^0^0^0^0
+UI_OWHS_NW_ADDR_USE_YN^UI자택신주소사용여부^1^0^0^0^0^0^0
+UI_OWHS_BLDN_MNNO^UI자택건물관리번호^25^0^0^0^0^0^0
+UI_CO_NW_ADDR_USE_YN^UI회사신주소사용여부^1^0^0^0^0^0^0
+UI_CO_BLDN_MNNO^UI회사건물관리번호^25^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obsap_acif_999a" title="금융상품가입일련번호 채번" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="54" _ulen="42" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="68" _ulen="48" >
+
+FNPR_JOIN_SRNO^금융상품가입일련번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

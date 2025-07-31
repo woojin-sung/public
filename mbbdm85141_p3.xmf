@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85141" scrname="취약금융소비자 확인사항" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container" ly_vert="0,0,375,594,1" scroll_ly_vert="0,0,375,594,1" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fontsize="3" fontstyle="01" caption="금융소비자 불이익 관련 우선 설명내용" ly_vert="10,22,364,22,1" />
+				<LABEL name="Label1" caption="금융투자상품에 취약한 소비자(ex. 고령투자자, 미성년자, 인지능력에 장애가 있는 투자자, 문맹자, 금융투자상품 투자 무경험자 등)는 상품의 주요 특성에 대한 설명에 앞서 금융소비자의 불이익 사항 및 투자위험 등에 대해 다른 정보보다 「우선」하여 설명 들으실 수 있습니다." valign="0" multiline="1" ly_vert="14,68,345,111,1" />
+				<LABEL name="Label2" fontsize="2" fontstyle="01" caption="금융소비자의 불이익 관련 사항" valign="0" ly_vert="16,196,331,32,1" />
+				<IMAGE name="Image0" autosize="1" imgpath="icon_dot.png" ly_vert="25,223,18,18,1" />
+				<LABEL name="Label3" caption="금융투자상품은 예금자보호법에 따라 보호되지 않습니다." valign="0" multiline="1" ly_vert="37,225,318,38,1" />
+				<LABEL name="Label4" caption="금융투자상품은 운용실적에 따라 원금손실이 발생할 수 있으며 손실 가능범위는 각 상품별로 다를 수 있으니 상품가입시 판매직원의 설명을 반드시 듣고 확인하시기 바랍니다." valign="0" multiline="1" ly_vert="37,263,318,76,1" />
+				<IMAGE name="Image1" autosize="1" imgpath="icon_dot.png" ly_vert="25,261,18,18,1" />
+				<LABEL name="Label5" caption="과거의 운용실적이 미래의 수익을 보장하지 않으며, 금융투자상품 투자 시 결과와 책임은 투자자 본인에게 귀속됩니다." valign="0" multiline="1" ly_vert="37,335,318,57,1" />
+				<IMAGE name="Image2" autosize="1" imgpath="icon_dot.png" ly_vert="25,333,18,18,1" />
+				<LABEL name="Label6" caption="중도환매 또는 해지 시 환매수수료가 발생할 수 있으며, 특히 세제관련 상품의 경우에는 별도의 추징세가 부과될 수 있습니다." valign="0" multiline="1" ly_vert="37,390,318,57,1" />
+				<IMAGE name="Image3" autosize="1" imgpath="icon_dot.png" ly_vert="25,389,18,18,1" />
+				<IMAGE name="Image4" autosize="1" imgpath="icon_dot.png" ly_vert="25,445,18,18,1" />
+				<LABEL name="Label7" caption="가입을 결정하시기 전에 규약, 계약서 또는 (간이)투자설명서 등을 통해 투자대상, 투자위험, 환매방법 및 보수 등에 대하여 반드시 확인하시기 바랍니다." valign="0" multiline="1" ly_vert="37,446,318,76,1" />
+				<CHKBUTTON name="ChkButton0" fontstyle="01" chkcaption="상기 설명내용을 이해하고 확인합니다." unchkcaption="상기 설명내용을 이해하고 확인합니다." ly_vert="40,553,302,32,1" />
+				<IMAGE name="ImgClose" imgpath="icon_close.png" ly_vert="336,19,24,24,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="BtnCnfr" caption="확인" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1804" _ulen="1780" >
+'--===========================================================================
+' 작성 : 2021.02.17. 장원혁
+'--===========================================================================
+
+Dim szTheme
+
+'============================================================================
+Sub Form_OnFormInit()
+    BtnCnfr.enable = False
+'    BtnCnfr.btnimage = "btn_20.9"
+'    BtnCnfr.fgcolor = "269"
+    
+    
+    szTheme = Form.GetEnvData("common.theme")
+    If szTheme == "white" Then
+        BtnCnfr.btnimage = "btn_21.9"
+    Else
+        BtnCnfr.btnimage = "btn_27.9"
+    End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed() '안드로이드전용
+    Form.CloseForm()
+End Sub
+
+'============================================================================
+
+
+
+'============================================================================
+Sub Container_ImgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub BtnCnfr_OnClick()
+    Form.SendReturnToParent("MBBDM85141_P3" , "ok")
+    Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container_ChkButton0_OnChange(sCheckState)
+	If sCheckState == 0 Or sCheckState == "0" Then
+        BtnCnfr.enable = False
+'        BtnCnfr.btnimage = "btn_20.9"
+'        BtnCnfr.fgcolor = "269"
+			
+		szTheme = Form.GetEnvData("common.theme")
+	    If szTheme == "white" Then
+			BtnCnfr.btnimage = "btn_21.9"
+	    Else
+			BtnCnfr.btnimage = "btn_27.9"
+	    End If
+	ElseIf sCheckState == 1 Or sCheckState == "1" Then
+        
+        BtnCnfr.btnimage = "btn_20.9"
+        BtnCnfr.fgcolor = "273"	
+		
+		BtnCnfr.enable = True
+	End If
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

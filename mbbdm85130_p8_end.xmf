@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="목표시장 불일치 안내" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMbg" imgpath="popup_bg_common.9" ly_vert="32,107,312,333,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="목표시장 비교 결과 안내" halign="1" ly_vert="52,141,275,32,1" />
+		<IMAGE name="imgClose" imgpath="icon_main_13" ly_vert="307,122,21,21,1" />
+		<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="2" rowcount="4" outline="0000" designorder="1" ly_vert="33,250,310,60,1" >
+			<COL_INFO ly_vert_width="145,165" />
+			<ROW_INFO ly_vert_height="10,20,20,10" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="0" line="0,0" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,1,1" line="0,0" caption="해당 상품의 판매 목표시장과" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="0" line="0,0" caption="합니다." fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,3,1,3" line="0,0" fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="imgState" autosize="1" imgpath="icon_error" ly_vert="153,180,70,70,1" />
+		<BUTTON name="btnNoNext" caption="계속 진행하기
+(목표시장 외)" fontsize="2" btnimage="btn_26.9" ly_vert="189,480,156,60,1" />
+		<BUTTON name="btnNoCancel" caption="중단하기" fontsize="2" btnimage="btn_25.9" ly_vert="32,480,156,60,1" />
+		<LABEL name="lblState" fontstyle="01" mask="1,0,“,”,1,,0,1,1,0,0" halign="2" ly_vert="126,280,65,20,1" />
+		<CONTAINER name="contNo" scroll_pos="0,0" ly_vert="33,310,310,100,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="lblInfoNo" fgcolor="006:213049051" fontsize="-1" caption="판매 목표시장 불일치 고객님의 경우
+                      로 투자가 가능합니다.
+다만, 이 경우 투자에 더욱 신중히 판단하시기 바랍니다." valign="0" multiline="1" ly_vert="10,0,285,76,1" />
+				<LABEL name="lblbInfoNo1" fgcolor="006:213049051" fontsize="-1" fontstyle="11" caption="“목표시장 외”" mask="1,0,,,1,,0,1,1,0,0" ly_vert="10,14,100,19,1" />
+				<CHKBUTTON name="ChkAgree" fontsize="-1" chkcaption="위 안내사항을 확인하였습니다." unchkcaption="위 안내사항을 확인하였습니다." ly_vert="45,65,220,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="lblInfo" fgcolor="096:102102102" fontsize="-3" fontstyle="01" caption="※ 목표시장(target market)이란?
+금융투자회사가 제조·판매하는 상품의 특성, 위험도 등을 종합적으로 고려하여 판매에 적합한 대상 고객범위를 설정한 기준" valign="0" multiline="1" ly_vert="42,310,285,76,1" />
+		<BUTTON name="btnNext" caption="확인" fontsize="2" btnimage="btn_22.9" ly_vert="32,380,312,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3965" _ulen="3763" >
+'============================================================================
+' 2021-07-14 KSJ : 목표시장 불일치 안내 팝업
+'============================================================================
+
+'전역변수 설정
+Dim g_szRet				' Return 값
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+' f_SetDialog() : 목표시장 일치여부에 따른 팝업 셋팅
+'============================================================================
+Function f_SetDialog(szOpenData)
+	'(Y.목표시장부적합 N.정상)
+	if szOpenData == "N" Then
+		imgState.imgpath = "icon_ok.png"
+		lblState.caption = "일치"
+		lblState.fgcolor = "2"
+		
+		contNo.visible = False
+		btnNoCancel.visible = False
+		btnNoNext.visible = False
+		btnNext.visible = True
+	Else
+		imgState.imgpath = "icon_error.png"	
+		lblState.caption = "불일치"
+		lblState.fgcolor = "1"
+		
+		contNo.visible = True
+		btnNoCancel.visible = True
+		btnNoNext.visible = True
+		btnNext.visible = False
+		
+		imgMbg.height = 433
+		lblInfo.top = 410 
+	End If
+End Function
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+'Form_OnFormInit()  
+'============================================================================
+Sub Form_OnFormInit()
+	g_szRet = "no"
+	
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	If szOpenData ~= null and szOpenData ~= "" Then
+		f_SetDialog(szOpenData)
+	End If
+	
+	btnNoCancel.fgcolor = 269
+	imgBg.imgpath = "alpha128.png"
+End Sub
+'============================================================================
+'Form_OnFormBackKeyPressed() : 닫기 
+'============================================================================
+Sub Form_OnFormBackKeyPressed() '안드로이드전용
+	Form.CloseForm()
+End Sub
+'============================================================================
+' imgBg_OnClick() : 닫기
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' imgClose_OnClick() : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnNoCancel_OnClick() : 목표시장 불일치 > 중단하기
+'============================================================================
+Sub btnNoCancel_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnNoNext_OnClick() : 목표시장 불일치 > 진행하기
+'============================================================================
+Sub btnNoNext_OnClick()
+	If contNo.ChkAgree.checkstate == 0 or contNo.ChkAgree.checkstate == "0" Then
+		Form.ShowAlert("알림", "안내사항을 확인해주세요.")
+		Exit Sub
+	End If 
+	g_szRet = "ok"
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnNext_OnClick() : 목표시장 일치 
+'============================================================================
+Sub btnNext_OnClick()
+	g_szRet = "ok"
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+' Form_OnFormClose()
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("MBBDM85130_P8_end" , g_szRet)
+End Sub
+
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

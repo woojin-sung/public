@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85135" scrname="CFD계좌 계약서 승인" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblSide0" border="1" ly_vert="8,57,360,497,1" />
+		<LABEL name="lblSide1" border="1" ly_vert="20,307,340,163,1" />
+		<EDIT name="EditPW" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" eventtr="obaci_acct_263r" ly_vert="275,9,92,39,1" />
+		<LABEL name="LabelInfoSub0" caption="비대면 계좌개설로 CFD계좌를 개설하신 경우 장외파생상품거래를 위한 계약서를 승인하는  화면입니다." valign="0" multiline="1" ly_vert="37,327,318,57,1" />
+		<IMAGE name="ImageInfo0" autosize="1" imgpath="icon_dot.png" ly_vert="25,325,18,18,1" />
+		<LABEL name="LabelInfoSub1" caption="당일 15:30 이전 승인 등록 된 계좌는 익영업일부터 거래가 가능하며, 이후 승인 등록된 계좌는 2영업일 뒤부터 거래가 가능합니다." valign="0" multiline="1" ly_vert="37,384,318,76,1" />
+		<IMAGE name="ImageInfo1" autosize="1" imgpath="icon_dot.png" ly_vert="25,382,18,18,1" />
+		<BUTTON name="btnOK" caption="등록" btnimage="btn_21.9" ly_vert="102,490,172,44,1" />
+		<TABLE name="tblRegisterYN" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="18,77,340,40,1" >
+			<COL_INFO ly_vert_width="140,200" />
+			<ROW_INFO ly_vert_height="40" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="096:102102102" bgcolor="066:238239240" caption="등록 현황" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="tblDate" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="18,122,340,40,1" >
+			<COL_INFO ly_vert_width="140,200" />
+			<ROW_INFO ly_vert_height="40" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="096:102102102" bgcolor="066:238239240" caption="등록 일자" impidxs="" />
+				<CELL cell_ly="1,0,1,0" import="1,1,0" mask="1,0,,,1,####-##-##,0,1,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnBasicAgree" caption="      장외파생상품거래 기본계약서
+      (위험고지포함)" fgcolor="004:000000000" btnimage="alpha" halign="0" ly_vert="20,182,240,46,1" />
+		<BUTTON name="btnCollateralAgree" caption="      장외파생상품거래 담보계약서" fgcolor="004:000000000" btnimage="alpha" halign="0" ly_vert="20,241,240,46,1" />
+		<BUTTON name="btnBasicInfo" caption="내용보기" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="276,186,82,39,1" />
+		<BUTTON name="btnCollateralInfo" caption="내용보기" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="276,245,82,39,1" />
+		<ACCOUNT name="Account0" bgcolor="052:255255255" itemcodetype="136,137" etcfunctions="" accpwdctl="EditPW" ly_vert="8,9,263,38,1" />
+		<CHKBUTTON name="chkBasicAgree" enable="0" ly_vert="20,182,22,46,1" />
+		<CHKBUTTON name="chkCollateralAgree" enable="0" ly_vert="20,241,22,46,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11920" _ulen="10796" >
+'============================================================================
+' 작성 : 2021.09.16 HSZ
+' CFD 메뉴 오픈용 (OPEN POPUP)
+'============================================================================
+
+'전역변수 설정
+Dim g_plain_rm				' v0003 메모리평문적용여부
+Dim g_szTheme					' 테마설정
+Dim g_szAgreeKind				' 약관팝업 종류
+
+Dim g_BDM_CFD_BasicAgree		' 장외파생상품거래 기본계약서
+Dim g_BDM_CFD_CollateralAgree	' 장외파생상품거래 담보계약서
+
+Dim g_sCertLogin 				' 로그인 시 인증유형
+Dim g_szCertUserType
+Dim g_prosyn					' 등록여부
+'g_sCertLogin에서 사용 (인증유형)
+DEF_PIN					= "0"	'간편인증
+DEF_BIO					= "1"	'바이오인증
+DEF_CERT					= "2"	'인증서로그인
+DEF_ID					= "3"	'ID로그인
+
+'===========================================================================
+'Y/N 설정 'Y/N 설정에 따른 Chk설정
+'============================================================================
+Function User_Chk_Next(trgt, chk)
+	'Y/N 설정
+	if trgt == "CFD1" then
+		g_BDM_CFD_BasicAgree = chk
+	elseif trgt == "CFD2" then
+		g_BDM_CFD_CollateralAgree = chk
+	end if
+	
+	'Y/N 설정에 따른 Chk설정
+	if trgt == "CFD1" then
+		if chk == "Y" then
+			chkBasicAgree.enable = true 
+			chkBasicAgree.chksilence = "1"
+		else
+			chkBasicAgree.chksilence = "0"
+		end if
+
+	elseif trgt == "CFD2" then
+		if chk == "Y" then
+			chkCollateralAgree.enable = true
+			chkCollateralAgree.chksilence = "1"
+		else
+			chkCollateralAgree.chksilence = "0"
+		end if
+	end if
+	
+	'등록버튼 활성화/비활성화
+	User_Btn_NextStep()
+End Function
+'===========================================================================
+'등록버튼 활성화/비활성화
+'===========================================================================
+Function User_Btn_NextStep()
+
+	if g_BDM_CFD_BasicAgree == "Y" and g_BDM_CFD_CollateralAgree == "Y"then
+		if g_prosyn = "Y" then
+			exit Function
+		end if
+		btnOK.enable = true
+		btnOK.btnimage = "btn_20.9"
+		btnOK.fgcolor = "273"
+	else 
+		btnOK.enable = false
+		If g_szTheme = "black" Then
+			btnOK.btnimage = "btn_27.9"
+		Else 
+			btnOK.btnimage = "btn_21.9"
+		End If
+		btnOK.fgcolor = "269"
+	end if	
+end Function
+'===========================================================================
+' 계좌비밀번호 입력체크함수
+'===========================================================================
+Function f_GetPWChk()
+	Dim szACNT_PWD 
+	szACNT_PWD = Form.GetCtlProp( "EditPW", "caption" )
+	
+	if szACNT_PWD == null or szACNT_PWD == "" then
+		Form.MsgBox( "알림", "비밀번호를 입력해주세요.", "", 6 )	
+		return true
+	end if
+	
+	return false
+End Function	
+'===========================================================================
+' 계좌번호 입력체크함수
+'===========================================================================
+Function f_GetAcntChk()
+	Dim szACNT
+	szACNT = Account0.caption
+	if szACNT == null or szACNT == "" then
+		Form.MsgBox( "알림", "계좌번호를 입력해주세요.", "", 6 )	
+		return true
+	end if
+	
+	return false
+End Function	
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInit()
+	'v0003 메모리평문적용여부(0:미적용 / 1:적용)
+	g_plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+
+	'테마구분 white/black
+	g_szTheme = Form.GetEnvData("common.theme")
+	
+	'로그인 인증방식
+	g_sCertLogin = Form.GetSharedData( "MBBDM85134_LOGIN", false)
+	
+    '다음버튼 비활성화
+    btnOK.enable = false
+    If g_szTheme = "black" Then
+        btnOK.btnimage = "btn_27.9"
+    Else 
+        btnOK.btnimage = "btn_21.9"
+    End If
+    btnOK.fgcolor = "269"
+
+    g_szAgreeKind = ""
+    
+    g_szCertUserType = Form.GetSharedData("&CERT_USE_TYPE", 0 )
+    
+End Sub
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'약관목록
+	if sKeyName == "mbbdm85134_p1" then
+		if g_szAgreeKind == "CFD1" then
+			if sRet == "ok_CFD1" then				' 장외파생상품거래 기본계약서	
+				g_BDM_CFD_BasicAgree = "Y"
+				User_Chk_Next("CFD1", g_BDM_CFD_BasicAgree)	
+			else
+				g_BDM_CFD_BasicAgree = "N"
+				User_Chk_Next("CFD1", g_BDM_CFD_BasicAgree)	
+			end if
+		else	
+			if sRet == "ok_CFD2" then			' 장외파생상품거래 담보계약서
+				g_BDM_CFD_CollateralAgree = "Y"
+				User_Chk_Next("CFD2", g_BDM_CFD_CollateralAgree)
+			else
+				g_BDM_CFD_CollateralAgree = "N"
+				User_Chk_Next("CFD2", g_BDM_CFD_CollateralAgree)
+			end if
+		end if
+	end if
+	
+	'공인인증서, 바이오인증
+	If sKeyName == "mhetc90060_p5" Then
+		If Left(Trim(sRet), 2) == "ok" Then
+			DATAMANAGER.RequestTranData("obaci_acct_262a")
+		ElseIf sRet == "cancel" Then
+			g_sBioCertYn = "N"			
+			Form.ShowAlert("오류", "인증에 실패하였습니다.")
+		End If
+	End If
+	
+	'간편번호 인증
+	If sKeyName == "mhetc90060_px" Then
+		If sRet == "ok" Then
+			DATAMANAGER.RequestTranData("obaci_acct_262a")
+		ElseIf sRet == "cancel" Then
+			g_sSpinCertYn = "N"
+			Form.ShowAlert("알림", "인증에 실패하였습니다.")
+		End If
+	End If	
+
+End Sub
+'============================================================================
+' 장외파생상품거래 기본계약서(위험고지 포함)
+'============================================================================
+Sub btnBasicAgree_OnClick()
+	'약관
+	g_szAgreeKind = "CFD1"
+	Form.OpenPopup("mbbdm85134_p1", "CFD1", "")
+End Sub
+'============================================================================
+Sub btnBasicInfo_OnClick()
+	'약관
+	g_szAgreeKind = "CFD1"
+	Form.OpenPopup("mbbdm85134_p1", "CFD1", "")
+End Sub
+'============================================================================
+' 장외파생상품 담보계약서
+'============================================================================
+'============================================================================
+Sub btnCollateralAgree_OnClick()
+	'약관
+	g_szAgreeKind = "CFD2"
+	Form.OpenPopup("mbbdm85134_p1", "CFD2", "")
+End Sub
+'============================================================================
+Sub btnCollateralInfo_OnClick()
+	'약관
+	g_szAgreeKind = "CFD2"
+	Form.OpenPopup("mbbdm85134_p1", "CFD2", "")
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	 '계좌비밀번호,계좌번호 입력체크함수
+	if f_GetPWChk() or f_GetAcntChk() then
+		Exit Sub
+	end if
+
+	if chkBasicAgree.checkstate = "0" or chkCollateralAgree.checkstate = "0" then
+		Form.ShowAlert("알림", "계약서 체크 후 등록 가능합니다.")
+		Exit Sub
+	end if
+	
+	call CertType()
+	
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim szACNT_PWD 
+	'v0003 
+	if g_plain_rm == "1" then  'MTS메모리평문 적용상태일때
+	    szACNT_PWD = EditPW.caption
+	else  'MTS메모리평문 미적용상태일때
+	    szACNT_PWD = Form.GetEncData(EditPW.caption)
+	end if
+	
+	g_sAcc = Account0.Caption
+	
+    'CFD 계약 승인서명 조회
+    if szTranID == "obaci_acct_263r" Then
+	    DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO"	, 0, left(g_sAcc,8)	)	'계좌번호
+	    DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ASNO"	, 0, mid(g_sAcc, 9, 2)	)	'계좌일련번호
+	    DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD", 0, szACNT_PWD	)  '암호화주민번호
+     
+    'CFD 계약 승인서명 처리
+    elseif szTranID == "obaci_acct_262a" Then
+	    DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO"	, 0, left(g_sAcc,8)	)	'계좌번호
+	    DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ASNO"	, 0, mid(g_sAcc, 9, 2)	)	'계좌일련번호
+	    DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD"	, 0, szACNT_PWD	)  '암호화주민번호
+	    DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CFD_BASC_CNDC_SGNT_YN"	, 0, g_BDM_CFD_BasicAgree	)  'CFD기본계약서서명여부
+	    DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CFD_MORG_CNDC_SGNT_YN"	, 0, g_BDM_CFD_CollateralAgree	)  'CFD담보계약서서명여부
+    end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+    '오류메시지 설정
+    strSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+    if Trim(strSubMsg) ~= null And Trim(strSubMsg) ~= "" Then
+        strMsg = szErrMsg.."("..Trim(strSubMsg)..")"
+    Else
+        strMsg = szErrMsg
+    End If
+
+    'CFD 계약 승인서명 처리
+    If szTranID = "obaci_acct_262a" or szTranID == "obaci_acct_263r" Then
+        Form.ShowAlert("오류", strMsg)
+    End If
+End Sub
+
+'============================================================================
+Sub chkBasicAgree_OnChange(sCheckState)
+	if Cint(sCheckState) = 0 then
+		chkBasicAgree.enable = false
+	end if
+End Sub
+
+'============================================================================
+Sub chkCollateralAgree_OnChange(sCheckState)
+	if Cint(sCheckState) = 0 then
+		chkCollateralAgree.enable = false
+	end if	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+    'CFD 계약 승인서명 조회
+    if szTranID == "obaci_acct_263r" Then
+	    g_prosyn = DATAMANAGER.GetDataValue(0, "obaci_acct_263r", "OutBlock1", "PROS_YN" , 0)
+	    if g_prosyn = "Y" then
+		    tblRegisterYN.SetCellString(0, 1, "등록")
+		    btnOK.enable = false
+		elseif g_prosyn = "N" then
+		    tblRegisterYN.SetCellString(0, 1, "미등록")
+		end if
+	elseif szTranID == "obaci_acct_262a" then
+		Form.MsgBox("알림", "정상 등록되었습니다.", "cfd_rgstr", 0)
+	end if
+	
+End Sub
+
+
+'============================================================================
+Sub EditPW_OnEditComplete()
+	DATAMANAGER.RequestTranData("obaci_acct_263r")
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub CertType()
+	if g_sCertLogin = DEF_CERT or g_sCertLogin = DEF_ID then '인증서로그인, ID로그인
+'		Form.OpenFramePopup
+		Call BioCertCall()
+	elseif g_sCertLogin = DEF_BIO then '바이오인증로그인
+		Call BioCertCall()
+     elseif g_szCertUserType = "5" then '사설인증
+		Call BioCertCall()
+	elseif g_sCertLogin = DEF_PIN then '간편인증로그인
+		Form.OpenPopup("mhetc90060_px", "", "")
+	else
+		Form.ShowAlert("오류", "재로그인 해주세요.")
+	end if
+
+End Sub
+'============================================================================
+Sub BioCertCall()
+	g_sBioTrData = "CFD계좌계약서승인\00\0\0" 
+	sBIO_TR_CODE = "1"                                       '바이오거래유형코드 0: 인증 1: 서명 
+	sATHN_USAG_CLS_CODE = "0"								' 서명데이터 생성여부
+	
+    sTRAN_CNTT = g_sBioTrData
+    
+    if g_szCertUserType = "4" then
+	    sData = "BCHAIN_trType★"& sBIO_TR_CODE  &"★"&  sTRAN_CNTT &"★"& sATHN_USAG_CLS_CODE 
+    elseif g_szCertUserType = "0" then
+	    sData = ""
+    elseif g_szCertUserType = "5" then
+	    sData = "ATON_trType★"&  sTRAN_CNTT
+    else
+	    sData = "BIO_trType★"& sBIO_TR_CODE  &"★"&  sTRAN_CNTT &"★"& sATHN_USAG_CLS_CODE 
+    end if
+    
+	Form.OpenFramePopup("mhetc90060_p5" , sData , "")
+End Sub 
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName = "cfd_rgstr" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_acct_262a" trcode="obaci_acct_262a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_263r" trcode="obaci_acct_263r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_acct_262a" title="계좌_CFD계약 승인서명 처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="258" _ulen="190" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+CFD_BASC_CNDC_SGNT_YN^CFD기본계약서서명여부^1^0^0^0^0^0^0
+CFD_MORG_CNDC_SGNT_YN^CFD담보계약서서명여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_263r" title="계좌_CFD계약 승인서명 내역" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="122" _ulen="90" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="64" >
+
+AGRM_DATE^동의일자^8^0^0^0^0^0^0
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

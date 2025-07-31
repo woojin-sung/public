@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="73000" scrname="카카오후속처리_ID등록완료" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="check_red.png" ly_vert="155,90,66,60,1" />
+		<IMAGE name="Image1" imgpath="img_bgbox.9" ly_vert="20,220,335,45,1" />
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" caption="ID 등록이 완료되었습니다." halign="1" ly_vert="0,173,375,36,1" />
+		<BUTTON name="btnRegPIN" caption="간편비밀번호(PIN) 등록" bgcolor2="062:255255255" fontsize="2" fontstyle="01" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+		<TABLE name="tblID" insidelinecolor="102:255255255" colcount="2" rowcount="1" outline="0000" transmode="1" designorder="1" ly_vert="25,232,325,20,1" >
+			<COL_INFO ly_vert_width="162,163" />
+			<ROW_INFO ly_vert_height="20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="사용자 ID" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="Table1" insidelinecolor="102:255255255" colcount="1" rowcount="4" outline="0000" designorder="1" ly_vert="0,303,375,80,1" >
+			<COL_INFO ly_vert_width="375" />
+			<ROW_INFO ly_vert_height="20,20,20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="146:124124124" line="0,0" caption="별도의 (공동)인증서 발급 없이" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="146:124124124" line="0,0" caption="간편비밀번호(PIN) 등록 후" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="146:124124124" line="0,0" caption="안전하게 로그인 할 수 있습니다." impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="146:124124124" line="0,0" caption="(단, 금융결제원 연계앱 설치 필요)" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11293" _ulen="10075" >
+
+Dim g_szUserID
+Dim g_szAcno
+
+'Fido 관련
+Dim DEF_BIO_FINGER
+Dim DEF_BIO_PIN
+
+'g_sBIOAthnTchnCode에서 사용 (인증기술코드)
+DEF_BIO_FINGER		= "100"	'지문/얼굴
+DEF_BIO_PIN			= "116"	'PIN 
+
+Dim g_szOsType
+Dim g_szTermID
+Dim g_szDeviceModel
+Dim g_szBioEnable
+
+Dim tbl_001a(0)
+Dim tbl_002a(0)
+Dim tbl_008a(0)
+
+Dim tbl_011a(0)
+Dim tbl_013a(0)
+Dim tbl_015a(0)
+
+'============================================================================
+Sub Form_OnFormInit()
+	'안드로이드 뒤로가기 비활성화
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+	
+	Form.SetSharedData("&SCREEN_AUTH" , "99")	'바이오인증시 선처리를 타게되므로.. 무조건 비대면권한으로 수행해야함.
+	
+	g_szUserID = Form.GetOpenLinkData()
+	g_szAcno = Form.GetSharedData("BDM_KAKAO_ACNO"          , false )
+	
+	g_szOsType = Form.GetSharedData("&OS_TYPE", false )	'iOS("2") Android("1") 기타("9")
+	g_szTermID = Form.getKftcBioDeviceID()				'단말FID획득
+	g_szDeviceModel = Form.getDeviceModel()				'모델명
+	g_szBioEnable = Form.GetKftcBioDeviceEnbl()			'바이오인증 지원 여부 : 0.미지원 1.지원(지문가능) 2.지원(지문불가)
+	
+	If g_szUserID <> "" And g_szUserID <> null Then
+		tblID.SetCellString(0, 1, g_szUserID)
+		
+		Form.SetSharedData("KAKAO_USERID" , g_szUserID)
+	End If
+End Sub
+
+'============================================================================
+Sub Form_onTriggerEventBio(sEventName, sParam)
+'	Form.ShowAlert(sEventName, sParam)
+	Dim sRet, sErrorCode, sErrorMsg
+	sRet = Split(sParam, "★")
+	
+	if #sRet > 1 then
+		sErrorCode	= sRet[0]
+		sErrorMsg 	= sRet[1]	
+	else
+		exit sub
+	end if
+	
+	if #sRet > 2 then
+		sBioRet = Form.KBase64Decoding(sRet[2])
+		sBioItemRet = Split(sBioRet, "★")
+	end if	
+
+	'FIDO 1.0 등록응답
+	if sEventName == "90110_Bio_104" then 
+
+		'--- FIDO등록응답메시지 수신 ---
+		sRespond	= sBioItemRet[0]	'FIDO 등록응답 메시지
+		sOtpk	= sBioItemRet[1]	'일회용 공개키
+		sVersion	= sBioItemRet[2]	'앱버전	
+		
+		'FIDO 등록 요청 메시지전송
+		sTlmsTrcNo = tbl_001a("BIO_TLMS_TRC_NO") '전문추적번호
+		 
+		DATAMANAGER.SetDataValue(0, "obtss_fido_002a", "InBlock1", "ELFN_ID",                 0 ,	g_szUserID) 		'전자금융 ID
+		DATAMANAGER.SetDataValue(0, "obtss_fido_002a", "InBlock1", "APP_RSPN_CODE",           0 ,	"0000")			'연계앱응답코드
+		DATAMANAGER.SetDataValue(0, "obtss_fido_002a", "InBlock1", "BIO_TLMS_TRC_NO",         0 , 	sTlmsTrcNo) 		'전문추적번호
+		DATAMANAGER.SetDataValue(0, "obtss_fido_002a", "InBlock1", "UI_FIDO_MSG_SIZE1" ,      0 , 	Len(sRespond)) 	'FIDO 메시지사이즈1(등록응답메시지 길이)
+		DATAMANAGER.SetDataValue(0, "obtss_fido_002a", "InBlock1", "UI_FIDO_REG_RSPN_MSG",    0 , 	sRespond) 		'FIDO 등록응답 메시지
+		DATAMANAGER.SetDataValue(0, "obtss_fido_002a", "InBlock1", "UI_FIDO_MSG_SIZE2",       0 , 	Len(sOtpk))		'FIDO 메시지사이즈2(일회용공개키 길이)
+		DATAMANAGER.SetDataValue(0, "obtss_fido_002a", "InBlock1", "ONTM_OPBL_KEY_1024_MSG" , 0 , 	sOtpk)			'일회용 공개키 1024메시지
+		DATAMANAGER.RequestTranData("obtss_fido_002a")			
+		'FIDO 1.0 비식별호환번호 저장결과
+	
+	elseif sEventName == "90110_Bio_106" then
+		if sBioRet == "Success" then
+			DATAMANAGER.SetDataValue(0 ,"obcsb_fido_002a", "InBlock1", "PROS_CLS_CODE",  	0, "I")				'처리구분코드 I:등록 D:해지
+'			if Form.isIphoneX() == true then
+'				DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "ATHN_TCHN_CODE", 	0, DEF_BIO_FACE)
+'			else
+				DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "ATHN_TCHN_CODE", 	0, DEF_BIO_FINGER)
+'			end if
+			DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "TERM_ID", 		0, g_szTermID)			'단말ID
+			DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "TERM_OS_CODE" , 	0, g_szOsType)			'단말운영체제
+			DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "ELFN_ID", 		0, g_szUserID)			'전자금융ID
+			DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "ACNO",	 		0, g_szAcno)			'계좌번호
+			DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "TERM_MODL_NO",	0, g_szDeviceModel)		'모델명
+			DATAMANAGER.RequestTranData("obcsb_fido_002a")
+		else
+			'실패
+		end if
+
+	'FIDO 2.0 등록응답
+	elseif sEventName == "90110_Bio_2104" then
+		'sBioItemRet[0] 'certification 삼성패스 등록 시 반환
+		'sBioItemRet[1] '앱버전
+		
+		'등록결과 전송
+		DATAMANAGER.SetDataValue(0, "obtss_fido_012a", "InBlock1", "ELFN_ID" ,        0 , g_szUserID) 					'전자금융ID
+		DATAMANAGER.SetDataValue(0, "obtss_fido_012a", "InBlock1", "BIO_TLMS_TRC_NO" ,0 , tbl_011a("BIO_TLMS_TRC_NO"))	'바이오전문추적번호
+		DATAMANAGER.RequestTranData("obtss_fido_012a")		
+			
+	
+	'FIDO 1.0 디바이스ID 획득
+	elseif sEventName == "90110_Bio_402" then
+		'sBioItemRet[0]	'디바이스 아이디
+		'sBioItemRet[1]	'앱버전
+		'sBioItemRet[2]	'인증기술목록
+		'sBioItemRet[3]	'홍채이관대상유무
+		
+		g_szTermID = Form.getKftcBioDeviceID() 'Bio_402 이후에 값을 가져올 수 있다
+		g_sBioAppVersion = sBioItemRet[1]
+		sAuthTechList = sBioItemRet[2]
+		
+		while LEN(sAuthTechList) >= 3
+			sAuthTechCode = LEFT(sAuthTechList,3)
+			sAuthTechList = RIGHT(sAuthTechList, LEN(sAuthTechList)-3)
+	
+			if sAuthTechCode == DEF_BIO_FINGER then 'or sAuthTechCode == DEF_BIO_FACE then
+			
+			elseif sAuthTechCode == DEF_BIO_PIN then
+			
+			end if
+		wend
+			if g_sBIOAthnTchnCode == DEF_BIO_FINGER then 'or g_sBIOAthnTchnCode == DEF_BIO_FACE then		
+				DATAMANAGER.SetDataValue(0, "obtss_fido_001a", "InBlock1", "ELFN_ID" 		, 0, g_szUserID) 			'전자금융ID
+				DATAMANAGER.SetDataValue(0, "obtss_fido_001a", "InBlock1", "TERM_OS_CODE" 	, 0, g_szOsType) 			'단말운영체제 1:안드로이드 2:아이폰 9:기타
+				DATAMANAGER.SetDataValue(0, "obtss_fido_001a", "InBlock1", "TERM_ID" 		, 0, g_szTermID)			'단말ID
+				DATAMANAGER.SetDataValue(0, "obtss_fido_001a", "InBlock1", "SVCD" 			, 0, "001")		'서비스코드   001:고정
+				DATAMANAGER.SetDataValue(0, "obtss_fido_001a", "InBlock1", "ATHN_TCHN_CODE" 	, 0, g_sBIOAthnTchnCode)		'인증기술코드 100:고정
+				DATAMANAGER.RequestTranData("obtss_fido_001a")
+			else
+				DATAMANAGER.SetDataValue(0, "obtss_fido_011a", "InBlock1", "ELFN_ID" 		, 0, g_szUserID) 			'전자금융ID
+				DATAMANAGER.SetDataValue(0, "obtss_fido_011a", "InBlock1", "TERM_ID" 		, 0, g_szTermID)			'단말ID
+				DATAMANAGER.SetDataValue(0, "obtss_fido_011a", "InBlock1", "SVCD" 			, 0, "001")		'서비스코드   001:고정
+				DATAMANAGER.SetDataValue(0, "obtss_fido_011a", "InBlock1", "ATHN_TCHN_CODE" 	, 0, g_sBIOAthnTchnCode)	'인증기술코드 100:지문, 116:PIN, 115:손바닥
+				DATAMANAGER.SetDataValue(0, "obtss_fido_011a", "InBlock1", "NTAT_ISNC_CLCD" 	, 0, "0")				'0:FIDO등록 1:인증서발급
+				DATAMANAGER.RequestTranData("obtss_fido_011a")	
+			end if
+			
+			
+	elseif sEventName == "90110_Bio_1000" then '연계앱 오류 메시지
+		If Len(sErrorCode) > 0 Then
+'			Form.MsgBox( "알림",  sErrorMsg  , "", 0 )
+			Form.OpenPopup("mbbdm85303", sErrorMsg, "")
+		End If
+		
+	end if
+End Sub
+
+'============================================================================
+Sub btnRegPIN_OnClick()
+	Dim szBioAppYn
+	szBioAppYn = Form.getKftcBioInstalled()
+	If szBioAppYn == "1" Then
+		'FIDO 2.0 등록요청 (PIN)
+		'(Bio_401 -> Bio_402) -> obtss_fido_011a -> (Bio_2103 -> Bio_2104) -> obtss_fido_012a -> obcsb_fido_002a
+		g_sBIOAthnTchnCode = "116"
+		Form.requestKftcBio("Bio_401", "" , "90110") '단말정보 취득
+	Else
+		Form.setKftcBioInstalled()
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'FIDO 2.0 등록요청 수신
+	If szTranID == "obtss_fido_011a" then
+		OTSD_TR_UNIQ_NO			= DATAMANAGER.GetDataValue( 0, "obtss_fido_011a", "OutBlock1", "OTSD_TR_UNIQ_NO"	,0)
+		tbl_011a("BIO_TLMS_TRC_NO")	= DATAMANAGER.GetDataValue( 0, "obtss_fido_011a", "OutBlock1", "BIO_TLMS_TRC_NO"	,0)
+		FIDO_TLMS_TRC_NO			= DATAMANAGER.GetDataValue( 0, "obtss_fido_011a", "OutBlock1", "FIDO_TLMS_TRC_NO"	,0)
+		
+		sParam = FIDO_TLMS_TRC_NO & "★" & "00287" & "★" & g_sBIOAthnTchnCode 'FIDO추적번호,기관코드,인증기술코드
+		Form.requestKftcBio("Bio_2103", sParam, "90110")	
+	
+	'FIDO 2.0 등록결과 수신
+	ElseIf szTranID == "obtss_fido_012a" then
+		DATAMANAGER.SetDataValue(0 ,"obcsb_fido_002a", "InBlock1", "PROS_CLS_CODE",  	0, "I")				'처리구분코드 I:등록 D:해지
+		DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "ATHN_TCHN_CODE", 	0, g_sBIOAthnTchnCode)	'인증기술코드
+		DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "TERM_ID", 		0, g_szTermID)			'단말ID
+		DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "TERM_OS_CODE" , 	0, g_szOsType)			'단말운영체제
+		DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "ELFN_ID", 		0, g_szUserID)			'전자금융ID
+		DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "ACNO",	 		0, g_szAcno)			'계좌번호
+		DATAMANAGER.SetDataValue(0, "obcsb_fido_002a", "InBlock1", "TERM_MODL_NO",	0, g_szDeviceModel)		'모델명
+		DATAMANAGER.RequestTranData("obcsb_fido_002a")
+	
+	ElseIf szTranID == "obcsb_fido_002a" then
+		Form.SetEnvData(1,"login.athntchn.cd", g_sBIOAthnTchnCode) '인증기술코드 (등록한 바이오인증 기술코드를 최종으로 저장)
+		
+		Form.SetEnvData(1, "login.input.bioathntchncode", g_sBIOAthnTchnCode)
+		Form.SetEnvData(1, "login.input.userid", g_szUserID)
+		Form.SetEnvData(1, "login.input.saveid", "1")
+		
+		'안드로이드 뒤로가기 활성화
+		'Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+				
+		'간편비밀번호(PIN) 등록완료 팝업 오픈
+		Form.OpenNextPopup("mbact73000_p4", "" , "")
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	sSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if Len(sSubMsg) > 1 then
+		'Form.MsgBox( "알림", "[TR]" & szErrMsg & "\n" & sSubMsg, "", 0 )
+		Form.OpenPopup("mbbdm85303", "[TR]" & szErrMsg & "★" & sSubMsg , "")
+	else
+		'Form.MsgBox( "알림", "[TR]" & szErrMsg , "", 0 )
+		Form.OpenPopup("mbbdm85303", "[TR]" & szErrMsg, "")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.MsgBox("알림", "인증서 발급 없이 홈화면으로 이동하시겠습니까?\n(추후 인증서 등록 시 별도 본인 인증 절차 필요)", "Exit", 1)
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	If sKeyName == "Exit" And sRet == "ok" Then
+		'안드로이드 뒤로가기 비활성화
+		'Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+		
+		'Form.SetSharedData("&SCREEN_AUTH" , "") '비대면화면 권한프리
+    		Form.OpenNextPopup("mhetc90022", "", "")	
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'안드로이드 뒤로가기 비활성화
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+	'Form.SetSharedData("&SCREEN_AUTH" , "") '비대면화면 권한프리
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_fido_002a" trcode="obcsb_fido_002a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_fido_011a" trcode="obtss_fido_011a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_fido_012a" trcode="obtss_fido_012a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_fido_002a" title="바이오정보 사용등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="495" _ulen="375" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ATHN_TCHN_CODE^인증기술코드^3^0^0^0^0^0^0
+TERM_ID^단말ID^64^0^0^0^0^0^0
+TERM_OS_CODE^단말운영체제코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+REG_YN_IQRY_KEY^등록여부조회키^64^0^0^0^0^0^0
+REG_FORM_CODE^등록방식코드^2^0^0^0^0^0^0
+NID_CMPA_NO^비식별호환번호^21^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+TERM_MODL_NO^단말모델번호^50^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="122" _ulen="98" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+ATHN_TCHN_CODE^인증기술코드^3^0^0^0^0^0^0
+TERM_ID^단말ID^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_fido_011a" title="공동FIDO2.0등록요청 전송(02003" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="221" _ulen="169" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+TERM_ID^단말ID^64^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+ATHN_TCHN_CODE^인증기술코드^3^0^0^0^0^0^0
+NTAT_ISNC_CLCD^인증서발급구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="270" _ulen="202" >
+
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+BIO_TLMS_TRC_NO^바이오전문추적번호^21^0^0^0^0^0^0
+FIDO_TLMS_TRC_NO^FIDO전문추적번호^21^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_fido_012a" title="공동FIDO2.0 등록결과요청전송(0" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="105" _ulen="79" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+BIO_TLMS_TRC_NO^바이오전문추적번호^21^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="278" _ulen="214" >
+
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+UI_FIDO_MSG_SIZE^UIFIDO메시지사이즈^6^0^7^0^0^0^0
+UI_FIDO_REG_RSPN_MSG^UIFIDO등록응답메시지^6000^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

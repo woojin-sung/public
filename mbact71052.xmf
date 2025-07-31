@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="71052" scrname="고객자산평가" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="cont0" vscroll="1" ly_vert="0,0,375,562,1" scroll_ly_vert="0,0,375,562,1" >
+			<CONTROL_INFO>
+				<FORMTAB name="fmtab0" tabcount="2" tabheadheight="0" usepg="1" pgbarheight="10" ly_vert="0,0,375,200,1" >
+					<PAGE name="page007484" caption="총자산" linkfile="mbact71052_t3" />
+					<PAGE name="page006818" caption="자산비중" linkfile="mbact71052_t4" />
+				</FORMTAB>
+				<LABEL name="Label0" transmode="0" ly_vert="0,189,375,12,1" />
+				<IMAGE name="Image1" autosize="1" imgpath="pwd_blue" ly_vert="171,167,6,6,1" />
+				<IMAGE name="Image2" autosize="1" imgpath="pwd_gray" ly_vert="187,167,6,6,1" />
+				<IMAGE name="Image3" visible="0" autosize="1" imgpath="pwd_gray" ly_vert="171,167,6,6,0" />
+				<IMAGE name="Image4" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="187,167,6,6,0" />
+				<FORMTAB name="fmtab1" tabcount="0" tabheadwidth="165" tabheadheight="27" ly_vert="15,197,345,552,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<IMAGE name="imgRefresh" imgpath="icon_refresh" ly_vert="1000,40,40,40,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6025" _ulen="5529" >
+'============================================================================
+' 01. 화 면 명 : 고객자산평가
+' 02. 화면설명 : 고객자산평가
+' 03. 작    성 : 2016. 02. 04. 유창재
+' 04. 수    정 : 2023. 03. 23  강희승 : 1. 화면 오픈 시 직전 선택한 탭 실행
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_TabIndex		'탭테이블 Index
+Dim szCust_Num		'고객번호
+
+Dim g_szCd
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' SetTrigger(nIndex) : Index 값에 따른 화면불러오기
+'============================================================================
+Function SetTrigger(nIndex)		'상단 탭
+	szCust_Num = Form.GetSharedData("&CUST_NUM", false )		'로그인 해야만 고객번호 받아옴
+	if nIndex == 0 then
+		Form.triggerEvent( "fmtab0." & cont0.fmtab0.currenttabpageid , "mbact71052_t3", szCust_Num )	'고객별자산
+	else
+		Form.triggerEvent( "fmtab0." & cont0.fmtab0.currenttabpageid , "mbact71052_t4", szCust_Num )	'계좌별자산
+	end if
+
+
+End Function
+'============================================================================
+' SetTrigger(nIndex) : Index 값에 따른 화면불러오기
+'============================================================================
+Function SetTrigger1(nIndex)	'하단 탭
+	szCust_Num = Form.GetSharedData("&CUST_NUM", false )		'로그인 해야만 고객번호 받아옴
+	
+	if nIndex == 0 then
+		Form.triggerEvent( "fmtab1." & cont0.fmtab1.currenttabpageid , "mbact71052_t1", szCust_Num )	'고객별자산
+		'Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "mbact71052_t1", cmb0.caption )
+	else
+		Form.triggerEvent( "fmtab1." & cont0.fmtab1.currenttabpageid , "mbact71052_t2", szCust_Num )	'계좌별자산
+		'Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid , "mbact71052_t2", cmb0.caption )
+	end if
+
+End Function
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()
+	Form.SetSharedData("mbact71052_openlink" , szData)
+	
+	g_szCd = Form.LoadConfigData("mbact71052", "cur_tabcode")
+	g_TabIndex = 0
+	cont0.setScrollBarVisible("0") 
+	
+	Dim szScreenNo, szTab
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+
+	cont0.fmtab1.setTabHeaderImage("img_bgcircle_darkblue.9" , "img_bgcircle_lightgray.9" , 5) '활성화/비활성화/여백
+	cont0.fmtab1.setTabHeaderFgColor("200" , "295") '활성화/비활성화 폰트색상
+	InsertTab()
+	
+	cont0.fmtab0.currenttab = "0"
+	cont0.fmtab1.currenttab = "0"
+	
+	cont0.fmtab1.currenttab = g_szCd
+	
+	if szData <> "" then
+		Form.SetTimerEvent(1, 1, 1)
+	else
+		call imgRefresh()	'상하탭 전체 조회(조회시점 차이로 데이터 안맞는 현상 방지)
+	end if	
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent(1, 0, 1)
+	
+	'cont0.fmtab1.currenttab = g_szCd
+	call imgRefresh()	'상하탭 전체 조회(조회시점 차이로 데이터 안맞는 현상 방지)	
+End Sub
+
+'============================================================================
+Sub InsertTab()
+	cont0.fmtab1.insertPage( cont0.fmtab1.tabcount, "page1", "page1", "mbact71052_t1", "0", "상품별 자산")
+	cont0.fmtab1.insertPage( cont0.fmtab1.tabcount, "page2", "page2", "mbact71052_t2", "1", "계좌별 자산")
+End Sub
+
+'============================================================================
+' fmtab0_OnTabChanged(nCurrentTab)
+'============================================================================
+Sub cont0_fmtab0_OnTabChanged(nCurrentTab)
+'hsz
+	if nCurrentTab = 0 then
+		cont0.Image1.visible = True
+		cont0.Image2.visible = True
+		cont0.Image3.visible = False
+		cont0.Image4.visible = False	
+'		imgRefresh.left = 310
+	else
+		cont0.Image3.visible = True
+		cont0.Image4.visible = True
+		cont0.Image1.visible = False
+		cont0.Image2.visible = False
+'		imgRefresh.left = 1000
+	end if
+'hsz
+	g_TabIndex = nCurrentTab
+	
+'	Call SetTrigger(g_TabIndex)
+	call imgRefresh()	'상하탭 전체 조회(조회시점 차이로 데이터 안맞는 현상 방지)
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+'hsz
+	cont0.Image1.SetMaintainingRatio("1")
+	cont0.Image2.SetMaintainingRatio("1")
+	cont0.Image3.SetMaintainingRatio("1")
+	cont0.Image4.SetMaintainingRatio("1")
+	'hsz
+End Sub
+
+'============================================================================
+Sub cont0_fmtab1_OnTabChanged(nCurrentTab)
+'	SetTrigger1(nCurrentTab)
+	call imgRefresh()	'상하탭 전체 조회(조회시점 차이로 데이터 안맞는 현상 방지)
+End Sub
+
+'============================================================================
+Function imgRefresh()
+	nTabIdx0 = CInt(cont0.fmtab0.currenttab)
+	nTabIdx1 = CInt(cont0.fmtab1.currenttab)
+	
+	call SetTrigger(nTabIdx0)
+	call SetTrigger1(nTabIdx1)
+End Function
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "Refresh" then
+		call imgRefresh()
+	elseif sEventName == "SCROLL_POS" then
+		cont0.scroll_pos = "end"
+	end if
+End Sub
+
+Sub Form_OnFormClose()
+	Form.SaveConfigData("mbact71052", "cur_tabcode", cont0.fmtab1.currenttab)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

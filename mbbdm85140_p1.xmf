@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85140" scrname="기존 투자성향 진단 정보" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="ImgBg" imgpath="alpha" ly_vert="0,0,377,300,1" />
+		<CONTAINER name="Container" containerimage="popup_bg.9" scroll_pos="0,0" ly_vert="0,281,375,366,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="ImgClose" autosize="1" imgpath="icon_close.png" ly_vert="332,21,24,24,1" />
+				<LABEL name="Label0" fontsize="4" fontstyle="01" caption="투자성향 진단" halign="1" ly_vert="20,40,334,22,1" />
+				<IMAGE name="ImgExpr" visible="0" autosize="1" imgpath="icon_error.png" ly_vert="153,82,70,70,0" />
+				<LABEL name="LblExpr1" visible="0" fontsize="2" caption="고객님의 투자성향 유효기간이
+만료되었습니다." halign="1" multiline="1" ly_vert="20,167,335,46,0" />
+				<LABEL name="LblExpr2" visible="0" caption="(마지막 투자성향은" ly_vert="50,228,151,18,0" />
+				<LABEL name="Label3" fontsize="2" caption="투자성향을 진단하세요." ly_vert="20,547,335,20,1" />
+				<LABEL name="LblExpr3" visible="0" fgcolor="006:213049051" caption="XXXXX" halign="1" ly_vert="189,228,89,18,0" />
+				<LABEL name="LblExpr4" visible="0" caption="입니다.)" ly_vert="268,228,61,18,0" />
+				<IMAGE name="ImgValid" visible="0" autosize="1" imgpath="icon_invest_1.png" ly_vert="123,82,130,94,0" />
+				<LABEL name="LblValid1" visible="0" fontsize="2" caption="고객님의 최종투자성향은" halign="1" ly_vert="20,196,335,37,0" />
+				<LABEL name="LblValid2" visible="0" fgcolor="006:213049051" fontsize="2" caption="XXXXX" halign="1" ly_vert="111,218,107,32,0" />
+				<LABEL name="LblValid3" visible="0" fontsize="2" caption="입니다." ly_vert="198,218,100,32,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="BtnCnfr" caption="진단하기" fgcolor="063:255255255" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="0,588,375,60,1" />
+		<BUTTON name="BtnNew" caption="신규 또는 정보변경" fgcolor="005:000000000" fontsize="4" btnimage="btn_27.9" ly_vert="0,587,375,60,1" />
+		<BUTTON name="BtnCont" visible="0" caption="기존정보와 동일" bgcolor="214:255039039" fontsize="4" btnimage="btn_20.9" ly_vert="187,587,188,60,0" />
+		<CALENDAR name="Today" visible="0" dispmode="72864352" ly_vert="126,166,140,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7846" _ulen="7286" >
+'--===========================================================================
+' 작성 : 2021.02.17. 장원혁
+'--===========================================================================
+Dim g_RCNO_PIP
+Dim isValid     '투자성향만료여부
+Dim g_ProsDate  '투자성향진단등록일자
+    g_ProsDate = 0
+Dim CurrentGrade
+Dim LastGrade
+Dim CloseValue
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+    g_RCNO_PIP = Form.GetSharedData("BDM_RCNO_PIP", False )
+    DATAMANAGER.SetDataValue(0, "obcsb_acif_701r", "InBlock1", "RCNO"           , 0, "NMET"   )
+    DATAMANAGER.SetDataValue(0, "obcsb_acif_701r", "InBlock1", "RCNO_PIP"       , 0,  g_RCNO_PIP)
+    DATAMANAGER.SetDataValue(0, "obcsb_acif_701r", "InBlock1", "RCNO_TYPE_CODE" , 0, "01"     )
+    DATAMANAGER.RequestTranData("obcsb_acif_701r")       
+    
+    'DATAMANAGER.SetDataValue(0 , "obcsb_acif_801r" , "InBlock1" , "RCNO_PIP" , 0 , g_RCNO_PIP)
+    'DATAMANAGER.RequestTranData("obcsb_acif_801r")
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+    'If szTranID == "obcsb_acif_801r" Then
+     
+    'End If
+
+    If szTranID == "obcsb_acif_701r" Then
+        	
+        szMtrtDate   = DATAMANAGER.GetDataValue(0, "obcsb_acif_701r", "OutBlock1", "KYC_VALD_PRD_MTRT_DATE" , 0)	
+        If szMtrtDate < Today.caption Then '만기가 지났으면
+            isValid = 0 '만료
+        Else '만기가 안지났으면
+            isValid = 1
+        End If
+	
+        '투자성향 최근등록일
+        g_ProsDate = DATAMANAGER.GetDataValue(0, "obcsb_acif_701r", "OutBlock1", "PROS_DATE" , 0)
+        If g_ProsDate == "" Or g_ProsDate == null Then
+            g_ProsDate = "00000000"
+        End If 
+	
+        szInvGradeIn = DATAMANAGER.GetDataValue(0, "obcsb_acif_701r", "OutBlock1", "KYC_INVT_INCL_GRAD_CODE", 0)
+		
+	    '	[KYC투자성향등급코드]
+	    '	00@정보미제공
+	    '	01@고수익지향형
+	    '	02@성장지향형
+	    '	03@중립형
+	    '	04@안정지향형
+	    '	05@이자소득형	
+        If szInvGradeIn == "01" Then
+            CurrentGrade = 1
+            LastGrade = 1
+        ElseIf szInvGradeIn == "02" Then
+            CurrentGrade = 2
+            LastGrade = 2
+        ElseIf szInvGradeIn == "03" Then
+            CurrentGrade = 3
+            LastGrade = 3
+        ElseIf szInvGradeIn == "04" Then
+            CurrentGrade = 4
+            LastGrade = 4
+        ElseIf szInvGradeIn == "05" Then
+            CurrentGrade = 5
+            LastGrade = 5
+        Else  '정보미제공
+            CurrentGrade = 0
+            LastGrade = 0
+        End If
+	    
+	    ScreenSet()
+	    
+    End If
+    
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+    szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+    If Trim(szSubMsg) == "" Then
+        Form.MsgBox("알림" , szErrMsg, "", 6)
+    Else
+        Form.MsgBox("알림" , szErrMsg & Chr(13) & Chr(10) & "(" & szSubMsg & ")" , "", 6)
+    End If	
+	
+End Sub
+
+'============================================================================
+Sub ScreenSet()
+    Dim szDate
+	nDev = Form.GetSharedData("&SERVER_MODE", 0 )
+	
+	if nDev == "1" then
+		szDate = "20210913"
+	Else
+		szDate = "20210925"
+	end if
+    
+    If isValid == 0 Or (isValid == 1 And CInt(g_ProsDate) < CDbl(szDate) ) Then '기존 투자성향 만료, '금융소비자보호법 제정(2021.09.25~ 적용)이전 등록분은 새로진단만 가능
+        If isValid == 0 Then
+            Container.LblExpr1.caption = "고객님의 투자성향 유효기간이\n만료되었습니다."
+        Else
+            Container.LblExpr1.caption = "금융소비자보호법 제정(2021.09.25)에 따라\n고객님의 투자성향 재진단이 필요합니다."
+        End If
+   
+        Container.ImgExpr.visible = True
+        Container.LblExpr1.visible = True	
+        Container.LblExpr2.visible = True		
+        Container.LblExpr3.visible = True			
+        Container.LblExpr4.visible = True	
+        BtnCnfr.visible = True
+
+        If LastGrade == 1 Then
+            Container.LblExpr3.caption = "고수익지향형"
+        ElseIf LastGrade == 2 Then
+            Container.LblExpr3.caption = "성장지향형"            
+        ElseIf LastGrade == 3 Then
+            Container.LblExpr3.caption = "중립형"
+        ElseIf LastGrade == 4 Then
+            Container.LblExpr3.caption = "안정지향형"
+        ElseIf LastGrade == 5 Then
+            Container.LblExpr3.caption = "이자소득형"
+        ElseIf LastGrade == 0 Then
+            Container.LblExpr3.caption = "정보미제공"
+        End If	    
+	
+        Container.ImgValid.visible = False
+        Container.LblValid1.visible = False
+        Container.LblValid2.visible = False
+        Container.LblValid3.visible = False	
+        BtnNew.visible = False
+'        BtnCont.visible = False	
+    
+    Else '투자성향 유효
+    
+        Container.ImgValid.visible = True
+        Container.LblValid1.visible = True
+        Container.LblValid2.visible = True
+        Container.LblValid3.visible = True
+        BtnNew.visible = True
+'        BtnCont.visible = True
+				
+        If CurrentGrade == 1 Then
+            Container.LblValid2.caption = "고수익지향형"
+            Container.ImgValid.imgpath = "icon_invest_grade_5.png"
+        ElseIf CurrentGrade == 2 Then
+            Container.LblValid2.caption = "성장지향형"
+            Container.ImgValid.imgpath = "icon_invest_grade_4.png"	    
+        ElseIf CurrentGrade == 3 Then
+            Container.LblValid2.caption = "중립형"
+            Container.ImgValid.imgpath = "icon_invest_grade_3.png"
+        ElseIf CurrentGrade == 4 Then
+            Container.LblValid2.caption = "안정지향형"
+            Container.ImgValid.imgpath = "icon_invest_grade_2.png"	    
+        ElseIf CurrentGrade == 5 Then
+            Container.LblValid2.caption = "이자소득형"
+            Container.ImgValid.imgpath = "icon_invest_grade_1.png"
+        ElseIf CurrentGrade == 0 Then
+            Container.LblValid2.caption = "정보미제공"
+        End If
+		
+        Container.ImgExpr.visible = False
+	   If CurrentGrade == 0 Then  '정보미제공인경우, 
+            Container.ImgExpr.visible = True
+            Container.ImgValid.visible = False
+	   End If
+        Container.LblExpr1.visible = False
+        Container.LblExpr2.visible = False		
+        Container.LblExpr3.visible = False			
+        Container.LblExpr4.visible = False	
+        BtnCnfr.visible = False
+	
+    End If
+
+End Sub
+
+'============================================================================
+Sub ImgBg_OnClick()
+    Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_OnFormBackKeyPressed()  '안드로이드전용
+    ImgBg_OnClick()
+End Sub
+
+'============================================================================
+Sub Container_ImgClose_OnClick()
+    Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub BtnNew_OnClick()
+    CloseValue = 0 '신규 또는 정보변경
+    Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub BtnCont_OnClick()
+    CloseValue = 1 '기존정보와 동일
+    Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub BtnCnfr_OnClick()
+    CloseValue = 0 '신규 또는 정보변경
+    Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+    Form.SendReturnToParent("MBBDM85140_P1" , CloseValue)
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_701r" trcode="obcsb_acif_701r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_801r" trcode="obcsb_acif_801r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_701r" title="KYC고객정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="266" _ulen="194" >
+
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+USE_YN^사용여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1960" _ulen="1468" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_FULL_NAME^고객풀명^100^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC전문투자자여부^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC투자성향등급코드^2^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+QUES_SCOR^설문점수^8^3^7^0^0^0^0
+QUES_YN^설문여부^1^0^0^0^0^0^0
+MTRT_DATE^만기일자^8^0^0^0^0^0^0
+KYC_SPCL_INVR_RGNO^KYC전문투자자등록번호^20^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+DEL_YN^삭제여부^1^0^0^0^0^0^0
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+KYC_DVPD_EPMD_CODE^KYC파생상품유의코드^2^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC유효기간만기일자^8^0^0^0^0^0^0
+AGE^연령^4^0^7^0^0^0^0
+INVT_INCL_OVRV_EXPL^투자성향개요설명^4000^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+PXPR_RCNO_TYPE_CODE^대리인실명확인번호유형코드^2^0^0^0^0^0^0
+PXPR_RCNO^대리인실명확인번호^13^0^0^0^0^0^0
+PXPR_NAME^대리인명^40^0^0^0^0^0^0
+CUST_RLTS_CODE^고객관계코드^2^0^0^0^0^0^0
+RLNM_ASCT_NO^실명조합번호^20^0^0^0^0^0^0
+CUST_RLTS_ETC_CNTT^고객관계기타내용^100^0^0^0^0^0^0
+COUN_EMPNO^상담직원번호^9^0^0^0^0^0^0
+COUN_EMPL_NAME^상담직원명^40^0^0^0^0^0^0
+STA_AGE^시작연령^4^0^7^0^0^0^0
+APLY_KYC_INVT_INCL_GRAD_CODE^적용KYC투자성향등급코드^2^0^0^0^0^0^0
+PRDY_KYC_LAST_GRAD^전일KYC최종등급^2^0^0^0^0^0^0
+TDAY_LWST_KYC_GRAD^당일최저KYC등급^2^0^0^0^0^0^0
+TDAY_PSNT_KYC_GRAD^당일현재KYC등급^2^0^0^0^0^0^0
+WEAK_YN^취약여부^1^0^0^0^0^0^0
+KYC_RENL_STND_DATE^KYC갱신기준일자^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+PXPR_RCNO_PIP^대리인실명확인번호PIP^68^0^0^0^0^0^0
+KYC_ACMP_TMNU^KYC수행횟수^3^0^7^0^0^0^0
+ENTT_IVIC_GRCD^일임투자성향등급코드^2^0^0^0^0^0^0
+TRUST_IVIC_GRCD^신탁투자성향등급코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="80" inout="out" _len="352" _ulen="266" >
+
+QUES_QSIT_NO^설문문항번호^11^0^7^0^0^0^0
+ITEM_NO_VAL^항목번호값^10^0^0^0^0^0^0
+RSPN_SLCT_YN^응답선택여부^1^0^0^0^0^0^0
+WGHN_SCOR^가중점수^4^0^7^0^0^0^0
+MLTT_SLCT_ABLE_YN^다중선택가능여부^1^0^0^0^0^0^0
+APLT_NO^신청번호^11^0^7^0^0^0^0
+INVT_INCL_QUES_QSIT_CNTT^투자성향설문문항내용^1000^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_801r" title="현재 투자성향 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="170" _ulen="126" >
+
+PROS_BRCD^처리지점코드^4^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="916" _ulen="684" >
+
+STND_DATE^기준일자^8^0^0^0^0^0^0
+PRDY_KYC_LAST_GRAD^전일KYC최종등급^2^0^0^0^0^0^0
+TDAY_LWST_KYC_GRAD^당일최저KYC등급^2^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC투자성향등급코드^2^0^0^0^0^0^0
+TDAY_PSNT_KYC_GRAD^당일현재KYC등급^2^0^0^0^0^0^0
+KYC_DVPD_EPMD_CODE^KYC파생상품유의코드^2^0^0^0^0^0^0
+WEAK_YN^취약여부^1^0^0^0^0^0^0
+CUST_AGRM_DATE^고객동의일자^8^0^0^0^0^0^0
+DVPD_INVT_EXPC_YN^파생상품투자경험여부^1^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC유효기간만기일자^8^0^0^0^0^0^0
+TRUST_ENTR_KYC_GRAD_CODE^신탁일임형KYC등급코드^2^0^0^0^0^0^0
+TRUST_ENTR_KYC_REG_DATE^신탁일임형KYC등록일자^8^0^0^0^0^0^0
+WA_ENTR_KYC_GRAD_CODE^랩어카운트일임형KYC등급코드^2^0^0^0^0^0^0
+WA_ENTR_KYC_REG_DATE^랩어카운트일임형KYC등록일자^8^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
