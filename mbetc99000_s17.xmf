@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99000" scrname="목표자금시뮬레이션 결과" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label1" fontstyle="01" caption="목표자금 예상" ly_vert="30,365,120,32,1" />
+		<LABEL name="Label2" caption="만원" ly_vert="290,365,100,32,1" />
+		<LABEL name="Label3" fontstyle="01" caption="1000000000" halign="1" ly_vert="170,365,100,32,1" />
+		<LABEL name="Label4" fontstyle="01" caption="은행적금 대비" ly_vert="30,415,120,32,1" />
+		<LABEL name="Label5" fontstyle="01" caption="투자원금 대비" ly_vert="30,465,120,32,1" />
+		<LABEL name="Label6" fontstyle="01" caption="1000000000" halign="1" ly_vert="170,415,100,32,1" />
+		<LABEL name="Label7" caption="만원" ly_vert="290,415,100,32,1" />
+		<LABEL name="Label8" fontstyle="01" caption="1000000000" halign="1" ly_vert="170,465,100,32,1" />
+		<LABEL name="Label9" caption="만원" ly_vert="290,465,100,32,1" />
+		<CHARTEX name="ChartEx0" ly_vert="8,95,360,260,1" >
+			<DATASETTING/>
+		</CHARTEX>
+		<BUTTON name="Button0" caption="성향및 수익률 결과보기" btnimage="btn_05.9" ly_vert="70,510,230,40,1" />
+		<LABEL name="Label0" fontsize="-4" fontstyle="01" caption="(단위 : 만원)" ly_vert="290,70,100,32,1" />
+		<LABEL name="Label19" fontsize="-3" fontstyle="01" caption="투자목적 선택" bgcolor="221:245245245" transmode="0" halign="1" ly_vert="0,0,100,32,1" />
+		<LABEL name="Label113" fontsize="-3" fontstyle="01" caption="▶        투자성향 진단" bgcolor="221:245245245" transmode="0" halign="1" ly_vert="100,0,110,32,1" />
+		<LABEL name="Label114" fontsize="-3" fontstyle="01" caption="▶  투자성향 진단결과" bgcolor="221:245245245" transmode="0" halign="1" ly_vert="210,0,170,32,1" />
+		<LABEL name="Label115" fontsize="-3" fontstyle="01" caption="▶  투자성향 및 목표수익률 설정 확인" bgcolor="221:245245245" transmode="0" ly_vert="150,30,230,32,1" />
+		<LABEL name="Label20" fgcolor="006:213049051" fontsize="-3" fontstyle="01" caption="▶  목표자금 시뮬레이션" bgcolor="221:245245245" transmode="0" halign="1" ly_vert="0,30,150,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4481" _ulen="4165" >
+'============================================================================
+Sub Form_OnFormInit()
+
+	
+
+	'Label3.caption = Form.GetSharedData("input1",false)
+	
+	
+	tmp1 = Cint(Form.GetSharedData("input1", false )) '최초투자금액
+	tmp2 = Cint(Form.GetSharedData("input2", false )) '월투자예정금액
+	tmp3 = Cint(Form.GetSharedData("input3", false )) '투자예정기간
+	tmp4 = Cint(Form.GetSharedData("input4", false )) '목표수익률
+	tmp5 = Cint(Form.GetSharedData("input6_6", false ))
+	'Form.MsgBox("테스트", tmp1&"/"&tmp2&"/"&tmp3&"/"&tmp4&"/"&tmp5, sKeyName, nType)
+	
+	
+	output_tmp = tmp1 + (tmp2 * tmp3)
+	
+	output1 = Cint(output_tmp / tmp4 + output_tmp) '목표자금예상 결과값
+	
+	output2 = tmp1 + (tmp2 * tmp3) + tmp2 * 0.03 * (tmp3 * (tmp3+1)) /2 /12 '은행적금대비
+	output2 = Cint(output1 - int(output2 + 0.5)) '은행적금대비 반올림
+	
+	output3 = Cint(tmp1 + (tmp2 * tmp3)) '투자원금대비
+	output3 = output1 - output3
+	
+	Form.SetSharedData("input5",output3)
+	
+	
+	
+	Label3.caption = output1 
+	
+	if output2 > 0 then
+	Label6.fgcolor = "92"
+	Label6.caption = "+" + output2
+	
+	else 
+	Label6.fgcolor = "91"
+	Label6.caption = "-" + output2
+	
+	
+	end if
+	
+	if output3 > 0 then 
+	Label8.fgcolor = "92"
+	Label8.caption = "+" + output3
+	
+	else
+	Label8.fgcolor = "91"
+	Label8.caption = "-" + output3
+	end if
+
+	
+	
+	'ChartEx0.SetAccrueData("주식;채권;펀드;기타=10;10.54;30.45;30=2=bottom")
+	'tab01.page004379.ChartEx3T5.SetAccrueData("initdata="&szIn10DataVal)
+	'tab01.page004379.ChartEx3T5.SetAccrueData("titles="&szIn10DataName)
+	'tab01.page004379.ChartEx3T5.SetAccrueData("자료일자="&szIn10DataName)
+	'tab01.page004379.ChartEx3T5.SetAccrueData("data1="&szIn10DataVal&"=2")
+	'tab01.page004379.ChartEx3T5.SetAccrueData("repaintall");
+			
+	'DATAMANAGER.SetDataValue(0, "obcpp_intr_701r", "InBlock1", "CSNM",0 , "테스트")
+	'DATAMANAGER.RequestTranData("obcpp_intr_701r")
+	
+	
+	'ChartEx0.SetAccrueName("개인,외국인,기관계")
+	 ChartEx0.SetAccrueName("은행적금대비,투자원금대비")
+	'ChartEx0.SetAccrueData("period=5=YYHHMM")
+	
+	
+	 szHeadName1 = "은행적금 대비"
+	 szHeadName2 = "투자원금 대비"
+	'szHeadName3 = "기관계"
+	gTempDate = ""
+	gTempData1=""
+	gTempData2=""
+	
+	tmp_data1 = output2 / tmp3 '은행적금대비 1개월 단위 값
+	tmp_data2 = output3 / tmp3 '투자원금대비 1개월 단위 값
+	
+	'test = ""
+	
+	for i = 0 to tmp3
+	
+		
+	if i == tmp3 then
+	gTempDate = gTempDate&dateadd("m",i,date)
+	gTempData1 = gTempData1&Cstr(tmp_data1*i)
+	gTempData2 = gTempData2&Cstr(tmp_data2*i)
+	
+	else
+	gTempDate = gTempDate&dateadd("m",i,date)&";"
+	gTempData1 = gTempData1&Cstr(tmp_data1*i)&";"
+	gTempData2 = gTempData2&Cstr(tmp_data2*i)&";"
+	
+	end if
+	
+	next
+	
+	gTempDate = replace(gTempDate,"-","")
+	
+	'gTempDate ="2016-08-02;2016-09-03;2016-10-04;2016-11-05;2016-12-06;2017-01-07" '처음시작날짜값
+	'gTempDate1="20160805;20170205;20170805"
+	
+	
+	'gTempData1="1000;2000;3000;4000;5000;6000;7000;8000;9000;10000;12000;10000" 'y축값
+	'gTempData2="2000;3000;4000;5000;6000;7000;7000;8000;9000;10000;12000;10000" 'y축값
+	'gTempData3="3000;4000;5000" 'y축값
+	
+	'sztime = "20160810"
+	'szdata1 = "1000"
+	'szdata2 = "2000"
+	'szdata3 = "3000"
+	
+	
+	
+		
+	ChartEx0.SetAccrueData("initdata="&gTempDate&"="&gTempDate)	
+	'ChartEx0.SetAccrueData("initdata="..gTempDate)
+	'ChartEx0.SetAccrueData("changetitle="..szHeadName1..";"..szHeadName2..";"..szHeadName3.."=;")
+	
+		
+	ChartEx0.SetAccrueData("자료일자="..gTempDate.."="..gTempDate)
+	ChartEx0.SetAccrueData("data1="..gTempData1.."="..gTempData1)
+	ChartEx0.SetAccrueData("data2="..gTempData2.."="..gTempData2)
+	
+	'ChartEx0.SetAccrueData("data2="..gTempData2.."="..gTempData2)
+	'ChartEx0.SetAccrueData("data3="..gTempData3.."="..gTempData3)
+	ChartEx0.SetShowCrossLine("true")
+	ChartEx0.SetAccrueData("repaintall");
+	
+'	ChartEx0.setInvestorRealData("은행적금대비, 투자원금대비="..sztime..";"..szdata1..";"..szdata2)
+	
+	
+	
+	'test = dateadd("m",5,date)
+	
+	Button0.caption = test
+	
+	
+End Sub
+
+
+'============================================================================
+
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+    
+
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub Button0_OnClick()
+	Form.OpenFramePopup("mbetc99000_s21","","")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_intr_513r" trcode="obcpp_intr_513r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_intr_701r" trcode="obcpp_intr_701r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_intr_513r" title="다건조회(반복)_이은섭" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="37" _ulen="31" >
+
+CSNM^고객명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="295" _ulen="225" >
+
+CSNM^고객명^40^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+GNDR_CLS_CODE^성별구분코드^1^0^0^0^0^0^0
+MNPL_YMDH^조작일시^19^0^0^0^0^0^0
+MNPL_TRNO^조작단말번호^39^0^0^0^0^0^0
+MNPL_EMPNO^조작직원번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="84" _ulen="66" >
+
+CSNM^고객명^40^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_intr_701r" title="그래프테스트" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="37" _ulen="31" >
+
+CSNM^고객명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="86" _ulen="66" >
+
+BRDT^생년월일^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

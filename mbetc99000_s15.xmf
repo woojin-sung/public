@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99000" scrname="투자성향진단결과" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fontstyle="01" caption="고객님의 투자성향은 [" ly_vert="20,273,170,32,1" />
+		<LABEL name="Label1" fgcolor="006:213049051" fontstyle="01" caption="안정추구형" halign="1" ly_vert="180,273,110,32,1" />
+		<LABEL name="Label2" fontstyle="01" caption="] 입니다." halign="1" ly_vert="270,273,110,32,1" />
+		<LABEL name="Label3" fgcolor="158:037097195" fontstyle="01" caption="매사에 조심조심(원리금보장형, 채권혼합형)" halign="1" ly_vert="20,238,340,30,1" />
+		<BUTTON name="Button0" caption="목표자금 시뮬레이션 →" fontstyle="01" btnimage="btn_05.9" ly_vert="73,500,230,40,1" />
+		<IMAGE name="Image0" bgcolor="035:237246255" ly_vert="10,70,350,150,1" />
+		<LABEL name="Label5" ly_vert="-10,530,100,32,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="10,310,350,180,1" />
+		<LABEL name="Label9" fontsize="-3" fontstyle="01" caption="투자목적 선택" bgcolor="221:245245245" transmode="0" halign="1" ly_vert="0,0,100,32,1" />
+		<LABEL name="Label18" fontsize="-3" fontstyle="01" caption="▶        투자성향 진단" bgcolor="221:245245245" transmode="0" halign="1" ly_vert="100,0,110,32,1" />
+		<LABEL name="Label19" fgcolor="006:213049051" fontsize="-3" fontstyle="01" caption="▶  투자성향 진단결과" bgcolor="221:245245245" transmode="0" halign="1" ly_vert="210,0,170,32,1" />
+		<LABEL name="Label110" fontsize="-3" fontstyle="01" caption="▶  투자성향 및 목표수익률 설정 확인" bgcolor="221:245245245" transmode="0" ly_vert="150,30,230,32,1" />
+		<LABEL name="Label20" fontsize="-3" fontstyle="01" caption="▶  목표자금 시뮬레이션" bgcolor="221:245245245" transmode="0" halign="1" ly_vert="0,30,150,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4088" _ulen="3194" >
+
+dim input
+
+'============================================================================
+Sub Form_OnFormInit()
+
+ Form.SetSharedData("result",Label1.caption)
+	
+	
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	Form.OpenFramePopup("mbetc99000_s16","","")
+	
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_751a", "InBlock1", "PROS_CLS_CODE",0,"U")
+	
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_751a", "InBlock1", "INP_MEMB_SRNO",0,"1")
+	
+	DATAMANAGER.SetDataValue(0, "obcpp_intr_751a", "InBlock1", "INP_INVT_INCL_CLCD",0,input)
+	
+	DATAMANAGER.RequestTranData("obcpp_intr_751a")
+	
+	
+	
+	
+	
+	'DATAMANAGER.SetDataValue(0, "obcpp_intr_413r", "InBlock1", "CSNM",0 , Edit0.caption )
+	'DATAMANAGER.SetDataValue(0, "obcpp_intr_413r", "InBlock1", "RCNO_PIP",0 , Edit1.caption )
+	'DATAMANAGER.RequestTranData("obcpp_intr_413r")
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	a = Form.GetSharedData("score1", true )
+	b = Form.GetSharedData("score2", true )
+	c = Form.GetSharedData("score3", true )
+	d = Form.GetSharedData("score4", true )
+	e = Form.GetSharedData("score5", true )
+	f = Form.GetSharedData("score6", true )
+	g = Form.GetSharedData("score7", true )
+	h = Form.GetSharedData("score8", true )
+	i = Form.GetSharedData("score9", true )
+	j = Form.GetSharedData("score10", true )
+	
+	total = Cint(a+b+c+d+e+f+g+h+i+j)
+	'total = 84
+	
+	Label5.caption = total
+	
+	if total >=20 and total <36 then
+	Label1.caption = "안정형"
+	Label3.caption = "첫째도 안정, 둘째도 안정 (원리금 보장형)"
+	WebView0.loaddata = "<center> 시중 은행의 예,적금 금리 수준의 수익을 기대합니다.\n\n 절대적으로 원금의 보장을 추구하므로 위험이 없는 \n\n원리금보장형 상품에 투자하고자 합니다.</center>"
+	input = 1
+	Image0.imgpath = "invt_incl1.png"
+	Form.SetSharedData("incl_clcd",input)
+	
+	
+	
+	elseif total >=36 and total<52 then
+	Label1.caption = "안정추구형"
+	Label3.caption = "매사에 조심조심(원리금 보장형, 채권혼합형)"
+	WebView0.loaddata = "<center> 투자 원금의 손실을 최소화하고자 합니다. \n\n단, 단기적인 손실을 감수할 수 있으며 예,적금 금리보다는 \n\n높은 수준이면서 이자소득이나 배당 소득과 같이 \n\n안정적이고 어느 정도 규칙적인 수익을 원합니다. \n\n자산중의 일부는 변동성 있는 자산에 투자할 수 있습니다.</center>"
+	input =2 
+	Image0.imgpath = "invt_incl2.png"
+	Form.SetSharedData("incl_clcd",input)
+	
+	elseif total >= 52 and total <68 then
+	Label1.caption = "중립형"
+	Label3.caption = "일도 투자도 균형있게!"
+	WebView0.loaddata = "<center> 주식과 채권에 적절히 배분하는 투자를 합니다.\n\n즉, 변동성이 있는 위험자산과 안정적인 자산에 \n\n골고루 투자하여 예,적금보다 상당히 높은 수준의 \n\n수익을 달성하고자 합니다.</center>"
+	input =3
+	Image0.imgpath = "invt_incl3.png"
+	Form.SetSharedData("incl_clcd",input)
+	
+	elseif total >=68 and total <84 then 
+	Label1.caption = "수익추구형"
+	Label3.caption = "모험이 없다면 재미없지!"
+	WebView0.loaddata = "<center> 원금의 보장을 중요시하기 보다는 \n\n투자로 인한 수익을 중요시합니다.\n\n따라서 자산의 상당 부분을 채권혼합형 등 \n\n위험 자산에 투자할 수 있습니다.</center>"
+	input =4
+	Image0.imgpath = "invt_incl4.png"
+	Form.SetSharedData("incl_clcd",input)
+	
+	elseif total >=84 then
+	Label1.caption = "고수익추구형"
+	Label3.caption = "투자와 인생은 다이나믹하게!"
+	WebView0.loaddata = "<center> 시장 평균보다 훨씬 높은 수익을 달성하고자 합니다.\n\n이런 높은 수익을 위해서는 \n\n자산이 크게 변동하는 것도 기꺼이 감수합니다.\n\n자산의 대부분을 위험 자산에 투자할 수 있습니다.</center>"
+	input =5
+	Image0.imgpath = "invt_incl5.png"
+	Form.SetSharedData("incl_clcd",input)
+	end if
+	
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_intr_751a" trcode="obcpp_intr_751a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_intr_751a" title="인턴A팀 회원테이블 처리서비스" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="180" _ulen="128" >
+
+INP_MEMB_SRNO^인턴쉽회원일련번호^11^0^7^0^0^0^0
+INP_INVT_INCL_CLCD^인턴쉽투자성향구분코드^2^0^7^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

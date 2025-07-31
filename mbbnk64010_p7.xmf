@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="외화이체_수취인조회팝업" version="2" writer="이아영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<CONTAINER name="contA" visible="0" containerimage="alpha" scroll_pos="0,0" ly_vert="0,347,375,300,0" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="imgHeader" imgpath="input_03_n.9" ly_vert="0,0,375,300,1" />
+				<BUTTON name="btnOK" caption="확인" fontsize="2" fontstyle="01" btnimage="btn_22.9" ly_vert="-5,250,385,50,1" />
+				<LABEL name="Label0" fontsize="3" fontstyle="01" caption="받는 분 확인" halign="1" valign="2" ly_vert="0,0,375,43,1" />
+				<IMAGE name="imgNm1" imgpath="btn_line_n.9" ly_vert="20,70,335,45,1" />
+				<IMAGE name="imgNm2" imgpath="btn_line_n.9" ly_vert="20,125,335,45,1" />
+				<LABEL name="lblNm1" fgcolor="146:124124124" fontsize="2" fontstyle="01" halign="1" ly_vert="30,75,315,35,1" />
+				<LABEL name="lblNm2" fgcolor="146:124124124" fontsize="2" fontstyle="01" halign="1" ly_vert="30,130,315,35,1" />
+				<LABEL name="lblResult" halign="1" multiline="1" ly_vert="20,175,335,40,1" />
+				<IMAGE name="ImgPrcreset" visible="0" autosize="1" imgpath="icon_remove.png" ly_vert="323,139,20,18,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="contB" visible="0" containerimage="alpha" scroll_pos="0,0" ly_vert="0,402,375,245,0" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" imgpath="input_03_n.9" ly_vert="0,0,375,245,1" />
+				<BUTTON name="btnOK2" caption="확인" fontsize="2" fontstyle="01" btnimage="btn_22.9" ly_vert="-5,195,385,50,1" />
+				<LABEL name="Label2" fontsize="3" fontstyle="01" caption="받는 분 확인" halign="1" valign="2" ly_vert="0,0,375,43,1" />
+				<IMAGE name="imgName" imgpath="bg_infobox.9" ly_vert="20,70,335,45,1" />
+				<LABEL name="lblName" fgcolor="146:124124124" fontsize="2" fontstyle="01" halign="1" ly_vert="30,75,315,35,1" />
+				<LABEL name="lblResult2" halign="1" multiline="1" ly_vert="20,120,335,40,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="14252" _ulen="12876" >
+'============================================================================
+' 화 면 명 : 외화이체 수취인조회
+'============================================================================
+' V001 2024-02-01 이체계좌관리-외화이체계좌등록인 경우 처리구분값 수정
+'============================================================================
+
+Dim g_szResult	'이체가능상태인지 아닌지
+
+Dim g_szACNO
+Dim g_szASNO
+Dim g_szBankCode
+Dim g_szBankAcno
+Dim g_szBicCode
+Dim g_szCurrencyCode
+Dim g_nSendAmt
+
+Dim g_szEngRmtName	'수취인 영문명
+Dim g_szCsno,g_szENG_RMT_NAME
+Dim g_121InputName, g_szIF_KOR_USE_INFO
+
+Dim g_szScreenNo
+Dim g_szOsType
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szScreenNo = Form.GetSharedData("&SCREEN_NO" , false)
+	g_szOsType   = Form.GetSharedData("&OS_TYPE", False) '1.안드로이드 2.iOS
+	
+	f_InitValue()
+	
+	szData = Form.GetOpenLinkData( )
+	
+	if szData ~= "" and szData ~= "" then
+		tOpenData = Split(szData, "★")
+	
+		'출금계좌번호★출금계좌순번★입금은행코드★입금은행계좌★입금은행BIC코드★통화코드★출금액
+		g_szACNO			= tOpenData[0]
+		g_szASNO			= tOpenData[1]
+		g_szBankCode		= tOpenData[2]
+		g_szBankAcno		= tOpenData[3]
+		g_szBicCode		= tOpenData[4]
+		g_szCurrencyCode	= tOpenData[5]
+		g_nSendAmt        = tOpenData[6]
+		g_szCsno = Form.GetSharedData("61140_Csno", false )
+		
+		DATAMANAGER.RequestTranData("obtsd_fbnk_121r")	'외화송금 예금주명조회		
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("64010_EngRmtName", g_szEngRmtName)	'고객영문명
+	
+	Form.SendReturnToParent( "mbbnk64010_p7" , g_szResult)
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	g_szResult = "Cancel"
+	g_szEngRmtName = ""
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub f_InitValue()
+	g_szResult = "N"	
+	g_szEngRmtName = ""
+End Sub
+
+'============================================================================
+Sub contA_btnOK_OnClick()
+
+	'특수문자체크 : "/  -  ?  :  (  )  ,  .  ‘  +" 만 가능!!
+	Str_Chk(contA.lblNm2.caption)
+
+	if g_bEngNm = False then
+		g_szResult = "N"	
+		g_szEngRmtName = contA.lblNm2.caption
+		
+		Form.MsgBox("알림", "해당 특수 문자만 입력 가능합니다.\n/  -  ?  :  (  )  ,  .  ‘  +", "", 6)
+'		contA.btnOK.btnimage = "btn_15.9"
+'		contA.btnOK.enable = false
+		Exit Sub
+	else
+		'정상
+		
+		'V001 본인인 경우에만 이 pop으로 호출되므로.. 굳이 추가체크하지 않음.
+		' 특수문자 체크는 Str_Chk 에서 수행하므로... 이 부분 skip..
+		'if g_szScreenNo == "61140" and g_szIF_KOR_USE_INFO == "Y" then'이체계좌관리
+		'	DATAMANAGER.RequestTranData( "obpds_srvc_186r" )
+		'else
+			g_szResult = "Y"
+			g_szEngRmtName = contA.lblNm2.caption
+			
+			Form.CloseForm()
+		'end if
+	End If
+End Sub
+
+'============================================================================
+Sub contA_ImgPrcreset_OnClick()
+	'영문키패드
+	'Form.OpenPopupAnimation("textkeypadpopup", "받는분 확인☆☆받는 분 영문명 입력☆1☆11" , "","2")
+	Form.OpenPopupAnimation("textkeypadpopup", "받는분 확인☆☆받는 분 영문명 입력☆1☆30" , "","2")
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "POPUP_TEXT" then	'영문키패드
+		If Trim(sRet) == "" Then
+			return
+		else
+			contA.lblNm2.caption = sRet
+			Str_Chk(contA.lblNm2.caption)
+			
+			if g_bEngNm = False then
+				Form.MsgBox("알림", "해당 특수 문자만 입력 가능합니다.\n/  -  ?  :  (  )  ,  .  ‘  +", "", 6)
+					
+		'		contA.btnOK.btnimage = "btn_15.9"
+		'		contA.btnOK.enable = false
+				Exit Sub
+			else
+				'정상
+				g_szResult = "Y"	
+				g_szEngRmtName = sRet
+			End If
+		End If
+	end if
+End Sub
+
+'============================================================================
+' Str_Chk(str) : 입력된 영문명 유효성 체크
+'============================================================================
+Function Str_Chk(str)	
+	dim i							'루프용 
+	dim chk_n						'숫자 체크
+	dim chk_c						'영문 체크
+	dim chk_t						'특수문자 체크(입력 가능)
+	dim chk_t2						'특수문자 체크(입력 불가능)
+    
+	chk_n = 0
+	chk_c = 0
+	chk_t = 0
+	chk_t2 = 0
+    
+	g_bEngNm = False
+
+	For i = 1 to Len(str)
+		nAscii = Asc(Mid(str, i, 1))
+    
+	    '48~57 : 0~9
+	    '65~90 : A~Z
+	    '97~122: a~z
+	    '
+	    ''입력가능한 특수문자
+	    '' Space : 32
+	    '' / : 47
+	    '' - : 45
+	    '' ? : 63
+	    '' : : 58
+	    '' ( : 40
+	    '' ) : 41
+	    '' , : 44
+	    '' . : 46
+	    '' ` : 39
+	    '' + : 43
+	    If   (nAscii >=48 and nAscii <=57) Then
+		    '숫자 통과!
+		    chk_n = 1 
+		
+	    ElseIf   (nAscii >=65 and nAscii <=90) or ( nAscii >=97 and nAscii <=122) Then
+		    '영문 대/소문자 통과!
+		    chk_c = 1 
+		
+	    Elseif   (nAscii = 32 or nAscii = 47 or nAscii = 45 or nAscii = 63 or nAscii = 58 or nAscii = 40 or nAscii = 41 or nAscii = 44 or nAscii = 46 or nAscii = 43) then
+		    '입력가능한 특수문자 통과!
+		    chk_t =  1
+	    
+	    Elseif	(g_szOsType = "1" and nAscii = 39) then
+		    '입력가능한 특수문자 통과! (특수문자 '가 OS별로 Ascii가 달라서 분기처리함)
+		    chk_t =  1
+	    
+	    Elseif	(g_szOsType = "2" and (nAscii = -104 or nAscii = -128 or nAscii = -30 or nAscii = -103 or nAscii = 39)) then
+		    	
+
+		    '입력가능한 특수문자 통과! (특수문자 '가 OS별로 Ascii가 달라서 분기처리함)
+		    chk_t =  1
+		    
+	    Else
+		    '그 외 문자는 불가!!!
+		    chk_t2 =  1
+
+	    End if
+	Next
+
+	If  (chk_t2 = 1) Then	'입력 불가능한 특수문자가 들어온 경우 Stop!!!
+		g_bEngNm = False
+		Exit Function
+	End if
+
+	g_bEngNm = True
+End Function
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	If szTranID == "obtsd_fbnk_121r" then
+		if g_szBankCode = "287" then
+			szTACT_LNKD_ISTU_CODE = "287"
+		else
+			szTACT_LNKD_ISTU_CODE = "702"
+		end if
+		
+		'V001
+		if g_szScreenNo == "61140" then'이체계좌관리
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "PROS_CLS_CODE"      , 0 , "3")	'처리구분코드 (3.약정에서 수취조회)
+		else
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "PROS_CLS_CODE"      , 0 , "1")	'처리구분코드 (1.수취조회)
+		end if
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "ACNO"                    , 0 , g_szACNO)	'출금계좌
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "ASNO"                    , 0 , g_szASNO)	'출금계좌
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "TACT_LNKD_ISTU_CODE"     , 0 , szTACT_LNKD_ISTU_CODE)	'이체연계기관코드
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "BANK_CODE"               , 0 , g_szBankCode)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "BANK_ACNO"               , 0 , g_szBankAcno)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "CRCD"                    , 0 , g_szCurrencyCode)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "FRCR_TR_AMT"             , 0 , g_nSendAmt)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "RRNO"                    , 0 , Form.GetSharedData("&RET_RSNO", False))
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "BIC_CODE"                , 0 , g_szBicCode)				
+	elseIf szTranID == "obpds_srvc_186r" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "PROS_CLS_CODE"                , 0 , "1")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "CSNO"            		    , 0 , Form.GetSharedData("61140_Csno", False))
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1" , "CUST_ENG_NAME"                , 0 , g_121InputName)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	If szTranID == "obtsd_fbnk_121r" then	
+		szAPLT_SRNO 				= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "APLT_SRNO" , 0)
+		szENG_RMT_NAME 			= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ENG_RMT_NAME" , 0)		'영문수취인명
+		szCUST_ENG_NAME 			= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "CUST_ENG_NAME" , 0)		'고객영문명
+	
+		szRSPN_CODE	 			= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "RSPN_CODE" , 0)			'응답코드
+		szRSPN_MSG_CNTT 			= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "RSPN_MSG_CNTT" , 0)		'응답메시지내용
+		
+		szSELF_ACNT_YN 			= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "SELF_ACNT_YN" , 0)		'본인계좌여부
+		szIF_KOR_USE_INFO 		= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "IF_KOR_USE_INFO" , 0)		'IF한글사용정보
+		szFEE 					= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FEE" , 0)				'수수료
+		szSELF_ACNT_YN			= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "SELF_ACNT_YN" , 0)		'본인계좌여부
+		
+		g_szENG_RMT_NAME = szENG_RMT_NAME
+		g_szIF_KOR_USE_INFO = szIF_KOR_USE_INFO
+		Form.SetSharedData("64010_Fee", cint(szFEE))
+
+		Dim sCode 
+		sCode = DATAMANAGER.GetDataMsgCode( szTranID ) 
+		if sCode == "3070" then '잘못된 계좌 입력시 에러!
+			if szRSPN_CODE = "0012" then '외화 입금이 불가한 계좌입니다.\n받는 계좌를 다시 확인해주세요.
+				Form.MsgBox("알림", szRSPN_MSG_CNTT, "", 6)
+				
+				g_szResult = "N"
+				Form.CloseForm()
+				Exit Sub			
+			else
+				g_szResult = "N"
+				g_szEngRmtName = szENG_RMT_NAME
+				
+				contB.visible = true
+				contB.lblName.caption = szENG_RMT_NAME
+				contB.lblResult2.caption = szRSPN_MSG_CNTT
+				contB.lblResult2.fgcolor = "6"
+				
+				Exit Sub			
+			end if
+		end if
+		
+		if g_szScreenNo == "61140" then'이체계좌관리
+
+			if szSELF_ACNT_YN == "N" then 'or szSELF_ACNT_YN = "S" then
+				Form.MsgBox("알림", "본인 계좌만 등록 가능합니다.", "61140_CLOSE_MSG", 6)
+				Exit Sub
+			end if
+
+			if szIF_KOR_USE_INFO = "Y" then'명의가 한글
+				g_szResult = "N"
+				g_szEngRmtName = szCUST_ENG_NAME
+				g_121InputName = szCUST_ENG_NAME
+				
+				contA.visible = true
+				contA.imgNm1.imgpath = "bg_infobox.9.png"
+				contA.lblNm1.caption = szENG_RMT_NAME
+				contA.imgNm2.imgpath = "btn_line_n.9.png"
+				contA.lblNm2.caption = szCUST_ENG_NAME
+				contA.ImgPrcreset.visible = true
+				contA.lblResult.caption = "수취 조회 결과는 영문명으로 변경 후 진행됩니다."
+				
+'				Exit Sub
+				
+			elseif szIF_KOR_USE_INFO = "N" then	'정상
+				g_szResult = "Y"
+				g_szEngRmtName = szENG_RMT_NAME
+				g_121InputName = szENG_RMT_NAME
+				
+'				contB.visible = true
+'				contB.lblName.caption = szENG_RMT_NAME
+				contA.visible = true
+				contA.imgNm1.imgpath = "bg_infobox.9.png"
+				contA.lblNm1.caption = szENG_RMT_NAME
+				contA.imgNm2.imgpath = "btn_line_n.9.png"
+				contA.lblNm2.caption = szENG_RMT_NAME
+				contA.ImgPrcreset.visible = true
+				
+				DATAMANAGER.RequestTranData( "obpds_srvc_186r" )
+				
+'				Exit Sub
+			end if		
+			
+		else
+			if szSELF_ACNT_YN = "Y" or szSELF_ACNT_YN = "S" then	'정상
+				
+				if szIF_KOR_USE_INFO = "Y" then	'이체 불가
+					g_szResult = "N"
+					g_szEngRmtName = szCUST_ENG_NAME
+					
+					contA.visible = true
+					contA.imgNm1.imgpath = "bg_infobox.9.png"
+					contA.lblNm1.caption = szENG_RMT_NAME
+					contA.imgNm2.imgpath = "btn_line_n.9.png"
+					contA.lblNm2.caption = szCUST_ENG_NAME
+					contA.ImgPrcreset.visible = true
+					contA.lblResult.caption = "수취 조회 결과는 영문명으로 변경 후 진행됩니다."
+					
+					Exit Sub
+					
+				elseif szIF_KOR_USE_INFO = "N" then	'정상
+					g_szResult = "Y"
+					g_szEngRmtName = szENG_RMT_NAME
+					
+					contB.visible = true
+					contB.lblName.caption = szENG_RMT_NAME
+					contB.lblResult2.caption = "본인 확인이 완료되었습니다."
+					
+					Exit Sub
+					
+				end if			
+				
+			elseif szSELF_ACNT_YN = "N" then	'이체 불가
+				g_szResult = "N"
+				g_szEngRmtName = szENG_RMT_NAME
+				
+				contB.visible = true
+				contB.lblName.caption = szENG_RMT_NAME
+				contB.lblResult2.caption = "본인명의 계좌로만 이체 가능합니다."
+				contB.lblResult2.fgcolor = "6"
+				
+				Exit Sub
+				
+			end if
+		end if
+		
+	ElseIf szTranID == "obpds_srvc_186r" then	'이체계좌관리화면용 TR
+		szIF_SPEC_LETT_USE_INFO = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "IF_SPEC_LETT_USE_INFO" , 0 )
+		
+		if szIF_SPEC_LETT_USE_INFO == "Y" then
+			g_szResult = "N"
+			Form.MsgBox("알림", "해당 특수 문자만 입력 가능합니다.\n/  -  ?  :  (  )  ,  .  ‘  +", "", 6)
+		else
+			g_szResult = "Y"	
+			g_szEngRmtName = contA.lblNm2.caption
+		
+			if g_szIF_KOR_USE_INFO == "Y" then
+				Form.CloseForm()
+			else
+				contA.lblResult.caption = "본인 확인이 완료되었습니다."
+			end if
+		end if
+	End If	
+End Sub
+
+'============================================================================
+Sub contB_btnOK2_OnClick()
+'	'정상
+'	g_szResult = "Y"
+'	g_szEngRmtName = contB.lblName.caption
+	if g_szScreenNo == "61140" then
+		g_szEngRmtName = contB.lblName.caption
+	end if
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+    szSubErr = Trim(DATAMANAGER.GetDataMsgSubText( szTranID ))
+    If szSubErr == "" Then
+        Form.MsgBox( "알림", szErrMsg, "", 6 )
+    Else
+        'Form.MsgBox( "알림", szErrMsg.."\n("..szSubErr..")", "", 6 )		
+		Form.MsgBox( "알림", szSubErr, "", 6 )
+    End If
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "61140_CLOSE_MSG" then
+		g_szResult = "Cancel"
+		g_szEngRmtName = ""
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	g_szResult = "Cancel"
+	g_szEngRmtName = ""
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtsd_fbnk_121r" trcode="obtsd_fbnk_121r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_186r" trcode="obpds_srvc_186r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtsd_fbnk_121r" title="외화송금 예금주명조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="424" _ulen="320" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+TACT_LNKD_ISTU_CODE^이체연계기관코드^3^0^0^0^0^0^0
+BANK_CODE^은행코드^3^0^0^0^0^0^0
+BANK_ACNO^은행계좌번호^16^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+BIC_CODE^BIC코드^11^0^0^0^0^0^0
+FRCR_TR_AMT^외화거래금액^20^3^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="510" _ulen="386" >
+
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+TACT_STND_TR_CODE^이체표준거래코드^6^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+ENG_RMT_NAME^영문수취인명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+ACNM^계좌명^40^0^0^0^0^0^0
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+SELF_ACNT_YN^본인계좌여부^1^0^0^0^0^0^0
+IF_KOR_USE_INFO^IF한글사용정보^1^0^0^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_186r" title="외화 계좌 수취인 계좌명 검증" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="104" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="116" _ulen="90" >
+
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+IF_SPEC_LETT_USE_INFO^IF특수문자사용정보^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

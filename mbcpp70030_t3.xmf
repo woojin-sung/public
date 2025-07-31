@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="70030" scrname="투자 성향 진단_탭3" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<COMBO name="Combo0" fontsize="-2" cbinputdatatext="손실
+불확실
+투자 기회
+높은 수익" ly_vert="227,54,72,30,1" />
+		<LABEL name="Label0" fontsize="-2" caption="라는 단어가 가장 먼저 떠오릅니다" ly_vert="32,93,241,34,1" />
+		<LABEL name="Label1" fontsize="-2" caption="제가 만약 투자를 한다면, 손실에 대한 생각은" ly_vert="30,192,353,34,1" />
+		<RADIOGROUP name="RadioGroup1" fontsize="-2" buttonsnumber="4" ly_vert="34,230,279,135,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="무슨 일이 있어도 원금 보존" position="2,2,300,32" />
+				<RADIO no="1" text="투자 원금에서 최소한의 손실" position="2,37,300,32" />
+				<RADIO no="2" text="투자 원금에서 일부 손실" position="2,72,300,32" />
+				<RADIO no="3" text="손실 수준 상관하지 않음" position="2,107,300,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="Label2" fontsize="-2" caption="제가 투자한 주식포트폴리오가 25%이상 급락했다면" ly_vert="25,422,358,34,1" />
+		<COMBO name="Combo1" fontsize="-2" fonttype="3" cbinputdatatext="보유 주식을 전부 처분하겠습니다
+보유 주식을 일부 처분하겠습니다
+주가가 곧 회복될 것으로 기대하고 보유하겠습니다
+주식을 추가로 취득하겠습니다" ly_vert="31,457,301,30,1" />
+		<LABEL name="Label8" fontsize="-2" caption="저는 리스크라는 단어를 들으면" ly_vert="32,50,226,34,1" />
+		<LABEL name="Label9" bgcolor="001:213049051" transmode="0" ly_vert="34,39,300,1,1" />
+		<LABEL name="Label3" bgcolor="001:213049051" transmode="0" ly_vert="34,154,300,1,1" />
+		<LABEL name="Label4" bgcolor="001:213049051" transmode="0" ly_vert="34,394,300,1,1" />
+		<LABEL name="Label5" bgcolor="001:213049051" transmode="0" ly_vert="34,514,300,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1785" _ulen="1785" >
+--===========================================================================
+Dim risk_combo_score
+Dim risk_combo_value
+Dim risk_radio_score
+Dim risk_radio_value
+Dim lose_score
+Dim lose_value
+--===========================================================================
+
+'============================================================================
+Sub Combo0_OnEditComplete(iIndex)
+	if iIndex = 0 then
+		risk_combo_score = 0
+	elseif iIndex = 1 then
+		risk_combo_score = 2
+	elseif iIndex = 2 then
+		risk_combo_score = 3
+	else
+		risk_combo_score = 5
+	end if
+	
+	risk_combo_value = iIndex+1
+	
+
+	
+	Form.SetSharedData("Risk_Combo_Value", risk_combo_value)
+	Form.SetSharedData("Risk_Combo_Score", risk_combo_score)
+
+End Sub
+
+'============================================================================
+Sub Combo1_OnEditComplete(iIndex)
+
+	if iIndex = 0 then
+		lose_score = -2
+		
+	elseif iIndex = 1 then
+		lose_score = 2
+		
+	elseif iIndex = 2 then
+		lose_score = 4
+		
+	else
+		lose_score = 6
+		
+	end if
+	
+	lose_value = iIndex+1
+	
+
+	
+	Form.SetSharedData("Lose_Value", lose_value)
+	Form.SetSharedData("Lose_Score", lose_score)
+
+End Sub
+
+'============================================================================
+Sub RadioGroup1_OnClick(nIndex)
+	if nIndex = 0 then
+		risk_radio_score = -2
+	elseif nIndex = 1 then
+		risk_radio_score = 2
+	elseif nIndex = 2 then
+		risk_radio_score = 4
+	else
+		risk_radio_score = 6
+	end if
+	
+	risk_radio_value = nIndex+1
+	
+
+	Form.SetSharedData("Risk_Radio_Value", risk_radio_value)
+	Form.SetSharedData("Risk_Radio_Score", risk_radio_score)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData("Risk_Combo_Score", 0)
+	Form.SetSharedData("Lose_Score", -2)
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

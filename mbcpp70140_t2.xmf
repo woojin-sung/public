@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="70140" scrname="예약확인여부" version="2" writer="조승행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,400,1" />
+	<CONTROL_INFO>
+		<BUTTON name="Button0" caption="예" btnimage="btn_05.9" ly_vert="86,333,79,35,1" />
+		<BUTTON name="Button1" caption="아니오" btnimage="btn_05.9" ly_vert="209,333,79,35,1" />
+		<LABEL name="Label0" fontsize="4" caption="예약하시겠습니까?" halign="1" ly_vert="89,274,192,32,1" />
+		<LABEL name="Label1" fontsize="3" fontstyle="01" halign="1" ly_vert="2,72,366,57,1" />
+		<LABEL name="Label2" fontsize="3" fontstyle="01" halign="1" multiline="1" ly_vert="3,127,367,107,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3925" _ulen="3905" >
+--===========================================================================
+--===========================================================================
+Dim g_loca, g_time
+Dim s_pros, s_username, s_cust, s_plac, s_rsev, s_prtr, s_inp_rsev, s_inp_stat_code, s_rsvID, s_PID, s_UID, used_s_PID
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+
+	temp = Form.GetSharedData("szpfID", true )
+	
+	s_PID	= Form.GetSharedData("Shared_PID", false )
+	
+	if temp <> "" then
+		s_PID = temp
+		Form.SetSharedData("szpfID", "")
+	end if
+	
+	s_rsvID = Form.GetSharedData("ck_rsvID", false )
+	s_pros = Form.GetSharedData("ck_pros_code", false )
+	s_username = Form.GetSharedData("ck_username", false )
+	s_cust = Form.GetSharedData("ck_custtel", false )
+	s_plac = Form.GetSharedData("ck_plac", false )
+	s_rsev = Form.GetSharedData("ck_rsevymdh", false )
+	s_prtr = Form.GetSharedData("ck_prtrcntt", false )
+	s_inp_rsev = Form.GetSharedData("ck_rsevcode", false )
+	s_inp_stat_code = Form.GetSharedData("ck_rsevstat", false )
+	s_UID = Form.GetSharedData("ck_userID", false)
+	
+	
+
+	g_loca = Form.GetSharedData("check_loca", false )
+	g_time = Form.GetSharedData("check_time", false )
+	
+	
+'	Form.ShowAlert(s_inp_stat_code, "")
+'	Form.ShowAlert(s_inp_rsev, "")
+'	Form.ShowAlert(s_prtr, "")
+'	Form.ShowAlert(s_rsev, "")
+'	Form.ShowAlert(s_plac, "")
+'	Form.ShowAlert(s_cust, "")
+'	Form.ShowAlert(s_username, "")
+'	Form.ShowAlert(s_PID, "")
+'	Form.ShowAlert(s_UID, "") 
+'	Form.ShowAlert(s_rsvID, "") 
+'	Form.ShowAlert(s_pros, "") 
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	Label1.caption = g_time
+	Label2.caption = g_loca
+	
+		
+		
+End Sub
+
+
+'============================================================================
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	Form.OpenFramePopup( "mbetc99130.xmf" , "" , "" )	
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1" , "PROS_CLS_CODE" , 0 , s_pros )
+	
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1" , "INP_ITEM_ID" , 0 , s_rsvID )
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1" , "CUST_ID" , 0 , s_UID ) '유저ID DB에 잘들어가나 확인
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1" , "PRTF_ID" , 0 , s_PID )
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "USER_NAME", 0 , s_username)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "CUST_TELNO", 0 , s_cust)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "PLAC_CNTT", 0 , s_plac)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "RSEV_YMDH", 0 , s_rsev)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "PRTR_MATR_DTL_CNTT", 0 , s_prtr)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "INP_RSEV_CLS_CODE", 0 , s_inp_rsev)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "INP_RSEV_STAT_CODE", 0 , s_inp_stat_code)
+	
+	if s_UID == "" then
+		DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "INP_MEMB_CLS_CODE", 0 , "2")
+	else
+		DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1", "INP_MEMB_CLS_CODE", 0 , "1")
+	end if
+	
+		
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	
+		DATAMANAGER.RequestTranData("obcpp_rbit_022a")
+		Form.OpenFramePopup( "mbetc99130.xmf" , "" , "" )
+		Form.SendReturnToParent("RESERVATION_CLOSE","1")
+		Form.CloseForm()
+		
+	
+End Sub
+
+
+
+'============================================================================
+Sub Button1_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_rbit_022a" trcode="obcpp_rbit_022a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_rbit_022a" title="예약정보처리성서비스" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="667" _ulen="505" >
+
+INP_ITEM_ID^인턴쉽항목ID^6^0^7^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+CUST_ID^고객ID^20^0^0^0^0^0^0
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+RSEV_YMDH^예약일시^19^0^0^0^0^0^0
+PRTR_MATR_DTL_CNTT^특이사항상세내용^1000^0^0^0^0^0^0
+CUST_TELNO^고객전화번호^16^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+INP_MEMB_CLS_CODE^인턴쉽회원구분코드^1^0^0^0^0^0^0
+INP_RSEV_CLS_CODE^인턴쉽예약구분코드^1^0^0^0^0^0^0
+INP_RSEV_STAT_CODE^인턴쉽예약상태코드^2^0^0^0^0^0^0
+FRST_REG_YMDH^최초등록일시^19^0^0^0^0^0^0
+PLAC_CNTT^장소내용^400^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="70110" scrname="상세정보_포트폴리오_탭4" version="2" writer="윤형빈" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fontsize="-2" fontstyle="01" caption="상품 수익률 그래프" ly_vert="7,4,129,32,1" />
+		<LABEL name="Label1" fontsize="-2" fontstyle="01" caption="상품 위험 지수 그래프" ly_vert="7,211,216,32,1" />
+		<LABEL name="Label2" fontsize="-2" caption="최근 1년 평균 수익률" ly_vert="83,175,172,25,1" />
+		<CHARTEX name="ChartEx0" chartdisptype="4" ly_vert="0,36,375,133,1" >
+			<DATASETTING/>
+		</CHARTEX>
+		<CHARTEX name="ChartEx1" ly_vert="0,241,375,150,1" >
+			<DATASETTING/>
+		</CHARTEX>
+		<LABEL name="Label3" fgcolor="006:213049051" fontsize="-2" fontstyle="01" mask="0,0,,%,0,,2,1,1" halign="1" ly_vert="210,175,100,25,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4027" _ulen="3945" >
+--===========================================================================
+--===========================================================================
+
+Dim g_pid
+
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+
+		g_pid = Form.GetSharedData("Shared_PID",false ) 
+
+	
+		DATAMANAGER.SetDataValue(0, "obcpp_rbit_004r", "InBlock1", "PRTF_ID", 0 , g_pid)
+		
+		DATAMANAGER.RequestTranData("obcpp_rbit_004r")
+		
+			
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	ChartEx0.SetAccrueName("수익률")                                                  
+                                                                                                     
+	'ChartEx0.SetAccrueData("period=5=YYMMDD")                                                           
+	ChartEx0.SetPeriodType(2)	                                                              
+                                                                                                
+	ChartEx0.SetAccrueData("initdata=20150301;20150601;20150901;20160101;20160301")                                    
+	ChartEx0.SetAccrueData("changetitle=".."수익률".."=;")           
+                             
+                         
+	ChartEx0.SetChartType("line")
+	ChartEx0.setLineColor("수익률;255;0;0")
+	  	
+'------------------------------------------------------------------------------------------	
+	ChartEx1.SetAccrueName("샤프지수,표준편차")                                                  
+                                                                                               
+	ChartEx0.SetPeriodType(2)	                                                           
+	                                                                                      
+	ChartEx1.SetAccrueData("initdata=20150301;20150601;20150901;20160101;20160301") 
+	ChartEx1.SetAccrueData("changetitle=".."샤프지수"..";".."표준편차".."=;")           
+    
+	                         
+	 
+	 ChartEx1.setLineColor("샤프지수;100;255;50")
+	 ChartEx1.setLineColor("표준편차;0;0;255")
+	 
+	
+	
+	
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	if szTranID == "obcpp_rbit_004r" then
+	ChartEx0.SetPriceFormat("data1^10^2")	
+	temp0= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M1_ERT" , 0)
+	temp1= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M3_ERT" , 0)
+	temp2= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M6_ERT" , 0)
+	temp3= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M12_ERT" , 0)
+	temp4= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M36_ERT" , 0)
+	
+
+	ChartEx0.SetAccrueData("자료일자=150301;150601;150901;160101;160301")       
+	ChartEx0.SetAccrueData("data1="&temp0&";"&temp1&";"&temp2&";"&temp3&";"&temp4&"=2")
+		
+	ChartEx0.SetAccrueData("repaintall");	 
+	
+	
+	Label3.caption= (temp1+temp2+temp3+temp4)/4
+	ChartEx1.SetPriceFormat("data1^10^2")
+	ChartEx1.SetPriceFormat("data2^10^2")
+	
+	
+	temp5= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M1_LSRT" , 0)
+	temp6= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M3_LSRT" , 0)
+	temp7= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M6_LSRT" , 0)
+	temp8= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "M12_LSRT" , 0)
+	temp9= DATAMANAGER.GetDataValue(0, "obcpp_rbit_004r", "OutBlock1", "INP_M36_LSRT" , 0)
+	
+	
+	temp1 = temp1/temp5
+	temp2 = temp2/temp6
+	temp3 = temp3/temp7
+	temp4 = temp4/temp8
+	temp5 = temp4/temp9
+
+	ChartEx1.SetAccrueData("자료일자=150301;150601;150901;160101;160301")       
+	ChartEx1.SetAccrueData("data1="&temp5&";"&temp6&";"&temp7&";"&temp8&";"&temp9&"=2")
+	ChartEx1.SetAccrueData("data2="&temp0&";"&temp1&";"&temp2&";"&temp3&";"&temp4&"=2")
+	
+	
+	ChartEx1.SetAccrueData("repaintall");	
+
+
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_rbit_004r" trcode="obcpp_rbit_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_rbit_004r" title="포트폴리오단건조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="48" _ulen="38" >
+
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1661" _ulen="1229" >
+
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+MOD_YMDH^수정일시^19^0^0^0^0^0^0
+USE_YN^사용여부^1^0^0^0^0^0^0
+PRTF_NAME^포트폴리오명^40^0^0^0^0^0^0
+MIN_MTRT_DATE^최소만기일자^8^0^0^0^0^0^0
+MIN_JOIN_AMT^최소가입금액^19^0^7^0^0^0^0
+NTNL_GR_LCTN_CLCD^국가군소재지구분코드^1^0^0^0^0^0^0
+TOTAL_ASET_AMT^총자산금액^19^0^7^0^0^0^0
+PRTF_TPCD^포트폴리오유형코드^2^0^0^0^0^0^0
+INP_RISK_GRAD_SCOR^인턴쉽위험등급점수^4^0^7^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+IISC_FEE_CLS_CODE^집합투자증권수수료구분코드^2^0^0^0^0^0^0
+FRST_REG_YMDH^최초등록일시^19^0^0^0^0^0^0
+PROD_RCMT_DTL_CNTT^상품추천상세내용^4000^0^0^0^0^0^0
+INP_MAX_ACML_LSRT^인턴쉽최대누적손실률^6^2^7^0^0^0^0
+OUTS_INVT_ADCP_CODE^외부투자자문사코드^5^0^0^0^0^0^0
+ERT^수익률^14^5^7^0^0^0^0
+INP_RISK_GRAD_CODE^인턴쉽위험등급코드^2^0^0^0^0^0^0
+STCK_RLIM^주식비중^20^9^7^0^0^0^0
+BOND_RLIM^채권비중^20^9^7^0^0^0^0
+FUTS_VOL_RLIM^선물거래량비중^14^5^7^0^0^0^0
+CASH_RLIM^현금비중^20^9^7^0^0^0^0
+INP_RLES_RLIM^인턴쉽부동산비중^20^9^7^0^0^0^0
+INP_IMSI_RLIM^인턴쉽적금비중^20^9^7^0^0^0^0
+ETC_RLIM^기타비중^20^9^7^0^0^0^0
+M1_LSRT^1개월손실률^11^6^7^0^0^0^0
+M3_LSRT^3개월손실률^11^6^7^0^0^0^0
+M6_LSRT^6개월손실률^11^6^7^0^0^0^0
+M12_LSRT^12개월손실률^11^6^7^0^0^0^0
+INP_M36_LSRT^인턴쉽36개월손실률^11^6^7^0^0^0^0
+M1_ERT^1개월수익률^23^6^7^0^0^0^0
+M3_ERT^3개월수익률^23^6^7^0^0^0^0
+M6_ERT^6개월수익률^23^6^7^0^0^0^0
+M12_ERT^12개월수익률^23^6^7^0^0^0^0
+M36_ERT^36개월수익률^14^5^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="7" inout="out" _len="115" _ulen="95" >
+
+TYPE_EXPL^유형설명^100^0^0^0^0^0^0
+RATE^비율^10^5^7^0^0^0^0
+UI_COL_NO^UI색상번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

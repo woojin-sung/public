@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="외화이체_금액입력키패드" version="2" writer="이아영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="input_03_n.9" ly_vert="0,190,375,457,1" />
+		<LABEL name="Label0" fontsize="3" fontstyle="01" caption="보낼 금액 입력" halign="1" valign="0" ly_vert="20,210,335,35,1" />
+		<IMAGE name="imgBox" imgpath="bg_infobox.9" ly_vert="20,250,335,35,1" />
+		<IMAGE name="imgCurrency" autosize="1" ly_vert="110,255,25,25,1" />
+		<LABEL name="lblAbleAmt" fgcolor="146:124124124" mask="0,0,,,0,,2,1,1" paddinginfo="1,0,0,0" ly_vert="145,250,150,35,1" />
+		<EDIT name="edtPrc" fontsize="12" mask="0,0,,,0,,2,1,0" halign="1" imetype="1" maxlength="20" hintcaption="보낼 금액 입력" clearall="0" imagefilepth="alpha" ly_vert="20,300,335,39,1" />
+		<BUTTON name="btnPrc" fgcolor="146:124124124" btnimage="alpha" halign="0" ly_vert="20,300,335,39,1" />
+		<IMAGE name="ImgPrcreset" visible="0" autosize="1" imgpath="icon_remove.png" ly_vert="330,311,20,18,0" />
+		<LABEL name="Label2" bgcolor="004:000000000" transmode="0" ly_vert="20,340,335,1,1" />
+		<LABEL name="lblOver" visible="0" fgcolor="006:213049051" fontsize="-2" caption="출금가능금액을 확인해주세요" halign="1" ly_vert="30,345,315,19,0" />
+		<BUTTON name="btn10" caption="10$" fgcolor="004:000000000" fontsize="-3" btnimage="btn_02.9" ly_vert="20,371,60,27,1" />
+		<BUTTON name="btn50" caption="50$" fgcolor="004:000000000" fontsize="-3" btnimage="btn_02.9" ly_vert="85,371,60,27,1" />
+		<BUTTON name="btn100" caption="100$" fgcolor="004:000000000" fontsize="-3" btnimage="btn_02.9" ly_vert="150,371,65,27,1" />
+		<BUTTON name="btn1000" caption="1,000$" fgcolor="004:000000000" fontsize="-3" btnimage="btn_02.9" ly_vert="220,371,70,27,1" />
+		<BUTTON name="btnPlusAll" caption="전액" fgcolor="004:000000000" fontsize="-3" btnimage="btn_02.9" ly_vert="295,371,60,27,1" />
+		<BUTTON name="btn1" caption="1" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="0,405,125,45,1" />
+		<BUTTON name="btn2" caption="2" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="125,405,125,45,1" />
+		<BUTTON name="btn3" caption="3" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="250,405,125,45,1" />
+		<BUTTON name="btn4" caption="4" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="0,450,125,45,1" />
+		<BUTTON name="btn5" caption="5" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="125,450,125,45,1" />
+		<BUTTON name="btn6" caption="6" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="250,450,125,45,1" />
+		<BUTTON name="btn7" caption="7" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="0,495,125,45,1" />
+		<BUTTON name="btn8" caption="8" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="125,495,125,45,1" />
+		<BUTTON name="btn9" caption="9" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="250,495,125,45,1" />
+		<BUTTON name="btnDot" caption="." fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="0,540,125,45,1" />
+		<BUTTON name="btn0" caption="0" fgcolor="004:000000000" fontsize="10" btnimage="btn_keypad6.9" ly_vert="125,540,125,45,1" />
+		<BUTTON name="btnBack" caption="←" fgcolor="004:000000000" fontsize="12" btnimage="btn_keypad6.9" ly_vert="250,540,125,45,1" />
+		<BUTTON name="btnConfirm" caption="확인" btnimage="btn_20.9" ly_vert="-5,597,385,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12714" _ulen="12184" >
+
+'============================================================================
+' 화 면 명 : 외화이체 금액입력키패드
+'============================================================================
+
+dim g_szOpenPrc
+dim g_szMaxPrc
+dim g_szCurrencyCode
+
+dim g_szDecimal
+
+'============================================================================
+Sub Form_OnFormInitBefore()	
+	imgCurrency.setMaintainingRatio("1")
+	ImgPrcreset.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpen
+	
+	Form.SetScreenName("가격입력기")
+	szOpen = Form.GetOpenLinkData()
+
+	'사용자입력금액★출금가능금액★통화코드★
+	if Trim(szOpen) <> "" then
+		tData = Split(szOpen, "★")
+		
+		g_szOpenPrc		= tData(0)
+		g_szMaxPrc		= tData(1)
+		g_szCurrencyCode	= tData(2)
+	
+		'통화코드별 화면 셋팅
+		f_SetScreen(g_szCurrencyCode)
+	else
+		g_szOpenPrc = 0
+		g_szMaxPrc = 0
+		g_szCurrencyCode = ""
+	end if
+	
+'	f_SetBtnConfirmEnable()
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btn1_OnClick
+'============================================================================
+Sub btn1_OnClick()
+	f_AppendAmt(1)
+End Sub
+
+'============================================================================
+' btn2_OnClick
+'============================================================================
+Sub btn2_OnClick()
+	f_AppendAmt(2)
+End Sub
+
+'============================================================================
+' btn3_OnClick
+'============================================================================
+Sub btn3_OnClick()
+	f_AppendAmt(3)
+End Sub
+
+'============================================================================
+' btn4_OnClick
+'============================================================================
+Sub btn4_OnClick()
+	f_AppendAmt(4)
+End Sub
+
+'============================================================================
+' btn5_OnClick
+'============================================================================
+Sub btn5_OnClick()
+	f_AppendAmt(5)
+End Sub
+
+'============================================================================
+' btn6_OnClick
+'============================================================================
+Sub btn6_OnClick()
+	f_AppendAmt(6)
+End Sub
+
+'============================================================================
+' btn7_OnClick
+'============================================================================
+Sub btn7_OnClick()
+	f_AppendAmt(7)
+End Sub
+
+'============================================================================
+' btn8_OnClick
+'============================================================================
+Sub btn8_OnClick()
+	f_AppendAmt(8)
+End Sub
+
+'============================================================================
+' btn9_OnClick
+'============================================================================
+Sub btn9_OnClick()
+	f_AppendAmt(9)
+End Sub
+
+'============================================================================
+' btn0_OnClick
+'============================================================================
+Sub btn0_OnClick()
+	f_AppendAmt(0)
+'	Calc_Zero("0")
+End Sub
+
+'============================================================================
+' btnDot_OnClick
+'============================================================================
+Sub btnDot_OnClick()
+	Calc_Zero(".")
+End Sub
+
+'============================================================================
+' btnBack_OnClick
+'============================================================================
+Sub btnBack_OnClick()
+	Dim nLen
+	nLen = Len(edtPrc.caption)
+
+	if nLen <> 0 then
+		szPrc = Left(edtPrc.caption, nLen-1)
+		edtPrc.caption = szPrc
+	end if
+	
+	if edtPrc.caption = "" then
+		ImgPrcreset.visible = false
+	end if
+	
+'	f_SetBtnConfirmEnable()
+	btnConfirm.enable = true	
+	btnConfirm.btnimage = "btn_20.9"
+	btnConfirm.fgcolor = "273"
+	
+End Sub
+
+'============================================================================
+' btnConfirm_OnClick
+'============================================================================
+Sub btnConfirm_OnClick()
+	szPrc = edtPrc.caption
+	if szPrc <> "" and g_szCurrencyCode = "JPY" and (CDBL(szPrc) > int(szPrc)) then
+		Form.MsgBox( "알림", "[JPY] 통화는 소수점 이하 금액\n이체가 불가합니다.\n보낼 금액을 다시 입력해주세요.", "", 6 )
+		Exit Sub
+	end if
+	Form.SendReturnToParent("mbbnk64010_p0", szPrc)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' BtnClose_OnClick : 닫기
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.SendReturnToParent("mbbnk64010_p0", g_szOpenPrc)						
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+' 10$
+Sub btn10_OnClick()
+	if g_szCurrencyCode = "JPY" then
+		n10_Unit = 1000
+	else
+		n10_Unit = 10	
+	end if
+	
+	f_AddAmt(n10_Unit)
+End Sub
+
+'============================================================================
+' 50$
+Sub btn50_OnClick()
+	if g_szCurrencyCode = "JPY" then
+		n50_Unit = 5000
+	elseif g_szCurrencyCode = "CNY" then
+		n50_Unit = 500
+	else
+		n50_Unit = 50
+	end if
+	
+	f_AddAmt(n50_Unit)
+End Sub
+
+'============================================================================
+' 100$
+Sub btn100_OnClick()
+	if g_szCurrencyCode = "JPY" then
+		n100_Unit = 10000
+	elseif g_szCurrencyCode = "CNY" then
+		n100_Unit = 1000
+	else
+		n100_Unit = 100
+	end if
+	
+	f_AddAmt(n100_Unit)
+End Sub
+
+'============================================================================
+' 1000$
+Sub btn1000_OnClick()
+	if g_szCurrencyCode = "JPY" then
+		n1000_Unit = 100000
+	elseif g_szCurrencyCode = "CNY" then
+		n1000_Unit = 10000
+	else
+		n1000_Unit = 1000
+	end if
+	
+	f_AddAmt(n1000_Unit)
+End Sub
+
+'============================================================================
+' 전액 클릭시
+Sub btnPlusAll_OnClick()
+
+	edtPrc.caption = Cdbl(g_szMaxPrc)
+	f_SetBtnConfirmEnable()
+	
+End Sub
+
+'============================================================================
+Sub f_AppendAmt(szAmt)
+
+    If (Cdbl(edtPrc.caption..szAmt) >= 1000000000000) Then	'Max 정수기준 12자리
+        return
+    End If
+
+    edtPrc.caption = edtPrc.caption..szAmt
+    
+    if Len(edtPrc.caption) > 10 then
+	    '입력된 금액 자릿수 긴 경우 x 버튼 이미지랑 겹치지 않도록 위치 이동.
+	    edtPrc.left = 10
+	    ImgPrcreset.left = 335
+	end if
+    
+    f_SetBtnConfirmEnable()
+    
+End Sub
+
+'============================================================================
+Sub f_AddAmt(szAmt)
+
+    If (Cdbl(edtPrc.caption) + Cdbl(szAmt) >= 1000000000000) Then	'Max 정수기준 12자리
+        return
+    End If
+
+    edtPrc.caption = Cdbl(edtPrc.caption) + Cdbl(szAmt)
+    f_SetBtnConfirmEnable()
+    
+End Sub
+
+'============================================================================
+Function Calc_Zero(szPlus)
+	Dim szPrc
+	
+	szPrc = edtPrc.caption	
+		
+	' "."이 있는지 체크
+	szChk = InStr(edtPrc.caption, ".")
+
+	if CStr(szChk) <> "0" then
+		if Trim(szPlus) == "." then
+			Exit Function
+		else
+			szCha = CInt(Len(edtPrc.caption) - szChk)
+			
+			if CStr(szCha) == g_szDecimal then
+				Exit Function
+			elseif CStr(szCha) == "1" then
+				if Len(szPlus) == 1 then
+					edtPrc.caption = edtPrc.caption & szPlus
+					szPrc = edtPrc.caption & szPlus
+				end if
+				
+				Exit Function
+			end if
+		end if
+	else
+'		szPrc = edtPrc.caption & szPlus
+	end if
+	
+	if Len(edtPrc.caption) > 0 then
+		szPrc = edtPrc.caption & szPlus
+		
+		Sum_Prc(szPrc)
+	end if
+	
+	f_SetBtnConfirmEnable()
+End Function
+
+'============================================================================
+' Sum_Prc
+'============================================================================
+Function Sum_Prc(szData)
+	if Cdbl(szData) < 1000000000000 then		'Max 정수기준 12자리
+	'if Len(szData) < 12 then		' Max 11
+		edtPrc.caption = szData
+	end if
+End Function	
+
+'============================================================================
+Sub ImgPrcreset_OnClick()
+	edtPrc.caption = ""
+	lblOver.visible   = false
+	
+	'입력된 금액 자릿수 긴 경우 x 버튼 이미지랑 겹치지 않도록 위치 이동.
+	edtPrc.left = 20
+	ImgPrcreset.left = 330
+	    
+'	f_SetBtnConfirmEnable()
+	btnConfirm.enable = true	
+	btnConfirm.btnimage = "btn_20.9"
+	btnConfirm.fgcolor = "273"
+	
+End Sub
+
+'============================================================================
+Function f_CheckAbleAmt()
+
+	If edtPrc.caption == "" or CDBL(edtPrc.caption) = 0 Then
+	'If edtPrc.caption == "" Then
+		ImgPrcreset.visible = false
+		btnConfirm.enable   = false
+	Else
+		ImgPrcreset.visible = true '금액클리어 버튼
+	End If
+	
+'ShowAlert(edtPrc.caption, g_szMaxPrc)
+	If CDBL(edtPrc.caption) > CDBL(g_szMaxPrc) Then
+		lblOver.visible = true
+'		btnConfirm.enable = false
+	else
+		lblOver.visible   = false
+'		btnConfirm.enable = true
+	end if
+
+End Function
+
+'============================================================================
+Function f_SetBtnConfirmEnable()
+	btnConfirm.btnimage = "btn_15.9"
+	btnConfirm.enable = false
+
+	f_CheckAbleAmt()
+
+	if edtPrc.caption = "" or edtPrc.caption = NULL or CDBL(edtPrc.caption) = 0 then
+'		btnConfirm.enable = false
+		Exit Function	
+	end if
+
+	If CDBL(edtPrc.caption) > CDBL(g_szMaxPrc) Then
+		btnConfirm.enable = false
+		Exit Function	
+	end if
+	
+	'이체가능
+	btnConfirm.enable = true	
+	btnConfirm.btnimage = "btn_20.9"
+	btnConfirm.fgcolor = "273"
+End Function
+
+
+'============================================================================
+Function f_SetScreen(g_szCurrencyCode)
+'	'JPY 이외의 통화는 소수점 두자리 표현
+'	if g_szCurrencyCode = "JPY" then
+'		g_szDecimal = 0
+'	else
+		g_szDecimal = "2"
+'	end if
+	
+	'통화별 이미지 & masking 표시
+	if g_szCurrencyCode = "USD" then
+		imgCurrency.imgpath = "flag_us2.png"		
+	elseif g_szCurrencyCode = "HKD" then
+		imgCurrency.imgpath = "flag_hk.png"
+	elseif g_szCurrencyCode = "JPY" then
+		imgCurrency.imgpath = "flag_jp2.png"
+	elseif g_szCurrencyCode = "CNY" then
+		imgCurrency.imgpath = "flag_chn.png"
+	elseif g_szCurrencyCode = "EUR" then
+		imgCurrency.imgpath = "flag_eu.png"
+	elseif g_szCurrencyCode = "GBP" then
+		imgCurrency.imgpath = "flag_uk.png"
+	elseif g_szCurrencyCode = "AUD" then
+		imgCurrency.imgpath = "flag_aus.png"
+	elseif g_szCurrencyCode = "SGD" then
+		imgCurrency.imgpath = "flag_sgp.png"
+	elseif g_szCurrencyCode = "CAD" then
+		imgCurrency.imgpath = "flag_can.png"
+	elseif g_szCurrencyCode = "CHF" then
+		imgCurrency.imgpath = "flag_swi.png"
+	else
+		imgCurrency.imgpath = "flag_general.png"
+	end if
+	
+	
+	'통화별 출금가능금액
+	lblAbleAmt.caption = g_szMaxPrc
+	sMask = "0,0,," .. " " ..g_szCurrencyCode .. ",1,,"..g_szDecimal..",1,0,0,0"
+	lblAbleAmt.mask = sMask
+	
+	
+	'보낼금액
+	edtPrc.caption = g_szOpenPrc
+	sMask = "0,0,," .. " " ..g_szCurrencyCode .. ",1,,"..g_szDecimal..",1,0,0,0"
+	edtPrc.mask = sMask
+	
+	if CDBL(g_szOpenPrc) > 0 then
+		ImgPrcreset.visible = true
+	else
+		ImgPrcreset.visible = false
+	end if
+	
+
+	'통화별 기호 표시
+	if g_szCurrencyCode = "JPY" or g_szCurrencyCode = "CNY" then
+		szSymbol = "￥"
+	elseif g_szCurrencyCode = "EUR" then
+		szSymbol = "€"
+	elseif g_szCurrencyCode = "GBP" then
+		szSymbol = "￡"
+	elseif g_szCurrencyCode = "USD" or g_szCurrencyCode = "HKD" or g_szCurrencyCode = "AUD" or g_szCurrencyCode = "SGD" or g_szCurrencyCode = "CAD" then
+		szSymbol = "$"
+	elseif g_szCurrencyCode = "CHF" then
+		szSymbol = "Fr"
+	else
+		'USD, HKD, AUD, SGD, CAD
+		szSymbol = ""
+	end if
+
+
+	'통화별 금액 단축버튼
+	'' : 버튼명이 너무 길어서.. 버튼명 잘리지만 않게 너비 늘려놓은 상태!  추후 변경할꺼임!!
+	if g_szCurrencyCode = "JPY" then
+		btn10.caption = "1,000" & szSymbol
+		btn50.caption = "5,000" & szSymbol
+		btn100.caption = "10,000" & szSymbol
+		btn1000.caption = "100,000" & szSymbol
+		
+		btn1000.width = 80
+		btnPlusAll.left = 305
+		btnPlusAll.width = 50
+		
+	elseif g_szCurrencyCode = "CNY" then
+		btn10.caption = "10" & szSymbol
+		btn50.caption = "500" & szSymbol
+		btn100.caption = "1,000" & szSymbol
+		btn1000.caption = "10,000" & szSymbol	
+		
+		btn1000.width = 80
+		btnPlusAll.left = 305
+		btnPlusAll.width = 50
+		
+	else
+		btn10.caption = "10" & szSymbol
+		btn50.caption = "50" & szSymbol
+		btn100.caption = "100" & szSymbol
+		btn1000.caption = "1,000" & szSymbol
+	
+		btn1000.width = 70
+		btnPlusAll.left = 295
+		btnPlusAll.width = 60
+	end if
+	
+End Function
+
+	</SCRIPT_INFO>
+</ROOT>

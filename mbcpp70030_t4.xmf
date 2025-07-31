@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="70030" scrname="투자 성향 진단_탭4" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<BUTTON name="Button0" caption="결과 확인" btnimage="btn_05.9" ly_vert="86,457,186,64,1" />
+		<LABEL name="Label2" fontsize="-2" caption="예상 밖의 여유자금 1억원이 생긴다면, 다음 중 어떤 것을 선택하시겠습니까?" multiline="1" ly_vert="41,42,298,34,1" />
+		<RADIOGROUP name="RadioGroup1" fontsize="-2" buttonsnumber="4" ly_vert="54,75,257,140,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="70% 예금, 30% 위험자산에 투자" position="2,2,252,32" />
+				<RADIO no="1" text="50% 예금, 50% 위험자산에 투자" position="2,37,252,32" />
+				<RADIO no="2" text="30% 예금, 70% 위험자산에 투자" position="2,72,252,32" />
+				<RADIO no="3" text="10% 예금, 90% 위험자산에 투자" position="2,107,252,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="Label1" fontsize="-2" caption="다음 투자 안 중에서 어떤 투자안을 고르시겠습니까?" ly_vert="35,252,298,34,1" />
+		<RADIOGROUP name="RadioGroup0" fontsize="-3" buttonsnumber="4" ly_vert="19,285,337,147,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="최대 수익률 6%, 기대 수익률 3%, 최대 손실률 -1%" position="2,2,396,32" />
+				<RADIO no="1" text="최대 수익률15%, 기대 수익률 6%, 최대 손실률 -9%" position="2,37,396,32" />
+				<RADIO no="2" text="최대 수익률 27%, 기대 수익률 10%, 최대 손실률 -19%" position="2,72,420,32" />
+				<RADIO no="3" text="최대 수익률 40%, 기대 수익률 14%, 최대 손실률 -26%" position="2,107,420,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="Label9" bgcolor="001:213049051" transmode="0" ly_vert="34,24,300,1,1" />
+		<LABEL name="Label0" bgcolor="001:213049051" transmode="0" ly_vert="34,234,300,1,1" />
+		<LABEL name="Label3" bgcolor="001:213049051" transmode="0" ly_vert="34,439,300,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4146" _ulen="4112" >
+--===========================================================================
+Dim selection_score
+Dim selection_value
+Dim projects_score
+Dim projects_value
+Dim sum
+
+
+
+--===========================================================================
+
+'============================================================================
+Sub Button0_OnClick()
+	 
+'	dim uid
+'	uid = Form.GetSharedData("&USER_ID", false )
+'
+'	Call SumTest()
+'	
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "CUST_ID", 0 , uid)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "USE_YN", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "TOTAL_CSNU", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "INP_INCL_GRAD_CODE", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "FRST_CNRC_AMT", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "SPLM_INVT_AMT", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "AGE", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "ANTC_INVT_PRD", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "INP_DVPD_INVT_EXPC", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "INP_INVT_KNLD", 0 , szValue)  
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "GOAL_AMT" ,0 , szValue)
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "INP_SCHL_REVN_YN", 0 , szValue)
+'	DATAMANAGER.SetDataValue(0, "obcpp_rbit_919a", "InBlock1", "PROS_CLS_CODE", 0 , szValue)
+'
+'	
+'	DATAMANAGER.SetDataValue('bReal, sTranID , sBlockName , sFieldName , nIndex , szValue)
+	'Form.MsgBox(sum,"","","")
+	
+	temp = Form.GetSharedData("Age_Score", false) <> "" and Form.GetSharedData("Invst_Monthly_Score", false) <> "" and Form.GetSharedData("Earn_Score", false) <> "" 
+	and Form.GetSharedData("Invst_Percent_Score", false) <> ""  and Form.GetSharedData("Regular_Earn_Score", false) <> ""  and Form.GetSharedData("Know_Score", false) <> "" 
+	and Form.GetSharedData("Exp_Score", false) and Form.GetSharedData("Risk_Combo_Score", false) and Form.GetSharedData("Lose_Score", false)
+	and Form.GetSharedData("Risk_Radio_Score", false) <> ""  and Form.GetSharedData("Selection_Score", false) <> ""  and Form.GetSharedData("Projects_Score", false)
+	
+	
+	if temp <> false then
+		Form.OpenFramePopup("mbcpp70040.xmf","","")
+	else
+		Form.ShowAlert("알림","모든 문항에 대한 답변을 해주십시오")
+	end if
+
+End Sub
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	if nIndex = 0 then
+		selection_score = 1
+		selection_value = 1
+	elseif nIndex = 1 then
+		selection_score = 2
+		selection_value = 2
+	elseif nIndex = 2 then
+		selection_score = 3
+		selection_value = 3
+	else
+		selection_score = 4
+		selection_value = 4
+	end if
+	
+
+
+	Form.SetSharedData("Selection_Value", selection_value)
+	Form.SetSharedData("Selection_Score", selection_score)
+
+End Sub
+
+'============================================================================
+Sub RadioGroup1_OnClick(nIndex)
+	if nIndex = 0 then
+		projects_score = 1
+		projects_value = 1
+	elseif nIndex = 1 then
+		projects_score = 2
+		projects_value = 2
+	elseif nIndex = 2 then
+		projects_score = 3
+		projects_value = 3
+	else
+		projects_score = 4
+		projects_value = 4
+	end if
+	
+
+	
+	Form.SetSharedData("Projects_Value", projects_value)
+	Form.SetSharedData("Projects_Score", projects_score)
+
+End Sub
+
+'============================================================================
+Function SumTest()
+	
+'	sum = Form.GetSharedData("Age_Score") + Form.GetSharedData("Invst_Monthly_Score") + Form.GetSharedData("Earn_Score")
+'	+ Form.GetSharedData("Invst_Percent_Score") + Form.GetSharedData("Regular_Earn_Score") + Form.GetSharedData("Know_Score")
+'	+ Form.GetSharedData("Exp_Score") + Form.GetSharedData("Risk_Combo_Score") + Form.GetSharedData("Lose_Score")
+'	+ Form.GetSharedData("Risk_Radio_Score") + Form.GetSharedData("Selection_Score") + Form.GetSharedData("Projects_Score")
+	
+
+	
+End Function
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_rbit_919a" trcode="obcpp_rbit_919a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_rbit_919a" title="obcpp_rbit_919a" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="609" _ulen="459" >
+
+CUST_ID^고객ID^20^0^0^0^0^0^0
+USE_YN^사용여부^1^0^0^0^0^0^0
+TOTAL_CSNU^총건수^8^0^7^0^0^0^0
+INP_INCL_GRAD_CODE^인턴쉽성향등급코드^2^0^0^0^0^0^0
+FRST_CNRC_AMT^최초계약금액^19^0^7^0^0^0^0
+SPLM_INVT_AMT^추가투자금액^20^9^7^0^0^0^0
+AGE^연령^4^0^7^0^0^0^0
+ANTC_INVT_PRD^예상투자기간^4^0^7^0^0^0^0
+INP_DVPD_INVT_EXPC^인턴쉽파생상품투자경험^1^0^0^0^0^0^0
+INP_INVT_KNLD^인턴쉽투자지식^1^0^0^0^0^0^0
+GOAL_AMT^목표금액^19^0^7^0^0^0^0
+INP_SCHL_REVN_YN^인턴쉽일정수입여부^1^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

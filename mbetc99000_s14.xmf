@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99000" scrname="투자성향진단5" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="저는" ly_vert="154,126,42,32,1" />
+		<LABEL name="Label2" border="1" bordercolor="144:034034034" ly_vert="14,86,350,200,1" />
+		<COMBO name="Combo0" cbinputdatatext="선택하세요.
+높은 기대수익, 높은 손실가능성
+보통의 기대수익, 보통의 손실가능성
+낮은 기대수익, 낮은 손실가능성" popuptitle="희망 기대 수익 및 손실" ly_vert="64,176,250,32,1" />
+		<LABEL name="Label1" caption="을 선호합니다." ly_vert="124,236,112,32,1" />
+		<BUTTON name="Button0" caption="진단결과 보기 →" fontstyle="01" btnimage="btn_05.9" ly_vert="100,360,180,42,1" />
+		<LABEL name="Label4" fontstyle="01" caption="Q5." transmode="0" halign="1" ly_vert="30,70,50,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1292" _ulen="1266" >
+'============================================================================
+Sub Combo0_OnEditComplete(iIndex)
+	
+	nIndex = Combo0.currentindex
+
+
+	Select Case CInt(nIndex)
+		Case 1
+			score = 30
+		Case 2
+			score = 20
+			
+		Case 3 
+			score = 10
+		End Select
+		
+		
+		Form.SetSharedData("score10", score)
+		
+		
+		if Combo0.currentindex <> "0" then
+		check_flag_5 = "1"
+		
+		else
+		check_flag_5 = "0"
+		
+		end if
+		
+		
+
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+
+  check_flag_1 = Form.GetSharedData("check_flag_1", true )
+  check_flag_2 = Form.GetSharedData("check_flag_2", true )
+  check_flag_3 = Form.GetSharedData("check_flag_3", true )
+  check_flag_4 = Form.GetSharedData("check_flag_4", true )
+  
+ ' Form.ShowAlert("", check_flag_1&"/"&check_flag_2&"/"&check_flag_3&"/"&check_flag_4&"/"&check_flag_5)
+
+ if check_flag_1 == "1" and check_flag_2 == "1" and check_flag_3 == "1" and check_flag_4 == "1" and check_flag_5 == "1"  then
+	Form.OpenFramePopup("mbetc99000_s15" , "" , "")
+	
+ else 
+	Form.Toast(0,"입력하지 않은 항목이 있습니다.", 0.5)
+	
+ end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	check_flag_5 = "0"
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

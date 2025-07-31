@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="FAQ_내용보기" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" caption="FAQ 내용 보기" ly_vert="40,4,222,30,1" />
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_main_01" ly_vert="9,7,24,24,1" />
+		<CONTAINER name="Container0" vscroll="1" scroll_pos="0,0" ly_vert="0,125,375,522,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="Title2" fontstyle="01" caption="A" valign="0" paddinginfo="1,0,0,0" ly_vert="20,17,30,35,1" />
+				<LABEL name="LabelText" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="45,15,309,150,1" />
+				<LABEL name="LabelNotice1" visible="0" fgcolor="067:049081150" fontsize="-1" fontstyle="11" caption="일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십일이삼사오육칠팔구십" autofontsize="1" click="1" ly_vert="45,45,310,23,0" />
+				<LABEL name="LabelNotice2" fgcolor="067:049081150" fontsize="-1" fontstyle="11" autofontsize="1" click="1" ly_vert="45,75,310,23,1" />
+				<LABEL name="LabelBlank" ly_vert="0,110,375,25,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="Title0" fontstyle="01" caption="Q" valign="0" paddinginfo="1,0,0,0" ly_vert="20,45,30,35,1" />
+		<LABEL name="LabelTitle" fontstyle="01" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="50,43,310,80,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="13232" _ulen="12248" >
+'============================================================================
+' 01. 화 면 명 : 제안하기_제안내용보기(답변완료)
+' 02. 작    성 : 신명준
+'============================================================================
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+
+Dim g_PROP_REG_ID
+Dim g_ANSR_CNTT
+
+Dim maxLength				' 한 줄 최대 글자수
+Dim g_LinHeight_answer		' 한 줄당 추가되는 컨트롤 높이 '20230511 수정
+Dim g_LinHeight_response	' 한 줄당 추가되는 컨트롤 높이 '20230511 수정
+
+Dim gURL_Type1
+Dim gURL_Type2
+
+Dim gBTN_Link1
+Dim gBTN_Link2
+
+Dim gURL_Link1
+Dim gURL_Link2
+
+Dim g_szOsType
+
+maxLength					= 23	
+g_LinHeight_answer			= 35 '20230511 수정
+
+'20231030 android, ios 별로 답변 높이를 따로 지정
+g_LinHeight_response_ios		= 20 
+g_LinHeight_response_android	= 20 
+
+g_LinHeight_notice          	= 18
+
+'===========================================================================
+' 							FORM 함수
+'============================================================================
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBackPress.SetMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Title0.fgcolor = "67"	'Q.
+	Container0.Title2.fgcolor = "67"	'A.
+	Container0.bgcolor = "066"
+
+
+	g_PROP_REG_ID = Form.GetOpenLinkData()
+	g_szOsType 	= Form.GetSharedData("&OS_TYPE", False) '1.안드로이드 2.iO
+	
+	if g_szOsType == "1" then
+		Title0.top = 45
+		Container0.Title2.top = 17
+		g_LinHeight_response = g_LinHeight_response_android
+	else
+		Title0.top = 42
+		Container0.Title2.top = 15
+		g_LinHeight_response = g_LinHeight_response_ios
+	end if 
+		
+	if g_PROP_REG_ID <> "" and g_PROP_REG_ID <> null then
+		DATAMANAGER.RequestTranData("obcpp_cbbs_021u")
+	end if
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)	
+	if szTranID == "obcpp_cbbs_021u" then
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "PROP_REG_ID", 0, g_PROP_REG_ID)
+	end if	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim iTextLength
+	Dim stCaption
+	
+	if szTranID == "obcpp_cbbs_021u" then
+	
+		Dim szQSTN_TITL_NAME
+		szQSTN_TITL_NAME  = DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "QSTN_TITL_NAME",	0)
+		g_ANSR_CNTT		= DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "QSTN_ANSR_CNTT",	0)
+		
+		'20240112 START
+		'LabelTitle.caption = szQSTN_TITL_NAME
+		'LabelTitle.SetMaxLineCount(5)	'컨트롤 라인 제한 함수	
+		if g_szOsType == "1" then 
+			
+			LabelTitle.caption = szQSTN_TITL_NAME
+			lineCntTitle = LabelTitle.linecnt
+			LabelTitle.height = lineCntTitle * 15 + 15
+		
+			nOrgnContTop = Container0.top
+			nNewContTop = CInt(Form.calcUnResize(LabelTitle.top, "1")) + CInt(Form.calcUnResize( LabelTitle.height, "1")) + 10
+			Container0.top  = nNewContTop
+			
+			if nNewContTop >= nOrgnContTop then
+				nNewContHeight = Container0.height - (nNewContTop - nOrgnContTop)
+			else
+				nNewContHeight = Container0.height + (nOrgnContTop - nNewContTop)
+			end if
+			
+			Container0.height = nNewContHeight
+			
+		else
+			
+			LabelTitle.fontsize = 0
+			LabelTitle.paddinginfo = "0,0,0,0"
+			LabelTitle.caption = szQSTN_TITL_NAME
+			LabelTitle.sizeTextFit()
+			
+			'오차줄이기
+'			'lineCntTitle = Cint(Form.getLen(szQSTN_TITL_NAME) / 20)
+'			lineCntTitle = Cint(Form.getLen(szQSTN_TITL_NAME) / 30)
+'		ShowAlert("---", lineCntTitle)	
+'			LabelTitle.height = LabelTitle.height - lineCntTitle * 5
+		
+			nOrgnContTop = Container0.top
+			Container0.top = LabelTitle.top + LabelTitle.height + 10
+			nNewContTop = Container0.top
+			
+			if nNewContTop >= nOrgnContTop then
+				nNewContHeight = Container0.height - (nNewContTop - nOrgnContTop)
+			else
+				nNewContHeight = Container0.height + (nOrgnContTop - nNewContTop)
+			end if
+			
+			Container0.height = nNewContHeight
+			
+		end if
+		
+		'20240112 END
+		
+		'화면 링크할 게 있는 경우!
+		gURL_Type1 = Trim(DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "BTN_LNKN_TYPE_CODE1",	0))	'버튼연결유형코드 (M: MTS_화면번호, U: url)
+		gURL_Link1 = Trim(DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "BTN_URL1",	0))			'버튼URL
+		gBTN_Link1 = Trim(DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "BTN_CNTT1",	0))			'버튼내용
+		
+		if Trim(gURL_Type1) <> "" then
+			Container0.LabelNotice1.caption = gBTN_Link1
+			Container0.LabelNotice1.visible = True
+		else
+			Container0.LabelNotice1.visible = False
+		end if
+		
+		gURL_Type2 = Trim(DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "BTN_LNKN_TYPE_CODE2",	0))	'버튼연결유형코드 (M: MTS_화면번호, U: url)
+		gURL_Link2 = Trim(DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "BTN_URL2",	0))			'버튼URL
+		gBTN_Link2 = Trim(DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "BTN_CNTT2",	0))			'버튼내용
+		
+		if Trim(gURL_Type2) <> "" then
+			Container0.LabelNotice2.caption = gBTN_Link2
+			Container0.LabelNotice2.visible = True
+		else
+			Container0.LabelNotice2.visible = False
+		end if
+
+		'20240112 START
+		'call f_CountLine(1)
+		
+		if g_szOsType == "1" then 
+		
+			'Container0.LabelText.fontsize = 0
+			'세팅순서 : 본문내용 넣어주기 > 본문내용 몇줄인지 가져오기 > 라벨높이값 조정 > 최대줄수 조정 > 버튼URL있는 경우 높이 조정 > 컨테이너 사이즈조정
+			Container0.LabelText.caption = g_ANSR_CNTT
+			lineCnt = Container0.LabelText.linecnt
+			Container0.LabelText.height = lineCnt * 15
+			Container0.LabelText.SetMaxLineCount(600) 	'안드로이드 디폴트 맥스라인 카운트가 100이므로, 늘려준다
+
+			if Trim(gURL_Type1) <> "" or Trim(gURL_Type2) <> "" then
+				if Trim(gURL_Type1) == "" then
+					Container0.LabelNotice1.height = 0
+				end if
+				if Trim(gURL_Type2) == "" then
+					Container0.LabelNotice2.height = 0
+				end if
+				Container0.LabelNotice1.top = 25 + CInt(Form.calcUnResize(Container0.LabelText.height, "1")) 'Container0.LabelText.height
+				Container0.LabelNotice2.top = 25 + CInt(Form.calcUnResize(Container0.LabelNotice1.height, "1")) + CInt(Form.calcUnResize(Container0.LabelText.height, "1"))'Container0.LabelText.height + Container0.LabelNotice1.height
+				Container0.LabelBlank.top = 25 + CInt(Form.calcUnResize(Container0.LabelNotice1.height, "1")) + CInt(Form.calcUnResize(Container0.LabelNotice2.height, "1")) + CInt(Form.calcUnResize(Container0.LabelText.height, "1"))
+			end if
+			Container0.SetScrollAutoSize()
+			
+		else
+		
+			Container0.LabelText.fontsize = 0
+			Container0.LabelText.caption = g_ANSR_CNTT
+			lineCnt = Cint(Form.getLen(g_ANSR_CNTT)/30)
+			Container0.LabelText.sizeTextFit()
+			
+			'오차줄이기
+			if lineCnt >= 10 then
+				Container0.LabelText.height = Container0.LabelText.height - lineCnt * 3
+			end if
+			
+			if Trim(gURL_Type1) <> "" or Trim(gURL_Type2) <> "" then
+				if Trim(gURL_Type1) == "" then
+					Container0.LabelNotice1.height = 0
+				end if
+				if Trim(gURL_Type2) == "" then
+					Container0.LabelNotice2.height = 0
+				end if
+				Container0.LabelNotice1.top = 25 + Container0.LabelText.height
+				Container0.LabelNotice2.top = 25 + Container0.LabelText.height + Container0.LabelNotice1.height
+				Container0.LabelBlank.top = 25 + Container0.LabelText.height + Container0.LabelNotice1.height + Container0.LabelNotice2.height
+			end if
+			Container0.SetScrollAutoSize()
+		
+		end if
+		'20240112 END
+		
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if szSubMsg <> null and szSubMsg <> "" then
+		Form.ShowAlert( "안내" , szErrMsg & "(" & szSubMsg & ")")
+	else
+		Form.ShowAlert( "안내" , szErrMsg)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Container0_LabelNotice1_OnClick()
+	'M: 화면번호, U: url
+	if gURL_Type1 == "M" then
+		Form.OpenScreen(gURL_Link1, "")
+	else
+		Form.openExternalBrowser(gURL_Link1)
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_LabelNotice2_OnClick()
+	'M: 화면번호, U: url
+	if gURL_Type2 == "M" then
+		Form.OpenScreen(gURL_Link2, "")
+	else
+		Form.openExternalBrowser(gURL_Link2)
+	end if
+End Sub
+
+
+''============================================================================
+'' 							사용자 함수
+''============================================================================
+'Function f_getLineCount(szText)
+'	Dim heightCnt, overLine
+'	Dim iNoticeLength
+'	
+'	iNoticeLength = Form.getLen(Trim(szText))
+'	
+'	' 현재 체크 중인 라인이 한 줄에 표시 가능한 최대 글자수를 넘겼는지 체크
+'	if CInt(iNoticeLength) > CInt(maxLength) then
+'	
+'		overLine = CInt(iNoticeLength) / CInt(maxLength)
+'		
+'		if (overLine - CInt(overLine)) > 0 then
+'			overLine = CInt(overLine) + 1
+'		end if
+'
+'		' 한 줄에 표시 가능한 최대 글자수 초과 시 컨트롤 높이 추가
+'		if CInt(overLine) > 0 then
+'			heightCnt = CInt(overLine)
+'		end if
+'
+'	else
+'		heightCnt = 1
+'	end if
+'	
+'	return heightCnt
+'end Function
+'
+
+
+'' 라벨 높이 조절 함수(줄 카운트)
+''============================================================================
+'Function f_CountLine(index)
+'	Dim txt, textArr, heightCnt, overLine
+'	txt			= index == 1 and g_ANSR_CNTT
+'
+'	textArr		= split(txt, CHR(10))
+'	heightCnt	= 0
+'
+'	' ===================================================================
+'	' 입력 데이터가 멀티라인인 경우
+'	' ===================================================================
+'	if UBound(textArr) > 0 then
+'		Dim textLength
+'		
+'		for i = 0 to Ubound(textArr)
+'		
+'			if textArr(i) <> null then
+'				textLength	= Form.getLen(textArr(i))
+'
+'				if CInt(textLength) > CInt(maxLength) then
+'				
+'					' 현재 체크 중인 라인이 한 줄에 표시 가능한 최대 글자수를 넘겼는지 체크
+'					overLine = CInt(textLength) / CInt(maxLength)
+'										
+'					' 한 줄에 표시 가능한 최대 글자수 초과 시 컨트롤 높이 추가
+'					if CInt(overLine) > 0 then
+'						heightCnt = heightCnt + CInt(overLine)
+'					end if
+'	
+'				else
+'					heightCnt = heightCnt + 1
+'				end if
+'			
+'			end if			
+'		next
+'
+'	' ===================================================================
+'	' 입력 데이터가 멀티라인인이 아닐 경우 or 엔터(\n)없이 입력한 경우
+'	' ===================================================================
+'	else
+'		
+'		if textArr(0) <> null then
+'			textLength = Form.getLen(textArr(0))
+'
+'			' 현재 체크 중인 라인이 한 줄에 표시 가능한 최대 글자수를 넘겼는지 체크
+'			if CInt(textLength) > CInt(maxLength) then
+'				overLine = CInt(textLength) / CInt(maxLength)
+'	
+'				' 한 줄에 표시 가능한 최대 글자수 초과 시 컨트롤 높이 추가
+'				if CInt(overLine) > 0 then
+'					heightCnt = CInt(overLine)
+'				end if
+'	
+'			else
+'				heightCnt = 1
+'			end if
+'			
+'		end if
+'
+'	end if
+'	
+''	Form.ShowAlert(index, heightCnt)
+'	
+'	' 답변내용
+'	if index == 1 then
+'		dim iLabel2Height, iNoticeLength, iNoticeHeight1, iNoticeHeight2, iNoticeHeight3
+'		dim szOsType
+'		
+'		iLabel2Height = (g_LinHeight_response * heightCnt)
+'				
+'		'Form.ShowAlert("iLabel2Height", iLabel2Height)
+'		
+'		Container0.Label2.height 	= (g_LinHeight_response * heightCnt) '20230511 수정
+''	ShowAlert("--", g_ANSR_CNTT)	
+'		Container0.Label2.caption	= g_ANSR_CNTT
+''		Container0.Label2.SetMaxLineCount(100)	'컨트롤 라인 제한 함수	
+'
+'
+'		
+'		lineCnt = Container0.Label2.linecnt
+'		Form.ShowAlert("lineCnt", lineCnt)
+'
+''				
+''		'Container0.안에서는 컨트롤의 top, height등의 위치값이 위치가 정확하게 나오지 않는다.
+''		'공지라벨 설정
+'''		if CInt(g_ButtonCnt) > 0 then 
+''		if Trim(gURL_Type1) <> "" or Trim(gURL_Type2) <> "" then
+''			Container0.LabelNotice1.top = 10 + iLabel2Height + 10
+''			
+''			heightCnt = f_getLineCount(Container0.LabelNotice1.caption)			
+''			if heightCnt > 1 then
+''				Container0.LabelNotice1.multiline = True
+''			end if
+''			
+''			iNoticeHeight1 = g_LinHeight_notice * heightCnt
+''			Container0.LabelNotice1.height = iNoticeHeight1
+''					
+''			Container0.LabelNotice2.top = 10 + iLabel2Height + iNoticeHeight1 + 20
+''			
+''			heightCnt = f_getLineCount(Container0.LabelNotice1.caption)
+''			if heightCnt > 1 then
+''				Container0.LabelNotice2.multiline = True
+''			end if
+''	
+''			iNoticeHeight2 = g_LinHeight_notice * heightCnt
+''			Container0.LabelNotice2.height = iNoticeHeight2	
+''			
+''		end if
+'	end if
+'
+'	Container0.SetScrollAutoSize()	
+'End Function
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_cbbs_021u" trcode="obcpp_cbbs_021u" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_cbbs_021u" title="MTS FAQ 상세내역조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="49" _ulen="41" >
+
+PROP_REG_ID^제안등록ID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1023" _ulen="811" >
+
+PROP_REG_ID^제안등록ID^36^0^0^0^0^0^0
+GRP_TYPE_CODE^그룹유형코드^2^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+MOD_DATE^변경일자^8^0^0^0^0^0^0
+REG_EMPNO^등록직원번호^9^0^0^0^0^0^0
+MOD_EMPNO^수정직원번호^9^0^0^0^0^0^0
+BEST_NO^최적번호^11^0^7^0^0^0^0
+DEL_YN^삭제여부^1^0^0^0^0^0^0
+QSTN_TITL_NAME^질문제목명^200^0^0^0^0^0^0
+QSTN_ANSR_CNTT^질문답변내용^4000^0^0^0^0^0^0
+BTN_LNKN_TYPE_CODE1^버튼연결유형코드1^1^0^0^0^0^0^0
+BTN_URL1^버튼URL1^200^0^0^0^0^0^0
+BTN_CNTT1^버튼내용1^100^0^0^0^0^0^0
+BTN_LNKN_TYPE_CODE2^버튼연결유형코드2^1^0^0^0^0^0^0
+BTN_URL2^버튼URL2^200^0^0^0^0^0^0
+BTN_CNTT2^버튼내용2^100^0^0^0^0^0^0
+BTN_LNKN_TYPE_CODE3^버튼연결유형코드3^1^0^0^0^0^0^0
+BTN_URL3^버튼URL3^200^0^0^0^0^0^0
+BTN_CNTT3^버튼내용3^100^0^0^0^0^0^0
+TDAY_CSNU^당일건수^11^0^7^0^0^0^0
+WEEK_CSNU^주건수^11^0^7^0^0^0^0
+MONTH_CSNU^월건수^11^0^7^0^0^0^0
+YR_CSNU^연건수^11^0^7^0^0^0^0
+RMRK^비고^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

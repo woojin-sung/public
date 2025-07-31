@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="70160" scrname="예약취소확인" version="2" writer="조승행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,400,1" />
+	<CONTROL_INFO>
+		<BUTTON name="Button0" caption="예" btnimage="btn_05.9" ly_vert="86,303,79,35,1" />
+		<BUTTON name="Button1" caption="아니오" btnimage="btn_05.9" ly_vert="209,303,79,35,1" />
+		<LABEL name="Label0" fontsize="4" caption="취소하시겠습니까?" halign="1" ly_vert="89,244,192,32,1" />
+		<LABEL name="Label1" multiline="1" ly_vert="73,33,283,68,1" />
+		<LABEL name="Label2" multiline="1" ly_vert="75,114,287,40,1" />
+		<LABEL name="Label3" multiline="1" ly_vert="99,163,252,67,1" />
+		<LABEL name="Label4" fontsize="1" fontstyle="01" caption="상품: " ly_vert="13,52,55,32,1" />
+		<LABEL name="Label5" fontsize="1" fontstyle="01" caption="일시: " ly_vert="13,118,55,32,1" />
+		<LABEL name="Label6" fontsize="1" fontstyle="01" caption="상담장소: " ly_vert="11,182,81,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1423" _ulen="1423" >
+--===========================================================================
+--===========================================================================
+Dim rsvYMDH, rsvPlace, ptName, rsvID
+'============================================================================
+Sub Form_OnFormInitBefore()
+	rsvID	= Form.GetSharedData("szrsvID", false )
+	rsvYMDH = Form.GetSharedData("szrsvYMDH", false )
+	rsvPlace = Form.GetSharedData("szrsvPlace", false )
+	ptName = Form.GetSharedData("szptName", false ) 
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnFormInit()
+		
+	Label1.caption =  ptName
+	Label2.caption =  rsvYMDH
+	Label3.caption =  rsvPlace
+	'Form.MsgBox("", rsvID, "", "")
+End Sub
+
+'============================================================================
+
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1" , "PROS_CLS_CODE" , 0 , "D" )
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_022a", "InBlock1" , "INP_ITEM_ID" , 0 , rsvID )
+End Sub
+
+'============================================================================
+
+Sub Button0_OnClick()
+	DATAMANAGER.RequestTranData("obcpp_rbit_022a")
+	Form.SendReturnToParent( "cancel" , "" )
+	Form.CloseForm()
+End Sub
+
+
+
+
+'============================================================================
+Sub Button1_OnClick()
+	Form.CloseForm( )
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_rbit_022a" trcode="obcpp_rbit_022a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_rbit_022a" title="예약정보처리성서비스" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="667" _ulen="505" >
+
+INP_ITEM_ID^인턴쉽항목ID^6^0^7^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+CUST_ID^고객ID^20^0^0^0^0^0^0
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+RSEV_YMDH^예약일시^19^0^0^0^0^0^0
+PRTR_MATR_DTL_CNTT^특이사항상세내용^1000^0^0^0^0^0^0
+CUST_TELNO^고객전화번호^16^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+INP_MEMB_CLS_CODE^인턴쉽회원구분코드^1^0^0^0^0^0^0
+INP_RSEV_CLS_CODE^인턴쉽예약구분코드^1^0^0^0^0^0^0
+INP_RSEV_STAT_CODE^인턴쉽예약상태코드^2^0^0^0^0^0^0
+FRST_REG_YMDH^최초등록일시^19^0^0^0^0^0^0
+PLAC_CNTT^장소내용^400^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

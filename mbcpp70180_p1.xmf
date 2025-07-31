@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="70180" scrname="상품비교_설정" version="2" writer="조승행" />
+	<FORM_INFO name="Form" ly_vert="0,0,286,330,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" colcount="4" ly_vert="17,41,251,235,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell1" valign="2" autofontsize="1" paddinginfo="10,0,0,0" />
+				<LABEL name="bd_cell3" />
+				<LABEL name="bd_cell4" fontsize="-3" paddinginfo="10,0,0,0" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell5" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell6" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell7" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell8" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell9" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell10" ly_vert="0,0,100,20,1" />
+				<IMAGE name="bd_cell2" imgpath="icon_sub_03.9" margin="0,0,5,0" />
+				<CHKBUTTON name="bd_cell0" checkstate="1" margin="10,0,0,0" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" cursorstyle="1" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="39,217,34,70" ly_vert_visible="1,0,0,1" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="39" ly_vert_visible="1" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="22,25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="217" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="22,25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,1" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="34" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="22,25" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="22,25" />
+						<CELLINFO>
+							<CELL name="bd_cell3" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<BUTTON name="BtnAdd" caption="추가" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="10,270,127,39,1" />
+		<BUTTON name="BtnSave" caption="저장" btnimage="btn_01.9" ly_vert="147,270,128,39,1" />
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,285,42,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="비교종목편집" bgcolor="064:255255255" halign="1" ly_vert="0,0,285,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_vert="248,8,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4567" _ulen="4399" >
+'--===========================================================================
+'--===========================================================================
+Dim g_szData
+Dim g_arrItem
+Dim g_intItemCnt
+Dim tmpPortfID
+
+'Dim g_arrCheck
+Dim g_arrPfID
+
+Dim Pid_search
+Dim Pname_search
+
+Dim getdataid
+Dim getdataname
+
+Dim nGridCnt
+'============================================================================
+Sub Form_OnFormInit()
+	 
+	g_intItemCnt = Form.GetEnvData( "ccomp_itemCnt")
+	tmpItem =  Form.GetEnvData( "ccomp_itemList" )
+	'tmpCheckSt = Form.GetEnvData("ccomp_itmeCheck")
+	tmpPortfID = Form.GetEnvData("ccomp_PfoID")
+	
+	if g_intItemCnt = "" then
+		Exit Sub		
+	end if
+	g_arrItem = split(tmpItem , "^")
+	'g_arrCheck = split(tmpCheckSt , "^")
+	g_arrPfID = split(tmpPortfID , "^")
+
+	for i = 0 to g_intItemCnt - 1
+		Grid0.insertrow = i
+		Grid0.SetCellData( "bd_cell1", i , g_arrItem[i] )
+		Grid0.SetCellData( "bd_cell3", i,  g_arrPfID[i] )
+		
+		'if g_arrCheck[i] = "" then
+		'	g_arrCheck[i] = "1"
+		'end if
+		'Grid0.SetCellData( "bd_cell0", i , g_arrCheck[i] )
+	next
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	nGridCnt = CInt(Grid0.rowcount)
+	if nGridCnt =  0 then
+		Exit Sub
+	end if
+	tmpItemData = ""
+	'tmpCheck = ""
+	tmpPortfID = ""
+	for i = 0 to nGridCnt -1
+		tmpItemData = tmpItemData..Grid0.GetCellData( "bd_cell1", i ).."^"
+		'tmpCheck = tmpCheck..Grid0.GetCellData( "bd_cell0", i ).."^"
+		tmpPortfID = tmpPortfID..Grid0.GetCellData( "bd_cell3", i ).."^"
+	next
+	Form.SetEnvData( 1, "ccomp_itemCnt", nGridCnt )
+	Form.SetEnvData( 1, "ccomp_itemList", tmpItemData )
+	'Form.SetEnvData( 1, "ccomp_itmeCheck", tmpCheck )
+	Form.SetEnvData( 1, "ccomp_PfoID", tmpPortfID)
+	'Form.MsgBox("", nGridCnt, "", "")
+	'Form.MsgBox("", tmpItemData, "", "")
+	'Form.MsgBox("", tmpCheck, "", "")
+	'Form.MsgBox("", tmpPortfID, "", "")
+	Form.SendReturnToParent( "CompOption" , "true" )
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub BtnSave_OnClick()
+	nGridCnt = CInt(Grid0.rowcount)
+	if nGridCnt = 1 then
+		Form.ShowAlert("알림", "2개의 상품을 추가해야 비교가능합니다.")
+		Exit Sub
+	end if
+	Form.CloseForm( )
+	Form.SendReturnToParent( "CompOption" , "true" )
+
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	nGridCnt = CInt(Grid0.rowcount)
+	if szCellID = "bd_cell2" then
+		if nGridCnt = 1 then
+			Form.ShowAlert("알림", "최소 1개 종목은 있어야 합니다. ")
+			Exit Sub
+		else
+			Grid0.SetDeleteRow( lRow )
+		end if
+	end if
+End Sub
+'============================================================================
+Sub BtnAdd_OnClick()
+	nGridCnt = CInt(Grid0.rowcount)
+	if nGridCnt = 2 then
+		Form.ShowAlert("알림" , "비교종목편집에는 최대 2개까지 추가가능합니다.")
+		Exit Sub
+	end if
+	Form.OpenPopup("mbcpp70180_p2.xmf" , "" , "")
+End Sub
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	 getdataid	=	""
+	 getdataname	=	""
+	
+	 
+	 if sKeyname == "A" then
+		 if sRet == "1" then
+			getdataid = Form.GetSharedData("selectedPid_fav" , true)
+			getdataname = Form.GetSharedData("selectedPname_fav" , true)
+			
+		 end if
+		
+		if sRet == "2" then
+			getdataid = Form.GetSharedData("selectedPid_search" , true)
+			getdataname = Form.GetSharedData("selectedPname_search" , true)
+			
+			
+		end if
+				
+	end if
+	 
+	nGridCnt = CInt(Grid0.rowcount)
+	
+	if sKeyname = "A" then
+		if sRet = "" or  sRet = null then
+			Exit Sub
+		else
+			if nGridCnt = 0 then
+				Grid0.insertrow = 0
+				Grid0.SetCellData("bd_cell1", 0, getdataname)
+				Grid0.SetCellData("bd_cell3", 0, getdataid)
+			
+			else
+				for i = 0 to nGridCnt-1
+					if i = nGridCnt -1 then
+						Grid0.insertrow = i+1
+						Grid0.SetCellData("bd_cell1", i+1, getdataname)
+						Grid0.SetCellData("bd_cell3", i+1, getdataid)
+						Grid0.SetCellData("bd_cell0", i+1, "1")
+					elseif i = 4 then
+						Grid0.SetCellData("bd_cell1", i+1, getdataname)
+						Grid0.SetCellData("bd_cell3", i+1, getdataid)
+						Grid0.SetCellData("bd_cell0", i+1, "1")
+					end if
+				next
+			end if
+		end if
+	end if
+				
+		
+	'Form.MsgBox("검색창에서설정창으로잘넘어오나?", getdataid, "", "")
+	'Form.MsgBox("검색창에서설정창으로잘넘어오나?", getdataname, "", "")
+	
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

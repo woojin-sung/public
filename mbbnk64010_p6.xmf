@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="외화이체_이체한도알림팝업" version="2" writer="이아영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<CONTAINER name="cont" containerimage="alpha" scroll_pos="0,0" ly_vert="32,215,311,240,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="imgHeader" imgpath="popup_bg_2.9" ly_vert="0,0,311,190,1" />
+				<BUTTON name="btnOK" caption="확인" fontsize="2" fontstyle="01" btnimage="btn_22.9" ly_vert="0,190,311,50,1" />
+				<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="알림" halign="1" ly_vert="0,6,311,40,1" />
+				<LABEL name="Label0" caption="입력하신 금액이 이체한도를 초과합니다." halign="1" multiline="1" ly_vert="10,50,291,20,1" />
+				<LABEL name="Label1" caption="확인 후 다시 입력해주세요." halign="1" multiline="1" ly_vert="10,70,291,20,1" />
+				<LABEL name="Label2" fontstyle="01" caption="잔여한도" ly_vert="15,110,80,20,1" />
+				<LABEL name="Label3" caption="1회 한도" ly_vert="15,131,80,20,1" />
+				<LABEL name="Label4" caption="1일 한도" ly_vert="15,152,80,20,1" />
+				<LABEL name="lblTotalLimit" fontstyle="01" mask="0,0,,,0,,2,1,1,0,0" halign="2" autofontsize="1" ly_vert="105,110,190,20,1" />
+				<LABEL name="lblOneLimit" mask="0,0,,,0,,2,1,1,0,0" halign="2" autofontsize="1" ly_vert="105,131,190,20,1" />
+				<LABEL name="lblDayLimit" mask="0,0,,,0,,2,1,1,0,0" halign="2" autofontsize="1" ly_vert="105,152,190,20,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2245" _ulen="2117" >
+
+'============================================================================
+' 화 면 명 : 외화이체 이체한도알림
+'============================================================================
+
+Dim g_szSelectButton
+Dim g_szReturnKey
+
+Dim g_szCurrencyCode	'통화코드
+Dim g_szTotalLimit	'잔여한도
+Dim g_szOneLimit		'1회한도
+Dim g_szDayLimit		'1일한도
+
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_szCurrencyCode = ""
+	g_szTotalLimit = ""
+	g_szOneLimit = ""
+	g_szDayLimit = ""
+	
+	szData = Form.GetOpenLinkData()
+
+	If szData <> "" And szData <> Null Then
+	
+		'잔여한도★1회한도★1일한도★통화코드
+		tOpenData = Split(szData, "★")
+		
+		g_szTotalLimit   = tOpenData[0]
+		g_szOneLimit     = tOpenData[1]
+		g_szDayLimit     = tOpenData[2]
+		g_szCurrencyCode = tOpenData[3]
+		
+		
+		if g_szCurrencyCode = "JPY" then
+			g_szDecimal = 0
+		else
+			g_szDecimal = 2
+		end if
+		
+		sMask = "0,0,,,1,,"..g_szDecimal..",1,0,0,0"
+		sMask = "0,0,," .. " " ..g_szCurrencyCode .. ",1,,"..g_szDecimal..",1,0,0,0"
+		
+		'잔여한도 마스킹
+		cont.lblTotalLimit.caption = g_szTotalLimit
+'		sMask = "0,0,,,1,,"..g_szDecimal..",1,0,0,0"
+'		sMask = "0,0,," .. " " ..g_szCurrencyCode .. ",1,,"..g_szDecimal..",1,0,0,0"
+		cont.lblTotalLimit.mask = sMask
+		
+		'1회한도 마스킹
+		cont.lblOneLimit.caption = g_szOneLimit
+'		sMask = "0,0,,,1,,"..g_szDecimal..",1,0,0,0"
+'		sMask = "0,0,," .. " " ..g_szCurrencyCode .. ",1,,"..g_szDecimal..",1,0,0,0"
+		cont.lblOneLimit.mask = sMask
+		
+		'1일한도 마스킹
+		cont.lblDayLimit.caption = g_szDayLimit
+'		sMask = "0,0,,,1,,"..g_szDecimal..",1,0,0,0"
+'		sMask = "0,0,," .. " " ..g_szCurrencyCode .. ",1,,"..g_szDecimal..",1,0,0,0"
+		cont.lblDayLimit.mask = sMask
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent( "mbbnk64010_p6" , "N")
+End Sub
+
+'============================================================================
+Sub cont_btnOK_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

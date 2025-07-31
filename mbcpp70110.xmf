@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="70110" scrname="포트폴리오 상세정보" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="3" tabwidthtype="1" tabheadheight="36" ly_vert="0,34,375,524,1" >
+			<PAGE name="page009904" caption="예상수익" linkfile="mbcpp70110_t1.xmf" loadingtype="1" />
+			<PAGE name="page000580" caption="포트폴리오" linkfile="mbcpp70110_t5.xmf" loadingtype="1" />
+			<PAGE name="page004044" caption="통계" linkfile="mbcpp70110_ta.xmf" loadingtype="1" />
+		</FORMTAB>
+		<IMAGE name="Image1" imgpath="btn_side_r" ly_vert="356,302,16,50,1" />
+		<LABEL name="Label0" fontsize="1" fontstyle="01" halign="1" ly_vert="0,2,374,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1755" _ulen="1755" >
+
+Dim g_pid
+Dim g_pp_name
+'============================================================================
+
+Sub Image1_OnClick()
+	Form.OpenPopup("mbcpp70110_p1.xmf","","")
+End Sub
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "POPUP_CLOSE" then
+	
+		'Form.triggerEvent("FormTab0." & "page009904", "REFRESH","1")
+		
+		'Form.triggerEvent("FormTab0." & "page000580", "REFRESH","1")
+		'Form.triggerEvent("FormTab0." & "page008559", "REFRESH","1")
+		
+		Form.postTriggerEvent("FormTab0." & "page009904", "REFRESH","1")
+		'Form.postTriggerEvent("FormTab0." & "page000580", "REFRESH","1")
+		'Form.postTriggerEvent("FormTab0." & "page008559", "REFRESH","1")
+		 
+	
+	end if
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_pid = Form.GetSharedData("Shared_PID", false )
+	
+	DATAMANAGER.SetDataValue( 0, "obcpp_rbit_004r", "InBlock1", "PRTF_ID" , 0 ,g_pid) 	
+	DATAMANAGER.RequestTranData("obcpp_rbit_004r")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	
+	if szTranID ==  "obcpp_rbit_004r" then
+	
+	g_pp_name=DATAMANAGER.GetDataValue(0,"obcpp_rbit_004r", "OutBlock1", "PRTF_NAME" ,0)
+	
+	Label0.caption = g_pp_name
+		
+	end if
+	
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if sKey == "PRTF_NAME" then
+		Label0.caption = sValue
+	elseif sKey == "TAB_CHANGE" then
+		if sValue == "1" then
+			FormTab0.currenttab = 0
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_rbit_004r" trcode="obcpp_rbit_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_rbit_004r" title="포트폴리오단건조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="48" _ulen="38" >
+
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1661" _ulen="1229" >
+
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+MOD_YMDH^수정일시^19^0^0^0^0^0^0
+USE_YN^사용여부^1^0^0^0^0^0^0
+PRTF_NAME^포트폴리오명^40^0^0^0^0^0^0
+MIN_MTRT_DATE^최소만기일자^8^0^0^0^0^0^0
+MIN_JOIN_AMT^최소가입금액^19^0^7^0^0^0^0
+NTNL_GR_LCTN_CLCD^국가군소재지구분코드^1^0^0^0^0^0^0
+TOTAL_ASET_AMT^총자산금액^19^0^7^0^0^0^0
+PRTF_TPCD^포트폴리오유형코드^2^0^0^0^0^0^0
+INP_RISK_GRAD_SCOR^인턴쉽위험등급점수^4^0^7^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+IISC_FEE_CLS_CODE^집합투자증권수수료구분코드^2^0^0^0^0^0^0
+FRST_REG_YMDH^최초등록일시^19^0^0^0^0^0^0
+PROD_RCMT_DTL_CNTT^상품추천상세내용^4000^0^0^0^0^0^0
+INP_MAX_ACML_LSRT^인턴쉽최대누적손실률^6^2^7^0^0^0^0
+OUTS_INVT_ADCP_CODE^외부투자자문사코드^5^0^0^0^0^0^0
+ERT^수익률^14^5^7^0^0^0^0
+INP_RISK_GRAD_CODE^인턴쉽위험등급코드^2^0^0^0^0^0^0
+STCK_RLIM^주식비중^20^9^7^0^0^0^0
+BOND_RLIM^채권비중^20^9^7^0^0^0^0
+FUTS_VOL_RLIM^선물거래량비중^14^5^7^0^0^0^0
+CASH_RLIM^현금비중^20^9^7^0^0^0^0
+INP_RLES_RLIM^인턴쉽부동산비중^20^9^7^0^0^0^0
+INP_IMSI_RLIM^인턴쉽적금비중^20^9^7^0^0^0^0
+ETC_RLIM^기타비중^20^9^7^0^0^0^0
+M1_LSRT^1개월손실률^11^6^7^0^0^0^0
+M3_LSRT^3개월손실률^11^6^7^0^0^0^0
+M6_LSRT^6개월손실률^11^6^7^0^0^0^0
+M12_LSRT^12개월손실률^11^6^7^0^0^0^0
+INP_M36_LSRT^인턴쉽36개월손실률^11^6^7^0^0^0^0
+M1_ERT^1개월수익률^23^6^7^0^0^0^0
+M3_ERT^3개월수익률^23^6^7^0^0^0^0
+M6_ERT^6개월수익률^23^6^7^0^0^0^0
+M12_ERT^12개월수익률^23^6^7^0^0^0^0
+M36_ERT^36개월수익률^14^5^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="7" inout="out" _len="115" _ulen="95" >
+
+TYPE_EXPL^유형설명^100^0^0^0^0^0^0
+RATE^비율^10^5^7^0^0^0^0
+UI_COL_NO^UI색상번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="70120" scrname="관심상품취소확인" version="2" writer="조승행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,400,1" />
+	<CONTROL_INFO>
+		<BUTTON name="Button0" caption="예" btnimage="btn_05.9" ly_vert="86,303,79,35,1" />
+		<BUTTON name="Button1" caption="아니오" btnimage="btn_05.9" ly_vert="209,303,79,35,1" />
+		<LABEL name="Label0" fontsize="4" caption="삭제하시겠습니까?" halign="1" ly_vert="89,244,192,32,1" />
+		<LABEL name="Label1" fontsize="1" fontstyle="01" caption="저장명: " ly_vert="14,52,59,33,1" />
+		<LABEL name="Label2" fontsize="1" fontstyle="01" caption="상품: " ly_vert="13,118,70,32,1" />
+		<LABEL name="Label3" fontsize="1" fontstyle="01" caption="3개월 수익률: " ly_vert="14,182,116,30,1" />
+		<LABEL name="Label4" halign="1" multiline="1" ly_vert="95,35,268,68,1" />
+		<LABEL name="Label5" multiline="1" ly_vert="98,105,266,58,1" />
+		<LABEL name="Label6" mask="0,1,,%,0,,1,1,1" halign="1" ly_vert="146,163,173,67,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2071" _ulen="2071" >
+--===========================================================================
+--===========================================================================
+'--===========================================================================
+Dim favID, favmodYMDH, favcustID, favptName, fav3ERT, favsvptname
+'============================================================================
+Sub Form_OnFormInitBefore()
+	favID	= Form.GetSharedData("szfavID", false )
+	favmodYMDH = Form.GetSharedData("szfavmodYMDH", false )
+	favcustID = Form.GetSharedData("szfavcustID", false )
+	favptName = Form.GetSharedData("szfaptName", false ) 
+	fav3ERT = Form.GetSharedData("szfa3ERT", false ) 
+	favsvptname = Form.GetSharedData("szfasvptname", false ) 
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	Label4.caption =  favsvptname
+	Label5.caption =  favptName
+	Label6.caption =  fav3ERT
+	
+End Sub
+
+'============================================================================
+
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_018a", "InBlock1" , "PROS_CLS_CODE" , 0 , "D" )
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_018a", "InBlock1" , "CUST_ID" , 0 , favcustID )
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_018a", "InBlock1" , "PRTF_ID" , 0 , favID )
+	DATAMANAGER.SetDataValue(0, "obcpp_rbit_018a", "InBlock1" , "MOD_YMDH" , 0 , favmodYMDH )
+End Sub
+
+'============================================================================
+
+Sub Button0_OnClick()
+	DATAMANAGER.RequestTranData("obcpp_rbit_018a")
+End Sub
+
+
+
+
+'============================================================================
+Sub Button1_OnClick()
+	Form.CloseForm( )
+End Sub
+'============================================================================
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcpp_rbit_018a" then
+		Form.CloseForm( )
+		Form.SendReturnToParent( "cancel" , "" )
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_rbit_018a" trcode="obcpp_rbit_018a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_rbit_018a" title="obcpp_rbit_018a" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="212" _ulen="166" >
+
+CUST_ID^고객ID^20^0^0^0^0^0^0
+PRTF_ID^포트폴리오ID^36^0^0^0^0^0^0
+PRTF_NAME^포트폴리오명^40^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+MOD_YMDH^수정일시^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
