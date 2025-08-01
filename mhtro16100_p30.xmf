@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="해외주식 거래안내" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnBackGround" btnimage="alpha.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,140,375,507,1" />
+		<LABEL name="LabelTitle" fontsize="2" fontstyle="01" caption="거래 안내" halign="1" ly_vert="20,170,335,30,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_close" margin="5,7,5,7" ly_vert="325,170,30,30,1" />
+		<FORMTAB name="FormTab0" fontsize="-3" tabcount="0" tabwidthtype="2" tabheadheight="27" ly_vert="20,220,335,27,1" />
+		<CONTAINER name="Container0" vscroll="1" ly_vert="0,267,375,380,1" scroll_ly_vert="0,267,375,380,1" >
+			<CONTROL_INFO>
+				<LINKFORM name="LinkForm0" ly_vert="0,10,375,72,1" />
+				<LINKFORM name="LinkForm1" ly_vert="0,90,375,72,1" />
+				<LINKFORM name="LinkForm2" ly_vert="0,170,375,72,1" />
+				<LINKFORM name="LinkForm3" ly_vert="0,250,375,72,1" />
+				<LINKFORM name="LinkForm4" ly_vert="0,330,375,72,1" />
+				<LINKFORM name="LinkForm5" ly_vert="0,410,375,72,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="19036" _ulen="18028" >
+Dim gOsType 
+Dim gNation
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'-------------------------------------------------------------
+	'이전화면 연결데이터
+	'-------------------------------------------------------------
+	sOpenData = Form.GetOpenLinkData()
+	gNation = sOpenData
+
+	'-------------------------------------------------------------
+	' 타이틀명 변경
+	'-------------------------------------------------------------
+	initTitleName(sOpenData)
+	
+	'-------------------------------------------------------------
+	'링크폼 사이즈 변경
+	'-------------------------------------------------------------
+	initLinkForm(sOpenData)
+	
+	'-------------------------------------------------------------
+	'폼탭 생성
+	'-------------------------------------------------------------
+	FormTab0.SetUseOnlyHeader(true)
+	InsertFormTabPage(sOpenData)
+	
+End Sub
+
+'============================================================================
+Sub BtnBackGround_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Function initTitleName(sGubun)
+
+	if sGubun == "USA" then
+		LabelTitle.caption = "미국시장 거래 안내"
+	elseif sGubun == "CHINA" then
+		LabelTitle.caption = "중국시장 거래 안내"
+	elseif sGubun == "HONGKONG" then
+		LabelTitle.caption = "홍콩시장 거래 안내"
+	elseif sGubun == "JAPAN" then
+		LabelTitle.caption = "일본시장 거래 안내"
+	end if
+
+End Function
+'============================================================================
+' 링크폼 초기화 (사이즈, 위치, 화면)
+'============================================================================
+Function initLinkForm(sGubun)
+
+	if sGubun == "USA" then
+		
+		'--------------------------------------------
+		'고정영역
+		'--------------------------------------------
+		Container0.LinkForm0.top = 0
+		Container0.LinkForm0.height = 350 '380
+		Container0.LinkForm0.linkfile = "mhtro16100_s10"
+		
+		'--------------------------------------------
+		'고정영역
+		'--------------------------------------------
+		Container0.LinkForm1.top = 350 '380
+		Container0.LinkForm1.height = 380
+		Container0.LinkForm1.linkfile = "mhtro16100_s11"
+		
+		'--------------------------------------------
+		'가변영역(TriggerEvent에서 위치/높이 세팅)
+		'미국시장 LinkForm3/LinkForm4/LinkForm5 링크맵파일은
+		'이전 링크폼의 맵파일 로드가 끝난 뒤에 트리거이벤트쪽에서
+		'세팅해준다.
+		'--------------------------------------------
+		Container0.LinkForm2.top = 730 '760
+		Container0.LinkForm2.linkfile = "mhtro16100_s12"
+		
+		'--------------------------------------------
+		'고정영역(이전 링크폼이 가변영역이므로 트리거에서 top값 세팅됨)
+		'--------------------------------------------
+		Container0.LinkForm3.height = 230
+		'Container0.LinkForm3.linkfile = "mhtro16100_s13"
+		
+		'--------------------------------------------
+		'가변영역(TriggerEvent에서 위치/높이 세팅)
+		'--------------------------------------------
+		'Container0.LinkForm4.linkfile = "mhtro16100_s14"
+		'Container0.LinkForm5.linkfile = "mhtro16100_s15"
+		
+		Container0.SetScrollAutoSize()
+		
+	elseif sGubun == "CHINA" then
+	
+		'--------------------------------------------
+		'고정영역
+		'--------------------------------------------
+		Container0.LinkForm0.top = 0
+		Container0.LinkForm0.height = 460
+		Container0.LinkForm0.linkfile = "mhtro16100_s16"
+		
+		Container0.LinkForm1.top = 460
+		Container0.LinkForm1.height = 360
+		Container0.LinkForm1.linkfile = "mhtro16100_s17"
+		
+		Container0.LinkForm2.top = 820
+		Container0.LinkForm2.height = 550
+		Container0.LinkForm2.linkfile = "mhtro16100_s18"
+		
+		'--------------------------------------------
+		'가변영역(TriggerEvent에서 위치/높이 세팅)
+		'--------------------------------------------
+		Container0.LinkForm3.top = 1370
+		Container0.LinkForm3.linkfile = "mhtro16100_s19"
+		
+		Container0.SetScrollAutoSize()
+		
+	elseif sGubun == "HONGKONG" then
+	
+		'--------------------------------------------
+		'고정영역
+		'--------------------------------------------
+		Container0.LinkForm0.top = 0
+		Container0.LinkForm0.height = 630
+		Container0.LinkForm0.linkfile = "mhtro16100_s20"
+		
+		Container0.LinkForm1.top = 630
+		Container0.LinkForm1.height = 350
+		Container0.LinkForm1.linkfile = "mhtro16100_s21"
+		
+		Container0.LinkForm2.top = 980
+		Container0.LinkForm2.height = 370
+		Container0.LinkForm2.linkfile = "mhtro16100_s22"
+		
+		'--------------------------------------------
+		'가변영역(TriggerEvent에서 위치/높이 세팅)
+		'--------------------------------------------
+		Container0.LinkForm3.top = 1350
+		Container0.LinkForm3.linkfile = "mhtro16100_s23"
+		
+		Container0.SetScrollAutoSize()
+		
+	elseif sGubun == "JAPAN" then
+	
+		'--------------------------------------------
+		'고정영역
+		'--------------------------------------------
+		Container0.LinkForm0.top = 0
+		Container0.LinkForm0.height = 140
+		Container0.LinkForm0.linkfile = "mhtro16100_s24"
+		
+		Container0.LinkForm1.top = 140
+		Container0.LinkForm1.height = 270
+		Container0.LinkForm1.linkfile = "mhtro16100_s25"
+		
+		Container0.LinkForm2.top = 410
+		Container0.LinkForm2.height = 230
+		Container0.LinkForm2.linkfile = "mhtro16100_s26"
+		
+		'--------------------------------------------
+		'가변영역(TriggerEvent에서 위치/높이 세팅)
+		'--------------------------------------------
+		Container0.LinkForm3.top = 640
+		Container0.LinkForm3.linkfile = "mhtro16100_s27"
+		
+		Container0.SetScrollAutoSize()
+		
+	end if
+
+End Function
+'============================================================================
+' 상단 폼탭 페이지 생성
+'============================================================================
+Function InsertFormTabPage(sNation)
+	
+	'------------------------------------------
+	'폼탭 헤더이미지 설정
+	'------------------------------------------
+	FormTab0.setTabHeaderImage("img_bgcircle_black.9" , "img_bgcircle_line.9" , 5)   
+	
+	'------------------------------------------
+	'활성화/비활성화 폰트색상
+	'------------------------------------------
+	FormTab0.setTabHeaderFgColor("28" , "321") 								   
+
+	'------------------------------------------
+	'페이지생성
+	'------------------------------------------
+	if sNation == "USA" then
+		
+		if gOsType == "1" then
+			FormTab0.insertPage( 0, "page0", "page0", "empty", "0", "거래시간")
+			FormTab0.insertPage( 1, "page1", "page1", "empty", "0", "주문")
+			FormTab0.insertPage( 2, "page2", "page2", "empty", "0", "수수료/시세")	
+			FormTab0.insertPage( 3, "page3", "page3", "empty", "0", "주간거래")	
+			FormTab0.insertPage( 4, "page4", "page4", "empty", "0", "유의사항")	
+		
+		else
+			FormTab0.insertPage( 0, "page0", "page0", "empty", "0", " 거래시간 ")
+			FormTab0.insertPage( 1, "page1", "page1", "empty", "0", " 주문 ")
+			FormTab0.insertPage( 2, "page2", "page2", "empty", "0", " 수수료/시세 ")	
+			FormTab0.insertPage( 3, "page3", "page3", "empty", "0", " 주간거래 ")	
+			FormTab0.insertPage( 4, "page4", "page4", "empty", "0", " 유의사항 ")	
+			
+		end if
+		
+	else
+		
+		if gOsType == "1" then
+			FormTab0.insertPage( 0, "page0", "page0", "empty", "0", "거래시간")
+			FormTab0.insertPage( 1, "page1", "page1", "empty", "0", "주문")
+			FormTab0.insertPage( 2, "page2", "page2", "empty", "0", "수수료/시세")	
+			FormTab0.insertPage( 3, "page3", "page3", "empty", "0", "유의사항")	
+		
+		else
+			FormTab0.insertPage( 0, "page0", "page0", "empty", "0", " 거래시간 ")
+			FormTab0.insertPage( 1, "page1", "page1", "empty", "0", " 주문 ")
+			FormTab0.insertPage( 2, "page2", "page2", "empty", "0", " 수수료/시세 ")	
+			FormTab0.insertPage( 3, "page3", "page3", "empty", "0", " 유의사항 ")		
+		end if
+		
+	
+	end if
+	
+	'------------------------------------------
+	'초기페이지 지정
+	'------------------------------------------
+	FormTab0.currenttab = 0
+	FormTab0_OnTabChanged(0)
+	
+End Function
+
+'============================================================================
+' 스크롤 위치 등록
+'============================================================================
+Function SetScrollNotiPos(sNation)
+
+	'-------------------------------------------------------------
+	'영역별 스크롤 위치값 가져오기
+	'-------------------------------------------------------------
+	if sNation == "USA" then
+	
+		if gOsType == "1" then
+			nFirstAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm0.top , "1")) 
+			nSecondAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm1.top , "1")) - 10
+			nThirdAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm3.top , "1")) - 10
+			nFourthAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm4.top , "1")) - 10
+			nFifthAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm5.top , "1")) - 50
+		else
+			nFirstAreaScrollPosNoti 	= Container0.LinkForm0.top 
+			nSecondAreaScrollPosNoti 	= Container0.LinkForm1.top - 10
+			nThirdAreaScrollPosNoti 	= Container0.LinkForm3.top - 10
+			nFourthAreaScrollPosNoti 	= Container0.LinkForm4.top - 10
+			nFifthAreaScrollPosNoti 	= Container0.LinkForm5.top - 50
+		end if
+	
+	else
+	
+		if gOsType == "1" then
+			nFirstAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm0.top , "1")) 
+			nSecondAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm1.top , "1")) - 10
+			nThirdAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm2.top , "1")) - 10
+			nFourthAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm3.top , "1")) - 10
+			nFifthAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm4.top , "1")) - 10
+		else
+			nFirstAreaScrollPosNoti 	= Container0.LinkForm0.top 
+			nSecondAreaScrollPosNoti 	= Container0.LinkForm1.top - 10
+			nThirdAreaScrollPosNoti 	= Container0.LinkForm2.top - 10
+			nFourthAreaScrollPosNoti 	= Container0.LinkForm3.top - 10
+			nFifthAreaScrollPosNoti 	= Container0.LinkForm4.top - 10
+		end if
+	
+	end if
+	
+	
+	'-------------------------------------------------------------
+	' 스크롤 위치값 세팅
+	'-------------------------------------------------------------
+	if sNation == "USA" then
+		Container0.SetNotifyScrollPos(nFirstAreaScrollPosNoti..":".. nSecondAreaScrollPosNoti .. ":" .. nThirdAreaScrollPosNoti .. ":" .. nFourthAreaScrollPosNoti  .. ":" .. nFifthAreaScrollPosNoti - 100)
+	elseif sNation == "CHINA" then
+		Container0.SetNotifyScrollPos(nFirstAreaScrollPosNoti..":".. nSecondAreaScrollPosNoti .. ":" .. nThirdAreaScrollPosNoti .. ":" .. nFourthAreaScrollPosNoti - 200)
+	elseif sNation == "HONGKONG" then
+		Container0.SetNotifyScrollPos(nFirstAreaScrollPosNoti..":".. nSecondAreaScrollPosNoti .. ":" .. nThirdAreaScrollPosNoti .. ":" .. nFourthAreaScrollPosNoti - 200)
+	elseif sNation == "JAPAN" then
+		Container0.SetNotifyScrollPos(nFirstAreaScrollPosNoti..":".. nSecondAreaScrollPosNoti .. ":" .. nThirdAreaScrollPosNoti .. ":" .. nFourthAreaScrollPosNoti - 200)
+	else	
+		Container0.SetNotifyScrollPos(nFirstAreaScrollPosNoti..":".. nSecondAreaScrollPosNoti .. ":" .. nThirdAreaScrollPosNoti .. ":" .. nFourthAreaScrollPosNoti)
+	end if
+	
+	
+	'-------------------------------------------------------------
+	'컨테이너 스크롤링 이벤트 활성화
+	'-------------------------------------------------------------
+	Container0.SetUseScrollingEvent(true)
+	
+End Function
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	'--------------------------------------------
+	' (미국)주문유의사항
+	'--------------------------------------------
+	if sEventName == "USA_LinkForm2_Height" then
+	
+		if gOsType == "1" then
+			nTop = Form.calcUnResize(Container0.LinkForm2.top, "1")
+		else
+			nTop = Container0.LinkForm2.top
+		end if
+		
+		Container0.LinkForm2.height = Cint(sParam)
+		Container0.LinkForm3.top = nTop + Cint(sParam)
+		Container0.LinkForm3.linkfile = "mhtro16100_s13"
+		Container0.SetScrollAutoSize()
+		
+	'--------------------------------------------
+	' (미국) 시세/수수료
+	'--------------------------------------------
+	elseif sEventName == "USA_LinkForm3_Height" then
+	
+		if gOsType == "1" then
+			nTop = Form.calcUnResize(Container0.LinkForm3.top, "1")
+		else
+			nTop = Container0.LinkForm3.top
+		end if
+		
+		Container0.LinkForm3.height = Cint(sParam)
+		Container0.LinkForm4.top = nTop + Cint(sParam)
+		Container0.LinkForm4.linkfile = "mhtro16100_s14"
+		Container0.SetScrollAutoSize()
+	
+	'--------------------------------------------
+	' (미국)주간거래
+	'--------------------------------------------
+	elseif sEventName == "USA_LinkForm4_Height" then
+	
+		if gOsType == "1" then
+			nTop = Form.calcUnResize(Container0.LinkForm4.top, "1")
+		else
+			nTop = Container0.LinkForm4.top
+		end if
+		
+		Container0.LinkForm4.height = Cint(sParam)
+		Container0.LinkForm5.top = nTop + Cint(sParam)
+		Container0.LinkForm5.linkfile = "mhtro16100_s15"
+		Container0.SetScrollAutoSize()
+	
+	'--------------------------------------------
+	' (미국)유의사항
+	'--------------------------------------------
+	elseif sEventName == "USA_LinkForm5_Height" then
+		
+		Container0.LinkForm5.height = Cint(sParam)
+		Container0.SetScrollAutoSize()
+		
+		SetScrollNotiPos("USA")
+	
+	'--------------------------------------------
+	' (중국)유의사항
+	'--------------------------------------------
+	elseif sEventName == "CHINA_LinkForm3_Height" then
+	
+		if gOsType == "1" then
+			nTop = Form.calcUnResize(Container0.LinkForm3.top, "1")
+		else
+			nTop = Container0.LinkForm3.top
+		end if
+	
+		Container0.LinkForm3.height = Cint(sParam)
+		
+		'안쓰는 링크폼 숨기기
+		Container0.LinkForm4.top = 0
+		Container0.LinkForm4.left = 1000
+		Container0.LinkForm5.top = 0
+		Container0.LinkForm5.left = 1000
+		
+		Container0.SetScrollAutoSize()
+		
+		SetScrollNotiPos("CHINA")
+	
+	'--------------------------------------------
+	' (홍콩)유의사항
+	'--------------------------------------------
+	elseif sEventName == "HONGKONG_LinkForm3_Height" then
+	
+		if gOsType == "1" then
+			nTop = Form.calcUnResize(Container0.LinkForm3.top, "1")
+		else
+			nTop = Container0.LinkForm3.top
+		end if
+	
+		Container0.LinkForm3.height = Cint(sParam)
+		
+		'안쓰는 링크폼 숨기기
+		Container0.LinkForm4.top = 0
+		Container0.LinkForm4.left = 1000
+		Container0.LinkForm5.top = 0
+		Container0.LinkForm5.left = 1000
+		
+		Container0.SetScrollAutoSize()
+		
+		SetScrollNotiPos("HONGKONG")
+	
+	'--------------------------------------------
+	' (일본)유의사항
+	'--------------------------------------------
+	elseif sEventName == "JAPAN_LinkForm3_Height" then
+	
+		if gOsType == "1" then
+			nTop = Form.calcUnResize(Container0.LinkForm3.top, "1")
+		else
+			nTop = Container0.LinkForm3.top
+		end if
+	
+		Container0.LinkForm3.height = Cint(sParam)
+		
+		'안쓰는 링크폼 숨기기
+		Container0.LinkForm4.top = 0
+		Container0.LinkForm4.left = 1000
+		Container0.LinkForm5.top = 0
+		Container0.LinkForm5.left = 1000
+		
+		Container0.SetScrollAutoSize()
+		
+		SetScrollNotiPos("JAPAN")
+		
+	end if
+	
+	
+End Sub
+
+'============================================================================
+' 스크롤 위치변경 시, 데이터가 모두 조회된 상태이면 애니메이션 효과적용
+' 차트쪽 애니메이션 효과와 겹쳐 비정상동작
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	
+	if nCurrentTab == 0 or nCurrentTab == "0" then
+		
+		if gOsType == "1" then
+			gFirstAreaScrollPos = Form.calcUnResize(Container0.LinkForm0.top, "1")
+			Container0.uniSetScroll("1",gFirstAreaScrollPos)
+		else
+			gFirstAreaScrollPos = Container0.LinkForm0.top
+			Container0.scroll_pos_noAni = gFirstAreaScrollPos
+		end if
+			
+		
+	elseif nCurrentTab == 1 or nCurrentTab == "1" then
+		
+		if gOsType == "1" then
+			gSecondAreaScrollPos = Form.calcUnResize(Container0.LinkForm1.top, "1")
+			Container0.uniSetScroll("1",gSecondAreaScrollPos)
+		else
+			gSecondAreaScrollPos = Container0.LinkForm1.top
+			Container0.scroll_pos_noAni = gSecondAreaScrollPos
+		end if
+		
+	elseif nCurrentTab == 2 or nCurrentTab == "2" then
+		
+		if gNation == "USA" then
+			
+			if gOsType == "1" then
+				gThirdAreaScrollPos = Form.calcUnResize(Container0.LinkForm3.top, "1")
+				Container0.uniSetScroll("1",gThirdAreaScrollPos)
+			else
+				gThirdAreaScrollPos = Container0.LinkForm3.top
+				Container0.scroll_pos_noAni = gThirdAreaScrollPos
+			end if
+	
+		else
+			if gOsType == "1" then
+				gThirdAreaScrollPos = Form.calcUnResize(Container0.LinkForm2.top, "1")
+				Container0.uniSetScroll("1",gThirdAreaScrollPos)
+			else
+				gThirdAreaScrollPos = Container0.LinkForm2.top
+				Container0.scroll_pos_noAni = gThirdAreaScrollPos
+			end if
+		end if
+			
+	elseif nCurrentTab == 3 or nCurrentTab == "3" then
+		
+		if gNation == "USA" then
+			
+			if gOsType == "1" then
+				gFourthAreaScrollPos = Form.calcUnResize(Container0.LinkForm4.top, "1")
+				Container0.uniSetScroll("1",gFourthAreaScrollPos)
+			else
+				gFourthAreaScrollPos = Container0.LinkForm4.top
+				Container0.scroll_pos_noAni = gFourthAreaScrollPos
+			end if
+			
+		else
+			
+			if gOsType == "1" then
+				gFourthAreaScrollPos = Form.calcUnResize(Container0.LinkForm3.top, "1")
+				Container0.uniSetScroll("1",gFourthAreaScrollPos)
+			else
+				'gFourthAreaScrollPos = Container0.LinkForm3.top
+				Container0.scroll_pos_noAni = "end"'gFourthAreaScrollPos
+			end if
+		
+		end if
+		
+	elseif nCurrentTab == 4 or nCurrentTab == "4" then
+		
+		if gNation == "USA" then
+			
+			if gOsType == "1" then
+				gFifthAreaScrollPos = Form.calcUnResize(Container0.LinkForm5.top, "1")
+				Container0.uniSetScroll("1",gFifthAreaScrollPos)
+			else
+				'gFifthAreaScrollPos = Container0.LinkForm5.top
+				Container0.scroll_pos_noAni = "end"
+			end if
+
+		else
+			if gOsType == "1" then
+				gFifthAreaScrollPos = Form.calcUnResize(Container0.LinkForm4.top, "1")
+				Container0.uniSetScroll("1",gFifthAreaScrollPos)
+			else
+				gFifthAreaScrollPos = Container0.LinkForm4.top
+				Container0.scroll_pos_noAni = gFifthAreaScrollPos
+			end if
+		end if
+	
+	end if
+
+	
+End Sub
+
+'============================================================================
+' 등록해놓은 스크롤 위치 도달 시 호출
+'============================================================================
+Sub Container0_OnNotifyScrolling(nIndex)
+	
+	if nIndex == 0 then
+		FormTab0.currenttab = 0
+	elseif nIndex == 1 then
+		FormTab0.currenttab = 1
+	elseif nIndex == 2 then
+		FormTab0.currenttab = 2
+	elseif nIndex == 3 then
+		FormTab0.currenttab = 3
+	elseif nIndex == 4 then
+		FormTab0.currenttab = 4
+	end if
+
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

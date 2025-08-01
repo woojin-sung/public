@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16091" scrname="해외주식_시세신청(실시간)" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="0,0,375,562,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2734" _ulen="2518" >
+'============================================================================
+Sub Form_OnFormInit()
+	f_EventPopup()
+	OpenLoadUrl()
+End Sub
+
+Sub OpenLoadUrl()
+	' 20180417 HAMWG START : 테스트/운영 판별 공유변수 변경
+	Dim isTestMode
+	isTestMode = Form.GetSharedData( "&SERVER_MODE", false )
+	Dim strURL
+	if CInt( isTestMode ) == 1 then
+		strURL = "https://devpaygts.einfomax.co.kr/m/MZSM/procmem/"
+	else
+		strURL = "https://paygts.einfomax.co.kr/m/MZSM/procmem/"
+	end if
+	' 20180417 HAMWG END
+	
+	Form.SetSharedData( "RUN_INFOMAX_RELOGIN" , "1" )
+	
+	Dim tmp
+	tmp = Form.GetEnvData( "login.session.userid_YH" )
+	Dim szUserID
+	szUserID = Form.KBase64Decoding( tmp )
+	szUserID = Form.AesEncoding( szUserID & "@" & os.date( "%Y%m%d" ) )
+	WebView0.urlpath = strURL & szUserID
+End Sub
+'============================================================================
+Sub Form_OnRefresh()
+	OpenLoadUrl()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH"	then
+		OpenLoadUrl()
+	end if
+End Sub
+
+'============================================================================
+' 해외주식 공지팝업
+'============================================================================
+function f_EventPopup()
+    Dim szEndDate
+    Dim szToday
+    Dim szDate
+    Dim nDiffDay
+    
+  '20200526 SWJ START : MTS 해외주식 실시간 서비스 비용 변동 안내 팝업
+    szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    szEndDate = "20200612"                            	' 팝업노출일
+	    szToday = Form.GetSharedData("&HOST_DATE", false )    ' 현재일
+	    szDate = Form.GetEnvData("EVENT_DATE_YH")            ' 일주일간 열지 않기 체크한 날짜
+    
+	    if tonumber(Form.DiffDate(szToday, szEndDate)) >= 0 then
+			if szDate == null or szDate == "" then
+			    Form.OpenPopup("popup_noti", "" , "")
+			else
+			    nDiffDay =  tonumber(Form.DiffDate(szDate, szToday))
+			    if nDiffDay > 7 then
+					Form.SetEnvData(0, "EVENT_DATE_YH", "")
+					Form.OpenPopup("popup_noti", "" , "")
+			    end if
+			end if
+	    end if
+	end if
+	'20200526 SWJ END
+
+end function
+
+'============================================================================
+Sub Form_OnFormClose()
+	' HYUNJONG_ITGEN 20190807
+	' 해외주식 현재가 -> 실시간 시세신청 -> 해외주식 현재가 -> 하단 시세신청 -> 로그아웃
+	' 로그아웃 되지 않고 로그인 되는 현상 수정
+	Form.SetSharedData( "RUN_INFOMAX_RELOGIN" , "0" )
+	Form.SendMessageToMain( "REQUEST_INFOMAX_LOGIN", "", "" )
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

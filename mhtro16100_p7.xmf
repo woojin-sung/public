@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="(NEW)해외주식_주문_전체취소확인창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,350,375,387,1" />
+		<LABEL name="Label0" fgcolor="293:017158176" fontsize="2" fontstyle="01" caption="일괄 취소" halign="2" ly_vert="65,350,120,60,1" />
+		<LABEL name="lblMaesu1Title" fontsize="2" fontstyle="01" caption="하시겠습니까?" bgcolor="092:185046046" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="180,350,130,60,1" />
+		<LABEL name="Label3" fgcolor="334:034034034" fontstyle="01" caption="주문정보" valign="0" ly_vert="20,423,100,20,1" />
+		<IMAGE name="Image0" imgpath="bg_infobox.9" ly_vert="20,453,335,123,1" />
+		<BUTTON name="btnMaesu1Close" caption="닫기" fgcolor="004:000000000" btnimage="btn_28.9" ly_vert="0,592,147,55,1" />
+		<BUTTON name="btnMaesu1" caption="취소하기" btnimage="btn_etc18.9" ly_vert="147,592,230,55,1" />
+		<TABLE name="tblMaedo1" insidelinecolor="102:255255255" colcount="3" rowcount="4" outline="0000" transmode="1" designorder="1" ly_vert="30,465,315,100,1" >
+			<COL_INFO ly_vert_width="89,120,106" />
+			<ROW_INFO ly_vert_height="25,25,25,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="333:115118124" bgcolor="042:255255255" halign="0" line="0,0" caption="계좌번호" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,2,0" fgcolor="334:034034034" halign="2" line="0,0" fontsize="-1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="333:115118124" halign="0" line="0,0" caption="주문건수" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,1,2,1" fgcolor="293:017158176" halign="2" line="0,0" fontsize="-1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="333:115118124" bgcolor="042:255255255" halign="0" line="0,0" caption="종목" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,2,2,2" fgcolor="334:034034034" halign="2" line="0,0" fontsize="-1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="333:115118124" bgcolor="042:255255255" halign="0" line="0,0" caption="수량" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,3,2,3" fgcolor="334:034034034" halign="2" line="0,0" fontsize="-1" mask="1,0,,,1,,0,0,0,0,0" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4642" _ulen="4148" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_nCount
+g_nCount = 0
+
+Dim g_nIndex				' 매도수구분 (0:매수, 1:매도, 2:정정, 3:취소)
+Dim g_szOrder_Acc			' 계좌번호
+Dim g_szOrder_AccName		' 고객명
+Dim g_szOder_Cnt			' 주문건수
+Dim g_szAllCheck			' 전체선택 여부
+
+
+'Dim g_szOrd_ItmCode		' 종목코드
+'Dim g_szOrd_ItmName		' 종목명
+'Dim g_szOrd_OrdType		' 주문구분
+'Dim g_szOrd_Security		' 현금/대출
+'Dim g_nOrd_Qty			' 주문수량
+'Dim g_nOrd_Price			' 주문가격
+'Dim g_nOrd_OrdNo			' 원주문번호
+'Dim g_nOrd_ChkAll			' 잔량전부	
+'Dim g_nOrd_Decimal		' 가격자릿수
+'Dim g_nOrd_Currency		' 통화기호
+'Dim g_szOrd_PrcName		' 시장가/지정가
+'
+'Dim g_nOrd_LoanType		' 대출구분
+'Dim g_szOrd_LoanDate		' 대출일자
+'Dim g_szOrd_LoanSrno		' 대출일련번호
+'
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	Dim szData, arrData, szItemName
+
+	szData = Form.GetOpenLinkData()
+	
+	arrData = Split(szData,"|")
+	
+	if UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+	
+	'-----------------------------------------------------------
+	' 일반주문
+	'-----------------------------------------------------------
+	g_nIndex				= arrData( 0) ' 매도수구분 (0:매수, 1:매도, 2:정정, 3:취소, 10:예약매수, 11:예약매도, 12:예약취소)
+	g_szOrder_Acc			= arrData( 1)	' 계좌번호
+	g_szOrder_AccName		= arrData( 2)	' 고객명
+	g_szOder_Cnt			= arrData( 3) ' 주문건수
+	g_szAllCheck			= arrData( 4) ' 전체선택여부
+	
+'	g_szOrd_ItmCode 		= arrData( 3)	' 종목코드
+'	g_szOrd_ItmName 		= arrData( 4)	' 종목명
+'	g_szOrd_OrdType  		= arrData( 5)	' 주문구분
+'	g_szOrd_Security 		= arrData( 6)	' 현금/대출구분 (0:현금/1:대출)
+'	g_nOrd_Qty   			= arrData( 7)	' 주문수량
+'	g_nOrd_Price 			= arrData( 8)	' 주문가격
+'	g_nOrd_OrdNo 			= arrData( 9)	' 원주문번호
+'	g_nOrd_ChkAll 		= arrData(10)	' 잔량전부
+'	g_nOrd_Decimal		= arrData(11)	' 가격자릿수
+'	g_nOrd_Currency		= arrData(12)	' 통화
+'	g_szOrd_PrcName		= arrData(13)	' 시장가or지정가
+'	
+'	'대출일경우
+'	if g_szOrd_Security == "1" then
+'		g_nOrd_LoanType		= arrData(14)	' 대출구분
+'		g_szOrd_LoanDate		= arrData(15)	' 대출일자
+'		g_szOrd_LoanSrno		= arrData(16)	' 대출일련번호
+'	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    Set_Data(g_nIndex)
+    
+End Sub
+
+'============================================================================
+'주문화면 데이터
+'============================================================================
+Function Set_Data(nIndex)
+
+    	'-----------------------------------------------------------
+	' 계좌번호/고객명
+	'-----------------------------------------------------------
+	szStr1 = left(g_szOrder_Acc,4)
+	szStr2 = mid(g_szOrder_Acc,5,4)
+	szStr3 = right(g_szOrder_Acc,2)
+	tblMaedo1.SetCellString( 0, 1, szStr1.."-".. szStr2 .."-".. szStr3.." "..g_szOrder_AccName)
+	
+	'-----------------------------------------------------------
+	' 주문건수
+	'-----------------------------------------------------------
+	tblMaedo1.SetCellString( 1, 1, g_szOder_Cnt.."건")
+	
+	'-----------------------------------------------------------
+	' 종목
+	'-----------------------------------------------------------
+	if g_szAllCheck == "Y" then
+		tblMaedo1.SetCellString( 2, 1, "전종목")
+	else
+		tblMaedo1.SetCellString( 2, 1, "선택종목")
+	end if
+	
+	'-----------------------------------------------------------
+	' 수량
+	'-----------------------------------------------------------
+	tblMaedo1.SetCellString( 3, 1, "전량")
+	
+	
+End Function
+
+'============================================================================
+Function SendOrder()
+    
+    If g_nCount = 0 Then
+	    Form.SendReturnToParent( "전체취소주문전송" , "1")
+	    
+	    g_nCount = 1
+	    Form.CloseForm( )
+	    
+    End If
+    
+End Function
+'============================================================================
+Sub btnMaesu1Close_OnClick()
+	Form.CloseForm()	
+End Sub
+'============================================================================
+Sub btnMaesu1_OnClick()
+	SendOrder()
+End Sub
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+
+
+	</SCRIPT_INFO>
+</ROOT>

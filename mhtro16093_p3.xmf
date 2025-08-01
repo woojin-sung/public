@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16093" scrname="해외주식 소수점 거래_콤보팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnBG" btnimage="alpha" ly_vert="0,0,375,562,1" />
+		<CONTAINER name="Container0" containerimage="alpha" scroll_pos="0,0" ly_vert="0,0,75,105,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" imgpath="input_01_n.9.png" ly_vert="0,0,75,100,1" />
+				<GRID name="Grid0" ly_vert="3,5,70,90,1" ver="1" itemcodeid="" >
+					<CONTROL_INFO>
+						<LABEL name="bd_cell0" fontsize="-2" halign="1" />
+					</CONTROL_INFO>
+					<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" border="0000" inlinecolor="025:255255255" />
+					<COLINFO ly_vert_width="70" ly_vert_visible="0" >
+						<COLUMN colcount="1" >
+							<SUBCOLINFO ly_vert_width="70" ly_vert_visible="0" />
+							<BODY rowcount="1" >
+								<ROWINFO ly_vert_height="25" />
+								<CELLINFO>
+									<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,0" >
+										<STATECOMP_INFO desttype="1" />
+									</CELL>
+								</CELLINFO>
+							</BODY>
+						</COLUMN>
+					</COLINFO>
+					<UPDATETR_INFO/>
+					<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+				</GRID>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1936" _ulen="1884" >
+--===========================================================================
+--===========================================================================
+dim g_szCtrlNm
+'============================================================================
+Sub Form_OnFormInit()
+	
+
+	dim szOpenData, tData, tRec, tVal, iIdx
+	szOpenData = Form.GetOpenLinkData()
+	
+	if szOpenData <> "" and szOpenData <> null then
+		tData = Split(szOpenData, "♥")
+		'위치크기 값
+		if tData(0) <> "" and tData(0) <> null then
+			tRec = Split(tData(0), "★")
+		end if
+		'데이터 값
+		if tData(1) <> "" and tData(1) <> null then
+			tVal = Split(tData(1), "★")
+		end if
+		'콤보 컨트롤 명
+		if tData(2) <> "" and tData(2) <> null then
+			g_szCtrlNm = tData(2)
+		end if
+		'현재 선택 인덱스
+		if tData(3) <> "" and tData(3) <> null then
+			iIdx = CInt(tData(3))
+		else
+			iIdx = 0
+		end if
+		
+		dim sOS_Type
+		sOS_Type = Form.GetSharedData("&OS_TYPE", false)
+		if sOS_Type = "2" then  'iOS
+		'Form.ShowAlert("IOS")
+			Container0.top = CInt(tRec(1)) + CInt(tRec(3)) +1
+		else  'AOS
+		'Form.ShowAlert("AOS")
+			Container0.top = CInt(tRec(1)) + CInt(tRec(3)) - 4
+		end if
+'		Container0.width = CInt(tRec(0))
+		Container0.left = CInt(tRec(2))
+		Container0.height = 25 * #tVal + 10
+		Container0.Grid0.height = 25 * #tVal
+		Container0.Image0.height = 25 * #tVal + 10
+		
+		for i=0 to #tVal-1
+			Container0.Grid0.AddRow()
+			Container0.Grid0.SetCellData( "bd_cell0", i, tVal(i) )
+			if i == iIdx then
+				Container0.Grid0.SetCellFgColor("bd_cell0", i, "10")
+			end if
+		next
+	end if
+	
+End Sub
+
+'============================================================================
+Sub btnBG_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container0_Grid0_OnClickUp(lRow, szCellID)
+	Form.SendReturnToParent( "COMBO_POP" , g_szCtrlNm&"★"&lRow )
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

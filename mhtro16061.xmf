@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16061" scrname="해외주식_주문" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="LinkForm2" linkfile="mhtro16000_p5" ly_vert="0,0,375,76,1" />
+		<IMAGE name="edtPwdBg" autosize="1" imgpath="input_01_n.9" ly_vert="283,101,90,35,1" />
+		<ITEMCODE name="ItemCode0" itemtype="11" marketcodelist="" ly_vert="555,86,209,39,1" />
+		<LINKFORM name="LinkForm0" enable="0" visible="0" ly_vert="554,132,375,39,0" />
+		<FORMTAB name="FormTab0" fontstyle="01" tabcount="5" tabwidthtype="1" tabheadheight="35" ly_vert="0,138,375,425,1" >
+			<PAGE name="page0" caption="예약매수" linkfile="mhtro16061_t1" />
+			<PAGE name="page1" caption="예약매도" linkfile="mhtro16061_t2" />
+			<PAGE name="page3" caption="예약내역" linkfile="mhtro16061_t3" />
+			<PAGE name="page2" caption="처리결과" linkfile="mhtro16061_t4" />
+			<PAGE name="page4" caption="유의사항" linkfile="mhtro16061_t5" />
+		</FORMTAB>
+		<EDIT name="edtPwd" fontsize="-2" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" des="비밀번호" imagefilepth="alpha" ly_vert="283,101,63,35,1" />
+		<ACCOUNT name="acnt" itemcodetype="100,200" etcfunctions="" accpwdctl="edtPwd" delegate="1" finaceexcept="1" benefitexcept="1" ly_vert="7,101,270,35,1" />
+		<IMAGE name="Image0" imgpath="pop_btn_drop.png" ly_vert="172,76,30,25,1" />
+		<IMAGE name="edtPwdIcon" autosize="1" imgpath="icon_save_password_n.9" ly_vert="343,108,26,21,1" />
+		<BUTTON name="btnPwd" btnimage="alpha" ly_vert="283,101,90,35,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="16269" _ulen="15133" >
+Dim g_sDecimalLen
+Dim sData
+
+Dim g_szCsno
+g_szCsno = ""
+
+' 계좌비밀번호 저장여부
+Dim g_szSavePwd 
+g_szSavePwd  = "0"
+
+Dim g_RightPop '20220719 SWJ : GME, GOOGLE 권리분할 플래그
+'============================================================================
+Function Tonum(sValue)
+	return tonumber( sValue ) or 0
+end Function
+
+'============================================================================
+' 거래소 ID 시장명으로 변환
+'============================================================================
+Function Transform_Market(sValue)
+	if sValue == "HK" then
+		return "홍콩"
+	elseif sValue == "CN" then
+		return "중국"
+	elseif sValue == "JP" then
+		return "일본"
+	elseif sValue == "US" then
+		return "미국"
+	end if
+end Function
+
+'============================================================================
+'[[ 폼 초기화 ]]
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Dim szPopup
+	szPopup = Form.LoadConfigData( "mhtro16061", "mhtro16061_p1" )
+	
+	If szPopup <> "1" Then
+		Form.OpenPopup( "mhtro16061_p1", "" , "")
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szSavePwd = Form.GetEnvData("order.save_orderpwd")					' 계좌비밀번호 저장여부
+	
+	' 계좌비밀번호사용여부 초기화(기본값 : 미사용)
+	if Trim(g_szSavePwd) = "" then
+		g_szSavePwd = "0"
+	end if	
+	
+	'20220425 HWG START : 계좌비밀번호 입력 개선
+	if g_szSavePwd == "0" then
+		edtPwdIcon.imgpath = "icon_save_password_n.9"
+		edtPwd.caption = ""
+	else
+		edtPwdIcon.imgpath = "icon_save_password_o.9"
+	end if
+	'20220425 HWG END
+	
+	btnPwd.bringfront("1")	'20220425 HWG : 계좌비밀번호 입력 개선
+	Form.SetInterestTitle("N")		'비활성화로 기본 세팅 20230722 HSZ
+	
+	'f_EventPopup()		'20240710 SWJ START
+	if Form.GetOpenLinkData( ) == "0" or Form.GetOpenLinkData( ) == 0	then			'매수
+		FormTab0.currenttabpageid = "page0"
+	elseif Form.GetOpenLinkData( ) == "1" or Form.GetOpenLinkData( ) == 1	then		'매도
+		FormTab0.currenttabpageid = "page1"
+	end if
+	ItemCode0.code = Form.GetSharedData("&ITEM_CODE", false)
+	if Len(ItemCode0.code) > 0 then
+		Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "InitCode", ItemCode0.code )
+		Form.triggerEvent( "LinkForm2", "RequestData", ItemCode0.code)
+	end if
+	
+	'20240710 SWJ START
+	'팝업 위치 변경, 311r은 권리선반영 체크 이후에 진행
+	f_EventPopup()
+	'DATAMANAGER.RequestTranData("obpds_srvc_323r")
+	'20240710 SWJ END
+end Sub
+
+'============================================================================
+'[[ 폼탭 변경시 ]]
+'============================================================================
+
+
+'============================================================================
+Sub Form_OnRefresh()
+	ItemCode0_OnEditComplete(ItemCode0.code)
+end Sub
+ 
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH" then
+		ItemCode0_OnEditComplete(ItemCode0.code)
+			
+	elseif sEventName == "REG_INTR" then ' 상반바 우측 관심추가 버튼 클릭 시 
+		Form.OpenPopup( "mhtro16010_p5" , ItemCode0.code , "" )
+		
+	elseif sEventName = "SCREEN_MENU" then							' 연결정보(상단 ...)
+		
+		if sParam = "REG_INTR" Then								' 관심종목등록
+			Form.OpenPopup( "mhtro16010_p5" , ItemCode0.code & "★" & ItemCode0.caption, "" )
+
+		elseif sParam = "POP_UP1" Then							' 유의사항
+			 Form.OpenPopup( "mhtro16061_p1", "" , "")
+
+		end if
+	
+	' 상단바 클릭 시
+	'20220922 SWJ START : 상단 바 클릭 시, 종목선택창 팝업 추가
+	elseif sEventName == "TITLE_CLICK" then
+		Form.OpenCommonDialog("SEARCH", "19", "")
+	'20220922 SWJ END
+	
+	elseif (sEventName == "16061_BALANCE") then
+		'20220510 LES START
+		arrLinkCode = Split(sParam,"★")
+		szLinkCode = arrLinkCode(0)
+		
+		if CheckMasterFile(szLinkCode) then
+			
+		else
+			Form.ShowAlert("안내", "MTS에서 거래가 불가능한 종목입니다")
+			Exit Sub
+		end if
+		'20220510 LES END 
+		Form.setOverStockItemCode(sParam)
+	end if
+end Sub
+
+
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)	
+	if "&ITEM_CODE" == sKey then
+		
+		ItemCode0_OnEditComplete(sValue)
+	end if
+End Sub
+
+'============================================================================
+Sub ItemCode0_OnEditComplete(sCode)
+	ItemCode0.code = sCode
+	Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "ChangeCode", ItemCode0.code )
+	Form.triggerEvent( "LinkForm2", "RequestData", ItemCode0.code)
+
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	if Len(ItemCode0.code) > 0 then
+		Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "ChangeTab", ItemCode0.code )	
+	end if
+End Sub
+'============================================================================
+' 종목검색창 호출 명령 들어올 경우
+'============================================================================
+Sub Form_OnOpenSearchDialog()
+	Form.OpenPopup( "ItemSearchOverStock" , "" , "I" )
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obpds_srvc_323r" then
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_323r", "InBlock1", "ACNO" 				, 0 	, acnt.total )
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_323r", "InBlock1", "ASNO"				, 0 	, acnt.sequence )
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_323r", "InBlock1", "SVCD"				, 0 	, "082" )
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_323r", "InBlock1", "CSNO"				, 0 	, "" )
+	
+	'20240710 SWJ START : 주석 처리
+	'20200827 LES START 애플/테슬라 액면분할 관련 고객유의사항
+'	elseif szTranID == "obtro_acnt_900r" then
+'	
+'		szCustNum = Form.GetSharedData("&CUST_NUM", false)
+'	
+'		DATAMANAGER.SetDataValue(0, "obtro_acnt_900r", "InBlock1", "BSWR_CLCD" 			, 0 , "09")  '20220531 SWJ : AMZN 종목
+'		DATAMANAGER.SetDataValue(0, "obtro_acnt_900r", "InBlock1", "CSNO" 				, 0 , szCustNum)
+'		
+	'20200827 LES END
+	'20240710 SWJ END
+			
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obpds_srvc_323r" then
+		szYakCd = DATAMANAGER.GetDataMsgCode(szTranID)
+		
+		if szYakCd <> "5766" then
+			Form.MsgBox("약정신청안내", "해외주식 거래신청 미등록 계좌는 약정 신청 후 거래가 가능합니다. 해당 화면으로 이동하시겠습니까?" , "REG", 1)
+		else
+			Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "ChangeAcnt", "" )
+			
+			'20220720 SWJ START : GME 권리분할
+			'20220713 SWJ START : GOOG, GOOGL 권리분할
+			szToday = Form.GetSharedData("&HOST_DATE", false )
+			
+'			if tonumber(szToday) >= 20220718 and tonumber(szToday) <= 20220721 then
+'				g_RightPop = "05"
+'				DATAMANAGER.RequestTranData("obtro_acnt_900r")
+'				
+'			elseif tonumber(szToday) >= 20220722 and tonumber(szToday) <= 20220728 then
+'				g_RightPop = "06"
+'				DATAMANAGER.RequestTranData("obtro_acnt_900r")
+'			end if
+			
+			'20220822 SWJ START
+			if tonumber(szToday) >= 20240610 and tonumber(szToday) <= 20240614 then
+				DATAMANAGER.RequestTranData("obtro_acnt_900r")
+			end if
+			'20220713 SWJ END
+			'20220720 SWJ END
+			'20220822 SWJ END
+		end if
+		
+	'20200827 LES START 애플/테슬라 액면분할 관련 고객유의사항
+	elseif szTranID == "obtro_acnt_900r" then
+	
+		'애플/테슬라 잔고보유 고객한테만 유의사항 팝업 띄어줌.
+		agreeYn = DATAMANAGER.GetDataValue(0, "obtro_acnt_900r", "OutBlock1", "AGRM_YN" 		, 0)
+		jangoYn = DATAMANAGER.GetDataValue(0, "obtro_acnt_900r", "OutBlock1", "RMND_EXST_YN" 	, 0)
+		
+		if jangoYn = "Y" then
+			if agreeYn = "N" then
+			
+				'20220719 SWJ START
+				'if g_RightPop = "05" then
+					Form.OpenPopup("mhtro16060_p9" , "" , "")
+				'elseif g_RightPop = "06" then
+				'	Form.OpenPopup("mhtro16060_p14" , "" , "")
+				'end if 
+				'20220719 SWJ END
+				
+				'20240710 SWJ START
+				'로그인 후 한번 뜨면 안떠도 됨
+				Form.SetSharedData("AbroadAgreement_PopupYN", "N")
+				'20240710 SWJ END
+			else
+				DATAMANAGER.RequestTranData("obpds_srvc_323r")	'20240710 SWJ START
+			end if
+		else
+			DATAMANAGER.RequestTranData("obpds_srvc_323r")	'20240710 SWJ START	
+		end if
+		
+	'20200827 LES END
+		
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID == "obpds_srvc_323r" then
+		szYakCd = DATAMANAGER.GetDataMsgCode(szTranID)
+		
+		if szYakCd <> "5766" then
+			Form.MsgBox("약정신청안내", "해외주식 거래신청 미등록 계좌는 약정 신청 후 거래가 가능합니다. 해당 화면으로 이동하시겠습니까?" , "REG", 1)
+		else
+			Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "ChangeAcnt", "" )	
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub acnt_ChangeAccount()
+	'20220425 HWG START : 계좌비밀번호 입력 개선
+	if g_szSavePwd == "0" then
+		edtPwd.caption = ""
+		edtPwdIcon.imgpath = "icon_save_password_n.9"
+	else
+		edtPwdIcon.imgpath = "icon_save_password_o.9"
+	end if
+	'20220425 HWG END
+	
+	DATAMANAGER.RequestTranData("obpds_srvc_323r")
+End Sub
+
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "REG" then
+		if sRet == "ok" then
+			Form.OpenScreen("87051" , "")
+		end if
+	end if
+End Sub
+
+
+
+'============================================================================
+' 해외주식 공지팝업
+'============================================================================
+function f_EventPopup()
+    Dim szEndDate
+    Dim szToday
+    Dim szDate
+    Dim nDiffDay
+    
+   '20200526 SWJ START : MTS 해외주식 실시간 서비스 비용 변동 안내 팝업
+    szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    szEndDate = "20200612"                            	' 팝업노출일
+	    szToday = Form.GetSharedData("&HOST_DATE", false )    ' 현재일
+	    szDate = Form.GetEnvData("EVENT_DATE_YH")            ' 일주일간 열지 않기 체크한 날짜
+    
+	    if tonumber(Form.DiffDate(szToday, szEndDate)) >= 0 then
+			if szDate == null or szDate == "" then
+			    Form.OpenPopup("popup_noti", "" , "")
+			else
+			    nDiffDay =  tonumber(Form.DiffDate(szDate, szToday))
+			    if nDiffDay > 7 then
+					Form.SetEnvData(0, "EVENT_DATE_YH", "")
+					Form.OpenPopup("popup_noti", "" , "")
+			    end if
+			end if
+	    end if
+	end if
+	'20200526 SWJ END
+
+	'20240710 SWJ START
+	'해외주식 권리선반영 팝업
+	'이제 주문화면 배포 안해도 됨
+	nStartDate = Cint(Form.LoadConfigData("NoticeSetting", "AbroadAgreement_StartDate"))
+	nEndDate = Cint(Form.LoadConfigData("NoticeSetting", "AbroadAgreement_EndDate"))
+	sBswrClcd = Form.LoadConfigData("NoticeSetting", "AbroadAgreement_BswrClcd")
+			
+	nToday = Cint(Form.GetSharedData("&HOST_DATE", false))
+			
+	if nToday >= nStartDate and nToday <= nEndDate then
+		sCustCSNO = Form.GetSharedData("&CUST_NUM", false)
+				
+		sPopupYN = Form.GetSharedData( "AbroadAgreement_PopupYN" , false)
+				
+		if sPopupYN == "Y" then
+			DATAMANAGER.SetDataValue( 0 , "obtro_acnt_900r", "InBlock1", "CSNO" , 0 , sCustCSNO )	
+			DATAMANAGER.SetDataValue( 0 , "obtro_acnt_900r", "InBlock1", "BSWR_CLCD" , 0 , sBswrClcd )	
+			DATAMANAGER.RequestTranData( "obtro_acnt_900r" )
+		else
+			DATAMANAGER.RequestTranData("obpds_srvc_323r")	'20240710 SWJ START
+		end if
+	else
+		DATAMANAGER.RequestTranData("obpds_srvc_323r")	'20240710 SWJ START
+	end if
+	'20240710 SWJ END
+end function
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "ITEMINFO_POP_CLOSE" then
+		Image0.visible = true
+		
+'	20200827 LES START 애플/테슬라 액면분할 관련 고객유의사항
+	elseif sKeyName == "16060_p9" then
+	
+		'20240710 SWJ START
+		'권리선반영 팝업 이후 약정 체크
+'		if sRet == "cancel" then
+'			szPrevScr = Form.GetSharedData("&PREV_SCREEN_NO", false )
+'			
+'			if szPrevScr == "" or szPrevScr == nil or szPrevScr == "16060" then
+'				szPrevScr = "41000"
+'			end if
+'			
+'			Form.OpenScreen(szPrevScr , "")
+'		end if
+		
+		DATAMANAGER.RequestTranData("obpds_srvc_323r")	'20240710 SWJ START
+		'20240710 SWJ END
+		
+'	20200827 LES END
+	'20220425 HWG START : 계좌비밀번호 입력 개선
+	elseif sKeyName == "CORRECT_PWD" then
+		if sRet <> "" then
+			Dim szAcnt
+			
+			tData = Split(sRet, "★")
+			
+			if UBOUND(tData) > 0 then
+				edtPwd.pwdlen = tData(1)
+				edtPwd.caption = tData(0)
+			end if
+			
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+			if g_szSavePwd == "0" then
+				edtPwdIcon.imgpath = "icon_save_password_n.9"
+			else
+				edtPwdIcon.imgpath = "icon_save_password_o.9"
+			end if
+		else
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+			if g_szSavePwd == "0" then
+				edtPwdIcon.imgpath = "icon_save_password_n.9"
+				edtPwd.caption = ""
+			else
+				szCurAcc = acnt.caption
+				nCnt = Cint(acnt.accountcount)
+				For i = 0 to nCnt - 1
+					szCompAcc = acnt.getAccountByIndex(i)
+					
+					if szCurAcc == szCompAcc then
+						acnt.currentindex = i
+						Exit For
+					end if
+				Next
+				edtPwdIcon.imgpath = "icon_save_password_o.9"
+			end if
+			
+		end if 
+	'20220425 HWG END
+	end if
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.OpenPopup( "mhtro16000_p0" , "", "" )
+	Image0.visible = false
+End Sub
+
+'20220425 HWG START : 계좌비밀번호 입력 개선
+'============================================================================
+Sub btnPwd_OnClick()
+	Form.openPopupAnimation("pwdcheckpopup", acnt.caption ,"","2")
+End Sub
+'20220425 HWG END
+
+'============================================================================
+'20220510 LES START : 마스터파일에 있는 종목인지 체크
+'============================================================================
+Function Transform_Exid(szExid)
+
+	if szExid = "HKS" then
+		Transform_Exid = "HK"
+		exit Function
+	elseif szExid = "SHS" then
+		Transform_Exid = "SH"
+		exit Function
+	elseif szExid = "SZS" then
+		Transform_Exid = "SZ"
+		exit Function
+	elseif szExid = "NYS" then
+		Transform_Exid = "NY"
+		exit Function
+	elseif szExid = "AMX" then
+		Transform_Exid = "AX"
+		exit Function
+	elseif szExid = "NAS" then
+		Transform_Exid = "OQ"
+		exit Function
+	elseif szExid = "TSE" then
+		Transform_Exid = "JP"
+		exit Function
+	else
+		Transform_Exid = szExid
+	end if
+
+End Function
+
+'============================================================================
+'20220510 LES START : 마스터파일에 있는 종목인지 체크
+'============================================================================
+Function CheckMasterFile(szCode)
+	'Form.ShowAlert("szCode", szCode)
+	arrCode = Split(szCode,"@")
+	'Form.ShowAlert("arrCode0", arrCode(0))
+	'Form.ShowAlert("arrCode1", arrCode(1))
+	szTransExidCode = Transform_Exid(arrCode(0))
+	
+	szTransItemCode = szTransExidCode .. "@" .. arrCode(1)
+	'Form.ShowAlert("szTransItemCode", szTransItemCode)
+
+	szCheckData = Form.GetItemCodeInfo(szTransItemCode, "exchid")
+	'Form.ShowAlert("szCheckData", szCheckData)
+	
+	if szCheckData = "" or szCheckData = null then
+		CheckMasterFile = false
+		Exit Function
+	end if
+	
+	CheckMasterFile = true
+	
+End Function
+'============================================================================
+'20220922 SWJ START : 종목선택창 팝업 추가
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	'sReturn1 = 거래소코드★종목코드
+	'name = 종목명 
+	name = Form.GetItemCodeInfo(sReturn1, "name")
+	
+	Form.setOverStockItemCode(sReturn1.."★"..name)
+	ItemCode0_OnEditComplete(sReturn1.."★"..name)
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_323r" trcode="obpds_srvc_323r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtro_acnt_900r" trcode="obtro_acnt_900r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_323r" title="HTS-WTS용 서비스 내역 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="148" _ulen="110" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="159" _ulen="119" >
+
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+APRV_YN^승인여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtro_acnt_900r" title="해외주식 고객 동의여부 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="84" _ulen="64" >
+
+BSWR_CLCD^업무구분코드^2^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="150" _ulen="112" >
+
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+RMND_EXST_YN^잔고존재여부^1^0^0^0^0^0^0
+DCPN_RMND_EXST_YN^소수점잔고존재여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

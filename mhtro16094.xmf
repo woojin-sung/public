@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16094" scrname="해외주식 소수점 정수주 변환" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="cmbAccount" itemcodetype="100,200" finaceexcept="1" cmaexcept="1" benefitexcept="1" kosdaqexcept="1" ly_vert="5,5,271,39,1" />
+		<EDIT name="edtPassword" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="283,5,86,39,1" />
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="36" ly_vert="0,49,375,513,1" >
+			<PAGE name="page001309" caption="전환신청" linkfile="mhtro16094_t1" loadingtype="1" />
+			<PAGE name="page008676" caption="전환내역조회" linkfile="mhtro16094_t2" loadingtype="1" />
+		</FORMTAB>
+		<BUTTON name="btnPwd" btnimage="alpha" ly_vert="279,5,91,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2863" _ulen="2807" >
+
+
+Dim g_szSavePwd             	'계좌비밀번호 저장여부
+--===========================================================================
+--===========================================================================
+
+'============================================================================
+Sub edtPassword_OnEditComplete()
+	Form.triggerEvent("FormTab0."&FormTab0.currenttabpageid, "Request", cmbAccount.caption)
+End Sub
+
+'============================================================================
+Sub cmbAccount_ChangeAccount()
+	edtPassword.caption = ""
+	Form.triggerEvent("FormTab0."&FormTab0.currenttabpageid, "Request", cmbAccount.caption)
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("FormTab0."&FormTab0.currenttabpageid, "Request", cmbAccount.caption)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	btnPwd.bringfront("1")
+	Form.triggerEvent("FormTab0."&FormTab0.currenttabpageid, "Request", cmbAccount.caption)
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "INFO_CLICK" then
+		Form.OpenFramePopup("mhtro16094_p2", "" , "")
+	elseif sEventName == "ShowTransList" then  '전환내역조회탭 전환요청
+		FormTab0.currenttab = 1
+		FormTab0_OnTabChanged(1)
+	end if
+End Sub
+
+Sub btnPwd_OnClick()
+	Form.openPopupAnimation("pwdcheckpopup",cmbAccount.caption,"","2")
+End Sub
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'==============================================
+	'*********** 계좌비번 수신 ************
+	'==============================================
+	if sKeyName = "CORRECT_PWD" then
+		if sRet <> "" then
+			Dim szAcnt
+			
+			tData = Split(sRet, "★")
+			
+			if UBOUND(tData) > 0 then
+				edtPassword.pwdlen = tData(1)
+				edtPassword.caption = tData(0)
+				edtPassword_OnEditComplete()
+			end if
+			
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+			if g_szSavePwd == "0" then
+				'edtPwdIcon.imgpath = "icon_save_password_n.9"
+			else
+				'edtPwdIcon.imgpath = "icon_save_password_o.9"
+			end if
+		else
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+			if g_szSavePwd == "0" then
+				'edtPwdIcon.imgpath = "icon_save_password_n.9"
+				edtPassword.caption = ""
+			else
+				szCurAcc = cmbAccount.caption
+				nCnt = Cint(cmbAccount.accountcount)
+				For i = 0 to nCnt - 1
+					szCompAcc = cmbAccount.getAccountByIndex(i)
+					
+					if szCurAcc == szCompAcc then
+						cmbAccount.currentindex = i
+						Exit For
+					end if
+				Next
+				
+				'edtPwdIcon.imgpath = "icon_save_password_o.9"
+			end if
+			
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

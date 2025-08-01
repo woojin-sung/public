@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16080" scrname="환전신청_매수외화잔고현황" version="2" writer="조승행" />
+	<FORM_INFO name="Form" ly_vert="0,0,310,232,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9" ly_vert="-1,-1,311,55,1" />
+		<IMAGE name="Image0" imgpath="icon_main_11" ly_vert="267,6,36,36,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="외화잔고현황" bgcolor="064:188030030" halign="1" ly_vert="0,-1,310,55,1" />
+		<TABLE name="Table0" insidelinecolor="000:255255255" colcount="3" rowcount="2" outline="0101" designorder="1" ly_vert="13,95,281,80,1" >
+			<COL_INFO ly_vert_width="126,47,108" />
+			<ROW_INFO ly_vert_height="40,40" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" caption="보유외화잔고" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" fontsize="-2" mask="1,0,,,1,,2,1,1" impidxs="" />
+				<CELL cell_ly="2,0,2,0" halign="2" caption="0" mask="0,0,,,0,,2,1,1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" caption="최대 환전 가능 외화" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" fontsize="-2" mask="1,0,,,1,,2,1,1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" halign="2" caption="0" mask="0,0,,,0,,2,1,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1407" _ulen="1337" >
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+'해당하는 값의 아이템을 리턴
+'============================================================================
+Function getListItem(szInput, nIdx)
+	dim szList
+	
+	if szInput = "" then
+		return 
+	else
+		szList = split(szInput, "★")
+		if szList <> "" then
+			return szList(nIdx)
+		else
+			return
+		end if 
+	end if 
+	
+end function
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szLinkedData
+	
+	szLinkedData = ""
+	
+	szLinkedData = Form.GetOpenLinkData()
+	
+	
+	if getListItem(szLinkedData,0) <> "" then
+		Table0.SetCellString( 0, 2, getListItem(szLinkedData,0)) ' 보유외화잔고
+	end if
+	
+	if getListItem(szLinkedData,1) <> "" then
+		Table0.SetCellString( 1, 2, getListItem(szLinkedData,1)) ' 최대 환전 가능 외화
+	end if
+	
+	Table0.SetCellString( 0, 1, getListItem(szLinkedData,2)) ' 통화코드
+	Table0.SetCellString( 1, 1, getListItem(szLinkedData,2)) ' 통화코드
+	
+	
+	
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

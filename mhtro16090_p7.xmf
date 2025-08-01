@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16092" scrname="해외소수점매매_주문확인창" version="2" writer="아이티젠" />
+	<FORM_INFO name="GridBank" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="-1,0,375,639,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,403,375,249,1" />
+		<LABEL name="edtPrc" fontsize="2" mask="0,0,,,0,,0,1,0,0,0" halign="1" ly_vert="30,281,315,39,1" />
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" caption="하시겠습니까?" bgcolor="064:188030030" autofontsize="1" ly_vert="147,403,224,61,1" />
+		<LABEL name="lblMaemae" fgcolor="094:064174162" fontsize="4" fontstyle="01" caption="취소" bgcolor="064:188030030" halign="2" autofontsize="1" ly_vert="-5,403,169,61,1" />
+		<GRID name="GrdLine" ly_vert="23,461,325,2,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell1" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell0" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" border="0000" bordercolor="028:255255255" inlinecolor="028:255255255" />
+			<COLINFO ly_vert_width="325" ly_vert_visible="0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="325" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="2" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,0" bgcolor="132:215215215" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<TABLE name="tblMaemae" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" transmode="1" designorder="1" ly_vert="33,476,305,105,1" >
+			<COL_INFO ly_vert_width="70,235" />
+			<ROW_INFO ly_vert_height="35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="계좌번호" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" mask="1,0,,,1,####-####-##,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="매매구분" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="종목명" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" line="0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnClose" caption="닫기" fgcolor="100:102102102" fontsize="3" fontstyle="01" btnimage="btn_etc9.9.png" ly_vert="0,596,187,51,1" />
+		<BUTTON name="btnOrder" caption="취소" fontsize="3" fontstyle="01" btnimage="btn_etc18.9.png" ly_vert="187,596,188,51,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4146" _ulen="3786" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 예약주문
+' 02. 화면설명 : 예약주문 주문확인창
+' 03. 작    성 : 2016.04.30 LJS
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+
+Dim g_nCount
+	g_nCount = 0
+
+Dim g_nIndex				' 매도수구분 (0:매수, 1:매도, 2:정정, 3:취소)
+Dim 	g_szOrder_Acc			' 계좌번호
+Dim 	g_szOrder_AccName		' 고객명
+Dim 	g_szOrd_ItmCode		' 종목코드
+Dim 	g_szOrd_ItmName		' 종목명
+Dim 	g_szOrd_OrdType		' 주문구분
+Dim 	g_szOrd_Security		' 현금/신용
+Dim 	g_nOrd_Qty			' 주문수량
+Dim 	g_nOrd_Price			' 주문가격
+Dim 	g_nOrd_OrdNo			' 원주문번호
+Dim 	g_nOrd_ChkAll			' 잔량전부	
+Dim	g_nOrd_Decimal		' 가격자릿수
+'20191029 YGH 예약주문 문구추가 Start
+Dim g_nOrd_res_Type 		' 예약주문유형
+Dim g_nOrd_res_time		' 주문시간유형
+'20191029 YGH 예약주문 문구추가 End
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+'주문화면 데이터
+'============================================================================
+Function Set_Data()
+	
+	tblMaemae.SetCellString( 0, 1, g_szOrder_Acc	 )
+	tblMaemae.SetCellString( 1, 1, g_nIndex )
+	tblMaemae.SetCellString( 2, 1, g_szOrd_ItmCode )
+
+End Function
+
+'============================================================================
+Function SendOrder()
+    If g_nCount = 0 Then
+	    Form.SendReturnToParent( "주문전송" , "1")
+	    
+	elseif g_nCount = 1 then
+	    Form.CloseForm( )
+    End If
+    
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Dim szData, arrData, szItemName
+
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData,"★")
+	orderData = Split(arrData[0],"|")
+	
+	if UBOUND(arrData) < 1 or UBOUND(orderData) < 1 then
+	    Exit sub
+	End if
+	
+	g_szOrdnum			= int(orderData( 0))	' 취소주문 수
+	g_szOrder_Acc			= orderData( 1)		' 계좌번호
+	g_nIndex				= orderData( 2) 		' 매도수구분 (0:매수, 1:매도)
+	g_szOrd_ItmCode		= orderData( 3)		' 종목코드
+	g_szOrd_ItmName 		= orderData( 4)		' 종목명
+'	g_szOrd_OrdType  		= arrData( 5)	' 주문구분
+'	g_szOrd_Security 		= arrData( 6)	' 현금
+'	g_nOrd_Qty   			= arrData( 7)	' 주문수량
+'	g_nOrd_Price 			= arrData( 8)	' 주문가격
+'	g_nOrd_OrdNo 			= arrData( 9)	' 원주문번호
+'	g_nOrd_ChkAll 		= arrData(10)	' 잔량전부
+'	g_nOrd_Decimal		= arrData(11)	' 가격자릿수
+	
+	if int(g_szOrdnum) > 1 then
+		g_nIndex = "전체"
+		g_szOrd_ItmCode = g_szOrd_ItmCode & " | " & g_szOrd_ItmName & " 외 " & g_szOrdnum-1 & "건"
+	else
+		g_szOrd_ItmCode = g_szOrd_ItmCode & " | " & g_szOrd_ItmName
+	end if
+	if g_nIndex = "2" then
+		g_nIndex = "매수"
+	elseif g_nIndex = "1" then
+		g_nIndex = "매도"
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	lblMaemae.fgcolor = "293"
+    Set_Data()
+    
+End Sub
+
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm( )	
+End Sub
+
+'============================================================================
+Sub btnOrder_OnClick()
+	SendOrder()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm( )
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

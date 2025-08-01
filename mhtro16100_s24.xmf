@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="일본 거래안내(거래시간)" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,140,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="3" designorder="1" ly_vert="20,0,335,120,1" >
+			<COL_INFO ly_vert_width="110,225" />
+			<ROW_INFO ly_vert_height="40,40,40" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="320:246247248" caption="정규장시간" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" bgcolor="320:246247248" caption="주문가능시간" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="320:246247248" line="1,0" caption="예약주문시간" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="LabelData0" fontsize="-2" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="140,0,205,40,1" />
+		<LABEL name="LabelData1" fgcolor="334:034034034" fontsize="-2" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="140,40,205,40,1" />
+		<LABEL name="LabelData2" fgcolor="334:034034034" fontsize="-2" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="140,80,205,40,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2905" _ulen="2753" >
+Dim gbLargeFont			'큰글씨 사용여부
+Dim gsLargeFontsize		'큰글씨 폰트크기(1:조금크게 2:크게)
+
+gbLargeFont = false
+gsLargeFontsize = 0
+
+Dim gOsType
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+
+	LabelData0.paddinginfo = "0,0,0,0"
+	LabelData1.paddinginfo = "0,0,0,0"
+	LabelData2.paddinginfo = "0,0,0,0"
+	
+	LabelData0.transmode = "1"
+	LabelData1.transmode = "1"
+	LabelData2.transmode = "1"
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSize = Form.GetEnvData("common.textsize")
+	if CInt(szTextSize) > 0 then
+		gbLargeFont = true
+		gsLargeFontsize = szTextSize
+	end if
+
+	'--------------------------------------------------------------
+	' 텍스트 속성 변경
+	'--------------------------------------------------------------
+	ChangeTextAttr("LabelData0")
+	ChangeTextAttr("LabelData1")
+	ChangeTextAttr("LabelData2")
+	
+	'--------------------------------------------------------------
+	' 텍스트 입력
+	'--------------------------------------------------------------
+	LabelData0.caption = "오전장 09:00 ~ 11:30\n오후장 12:30 ~ 15:00"
+	LabelData1.caption = "오전장 08:00 ~ 11:30\n오후장 12:05 ~ 15:00"
+	LabelData2.caption = "16:30 ~ 익일 07:30"
+	
+	
+End Sub
+'============================================================================
+Function ChangeTextAttr(sCtlName)
+	
+	'-------------------------------------
+	' 글자크기 결정(큰글씨모드 대응)
+	'-------------------------------------
+	if gbLargeFont then
+		
+		if gOsType == "1" then
+			sTargetTextSize = - Cint((gsLargeFontsize * 2))
+		else
+			sTargetTextSize = - Cint((gsLargeFontsize * 2))
+		end if
+		
+		sTextSize = sTargetTextSize - 1
+	else
+		sTargetTextSize = -2
+		sTextSize = sTargetTextSize - 1
+	end if
+	
+	'-------------------------------------
+	' 글자 크기변경
+	'-------------------------------------
+	Form.SetCtlProp(sCtlName, "fontsize", sTextSize)
+	
+	'-------------------------------------
+	' 속성변경
+	'-------------------------------------
+'	if sCtlName == "LabelData0" then
+'		
+'		LabelData0.fontsize = sTargetTextSize
+'		
+'	elseif sCtlName == "LabelData1" then
+'		
+'		LabelData1.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData2" then
+'	
+'		LabelData2.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData3" then
+'	
+'		LabelData3.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData4" then
+'	
+'		LabelData4.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData5" then
+'		
+'		LabelData5.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData6" then
+'		
+'		LabelData6.fontsize = sTextSize
+'		
+'	end if
+
+End Function
+	</SCRIPT_INFO>
+</ROOT>

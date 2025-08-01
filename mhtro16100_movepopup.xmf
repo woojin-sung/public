@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="(NEW)해외주식_주문_잔고_무브팝업" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,647,1" />
+		<CONTAINER name="contOvrsStock" ly_vert="10,100,355,107,1" scroll_ly_vert="10,100,355,107,1" >
+			<CONTROL_INFO>
+				<LABEL name="LabelBg" visible="0" bgcolor="087:240240240" transmode="0" ly_vert="0,0,355,40,0" />
+				<IMAGE name="ImageBg" autosize="1" imgpath="btn_link_shadow_bg.9" ly_vert="0,0,375,107,1" />
+				<LABEL name="LabelName" fontsize="-1" fontstyle="01" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="10,20,200,40,1" />
+				<LABEL name="LabelPrice" fontsize="2" fontstyle="01" mask="0,0,,,0,,-1,1,0,0,0" bgcolor="038:255255255" transmode="0" halign="2" valign="0" autofontsize="1" ly_vert="220,20,125,20,1" import="0,1,1;1,1,1" realrec="0,1,10;1,1,10" />
+				<LABEL name="LabelRate" fontsize="-4" mask="0,0,,%,0,,2,1,1,0,0" bgcolor="038:255255255" halign="2" multiline="1" ly_vert="290,40,55,22,1" import="0,1,17;1,1,4" realrec="0,1,13;1,1,13" />
+				<LABEL name="LabelDebiSign" fontsize="-3" bgcolor="085:205216147" halign="1" usesign="1" autofontsize="1" ly_vert="200,40,20,22,1" import="0,1,3;1,1,2" realrec="0,1,11;1,1,11" />
+				<LABEL name="LabelDebi" fontsize="-4" mask="0,0,, ,0,,-1,1,0,0,0" bgcolor="038:255255255" halign="2" ly_vert="220,40,70,22,1" import="0,1,16;1,1,3" realrec="0,1,12;1,1,12" />
+				<BUTTON name="ButtonLink0" caption="현재가" fgcolor="333:115118124" fontsize="-2" btnimage="btn_line.9" ly_vert="10,64,80,32,1" />
+				<BUTTON name="ButtonLink1" caption="차트" fgcolor="333:115118124" fontsize="-2" btnimage="btn_line.9.9" ly_vert="96,64,80,32,1" />
+				<BUTTON name="ButtonLink2" caption="매수" fontsize="-2" btnimage="btn_30.9" ly_vert="182,64,80,32,1" />
+				<BUTTON name="ButtonLink3" caption="매도" fontsize="-2" btnimage="btn_31.9" ly_vert="268,64,80,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="13261" _ulen="12279" >
+Dim gType
+Dim gYPos
+Dim gHeight
+Dim gIndex
+Dim gName
+Dim gCode
+Dim gVndrCode
+Dim gMarket
+
+Dim gOsType
+
+Dim gUSItem
+gUSItem = "N"
+
+Dim gDayMarket
+gDayMarket = "N"
+
+Dim gApplyRealSise
+gApplyRealSise = "N"
+
+Dim gAddTopPos
+gAddTopPos = 0
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	gOsType = Form.GetSharedData("&OS_TYPE", false )
+	
+	'--------------------------------------
+	' 대비/등락률 간격 조정을 위해서 호출
+	'--------------------------------------
+	contOvrsStock.LabelDebi.sizeAutoFit()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'-----------------------------------------
+	' 컨트롤 설정
+	'-----------------------------------------
+	contOvrsStock.LabelName.transmode = "1"
+	
+	contOvrsStock.LabelName.paddinginfo		 = "0,0,0,0"
+	contOvrsStock.LabelPrice.paddinginfo 	 = "0,0,0,0"
+	contOvrsStock.LabelDebiSign.paddinginfo 	 = "0,0,0,0"
+	contOvrsStock.LabelDebi.paddinginfo 		 = "0,0,0,0"
+	contOvrsStock.LabelRate.paddinginfo 		 = "0,0,0,0"
+	
+	contOvrsStock.LabelName.maxlinecnt = "2^-4"
+
+	'---------------------------------------------------------------------------------------------------
+	'호출화면구분명★선택행의Y좌표★선택행의높이★선택행인덱스★종목명★종목코드★거래소벤더코드(4자리)
+	'---------------------------------------------------------------------------------------------------
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData , "★")
+	
+	if #arrData > 2 then
+	
+		gType 		= arrData(0) 
+		gYPos 		= arrData(1)
+		gHeight 		= arrData(2)
+		gIndex 		= arrData(3)
+		gName 		= arrData(4)
+		gCode 		= arrData(5)
+		gVndrCode 	= arrData(6)
+		gMarket		= GetMarketCode(gVndrCode)
+		
+		'-----------------------------------------
+		' 주간장 여부
+		'-----------------------------------------
+		gDayMarket = Form.GetSharedData( "&OVRS_DAYMARKET", false ) 
+
+		'-----------------------------------------
+		' 미국종목 여부
+		'-----------------------------------------
+		if gMarket == "OQ" or gMarket == "AX" or gMarket == "NY" then
+			gUSItem = "Y"
+		end if
+		
+		'-----------------------------------------
+		' 실시간 시세 적용여부(해외종합잔고에서 호출시에만 시세 조회/실시간 호출)
+		'-----------------------------------------
+		sParentScrNo = Form.GetSharedData("&SCREEN_NO", false)
+		if sParentScrNo == "16070" then
+			gApplyRealSise = "Y"
+			
+			'-----------------------
+			' 시세조회
+			'-----------------------
+			RequestData()
+		
+		
+		else
+		
+			'--------------------------
+			' 종목명/시세영역 숨김처리
+			'--------------------------
+			SetHideSiseLabel()
+			
+		end if
+		
+		
+		
+		'-----------------------
+		' 종목명 세팅
+		'-----------------------
+		contOvrsStock.LabelName.caption = gName
+		
+		'-----------------------
+		' 위치설정
+		'-----------------------
+		SetMovePopupPos()
+	
+	else
+		
+		'Form.CloseForm()
+	
+	end if
+	
+End Sub
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Function SetMovePopupPos()
+	
+	'------------------------------------------------------------
+	'(해외주식 주문 > 잔고 탭) : [현재가] [차트] [매수] [매도]
+	'------------------------------------------------------------
+	if gType == "OVRS_ODER_JANGO" then
+	
+		contOvrsStock.visible = true
+		
+		nScreenHeight = 600
+		nConHeight 	= contOvrsStock.height
+		nImageTop 	= contOvrsStock.ImageBg.top
+		nImageHeight 	= contOvrsStock.ImageBg.height
+		
+		'---------------------------------------------------
+		' 위로 떠야 하는 경우
+		'---------------------------------------------------
+		if nConHeight + gYPos + gHeight > nScreenHeight then
+			
+			if gOsType == "1" then
+				contOvrsStock.top = gYPos - nConHeight + 3
+				contOvrsStock.ImageBg.top = -2
+			else
+				contOvrsStock.top = gYPos - nConHeight - 3
+				contOvrsStock.ImageBg.top = -3
+			end if
+		
+			
+			contOvrsStock.ImageBg.imgpath = "btn_link_shadow_bg2.9"
+			
+			contOvrsStock.LabelName.top 	= 15
+			contOvrsStock.LabelPrice.top 	= 15
+			contOvrsStock.LabelRate.top 	= 33
+			contOvrsStock.LabelDebi.top 	= 33
+			
+			if gOsType == "1" then
+				contOvrsStock.LabelDebiSign.top = 35
+			else
+				contOvrsStock.LabelDebiSign.top = 33
+			end if
+			
+			contOvrsStock.ButtonLink0.top = gAddTopPos + 59
+			contOvrsStock.ButtonLink1.top = gAddTopPos + 59
+			contOvrsStock.ButtonLink2.top = gAddTopPos + 59
+			contOvrsStock.ButtonLink3.top = gAddTopPos + 59
+			
+			contOvrsStock.LabelBg.visible = true
+			contOvrsStock.LabelBg.top = gAddTopPos + 68
+			
+		
+		'---------------------------------------------------
+		' 아래로 떠야 하는 경우
+		'---------------------------------------------------
+		else
+		
+			contOvrsStock.top = gYPos + gHeight - 10
+			contOvrsStock.ImageBg.imgpath = "btn_link_shadow_bg.9"
+			
+			contOvrsStock.LabelName.top 	= 20
+			contOvrsStock.LabelPrice.top 	= 20
+			
+			if gOsType == "1" then
+				contOvrsStock.LabelRate.top 	= 34
+				contOvrsStock.LabelDebi.top 	= 34
+				contOvrsStock.LabelDebiSign.top = 36
+			else
+				contOvrsStock.LabelRate.top 	= 36
+				contOvrsStock.LabelDebi.top 	= 36
+				contOvrsStock.LabelDebiSign.top = 36
+			end if
+			
+			contOvrsStock.ButtonLink0.top = gAddTopPos + 65
+			contOvrsStock.ButtonLink1.top = gAddTopPos + 65
+			contOvrsStock.ButtonLink2.top = gAddTopPos + 65
+			contOvrsStock.ButtonLink3.top = gAddTopPos + 65
+			
+			contOvrsStock.LabelBg.visible = true
+		
+		end if
+	
+	end if
+
+
+End Function
+'============================================================================
+' 종목 시세조회
+'============================================================================
+Function RequestData()
+	
+	'----------------------------------
+	'해당 거래소 실시간 신청여부
+	'----------------------------------
+	szDelay = Form.GetSharedData("REALTIME_"..gMarket, false)
+	
+	
+	'----------------------------------------------------
+	'주간장 & 미국종목일 경우에만 주간현재가 조회 서비스 호출
+	'----------------------------------------------------
+	if gDayMarket == "Y" and gUSItem == "Y" then
+	
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_017r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" 	, 0 , "OV" ) 		' 해외주식 OV
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_017r", "InBlock1", "FID_INPUT_OVRS_ISCD" 		, 0 , gCode ) 	' 종목코드
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_017r", "InBlock1", "FID_COND_MRKT_CLS_CODE" 		, 0 , gMarket ) 	' 거래소코드
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_017r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE"	, 0 , szDelay ) 	' 실시간구분 0 : 실시간 (Default), 1:지연
+		DATAMANAGER.RequestTranData("ohhts_6000_017r")
+	
+	else
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" 	, 0 , "OV" ) 		' 해외주식 OV
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_001r", "InBlock1", "FID_INPUT_OVRS_ISCD" 		, 0 , gCode ) 	' 종목코드
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_001r", "InBlock1", "FID_COND_MRKT_CLS_CODE" 		, 0 , gMarket ) 	' 거래소코드
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_001r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE"	, 0 , szDelay ) 	' 실시간구분 0 : 실시간 (Default), 1:지연
+		DATAMANAGER.RequestTranData("ohhts_6000_001r")
+		
+	end if
+	
+End Function
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID == "ohhts_6000_001r" or szTranID == "ohhts_6000_017r" then
+		
+		'---------------------------------------
+		'실시간 해제 및 인풋값 클리어
+		'---------------------------------------
+		DATAMANAGER.CancelRealData("ohhts_exst_cntg")
+		DATAMANAGER.CancelRealData("ohhts_exst_cntd")
+		
+		DATAMANAGER.ClearInputData(1, "ohhts_exst_cntg")
+		DATAMANAGER.ClearInputData(1, "ohhts_exst_cntd")
+		
+		'---------------------------------------
+		' 실시간 호출 여부
+		'---------------------------------------
+		if gApplyRealSise == "Y" then
+			
+			'---------------------------------------
+			'미국
+			'---------------------------------------
+			if gUSItem == "Y" then
+			
+				'---------------------------------------
+				' 주간장
+				'---------------------------------------
+				if gDayMarket == "Y" then
+					
+					DATAMANAGER.SetDataValue(1, "ohhts_exst_cntd", "InBlock1", "FIDXR_ISCD" , 0 , gMarket & "@" & gCode)
+					DATAMANAGER.RequestRealData("ohhts_exst_cntd")
+				
+				'---------------------------------------
+				' 정규장 
+				'---------------------------------------
+				else
+				
+					DATAMANAGER.SetDataValue(1, "ohhts_exst_cntg", "InBlock1", "FIDXR_ISCD" , 0 , gMarket & "@" & gCode)
+					DATAMANAGER.RequestRealData("ohhts_exst_cntg")
+				
+				end if
+			
+			'---------------------------------------
+			'중국/홍콩/일본
+			'---------------------------------------
+			else
+			
+				DATAMANAGER.SetDataValue(1, "ohhts_exst_cntg", "InBlock1", "FIDXR_ISCD" , 0 , gMarket & "@" & gCode)
+				DATAMANAGER.RequestRealData("ohhts_exst_cntg")
+			
+			end if
+		
+		end if
+		
+	end if
+	
+End Sub
+'============================================================================
+' 거래소벤더코드(4자리) -> 거래소코드(2자리)
+'============================================================================
+Function GetMarketCode(sValue)
+
+	if sValue == "0104" then	' 홍콩
+		return "HK"
+	elseif sValue == "0215" then ' 상해
+		return "SH"
+	elseif sValue == "0214" then ' 심천
+		return "SZ"
+	elseif sValue == "0321" then ' 뉴욕
+		return "NY"
+	elseif sValue == "0066" then ' 아멕스
+		return "AX"
+	elseif sValue == "0537" then ' 나스닥
+		return "OQ"
+	elseif sValue == "0106" then ' 도쿄
+		return "JP"
+	else
+		return ""
+	end if
+	
+end Function
+
+
+'============================================================================
+' 현재가
+'============================================================================
+Sub contOvrsStock_ButtonLink0_OnClick()
+
+	if gMarket <> "" then
+
+		Form.SendReturnToParent("MOVEPOPUP_RETURN" , gIndex & "★" & "MOVE_HYUN")
+		Form.CloseForm()
+	else
+		
+		Form.MsgBox("안내", "해당 종목은 온라인에서\n거래가 불가합니다.\n\n영업점 또는 해외주식 데스크로 문의해주세요.", "OnLineCheck", 6)
+	
+	end if
+	
+End Sub
+
+'============================================================================
+' 차트
+'============================================================================
+Sub contOvrsStock_ButtonLink1_OnClick()
+	
+	if gMarket <> "" then
+		
+		Form.SendReturnToParent("MOVEPOPUP_RETURN" , gIndex & "★" & "MOVE_CHART")
+		Form.CloseForm()
+		
+	else
+		
+		Form.MsgBox("안내", "해당 종목은 온라인에서\n거래가 불가합니다.\n\n영업점 또는 해외주식 데스크로 문의해주세요.", "OnLineCheck", 6)
+	
+	end if
+	
+End Sub
+
+'============================================================================
+' 매수
+'============================================================================
+Sub contOvrsStock_ButtonLink2_OnClick()
+
+	if gMarket <> "" then
+	
+		Form.SendReturnToParent("MOVEPOPUP_RETURN" , gIndex & "★" & "MOVE_MAESU")
+		Form.CloseForm()
+	
+	else
+
+		Form.MsgBox("안내", "해당 종목은 온라인에서\n거래가 불가합니다.\n\n영업점 또는 해외주식 데스크로 문의해주세요.", "OnLineCheck", 6)
+	
+	end if
+	
+End Sub
+
+'============================================================================
+' 매도
+'============================================================================
+Sub contOvrsStock_ButtonLink3_OnClick()
+	
+	if gMarket <> "" then
+
+		Form.SendReturnToParent("MOVEPOPUP_RETURN" , gIndex & "★" & "MOVE_MAEDO")
+		Form.CloseForm()
+	
+	else
+		
+		Form.MsgBox("안내", "해당 종목은 온라인에서\n거래가 불가합니다.\n\n영업점 또는 해외주식 데스크로 문의해주세요.", "OnLineCheck", 6)
+	
+	end if
+	
+End Sub
+
+
+'============================================================================
+Sub contOvrsStock_LabelDebi_OnSizeAutoFit()
+
+	if gOsType == "1" then
+		nLeftDebi = Form.calcUnResize(contOvrsStock.LabelDebi.left, "2")
+		nWidthSign = Form.calcUnResize(contOvrsStock.LabelDebiSign.width, "2")
+	else
+		nLeftDebi = contOvrsStock.LabelDebi.left
+		nWidthSign = contOvrsStock.LabelDebiSign.width
+	end if
+	
+	contOvrsStock.LabelDebiSign.left = nLeftDebi - nWidthSign - 2
+
+End Sub
+
+'============================================================================
+Function SetHideSiseLabel()
+
+	contOvrsStock.LabelName.visible = false
+	contOvrsStock.LabelPrice.visible = false
+	contOvrsStock.LabelDebiSign.visible = false
+	contOvrsStock.LabelDebi.visible = false
+	contOvrsStock.LabelRate.visible = false
+	
+	contOvrsStock.height = 57
+	contOvrsStock.ImageBg.height = 57
+	gAddTopPos = -50
+	
+End Function
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("MOVEPOPUP_CLOSE" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	if gApplyRealSise == "Y" then
+		Form.CloseForm()
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_exst_cntg" trcode="ohhts_exst_cntg" />
+			<TRAN tranid="ohhts_exst_cntd" trcode="ohhts_exst_cntd" />
+			<TRAN tranid="ohhts_6000_001r" trcode="ohhts_6000_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_6000_017r" trcode="ohhts_6000_017r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_exst_cntg" title="해외주식체결 자동갱신" realdata="1" dessvr="4" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="51" _ulen="43" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1570" _ulen="1290" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+FIDXR_DELY_YN^FIDXR지연여부^1^0^0^0^0^0^0
+FIDXR_ACPL_BSOP_DATE^FIDXR현지영업일자^8^0^0^0^0^0^0
+FIDXR_ACPL_DATE^FIDXR현지일자^8^0^0^0^0^0^0
+FIDXR_ACPL_HOUR^FIDXR현지시간^6^0^0^0^0^0^0
+FIDXR_KOREA_DATE^FIDXR한국일자^8^0^0^0^0^0^0
+FIDXR_KOREA_HOUR^FIDXR한국시간^6^0^0^0^0^0^0
+FIDXR_OPRC^FIDXR시가^18^4^7^0^0^1^0
+FIDXR_HPRC^FIDXR고가^18^4^7^0^0^1^0
+FIDXR_LPRC^FIDXR저가^18^4^7^0^0^1^0
+FIDXR_PRPR^FIDXR현재가^18^4^7^0^0^1^0
+FIDXR_VRSS_SIGN^FIDXR대비부호^1^0^0^0^0^0^0
+FIDXR_PRDY_VRSS^FIDXR전일대비^18^4^7^0^0^1^0
+FIDXR_RSFL_RT^FIDXR등락율^10^2^7^0^0^1^0
+FIDXR_BIDP^FIDXR매수호가^18^4^7^0^0^1^0
+FIDXR_SHNU_ASPR_RSQN^FIDXR매수호가잔량^13^0^7^0^0^0^0
+FIDXR_ASKP^FIDXR매도호가^18^4^7^0^0^1^0
+FIDXR_SELN_ASPR_RSQN^FIDXR매도호가잔량^13^0^7^0^0^0^0
+FIDXR_CNQN^FIDXR체결량^13^0^7^0^0^1^0
+FIDXR_ACML_VOL^FIDXR누적거래량^19^0^7^0^0^0^0
+FIDXR_ACML_TR_PBMN^FIDXR누적거래대금^19^0^7^0^0^0^0
+FIDXR_MKT_CLS^FIDXR장구분^1^0^0^0^0^0^0
+FIDXR_SHNU_ACML_CNQN^FIDXR매수누적체결량^19^0^7^0^0^0^0
+FIDXR_SELN_ACML_CNQN^FIDXR매도누적체결량^19^0^7^0^0^0^0
+FIDXR_RLTV^FIDXR체결강도^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_OPRC_RATE^FIDXR전일대비시가비율^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_HPRC_RATE^FIDXR전일대비고가비율^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_LPRC_RATE^FIDXR전일대비저가비율^10^2^7^0^0^1^0
+FIDXR_WGHN_AVRG_PRC^FIDXR가중평균가격^18^4^7^0^0^0^0
+FIDXR_UNCH_PRPR^FIDXR환산현재가^18^4^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_exst_cntd" title="해외주식 주간체결 자동갱신" realdata="1" dessvr="4" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="51" _ulen="43" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1570" _ulen="1290" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+FIDXR_DELY_YN^FIDXR지연여부^1^0^0^0^0^0^0
+FIDXR_ACPL_BSOP_DATE^FIDXR현지영업일자^8^0^0^0^0^0^0
+FIDXR_ACPL_DATE^FIDXR현지일자^8^0^0^0^0^0^0
+FIDXR_ACPL_HOUR^FIDXR현지시간^6^0^0^0^0^0^0
+FIDXR_KOREA_DATE^FIDXR한국일자^8^0^0^0^0^0^0
+FIDXR_KOREA_HOUR^FIDXR한국시간^6^0^0^0^0^0^0
+FIDXR_OPRC^FIDXR시가^18^4^7^0^0^1^0
+FIDXR_HPRC^FIDXR고가^18^4^7^0^0^1^0
+FIDXR_LPRC^FIDXR저가^18^4^7^0^0^1^0
+FIDXR_PRPR^FIDXR현재가^18^4^7^0^0^1^0
+FIDXR_VRSS_SIGN^FIDXR대비부호^1^0^0^0^0^0^0
+FIDXR_PRDY_VRSS^FIDXR전일대비^18^4^7^0^0^1^0
+FIDXR_RSFL_RT^FIDXR등락율^10^2^7^0^0^1^0
+FIDXR_BIDP^FIDXR매수호가^18^4^7^0^0^1^0
+FIDXR_SHNU_ASPR_RSQN^FIDXR매수호가잔량^13^0^7^0^0^0^0
+FIDXR_ASKP^FIDXR매도호가^18^4^7^0^0^1^0
+FIDXR_SELN_ASPR_RSQN^FIDXR매도호가잔량^13^0^7^0^0^0^0
+FIDXR_CNQN^FIDXR체결량^13^0^7^0^0^1^0
+FIDXR_ACML_VOL^FIDXR누적거래량^19^0^7^0^0^0^0
+FIDXR_ACML_TR_PBMN^FIDXR누적거래대금^19^0^7^0^0^0^0
+FIDXR_MKT_CLS^FIDXR장구분^1^0^0^0^0^0^0
+FIDXR_SHNU_ACML_CNQN^FIDXR매수누적체결량^19^0^7^0^0^0^0
+FIDXR_SELN_ACML_CNQN^FIDXR매도누적체결량^19^0^7^0^0^0^0
+FIDXR_RLTV^FIDXR체결강도^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_OPRC_RATE^FIDXR전일대비시가비율^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_HPRC_RATE^FIDXR전일대비고가비율^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_LPRC_RATE^FIDXR전일대비저가비율^10^2^7^0^0^1^0
+FIDXR_WGHN_AVRG_PRC^FIDXR가중평균가격^18^4^7^0^0^0^0
+FIDXR_UNCH_PRPR^FIDXR환산현재가^18^4^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_001r" title="해외주식 현재가 조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2803" _ulen="2393" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_52_WEEK_HGPR^FIDX52주최고가^14^4^7^32^1000^0^0
+FIDX_52_WEEK_LWPR^FIDX52주최저가^14^4^7^35^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_EPS^FIDXEPS^11^4^7^210^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_BSTP_CLS_CODE^FIDX업종구분코드^4^0^0^335^1000^0^0
+FIDX_BSTP_LRDV_NAME^FIDX업종대분류명^80^0^0^5133^1000^0^0
+FIDX_BSTP_MDDV_NAME^FIDX업종중분류명^80^0^0^5134^1000^0^0
+FIDX_BSTP_SMDV_NAME^FIDX업종소분류명^80^0^0^5135^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_SHNU_ASPR_UNIT^FIDX매수호가단위^14^4^7^5125^1000^0^0
+FIDX_SELN_ASPR_UNIT^FIDX매도호가단위^14^4^7^5126^1000^0^0
+FIDX_SHNU_ODER_QTY_UNIT^FIDX매수주문수량단위^9^0^7^5127^1000^0^0
+FIDX_SELN_ODER_QTY_UNIT^FIDX매도주문수량단위^9^0^7^5128^1000^0^0
+FIDX_CRNC_CODE^FIDX통화코드^4^0^0^5114^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_TICK_CLS^FIDX틱구분^4^0^0^5136^1000^0^0
+FID_PBR^FIDPBR^9^2^7^43^1000^0^0
+FIDX_PER^FIDXPER^9^2^7^42^1000^0^0
+BSTP_KOR_ISNM^업종한글종목명^100^0^0^822^1000^0^0
+FIDX_CAS_TRGT_ISSU_YN^FIDXCAS대상종목여부^1^0^0^5181^1000^0^0
+FIDX_VCM_STAT_CLS_CODE^FIDXVCM상태구분코드^1^0^0^5166^1000^0^0
+FIDX_ENG_ISNM^FIDX영문종목명^65^0^0^5112^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_VCM_STA_HOUR^FIDXVCM시작시간^6^0^0^5167^1000^0^0
+FIDX_VCM_FIN_HOUR^FIDXVCM종료시간^6^0^0^5168^1000^0^0
+FIDX_SELL_ONLY^FIDXSELLONLY^2^0^7^5173^1000^0^0
+FIDX_ISSU_STAT_CLS_CODE^FIDX종목상태구분코드^1^0^0^6016^1000^0^0
+FIDX_CAS_IEP^FIDXCASIEP^11^4^7^5215^1000^0^0
+FIDX_CAS_IEV^FIDXCASIEV^11^4^7^5216^1000^0^0
+FIDX_ETF_YN^FIDXETF여부^1^0^0^5159^1000^0^0
+FID_LVRG^FID레버리지^14^6^7^81^1000^0^0
+FIDX_CAS_TRGT_ISSU^FIDXCAS대상종목^1^0^0^5221^1000^0^0
+FIDX_CAS_STAT^FIDXCAS상태^2^0^0^5222^1000^0^0
+FIDX_CAS_SDPR^FIDXCAS기준가^14^4^7^5223^1000^0^0
+FIDX_CAS_MXPR^FIDXCAS상한가^14^4^7^5224^1000^0^0
+FIDX_CAS_LLAM^FIDXCAS하한가^14^4^7^5225^1000^0^0
+FIDX_ETF_TYPE_CODE^FIDXETF유형코드^3^0^0^5210^1000^0^0
+FIDX_UNCH_PRPR^FIDX환산현재가^14^4^7^2051^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_017r" title="해외주식 주간거래 현재가 조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="584" _ulen="470" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_DYTM_PRPR^FIDX주간현재가^14^4^7^7479^1000^0^0
+FIDX_DYTM_PRDY_VRSS_SIGN^FIDX주간전일대비부호^1^0^0^7480^1000^0^0
+FIDX_DYTM_PRDY_VRSS^FIDX주간전일대비^14^4^7^7481^1000^0^0
+FIDX_DYTM_PRDY_CTRT^FIDX주간전일대비율^11^2^7^7482^1000^0^0
+FIDX_DYTM_ACML_VOL^FIDX주간누적거래량^19^0^7^7484^1000^0^0
+FIDX_DYTM_ACML_TR_PBMN^FIDX주간누적거래대금^19^0^7^7485^1000^0^0
+FIDX_DYTM_MKT_YN^FIDX주간장여부^1^0^0^7483^1000^0^0
+FIDX_DYTM_UNCH_PRPR^FIDX주간환산현재가^14^4^7^2052^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

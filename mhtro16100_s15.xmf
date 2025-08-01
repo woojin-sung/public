@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="미국 거래안내(유의사항)" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,650,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="20,0,335,620,1" >
+			<COL_INFO ly_vert_width="110,225" />
+			<ROW_INFO ly_vert_height="620" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="320:246247248" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="LabelData0" fgcolor="334:034034034" fontsize="-3" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="140,10,205,100,1" />
+		<LABEL name="LabelData1" fgcolor="334:034034034" fontsize="-3" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="140,110,205,100,1" />
+		<LABEL name="LabelData2" fgcolor="334:034034034" fontsize="-3" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="140,210,205,100,1" />
+		<LABEL name="LabelData3" fgcolor="334:034034034" fontsize="-3" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="140,310,205,100,1" />
+		<LABEL name="LabelData4" fgcolor="334:034034034" fontsize="-3" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="140,410,205,100,1" />
+		<LABEL name="LabelData5" fgcolor="334:034034034" fontsize="-3" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="140,510,205,100,1" />
+		<LABEL name="LabelData6" fgcolor="334:034034034" fontsize="-3" caption="유의사항" bgcolor="035:237246255" transmode="0" halign="1" multiline="1" ly_vert="30,310,90,100,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6185" _ulen="5615" >
+Dim gOsType
+Dim gbLargeFont			'큰글씨 사용여부
+Dim gsLargeFontsize		'큰글씨 폰트크기(1:조금크게 2:크게)
+
+gbLargeFont = false
+gsLargeFontsize = 0
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+		
+	LabelData0.paddinginfo = "0,0,0,0"
+	LabelData1.paddinginfo = "0,0,0,0"
+	LabelData2.paddinginfo = "0,0,0,0"
+	LabelData3.paddinginfo = "0,0,0,0"
+	LabelData4.paddinginfo = "0,0,0,0"
+	LabelData5.paddinginfo = "0,0,0,0"
+	LabelData6.paddinginfo = "0,0,0,0"
+	
+	LabelData0.transmode = "1"
+	LabelData1.transmode = "1"
+	LabelData2.transmode = "1"
+	LabelData3.transmode = "1"
+	LabelData4.transmode = "1"
+	LabelData5.transmode = "1"
+	LabelData6.transmode = "1"
+
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSize = Form.GetEnvData("common.textsize")
+	if CInt(szTextSize) > 0 then
+		gbLargeFont = true
+		gsLargeFontsize = szTextSize
+	end if
+	
+	'--------------------------------------------------------------
+	' 텍스트 속성 변경
+	'--------------------------------------------------------------
+	ChangeTextAttr("LabelData0")
+	ChangeTextAttr("LabelData1")
+	ChangeTextAttr("LabelData2")
+	ChangeTextAttr("LabelData3")
+	ChangeTextAttr("LabelData4")
+	ChangeTextAttr("LabelData5")
+	'ChangeTextAttr("LabelData6")
+	
+	'--------------------------------------------------------------
+	' 텍스트 입력
+	'--------------------------------------------------------------
+	LabelData0.sizeAutoFit()
+	LabelData0.caption = "* 프랑스, 이탈리아 등의 일부 ADR 종목 매수 시 별도 거래세가 부과될 수 있습니다.(0.3% 등)"
+	
+	LabelData1.sizeAutoFit()
+	LabelData1.caption = "* 현재가 대비 과하게 높은 가격으로 주문을 낼 경우 주문거부가 발생할 수 있습니다."
+
+	LabelData2.sizeAutoFit()
+	LabelData2.caption = "* 현지 주식시장 및 중개사의 사정으로 주문이 거부되거나 취소될 수 있습니다."
+	
+	LabelData3.sizeAutoFit()
+	LabelData3.caption = "* 100주 미만의 주문 수량은 호가창에 보이지 않습니다."
+	
+	LabelData4.sizeAutoFit()
+	LabelData4.caption = "* 실시간 시세 신청을 하지 않은 경우 지연시세로 시세가 제공됩니다."
+	
+	LabelData5.sizeAutoFit()
+	LabelData5.caption = "*  PTP(Publicly Traded Partnership) 지정 종목의 경우 매도 금액의 10%가 세금으로 부과될 수 있습니다. (단, PTP로 지정된 종목이라도 QN(Qualified Notice) 여부에 따라 과세가 면제될 수 있음)"
+
+	
+	
+End Sub
+'============================================================================
+Function ChangeTextAttr(sCtlName)
+	
+	'-------------------------------------
+	' 글자크기 결정(큰글씨모드 대응)
+	'-------------------------------------
+	if gbLargeFont then
+		
+		if gOsType == "1" then
+			sTargetTextSize = - Cint((gsLargeFontsize * 2))
+		else
+			sTargetTextSize = - Cint((gsLargeFontsize * 2))
+		end if
+		
+		sTextSize = sTargetTextSize - 1
+	else
+		sTargetTextSize = -2
+		sTextSize = sTargetTextSize - 1
+	end if
+	
+	'-------------------------------------
+	' 글자크기 변경
+	'-------------------------------------
+	Form.SetCtlProp(sCtlName, "fontsize", sTextSize)
+	
+	'-------------------------------------
+	' 속성변경
+	'-------------------------------------
+'	if sCtlName == "LabelData0" then
+'		
+'		LabelData0.fontsize = sTargetTextSize
+'
+'	elseif sCtlName == "LabelData1" then
+'		
+'		LabelData1.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData2" then
+'	
+'		LabelData2.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData3" then
+'	
+'		LabelData3.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData4" then
+'	
+'		LabelData4.fontsize = sTextSize
+'		
+'	elseif sCtlName == "LabelData5" then
+'		
+'		LabelData5.fontsize = sTextSize
+'	
+'	elseif sCtlName == "LabelData6" then
+'		
+'		LabelData6.fontsize = sTextSize
+'	
+'	end if
+
+End Function
+
+'============================================================================
+Function ChangeLabelPos(sOrgnCtlName,sTargetCtlName)
+	
+	nOrgnTop = Form.GetCtlProp(sOrgnCtlName, "top")
+	nOrgnHeight = Form.GetCtlProp(sOrgnCtlName, "height")
+	
+	if gOsType == "1" then
+		nTargetTop = Form.calcUnResize(nOrgnTop + nOrgnHeight, "1") + 10
+	else
+		nTargetTop = nOrgnTop + nOrgnHeight + 10
+	end if
+	
+	Form.SetCtlProp(sTargetCtlName, "top", nTargetTop)
+
+End Function
+
+'============================================================================
+Sub LabelData0_OnSizeAutoFit()
+
+	ChangeLabelPos("LabelData0","LabelData1")
+	
+End Sub
+
+'============================================================================
+Sub LabelData1_OnSizeAutoFit()
+
+	ChangeLabelPos("LabelData1","LabelData2")
+	
+End Sub
+
+'============================================================================
+Sub LabelData2_OnSizeAutoFit()
+
+	ChangeLabelPos("LabelData2","LabelData3")
+	
+End Sub
+
+'============================================================================
+Sub LabelData3_OnSizeAutoFit()
+
+	ChangeLabelPos("LabelData3","LabelData4")
+	
+End Sub
+
+'============================================================================
+Sub LabelData4_OnSizeAutoFit()
+
+	ChangeLabelPos("LabelData4","LabelData5")
+	
+End Sub
+
+'============================================================================
+Sub LabelData5_OnSizeAutoFit()
+
+	'테이블 높이값 조정
+	nOrgnTop = Form.GetCtlProp("LabelData5", "top")
+	nOrgnHeight = Form.GetCtlProp("LabelData5", "height")
+	
+	if gOsType == "1" then
+		nTargetHeight = Form.calcUnResize(nOrgnTop + nOrgnHeight, "1") + 10
+	else
+		nTargetHeight = nOrgnTop + nOrgnHeight + 10
+	end if
+	
+	Table0.height = nTargetHeight
+	
+	'테이블 타이틀라벨 Top값 지정
+	nTableTitleTop = nTargetHeight / 2 - 50
+	LabelData6.top = nTableTitleTop
+	
+	'부모화면에 자기사이즈 알리기
+	Form.triggerEvent("#", "USA_LinkForm5_Height", nTargetHeight + 20)
+	
+End Sub
+
+
+'============================================================================
+
+	</SCRIPT_INFO>
+</ROOT>

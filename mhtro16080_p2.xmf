@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16080" scrname="환전신청_매매가능통화" version="2" writer="조승행" />
+	<FORM_INFO name="Form" ly_vert="0,0,310,343,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" colcount="2" ly_vert="0,61,310,282,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" halign="1" />
+				<LABEL name="th_cell0" caption="통화코드" halign="1" />
+				<LABEL name="bd_cell1" halign="1" />
+				<LABEL name="th_cell1" caption="통화코드명" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="107,202" ly_vert_visible="0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="107" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="202" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9" ly_vert="-1,-1,311,55,1" />
+		<IMAGE name="Image0" imgpath="icon_main_11" ly_vert="267,6,36,36,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="통화코드" bgcolor="064:188030030" halign="1" ly_vert="0,-1,310,55,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1086" _ulen="1086" >
+'--===========================================================================
+dim g_szRet
+
+g_szRet = 0
+'--===========================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	DATAMANAGER.RequestTranData( "obtsd_fbnk_209r")
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	g_szRet = 1
+	
+	Form.SetSharedData("G_bcpp_commonCodeVal" , Grid0.GetCellData( "bd_cell0", lRow )	)
+	Form.SetSharedData("G_bcpp_commonCodeValName" , Grid0.GetCellData( "bd_cell1", lRow )	)
+	
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("16080_SearchCrcd" , g_szRet)
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtsd_fbnk_209r" trcode="obtsd_fbnk_209r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtsd_fbnk_209r" title="외화 거래가능 통화조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="54" _ulen="42" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="129" _ulen="99" >
+
+CRCD^통화코드^3^0^0^0^0^0^0
+CRCD_KOR_NAME^통화코드한글명^40^0^0^0^0^0^0
+STND_AMT^기준금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

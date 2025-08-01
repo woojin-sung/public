@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16080" scrname="환전신청_메인탭" version="2" writer="조승행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab01" tabcount="4" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,49,373,510,1" >
+			<PAGE name="page003765" caption="외화매수" linkfile="mhtro16080_t5" loadingtype="1" />
+			<PAGE name="page002537" caption="외화매도" linkfile="mhtro16080_t6" loadingtype="1" />
+			<PAGE name="page000942" caption="시간외매수" linkfile="mhtro16080_t3" loadingtype="1" />
+			<PAGE name="page005089" caption="환전내역" linkfile="mhtro16080_t4" loadingtype="1" />
+		</FORMTAB>
+		<ACCOUNT name="acnt01" bgcolor="052:255255255" itemcodetype="100,119,135,137,200" accpwdctl="edtPwd01" delegate="1" ly_vert="5,5,271,39,1" />
+		<EDIT name="edtPwd01" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="284,5,86,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1362" _ulen="1356" >
+'--===========================================================================
+'--===========================================================================
+
+
+Sub edtPwd01_OnEditComplete()
+	
+	Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "PWDINFO_CHG",  edtPwd01.caption)
+End Sub
+
+
+'============================================================================
+Sub acnt01_ChangeAccount()
+	Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "ACNTINFO_CHG", left(acnt01.caption,8) & "★" & mid(acnt01.caption,9,2))
+End Sub
+
+
+'============================================================================
+Sub fmtab01_OnTabChanged(nCurrentTab)
+	if	edtPwd01.caption	<>	null		and	len(edtPwd01.caption)	> 2	then
+		Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "PWDINFO_CHG", edtPwd01.caption)
+	end	if
+	
+	if	acnt01.caption	<>	null		and	len(acnt01.caption)	>6	then
+		Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "ACNTINFO_CHG", left(acnt01.caption,8) & "★" & mid(acnt01.caption,9,2)  & "★" & edtPwd01.caption)
+	end	if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szScreenNo 
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+	
+	if szScreenNo == "16081" then
+		fmtab01.currenttab = "3"
+		fmtab01_OnTabChanged(3)
+	end if
+	
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

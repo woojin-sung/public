@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="(NEW)해외주식_주문__PTP경고팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgClose1" imgpath="alpha" ly_vert="0,0,375,562,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="popup_bg.9" ly_vert="0,230,375,368,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="PTP종목 주문 주의 안내" bgcolor="092:185046046" halign="1" ly_vert="0,240,375,60,1" />
+		<LABEL name="Label0" fontsize="-1" caption="해당종목은 PTP(Publicly Traded Partnership)로" ly_vert="20,310,335,32,1" />
+		<LABEL name="Label1" fontsize="-1" caption="지정된 종목으로 美 국세청 *Section 1446(f) " ly_vert="20,340,335,32,1" />
+		<LABEL name="Label2" fontsize="-1" caption="조항에 근거하여 매도일 기준" ly_vert="20,370,335,32,1" />
+		<LABEL name="Label3" fontsize="-1" fontstyle="01" caption="2023년 1월 1일부터" ly_vert="20,400,335,32,1" />
+		<LABEL name="Label4" fontsize="-1" fontstyle="01" caption="매도 금액의 10% 가 세금으로 발생합니다." ly_vert="20,430,335,32,1" />
+		<LABEL name="Label5" fontsize="-1" caption="단, PTP로 지정된 종목이라도 QN(Qualified Notice)" ly_vert="20,460,335,32,1" />
+		<LABEL name="Label6" fontsize="-1" caption="여부에 따라 과세가 면제될 수 있습니다." ly_vert="20,490,335,32,1" />
+		<LABEL name="Label7" fontstyle="01" caption="주문처리 하시겠습니까?" halign="1" ly_vert="20,524,335,60,1" />
+		<BUTTON name="btnClose" caption="닫기" fgcolor="018:102102102" btnimage="btn_28.9" ly_vert="0,592,147,55,1" />
+		<BUTTON name="btnOrder" caption="매수하기" btnimage="btn_etc10.9" ly_vert="146,592,231,55,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2880" _ulen="2730" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : PTP종목 경고안내
+' 02. 화면설명 : 
+' 03. 작    성 : 2022.12.06 KBC
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_nCount
+Dim g_nIndex				' 매도수구분 (0:매수, 1:매도, 2:정정, 3:취소)
+Dim g_szErrMsg			' 경고메세지
+
+g_nCount = 0
+g_nIndex = "0"
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+Function SendOrder()
+    If g_nCount = 0 Then
+	    Form.SendReturnToParent( "PTP주문경고" , "1")
+	    
+	    g_nCount = 1
+	    Form.CloseForm( )
+    End If    
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	Label0.paddinginfo = "0,0,0,0"
+	Label1.paddinginfo = "0,0,0,0"
+	Label2.paddinginfo = "0,0,0,0"
+	Label3.paddinginfo = "0,0,0,0"
+	Label4.paddinginfo = "0,0,0,0"
+	Label5.paddinginfo = "0,0,0,0"
+	Label6.paddinginfo = "0,0,0,0"
+	Label7.paddinginfo = "0,0,0,0"
+	
+	Dim szData, arrData, szItemName
+
+	szData = Form.GetOpenLinkData()
+	
+	arrData = Split(szData,"|")
+	
+	if UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+
+	g_nIndex				= arrData(0)  '매도수구분 (0:매수, 1:매도, 2:정정, 3:취소, 10:예약매수, 11:예약매도, 12:예약취소)
+	g_szErrMsg	 		= arrData(1)	'경고메세지
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()	
+	If g_nIndex = "0" Then
+		lblTitle.bgcolor = "92"
+		btnOrder.btnimage = "btn_etc10.9"
+		btnOrder.caption="매수하기"
+		
+	ElseIf g_nIndex = "1" Then
+		lblTitle.bgcolor = "91"
+		btnOrder.btnimage = "btn_etc11.9"
+		btnOrder.caption="매도하기"
+	
+	End If	
+End Sub
+
+'============================================================================
+Sub btnOrder_OnClick()
+	SendOrder()
+End Sub
+
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm( )	
+End Sub
+
+'============================================================================
+Sub imgClose1_OnClick()
+	Form.CloseForm( )
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16092" scrname="해외주식 소수점 주문_상단" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,122,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" bgcolor="097:255255255" transmode="0" halign="1" ly_vert="0,15,379,75,1" />
+		<LABEL name="Label1" fgcolor="146:124124124" bgcolor="132:215215215" transmode="0" ly_vert="90,11,1,16,1" />
+		<LABEL name="Label3" bgcolor="132:215215215" transmode="0" ly_vert="48,11,1,16,1" />
+		<LABEL name="LblPrice" fontsize="14" fontstyle="01" mask="0,0,,,0,,4,1,0,0,0" autofontsize="1" ly_vert="10,56,138,44,1" import="3,1,3" />
+		<LABEL name="LblExid" fgcolor="146:124124124" fontsize="-4" bgcolor="096:102102102" halign="1" ly_vert="50,9,40,20,1" />
+		<LABEL name="LblNat" fgcolor="146:124124124" fontsize="-4" bgcolor="096:102102102" halign="1" ly_vert="10,9,40,20,1" />
+		<LABEL name="Label5" fgcolor="146:124124124" fontsize="-4" halign="1" ordclruse="1" ly_vert="91,9,57,20,1" import="0,1,0" />
+		<LABEL name="LblRate" plusminuscolor="1" mask="0,0,(,%),0,,2,0,1,0,0" autofontsize="1" ly_vert="142,56,297,44,1" import="3,1,2" />
+		<LABEL name="LblName" fontsize="6" autofontsize="1" ly_vert="10,25,304,44,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="1" outline="0000" designorder="1" ly_vert="143,87,117,32,1" >
+			<COL_INFO ly_vert_width="37,80" />
+			<ROW_INFO ly_vert_height="32" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="095:000000000" halign="0" line="0,0" caption="환율" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" import="2,1,0" fgcolor="095:000000000" halign="0" line="0,0" fontsize="-1" mask="0,0,,원,0,,2,1,0,0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="ImgItem" autosize="1" imgpath="icon_main_06" ly_vert="327,30,24,24,1" />
+		<IMAGE name="ImgGwan" autosize="1" imgpath="icon_like2_n.png" ly_vert="329,89,20,20,1" />
+		<LABEL name="LblWonpriceCH" visible="0" mask="0,0,(,원),0,,2,1,0,0,0" ly_vert="10,87,135,32,0" />
+		<LABEL name="LblWonpriceHK" visible="0" mask="0,0,(,원),0,,2,1,0,0,0" ly_vert="10,87,135,32,0" />
+		<LABEL name="LblWonpriceJP" visible="0" mask="0,0,(,원),0,,1,1,0,0,0" ly_vert="10,87,135,32,0" />
+		<LABEL name="LblWonpriceUS" visible="0" mask="0,0,(,원),0,,0,1,0,0,0" ly_vert="10,87,135,32,0" />
+		<LABEL name="LblStatus" fgcolor="101:247134051" fontsize="-4" halign="1" ly_vert="149,9,75,20,1" />
+		<LABEL name="Label2" bgcolor="132:215215215" transmode="0" ly_vert="148,11,1,16,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10777" _ulen="10207" >
+Dim nExid
+Dim sItemCode
+Dim g_sDecimal
+Dim nNat
+
+Dim g_sCode
+Dim g_sExid
+Dim g_rtChk
+Dim g_sClsCd '현재가 종목상태구분코드 Y : 거래정지
+Dim g_sSellOnly '현재가 거래상태 1 : 매도만가능
+
+Dim g_szCur
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "RequestData"	then
+		g_sDecimal = "0"
+		sItemCode = sParam
+		Dim sTemp
+		sTemp = split(sParam, "@")
+		'20211223 HSZ START
+		if UBOUND(sTemp)<1 then
+			exit Sub
+		end if
+		'20211223 HSZ END
+		
+		g_sExid = sTemp[0] '시장구분
+		g_sCode = sTemp[1] '종목코드 
+		                           
+		szName = Form.GetItemCodeInfo(sItemCode, "name") 'hsz
+		LblName.caption = szName
+'		initRealCheck(g_sExid)
+		
+'		DATAMANAGER.CancelRealData("ohhts_exst_cntg")
+		if Len(sItemCode) > 0	then
+			DATAMANAGER.RequestTranData( "ohhts_6000_001r" )
+			DATAMANAGER.RequestTranData( "obsim_oscm_343r" )
+			
+		end if
+		
+	
+	'------------------------------------------------
+	'20240626 LES START
+	'------------------------------------------------
+	elseif sEventName == "SET_INTR_YN" then
+		
+		if sParam == "Y" then
+			ImgGwan.imgpath = "icon_like_o.png"
+		else
+			ImgGwan.imgpath = "icon_like2_n.png"
+		end if
+	'------------------------------------------------
+	'20240626 LES END
+	'------------------------------------------------
+		
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	if szTranID == "ohhts_6000_001r"	then
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" , 0 , "OV" )
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_COND_MRKT_CLS_CODE" , 0 , g_sExid)
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_INPUT_OVRS_ISCD" , 0 , g_sCode )
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk )
+	elseif szTranID == "obsim_oscm_343r"	then
+		DATAMANAGER.SetDataValue( false, "obsim_oscm_343r", "InBlock1", "ISCD" , 0 , g_sCode.."."..g_sExid )
+		DATAMANAGER.SetDataValue( false, "obsim_oscm_343r", "InBlock1", "OVRS_STCK_MRKT_TR_CLS_CODE" , 0 , Transform_Mrkt(sItemCode))
+	elseif szTranID == "obsim_oscm_331r"	then
+		DATAMANAGER.SetDataValue( false, "obsim_oscm_331r", "InBlock1", "ISCD" , 0 , g_sCode.."."..g_sExid )
+	elseif szTranID == "obtro_comn_025r" then
+		szDate = Form.GetSharedData("&HOST_DATE", false)
+		DATAMANAGER.SetDataValue( 0, "obtro_comn_025r", "InBlock1", "STND_DATE" 	, 0 , szDate )
+		DATAMANAGER.SetDataValue( 0, "obtro_comn_025r", "InBlock1", "CRCD"		, 0 , g_szCur )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "ohhts_6000_001r"	then
+		
+		nNat = Form.GetItemCodeInfo(sItemCode, "ovsnation") '국가구분 코드
+		
+		Dim sExid
+		
+		'USA, HKG JPY, CHN
+		if nNat == "USA"	then
+			LblNat.caption = "미국"
+		elseif nNat == "HKG"	then
+			LblNat.caption = "홍콩"
+		elseif nNat == "CHN"	then
+			LblNat.caption = "중국"
+		elseif nNat == "JPY"	then		'해외주식 일본 추가
+			LblNat.caption = "일본"
+		end if
+
+		nExid = Form.GetItemCodeInfo(sItemCode, "exchcode3") '거래소 구분코드
+		sExid = Transform_Exid(nExid)
+		LblExid.caption = sExid
+		
+		g_sClsCd = DATAMANAGER.GetDataValue(false,"ohhts_6000_001r", "OutBlock1", "FIDX_ISSU_STAT_CLS_CODE", 0) ' 종목상태구분코드 Y : 거래정지
+		g_sSellOnly = CInt(DATAMANAGER.GetDataValue(false,"ohhts_6000_001r", "OutBlock1", "FIDX_SELL_ONLY", 0)) '거래상태 ' 1매도만가능
+		
+		sEtfYn = DATAMANAGER.GetDataValue(false,"ohhts_6000_001r", "OutBlock1", "FIDX_ETF_YN", 0) ' ETF여부
+		sLvrg = DATAMANAGER.GetDataValue(false,"ohhts_6000_001r", "OutBlock1", "FID_LVRG", 0) ' 레버리지
+		g_szCur		=  DATAMANAGER.GetDataValue( 0, "ohhts_6000_001r", "OutBlock1", "FIDX_CRNC_CODE" 	, 0 )	' 통화
+'		if sEtfYn = "Y" then
+'			LblIndu.caption = "ETF(" & FormatNumber(sLvrg,1) & ")"
+'			LblIndu1.caption = "ETF(" & FormatNumber(sLvrg,1) & ")"
+'		end if
+		
+		DATAMANAGER.RequestTranData( "obsim_oscm_331r" )
+		DATAMANAGER.RequestTranData("obtro_comn_025r") 'hsz
+'		DATAMANAGER.SetDataValue( 1, "ohhts_exst_cntg", "InBlock1", "FIDXR_ISCD" , 0 , sItemCode )
+'		DATAMANAGER.RequestRealData( "ohhts_exst_cntg" )
+
+	elseif szTranID == "obsim_oscm_331r"	then
+	
+		Dim ssSellOnly,sStatus,WeekDate,sMrktCls
+		
+		sSellOnly   = DATAMANAGER.GetDataValue(false,"obsim_oscm_331r", "OutBlock1", "BYOV_PRHB_YN", 0) ' 매수불가여부
+		sStatus     = DATAMANAGER.GetDataValue(false,"obsim_oscm_331r", "OutBlock1", "TRHT_YN", 0) 		' 거래정지여부
+		sWeekDate   = DATAMANAGER.GetDataValue(false,"obsim_oscm_331r", "OutBlock2", "STND_DATE", 0) 	' 기준일
+		sMrktCls    = DATAMANAGER.GetDataValue(false,"obsim_oscm_331r", "OutBlock2", "HLDY_YN", 0) 		' 휴일여부
+		
+
+		sWeekDate = WeekDay( CDate( Left( sWeekDate, 4 ) & "-" & Mid( sWeekDate, 5, 2 ) & "-" & Right( sWeekDate, 2 ) ) )
+		If Trim( sMrktCls ) = "Y" And Trim( sWeekDate ) <> "1" And Trim( sWeekDate ) <> "7" Then		'일요일, 토요일 제외
+			LblStatus.caption = "휴장"
+		Else
+			if g_sClsCd == "Y" then
+				LblStatus.caption = "거래정지"
+			else
+				LblStatus.caption = ""
+				if g_sSellOnly == 1 then
+					LblStatus.caption = "매도만가능"
+				end if
+			end if
+		End If
+		
+'		if LblStatus.caption == "" then
+'			LblIndu1.visible = true
+'			LblIndu.visible = false
+'		else
+'			LblIndu1.visible = false
+'			LblIndu.visible = true
+'		end if
+	elseif "obtro_comn_025r" then
+		szAnncExrt = DATAMANAGER.GetDataValue( 0, "obtro_comn_025r", "OutBlock1", "ANNC_EXRT" , 0 )	' 고시환율
+'		Table0.SetCellString(0, 1, szAnncExrt)
+		nNat = Form.GetItemCodeInfo(sItemCode, "ovsnation") '국가구분 코드
+		sWonPrc = Cdbl(szAnncExrt) * Cdbl(LblPrice.caption)
+
+		'USA, HKG JPY, CHN
+		if nNat == "USA"	then
+			LblWonpriceUS.caption = sWonPrc
+			LblWonpriceUS.visible = true 
+			LblWonpriceCH.visible = false
+			LblWonpriceHK.visible = false
+			LblWonpriceJP.visible = false
+		elseif nNat == "HKG"	then
+			LblWonpriceHK.caption = sWonPrc
+			LblWonpriceUS.visible = false 
+			LblWonpriceCH.visible = false
+			LblWonpriceHK.visible = true
+			LblWonpriceJP.visible = false
+		elseif nNat == "CHN"	then
+			LblWonpriceCH.caption = sWonPrc
+			LblWonpriceUS.visible = false 
+			LblWonpriceCH.visible = true
+			LblWonpriceHK.visible = false
+			LblWonpriceJP.visible = false
+		elseif nNat == "JPY"	then		'해외주식 일본 추가
+			LblWonpriceJP.caption = sWonPrc
+			LblWonpriceUS.visible = false 
+			LblWonpriceCH.visible = false
+			LblWonpriceHK.visible = false
+			LblWonpriceJP.visible = true
+		end if
+	end if
+End Sub
+
+'============================================================================
+' 거래소 ID 이름으로 변환
+'============================================================================
+Function Transform_Exid(sValue)
+	if sValue == "HKS" then	' 104
+		return "홍콩"
+	elseif sValue == "HSI" then ' 529
+		return "항셍 지수"
+'		return "중국"
+	elseif sValue == "SHS" then ' 215
+		return "상해"
+'		return "중국"
+	elseif sValue == "SZS" then ' 214
+		return "심천"
+'		return "중국"
+	elseif sValue == "NYS" then ' 321
+		return "뉴욕"
+'		return "미국"
+	elseif sValue == "AMX" then ' 66
+		return "아멕스"
+'		return "미국"
+	elseif sValue == "NAS" then ' 537
+		return "나스닥"
+'		return "미국"
+	elseif sValue == "NAO" then ' 130
+		return "미국"
+	elseif sValue == "SPI" then ' 625
+		return "S&P"
+	elseif sValue == "DJI" then ' 310
+		return "다우존스"
+	elseif sValue == "TSE" then ' 106
+		return "도쿄"
+	elseif sValue == "OSE" then ' 107
+		return "오사카"
+	elseif sValue == "JSD" then ' 112
+		return "자스닥"
+	elseif sValue == "NII" then ' 889
+		return "니케이"
+	elseif sValue == "NAI" then ' 538
+		return "나스닥"
+	elseif sValue == "HSX" then ' 770
+		return "호치민"
+	elseif sValue == "HNX" then ' 771
+		return "하노이"
+	end if
+
+
+end Function
+'============================================================================
+Function Transform_Mrkt(sItemCode)
+	nNat = Form.GetItemCodeInfo(sItemCode, "ovsnation") '국가구분 코드
+	if nNat == "USA"	then 
+		return "01" '미국
+	elseif nNat == "HKG"	then
+		return "02" '홍콩
+	elseif nNat == "CHN" then
+		nExid = Form.GetItemCodeInfo(sItemCode, "exchcode3") '거래소 구분코드
+		if nExid = "SHS" then
+			return "03" '상해
+		elseif nExid == "SZS" then
+			return "04" '심천
+		end if
+	elseif nNat == "JPY" then
+		return "05" '일본
+	end if
+end Function 
+'============================================================================
+'Sub initRealCheck(sValue)
+'	g_rtChk = Form.GetSharedData( "REALTIME_"..sValue, false )
+'	if g_rtChk == "0" then
+'		LblSise.caption = "실시간"
+'	else
+'		if sValue == "JP" then
+'			LblSise.caption = "20분지연"
+'		else
+'			LblSise.caption = "15분지연"
+'		end if
+'	end if 
+'	
+'end Sub
+
+
+'============================================================================
+Function Move_ItemCode( szType )
+	If szType = "Right" Then
+		Form.ACRSetProp( "moveitem", "1" )
+	ElseIf szType = "Left" Then
+		Form.ACRSetProp( "moveitem", "-1" )
+	End If
+End Function
+
+'============================================================================
+Sub ImgItem_OnClick()
+	Form.OpenCommonDialog("SEARCH", "28", "")
+End Sub
+'============================================================================
+' Form_OnCommonDialogReturn : 종목검색창에서 선택된 종목 가져오기
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	if sDlgName == "SEARCH" then
+		if Trim(sReturn1)  <> "" then
+			g_sDecimal = "0"
+			sItemCode = sReturn1
+			Dim sTemp
+			sTemp = split(sReturn1, "@")
+			
+			if UBOUND(sTemp)<1 then
+				exit Sub
+			end if
+			
+			g_sExid = sTemp[0] '시장구분
+			g_sCode = sTemp[1] '종목코드 
+			
+			szName = Form.GetItemCodeInfo(sItemCode, "name")
+			LblName.caption = szName
+			
+'			DATAMANAGER.CancelRealData("ohhts_exst_cntg")
+			if Len(sItemCode) > 0	then
+				DATAMANAGER.RequestTranData( "ohhts_6000_001r" )
+				DATAMANAGER.RequestTranData( "obsim_oscm_343r" )
+				Form.triggerEvent("#", "CHANGE_CODE", sItemCode)
+			end if
+		end if
+	end if
+End Sub
+'============================================================================
+Sub ImgGwan_OnClick()
+	Form.triggerEvent("#", "SCREEN_MENU", "REG_INTR") '메인화면에 관심등록팝업 오픈 요청
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgItem.SetMaintainingRatio("1")
+	ImgGwan.SetMaintainingRatio("1")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_6000_001r" trcode="ohhts_6000_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obsim_oscm_331r" trcode="obsim_oscm_331r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtro_comn_025r" trcode="obtro_comn_025r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obsim_oscm_343r" trcode="obsim_oscm_343r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_6000_001r" title="해외주식 현재가 조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2686" _ulen="2294" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_52_WEEK_HGPR^FIDX52주최고가^14^4^7^32^1000^0^0
+FIDX_52_WEEK_LWPR^FIDX52주최저가^14^4^7^35^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_EPS^FIDXEPS^11^4^7^210^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_BSTP_CLS_CODE^FIDX업종구분코드^4^0^0^335^1000^0^0
+FIDX_BSTP_LRDV_NAME^FIDX업종대분류명^80^0^0^5133^1000^0^0
+FIDX_BSTP_MDDV_NAME^FIDX업종중분류명^80^0^0^5134^1000^0^0
+FIDX_BSTP_SMDV_NAME^FIDX업종소분류명^80^0^0^5135^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_SHNU_ASPR_UNIT^FIDX매수호가단위^14^4^7^5125^1000^0^0
+FIDX_SELN_ASPR_UNIT^FIDX매도호가단위^14^4^7^5126^1000^0^0
+FIDX_SHNU_ODER_QTY_UNIT^FIDX매수주문수량단위^9^0^7^5127^1000^0^0
+FIDX_SELN_ODER_QTY_UNIT^FIDX매도주문수량단위^9^0^7^5128^1000^0^0
+FIDX_CRNC_CODE^FIDX통화코드^4^0^0^5114^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_TICK_CLS^FIDX틱구분^4^0^0^5136^1000^0^0
+FID_PBR^FIDPBR^9^2^7^43^1000^0^0
+FIDX_PER^FIDXPER^9^2^7^42^1000^0^0
+BSTP_KOR_ISNM^업종한글종목명^100^0^0^822^1000^0^0
+FIDX_CAS_TRGT_ISSU_YN^FIDXCAS대상종목여부^1^0^0^5181^1000^0^0
+FIDX_VCM_STAT_CLS_CODE^FIDXVCM상태구분코드^1^0^0^5166^1000^0^0
+FIDX_ENG_ISNM^FIDX영문종목명^65^0^0^5112^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_VCM_STA_HOUR^FIDXVCM시작시간^6^0^0^5167^1000^0^0
+FIDX_VCM_FIN_HOUR^FIDXVCM종료시간^6^0^0^5168^1000^0^0
+FIDX_SELL_ONLY^FIDXSELLONLY^2^0^7^5173^1000^0^0
+FIDX_ISSU_STAT_CLS_CODE^FIDX종목상태구분코드^1^0^0^6016^1000^0^0
+FIDX_CAS_IEP^FIDXCASIEP^11^4^7^5215^1000^0^0
+FIDX_CAS_IEV^FIDXCASIEV^11^4^7^5216^1000^0^0
+FIDX_ETF_YN^FIDXETF여부^1^0^0^5159^1000^0^0
+FID_LVRG^FID레버리지^14^6^7^81^1000^0^0
+FIDX_CAS_TRGT_ISSU^FIDXCAS대상종목^1^0^0^5221^1000^0^0
+FIDX_CAS_STAT^FIDXCAS상태^2^0^0^5222^1000^0^0
+FIDX_CAS_SDPR^FIDXCAS기준가^14^4^7^5223^1000^0^0
+FIDX_CAS_MXPR^FIDXCAS상한가^14^4^7^5224^1000^0^0
+FIDX_CAS_LLAM^FIDXCAS하한가^14^4^7^5225^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obsim_oscm_331r" title="해외주식 종목정보 및 휴장일 조" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="40" _ulen="32" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="462" _ulen="338" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+OVRS_STCK_SYMB_ISCD^해외주식심볼종목코드^12^0^0^0^0^0^0
+OVRS_STCK_EXCH_IDNO^해외주식거래소식별번호^6^0^0^0^0^0^0
+KOR_ISNM^한글종목명^100^0^0^0^0^0^0
+ISIN_ISCD^ISIN종목코드^12^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+BYOV_PRHB_YN^매수불가여부^1^0^0^0^0^0^0
+TRHT_YN^거래정지여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="80" _ulen="64" >
+
+STND_DATE^기준일자^8^0^0^0^0^0^0
+HLDY_YN^휴일여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtro_comn_025r" title="해외주식 고시환율 단건 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="77" _ulen="61" >
+
+STND_DATE^기준일자^8^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="45" _ulen="37" >
+
+ANNC_EXRT^고시환율^12^4^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obsim_oscm_343r" title="해외주식 최근 종가" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="119" _ulen="87" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="199" _ulen="153" >
+
+STND_DATE^기준일자^8^0^0^0^0^0^0
+PRDY_VRSS_RSFL_CRNC_PRC^전일대비등락통화가격^20^8^7^0^0^0^0
+PRDY_VRSS_RSFL_RT^전일대비등락율^20^6^7^0^0^0^0
+CLPR^종가^20^6^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

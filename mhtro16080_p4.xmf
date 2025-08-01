@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16080" scrname="환전신청_매도외화잔고현황" version="2" writer="조승행" />
+	<FORM_INFO name="Form" ly_vert="0,0,310,341,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9" ly_vert="-1,-1,311,55,1" />
+		<IMAGE name="Image0" imgpath="icon_main_11" ly_vert="267,6,36,36,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="잔고현황" bgcolor="064:188030030" halign="1" ly_vert="0,-1,310,55,1" />
+		<GRID name="Grid0" colcount="3" ly_vert="1,70,309,268,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-3" halign="1" />
+				<LABEL name="th_cell0" fontsize="-2" caption="통화코드" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-3" mask="0,0,,,0,,2,1,1,0,0" halign="2" />
+				<LABEL name="th_cell1" fontsize="-2" caption="잔액" halign="1" />
+				<LABEL name="bd_cell2" fontsize="-3" mask="0,0,,,0,,2,1,1,0,0" halign="2" />
+				<LABEL name="th_cell2" fontsize="-2" caption="최대환전가능금액" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="100,103,103" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="100" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="103" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="103" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell2" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2996" _ulen="2918" >
+' 수정 : 2021.09.02. 장원혁 v001 통합증거금
+'        2022.08.23. 장원혁 v002 다드림계좌 개발
+
+'--===========================================================================
+Dim g_szFullAcnt
+'--===========================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "obrtd_fcur_001r" then
+		DATAMANAGER.SetDataValue(0, "obrtd_fcur_001r", "InBlock1", "ACNO" , 0 , left(g_szFullAcnt,8))
+		DATAMANAGER.SetDataValue(0, "obrtd_fcur_001r", "InBlock1", "ASNO" , 0 , mid(g_szFullAcnt,9,2))
+		DATAMANAGER.SetDataValue(0, "obrtd_fcur_001r", "InBlock1", "SVCD" , 0 , "001")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szLinkedData
+	
+	szLinkedData = ""
+	
+	szLinkedData = Form.GetOpenLinkData()
+	
+	g_szFullAcnt = szLinkedData
+	
+	DATAMANAGER.RequestTranData("obrtd_fcur_001r")
+	
+	
+	
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	dim szDataCnt
+	dim szCrcd, szCrcdKrNm, szExDealAmt
+	
+	szDataCnt = ""
+	szCrcd =	""
+	szCrcdKrNm = ""
+	szExDealAmt = ""
+	
+	if	szTranID =	"obrtd_fcur_001r" then
+		
+		szDataCnt =	DATAMANAGER.GetDataCount(0, "obrtd_fcur_001r", "OutBlock1")
+		
+		
+		for	i=0 to szDataCnt - 1
+		
+			szCrcd		 =	DATAMANAGER.GetDataValue(0, "obrtd_fcur_001r", "OutBlock1", "CRCD", i )
+			szCrcdKrNm	 =	DATAMANAGER.GetDataValue(0, "obrtd_fcur_001r", "OutBlock1", "CRCD_KOR_NAME", i )
+			'szExDealAmt	 =	DATAMANAGER.GetDataValue(0, "obrtd_fcur_001r", "OutBlock1", "UI_FRCR_WTMN_ABLE_AMT", i ) v002 주석처리
+			szExDealAmt	 =	DATAMANAGER.GetDataValue(0, "obrtd_fcur_001r", "OutBlock1", "ATMT_INVT_VLTN_ADUP_FRCR_AMT", i ) 'v002
+			szExDealAmtMax =	DATAMANAGER.GetDataValue(0, "obrtd_fcur_001r", "OutBlock1", "UI_MAX_MNEC_ABLE_FRCR_AMT", i ) 'v001
+						
+			
+			Grid0.SetCellData("bd_cell0", i, szCrcd & " " & szCrcdKrNm)
+			Grid0.SetCellData("bd_cell1", i, szExDealAmt)
+			Grid0.SetCellData("bd_cell2", i, szExDealAmtMax) 'v001
+					
+		next
+		
+	end if
+End Sub
+
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+
+	if Left(Grid0.GetCellData( "bd_cell0", lRow ), 3) = "KRW" then
+		
+		Form.ShowAlert("알림", "매도 할 외화를 선택해주십시오.")
+		Exit Sub
+	
+	else
+		
+		Form.SetSharedData("G_bcpp_commonFrCd" 	   , Grid0.GetCellData( "bd_cell0", lRow )	)
+		Form.SetSharedData("G_bcpp_commonFrBalc"    , Grid0.GetCellData( "bd_cell1", lRow )	)
+		Form.SetSharedData("G_bcpp_commonFrBalcMax" , Grid0.GetCellData( "bd_cell2", lRow )	) 'v001
+		
+		Form.CloseForm()
+	end if
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("16080_Frbalc" , "1")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obrtd_fcur_001r" trcode="obrtd_fcur_001r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obrtd_fcur_001r" title="외화 잔액내역조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="158" _ulen="116" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="800" _ulen="612" >
+
+CRCD^통화코드^3^0^0^0^0^0^0
+CRCD_KOR_NAME^통화코드한글명^40^0^0^0^0^0^0
+FRCR_AMT^외화금액^20^3^7^0^0^0^0
+UI_AMT_LETT1^UI금액문자1^18^0^0^0^0^0^0
+OVSC_DEAL_MARG^해외증권매매증거금^20^3^7^0^0^0^0
+UI_AMT_LETT2^UI금액문자2^18^0^0^0^0^0^0
+PRVS_SUSP_QTY^지급정지수량^22^5^7^0^0^0^0
+UI_FRCR_WTMN_ABLE_AMT^UI외화인출가능금액^20^3^7^0^0^0^0
+UI_AMT_LETT3^UI금액문자3^18^0^0^0^0^0^0
+UI_MAX_MNEC_ABLE_FRCR_AMT^UI최대환전가능외화금액^20^3^7^0^0^0^0
+UI_AMT_LETT4^UI금액문자4^18^0^0^0^0^0^0
+ATMT_INVT_VLTN_FRCR_AMT^자동투자평가외화금액^20^3^7^0^0^0^0
+UI_AMT_LETT5^UI금액문자5^18^0^0^0^0^0^0
+ATMT_INVT_VLTN_ADUP_FRCR_AMT^자동투자평가합산외화금액^20^3^7^0^0^0^0
+UI_AMT_LETT6^UI금액문자6^18^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="113" _ulen="87" >
+
+CUST_GRAD_CODE^고객등급코드^2^0^0^0^0^0^0
+CUST_GRAD_CODE_NAME^고객등급코드명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="52" _ulen="40" >
+
+MAX_MNEC_YN^최대환전여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

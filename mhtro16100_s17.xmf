@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="중국 거래안내(주문)" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,360,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="8" designorder="1" ly_vert="20,0,335,340,1" >
+			<COL_INFO ly_vert_width="110,225" />
+			<ROW_INFO ly_vert_height="40,35,35,60,30,40,70,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="320:246247248" caption="주문 수량 단위" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" bgcolor="320:246247248" caption="호가단위" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="320:246247248" caption="거래 통화" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,2,1,2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" bgcolor="320:246247248" caption="가격제한폭" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,3,1,3" impidxs="" />
+				<CELL cell_ly="0,4,0,4" bgcolor="320:246247248" caption="주문유형" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,4,1,4" impidxs="" />
+				<CELL cell_ly="0,5,0,5" bgcolor="320:246247248" caption="재매매 가능 여부" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,5,1,5" impidxs="" />
+				<CELL cell_ly="0,6,0,6" bgcolor="320:246247248" caption="정정/취소" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,6,1,6" impidxs="" />
+				<CELL cell_ly="0,7,0,7" bgcolor="320:246247248" line="1,0" caption="결제일" fontsize="-3" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,7,1,7" line="1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="LabelData0" fgcolor="334:034034034" fontsize="-3" caption="매수 : 100주 단위
+매도 : 1주 단위" bgcolor="035:237246255" multiline="1" ly_vert="140,5,205,30,1" />
+		<LABEL name="LabelData1" fgcolor="334:034034034" fontsize="-3" caption="CNY" bgcolor="035:237246255" multiline="1" ly_vert="140,73,205,40,1" />
+		<LABEL name="LabelData2" fgcolor="334:034034034" fontsize="-3" caption="±10%
+(단, 현재가 대비 3%를 초과하는 주문은 거부될 수 있음)" bgcolor="035:237246255" multiline="1" ly_vert="140,110,205,60,1" />
+		<LABEL name="LabelData3" fgcolor="334:034034034" fontsize="-3" caption="지정가" bgcolor="035:237246255" multiline="1" ly_vert="140,170,205,30,1" />
+		<LABEL name="LabelData4" fgcolor="334:034034034" fontsize="-3" caption="매수 결제 전 매도불가,
+매도체결 후 매수는 가능" bgcolor="035:237246255" multiline="1" ly_vert="140,200,205,40,1" />
+		<LABEL name="LabelData5" fgcolor="334:034034034" fontsize="-3" caption="정정불가
+취소만 가능
+(잔량일부 취소 불가, 전량 취소만 가능)" bgcolor="035:237246255" multiline="1" ly_vert="140,245,205,60,1" />
+		<LABEL name="LabelData6" fgcolor="334:034034034" fontsize="-3" caption="종목별 상이" bgcolor="035:237246255" multiline="1" ly_vert="140,43,205,30,1" />
+		<LABEL name="LabelData7" fgcolor="334:034034034" fontsize="-3" caption="T+1일" bgcolor="035:237246255" multiline="1" ly_vert="140,310,205,30,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3202" _ulen="2935" >
+Dim gbLargeFont			'큰글씨 사용여부
+Dim gsLargeFontsize		'큰글씨 폰트크기(1:조금크게 2:크게)
+
+gbLargeFont = false
+gsLargeFontsize = 0
+
+Dim gOsType
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+
+	LabelData0.paddinginfo = "0,0,0,0"
+	LabelData1.paddinginfo = "0,0,0,0"
+	LabelData2.paddinginfo = "0,0,0,0"
+	LabelData3.paddinginfo = "0,0,0,0"
+	LabelData4.paddinginfo = "0,0,0,0"
+	LabelData5.paddinginfo = "0,0,0,0"
+	LabelData6.paddinginfo = "0,0,0,0"
+	LabelData7.paddinginfo = "0,0,0,0"
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSize = Form.GetEnvData("common.textsize")
+	if CInt(szTextSize) > 0 then
+		gbLargeFont = true
+		gsLargeFontsize = szTextSize
+	end if
+
+	'--------------------------------------------------------------
+	' 텍스트 속성 변경
+	'--------------------------------------------------------------
+	ChangeTextAttr("LabelData0")
+	ChangeTextAttr("LabelData1")
+	ChangeTextAttr("LabelData2")
+	ChangeTextAttr("LabelData3")
+	ChangeTextAttr("LabelData4")
+	ChangeTextAttr("LabelData5")
+	ChangeTextAttr("LabelData6")
+	ChangeTextAttr("LabelData7")
+	
+	LabelData0.caption = "매수 : 100주 단위\n매도 : 1주 단위"
+	LabelData1.caption = "CNY"
+	LabelData2.caption = "±10%\n(단, 현재가 대비 3%를 초과하는 주문은 거부될 수 있음)"
+	LabelData3.caption = "지정가"
+	LabelData4.caption = "매수 결제 전 매도불가,\n매도체결 후 매수는 가능"
+	LabelData5.caption = "정정불가\n취소만 가능\n(잔량일부 취소 불가, 전량 취소만 가능)"
+	LabelData6.caption = "종목별 상이"
+	LabelData7.caption = "T+1일"
+	
+End Sub
+'============================================================================
+Function ChangeTextAttr(sCtlName)
+	
+	'-------------------------------------
+	' 글자크기 결정(큰글씨모드 대응)
+	'-------------------------------------
+	if gbLargeFont then
+		
+		if gOsType == "1" then
+			sTargetTextSize = - Cint((gsLargeFontsize * 2))
+		else
+			sTargetTextSize = - Cint((gsLargeFontsize * 2))
+		end if
+		
+		sTextSize = sTargetTextSize - 1
+	else
+		
+		sTargetTextSize = -2
+		sTextSize = sTargetTextSize - 1
+		
+	end if
+	
+	'-------------------------------------
+	' 속성변경
+	'-------------------------------------
+	if sCtlName == "LabelData0" then
+		
+		LabelData0.fontsize = sTextSize
+
+	elseif sCtlName == "LabelData1" then
+		
+		LabelData1.fontsize = sTextSize
+	
+	elseif sCtlName == "LabelData2" then
+	
+		LabelData2.fontsize = sTextSize
+		
+	elseif sCtlName == "LabelData3" then
+	
+		LabelData3.fontsize = sTextSize
+	
+	elseif sCtlName == "LabelData4" then
+	
+		LabelData4.fontsize = sTextSize
+	
+	elseif sCtlName == "LabelData5" then
+		
+		LabelData5.fontsize = sTextSize
+	
+	elseif sCtlName == "LabelData6" then
+		
+		LabelData6.fontsize = sTextSize
+	
+	elseif sCtlName == "LabelData7" then
+		
+		LabelData7.fontsize = sTextSize
+		
+	end if
+
+End Function
+	</SCRIPT_INFO>
+</ROOT>

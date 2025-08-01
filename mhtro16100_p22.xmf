@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="(NEW)해외주식_주문_잔고_유의사항" version="2" writer="이학록" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgHeader" imgpath="popup_bg.9" ly_vert="0,70,375,570,1" />
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="잔고 기준 안내" halign="1" paddinginfo="1,0,0,0" ly_vert="10,90,355,30,1" />
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_20.9" ly_vert="-2,590,377,60,1" />
+		<CONTAINER name="Container0" vscroll="1" ly_vert="0,130,375,460,1" scroll_ly_vert="0,130,375,460,1" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" imgpath="bp_img_balance" ly_vert="0,195,375,177,1" />
+				<LABEL name="Label1" fontsize="-2" caption="· 조회 시점의 시세로 잔고가 조회돼요" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="20,10,335,20,1" />
+				<LABEL name="Label2" fontsize="-2" caption="· 실시간 시세 신청 기준에 따라
+   실시간/지연 시세가 반영되어 조회 돼요." bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="20,40,335,40,1" />
+				<LABEL name="Label3" fontsize="-2" caption="· 미국 주간거래, Pre Market, 정규장 시장은
+   해당 시장의 시세가 반영되어 조회 돼요." bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="20,90,335,40,1" />
+				<LABEL name="Label4" fontsize="-2" caption="· 잔고 조회 시, 매입금액의 소수점 자리 수 표기에 따라 
+   단가가 변경 될 수 있어요
+" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="20,365,335,40,1" />
+				<LABEL name="Label5" fontsize="-2" caption="· 원화환산금액 적용환율은 고시환율로 적용 돼요
+" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="20,415,335,20,1" />
+				<LABEL name="Label6" fontsize="-2" caption="· 매수수수료 
+   : 매수시점에 실제 납부된 매수수수료" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="20,445,335,40,1" />
+				<LABEL name="Label7" fontsize="-2" caption="· 매도수수료(추정) 
+   : 현재가로 전량 매도시 납부될 추정 매도수수료" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="20,495,335,40,1" />
+				<LABEL name="Label8" fontsize="-2" caption="· 제세금(추정) 
+   : 현재가로 전량 매도시 납부될 추정 제세금
+" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="20,545,335,40,1" />
+				<LABEL name="Label9" resize="0100" fontsize="-2" caption="· 이자(추정) 
+   : 매도시 발생될 추정 대출이자비용
+" bgcolor="035:237246255" transmode="0" valign="0" multiline="1" ly_vert="20,595,335,60,1" />
+				<LABEL name="Label10" fontsize="-2" caption="   (단, After Market 시장은 '정규장 종가' 기준으로
+   잔고가 조회돼요.)" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="20,123,335,40,1" />
+				<LABEL name="Label11" fontsize="-2" caption="· 정규종가 선택 옵션 기능은 '주간거래 시장' 에만
+   선택하여 조회 할 수 있어요" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="20,175,335,40,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5079" _ulen="4369" >
+Dim gTextSize
+gTextSize = -2
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	Container0.Image0.setMaintainingRatio("1")
+
+	'--------------------------------------------------------------
+	' 라벨 투명모드
+	'--------------------------------------------------------------
+	Container0.Label1.transmode = "1"
+	Container0.Label2.transmode = "1"
+	Container0.Label3.transmode = "1"
+	Container0.Label4.transmode = "1"
+	Container0.Label5.transmode = "1"
+	Container0.Label6.transmode = "1"
+	Container0.Label7.transmode = "1"
+	Container0.Label8.transmode = "1"
+	Container0.Label9.transmode = "1"
+	Container0.Label10.transmode = "1"
+	Container0.Label11.transmode = "1"
+	
+	'--------------------------------------------------------------
+	' 라벨 패딩값 설정
+	'--------------------------------------------------------------
+	Container0.Label1.paddinginfo = "0,0,0,0"
+	Container0.Label2.paddinginfo = "0,0,0,0"
+	Container0.Label3.paddinginfo = "0,0,0,0"
+	Container0.Label4.paddinginfo = "0,0,0,0"
+	Container0.Label5.paddinginfo = "0,0,0,0"
+	Container0.Label6.paddinginfo = "0,0,0,0"
+	Container0.Label7.paddinginfo = "0,0,0,0"
+	Container0.Label8.paddinginfo = "0,0,0,0"
+	Container0.Label9.paddinginfo = "0,0,0,0"
+	Container0.Label10.paddinginfo = "0,0,0,0"
+	Container0.Label11.paddinginfo = "0,0,0,0"
+	
+	'--------------------------------------------------------------
+	' 큰글씨 모드 대응
+	'--------------------------------------------------------------
+	szTextSize = Form.GetEnvData("common.textsize")
+	if CInt(szTextSize) > 0 then
+	
+		gTextSize = - Cint((szTextSize * 2)) + 1
+		
+		Container0.Label1.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label2.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label3.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label4.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label5.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label6.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label7.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label8.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label9.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label10.fontsize = - Cint((szTextSize * 2)) + 1
+		Container0.Label11.fontsize = - Cint((szTextSize * 2)) + 1
+		
+	end if
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	Container0.Label1.caption = "· 조회 시점의 시세로 잔고가 조회돼요"
+	Container0.Label2.caption = "· 실시간 시세 신청 기준에 따라\n   실시간/지연 시세가 반영되어 조회 돼요"
+	Container0.Label3.caption = "· 미국 주간거래, Pre Market, 정규장 시장은\n   해당 시장의 시세가 반영되어 조회 돼요"
+	Container0.Label4.caption = "· 잔고 조회 시, 매입금액의 소수점 자리 수 표기에\n   따라 단가가 변경 될 수 있어요"
+	Container0.Label5.caption = "· 원화환산금액 적용환율은 고시환율로 적용 돼요"
+	Container0.Label6.caption = "· 매수수수료 \n   : 매수시점에 실제 납부된 매수수수료"
+	Container0.Label7.caption = "· 매도수수료(추정) \n   : 현재가로 전량 매도시 납부될 추정 매도수수료"
+	Container0.Label8.caption = "· 제세금(추정) \n   : 현재가로 전량 매도시 납부될 추정 제세금"
+	Container0.Label9.caption = "· 이자(추정) \n   : 매도시 발생될 추정 대출이자비용"
+	Container0.Label10.caption = "   (단, After Market 시장은 '정규장 종가' 기준으로\n   잔고가 조회돼요)"
+	Container0.Label11.caption = "· 정규종가 선택 옵션 기능은 '주간거래 시장' 에만\n   선택하여 조회 할 수 있어요"
+
+'	sChangeText = "· 실시간 시세 신청 기준에 따라"
+'	sChangeTextLen = Form.getLen(sChangeText)
+'	Container0.Label2.changeTextAttr(0, sChangeTextLen, 290, gTextSize, true)
+'	
+'	sStartText = "· 미국 주간거래, Pre Market, 정규장 시장은\n   "
+'	sStartOffset = Form.getLen(sStartText)
+'	sChangeText = "해당 시장의 시세가 반영되어 조회"
+'	sChangeTextLen = Form.getLen(sChangeText)
+'	Container0.Label3.changeTextAttr(sStartOffset, sChangeTextLen, 290, gTextSize, true)
+'	
+'	sStartText = "· 정규종가 선택 옵션 기능은 "
+'	sStartOffset = Form.getLen(sStartText)
+'	sChangeText = "'주간거래 시장'"
+'	sChangeTextLen = Form.getLen(sChangeText)
+'	Container0.Label11.changeTextAttr(sStartOffset, sChangeTextLen, 290, gTextSize, true)
+'	
+'	sStartText = "· 원화환산금액 적용환율은 "
+'	sStartOffset = Form.getLen(sStartText)
+'	sChangeText = "고시환율"
+'	sChangeTextLen = Form.getLen(sChangeText)
+'	Container0.Label5.changeTextAttr(sStartOffset, sChangeTextLen, 290, gTextSize, true)
+	
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

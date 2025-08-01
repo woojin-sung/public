@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16093" scrname="해외주식 소수점 체결내역_상세팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,2,376,639,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="input_03_n.9" ly_vert="0,320,375,332,1" />
+		<LABEL name="lblOrdType" fontsize="4" fontstyle="01" bgcolor="064:188030030" halign="2" ly_vert="-6,326,187,61,1" />
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" caption="체결완료" bgcolor="064:188030030" ly_vert="170,326,188,61,1" />
+		<LABEL name="lblItemCd" fontsize="4" fontstyle="01" ly_vert="17,395,86,32,1" />
+		<LABEL name="lblItemNm" fontsize="4" fontstyle="01" autofontsize="1" ly_vert="90,395,231,32,1" />
+		<LABEL name="Label2" caption="주문금액" ly_vert="17,465,100,32,1" />
+		<LABEL name="Label3" caption="체결수량" ly_vert="17,493,100,32,1" />
+		<LABEL name="Label4" caption="체결단가" ly_vert="17,536,100,32,1" />
+		<LABEL name="Label5" caption="체결금액" ly_vert="17,564,100,32,1" />
+		<LABEL name="Label6" caption="수수료" ly_vert="17,592,100,32,1" />
+		<LABEL name="Label7" fontsize="1" caption="주" halign="1" paddinginfo="1,0,0,0" ly_vert="328,493,25,32,1" />
+		<LABEL name="Label8" fontsize="-3" caption="USD" halign="1" ly_vert="318,538,30,32,1" />
+		<LABEL name="Label9" fontsize="-3" caption="USD" halign="1" ly_vert="318,566,30,32,1" />
+		<LABEL name="Label10" fontsize="-3" caption="USD" halign="1" ly_vert="318,594,30,32,1" />
+		<LABEL name="lblOrdAmt" fontsize="2" mask="0,0,,원,0,,0,1,0,0,0" halign="2" autofontsize="1" ly_vert="122,464,236,32,1" />
+		<LABEL name="lblCheQty" fontsize="2" caption="0.123456" mask="0,0,,,0,,6,1,0,0,0" halign="2" autofontsize="1" ly_vert="119,493,220,32,1" />
+		<LABEL name="lblChePrc" fontsize="2" mask="0,0,,,0,,4,1,0,0,0" halign="2" autofontsize="1" ly_vert="114,536,205,32,1" />
+		<LABEL name="lblCheAmt" fontsize="2" mask="0,0,,,0,,2,1,0,0,0" halign="2" autofontsize="1" ly_vert="114,564,205,32,1" />
+		<LABEL name="lblFee" fontsize="2" mask="0,0,,,0,,2,1,0,0,0" halign="2" autofontsize="1" ly_vert="114,592,205,32,1" />
+		<LABEL name="Label0" bgcolor="026:186186186" transmode="0" ly_vert="20,528,335,1,1" />
+		<LABEL name="lblDate" fontsize="-3" mask="1,0,,,1,####.##.##,0,1,1,0,0" ly_vert="18,434,280,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1927" _ulen="1837" >
+--===========================================================================
+--===========================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	
+	if szOpenData <> "" and szOpenData <> null then
+'		전달내용 
+'		0종목코드 
+'		1종목명 
+'		2매수매도구분코드 
+'		3주문금액 
+'		4체결수량 
+'		5체결단가 
+'		6체결금액 
+'		7수수료
+'		8날짜
+		dim tData, tCode
+		tData = Split(szOpenData, "★")
+		tCode = Split(tData(0), ".")
+		
+		if tData(2) == "1" then
+			lblOrdType.caption = "매도"
+			lblOrdType.fgcolor = "11"
+		elseif tData(2) == "2" then
+			lblOrdType.caption = "매수"
+			lblOrdType.fgcolor = "10"
+		end if
+		
+		
+		'lblItemCd.caption = Trim(tCode(0)) & " |"
+		lblItemCd.caption = f_GetCode(tData(0)) & " |" 
+		lblItemNm.caption = tData(1) 
+		lblOrdAmt.caption = tData(3)
+		lblCheQty.caption = tData(4)
+		lblChePrc.caption = tData(5)
+		lblCheAmt.caption = tData(6)
+		lblFee.caption = tData(7)
+		lblDate.caption = tData(8)
+		
+		dim nCdLen
+		nCdLen = Len(f_GetCode(tData(0)))
+		
+		if nCdLen == 1 then
+			lblItemNm.left = 45
+		elseif nCdLen == 2 then
+			lblItemNm.left = 57
+		elseif nCdLen == 3 then
+			lblItemNm.left = 71
+		elseif nCdLen == 4 then
+			lblItemNm.left = 82
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+Sub f_GetCode(aCode)
+	aCode = Replace(aCode, ".AX", "")
+	aCode = Replace(aCode, ".ET", "")
+	aCode = Replace(aCode, ".NY", "")
+	aCode = Replace(aCode, ".OQ", "")
+	aCode = Replace(aCode, ".OT", "")
+	return aCode
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+
+
+	</SCRIPT_INFO>
+</ROOT>

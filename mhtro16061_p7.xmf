@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16061" scrname="해외주식예약주문_일괄취소주문확인창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,359,375,491,1" />
+		<IMAGE name="Image0" imgpath="bg_infobox.9" ly_vert="20,449,335,123,1" />
+		<BUTTON name="btnCancle" caption="취소하기" btnimage="btn_etc18.9" ly_vert="147,592,228,55,1" />
+		<BUTTON name="btnCancleClose" caption="닫기" fgcolor="004:000000000" btnimage="btn_28.9" ly_vert="0,592,147,55,1" />
+		<TABLE name="tblCancle" insidelinecolor="102:255255255" colcount="2" rowcount="4" outline="0000" transmode="1" designorder="1" ly_vert="40,469,295,83,1" >
+			<COL_INFO ly_vert_width="89,206" />
+			<ROW_INFO ly_vert_height="21,20,21,21" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="321:115118124" bgcolor="042:255255255" halign="0" line="0,0" caption="계좌번호" fontsize="-2" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" fgcolor="334:034034034" halign="2" line="0,0" fontsize="-2" paddinginfo="0,0,1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="321:115118124" halign="0" line="0,0" caption="주문건수" fontsize="-2" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" fgcolor="293:017158176" halign="2" line="0,0" fontsize="-2" mask="0,0,,건,0,,0,1,0,0,0" paddinginfo="0,0,1,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="321:115118124" bgcolor="042:255255255" halign="0" line="0,0" caption="종목" fontsize="-2" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="1,2,1,2" fgcolor="334:034034034" halign="2" line="0,0" fontsize="-2" fontstyle="01" paddinginfo="0,0,1,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="321:115118124" bgcolor="042:255255255" halign="0" line="0,0" caption="수량" fontsize="-2" paddinginfo="1,0,0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" fgcolor="334:034034034" halign="2" line="0,0" caption="전량" fontsize="-2" fontstyle="01" paddinginfo="0,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="lblMaesu1Title" fontsize="2" fontstyle="01" caption="하시겠습니까?" bgcolor="092:185046046" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="168,360,142,60,1" />
+		<LABEL name="Label0" fgcolor="293:017158176" fontsize="2" fontstyle="01" caption="일괄 취소" halign="2" ly_vert="60,360,113,60,1" />
+		<LABEL name="Label3" fgcolor="334:034034034" fontsize="-2" fontstyle="01" caption="주문정보" valign="0" ly_vert="20,419,74,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3056" _ulen="2904" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 예약주문
+' 02. 화면설명 : 예약주문 주문확인창
+' 03. 작    성 : 2016.04.30 LJS
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+
+Dim g_nCount
+	g_nCount = 0
+
+Dim 	g_szOrder_Acc			' 계좌번호
+Dim 	g_szOrder_AccName		' 고객명
+Dim 	g_szCnt				' 건수
+Dim	g_szText				' 전종목 or 선택종목
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+'주문화면 데이터
+'============================================================================
+Function Set_Data(nIndex)
+
+
+	Dim szStr1,szStr2,szStr3
+	szStr1 = left(g_szOrder_Acc,4)
+	szStr2 = mid(g_szOrder_Acc,5,4)
+	szStr3 = right(g_szOrder_Acc,2)
+
+	tblCancle.SetCellString( 0, 1, szStr1.."-".. szStr2 .."-".. szStr3.." "..g_szOrder_AccName)
+
+	tblCancle.SetCellString( 1, 1, g_szCnt)
+	tblCancle.SetCellString( 2, 1, g_szText)
+	
+End Function
+
+'============================================================================
+Function SendOrder()
+    If g_nCount = 0 Then
+	    Form.SendReturnToParent( "전체취소주문전송" , "1")
+	    
+	    g_nCount = 1
+	    Form.CloseForm( )
+    End If
+    
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Dim szData, arrData, szItemName
+
+	szData = Form.GetOpenLinkData()
+	
+	arrData = Split(szData,"|")
+	
+	if UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+	
+	g_szOrder_Acc			= arrData( 0)	' 계좌번호
+	g_szOrder_AccName		= arrData( 1)	' 고객명
+	g_szCnt				= arrData( 2)	' 건수
+	g_szText				= arrData( 3)	' 전종목 or 선택종목
+	if g_szText = "Y" then
+		g_szText = "전종목"
+	else
+		g_szText = "선택종목"
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+    Set_Data(g_nIndex)
+    
+End Sub
+
+
+'============================================================================
+Sub btnCancle_OnClick()
+	SendOrder()
+End Sub
+
+
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnCancleClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

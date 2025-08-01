@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16100" scrname="중국 거래안내(유의사항)" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,390,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="20,0,335,380,1" >
+			<COL_INFO ly_vert_width="110,225" />
+			<ROW_INFO ly_vert_height="380" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="320:246247248" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="LabelData0" visible="0" fgcolor="334:034034034" fontsize="-3" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="140,10,205,40,0" />
+		<LABEL name="LabelData1" fgcolor="334:034034034" fontsize="-3" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="140,10,205,60,1" />
+		<LABEL name="LabelData2" fgcolor="334:034034034" fontsize="-3" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="140,70,205,60,1" />
+		<LABEL name="LabelData3" fgcolor="334:034034034" fontsize="-3" bgcolor="029:255212175" transmode="0" multiline="1" ly_vert="140,130,205,60,1" />
+		<LABEL name="LabelData4" fgcolor="334:034034034" fontsize="-3" bgcolor="035:237246255" transmode="0" multiline="1" ly_vert="140,190,205,60,1" />
+		<LABEL name="LabelData5" fgcolor="334:034034034" fontsize="-3" caption="유의사항" bgcolor="035:237246255" transmode="0" halign="1" multiline="1" ly_vert="30,100,90,100,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5332" _ulen="4910" >
+Dim gbLargeFont			'큰글씨 사용여부
+Dim gsLargeFontsize		'큰글씨 폰트크기(1:조금크게 2:크게)
+
+gbLargeFont = false
+gsLargeFontsize = 0
+
+Dim gOsType
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+	
+	LabelData0.paddinginfo = "0,0,0,0"
+	LabelData1.paddinginfo = "0,0,0,0"
+	LabelData2.paddinginfo = "0,0,0,0"
+	LabelData3.paddinginfo = "0,0,0,0"
+	LabelData4.paddinginfo = "0,0,0,0"
+	LabelData5.paddinginfo = "0,0,0,0"
+	
+	LabelData0.transmode = "1"
+	LabelData1.transmode = "1"
+	LabelData2.transmode = "1"
+	LabelData3.transmode = "1"
+	LabelData4.transmode = "1"
+	LabelData5.transmode = "1"
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSize = Form.GetEnvData("common.textsize")
+	if CInt(szTextSize) > 0 then
+		gbLargeFont = true
+		gsLargeFontsize = szTextSize
+	end if
+	
+	'--------------------------------------------------------------
+	' 텍스트 속성 변경
+	'--------------------------------------------------------------
+	ChangeTextAttr("LabelData0")
+	ChangeTextAttr("LabelData1")
+	ChangeTextAttr("LabelData2")
+	ChangeTextAttr("LabelData3")
+	ChangeTextAttr("LabelData4")
+	'ChangeTextAttr("LabelData5")
+	'ChangeTextAttr("LabelData6")
+	
+	'--------------------------------------------------------------
+	' 텍스트 세팅
+	'--------------------------------------------------------------
+	LabelData0.sizeAutoFit()
+	LabelData0.caption = "* 단주 매도시 온라인(HTS/MTS)로 매도 가능합니다."
+	
+	LabelData1.sizeAutoFit()
+	LabelData1.caption = "* 현재가 대비 과하게 높은 가격으로 주문을 낼 경우 주문이 거부될 수 있습니다."
+	
+	LabelData2.sizeAutoFit()
+	LabelData2.caption = "* 현지 주식시장 사정에 따라 주문이 취소되거나 거부될 수 있습니다."
+	
+	LabelData3.sizeAutoFit()
+	LabelData3.caption = "* 실시간 시세 신청을 하지 않은 경우 지연시세가 제공됩니다."
+	
+	LabelData4.sizeAutoFit()
+	LabelData4.caption = "* 홍콩 주식시장 장운영 상황에 따라 주문이 거부될 수 있습니다."
+	
+End Sub
+'============================================================================
+Function ChangeTextAttr(sCtlName)
+	
+	'-------------------------------------
+	' 글자크기 결정(큰글씨모드 대응)
+	'-------------------------------------
+	if gbLargeFont then
+		
+		if gOsType == "1" then
+			sTargetTextSize = - Cint((gsLargeFontsize * 2))
+		else
+			sTargetTextSize = - Cint((gsLargeFontsize * 2))
+		end if
+		
+		sTextSize = sTargetTextSize - 1
+	else
+		sTargetTextSize = -2
+		sTextSize = sTargetTextSize - 1
+	end if
+	
+	'-------------------------------------
+	' 속성변경
+	'-------------------------------------
+	if sCtlName == "LabelData0" then
+		
+		LabelData0.fontsize = sTextSize
+
+	elseif sCtlName == "LabelData1" then
+		
+		LabelData1.fontsize = sTextSize
+	
+	elseif sCtlName == "LabelData2" then
+	
+		LabelData2.fontsize = sTextSize
+	
+	elseif sCtlName == "LabelData3" then
+	
+		LabelData3.fontsize = sTextSize
+		
+	
+	elseif sCtlName == "LabelData4" then
+	
+		LabelData4.fontsize = sTextSize
+		
+	
+	elseif sCtlName == "LabelData5" then
+		
+		LabelData5.fontsize = sTextSize
+		
+	elseif sCtlName == "LabelData6" then
+		
+		LabelData6.fontsize = sTextSize
+		
+	end if
+
+End Function
+'============================================================================
+Function ChangeLabelPos(sOrgnCtlName,sTargetCtlName)
+	
+	nOrgnTop = Form.GetCtlProp(sOrgnCtlName, "top")
+	nOrgnHeight = Form.GetCtlProp(sOrgnCtlName, "height")
+	
+	if gOsType == "1" then
+		nTargetTop = Form.calcUnResize(nOrgnTop + nOrgnHeight, "1") + 10
+	else
+		nTargetTop = nOrgnTop + nOrgnHeight + 10
+	end if
+	
+	Form.SetCtlProp(sTargetCtlName, "top", nTargetTop)
+
+End Function
+
+'============================================================================
+Sub LabelData0_OnSizeAutoFit()
+
+	'ChangeLabelPos("LabelData0","LabelData1")
+	
+End Sub
+
+'============================================================================
+Sub LabelData1_OnSizeAutoFit()
+
+	ChangeLabelPos("LabelData1","LabelData2")
+	
+End Sub
+
+'============================================================================
+Sub LabelData2_OnSizeAutoFit()
+
+	ChangeLabelPos("LabelData2","LabelData3")
+	
+End Sub
+
+'============================================================================
+Sub LabelData3_OnSizeAutoFit()
+
+	ChangeLabelPos("LabelData3","LabelData4")
+	
+End Sub
+
+'============================================================================
+Sub LabelData4_OnSizeAutoFit()
+
+	'테이블 높이값 조정
+	nOrgnTop = Form.GetCtlProp("LabelData4", "top")
+	nOrgnHeight = Form.GetCtlProp("LabelData4", "height")
+	
+	if gOsType == "1" then
+		nTargetHeight = Form.calcUnResize(nOrgnTop + nOrgnHeight, "1") + 10
+	else
+		nTargetHeight = nOrgnTop + nOrgnHeight + 10
+	end if
+	
+	Table0.height = nTargetHeight
+	
+	'테이블 타이틀라벨 Top값 지정
+	nTableTitleTop = nTargetHeight / 2 - 50
+	LabelData5.top = nTableTitleTop
+	
+	'부모화면에 자기사이즈 알리기
+	Form.triggerEvent("#", "CHINA_LinkForm3_Height", nTargetHeight + 20)
+	
+	
+End Sub
+	</SCRIPT_INFO>
+</ROOT>
