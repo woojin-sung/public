@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="42040" scrname="해외지수_메인탭" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab01" tabcount="4" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,0,375,562,1" >
+			<PAGE name="page009876" caption="주요지수" linkfile="mhidx42040_t1" loadingtype="1" />
+			<PAGE name="page005982" caption="환율" linkfile="mhidx42040_t2" loadingtype="1" />
+			<PAGE name="page002642" caption="해외장중지수" linkfile="mhidx42040_t3" loadingtype="1" />
+			<PAGE name="page005955" caption="해외상품선물" linkfile="mhidx42040_t4" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2614" _ulen="2510" >
+'============================================================================
+' 01.화면명 	: 해외지수
+' 02.화면설명	: 해외지수_메인탭
+' 03.작성	: 2016.01.05
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	szOpenData = Form.GetOpenLinkData()
+	arrData = Split(szOpenData,"★")
+	if arrData(0) <> "" then
+		if arrData(0) == "주요지수" then
+			fmtab01.currenttabpageid = "page009876"
+			if arrData(1) <> "" then
+				Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "SELECT_RADIO", arrData(1))
+			end if
+		elseif arrData(0) == "환율" then
+			fmtab01.currenttabpageid = "page005982"
+		'20240509 HSZ START: HOME화면 연동추가
+		elseif arrData(0) == "해외상품선물" then
+			fmtab01.currenttabpageid = "page005955"
+			if arrData(1) <> "" then
+				Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "SELECT_RADIO", arrData(1))
+			end if
+		'20240509 HSZ END
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName = "SCREEN_MENU" Then							' 연결정보(상단 ...)
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns1" , "0", "")
+		End If
+	End if	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "snsshare" Then			' 폼탭 초기화
+		g_nSNSType = Cint(sRet)
+		If g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+		Else
+			Form.triggerEvent("linkfmHoga", "sharedata", "")
+		End If
+	End if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

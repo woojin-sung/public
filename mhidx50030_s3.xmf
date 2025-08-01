@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="My자산_수익 알아보기" version="2" writer="김인섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,187,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" ly_vert="0,0,375,197,1" scroll_ly_vert="0,0,375,197,1" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fontsize="1" fontstyle="01" caption="지난달 투자해서 얼마나 벌었더라?" ly_vert="20,12,330,32,1" />
+				<LABEL name="Label1" fgcolor="146:124124124" fontsize="-1" caption="나의 투자수익 알아보기" ly_vert="20,34,300,32,1" />
+				<IMAGE name="ImageBgY" imgpath="img_bgbox_yellow.9" ly_vert="21,72,162,90,1" />
+				<IMAGE name="ImageBgG" imgpath="img_bgbox_green.9" ly_vert="193,72,162,90,1" />
+				<IMAGE name="ImageSuper" imgpath="fb_icon01" ly_vert="74,80,56,56,1" />
+				<IMAGE name="ImageTrd" imgpath="icon_tradinglog" ly_vert="246,80,56,56,1" />
+				<LABEL name="Label2" fontsize="-1" fontstyle="01" caption="Super365 수익금" halign="1" click="1" ly_vert="32,130,140,20,1" />
+				<LABEL name="Label3" fontsize="-1" fontstyle="01" caption="매매일지(실현손익)" halign="1" click="1" ly_vert="207,130,134,20,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3013" _ulen="2717" >
+'============================================================================
+' 01. 화 면 명 : Home 화면 My자산 - 수익 알아보기
+' 02. 화면설명 : Home 화면 My자산 - 수익 알아보기 Sub화면
+' 03. 작    성 : 2024. 01. 25. KIS
+'============================================================================
+
+Dim gOsType
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+	
+	'폰사이즈에 적합하게 이미지 맞추기
+	Container0.ImageSuper.setMaintainingRatio("1")  
+	Container0.ImageTrd.setMaintainingRatio("1")  
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSizeMode = Form.GetEnvData("common.textsize")
+	
+	if CInt(szTextSizeMode) > 0 then
+	
+		if gOsType == "1" then
+			
+			Container0.Label0.fontsize = 2 - Cint((szTextSizeMode * 2))
+			Container0.Label1.fontsize = - Cint((szTextSizeMode * 2))
+			Container0.Label2.fontsize = - Cint((szTextSizeMode * 2))
+			Container0.Label3.fontsize = - Cint((szTextSizeMode * 2))
+		
+		else
+			Container0.Label0.fontsize = 1 - Cint((szTextSizeMode * 2))
+			Container0.Label1.fontsize = -1 - Cint((szTextSizeMode * 2))
+			Container0.Label2.fontsize = -1 - Cint((szTextSizeMode * 2))
+			Container0.Label3.fontsize = -1 - Cint((szTextSizeMode * 2))
+		end if
+	
+	end if	
+	
+End Sub
+
+'============================================================================
+Sub Container0_ImageBgY_OnClick()
+     Form.SetSharedData("HOME_TAB" , "MYASSET")  '화면이동후 백버튼눌렀을때. 현재탭으로 이동
+     Form.OpenScreen( "88029" , "" ) 'Super365 수익금 화면 오픈
+     
+End Sub
+
+'============================================================================
+Sub Container0_ImageBgG_OnClick()
+     
+     Form.SetSharedData("HOME_TAB" , "MYASSET")  '화면이동후 백버튼눌렀을때. 현재탭으로 이동
+	Form.OpenScreen( "15020" , "" ) '매매일지(실현손익) 화면 오픈
+	
+End Sub
+
+'============================================================================
+Sub Container0_ImageSuper_OnClick()
+	Container0_ImageBgY_OnClick() 'Super365 수익금 화면 오픈
+End Sub
+
+'============================================================================
+Sub Container0_ImageTrd_OnClick()
+	Container0_ImageBgG_OnClick() '매매일지(실현손익) 화면 오픈
+End Sub
+
+'============================================================================
+Sub Container0_Label2_OnClick()
+	Container0_ImageBgY_OnClick() 'Super365 수익금 화면 오픈
+End Sub
+
+'============================================================================
+Sub Container0_Label3_OnClick()
+	Container0_ImageBgG_OnClick()'매매일지(실현손익) 화면 오픈
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

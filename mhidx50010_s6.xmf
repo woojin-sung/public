@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME_시장지표" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,250,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fgcolor="144:034034034" fontsize="2" fontstyle="01" caption="시장지표" bgcolor="029:255212175" ly_vert="5,0,187,32,1" />
+		<LABEL name="lbl1" fgcolor="321:115118124" fontsize="-2" caption="더보기" halign="2" click="1" ly_vert="263,0,84,32,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_arrow" ly_vert="346,12,6,8,1" />
+		<LABEL name="lblMore0" fgcolor="321:115118124" click="1" ly_vert="283,0,84,30,1" />
+		<PANNEL name="Pannel0" ly_vert="10,85,350,135,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblCode" visible="0" ly_vert="10,10,100,32,0" />
+				<LABEL name="lblMarket" visible="0" ly_vert="10,10,100,32,0" />
+				<LABEL name="lblRank" visible="0" fontsize="-2" mask="1,0,,.,1,,0,1,1,0,0" ly_vert="0,0,23,40,0" />
+				<LABEL name="lblName" fontsize="-2" bgcolor="029:255212175" autofontsize="1" ly_vert="0,0,120,40,1" />
+				<LABEL name="lblPr" fontsize="-2" fontstyle="01" mask="0,0,,,0,,-1,1,1,0,0" bgcolor="035:237246255" halign="2" paddinginfo="0,0,5,0" ly_vert="145,3,130,18,1" />
+				<LABEL name="lblVrss" visible="0" fontsize="-2" mask="0,0,,,0,,-1,1,0,0,0" halign="2" paddinginfo="0,0,1,0" ly_vert="180,20,65,20,0" />
+				<LABEL name="lblSign" visible="0" fontsize="-2" halign="2" usesign="1" paddinginfo="0,0,1,0" ly_vert="240,20,25,20,0" />
+				<IMAGE name="imgBg" autosize="1" imgpath="alpha" ly_vert="280,5,70,30,1" />
+				<LABEL name="lblCtrt" fontsize="-2" mask="0,0,,%,0,,2,1,0,0,0" halign="1" autofontsize="1" ly_vert="280,5,70,30,1" />
+				<CHANGE name="Change0" fontsize="-2" mask="0,0,,,0,,-1,1,0,0,0" halign="2" ly_vert="145,20,130,17,1" />
+			</CONTROL_INFO>
+			<CARD_INFO realkey="lblCode" cardheight="40" gap="5" >
+				<CELL name="lblRank" />
+				<CELL name="lblName" />
+				<CELL name="lblPr" />
+				<CELL name="lblVrss" />
+				<CELL name="lblSign" />
+				<CELL name="lblCtrt" />
+				<CELL name="lblCode" />
+				<CELL name="imgBg" />
+				<CELL name="lblMarket" />
+				<CELL name="Change0" />
+			</CARD_INFO>
+		</PANNEL>
+		<FORMTAB name="FormTab0" fontsize="-1" tabcount="0" tabheadwidth="77" tabheadheight="28" ly_vert="10,43,350,30,1" />
+		<LABEL name="lblLine" bgcolor="322:226228229" ly_vert="0,78,375,1,1" />
+		<LABEL name="Label3" bgcolor="320:246247248" transmode="0" ly_vert="0,240,375,8,1" />
+		<LINKFORM name="linkfm" linkfile="mhidx50010_t8" ly_vert="0,85,375,165,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3772" _ulen="3524" >
+'============================================================================
+' 01. 화 면 명 : HOME_시장지표
+' 02. 화면설명 : 시장지표
+' 03. 작    성 : 
+'============================================================================
+Dim g_szSpData
+Dim nRow
+Dim g_szOsType
+'============================================================================
+Sub Form_OnFormInit()
+	FormTab0.setTabHeaderImage("img_bgcircle_black.9" , "img_bgcircle_line.9" , 5) '활성화/비활성화/여백
+	FormTab0.setTabHeaderFgColor("28" , "321") '활성화/비활성화 폰트색상
+	
+	g_szOsType = Form.GetSharedData("&OS_TYPE", False) '1.안드로이드 2.iOS
+		
+	if g_szOsType = "2" then	'OS별 패딩차이
+		InsertTab1()
+	else	
+		InsertTab2()
+	end if
+	
+	lblTitle.fgcolor = 334 
+	
+	linkfm.gesture = true
+	
+	'탭 세팅
+	nTab = Form.GetSharedData("mhidx50010_s6", true )
+	if Trim(nTab) = "" then
+		nTab = 0
+	end if
+	
+	FormTab0.currenttab = nTab
+	call FormTab0_OnTabChanged(nTab)
+	
+End Sub
+
+
+'============================================================================
+Sub InsertTab1()
+	FormTab0.insertPage( 0, "page0", "page0", "empty", "0", " 환율 ")
+	FormTab0.insertPage( 1, "page1", "page1", "empty", "0", " 귀금속 ")
+	FormTab0.insertPage( 2, "page2", "page2", "empty", "0", " 비철금속 ")	'20231214 HSZ: 하락률 추가
+	FormTab0.insertPage( 3, "page3", "page3", "empty", "0", " 곡물 ")
+	FormTab0.insertPage( 4, "page4", "page4", "empty", "0", "  원유  ")	
+End Sub
+'============================================================================
+Sub InsertTab2()
+	FormTab0.insertPage( 0, "page0", "page0", "empty", "0", "환율")
+	FormTab0.insertPage( 1, "page1", "page1", "empty", "0", "귀금속")
+	FormTab0.insertPage( 2, "page2", "page2", "empty", "0", "비철금속")  '20231214 HSZ: 하락률 추가
+	FormTab0.insertPage( 3, "page3", "page3", "empty", "0", "곡물")
+	FormTab0.insertPage( 4, "page4", "page4", "empty", "0", "원유")	
+End Sub
+
+'============================================================================
+Sub lblMore0_OnClick()
+	nTab = CInt(FormTab0.currenttab)
+	Form.SetSharedData( "mhidx50010_s6" ,nTab)
+	
+	Select Case nTab
+	Case 0
+		Form.OpenScreen("42040" , "환율")
+	Case 1
+		Form.OpenScreen("42040" , "해외상품선물★0")
+	Case 2
+		Form.OpenScreen("42040" , "해외상품선물★1")
+	Case 3
+		Form.OpenScreen("42040" , "해외상품선물★2")
+	Case 4
+		Form.OpenScreen("42040" , "해외상품선물★3")
+	End Select
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("linkfm", "TAB_CHANGE", nCurrentTab)
+	    
+End Sub
+
+'스와이프 기능 추가
+'============================================================================
+Sub linkfm_OnGestureEvent(sEvent)
+	if sEvent == "RtoL" then
+		btnNext()
+		
+	elseif sEvent == "LtoR" then
+		btnPrev()
+	end if
+	
+End Sub
+
+'============================================================================
+Function btnPrev()
+	Dim nTab
+	
+	nCurTab = CInt(FormTab0.currenttab)
+	if nCurTab == 0 then
+		nTab = 0		
+	else
+		nTab = nCurTab - 1		
+	end if
+	
+	FormTab0.currenttab = nTab
+	call FormTab0_OnTabChanged(nTab)
+	
+End Function
+
+'============================================================================
+Function btnNext()
+	Dim nTab
+	
+	nCurTab = CInt(FormTab0.currenttab)
+	nTabCnt = CInt(FormTab0.tabcount)
+	
+	if nCurTab == nTabCnt then
+		nTab = nTabCnt		
+	else
+		nTab = nCurTab + 1		
+	end if
+	
+	FormTab0.currenttab = nTab
+	call FormTab0_OnTabChanged(nTab)
+	
+End Function
+
+'============================================================================
+Sub Form_OnRefresh()
+	nTab = FormTab0.currenttab
+	call FormTab0_OnTabChanged(nTab)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

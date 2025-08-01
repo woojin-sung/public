@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME_시장지표" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,165,1" />
+	<CONTROL_INFO>
+		<PANNEL name="Pannel0" ly_vert="10,0,350,135,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblCode" visible="0" ly_vert="10,10,100,32,0" />
+				<LABEL name="lblMarket" visible="0" ly_vert="10,10,100,32,0" />
+				<LABEL name="lblRank" visible="0" fontsize="-2" mask="1,0,,.,1,,0,1,1,0,0" ly_vert="0,0,23,40,0" />
+				<LABEL name="lblName" fontsize="-1" bgcolor="029:255212175" autofontsize="1" ly_vert="0,0,120,40,1" />
+				<LABEL name="lblPr" fontsize="-2" fontstyle="01" mask="0,0,,,0,,-1,1,1,0,0" bgcolor="035:237246255" halign="2" paddinginfo="0,0,5,0" ly_vert="145,3,130,18,1" />
+				<LABEL name="lblVrss" visible="0" fontsize="-2" mask="0,0,,,0,,-1,1,0,0,0" halign="2" paddinginfo="0,0,1,0" ly_vert="180,20,65,20,0" />
+				<LABEL name="lblSign" visible="0" fontsize="-2" halign="2" usesign="1" paddinginfo="0,0,1,0" ly_vert="240,20,25,20,0" />
+				<IMAGE name="imgBg" autosize="1" imgpath="alpha" ly_vert="280,5,70,30,1" />
+				<LABEL name="lblCtrt" fontsize="-2" mask="0,0,,%,0,,2,1,0,0,0" halign="1" autofontsize="1" ly_vert="280,5,70,30,1" />
+				<CHANGE name="Change0" fontsize="-2" mask="0,0,,,0,,-1,1,0,0,0" halign="2" ly_vert="145,20,130,17,1" />
+			</CONTROL_INFO>
+			<CARD_INFO realkey="lblCode" cardheight="40" gap="5" >
+				<CELL name="lblRank" />
+				<CELL name="lblName" import="0,1,2;1,1,2" />
+				<CELL name="lblPr" import="0,1,4;1,1,4" realrec="0,1,3;1,1,3" />
+				<CELL name="lblVrss" import="0,1,5;1,1,5" realrec="0,1,5;1,1,5" />
+				<CELL name="lblSign" import="0,1,6;1,1,6" realrec="0,1,4;1,1,4" />
+				<CELL name="lblCtrt" import="0,1,7;1,1,7" realrec="0,1,6;1,1,6" />
+				<CELL name="lblCode" import="0,1,0;1,1,0" realrec="0,1,0;1,1,0" />
+				<CELL name="imgBg" />
+				<CELL name="lblMarket" import="0,1,1;1,1,1" />
+				<CELL name="Change0" />
+			</CARD_INFO>
+		</PANNEL>
+		<FORMTAB name="FormTab0" fontsize="-1" tabcount="0" tabheadwidth="77" tabheadheight="28" ly_vert="1000,43,350,30,1" />
+		<LABEL name="lblLine" bgcolor="322:226228229" ly_vert="0,78,375,1,1" />
+		<LABEL name="Label3" bgcolor="320:246247248" transmode="0" ly_vert="0,155,375,8,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8860" _ulen="8404" >
+'============================================================================
+' 01. 화 면 명 : HOME_시장지표
+' 02. 화면설명 : 시장지표
+' 03. 작    성 : 
+'============================================================================
+Dim g_szSpData
+Dim nRow
+Dim g_szOsType
+'============================================================================
+Sub Form_OnFormInit()	
+	g_szOsType = Form.GetSharedData("&OS_TYPE", false )
+
+	InsertTab1()
+End Sub
+
+'============================================================================
+Sub InsertTab1()
+	FormTab0.insertPage( 0, "page0", "page0", "empty", "0", " 환율 ")
+	FormTab0.insertPage( 1, "page1", "page1", "empty", "0", " 귀금속 ")
+	FormTab0.insertPage( 2, "page2", "page2", "empty", "0", " 비철금속 ")	'20231214 HSZ: 하락률 추가
+	FormTab0.insertPage( 3, "page3", "page3", "empty", "0", " 곡물 ")
+	FormTab0.insertPage( 4, "page4", "page4", "empty", "0", "  원유  ")	
+End Sub
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	dim szData
+
+	DATAMANAGER.CancelRealData("ohhts_exrt_cntg")
+	DATAMANAGER.CancelRealData("ohhts_nfut_cntg")
+	
+	if szTranID = "ohhts_1684_001r" then
+	    For i = 0 to 2
+			Select Case i
+			Case 0			    
+			    szData = "USDKRWSMBS" '원/달러
+			Case 1
+			    szData = "USDCNYCOMP" '중국 위안/달러
+			Case 2
+			    szData = "USDJPYCOMP" '일본 엔/달러 
+			End Select
+		    
+		    DATAMANAGER.SetDataValue(0, "ohhts_1684_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" , i , "EN" )
+		    DATAMANAGER.SetDataValue(0, "ohhts_1684_001r", "InBlock1", "FID_INPUT_ISCD" , i , szData )
+	    Next	    
+
+	else
+		For i = 0 to 2
+		    DATAMANAGER.SetDataValue(0, "ohhts_1682_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" , i , "FN" )
+		    DATAMANAGER.SetDataValue(0, "ohhts_1682_001r", "InBlock1", "FID_INPUT_ISCD" , i , g_szSpData(i) )
+		Next
+	End if
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranData
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	dim ncnt1684
+	dim szOrgTime
+		
+	ncnt1684 = DATAMANAGER.GetDataCount(0, "ohhts_1684_001r" , "OutBlock1")
+	
+	if szTranID = "ohhts_1684_001r" then
+		
+		for i = 0 to 2
+			szOrgTime = DATAMANAGER.GetDataValue(0, "ohhts_1684_001r", "OutBlock1", "FID_CNCN_DATE", i)
+			if szOrgTime = "" or szOrgTime = null then '20220302 HSZ : 예외처리 추가
+				exit Sub
+			else
+				DATAMANAGER.SetDataValue(0, "ohhts_1684_001r", "OutBlock1", "FID_CNCN_DATE", i , mid(szOrgTIme,3,2) &  mid(szOrgTIme,5,2)  &  mid(szOrgTIme,7,2)  )
+			end if
+		next	
+	end if 
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	dim szRealID
+	
+	if szTranID = "ohhts_1684_001r" then 
+		szRealID = "ohhts_exrt_cntg"	'환율
+	else
+		szRealID = "ohhts_nfut_cntg"	'해외선물
+	end if
+	
+	DATAMANAGER.CancelRealData("ohhts_exrt_cntg")
+	DATAMANAGER.CancelRealData("ohhts_nfut_cntg")
+	
+	for i = 0 to 2
+		szRealCode = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "FID_CNCN_ISCD", i )
+		szSignData = CInt(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "FID_CNCN_PRDY_VRSS_SIGN", i ))
+		
+		diff			= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "FID_CNCN_PRDY_VRSS" , i )
+		sign			= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "FID_CNCN_PRDY_VRSS_SIGN", i )
+		
+		'패딩 설정
+		if g_szOsType == "1" then
+			Pannel0.setPropCardCell("paddinginfo","Change0",i,"0,0,0,0")
+			Pannel0.setPropCardCell("paddinginfo","lblPr",i,"0,0,3,0")
+		else
+			Pannel0.setPropCardCell("paddinginfo","lblPr",i,"0,0,4,0")
+		end if
+			
+		'현재가 색상 세팅 방지
+		Pannel0.setPropCardCell("attributeenable","lblPr",i,"0")
+		
+		'등락컨트롤 세팅
+		Pannel0.setPropCardCell("signpos","Change0", i, "1")		'등락기호 좌측세팅
+		Pannel0.setPropCardCell("caption","Change0",i, diff)
+		Pannel0.SetCellValue("Change0", i, diff)
+		Pannel0.setPropCardCell("changesign","Change0", i, sign)	
+		
+		'동일 이미지 중복세팅 방지 & 등락률 이미지 세팅
+		if szSignData = 1 or szSignData = 2 then
+			Pannel0.setPropCardCell("imgduplicate", "imgBg", i, "1")
+			Pannel0.setPropCardCell("imgpath", "imgBg", i, "roundbox_4r_pink.9.png")
+		elseif szSignData = 4 or szSignData = 5 then
+			Pannel0.setPropCardCell("imgduplicate", "imgBg", i, "1")
+			Pannel0.setPropCardCell("imgpath", "imgBg", i, "roundbox_4r_blue.9.png")
+		else
+			Pannel0.setPropCardCell("imgduplicate", "imgBg", i, "1")
+			Pannel0.setPropCardCell("imgpath", "imgBg", i, "roundbox_4r_gray.9.png")
+		end if
+		
+		' 실시간 인풋 세팅
+		DATAMANAGER.SetDataValue(1, szRealID, "InBlock1", "FIDR_SYMB", i, szRealCode) 
+	Next	    
+	
+	DATAMANAGER.RequestRealData(szRealID)
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveRealComplete(szTranID)
+	dim ncntExrt
+	dim szOrgTime
+
+	nRow = -1
+	
+	szCode = DATAMANAGER.GetDataValue( 1, szTranID, "OutBlock1", "FIDR_SYMB" , 0 )
+	nRow = Pannel0.FindRow("lblCode",szCode,0)
+	
+	if nRow >= 0 then
+
+		'등락 컨트롤 값 세팅
+		if szTranID 		= "ohhts_exrt_cntg" then		'환율 실시간
+			diff			= DATAMANAGER.GetDataValue( 1, szTranID, "OutBlock1", "FIDR_EXRT_PRDY_VRSS" , j )
+		elseif szTranID 	= "ohhts_nfut_cntg" then	'해외선물 실시간
+			diff			= DATAMANAGER.GetDataValue( 1, szTranID, "OutBlock1", "FIDR_PRDY_VRSS2" , j )
+		end if
+		sign				= DATAMANAGER.GetDataValue( 1, szTranID, "OutBlock1", "FIDR_PRDY_VRSS_SIGN", j )
+		
+		Pannel0.setPropCardCell("caption","Change0",nRow,diff)
+		Pannel0.SetCellValue("Change0",nRow,diff)
+		Pannel0.setPropCardCell("changesign","Change0",nRow,sign)
+			
+		'실시간에 따라 등락률 배경이미지 변경
+		szSignData	= CInt( Pannel0.GetCellValue("lblSign",nRow) )
+					
+		if szSignData = 1 or szSignData = 2 then
+			Pannel0.setPropCardCell("imgpath", "imgBg", nRow, "roundbox_4r_pink.9.png")
+		elseif szSignData = 4 or szSignData = 5 then
+			Pannel0.setPropCardCell("imgpath", "imgBg", nRow, "roundbox_4r_blue.9.png")
+		else
+			Pannel0.setPropCardCell("imgpath", "imgBg", nRow, "roundbox_4r_gray.9.png")
+		end if
+			
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+	dim szSymbol
+	dim szMarket
+	dim szName
+	
+	szSymbol = Pannel0.GetCellValue("lblCode",nIndex)
+	szMarket = Pannel0.GetCellValue("lblMarket",nIndex)
+	szName = Pannel0.GetCellValue("lblName",nIndex)
+	
+	Form.OpenFramePopup("mhidx42040_p1" , szSymbol & "★" &  szMarket & "★" & szName , "")
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+
+    Select Case CInt(nCurrentTab)
+	    Case 0
+		    '환율: 원/달러, 중국 위안/달러, 일본 엔/달러
+			szData = "USDKRWSMBS:USDCNYCOMP:USDJPYCOMP"
+			g_szSpData = Split(szData, ":")
+			 
+			DATAMANAGER.RequestTranData("ohhts_1684_001r")
+	    Case 1
+		    '귀금속비: 금, 은, 백금
+			szData = "COM@GC:COM@SI:NYM@PL"
+			g_szSpData = Split(szData, ":")
+		    
+			DATAMANAGER.RequestTranData("ohhts_1682_001r")
+	    Case 2
+		    '비철금속: 동 최근월, 납 캐시, 아연 캐시    
+			szData = "COM@HG:LME@PDY:LME@ZDY"		    
+			g_szSpData = Split(szData, ":")	
+		    
+		    DATAMANAGER.RequestTranData("ohhts_1682_001r")
+	    Case 3
+		    '곡물: 옥수수 최근월, 대두 최근월, 소맥 최근월
+			szData = "CBT$ZC:CBT$ZS:CBT$ZW"
+			g_szSpData = Split(szData, ":")	
+		    
+		    DATAMANAGER.RequestTranData("ohhts_1682_001r")
+	    Case 4
+		    '원유: WTI 최근월, 브렌트유 최근월, 두바이유 현물
+			szData = "NYM@CL:IPE@EB:SPT@DU"
+			g_szSpData = Split(szData, ":")
+		    
+			DATAMANAGER.RequestTranData("ohhts_1682_001r")
+	End Select
+	    
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	DATAMANAGER.CancelRealData("ohhts_exrt_cntg")
+	DATAMANAGER.CancelRealData("ohhts_nfut_cntg")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	nTab = FormTab0.currenttab
+	call FormTab0_OnTabChanged(nTab)
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "TAB_CHANGE" then
+		if trim(sParam) <> "" then
+			FormTab0.currenttab = CInt(sParam)
+			call FormTab0_OnTabChanged(sParam)
+		end if
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_exrt_cntg" trcode="ohhts_exrt_cntg" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FIDR_SYMB" idx="0" deflink="0,1,0" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="ohhts_nfut_cntg" trcode="ohhts_nfut_cntg" />
+			<TRAN tranid="ohhts_1684_001r" trcode="ohhts_1684_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_1682_001r" trcode="ohhts_1682_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_exrt_cntg" title="환율 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="584" _ulen="484" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_EXRT_PRPR^FIDR환율현재가^14^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_EXRT_PRDY_VRSS^FIDR환율전일대비^14^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_EXRT_OPRC^FIDR환율시가^14^4^7^0^0^1^0
+FIDR_EXRT_HPRC^FIDR환율고가^14^4^7^0^0^1^0
+FIDR_EXRT_LPRC^FIDR환율저가^14^4^7^0^0^1^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_nfut_cntg" title="해외선물 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="589" _ulen="499" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1684_001r" title="해외환율정보" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" occurs="55" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="55" inout="out" _len="627" _ulen="505" >
+
+FID_CNCN_ISCD^FID관심종목코드^12^0^0^1^1200^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^778^1200^0^0
+FID_CNCN_ISNM^FID관심종목명^50^0^0^2^1200^0^0
+FID_CNCN_DATE^FID관심일자^8^0^0^67^1200^0^0
+FID_CNCN_PRPR^FID관심현재가^12^0^0^4^1200^0^0
+FID_CNCN_PRDY_VRSS^FID관심전일대비^12^0^0^5^1200^0^0
+FID_CNCN_PRDY_VRSS_SIGN^FID관심전일대비부호^1^0^0^6^1200^0^0
+FID_CNCN_PRDY_CTRT^FID관심전일대비율^9^0^0^7^1200^0^0
+FID_CNCN_CPRC^FID관심시가^12^0^0^17^1200^0^0
+FID_CNCN_HPRC^FID관심고가^12^0^0^18^1200^0^0
+FID_CNCN_LPRC^FID관심저가^12^0^0^19^1200^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1682_001r" title="해외주요지수" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" occurs="54" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="54" inout="out" _len="690" _ulen="554" >
+
+FID_CNCN_ISCD^FID관심종목코드^12^0^0^1^1200^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^778^1200^0^0
+FID_CNCN_ISNM^FID관심종목명^50^0^0^2^1200^0^0
+FID_CNCN_DATE^FID관심일자^8^0^0^67^1200^0^0
+FID_CNCN_PRPR^FID관심현재가^12^0^0^4^1200^0^0
+FID_CNCN_PRDY_VRSS^FID관심전일대비^12^0^0^5^1200^0^0
+FID_CNCN_PRDY_VRSS_SIGN^FID관심전일대비부호^1^0^0^6^1200^0^0
+FID_CNCN_PRDY_CTRT^FID관심전일대비율^9^0^0^7^1200^0^0
+FID_CNCN_ACML_VOL^FID관심누적거래량^18^0^0^14^1200^0^0
+FID_CNCN_CPRC^FID관심시가^12^0^0^17^1200^0^0
+FID_CNCN_HPRC^FID관심고가^12^0^0^18^1200^0^0
+FID_CNCN_LPRC^FID관심저가^12^0^0^19^1200^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

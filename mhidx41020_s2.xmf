@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="시장종합_주요지수" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,250,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" bgcolor="272:246246246" transmode="0" ly_vert="0,25,375,205,1" />
+		<FORMTAB name="FormTab0" tabcount="4" tabwidthtype="2" tabheadheight="0" usepg="1" pgbarheight="20" ly_vert="0,30,375,198,1" >
+			<PAGE name="page007737" caption="코스피 코스닥" linkfile="mhidx41020_p1" loadingtype="1" />
+			<PAGE name="page008241" caption="미국 지수" linkfile="mhidx41020_p2" loadingtype="1" />
+			<PAGE name="page001749" caption="기타 해외지수" linkfile="mhidx41020_p3" loadingtype="1" />
+			<PAGE name="page4" caption="기타_금리 원자재 등" linkfile="mhidx41020_p4" loadingtype="1" />
+		</FORMTAB>
+		<LABEL name="Label2" visible="0" bgcolor="320:246247248" transmode="0" ly_vert="0,215,375,45,0" />
+		<IMAGE name="imgIndic" visible="0" autosize="1" ly_vert="161,213,49,7,0" />
+		<LABEL name="Label1" fgcolor="144:034034034" fontsize="2" fontstyle="01" caption="  주요 지수" bgcolor="320:246247248" transmode="0" ly_vert="0,2,1000,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="988" _ulen="918" >
+'============================================================================
+'20210916 SWJ START
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Select Case nCurrentTab
+		Case 0
+			imgIndic.imgpath = "icon_4step1"
+		Case 1
+			imgIndic.imgpath = "icon_4step2"
+		Case 2
+			imgIndic.imgpath = "icon_4step3"
+		Case 3
+			imgIndic.imgpath = "icon_4step4"
+	End Select
+
+	'폼탭 움직이면 지수부분 양쪽에서
+	'실시간이 끊기는 현상이 있어서 재조회 하도록 수정
+	Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "Reload_Data", "")
+	
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	Form.bgcolor = "320"
+	Label1.fgcolor = 334
+	FormTab0_OnTabChanged(0)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgIndic.setMaintainingRatio("1")
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_ovrs_nmix" trcode="ohhts_ovrs_nmix" />
+			<TRAN tranid="ohhts_nmix_cntg" trcode="ohhts_nmix_cntg" />
+			<TRAN tranid="ohhts_nfut_cntg" trcode="ohhts_nfut_cntg" />
+			<TRAN tranid="ohhts_futs_cntg" trcode="ohhts_futs_cntg" />
+			<TRAN tranid="ohhts_exrt_cntg" trcode="ohhts_exrt_cntg" />
+			<TRAN tranid="ohhts_1500_001r" trcode="ohhts_1500_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_0510_001r" trcode="ohhts_0510_001r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FID_INPUT_COND_SCR_DIV_CODE" idx="0" defconst="510" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_ovrs_nmix" title="해외지수/종목 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="589" _ulen="499" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_nmix_cntg" title="업종지수 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="63" _ulen="51" >
+
+FIDR_BSTP_CLS_CODE^FIDR업종구분코드^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1183" _ulen="965" >
+
+FIDR_BSTP_CLS_CODE^FIDR업종구분코드^6^0^0^0^0^0^0
+FIDR_ANTC_NMIX_CLS_CODE^FIDR예상지수구분코드^1^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_ACML_TR_PBMN^FIDR누적거래대금^13^0^7^0^0^0^0
+FIDR_PCAS_VOL^FIDR건별거래량^11^0^7^0^0^0^0
+FIDR_PCAS_TR_PBMN^FIDR건별거래대금^11^0^7^0^0^0^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_OPRC_VRSS2^FIDR시가대비2^12^4^7^0^0^1^0
+FIDR_OPRC_VRSS_SIGN^FIDR시가대비부호^1^0^0^0^0^0^0
+FIDR_HPRC_VRSS2^FIDR고가대비2^12^4^7^0^0^1^0
+FIDR_HPRC_VRSS_SIGN^FIDR고가대비부호^1^0^0^0^0^0^0
+FIDR_LPRC_VRSS2^FIDR저가대비2^12^4^7^0^0^1^0
+FIDR_LPRC_VRSS_SIGN^FIDR저가대비부호^1^0^0^0^0^0^0
+FIDR_OPRC_CTRT^FIDR시가대비율^9^2^7^0^0^1^0
+FIDR_HPRC_CTRT^FIDR고가대비율^9^2^7^0^0^1^0
+FIDR_LPRC_CTRT^FIDR저가대비율^9^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_nfut_cntg" title="해외선물 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="589" _ulen="499" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_futs_cntg" title="선물 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="59" _ulen="47" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="3141" _ulen="2479" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_CNTG_VOL^FIDR체결거래량^11^0^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_ACML_TR_PBMN^FIDR누적거래대금^13^0^7^0^0^0^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_OPRC_HOUR^FIDR시가시간^6^0^0^0^0^0^0
+FIDR_OPRC_VRSS_SIGN^FIDR시가대비부호^1^0^0^0^0^0^0
+FIDR_OPRC_VRSS2^FIDR시가대비2^12^4^7^0^0^1^0
+FIDR_HPRC_HOUR^FIDR고가시간^6^0^0^0^0^0^0
+FIDR_HPRC_VRSS_SIGN^FIDR고가대비부호^1^0^0^0^0^0^0
+FIDR_HPRC_VRSS2^FIDR고가대비2^12^4^7^0^0^1^0
+FIDR_LPRC_HOUR^FIDR저가시간^6^0^0^0^0^0^0
+FIDR_LPRC_VRSS_SIGN^FIDR저가대비부호^1^0^0^0^0^0^0
+FIDR_LPRC_VRSS2^FIDR저가대비2^12^4^7^0^0^1^0
+FIDR_NMSC_FCTN_STPL_PRC^FIDR근월물의제약정가격^12^4^7^0^0^0^0
+FIDR_FMSC_FCTN_STPL_PRC^FIDR원월물의제약정가격^12^4^7^0^0^0^0
+FIDR_SPEAD^FIDR스프레드^11^4^7^0^0^0^0
+FIDR_OTST_STPL_QTY^FIDR미결제약정수량^13^0^7^0^0^0^0
+FIDR_OTST_STPL_QTY_ICDC^FIDR미결제약정수량증감^13^0^7^0^0^1^0
+FIDR_OTST_STPL_RGBF_QTY_ICDC^FIDR미결제약정직전수량증감^13^0^7^0^0^1^0
+FIDR_THPR^FIDR이론가^11^4^7^0^0^1^0
+FIDR_MRKT_BASIS^FIDR시장베이시스^11^4^7^0^0^1^0
+FIDR_THER_BASIS^FIDR이론베이시스^11^4^7^0^0^1^0
+FIDR_ESDG^FIDR괴리도^11^4^7^0^0^1^0
+FIDR_DPRT^FIDR괴리율^9^2^7^0^0^1^0
+FIDR_SHNU_RATE^FIDR매수비율^9^2^7^0^0^1^0
+FIDR_RLTV^FIDR체결강도^9^2^7^0^0^1^0
+FIDR_FUTS_OPTN_ASKP1^FIDR선물옵션매도호가1^12^4^7^0^0^1^0
+FIDR_FUTS_OPTN_BIDP1^FIDR선물옵션매수호가1^12^4^7^0^0^1^0
+FIDR_ASKP_RSQN1^FIDR매도호가잔량1^13^0^7^0^0^0^0
+FIDR_BIDP_RSQN1^FIDR매수호가잔량1^13^0^7^0^0^0^0
+FIDR_SELN_CNTG_CSNU^FIDR매도체결건수^5^0^7^0^0^0^0
+FIDR_SHNU_CNTG_CSNU^FIDR매수체결건수^5^0^7^0^0^0^0
+FIDR_NTBY_CNTG_CSNU^FIDR순매수체결건수^5^0^7^0^0^1^0
+FIDR_SELN_CNTG_SMTN^FIDR매도체결합계^13^0^7^0^0^0^0
+FIDR_SHNU_CNTG_SMTN^FIDR매수체결합계^13^0^7^0^0^0^0
+FIDR_TOTAL_ASKP_RSQN^FIDR총매도호가잔량^13^0^7^0^0^0^0
+FIDR_TOTAL_BIDP_RSQN^FIDR총매수호가잔량^13^0^7^0^0^0^0
+FIDR_PRDY_VRSS_VOL_RATE^FIDR전일대비거래량비율^9^2^7^0^0^1^0
+FIDR_UNAS_PRPR^FIDR기초자산현재가^12^4^7^0^0^1^0
+FIDR_UNAS_PRDY_VRSS_SIGN^FIDR기초자산전일대비부호^1^0^0^0^0^0^0
+FIDR_UNAS_PRDY_VRSS^FIDR기초자산전일대비^12^4^7^0^0^1^0
+FIDR_UNAS_PRDY_CTRT^FIDR기초자산전일대비율^9^2^7^0^0^1^0
+FIDR_UNAS_ACML_VOL^FIDR기초자산누적거래량^13^0^7^0^0^0^0
+FIDR_LRQN_ACML_CNTG_QTY^FIDR대량누적체결수량^13^0^7^0^0^0^0
+FIDR_RLTM_MXPR_SIGN^FIDR실시간상한가부호^1^0^0^0^0^0^0
+FIDR_RLTM_MXPR^FIDR실시간상한가^12^4^7^0^0^1^0
+FIDR_RLTM_LLAM_SIGN^FIDR실시간하한가부호^1^0^0^0^0^0^0
+FIDR_RLTM_LLAM^FIDR실시간하한가^12^4^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_exrt_cntg" title="환율 체결 자동갱신" realdata="1" dessvr="" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="584" _ulen="484" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_EXRT_PRPR^FIDR환율현재가^14^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_EXRT_PRDY_VRSS^FIDR환율전일대비^14^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_EXRT_OPRC^FIDR환율시가^14^4^7^0^0^1^0
+FIDR_EXRT_HPRC^FIDR환율고가^14^4^7^0^0^1^0
+FIDR_EXRT_LPRC^FIDR환율저가^14^4^7^0^0^1^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1500_001r" title="시장종합_1" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" occurs="4" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="4" inout="out" _len="973" _ulen="765" >
+
+FID_CNCN_ISCD^FID관심종목코드^12^0^0^1^1200^0^0
+FID_CNCN_ISNM^FID관심종목명^50^0^0^2^1200^0^0
+FID_CNCN_PRPR^FID관심현재가^12^0^0^4^1200^0^0
+FID_CNCN_PRDY_VRSS_SIGN^FID관심전일대비부호^1^0^0^6^1200^0^0
+FID_CNCN_PRDY_VRSS^FID관심전일대비^12^0^0^5^1200^0^0
+FID_CNCN_PRDY_CTRT^FID관심전일대비율^9^0^0^7^1200^0^0
+FID_CNCN_ACML_VOL^FID관심누적거래량^18^0^0^14^1200^0^0
+FID_CNCN_ACML_TR_PBMN^FID관심누적거래대금^18^0^0^16^1200^0^0
+FID_CNCN_UPLM_ISSU_CNT^FID관심상한종목수^7^0^0^137^1200^0^0
+FID_CNCN_ASCN_ISSU_CNT^FID관심상승종목수^7^0^0^134^1200^0^0
+FID_CNCN_STNR_ISSU_CNT^FID관심보합종목수^7^0^0^136^1200^0^0
+FID_CNCN_DOWN_ISSU_CNT^FID관심하락종목수^7^0^0^135^1200^0^0
+FID_CNCN_LSLM_ISSU_CNT^FID관심하한종목수^7^0^0^138^1200^0^0
+FID_CNCN_OTST_STPL_QTY^FID관심미결제약정수량^18^0^0^116^1200^0^0
+FID_CNCN_MRKT_BASIS^FID관심시장베이시스^7^0^0^114^1200^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_0510_001r" title="옵션가치분석(선물월물코드리스?" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="89" toutblk="OutBlock1" _ulen="69" >
+
+FID_INPUT_COND_SCR_DIV_CODE^FID입력조건화면분류코드^6^0^0^9101^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="172" _ulen="140" >
+
+FID_MTRT_YYMM^FID만기년월^6^0^0^113^2000^0^0
+FID_MTRT_YYMM_CODE^FID만기년월코드^4^0^0^6387^2000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^2000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

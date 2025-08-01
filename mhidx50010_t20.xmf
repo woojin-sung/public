@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME(아시아지수)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,360,222,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="2" tabheadheight="0" usepg="1" pgbarheight="20" ly_vert="0,0,375,222,1" >
+			<PAGE name="page0" caption="아시아지수 1페이지" linkfile="mhidx50010_s201" />
+			<PAGE name="page1" caption="아시아지수 2페이지" linkfile="mhidx50010_s202" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="548" _ulen="482" >
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "SELECT_JISU" then
+		
+		arrData = Split(sParam,"@")
+		
+		if #arrData > 1 then
+		
+			'부모화면 맵 이미지 변경 트리거
+			Form.triggerEvent("#", "CHANGE_MAP_IMAGE", sParam)
+			
+			'폼탭화면 현재 선택된 지수 외 포커스 이미지 해제
+			for i = 0 to 1 
+				Form.triggerEvent("FormTab0.".."page"..i, "SELECT_INDEX", arrData(1))
+			next
+			
+		
+		end if
+		
+	
+	end if
+
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_exrt_cntg" trcode="ohhts_exrt_cntg" />
+			<TRAN tranid="ohhts_1684_001r" trcode="ohhts_1684_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_exrt_cntg" title="환율 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="584" _ulen="484" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_EXRT_PRPR^FIDR환율현재가^14^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_EXRT_PRDY_VRSS^FIDR환율전일대비^14^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_EXRT_OPRC^FIDR환율시가^14^4^7^0^0^1^0
+FIDR_EXRT_HPRC^FIDR환율고가^14^4^7^0^0^1^0
+FIDR_EXRT_LPRC^FIDR환율저가^14^4^7^0^0^1^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1684_001r" title="해외환율정보" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" occurs="55" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="55" inout="out" _len="627" _ulen="505" >
+
+FID_CNCN_ISCD^FID관심종목코드^12^0^0^1^1200^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^778^1200^0^0
+FID_CNCN_ISNM^FID관심종목명^50^0^0^2^1200^0^0
+FID_CNCN_DATE^FID관심일자^8^0^0^67^1200^0^0
+FID_CNCN_PRPR^FID관심현재가^12^0^0^4^1200^0^0
+FID_CNCN_PRDY_VRSS^FID관심전일대비^12^0^0^5^1200^0^0
+FID_CNCN_PRDY_VRSS_SIGN^FID관심전일대비부호^1^0^0^6^1200^0^0
+FID_CNCN_PRDY_CTRT^FID관심전일대비율^9^0^0^7^1200^0^0
+FID_CNCN_CPRC^FID관심시가^12^0^0^17^1200^0^0
+FID_CNCN_HPRC^FID관심고가^12^0^0^18^1200^0^0
+FID_CNCN_LPRC^FID관심저가^12^0^0^19^1200^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

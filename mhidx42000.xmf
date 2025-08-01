@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="42000" scrname="업종현재가_메인탭" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab01" tabcount="4" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,75,376,487,1" >
+			<PAGE name="page001534" caption="업종등락" linkfile="mhidx42000_t1" loadingtype="1" />
+			<PAGE name="page001535" caption="차트" linkfile="mhidx42000_t2" loadingtype="1" />
+			<PAGE name="page000227" caption="종목구성" linkfile="mhidx42000_t3" loadingtype="1" />
+			<PAGE name="page005473" caption="변동추이" linkfile="mhidx42000_t4" loadingtype="1" />
+		</FORMTAB>
+		<TABLE name="tbl01" insidelinecolor="102:255255255" colcount="6" rowcount="2" outline="0001" designorder="1" ly_vert="0,6,378,65,1" >
+			<COL_INFO ly_vert_width="100,109,20,65,65,19" />
+			<ROW_INFO ly_vert_height="40,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="129:027137222" valign="2" halign="2" line="0,0" fontsize="-2" mask="1,0,,,1,,0,1,1,0,0" autofontsize="1" paddinginfo="40,0,0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" import="0,2,0" realrec="0,1,3" halign="2" line="0,0" fontsize="12" mask="0,0,,,0,,2,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,0,2,0" import="0,2,2" realrec="0,1,4" usesign="1" line="0,0" impidxs="" />
+				<CELL cell_ly="3,0,3,0" import="0,2,1" realrec="0,1,5" halign="2" line="0,0" fontsize="2" mask="0,0,,,0,,2,1,0,0,0" plusminuscolor="1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="4,0,4,0" import="0,2,3" realrec="0,1,6" halign="2" line="0,0" fontsize="2" mask="0,0,,%,0,,2,1,0,0,0" plusminuscolor="1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="5,0,5,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" import="1,1,0" fgcolor="129:027137222" valign="0" halign="2" line="0,0" fontsize="-2" paddinginfo="30,0,0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" fgcolor="129:027137222" valign="0" halign="0" line="0,0" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,1,4,1" import="0,2,4" realrec="0,1,7" fgcolor="018:102102102" valign="0" halign="2" line="0,0" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<CELLBONG name="CellBong0" charttype="1" ly_vert="11,0,19,76,1" base="0,2,8" open="0,2,8" high="0,2,12" low="0,2,16" close="0,2,0" realopen="0,1,11" realhigh="0,1,12" reallow="0,1,13" realcur="0,1,3" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11191" _ulen="10705" >
+'============================================================================
+' 01.화면명 	: 업종현재가
+' 02.화면설명	: 업종현재가_메인탭
+' 03.작성	: 2015.12.31
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim	g_szItemCode
+dim	g_szMarket
+Dim g_nSNSType '1 카카오톡 , 2 카카오톡 화면 공유 , 3 트위터 , 4페이스북
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+'setMarketType :	TR조회용 마켓구분가져옴
+'============================================================================
+Function	setMarketType( szInput )
+	if	szInput	=	"0"	then
+		g_szMarket	=	"K"
+	elseif	szInput	=	"1"	then
+		g_szMarket	=	"Q"
+	elseif	szInput	=	"2"	then
+		g_szMarket	=	"K2"
+	elseif	szInput	=	"3"	then
+		g_szMarket	=	"KR"
+	elseif	szInput	=	"P"	then
+		g_szMarket	=	"KN"
+	else	
+		g_szMarket	=	""
+	end	if
+End	Function
+
+
+'============================================================================
+'getIdxName	:	인덱스명 리턴
+'============================================================================
+Function	getIdxName( szInput )
+	if	szInput	=	"0"	then
+		return	"코스피"
+	elseif	szInput	=	"1"	then
+		return	"코스닥"
+	elseif	szInput	=	"2"	then
+		return	"코스피200"
+	elseif	szInput	=	"3"	then
+		return	"KRX100"
+	elseif	szInput	=	"P"	then
+		return	"코넥스"
+	else
+		return	" "
+	end	if
+End	Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	dim szListItems
+	dim szLinkData
+	dim szTabIdx	'선택될 탭 인덱스
+
+	szLinkData = Form.GetOpenLinkData()
+
+	if len(szLinkData)  > 0	then
+		szListItems = split(szLinkData, "★")
+		szTabIdx			= szListItems(0)
+		g_szItemCode 		= szListItems(1)
+		temp				=	Form.GetItemCodeInfo(g_szItemCode, "indextype")
+		setMarketType(temp)
+		
+		fmtab01.currenttab	= szTabIdx
+	
+		Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "42000ITEMCODE", g_szItemCode)
+		
+		'20240508 HSZ START: 해외주식고도화_HOME연동 추가
+		nInstrUP = Instr(szLinkData, "UP")
+		nInstrDOWN = Instr(szLinkData, "DOWN")
+		
+		if CInt(nInstrUP) > 0 or CInt(nInstrDOWN) > 0 then
+			szHomeData = szListItems(2).. "★"..szListItems(3)
+			Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "HOME_SORTING", szHomeData)
+		
+		elseif CInt(szTabIdx) = 2 then
+			if UBound(szListItems) > 1 then
+				Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "HOME_RDOIDX", szListItems(2))
+			end if
+		end if
+		'20240508 HSZ END
+			
+	else
+		g_szItemCode = Form.GetSharedData("&ITEM_UPJONG", 0)
+		'20221213 jipark 이전 업종코드(6자리 미만)일때 변환 함수 호출
+		nCodeLen = Form.getLen(g_szItemCode)
+		if nCodeLen < 6 then
+			g_szItemCode = Form.ConvertUpjongCode(g_szItemCode)
+		end if
+		'20221213 jipark
+		temp		= Form.GetItemCodeInfo(g_szItemCode, "indextype")
+		setMarketType(temp)
+		
+		Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "42000ITEMCODE", g_szItemCode)
+	end if 
+	
+	Form.SetSearchType ("9")
+	Form.SetItemCode(g_szItemCode)
+	
+	DATAMANAGER.RequestTranData("ohhts_1514_001r")
+	DATAMANAGER.RequestTranData("ohhts_1504_001r")
+
+End Sub
+
+
+'============================================================================
+'Form_OnRefresh
+'============================================================================
+Sub Form_OnRefresh()
+	Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "42000ITEMCODE", g_szItemCode)
+	
+	DATAMANAGER.RequestTranData("ohhts_1514_001r")
+	DATAMANAGER.RequestTranData("ohhts_1504_001r")
+
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	if	szTranID	=	"ohhts_1514_001r"	then
+		DATAMANAGER.ClearInputData(0, "ohhts_1514_001r")
+		DATAMANAGER.SetDataValue(0,"ohhts_1514_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0, "U")
+		DATAMANAGER.SetDataValue(0,"ohhts_1514_001r", "InBlock1", "FID_INPUT_ISCD", 0, g_szItemCode)
+		
+		DATAMANAGER.SetDataValue(0,"ohhts_1514_001r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 0, "U")
+		DATAMANAGER.SetDataValue(0,"ohhts_1514_001r", "InBlock2", "FID_INPUT_COND_SCR_DIV_CODE", 0, "1514")
+		DATAMANAGER.SetDataValue(0,"ohhts_1514_001r", "InBlock2", "FID_INPUT_MRKT_CLS_CODE", 0, g_szMarket)
+		
+	elseif	szTranID	=	"ohhts_1504_001r"	then
+		DATAMANAGER.ClearInputData(0, "ohhts_1504_001r")
+		DATAMANAGER.SetDataValue(0,"ohhts_1504_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0, "U")
+		DATAMANAGER.SetDataValue(0,"ohhts_1504_001r", "InBlock1", "FID_INPUT_ISCD", 0, g_szItemCode)
+	end if
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim	szCode, szName, szIdxName, szIdxCode
+	
+	szCode	=""
+	szName	=""
+	szIdxName=""
+	szIdxCode=""
+	
+	if	szTranID	=	"ohhts_1514_001r"	then
+		DATAMANAGER.CancelRealData("ohhts_nmix_cntg")
+		DATAMANAGER.SetDataValue(1, "ohhts_nmix_cntg", "InBlock1", "FIDR_BSTP_CLS_CODE", 0, g_szItemCode)
+		DATAMANAGER.RequestRealData("ohhts_nmix_cntg")
+	elseif		szTranID	=	"ohhts_1504_001r"	then
+		szCode = DATAMANAGER.GetDataValue(0, "ohhts_1504_001r", "OutBlock1", "FID_SHRN_ISCD", 0)
+		szName = DATAMANAGER.GetDataValue(0, "ohhts_1504_001r", "OutBlock1", "FID_KOR_ISNM", 0)
+		
+		szIdxCode = Form.GetItemCodeInfo(szCode, "indextype")
+		szIdxName	=	getIdxName(szIdxCode)
+		
+		'tbl01.SetCellString(0, 0, szIdxName & "\r\n" & szName)
+		
+		'2016.4.2 by HA.WM 수정
+		tbl01.SetCellString(0, 0, szIdxName)
+		tbl01.SetCellString(1, 1, szName)
+	end if
+End Sub
+
+
+'============================================================================
+'Form_OnLinkData
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if	sKey	=	"ITEMCODE"		then
+		g_szItemCode	=	sValue
+		
+		temp		=	Form.GetItemCodeInfo(sValue, "indextype")
+		setMarketType(temp)
+		
+		Form.SetSharedData("42000INITCODE" , g_szItemCode)
+		Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "42000ITEMCODE", g_szItemCode)
+		
+		DATAMANAGER.RequestTranData("ohhts_1514_001r")
+		DATAMANAGER.RequestTranData("ohhts_1504_001r")
+
+	end if
+End Sub
+
+
+'============================================================================
+'Form_OnTriggerEvent
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if	sEventName = "42000INDEXTOM"	then
+		if sParam = "0"	then
+			g_szItemCode = "KGG01P"		'22년 차세대 업종코드 하드코딩
+			g_szMarket	="K"
+			Form.SetTitleCaption("코스피")
+		elseif sParam = "1"	then
+			g_szItemCode = "QGG01P"		'22년 차세대 업종코드 하드코딩
+			g_szMarket	="Q"
+			Form.SetTitleCaption("코스닥")
+		elseif sParam = "2"	then
+			g_szItemCode = "K2G01P"		'22년 차세대 업종코드 하드코딩
+			g_szMarket	="K2"
+			Form.SetTitleCaption("KOSPI200")
+		elseif sParam = "3"	then
+			g_szItemCode = "XGG01P"		'22년 차세대 업종코드 하드코딩
+			g_szMarket	="KR"
+			Form.SetTitleCaption("KRX100")
+		else
+			g_szItemCode = "KGG01P"		'22년 차세대 업종코드 하드코딩
+			g_szMarket	="K"
+			Form.SetTitleCaption("업종현재가")
+		end if 
+		
+		DATAMANAGER.RequestTranData("ohhts_1514_001r")
+		DATAMANAGER.RequestTranData("ohhts_1504_001r")
+	elseif	sEventName	=	"42000_CHGITEM"	then
+		Form.SetItemCode(sParam)
+		g_szItemCode	=	sParam
+	ElseIf sEventName = "SCREEN_MENU" Then							' 연결정보(상단 ...)
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns" , "1", "")
+		End If
+		
+	'20220922 SWJ START : 상단 바 종목명 클릭 시 종목선택 팝업 추가	
+	ElseIf sEventName = "TITLE_CLICK" Then
+		Form.OpenCommonDialog("SEARCH", "9", "")
+	end if
+	'20220922 SWJ END
+End Sub
+
+
+'============================================================================
+'fmtab01_OnTabChanged
+'============================================================================
+Sub fmtab01_OnTabChanged(nCurrentTab)
+		Form.SetSharedData("42000INITCODE" , g_szItemCode)
+		Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "42000ITEMCODE", g_szItemCode)
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnSendRealBefore
+'============================================================================
+Sub DATAMANAGER_OnSendRealBefore(szTranID)
+	if	szTranID	=	"ohhts_nmix_cntg"	then
+		DATAMANAGER.SetDataValue(1, "ohhts_nmix_cntg", "InBlock1", "FIDR_BSTP_CLS_CODE", 0, g_szItemCode)
+	end	if
+End Sub
+
+
+'============================================================================
+'Form_OnPopupReturn
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "snsshare" Then			' 폼탭 초기화
+		g_nSNSType = Cint(sRet)
+		
+		If g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+		Else
+			Dim szFlag
+		
+			sName = tbl01.GetCellString(1, 1)
+			sCurpirce = FormatNumber( tbl01.GetCellString(0, 1),  2)
+			
+			If CDbl(tbl01.GetCellString(0, 3)) > 0 Then
+				szFlag	= "▲"			
+			ElseIf CDbl(tbl01.GetCellString(0, 3)) < 0 Then
+				szFlag	= "▼"
+			Else
+				szFlag	= ""
+			End If
+			
+			sDiff    = FormatNumber( tbl01.GetCellString(0, 3),  2)		
+			sRate     = FormatNumber( tbl01.GetCellString(0, 4),  2)
+			sQuqn	 = FormatNumber( tbl01.GetCellString(1, 2),  0)
+			szParam = sName.."\n"..sCurpirce.."\n ("..szFlag..sDiff.." / "..sRate.."% / "..sQuqn..")"
+			
+			Form.SendSNSLinkage(g_nSNSType, "메리츠 증권", szParam)
+		End If
+	End if
+End Sub
+
+'============================================================================
+'20220922 SWJ START : 상단 바 종목명 클릭 시 종목선택 팝업 추가
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	' 종목컨트롤에서 리턴
+	if sDlgName == "SEARCH" then
+		if Trim(sReturn1) <> "" then
+			Form.SetItemCode(sReturn1)
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_nmix_cntg" trcode="ohhts_nmix_cntg" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FIDR_BSTP_CLS_CODE" idx="0" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="ohhts_1514_001r" trcode="ohhts_1514_001r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FID_INPUT_COND_MRKT_DIV_CODE" idx="0" defconst="U" />
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" >
+					<FIELD name="FID_INPUT_COND_MRKT_DIV_CODE" idx="0" defconst="U" />
+					<FIELD name="FID_INPUT_COND_SCR_DIV_CODE" idx="1" defconst="1514" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="ohhts_1504_001r" trcode="ohhts_1504_001r" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FID_INPUT_COND_MRKT_DIV_CODE" idx="0" defconst="U" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_nmix_cntg" title="업종지수 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="63" _ulen="51" >
+
+FIDR_BSTP_CLS_CODE^FIDR업종구분코드^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1183" _ulen="965" >
+
+FIDR_BSTP_CLS_CODE^FIDR업종구분코드^6^0^0^0^0^0^0
+FIDR_ANTC_NMIX_CLS_CODE^FIDR예상지수구분코드^1^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_ACML_TR_PBMN^FIDR누적거래대금^13^0^7^0^0^0^0
+FIDR_PCAS_VOL^FIDR건별거래량^11^0^7^0^0^0^0
+FIDR_PCAS_TR_PBMN^FIDR건별거래대금^11^0^7^0^0^0^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_OPRC_VRSS2^FIDR시가대비2^12^4^7^0^0^1^0
+FIDR_OPRC_VRSS_SIGN^FIDR시가대비부호^1^0^0^0^0^0^0
+FIDR_HPRC_VRSS2^FIDR고가대비2^12^4^7^0^0^1^0
+FIDR_HPRC_VRSS_SIGN^FIDR고가대비부호^1^0^0^0^0^0^0
+FIDR_LPRC_VRSS2^FIDR저가대비2^12^4^7^0^0^1^0
+FIDR_LPRC_VRSS_SIGN^FIDR저가대비부호^1^0^0^0^0^0^0
+FIDR_OPRC_CTRT^FIDR시가대비율^9^2^7^0^0^1^0
+FIDR_HPRC_CTRT^FIDR고가대비율^9^2^7^0^0^1^0
+FIDR_LPRC_CTRT^FIDR저가대비율^9^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1514_001r" title="업종현재가(시세)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="246" toutblk="OutBlock2" _ulen="190" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_COND_SCR_DIV_CODE^FID입력조건화면분류코드^6^0^0^9101^9999^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^9000^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1880" _ulen="1516" >
+
+FID_STCK_PRPR^FID주식현재가^13^0^7^4^1000^0^0
+FID_PRDY_VRSS^FID전일대비^13^0^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_ACML_TR_PBMN^FID누적거래대금^19^0^7^16^1000^0^0
+FID_TR_FRMT_ISSU_CNT^FID거래형성종목수^13^0^7^139^1000^0^0
+FID_TR_FRMT_CTRT^FID거래형성대비율^9^2^7^796^1000^0^0
+FID_OPRC^FID시가^13^0^7^17^1000^0^0
+FID_OPRC_HOUR^FID시가시간^6^0^0^145^1000^0^0
+FID_PRDY_CLPR_VRSS_OPRC^FID전일종가대비시가^13^0^7^20^1000^0^0
+FID_PRDY_CLPR_VRSS_OPRC_RATE^FID전일종가대비시가비율^9^2^7^21^1000^0^0
+FID_HPRC^FID고가^13^0^7^18^1000^0^0
+FID_HGPR_HOUR^FID최고가시간^6^0^0^146^1000^0^0
+FID_PRDY_CLPR_VRSS_HGPR^FID전일종가대비최고가^13^0^7^22^1000^0^0
+FID_PRDY_CLPR_VRSS_HGPR_RATE^FID전일종가대비최고가비율^9^2^7^23^1000^0^0
+FID_LPRC^FID저가^13^0^7^19^1000^0^0
+FID_LWPR_HOUR^FID최저가시간^6^0^0^147^1000^0^0
+FID_PRDY_CLPR_VRSS_LWPR^FID전일종가대비최저가^13^0^7^324^1000^0^0
+FID_PRDY_CLPR_VRSS_LWPR_RATE^FID전일종가대비최저가비율^9^2^7^326^1000^0^0
+FID_ASCN_ISSU_CNT^FID상승종목수^13^0^7^134^1000^0^0
+FID_DOWN_ISSU_CNT^FID하락종목수^13^0^7^135^1000^0^0
+FID_STNR_ISSU_CNT^FID보합종목수^13^0^7^136^1000^0^0
+FID_UPLM_ISSU_CNT^FID상한종목수^5^0^7^137^1000^0^0
+FID_LSLM_ISSU_CNT^FID하한종목수^5^0^7^138^1000^0^0
+FID_52_WEEK_HGHS_NMIX^FID52주최고지수^14^2^7^32^1000^0^0
+FID_52_WEEK_HGPR_DATE^FID52주최고가일자^8^0^0^34^1000^0^0
+FID_52_WEEK_HGPR_RATE^FID52주최고가비율^9^2^7^33^1000^0^0
+FID_52_WEEK_LWST_NMIX^FID52주최저지수^14^2^7^35^1000^0^0
+FID_52_WEEK_LWPR_DATE^FID52주최저가일자^8^0^0^37^1000^0^0
+FID_52_WEEK_LWPR_RATE^FID52주최저가비율^9^2^7^36^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="4" inout="out" _len="313" _ulen="255" >
+
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1012^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1012^0^0
+FID_PRPR^FID현재가^14^4^7^4^1012^0^0
+FID_PRDY_VRSS2^FID전일대비2^14^4^7^5^1012^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^6^1012^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1012^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1504_001r" title="KOSPI200 지수추이" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="583" _ulen="491" >
+
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^4^7^4^1000^0^0
+FID_OPRC2^FID시가2^14^4^7^17^1000^0^0
+FID_HPRC2^FID고가2^14^4^7^18^1000^0^0
+FID_LPRC2^FID저가2^14^4^7^19^1000^0^0
+FID_52_WEEK_HGPR_DATE^FID52주최고가일자^8^0^0^34^1000^0^0
+FID_52_WEEK_HGHS_NMIX^FID52주최고지수^14^2^7^32^1000^0^0
+FID_52_WEEK_LWPR_DATE^FID52주최저가일자^8^0^0^37^1000^0^0
+FID_52_WEEK_LWST_NMIX^FID52주최저지수^14^2^7^35^1000^0^0
+FID_PRDY_CLPR2^FID전일종가2^14^4^7^13^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

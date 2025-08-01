@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME_공지사항" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,160,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label1" fgcolor="144:034034034" fontsize="2" fontstyle="01" caption="공지사항" bgcolor="029:255212175" ly_vert="5,8,187,32,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_arrow" ly_vert="343,20,6,8,1" />
+		<LABEL name="lbl2" fgcolor="321:115118124" fontsize="-2" caption="더보기" halign="2" click="1" ly_vert="263,8,84,32,1" />
+		<FORMTAB name="FormTab0" tabcount="3" tabheadheight="0" usepg="1" pgbarheight="20" ly_vert="10,48,350,90,1" >
+			<PAGE name="page002211" caption="page1" linkfile="mhidx41020_notice" loadingtype="1" />
+			<PAGE name="page001939" caption="page2" linkfile="mhidx41020_notice" loadingtype="1" />
+			<PAGE name="page009649" caption="page3" linkfile="mhidx41020_notice" loadingtype="1" />
+		</FORMTAB>
+		<LABEL name="lblMore0" fgcolor="321:115118124" click="1" ly_vert="280,8,84,30,1" />
+		<LABEL name="Label3" bgcolor="320:246247248" transmode="0" ly_vert="0,150,375,8,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3462" _ulen="3420" >
+'============================================================================
+' 01. 화 면 명 : 
+' 02. 화면설명 : 
+' 03. 작    성 : 
+
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+'============================================================================
+Dim g_AryTitle, g_AryDate, g_AryUrl, g_AryszCls
+Dim g_szTitle, g_szUrl, g_szDate, g_szCls
+Dim g_Init
+g_szTitle = ""
+g_szUrl = ""
+g_szDate = ""
+g_szCls = ""
+
+'============================================================================
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "ohhts_note_003r" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "FID_CLS" , 0 , "99" )	'00(공지사항),01(증거금변경)만 조회
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "FID_INPUT_CLS_CODE" , 0 , "02" )
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Label1.fgcolor = 334
+	
+	DATAMANAGER.RequestTranData("ohhts_note_003r")
+	g_Init = "0"
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "ohhts_note_003r" then
+		nDataCnt = DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1")
+		for i = 0 to 2
+			szCls = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_CLS" , i)
+			szTitle = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_TITL" , i)
+			szDate = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_REG_DATE" , i)
+			szUrl = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_EXTS_URL_ADDR" , i)
+
+			g_szTitle = g_szTitle..szTitle.."|"
+			g_szDate	 = g_szDate..szDate.."|"
+			g_szUrl = g_szUrl..szUrl.."|"
+			g_szCls = g_szCls..szCls.."|"
+		next
+		g_AryTitle = Split(g_szTitle,"|")
+		g_AryDate = Split(g_szDate,"|")
+		g_AryUrl = Split(g_szUrl,"|")
+		g_AryCls = Split(g_szCls,"|")
+		if g_Init = "0" then
+			FormTab0.currenttab = 0
+			Form.TriggerEvent( "FormTab0."..FormTab0.currenttabpageid, "HOME_NOTICE", g_AryTitle(0).."|"..g_AryDate(0).."|"..g_AryUrl(0).."|"..g_AryCls(0).."|")
+			g_Init = "1"
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	szTriggerData = g_AryTitle(nCurrentTab).."|"..g_AryDate(nCurrentTab).."|"..g_AryUrl(nCurrentTab).."|"..g_AryCls(nCurrentTab).."|"
+	Form.TriggerEvent( "FormTab0."..FormTab0.currenttabpageid, "HOME_NOTICE", szTriggerData)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.SetMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	DATAMANAGER.RequestTranData("ohhts_note_003r")
+	g_Init = "0"
+End Sub
+
+'============================================================================
+Sub lblMore0_OnClick()
+	Form.OpenScreen("90100" , "")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_note_003r" trcode="ohhts_note_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_note_003r" title="공지사항 조회" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="141" _ulen="117" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_INPUT_CLS_CODE^FID입력구분코드^2^0^0^0^0^0^0
+FID_INPUT_DATE^FID입력일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="656" _ulen="536" >
+
+FID_SEQ_CODE^FID순서코드^2^0^0^0^0^0^0
+FID_NTC_MATR_SRNO^FID공지사항일련번호^10^0^0^0^0^0^0
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_INPUT_CLS_CODE^FID입력구분코드^2^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_EXTS_URL_ADDR^FID연장URL주소^500^0^0^0^0^0^0
+FID_COL_CODE^FID색상코드^11^0^0^0^0^0^0
+FID_PPP_YN^FID팝업여부^1^0^0^0^0^0^0
+FID_PPP_STA_DATE^FID팝업시작일자^8^0^0^0^0^0^0
+FID_PPP_FIN_DATE^FID팝업종료일자^8^0^0^0^0^0^0
+FID_REG_DATE^FID등록일자^8^0^0^0^0^0^0
+FID_RGSN_NAME^FID등록자명^12^0^0^0^0^0^0
+FID_DATE^FID일자^8^0^0^0^0^0^0
+FID_MDFR_NAME^FID수정자명^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

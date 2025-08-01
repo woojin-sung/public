@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME_MY종목MY뉴스" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,350,1" />
+	<CONTROL_INFO>
+		<RADIOGROUP name="rdoNation" fontsize="-1" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="10,11,188,31,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="MY종목" radioimage="btn_radio_select2_n.9.png" forecolor="095:000000000" selforecolor="062:255255255" position="2,3,90,28" />
+				<RADIO no="1" text="MY뉴스" radioimage="btn_radio_select2_n.9.png" forecolor="095:000000000" selforecolor="062:255255255" position="98,3,90,28" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LINKFORM name="linkfm" linkfile="mhidx50010_s40" ly_vert="0,50,375,290,1" />
+		<LABEL name="lbl1" fgcolor="321:115118124" fontsize="-2" caption="더보기" halign="2" click="1" ly_vert="263,10,84,32,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_arrow" ly_vert="346,22,6,8,1" />
+		<LABEL name="lblMore0" fgcolor="321:115118124" click="1" ly_vert="283,10,84,30,1" />
+		<LABEL name="Label3" bgcolor="320:246247248" transmode="0" ly_vert="0,340,375,8,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2804" _ulen="2686" >
+'============================================================================
+' 01. 화 면 명 : HOME_업계동향
+' 02. 화면설명 : 업계동향
+' 03. 작    성 : 
+'============================================================================
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image1.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	szLoginID = Form.GetSharedData("&USER_ID", false)
+	Form.SetSharedData("41020_s5_LoginID" , szLoginID)
+	
+	nIndex = CInt(Form.GetSharedData("HOME_MYSTOCKMYNEWS", true ))
+	if Trim(nIndex) = "" then
+		nIndex = 0
+	end if
+	
+	'스와이프 기능
+	linkfm.gesture = true
+	
+	rdoNation.currentindex = nIndex
+	call rdoNation_OnClick(nIndex)
+End Sub
+
+'============================================================================
+Sub rdoNation_OnClick(nIndex)
+	linkfm.linkfile = "mhidx50010_s40"
+	if CInt(nIndex) = 0 then	'MY종목
+'		linkfm.linkfile = "mhidx50010_t1"
+		szlinkfile = "mhidx50010_t1"
+	else						'MY뉴스
+'		linkfm.linkfile = "mhidx50010_t2"
+		szlinkfile = "mhidx50010_t2"
+	end if
+	
+	Form.triggerEvent( "linkfm", "LINKFILE", szlinkfile  )
+End Sub
+
+'============================================================================
+Sub lblMore0_OnClick()
+	Form.triggerEvent( "linkfm", "MOVE_MORE_SCREEN", ""  )
+	Form.SetSharedData("HOME_MYSTOCKMYNEWS" , rdoNation.currentindex)
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+'	Form.SetSharedData("HOME_MYSTOCKMYNEWS" , rdoNation.currentindex)
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if	sKey	=	"&LOGIN"	then				'로그인 후 보유종목/관심그룹 재조회
+		if	sValue	=	"login"	then
+			'20230414 HSZ START : 로그인 ID 비교로직 추가
+			szBeforeID = Trim(Form.GetSharedData("50010_s4_LoginID", false ))
+			szAfterID = Trim(Form.GetSharedData("&USER_ID", false))
+
+			if szBeforeID <> szAfterID then
+				Form.triggerEvent( "linkfm", "LOGIN", szAfterID  )
+				
+				Form.SetSharedData("50010_s4_LoginID" , szAfterID)
+			end if
+			'20230414 HSZ END	
+		end	if
+	end	if
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	nIndex = rdoNation.currentindex
+	call rdoNation_OnClick(nIndex)
+End Sub
+
+'스와이프 기능 추가
+'============================================================================
+Sub linkfm_OnGestureEvent(sEvent)
+	if sEvent == "RtoL" then
+		Form.triggerEvent( "linkfm", "SWIPE", "NEXT"  )
+		
+	elseif sEvent == "LtoR" then
+		Form.triggerEvent( "linkfm", "SWIPE", "PREV"  )
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

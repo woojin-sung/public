@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME_주목받는섹터" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,350,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fgcolor="144:034034034" fontsize="2" fontstyle="01" caption="주목받는 섹터" bgcolor="029:255212175" ly_vert="5,10,187,32,1" />
+		<LABEL name="lbl1" fgcolor="321:115118124" fontsize="-2" caption="더보기" halign="2" click="1" ly_vert="263,10,84,32,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_arrow" ly_vert="346,22,6,8,1" />
+		<LABEL name="lblMore0" fgcolor="321:115118124" click="1" ly_vert="283,10,84,30,1" />
+		<FORMTAB name="FormTab0" tabcount="3" tabwidthtype="2" tabheadheight="0" usepg="1" pgbarheight="20" ly_vert="0,40,375,285,1" >
+			<PAGE name="page0" caption="섹터1" linkfile="empty" loadingtype="1" />
+			<PAGE name="page1" caption="섹터2" linkfile="empty" loadingtype="1" />
+			<PAGE name="page2" caption="섹터3" linkfile="empty" loadingtype="1" />
+		</FORMTAB>
+		<LINKFORM name="linkfm0" ly_vert="0,40,375,265,1" />
+		<LABEL name="Label3" bgcolor="320:246247248" transmode="0" ly_vert="0,340,375,8,1" />
+		<CONTAINER name="contNone" bgcolor="047:255255255" ly_vert="1000,40,375,290,1" scroll_ly_vert="1000,40,375,290,1" >
+			<CONTROL_INFO>
+				<IMAGE name="imgNotice" autosize="1" imgpath="icon_notice_3" ly_vert="168,70,32,28,1" />
+				<LABEL name="lbNoticeMsg" fgcolor="146:124124124" fontsize="-2" caption="데이터가 아직 없어요.
+오늘의 주목받는 섹터를 기다려주세요." halign="1" multiline="1" ly_vert="20,100,335,50,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3830" _ulen="3658" >
+'============================================================================
+' 01. 화 면 명 : HOME_주목받는 섹터
+' 02. 화면설명 : 주목받는 섹터 -> 섹터리스트 조회
+' 03. 작    성 : 
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_arrayCode
+Dim g_arrayData
+
+Dim g_nTab
+'============================================================================
+Sub Form_OnFormInit()
+	linkfm0.gesture = true
+	
+	g_nTab = 0
+	FormTab0.currenttab = g_nTab
+	
+	lblTitle.fgcolor = 334
+	DATAMANAGER.RequestTranData("ohhts_1033_002r")	'섹터 조회: 등락률 상승률 순
+End Sub
+
+'============================================================================
+Sub lblMore0_OnClick()
+	Form.OpenScreen("11030" , "1")
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "ohhts_1033_002r" then
+		g_arrayCode = ""
+		g_arrayData = ""
+		
+		'데이터가 없는 경우
+		nCnt = Cint(DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1"))
+		
+		if nCnt = 0 then
+			contNone.left = 0
+			linkfm0.linkfile = "empty"
+			exit sub
+		else
+			linkfm0.linkfile = "mhidx50010_t5"
+			
+			if nCnt > 3 then
+				nCnt = 3
+			end if
+		end if
+			
+		for i = 0 to nCnt-1
+			szCode = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_TMST_CODE" , i)
+			szData = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_PRDY_CTRT" , i)
+			
+			g_arrayCode = g_arrayCode..szCode.."★"
+			g_arrayData = g_arrayData..szData.."★"
+		next
+		
+		call FormTab0_OnTabChanged(g_nTab)
+	end if
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	arrayCode = Split(g_arrayCode, "★")
+	arrayData = Split(g_arrayData, "★")
+	szData = arrayCode(nCurrentTab).."★"..arrayData(nCurrentTab)
+
+'	Form.triggerEvent( "FormTab0."..FormTab0.currenttabpageid, "INIT", arrayCode(nCurrentTab).."★"..arrayData(nCurrentTab))
+	Form.triggerEvent( "linkfm0", "INIT", szData)
+
+End Sub
+
+'============================================================================
+Sub linkfm0_OnGestureEvent(sEvent)
+	Form.triggerEvent( "linkfm0", "CLEAR", "")
+
+	if sEvent == "RtoL" then
+		btnNext()
+	elseif sEvent == "LtoR" then
+		btnPrev()
+	end if
+	
+End Sub
+
+'============================================================================
+' btnPrev_OnClick : 관심그룹보기 ◁(이전)버튼
+'============================================================================
+Function btnPrev()
+	if Int(g_nTab) == 0 then
+		g_nTab = 0
+	else
+		g_nTab = g_nTab - 1
+	end if
+	
+	FormTab0.currenttab = g_nTab
+	call FormTab0_OnTabChanged(g_nTab)
+End Function
+
+'============================================================================
+' btnNext_OnClick : 관심그룹보기 ▷(다음)버튼
+'============================================================================
+Function btnNext()
+	if g_nTab == 2 then
+		g_nTab = 2		
+	else
+		g_nTab = g_nTab + 1		
+	end if
+	
+	FormTab0.currenttab = g_nTab
+	call FormTab0_OnTabChanged(g_nTab)
+End Function
+
+'============================================================================
+Sub Form_OnRefresh()
+	DATAMANAGER.RequestTranData("ohhts_1033_002r")	'섹터 조회: 등락률 상승률 순
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	contNone.left = 1000
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	contNone.imgNotice.setmaintainingratio("1")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_1033_002r" trcode="ohhts_1033_002r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FID_INPUT_COND_MRKT_DIV_CODE" idx="0" defconst="J" />
+					<FIELD name="FID_INPUT_COND_SCR_DIV_CODE" idx="2" defconst="1001" />
+					<FIELD name="FID_INPUT_RANK_SORT_CLS_CODE" idx="3" defconst="01" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_1033_002r" title="종목별테마" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="316" toutblk="OutBlock1" _ulen="244" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_COND_SCR_DIV_CODE^FID입력조건화면분류코드^6^0^0^9101^9999^0^0
+FID_INPUT_RANK_SORT_CLS_CODE^FID입력순위정렬구분코드^3^0^7^9003^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="1000" inout="out" _len="403" _ulen="331" >
+
+FID_TMST_CODE^FID테마코드^4^0^0^1000^1067^0^0
+FID_TMST_NAME^FID테마명^50^0^0^1002^1067^0^0
+FID_ASCN_ISSU_RATE^FID상승종목비율^9^2^7^200^1067^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1067^0^0
+FID_D3_PRDY_CTRT^FID3일전일대비율^9^2^7^6598^1067^0^0
+FID_D5_PRDY_CTRT^FID5일전일대비율^9^2^7^6599^1067^0^0
+FID_D10_PRDY_CTRT^FID10일전일대비율^9^2^7^6600^1067^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

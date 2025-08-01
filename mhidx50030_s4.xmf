@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50030" scrname="My자산_비로그인" version="2" writer="김인섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,280,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelBg" transmode="0" ly_vert="0,0,375,309,1" />
+		<CONTAINER name="Container0" ly_vert="20,45,335,219,1" scroll_ly_vert="20,45,335,219,1" >
+			<CONTROL_INFO>
+				<IMAGE name="ImageCrd" imgpath="bg_listbox.9" ly_vert="0,0,335,210,1" />
+				<IMAGE name="ImageIcon" imgpath="fb_icon02" ly_vert="130,15,70,70,1" />
+				<LABEL name="LabelNotice" fontsize="1" fontstyle="01" caption="소중한 MY자산 로그인하고
+간편하게 확인하세요" halign="1" multiline="1" ly_vert="16,83,299,46,1" />
+				<IMAGE name="ImageBtn" imgpath="btn_line2_n.9" ly_vert="20,140,295,44,1" />
+				<LABEL name="Label0" fontsize="-1" caption="로그인" halign="1" click="1" ly_vert="141,147,53,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="LabelCSNM" fontsize="1" fontstyle="11" autofontsize="1" ly_vert="20,20,200,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1619" _ulen="1511" >
+'============================================================================
+' 화 면 명 : Home 화면 My자산 비로그인
+' 화면설명 : Home 화면내 My자산 비로그인
+' 작    성 : 2024.01.25 KIS
+'============================================================================
+Dim g_szNm
+
+Sub Form_OnFormInitBefore()
+    
+    '배경색 세팅
+	LabelBg.bgcolor = "066"	
+	Container0.bgcolor = "066"	
+     
+	'폰사이즈에 적합하게 이미지 맞추기
+	Container0.ImageIcon.setMaintainingRatio("1")  
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSizeMode = Form.GetEnvData("common.textsize")
+	if CInt(szTextSizeMode) > 0 then
+
+		Container0.LabelNotice.fontsize = 1 - Cint((szTextSizeMode * 2))
+	
+	end if	
+	
+
+	Form.SetTimerEvent2(1, 1, 1.0)
+	
+End Sub
+
+'============================================================================
+Sub Container0_ImageBtn_OnClick()
+
+     Form.OpenScreen( "90020" , "" )
+
+End Sub
+
+'============================================================================
+Sub Container0_Label0_OnClick()
+
+	Container0_ImageBtn_OnClick() 
+
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if CInt(sTimerID) == 1 then
+		Form.SetTimerEvent2(1, 0, 1.0)
+		g_szNm = Form.GetSharedData("&USER_NAME", false)
+		LabelCSNM.caption = g_szNm & "님"
+	end if 
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

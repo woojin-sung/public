@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME_업종동향" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,370,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fgcolor="144:034034034" fontsize="2" fontstyle="01" caption="업종동향" bgcolor="029:255212175" ly_vert="5,10,187,32,1" />
+		<RADIOGROUP name="rdoNation" fontsize="-1" buttonshape="1" ly_vert="10,41,166,31,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="국내" radioimage="btn_radio_select2_n.9.png" selforecolor="062:255255255" position="2,2,78,28" />
+				<RADIO no="1" text="해외" radioimage="btn_radio_select2_n.9.png" selforecolor="062:255255255" position="86,2,78,28" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LINKFORM name="linkfm" bordercolor="042:255255255" ly_vert="0,80,375,281,1" />
+		<LABEL name="Label3" bgcolor="320:246247248" transmode="0" ly_vert="0,360,375,8,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3311" _ulen="3059" >
+'============================================================================
+' 01. 화 면 명 : HOME_업계동향
+' 02. 화면설명 : 업계동향
+' 03. 작    성 : 
+'============================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	lblTitle.fgcolor = 334
+	
+	szIndex = Trim(Form.GetSharedData( "HOME_INDUSTRY", true  ))
+	if szIndex = "" then
+		'----------------------------------------------------------------------
+		'미국장 장운영정보 조회(미국 정규장일때, 초기탭 해외로 설정)
+		'----------------------------------------------------------------------
+		RequestMarketTime("01")
+		exit Sub
+		
+	else
+		nIndex = CInt(szIndex)
+	end if
+	
+	rdoNation.currentindex = nIndex
+	call rdoNation_OnClick(nIndex)
+End Sub
+
+'============================================================================
+Sub rdoNation_OnClick(nIndex)
+	if CInt(nIndex) = 0 then	'국내
+		linkfm.linkfile = "mhidx50010_t6"
+	else						'해외
+		linkfm.linkfile = "mhidx50010_t7"
+		Form.triggerEvent("linkfm", "RELOAD", "")
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	RequestMarketTime("01")
+
+End Sub
+
+'============================================================================
+' 미국시장 장운영정보 조회
+'============================================================================
+Function RequestMarketTime(sCountryCode)
+
+	DATAMANAGER.SetDataValue(0, "obtro_comn_010r", "InBlock1", "OVRS_STCK_MRKT_TR_CLS_CODE" , 0 , sCountryCode)
+	DATAMANAGER.RequestTranData("obtro_comn_010r")
+		
+End Function
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'-----------------------------------------------------------
+	'해외 장운영정보 조회
+	'-----------------------------------------------------------
+	if szTranID == "obtro_comn_010r" then
+	
+		'-----------------------------------------------------------
+		' 장운영정보
+		'-----------------------------------------------------------
+		sMkop = DATAMANAGER.GetDataValue(0, "obtro_comn_010r", "OutBlock1", "OVRS_MKOP_CLS_CODE" , 0)
+		
+		'---------------------------------------------------------------
+		' 미국 정규장 시, 초기 탭 "해외"로 설정. 그외에는 "국내"로 설정
+		' 004:정규개시 / 011:장개시
+		'---------------------------------------------------------------
+		if sMkop == "004" or sMkop == "011" then
+			
+			rdoNation.currentindex = 1
+			call rdoNation_OnClick(1)
+		
+		else
+		
+			rdoNation.currentindex = 0
+			call rdoNation_OnClick(0)
+		
+		end if
+		'---------------------------------------------------------------
+			
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	'---------------------------------------------------------------
+	' 미국장운영정보 조회 오류 시, 무조건 국내탭으로 초기탭 설정
+	'---------------------------------------------------------------
+	if szTranID == "obtro_comn_010r" then
+	
+		rdoNation.currentindex = 0
+		call rdoNation_OnClick(0)
+	
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtro_comn_010r" trcode="obtro_comn_010r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtro_comn_010r" title="해외주식 장운영정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="85" _ulen="61" >
+
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="244" _ulen="178" >
+
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+OVRS_MKOP_CLS_CODE^해외장운영구분코드^3^0^0^0^0^0^0
+MRKT_BEGN_TIME^시장개시시각^9^0^0^0^0^0^0
+MRKT_FIN_TIME^시장종료시각^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50030" scrname="My자산_로그인" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,260,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelBg" transmode="0" ly_vert="0,0,380,370,1" />
+		<CONTAINER name="Container0" ly_vert="18,45,335,209,1" scroll_ly_vert="18,45,335,209,1" >
+			<CONTROL_INFO>
+				<IMAGE name="ImageCrd" imgpath="bg_listbox.9" ly_vert="0,0,335,209,1" />
+				<LABEL name="lblDate" fgcolor="146:124124124" fontsize="-1" mask="1,0,,,1,##.##.##,0,1,1,0,0" halign="2" autofontsize="1" fonttype="1" ly_vert="241,11,80,32,1" />
+				<LABEL name="lblAcct" fontsize="-1" caption="전체계좌" paddinginfo="1,0,0,0" fonttype="1" click="1" ly_vert="20,11,220,32,1" />
+				<LABEL name="LblTotal" fontsize="5" fontstyle="01" mask="0,0,,원,0,,0,1,1,0,0" paddinginfo="1,0,0,0" fonttype="1" click="1" ly_vert="20,47,363,54,1" import="0,1,0;1,1,0" />
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="4" rowcount="2" outline="0000" transmode="1" designorder="1" ly_vert="20,92,295,50,1" >
+					<COL_INFO ly_vert_width="93,143,13,46" />
+					<ROW_INFO ly_vert_height="25,25" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" fgcolor="146:124124124" halign="0" line="0,0" caption="평가손익" fontsize="-2" fonttype="1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,0,3,0" halign="2" line="0,0" fontsize="-2" autofontsize="1" fonttype="1" paddinginfo="0,0,1,0" impidxs="" />
+						<CELL cell_ly="0,1,0,1" fgcolor="146:124124124" halign="0" line="0,0" caption="출금가능금액" fontsize="-2" fonttype="1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,1,3,1" import="0,1,2;2,1,3" halign="2" line="0,0" fontsize="-2" mask="0,0,,원,0,,0,1,0,0,0" autofontsize="1" fonttype="1" paddinginfo="0,0,1,0" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<IMAGE name="ImageBtn1" imgpath="btn_line2_n.9" ly_vert="23,155,143,30,1" />
+				<IMAGE name="ImageBtn2" imgpath="btn_line2_n.9" ly_vert="173,155,140,30,1" />
+				<LABEL name="LabelBtn1" fontsize="-1" caption="거래내역" halign="1" click="1" ly_vert="60,155,70,32,1" />
+				<LABEL name="LabelBtn2" fontsize="-1" caption="이체" halign="1" click="1" ly_vert="213,153,60,32,1" />
+				<IMAGE name="ImageArrowDn" imgpath="icon_arrow_down2" ly_vert="90,20,26,13,1" />
+				<IMAGE name="ImageArrowR" visible="0" imgpath="icon_arrow_r" ly_vert="200,65,9,18,0" />
+				<LABEL name="LabelLine" transmode="0" ly_vert="20,50,295,1,1" />
+				<BUTTON name="btnMoveAlpha" visible="0" btnimage="alpha" ly_vert="186,56,36,36,0" />
+				<LABEL name="lblLoading" fgcolor="333:115118124" fontstyle="01" caption="조회 중입니다." transmode="0" halign="1" multiline="1" paddinginfo="1,0,0,0" ly_vert="20,47,300,93,1" />
+				<IMAGE name="ImageRefresh" autosize="1" imgpath="icon_refresh" ly_vert="295,64,20,20,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="LabelCSNM" fontsize="1" fontstyle="11" autofontsize="1" ly_vert="20,20,200,20,1" />
+		<LABEL name="LabelHide" fgcolor="146:124124124" fontsize="-1" caption="금액숨김" halign="2" fonttype="1" ly_vert="200,14,80,32,1" />
+		<BUTTON name="Button0" ly_vert="280,20,60,20,1" />
+		<ACCOUNT name="Account0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,200" etcfunctions="" ly_vert="0,500,320,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="16831" _ulen="15671" >
+'============================================================================
+' 01. 화 면 명 : Home 화면 My자산 로그인
+' 02. 화면설명 : Home 화면 My자산 로그인시 자산 조회 화면
+' 03. 작    성 : 2024. 01. 25. KIS
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim nCellType			'토글 상태를 구분하기 위한 변수
+Dim szCSNO			'고객번호
+Dim szACNO			'계좌번호
+Dim szASNO             '계좌일련번호'
+Dim szUSERID           '사용자ID' 
+Dim g_szNm
+Dim strSwitchIndex      '자산숨김 토글 인덱스'
+
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+
+Sub Set_RequestData()
+	
+	Container0.LblTotal.visible = false
+	Container0.lblLoading.visible = true
+	Container0.ImageArrowR.visible = false
+	
+    szUSERID = Form.GetSharedData("&USER_ID", false )
+    szCSNO = Form.GetSharedData("&CUST_NUM", false )
+
+    If Trim(Account0.caption) == "ALL" then
+	
+   	   szACNO = ""
+
+     
+        DATAMANAGER.SetDataValue( 0 , "obacb_balc_151r", "InBlock1", "IQRY_CLS_CODE" , 0 , "1")
+        DATAMANAGER.SetDataValue( 0 , "obacb_balc_151r", "InBlock1", "ELFN_ID" , 0 , szUSERID)
+        DATAMANAGER.SetDataValue( 0 , "obacb_balc_151r", "InBlock1", "CSNO" , 0 , szCSNO)
+        DATAMANAGER.SetDataValue( 0 , "obacb_balc_151r", "InBlock1", "ACNO" , 0 , szACNO)
+
+        DATAMANAGER.RequestTranData( "obacb_balc_151r" )
+     
+     Elseif Trim(Account0.caption) <> "" Then
+     
+   	   szACNO = Trim(Account0.total)
+	   szASNO = Trim(Account0.sequence)
+
+
+'Form.ShowAlert("ACNO", szACNO)
+'Form.ShowAlert("ASNO", szASNO)
+'Form.ShowAlert("CSNO", szCSNO)
+
+
+        DATAMANAGER.SetDataValue( 0 , "obacb_balc_154r", "InBlock1", "ACNO" , 0 , szACNO)
+        DATAMANAGER.SetDataValue( 0 , "obacb_balc_154r", "InBlock1", "ASNO" , 0 , szASNO)
+        DATAMANAGER.SetDataValue( 0 , "obacb_balc_154r", "InBlock1", "ASET_CLS_CODE" , 0 , "00")
+        DATAMANAGER.SetDataValue( 0 , "obacb_balc_154r", "InBlock1", "CSNO" , 0 , szCSNO)
+
+        DATAMANAGER.RequestTranData( "obacb_balc_154r" )     
+     
+     End If
+     
+End Sub
+
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()		
+'============================================================================
+Sub Form_OnFormInit()
+	Container0.LblTotal.sizeAutoFit()
+	Container0.lblAcct.sizeAutoFit()
+	
+	if Form.GetSharedData("&OS_TYPE", false) == "2" then
+	     Account0.SetTotalEnable(true)  '전체계좌 추가
+     end if
+     
+	g_szNm = Form.GetSharedData("&USER_NAME", false)
+	LabelCSNM.caption = g_szNm & "님"
+
+     'Button0.setApplySwitch("OFF", "ON", "294", "200", "270", "249") 'CI색상
+      Button0.setApplySwitch2( "295", "323", "347", "390") '스위치버튼 2 : ON/OFF 글자 없는 버전
+	
+	if Form.GetSharedData("&OS_TYPE", false) == "2" then
+		LabelHide.left = 210
+	end if 
+
+	szDate = right(Form.GetSharedData("&HOST_DATE" , false), 6)
+	Container0.lblDate.caption = szDate
+	
+	'저장된 스위치 인덱스 값을 가져오기
+	Button0.switchindex = Form.GetEnvData("SWID_VALUE_SAVE") 
+	
+	Button0_OnClick() 'SwitchIndex 값에 따라 컨트롤 크기와 위치를 조정함
+    
+    Account0_ChangeAccount()        
+    
+'    If Button0.switchindex = "0" Then
+'     Set_RequestData()  'Input Data Setting / Request Data
+'    End If 
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	Container0.lblLoading.height = 93
+	Container0.lblLoading.caption = "조회 중입니다."
+
+	if szTranID == "obacb_balc_157r" then
+		szACNO = Trim(Account0.total)
+		szASNO = Trim(Account0.sequence)
+		
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "UI_UNIT_CLS" , 0 , "2")
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ACNO" , 0 , szACNO)
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ASNO" , 0 , szASNO)
+	end if 
+End Sub
+
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) 
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+    
+    Dim nPrlsrate 
+    Dim nPrlsamt 
+    Dim nVltnamt 
+
+
+	if szTranID == "obacb_balc_151r" then
+	    nVltnamt = DATAMANAGER.GetDataValue( 0 , "obacb_balc_151r", "OutBlock1", "VLTN_AMT" , 0)		'평가금액
+		nPrlsrate = DATAMANAGER.GetDataValue( 0 , "obacb_balc_151r", "OutBlock1", "PLRT" , 0)			'손익률
+		nPrlsamt = DATAMANAGER.GetDataValue( 0 , "obacb_balc_151r", "OutBlock1", "VLTN_PRLS_AMT" , 0)	'평가손익
+		if CDBL(nPrlsamt) > 0 then
+			szPrls = "+"..FormatNumber(nPrlsamt,0).."원   |   +"..FormatNumber(nPrlsrate,2).."%"
+			Container0.Table0.SetCellString(0, 1, szPrls)
+			Container0.Table0.SetCellFgColor(0, 1, "10")
+		elseif CDBL(nPrlsamt) < 0 then
+			szPrls = FormatNumber(nPrlsamt,0).."원   |   "..FormatNumber(nPrlsrate,2).."%"
+			Container0.Table0.SetCellString(0, 1, szPrls)
+			Container0.Table0.SetCellFgColor(0, 1, "11")
+		else
+			szPrls = FormatNumber(nPrlsamt,0).."원   |   "..FormatNumber(nPrlsrate,2).."%"
+			Container0.Table0.SetCellString(0, 1, szPrls)
+			Container0.Table0.SetCellFgColor(0, 1, "4")
+		end if
+		
+	    Container0.LblTotal.Caption = nVltnamt
+		
+	Elseif szTranID == "obacb_balc_154r" Then
+	    nVltnamt = DATAMANAGER.GetDataValue( 0 , "obacb_balc_154r", "OutBlock1", "VLTN_AMT" , 0)		'평가금액
+		nPrlsrate = DATAMANAGER.GetDataValue( 0 , "obacb_balc_154r", "OutBlock1", "PLRT" , 0)			'손익률
+		nPrlsamt = DATAMANAGER.GetDataValue( 0 , "obacb_balc_154r", "OutBlock1", "VLTN_PRLS_AMT" , 0)	'평가손익
+		if CDBL(nPrlsamt) > 0 then
+			szPrls = "+"..FormatNumber(nPrlsamt,0).."원   |   +"..FormatNumber(nPrlsrate,2).."%"
+			Container0.Table0.SetCellString(0, 1, szPrls)
+			Container0.Table0.SetCellFgColor(0, 1, "10")
+		elseif CDBL(nPrlsamt) < 0 then
+			szPrls = FormatNumber(nPrlsamt,0).."원   |   "..FormatNumber(nPrlsrate,2).."%"
+			Container0.Table0.SetCellString(0, 1, szPrls)
+			Container0.Table0.SetCellFgColor(0, 1, "11")
+		else
+			szPrls = FormatNumber(nPrlsamt,0).."원   |   "..FormatNumber(nPrlsrate,2).."%"
+			Container0.Table0.SetCellString(0, 1, szPrls)
+			Container0.Table0.SetCellFgColor(0, 1, "4")
+		end if
+		
+		'계별계좌 출금가능금액 조회
+		DATAMANAGER.RequestTranData( "obacb_balc_157r" )
+		
+'		Container0.LblTotal.Caption = nVltnamt
+	End if
+	
+	
+     '컨트롤 위치 이동 / 펼침 (자산보임)
+    
+    Container0.ImageArrowR.visible = True
+    Container0.ImageRefresh.visible = True
+    Container0.Table0.visible = True
+    Container0.LblTotal.fgcolor = "004"  '(RGB:000/000/000 : 004)
+   'Container0.LblTotal.Caption = ""
+'    Container0.LblTotal.mask = "0,0, , ,1,'',0,1,1"  
+    Container0.LblTotal.mask = "0,0,,원,0,,0,1,1,0,0"
+    
+   '(Mask property :숫자or문자 / 0표시여부 / prefix / postfix /마스크처리여부 / 마스크포맷 / 소수점 자리수/천단위 부호표시 여부 / - 부호표시 여부)
+
+    Container0.Table0.visible = True
+	
+    Container0.ImageBtn1.Top = 155
+    Container0.ImageBtn2.Top = 155
+    Container0.LabelBtn1.Top = 155
+    Container0.LabelBtn2.Top = 155
+    Container0.height = 209
+    Container0.ImageCrd.height = 209
+	
+	'금액이 세팅 된 후 화살표 보여주기
+	Container0.LblTotal.visible = true
+	Container0.ImageArrowR.visible = true
+	Container0.btnMoveAlpha.visible = true
+	Container0.lblLoading.visible = false
+	
+End Sub
+'============================================================================
+
+Sub Container0_ImgRefresh_OnClick()
+
+	Set_RequestData()  'Input Data Setting / Request Data
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	
+	'Form.ShowAlert("알림", szErrMsg)
+	Container0.lblLoading.height = 88
+	Container0.lblLoading.caption = "조회 중 오류가 발생했습니다.\n재조회 해주세요."
+	
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+
+	strSwitchIndex = Button0.switchindex
+    'Form.MsgBox("알림", strSwitchIndex , strSwitchIndex, 0)
+
+	'Switch ON
+    If strSwitchIndex = "1" Then 
+
+		'1. 숨김처리
+		Container0.lblLoading.visible = false
+		Container0.ImageArrowR.visible = False
+		Container0.ImageRefresh.visible = False
+		Container0.Table0.visible = False
+		Container0.LblTotal.fgcolor = "295"  '(RGB:153/153/153 : 295)
+		
+		Container0.ImageArrowR.visible = true
+		Container0.LblTotal.visible = true
+		Container0.LblTotal.Caption = "금액숨김"
+		Container0.LblTotal.mask = "1,0, , ,0,'',0,0,0"  
+	     '(Mask property :숫자or문자 / 0표시여부 / prefix / postfix /마스크처리여부 / 마스크포맷 / 소수점 자리수/천단위 부호표시 여부 / - 부호표시 여부)
+    
+		'2. 사이즈 조정 (축소)
+		Container0.ImageBtn1.Top = 90
+		Container0.ImageBtn2.Top = 90
+		Container0.LabelBtn1.Top = 90
+		Container0.LabelBtn2.Top = 90
+		Container0.height = 143
+		Container0.ImageCrd.height = 143
+       
+	     Container0.LblTotal.top = 43
+	     Container0.ImageArrowR.top = 61
+	     Container0.ImageRefresh.top = 60
+       
+	     Form.SetEnvData(1, "SWID_VALUE_SAVE", strSwitchIndex)
+
+	 
+    Elseif strSwitchIndex = "0" Then  'Switch OFF'
+
+	    '1. 보임처리 
+		Container0.ImageRefresh.visible = True
+		Set_RequestData()  'Input Data Setting / Request Data / 컨트롤 보임처리  
+
+
+	    '2. 사이즈 조정 (확대))
+	    '컨트롤 위치 이동 / 펼침 (자산보임)
+
+		Container0.ImageBtn1.Top = 155
+		Container0.ImageBtn2.Top = 155
+		Container0.LabelBtn1.Top = 155
+		Container0.LabelBtn2.Top = 155
+		Container0.height = 209
+		Container0.ImageCrd.height = 209
+		'Container0.LblTotal.Caption = ""
+       
+		'Container0.LblTotal.visible = false
+		'Container0.lblLoading.visible = true
+		'Container0.ImageArrowR.visible = false
+		Container0.btnMoveAlpha.visible = false
+       
+       
+'		 Container0.LblTotal.mask = "0,0,,원,0,,0,1,1,0,0"
+		Container0.LblTotal.top = 47
+		Container0.ImageArrowR.top = 65
+		Container0.ImageRefresh.top = 64
+		 
+    End If
+    
+    '컨테이너 사이즈 조정후 영역 재지정
+    Container0.SetScrollAutoSize()
+    
+   '부모창에 스위치 값 넘거주기
+    Form.triggerEvent( "#", "SWID", strSwitchIndex) 
+    Form.SetEnvData(1, "SWID_VALUE_SAVE", strSwitchIndex)
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	LabelBg.bgcolor = "246247248"
+	Container0.bgcolor = "246247248"
+	Container0.LabelLine.bgcolor = "238239240"
+	
+	'폰사이즈에 적합하게 이미지 맞추기
+	'Container0.ImageCrd.setMaintainingRatio("1")  
+	Container0.ImageRefresh.setMaintainingRatio("1")  
+	'Container0.ImageBtn1.setMaintainingRatio("1")  
+	'Container0.ImageBtn2.setMaintainingRatio("1")  
+	Container0.ImageArrowDn.setMaintainingRatio("1")  
+	Container0.ImageArrowR.setMaintainingRatio("1")  
+
+	Container0.ImageRefresh.setMaintainingRatio("1")  
+	
+	if Form.GetSharedData("&OS_TYPE", false) == "1" then
+	     Account0.SetTotalEnable(true)  '전체계좌 추가
+     end if
+	
+End Sub
+
+'============================================================================
+Sub Account0_ChangeAccount()
+	Container0.lblAcct.multiline = false
+	
+	if Trim(Account0.caption) == "ALL" then
+	
+		Container0.lblAcct.Caption = "전체계좌"
+	else			    
+		Container0.lblAcct.Caption =   MID(Account0.total, 1,4) & "-" & MID(Account0.total, 5,4) 
+								    & "-" & Account0.sequence					    
+	end if
+	
+	Container0.lblAcct.sizeAutoFit()
+	
+	If Button0.switchindex = "0" Then 
+		Set_RequestData()  'Input Data Setting / Request Data / 컨트롤 보임처리 
+	end if
+    
+End Sub
+
+'============================================================================
+Sub Container0_lblAcct_OnClick()
+'	'계좌콤보를 열어준다....
+'	Account0.openList()
+	
+	if trim(Container0.lblAcct.Caption) <> "전체계좌" then
+		'계좌번호 복사하기
+		Dim szClipAcno
+		szClipAcno = left(replace(Container0.lblAcct.Caption,"-",""),12)  '하이픈제거
+		Form.setClipboardText(szClipAcno)  '클립보드에 복사
+		
+		if Form.GetSharedData("&OS_TYPE", false) == "2" then
+			Form.Toast(0, "계좌번호를 복사했어요.", 0.2)
+		end if
+	end if
+End Sub
+
+
+'============================================================================
+Sub Container0_lblAcct_OnLongClick()
+	'계좌번호 복사하기
+	Dim szClipAcno
+	szClipAcno = left(replace(Container0.lblAcct.Caption,"-",""),12)  '하이픈제거
+	Form.setClipboardText(szClipAcno)  '클립보드에 복사
+	
+	Form.Toast(0, "계좌번호를 복사했어요.", 0.2)
+End Sub
+
+
+
+'============================================================================
+Sub Container0_ImageArrowDn_OnClick()
+	 Account0.openList()
+End Sub
+
+'============================================================================
+Sub Container0_ImageBtn1_OnClick()
+ 
+    Form.SetSharedData("HOME_TAB" , "MYASSET")  '화면이동후 백버튼눌렀을때. 현재탭으로 이동
+    Form.OpenScreen( "71040" , "" )  '거래내역 화면 오픈
+    
+End Sub
+
+'============================================================================
+Sub Container0_ImageBtn2_OnClick()
+
+    Form.SetSharedData("HOME_TAB" , "MYASSET")  '화면이동후 백버튼눌렀을때. 현재탭으로 이동
+    Form.OpenScreen( "63010" , "" ) '원화이체 화면 오픈
+
+End Sub
+
+'============================================================================
+Sub Container0_LabelBtn1_OnClick()
+    Container0_ImageBtn1_OnClick()  '거래내역 버튼 클릭
+End Sub
+
+
+'============================================================================
+Sub Container0_LabelBtn2_OnClick()
+    Container0_ImageBtn2_OnClick()  '이체 버튼 클릭
+End Sub
+
+'============================================================================
+Sub Container0_ImageRefresh_OnClick()
+	Set_RequestData()
+End Sub
+
+'============================================================================
+ '20240219 SWJ START
+ '============================================================================
+Sub Container0_ImageArrowR_OnClick()
+      szData = Account0.caption
+      
+	if trim(Container0.lblAcct.Caption) == "전체계좌" then
+		Form.SaveConfigData("mbact71052", "cur_tabcode", "0") 
+	else
+		Form.SaveConfigData("mbact71052", "cur_tabcode", "1") 
+	end if 
+	
+	Form.SetSharedData("50030_Acnt", szData)
+	
+	 Form.OpenScreen("71052" , "" )
+End Sub
+
+'============================================================================
+Sub Container0_LblTotal_OnClick()
+	Container0_ImageArrowR_OnClick()
+End Sub
+
+'============================================================================
+Sub Container0_LblTotal_OnSizeAutoFit()
+	SetPeriodLabelSize("total")
+End Sub
+
+'============================================================================
+Sub Container0_lblAcct_OnSizeAutoFit()
+	'안드로이드일때만 416,417라인 호출
+	if Form.GetSharedData("&OS_TYPE", false) == "1" then
+		Container0.lblAcct.multiline = true
+		Container0.lblAcct.maxlinecnt = "1^0"
+		Container0.lblAcct.top = 14
+	end if
+
+	if Trim(Container0.lblAcct.caption) == "전체계좌" then
+		Container0.lblAcct.fontstyle = "00"
+	else
+		Container0.lblAcct.fontstyle = "10"				    
+	end if
+	
+	SetPeriodLabelSize("acct")
+End Sub
+
+'============================================================================
+Function SetPeriodLabelSize(szCtrl)
+	if szCtrl == "total" then
+		nLeft = Form.calcUnResize(Container0.LblTotal.left, "2")
+		nWidth = Form.calcUnResize(Container0.LblTotal.width, "2")
+		Container0.ImageArrowR.left = nLeft + nWidth + 6
+		Container0.btnMoveAlpha.left = nLeft + nWidth
+		
+		'금액이 세팅 된 후 화살표 보여주기
+		Container0.LblTotal.visible = true
+		Container0.ImageArrowR.visible = true
+		Container0.btnMoveAlpha.visible = true
+		Container0.lblLoading.visible = false
+		
+	else
+		nLeft = Form.calcUnResize(Container0.lblAcct.left, "2")
+		nWidth = Form.calcUnResize(Container0.lblAcct.width, "2")
+		Container0.ImageArrowDn.left = nLeft + nWidth
+	end if
+End Function
+
+'============================================================================
+Sub Container0_btnMoveAlpha_OnClick()
+	Container0_ImageArrowR_OnClick()
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacb_balc_151r" trcode="obacb_balc_151r" compress="1" encryption="1" timeout="180" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="IQRY_CLS_CODE" idx="0" defconst="2" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="obacb_balc_154r" trcode="obacb_balc_154r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacb_balc_157r" trcode="obacb_balc_157r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacb_balc_151r" title="고객 자산현황 합계조회(MTS)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="160" _ulen="124" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="317" _ulen="251" >
+
+VLTN_AMT^평가 금액^19^0^7^0^0^0^0
+VLTN_PRLS_AMT^평가 손익 금액^19^0^7^0^0^0^0
+DRNG_ABLE_AMT^출금 가능 금액^19^0^7^0^0^0^0
+PLRT^손익률^23^6^7^0^0^0^0
+BYNG_AMT^매입 금액^19^0^7^0^0^0^0
+LOAN_AMT^대출금액^19^0^7^0^0^0^0
+TFAM^예수금^19^0^7^0^0^0^0
+UNAM^미수금^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacb_balc_154r" title="개별계좌별 자산별 평가금액조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="160" _ulen="120" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ASET_CLS_CODE^자산구분코드^2^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="265" _ulen="211" >
+
+VLTN_AMT^평가금액^19^0^7^0^0^0^0
+VLTN_PRLS_AMT^평가 손익 금액^19^0^7^0^0^0^0
+LOAN_AMT^대출금액^19^0^7^0^0^0^0
+PLRT^손익률^23^6^7^0^0^0^0
+BYNG_AMT^매입 금액^19^0^0^0^0^0^0
+TFAM^예수금^19^0^0^0^0^0^0
+UNAM^미수금^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacb_balc_157r" title="종합 및 개별계좌 예수금현황조?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="217" _ulen="165" >
+
+UI_UNIT_CLS^UI 단위 구분^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+IQRY_CLS_CODE^조회 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="765" _ulen="589" >
+
+BKKP_NAME^부기 명^40^0^0^0^0^0^0
+TFAM^예수금^19^0^7^0^0^0^0
+CHECK_AMT^수표 금액^19^0^7^0^0^0^0
+DRNG_ABLE_AMT^출금 가능 금액^19^0^7^0^0^0^0
+SBSC_MARG^청약 증거금^19^0^7^0^0^0^0
+UNAM^미수금^19^0^7^0^0^0^0
+LOAN_INT_NTPD_AMT^대출 이자 미납 금액^19^0^7^0^0^0^0
+MORG_DFCN_AMT^담보 부족 금액^19^0^7^0^0^0^0
+UI_D1_AFT_TFAM^UI 1일 후 예수금^19^0^7^0^0^0^0
+UI_D2_AFT_TFAM^UI 2일 후 예수금^19^0^7^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+ACNT_PRNM^계좌상품명^100^0^0^0^0^0^0
+WTMN_ABLE_ATMT_INVT_AMT^인출가능자동투자금액^19^0^7^0^0^0^0
+WTMN_ABLE_CASH_AMT^인출가능현금금액^19^0^7^0^0^0^0
+OM_BOND_MARG^장외채권증거금^19^0^7^0^0^0^0
+LOAN_BAL_SMTN^대출잔액합계^20^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

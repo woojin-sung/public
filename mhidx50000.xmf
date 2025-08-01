@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="홈_메인" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,602,1" />
+	<CONTROL_INFO>
+		<TAB name="tabMenu" fontsize="4" tabheadheight="47" tabwidthtype="2" tabcount="3" ly_vert="1000,0,330,47,1" >
+			<PAGE name="0" caption="Market" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="1" caption="Meritz365" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="2" caption="MY자산" >
+				<CONTROL_INFO/>
+			</PAGE>
+		</TAB>
+		<IMAGE name="imgSearch" autosize="1" imgpath="icon_search" ly_vert="343,12,22,22,1" />
+		<LINKFORM name="lkformScreen" ly_vert="0,47,375,555,1" />
+		<LABEL name="Label0" bgcolor="322:226228229" transmode="0" ly_vert="0,46,375,1,1" />
+		<FORMTAB name="fmtabMenu" fontsize="4" tabcount="3" tabwidthtype="2" tabheadheight="47" ly_vert="0,0,330,47,1" >
+			<PAGE name="0" caption="Market" linkfile="empty" />
+			<PAGE name="1" caption="Meritz365" linkfile="empty" />
+			<PAGE name="2" caption="MY자산" linkfile="empty" />
+		</FORMTAB>
+		<IMAGE name="Image11" ly_vert="30,0,55,55,1" />
+		<IMAGE name="Image10" ly_vert="137,0,60,60,1" />
+		<IMAGE name="Image9" ly_vert="242,0,55,55,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5345" _ulen="4803" >
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+'20240520 HSZ START
+Dim g_nTab
+
+' 돌아온 경우에만 스크롤 세팅
+Dim g_isOpen		'FORMINIT 후 트리거 처음 탄건지 확인 FLAG
+g_isOpen = true
+'20240520 HSZ END
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgSearch.setMaintainingRatio("1")
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'20240520 HSZ START: 해외주식고도화
+	g_isOpen = true
+	
+	Image9.setRippleEffect(-1)		'-1.기본컬러사용
+	Image10.setRippleEffect(-1)
+	Image11.setRippleEffect(-1)
+	'20240520 HSZ END
+	
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	
+	'디폴트 폰트사이즈
+	nTextSize = 4
+	
+	'큰글씨 폰트크기(1:조금크게 2:크게)
+	szTextSizeMode = Form.GetEnvData("common.textsize")
+	
+	if CInt(szTextSizeMode) > 0 then
+		nTextSize = nTextSize - Cint(szTextSizeMode) * 2
+	end if
+	'--------------------------------------------------------------
+
+	if Form.GetSharedData("&OS_TYPE", false) == "1" then
+		fmtabMenu.setTabDefaultImage("tab_03_o.9","alpha.9")
+	else
+		
+		fmtabMenu.setTabPageTextBold(0, "Market"		, nTextSize, True)
+		fmtabMenu.setTabPageTextBold(1, "Meritz365"	, nTextSize, True)
+		fmtabMenu.setTabPageTextBold(2, "MY자산"		, nTextSize, True)
+		
+		fmtabMenu.setTabHeaderImage("tab_00_o.9","alpha", 0)
+	end if
+	
+	Dim szSavedTab
+	szSavedTab = Form.GetSharedData("HOME_TAB", true)
+	
+	szOpenData = Form.GetOpenLinkData()
+	
+	'20240610 SWJ START
+	if Instr(szOpenData, "Meritz365") > 0 then	'외부url 탭 연동용
+
+		'외부링크로 호출하면 폼탭 이동 씹히는 현상 수정
+		Form.SetTimerEvent2("1", 1, 0.01)
+		
+		'이 때 홈화면 호출될 때 모바일OTP 밑에 로직 안타도 됨
+		exit sub
+	end if
+	'20240610 SWJ END
+	
+	'KBC 해외화면 시세제어 START
+	if szOpenData == "OVRS_CLOSE" then	'메인 하드코딩
+		szSavedTab = "MYASSET"			'MY자산 탭으로 이동
+	end if	
+	'KBC 해외화면 시세제어 END
+			
+	if szSavedTab <> "" and szSavedTab <> null then
+		if szSavedTab == "MYASSET" then
+			fmtabMenu.currenttab = "2"
+			fmtabMenu_OnTabChanged(2)
+			
+		elseif szSavedTab == "MARKET" then
+			fmtabMenu.currenttab = "0"
+			fmtabMenu_OnTabChanged(0)
+		
+		else
+			fmtabMenu.currenttab = "1"
+			fmtabMenu_OnTabChanged(1)
+		end if
+	else
+			fmtabMenu.currenttab = "0"
+			fmtabMenu_OnTabChanged(0)
+	end if
+	
+	'20210514 LES START : iOS 2.5.2버전 이후 해당문제 메인수정, 
+	'20210508 SWJ START : 앱 미실행 상태 푸시 화면 안뜨는 현상 임시 수정
+	szAppVer 	= Form.GetSharedData("&APP_VERSION", False)
+	szAppVer 	= replace(szAppVer , "." , "")
+	
+	sDeviceOS = Form.GetSharedData("&OS_TYPE", false)
+	if Cint(szAppver) < 252 then
+	
+		if sDeviceOS == "2" then
+			sOpenMOTP = Form.GetSharedData("&IS_OPEN_MOTP" , True)
+		
+			if sOpenMOTP == "YES" then
+				Form.OpenPopup("mhetc90060_motp" , "" , "")
+			end if
+		end if
+		
+	end if
+	'20210508 SWJ END
+End Sub
+
+'============================================================================
+Sub fmtabMenu_OnTabChanged(nCurrentTab)
+szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+
+	'20240313 Market탭의 로딩속도를 줄이기 위해 링크폼 2개로 분리
+	if nCurrentTab == 0 then		'market
+'		lkformScreen.linkfile = "mhidx41000"
+
+		Image11.runRippleEffect()				'202406 HSZ 해외주식고도화
+		lkformScreen.linkfile = "mhidx50010"		'202406 HSZ 해외주식고도화
+		Form.SetSharedData("HOME_TAB", "MARKET")
+
+		Form.setCodeDupt(szScreenNo, false)		'KBC 해외화면 시세제어 (링크변수 "HOME_TAB" 이후에 있어야 함)
+
+	elseif nCurrentTab == 1 then	'meritz365
+	
+		Image10.runRippleEffect()			'202406 HSZ 해외주식고도화
+		lkformScreen.linkfile = "mhidx50001"
+		Form.SetSharedData("HOME_TAB", "MERITZ365")
+		
+	else	
+
+		'my자산
+		Image9.runRippleEffect()			'202406 HSZ 해외주식고도화
+		lkformScreen.linkfile = "mhidx50030"
+		Form.SetSharedData("HOME_TAB", "MYASSET")
+	end if
+End Sub
+
+
+'============================================================================
+'20240610 SWJ START
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID, 0, 0.01)
+	
+	if Cint(sTimerID) == 1 then
+		szSavedTab = "MERITZ365"
+		fmtabMenu.currenttab = "1"
+		fmtabMenu_OnTabChanged(1)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub imgSearch_OnClick()
+	Form.OpenPopup("mhidx41000_p5" , "" , "")	'20230818 HSZ : 통합검색 팝업 추가
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEventSCREEN(sEventName,sParam)
+	'백버튼으로 돌아온 경우, 스크롤 위치 세팅
+	if g_isOpen = true then
+		g_isOpen = false
+		if sEventName = "PREV" then
+			if CInt(fmtabMenu.currenttab) = 0 then
+				Form.triggerEvent("lkformScreen", "HOME_SCROLL", "")
+			end if
+		else
+			Form.SetSharedData("HOME_SCROLL" , "")		'저장했던 위치 CLEAR
+		end if
+	end if
+
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

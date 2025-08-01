@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME(유럽지수)_2페이지" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,202,1" />
+	<CONTROL_INFO>
+		<IMAGE name="ImageBg0" autosize="1" imgpath="btn_line2_n.9" ly_vert="10,10,172,85,1" />
+		<LABEL name="LabelTitle0" fontsize="-2" fontstyle="01" caption="유로스톡스 50" autofontsize="1" ly_vert="20,20,110,20,1" />
+		<LABEL name="LabelData0" fontstyle="01" mask="0,0,,,0,,2,1,0,0,0" autofontsize="1" ly_vert="20,45,90,20,1" />
+		<LABEL name="LabelSign0" fontsize="-6" bgcolor="035:237246255" usesign="1" autofontsize="1" ly_vert="20,70,20,20,1" />
+		<LABEL name="LabelDebi0" fontsize="-4" plusminuscolor="1" bgcolor="029:255212175" autofontsize="1" ly_vert="40,70,60,20,1" />
+		<LABEL name="LabelRate0" fontsize="-4" plusminuscolor="1" mask="0,0,(,%),0,,2,1,1,0,0" bgcolor="035:237246255" autofontsize="1" ly_vert="100,70,60,20,1" />
+		<IMAGE name="ImageBg1" autosize="1" imgpath="btn_line2_n.9" ly_vert="192,10,172,85,1" />
+		<LABEL name="LabelTitle1" fontsize="-2" fontstyle="01" caption="러시아 RTS" autofontsize="1" ly_vert="202,20,90,20,1" />
+		<LABEL name="LabelData1" fontstyle="01" mask="0,0,,,0,,2,1,0,0,0" autofontsize="1" ly_vert="202,45,90,20,1" />
+		<LABEL name="LabelSign1" fontsize="-6" bgcolor="035:237246255" usesign="1" autofontsize="1" ly_vert="202,70,20,20,1" />
+		<LABEL name="LabelDebi1" fontsize="-4" plusminuscolor="1" bgcolor="029:255212175" autofontsize="1" ly_vert="222,70,60,20,1" />
+		<LABEL name="LabelRate1" fontsize="-4" plusminuscolor="1" mask="0,0,(,%),0,,2,1,1,0,0" bgcolor="035:237246255" autofontsize="1" ly_vert="282,70,60,20,1" />
+		<IMAGE name="imgReal0" autosize="1" imgpath="realtime_grey" ly_vert="138,20,9,20,1" />
+		<LABEL name="lblTime0" fontsize="-8" caption="장 마감" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="150,20,25,20,1" />
+		<IMAGE name="imgReal1" autosize="1" imgpath="realtime_grey" ly_vert="320,20,9,20,1" />
+		<LABEL name="lblTime1" fontsize="-8" caption="장 마감" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="332,20,25,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4811" _ulen="4697" >
+Dim gImageBG()
+gImageBG = {"ImageBg0","ImageBg1"}
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	LabelTitle0.paddinginfo = "0,0,0,0"
+	LabelTitle1.paddinginfo = "0,0,0,0"
+	
+	LabelData0.paddinginfo = "0,0,0,0"
+	LabelData1.paddinginfo = "0,0,0,0"
+	
+	LabelSign0.paddinginfo = "0,0,0,0"
+	LabelSign1.paddinginfo = "0,0,0,0"
+	
+	LabelDebi0.paddinginfo = "0,0,0,0"
+	LabelDebi1.paddinginfo = "0,0,0,0"
+	
+	LabelRate0.paddinginfo = "0,0,0,0"
+	LabelRate1.paddinginfo = "0,0,0,0"
+	
+	lblTime0.paddinginfo = "0,0,0,0"
+	lblTime1.paddinginfo = "0,0,0,0"
+	
+	imgReal0.setMaintainingRatio("1")
+	imgReal1.setMaintainingRatio("1")
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	RequestData()
+	RequestChartData()
+	
+End Sub
+'============================================================================
+Function RequestData()
+
+	DATAMANAGER.ClearInputData(0, "ohhts_1500_001r")
+	
+	'---------------------
+	' 유로스톡스
+	'---------------------
+	DATAMANAGER.SetDataValue(0, "ohhts_1500_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" 	, 0 , "N")
+	DATAMANAGER.SetDataValue(0, "ohhts_1500_001r", "InBlock1", "FID_INPUT_ISCD" 				, 0 , "STX@SX5E")
+	
+	'---------------------
+	' 러시아
+	'---------------------
+	DATAMANAGER.SetDataValue(0, "ohhts_1500_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" 	, 1 , "N")
+	DATAMANAGER.SetDataValue(0, "ohhts_1500_001r", "InBlock1", "FID_INPUT_ISCD" 				, 1 , "RUI@RTSI")
+	
+	'---------------------
+	' 서비스 호출
+	'---------------------
+	DATAMANAGER.RequestTranData("ohhts_1500_001r")
+
+End Function
+'============================================================================
+Function RequestChartData()
+
+	
+
+End Function
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID == "ohhts_1500_001r" then
+		
+		'---------------------
+		' 유로스톡스
+		'---------------------
+		sData0 = DATAMANAGER.GetDataValue(0, "ohhts_1500_001r", "OutBlock1", "FID_CNCN_PRPR" , 0)
+		sSign0 = DATAMANAGER.GetDataValue(0, "ohhts_1500_001r", "OutBlock1", "FID_CNCN_PRDY_VRSS_SIGN" , 0)
+		sDebi0 = DATAMANAGER.GetDataValue(0, "ohhts_1500_001r", "OutBlock1", "FID_CNCN_PRDY_VRSS" , 0)
+		sRate0 = DATAMANAGER.GetDataValue(0, "ohhts_1500_001r", "OutBlock1", "FID_CNCN_PRDY_CTRT" , 0)
+		
+		LabelData0.caption = sData0
+		LabelSign0.caption = sSign0
+		LabelDebi0.caption = sDebi0
+		LabelRate0.caption = sRate0
+		
+		'------------------------------------------------------------
+		'현재가 글자색상 설정
+		'------------------------------------------------------------
+		if sSign0 == "1" or sSign0 == "2" then
+			LabelData0.fgcolor = 10
+		elseif sSign0 == "4" or sSign0 == "5" then
+			LabelData0.fgcolor = 11
+		else
+			LabelData0.fgcolor = 12
+		end if
+		
+		'---------------------
+		' 러시아
+		'---------------------
+		sData1 = DATAMANAGER.GetDataValue(0, "ohhts_1500_001r", "OutBlock1", "FID_CNCN_PRPR" , 1)
+		sSign1 = DATAMANAGER.GetDataValue(0, "ohhts_1500_001r", "OutBlock1", "FID_CNCN_PRDY_VRSS_SIGN" , 1)
+		sDebi1 = DATAMANAGER.GetDataValue(0, "ohhts_1500_001r", "OutBlock1", "FID_CNCN_PRDY_VRSS" , 1)
+		sRate1 = DATAMANAGER.GetDataValue(0, "ohhts_1500_001r", "OutBlock1", "FID_CNCN_PRDY_CTRT" , 1)
+		
+		LabelData1.caption = sData1
+		LabelSign1.caption = sSign1
+		LabelDebi1.caption = sDebi1
+		LabelRate1.caption = sRate1
+		
+		'------------------------------------------------------------
+		'현재가 글자색상 설정
+		'------------------------------------------------------------
+		if sSign1 == "1" or sSign1 == "2" then
+			LabelData1.fgcolor = 10
+		elseif sSign1 == "4" or sSign1 == "5" then
+			LabelData1.fgcolor = 11
+		else
+			LabelData1.fgcolor = 12
+		end if
+		
+	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub ImageBg0_OnClick()
+	ClickButton(4,false)
+End Sub
+'============================================================================
+Sub ImageBg1_OnClick()
+	ClickButton(5,false)
+End Sub
+'============================================================================
+Function ClickButton(nIndx,bSlient)
+
+	'배경이미지 변경
+	for i = 0 to #gImageBG - 1
+		
+		if i == nIndx - 4 then
+			Form.SetCtlProp(gImageBG[i], "imgpath", "btn_line2_o.9")
+			
+		else
+			Form.SetCtlProp(gImageBG[i], "imgpath", "btn_line2_n.9")
+		end if
+		
+	next
+	
+	'선택지수 부모화면에 전달
+	if bSlient <> true then
+		Form.triggerEvent("#", "SELECT_JISU", "EURO@"..nIndx)
+	end if
+
+End Function
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "SELECT_INDEX" then
+		ClickButton(Cint(sParam),true)
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_1500_001r" trcode="ohhts_1500_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_1500_001r" title="시장종합_1" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" occurs="4" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="4" inout="out" _len="973" _ulen="765" >
+
+FID_CNCN_ISCD^FID관심종목코드^12^0^0^1^1200^0^0
+FID_CNCN_ISNM^FID관심종목명^50^0^0^2^1200^0^0
+FID_CNCN_PRPR^FID관심현재가^12^0^0^4^1200^0^0
+FID_CNCN_PRDY_VRSS_SIGN^FID관심전일대비부호^1^0^0^6^1200^0^0
+FID_CNCN_PRDY_VRSS^FID관심전일대비^12^0^0^5^1200^0^0
+FID_CNCN_PRDY_CTRT^FID관심전일대비율^9^0^0^7^1200^0^0
+FID_CNCN_ACML_VOL^FID관심누적거래량^18^0^0^14^1200^0^0
+FID_CNCN_ACML_TR_PBMN^FID관심누적거래대금^18^0^0^16^1200^0^0
+FID_CNCN_UPLM_ISSU_CNT^FID관심상한종목수^7^0^0^137^1200^0^0
+FID_CNCN_ASCN_ISSU_CNT^FID관심상승종목수^7^0^0^134^1200^0^0
+FID_CNCN_STNR_ISSU_CNT^FID관심보합종목수^7^0^0^136^1200^0^0
+FID_CNCN_DOWN_ISSU_CNT^FID관심하락종목수^7^0^0^135^1200^0^0
+FID_CNCN_LSLM_ISSU_CNT^FID관심하한종목수^7^0^0^138^1200^0^0
+FID_CNCN_OTST_STPL_QTY^FID관심미결제약정수량^18^0^0^116^1200^0^0
+FID_CNCN_MRKT_BASIS^FID관심시장베이시스^7^0^0^114^1200^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

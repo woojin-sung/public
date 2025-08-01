@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME_주요지수" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,340,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgMap" autosize="1" ly_vert="0,0,375,340,1" />
+		<RADIOGROUP name="rdoNation" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="10,10,200,37,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="국내" radioimage="btn_radio_select2_n.9.png" selforecolor="062:255255255" position="2,2,78,28" />
+				<RADIO no="1" text="해외" radioimage="btn_radio_select2_n.9.png" selforecolor="062:255255255" position="86,2,78,28" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LINKFORM name="linkfm0" ly_vert="0,125,375,204,1" />
+		<IMAGE name="iconBrief" visible="0" autosize="1" imgpath="icon_briefing" ly_vert="276,95,20,20,0" />
+		<LABEL name="lblBrief" fontsize="-3" caption="<![CDATA[시황브리핑 >]]>" halign="2" autofontsize="1" paddinginfo="0,0,1,0" click="1" ly_vert="290,90,70,32,1" />
+		<LABEL name="lbl44010" fontsize="-3" fontstyle="10" halign="2" autofontsize="1" paddinginfo="0,0,1,0" click="1" ly_vert="280,90,85,32,1" />
+		<IMAGE name="imgMarketInfoBg" visible="0" autosize="1" imgpath="map_line" ly_vert="184,52,100,25,0" />
+		<LABEL name="lblMarketInfo" visible="0" fgcolor="334:034034034" fontsize="-3" caption="장운영안내" click="1" ly_vert="210,26,80,32,0" />
+		<IMAGE name="iconMarketInfo" visible="0" autosize="1" imgpath="icon_notice" ly_vert="204,36,12,12,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11897" _ulen="11163" >
+'============================================================================
+' rdoNation	-> 상단 국가 선택영역
+' linkfm0			-> 실제 보여주는 맵파일 (gesture기능 on)
+'============================================================================
+
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+'============================================================================
+Dim g_nTab
+Dim g_szNowTime	'현재 시간
+Dim g_szRSelect	'0:장중 / 1:장전 / 2:장마감
+Dim g_szBizDt, g_szBizStart, g_szBizEnd	'영업일, 장시작시간, 장종료시간
+Dim g_OsType, g_nMode
+
+Dim gSelectNation
+gSelectNation = "USA"
+
+'============================================================================
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_nMode = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+	g_OsType = Form.GetSharedData("&OS_TYPE", false)
+	
+	nTab = Form.GetSharedData("mhidx50010_s1", true )
+	
+	if trim(nTab) = "" then
+		'----------------------------------------------------------------------
+		'미국장 장운영정보 조회(미국 정규장일때, 초기탭 해외로 설정)
+		'----------------------------------------------------------------------
+		RequestMarketTime("01")
+		
+	else
+		nTab = CInt(nTab)
+		rdoNation.currentindex = nTab
+		call rdoNation_OnClick(nTab)
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	iconBrief.setmaintainingratio("1")
+	iconMarketInfo.setMaintainingRatio("1")
+	'imgMarketInfoBg.setMaintainingRatio("1")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	RequestMarketTime("01")
+	
+End Sub
+
+'============================================================================
+Sub rdoNation_OnClick(nIndex)
+	linkfm0.linkfile = "empty"
+	SetLinkFormFile(nIndex)
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendRealBefore(szTranID)
+	
+	' ----------------------------------------------------------------------
+	' 전체 장운영 알람 자동갱신
+	' ----------------------------------------------------------------------
+	if szTranID == "ohhts_whol_mkop" then
+		DATAMANAGER.SetDataValue(1, "ohhts_whol_mkop", "InBlock1", "FIDR_SHRN_ISCD", 0, "*")	' 단축종목코드
+	end if
+	
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	' ----------------------------------------------------------------------
+	' 영업일 조회 (iOS 로딩속도 이슈로 서비스로 조회)
+	' ----------------------------------------------------------------------
+	if szTranID == "obcpp_bsdy_021r" then
+		DATAMANAGER.SetDataValue(0, "obcpp_bsdy_021r", "InBlock1", "FID_INPUT_COND_SCR_DIV_CODE", 0, "514")
+	end if	
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveRealComplete(szTranID)
+	
+	if szTranID = "ohhts_whol_mkop" then
+		szMkCode = DATAMANAGER.GetDataValue(1, szTranID , "OutBlock1" , "FIDR_MKOP_TRNM_CODE" , 0)
+		
+		if szMkCode = "P100" then		'장 시작 시, 서비스 조회
+			g_szNowTime = g_szBizStart
+			g_szRSelect = "0"
+			Setting_Market()
+			Form.triggerEvent("linkfm0", "MARKET_SETTING", g_szRSelect)
+			
+		elseif szMkCode = "P199" then	'장 마감 시, 서비스 조회
+			g_szNowTime = g_szBizEnd
+			g_szRSelect = "2"
+			Setting_Market()
+			Form.triggerEvent("linkfm0", "MARKET_SETTING", g_szRSelect)
+		end if
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	if szTranID = "obcpp_bsdy_021r" then
+		
+		g_szBizDt = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_STND_DATE1" , 0)		' 영업일
+		g_szBizStart = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_STA_HOUR" , 0)	' 장 시작시간
+		g_szBizEnd = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FID_FIN_HOUR" , 0)		' 장 종료시간
+		
+		if g_nMode = "1" or g_nMode = 1 then		'테스트용 하드코딩
+			g_szBizStart = "090000"	
+			g_szBizEnd = "153000"
+		end if
+		
+		CheckingMarket()	' 국내 장운영 정보 세팅
+	
+	'-----------------------------------------------------------
+	'해외 장운영정보 조회
+	'-----------------------------------------------------------
+	elseif szTranID == "obtro_comn_010r" then
+	
+		'-----------------------------------------------------------
+		' 장운영정보
+		'-----------------------------------------------------------
+		sMkop = DATAMANAGER.GetDataValue(0, "obtro_comn_010r", "OutBlock1", "OVRS_MKOP_CLS_CODE" , 0)
+		
+		'---------------------------------------------------------------
+		' 미국 정규장 시, 초기 탭 "해외"로 설정. 그외에는 "국내"로 설정
+		' 004:정규개시 / 011:장개시
+		'---------------------------------------------------------------
+		if sMkop == "004" or sMkop == "011" then
+			
+			rdoNation.currentindex = 1
+			call rdoNation_OnClick(1)
+		
+		else
+		
+			rdoNation.currentindex = 0
+			call rdoNation_OnClick(0)
+		
+		end if
+		'---------------------------------------------------------------
+			
+	end if
+	
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+	'---------------------------------------------------------------
+	' 미국장운영정보 조회 오류 시, 무조건 국내탭으로 초기탭 설정
+	'---------------------------------------------------------------
+	if szTranID == "obtro_comn_010r" then
+	
+		rdoNation.currentindex = 0
+		call rdoNation_OnClick(0)
+	
+	end if
+	
+End Sub
+
+'============================================================================
+'	장 시간 체크
+'============================================================================
+Sub CheckingMarket()
+	Dim szToday
+	
+	szToday = Form.GetSharedData("&HOST_DATE", false)
+	g_szNowTime = Form.GetSharedData("&HOST_TIME", false)
+
+	g_szRSelect = ""
+	
+	if Trim(g_szBizDt) = Trim(szToday) then
+		if CLng(g_szNowTime) < CLng(g_szBizStart) then										'영업일 장 전
+			g_szRSelect = "1"
+			DATAMANAGER.RequestRealData("ohhts_whol_mkop")	'장 운영 실시간 호출
+		elseif CLng(g_szNowTime) < CLng(g_szBizEnd) then										'영업일 장 중
+			g_szRSelect = "0"
+			DATAMANAGER.RequestRealData("ohhts_whol_mkop")	'장 운영 실시간 호출
+		elseif CLng(g_szNowTime) > CLng(g_szBizEnd) or CLng(g_szNowTime) == CLng(g_szBizEnd) then	'영업일 장 마감
+			g_szRSelect = "2"
+		end if
+	else
+		g_szRSelect = "2"	'영업일 아님 (장마감표시)
+	end if
+	
+	call Setting_Market()
+	 
+End Sub
+
+'============================================================================
+' 장 정보/시간 세팅
+'============================================================================
+Sub Setting_Market()
+
+	Form.triggerEvent("linkfm0", "MARKET_SETTING", g_szRSelect)
+	
+End Sub
+
+'============================================================================
+Function SetLinkFormFile(nRdoIndex)
+	
+	'-----------------------------------------------
+	' 국내
+	'-----------------------------------------------
+	if nRdoIndex == 0 then
+	
+		linkfm0.linkfile = "mhidx50010_t00"
+		imgMap.imgpath = "map_01kor.png"
+		
+		DATAMANAGER.RequestTranData("obcpp_bsdy_021r")	'영업일 정보 조회
+		
+		gSelectNation = ""
+		SetShowMarketInfo(false)
+		SetShowBreif(true)
+		
+	'-----------------------------------------------
+	' 해외
+	'-----------------------------------------------
+	elseif nRdoIndex == 1 then
+	
+		linkfm0.linkfile = "mhidx50010_t10"
+		imgMap.imgpath = "map_02us.png"
+		
+		gSelectNation = "USA"
+		SetShowMarketInfo(true)
+		SetShowBreif(true)
+		
+	end if
+
+End Function
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	'------------------------------------------
+	' 해외지수 클릭 시, 배경 지도이미지 변경
+	'------------------------------------------
+	if sEventName == "CHANGE_MAP_IMAGE" then
+		
+		arrData = Split(sParam,"@")
+		
+		if #arrData > 1 then
+			
+			if arrData(0) == "AME" then
+			
+				SetShowMarketInfo(true)
+				SetShowBreif(true)
+				
+				imgMap.imgpath = "map_02us.png"
+				gSelectNation = "USA"
+			
+			elseif arrData(0) == "ASIA" then
+				
+				SetShowMarketInfo(true)
+				SetShowBreif(true)
+				
+				if arrData(1) == "0" then
+					imgMap.imgpath = "map_03_01jap.png"
+					gSelectNation = "JAPAN"
+				elseif arrData(1) == "1" then
+					imgMap.imgpath = "map_03_02chi.png"
+					gSelectNation = "CHINA"
+				elseif arrData(1) == "2" then
+					imgMap.imgpath = "map_03_02chi.png"
+					gSelectNation = "CHINA"
+				elseif arrData(1) == "3" then
+					imgMap.imgpath = "map_03_03hk.png"
+					gSelectNation = "HONGKONG"
+				end if
+			
+			elseif arrData(0) == "EURO" then
+				
+				SetShowMarketInfo(false)
+				SetShowBreif(false)
+				
+				if arrData(1) == "4" then
+					imgMap.imgpath = "map_04_01fra.png"
+				elseif arrData(1) == "5" then
+					imgMap.imgpath = "map_04_02ger.png"
+				elseif arrData(1) == "6" then
+					imgMap.imgpath = "map_04_04net.png"
+				elseif arrData(1) == "7" then
+					imgMap.imgpath = "map_04_05eu.png"
+				end if
+				
+				gSelectNation = ""
+'	
+			end if
+		
+		end if
+		
+	end if
+	
+End Sub
+
+'============================================================================
+' 미국시장 장운영정보 조회
+'============================================================================
+Function RequestMarketTime(sCountryCode)
+
+	DATAMANAGER.SetDataValue(0, "obtro_comn_010r", "InBlock1", "OVRS_STCK_MRKT_TR_CLS_CODE" , 0 , sCountryCode)
+	DATAMANAGER.RequestTranData("obtro_comn_010r")
+		
+End Function
+
+'============================================================================
+' 시황브리핑(44010) 이동
+'============================================================================
+Sub lbl44010_OnClick()
+	nIndex = CInt(rdoNation.currentindex)
+	
+	Form.SetSharedData("mhidx50010_s1", nIndex )
+	
+	if nIndex = 0 then
+		Form.OpenScreen("44010" , "국내시황"&"★"&"주식")
+	elseif nIndex = 1 then
+		Form.OpenScreen("44010" , "해외시황"&"★"&"미국")
+	end if
+End Sub
+
+'============================================================================
+' 20240709 시황브리핑 라벨/이미지 보임처리 제어
+'============================================================================
+Function SetShowBreif(bShow)
+
+	if bShow then
+	
+		lblBrief.visible = true
+		lbl44010.visible = true
+		'iconBrief.visible = true
+	
+	else
+	
+		lblBrief.visible = false
+		lbl44010.visible = false
+		'iconBrief.visible = false
+	
+	end if
+
+End Function
+
+'============================================================================
+' 20240709 장운영안내 보임처리 제어
+'============================================================================
+Function SetShowMarketInfo(bShow)
+
+	if bShow then
+		
+		lblMarketInfo.visible = true
+		imgMarketInfoBg.visible = true
+		iconMarketInfo.visible = true
+		
+	else
+	
+		lblMarketInfo.visible = false
+		imgMarketInfoBg.visible = false
+		iconMarketInfo.visible = false
+		
+	end if
+
+End Function
+
+'============================================================================
+Sub lblMarketInfo_OnClick()
+	
+	if gSelectNation <> "" then
+		Form.OpenPopupAnimation("mhtro16100_p30", gSelectNation, "", "2")
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_whol_mkop" trcode="ohhts_whol_mkop" />
+			<TRAN tranid="obcpp_bsdy_021r" trcode="obcpp_bsdy_021r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtro_comn_010r" trcode="obtro_comn_010r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_whol_mkop" title="전체 장운영 알람 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="59" _ulen="47" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="125" _ulen="99" >
+
+FIDR_MKOP_TRNM_CODE^FIDR장운영전송코드^4^0^0^0^0^0^0
+FIDR_MKOP_CLS_NAME^FIDR장운영구분명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_bsdy_021r" title="업무공통_영업일조회(당일비영업" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="83" _ulen="63" >
+
+FID_INPUT_COND_SCR_DIV_CODE^FID입력조건화면분류코드^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="329" _ulen="273" >
+
+FID_STND_DATE1^FID기준일자1^8^0^0^0^0^0^0
+FID_STND_DATE2^FID기준일자2^8^0^0^0^0^0^0
+FID_STND_DATE3^FID기준일자3^8^0^0^0^0^0^0
+FID_STND_DATE4^FID기준일자4^8^0^0^0^0^0^0
+FID_STND_DATE5^FID기준일자5^8^0^0^0^0^0^0
+FID_STA_HOUR^FID시작시간^6^0^0^0^0^0^0
+FID_FIN_HOUR^FID종료시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtro_comn_010r" title="해외주식 장운영정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="85" _ulen="61" >
+
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="244" _ulen="178" >
+
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+OVRS_MKOP_CLS_CODE^해외장운영구분코드^3^0^0^0^0^0^0
+MRKT_BEGN_TIME^시장개시시각^9^0^0^0^0^0^0
+MRKT_FIN_TIME^시장종료시각^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

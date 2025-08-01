@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="HOME(한국지수)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,360,204,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="4" tabheadheight="0" usepg="1" pgbarheight="10" ly_vert="0,0,375,204,1" >
+			<PAGE name="page1" caption="한국지수 1페이지" linkfile="mhidx50010_t01" loadingtype="1" />
+			<PAGE name="page2" caption="한국지수 2페이지" linkfile="mhidx50010_t02" loadingtype="1" />
+			<PAGE name="page3" caption="한국지수 3페이지" linkfile="mhidx50010_t03" loadingtype="1" />
+			<PAGE name="page4" caption="한국지수 4페이지" linkfile="mhidx50010_t04" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1022" _ulen="1000" >
+Dim g_szNowTime	'현재 시간
+Dim g_szRSelect	'0:장중 / 1:장전 / 2:장마감
+
+'============================================================================
+Sub Form_OnFormInit()
+	nTab = CInt(Form.GetSharedData("mhidx50010_t00", true))
+	if nTab = "" then
+		nTab = 0
+	end if
+	
+	FormTab0.currenttab = nTab
+	call FormTab0_OnTabChanged(nTab)
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "MARKET_SETTING" then
+		g_szRSelect = sParam
+		Form.triggerEvent("FormTab0."& FormTab0.currenttabpageid, sEventName, sParam)
+		Form.triggerEvent("FormTab0."& FormTab0.currenttabpageid, "Reload_Data", "")
+	end if
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("FormTab0."& FormTab0.currenttabpageid, "MARKET_SETTING", g_szRSelect)
+	Form.triggerEvent("FormTab0."& FormTab0.currenttabpageid, "Reload_Data", "")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

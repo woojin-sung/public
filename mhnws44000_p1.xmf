@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44000" scrname="뉴스/공시_상세팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="webNews01" urlpath="about:blank" ly_vert="0,79,375,529,1" />
+		<TABLE name="tblHeader01" colcount="4" rowcount="2" designorder="1" ly_vert="0,0,375,78,1" >
+			<COL_INFO ly_vert_width="100,100,85,90" />
+			<ROW_INFO ly_vert_height="39,39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,3,0" halign="0" line="1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,1" mask="1,0,,,1,####/##/##,0,1,1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" line="0,1" mask="1,0,,,1,##:##:##,0,1,1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" line="0,1" impidxs="" />
+				<CELL cell_ly="3,1,3,1" line="0,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnZoomIn" caption="가+" fontsize="1" ly_vert="287,40,39,39,1" />
+		<BUTTON name="btnZoomOut" caption="가-" fontsize="-1" ly_vert="333,40,39,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4407" _ulen="4341" >
+'============================================================================
+' 01.화면명 	: 뉴스/공시
+' 02.화면설명	: 뉴스/공시_상세팝업창
+' 03.작성	: 2016.01.07
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szDate, g_szTime, g_szNewCorpName, g_szNewKey, g_szNewsCorpCode
+Dim g_nFontSize					'웹뷰 폰트사이즈
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'btnZoomIn_OnClick
+'============================================================================
+Sub btnZoomIn_OnClick()
+
+	if g_nFontSize = 0 then
+		webNews01.fontsize = 1
+		g_nFontSize = 1
+	elseif g_nFontSize = 1 then
+		webNews01.fontsize = 2
+		g_nFontSize = 2
+	elseif g_nFontSize = -2 then
+		webNews01.fontsize = -1
+		g_nFontSize = -1
+	elseif g_nFontSize = -1 then 
+		webNews01.fontsize = 0
+		g_nFontSize = 0
+	else 
+		webNews01.fontsize = 2
+		g_nFontSize = 2
+	end if
+End Sub
+
+
+'============================================================================
+'btnZoomOut_OnClick
+'============================================================================
+Sub btnZoomOut_OnClick()
+
+	if g_nFontSize = 0 then
+		webNews01.fontsize = -1
+		g_nFontSize = -1
+	elseif g_nFontSize = -1 then
+		webNews01.fontsize = -2
+		g_nFontSize = -2
+	elseif g_nFontSize = 2 then
+		webNews01.fontsize = 1
+		g_nFontSize = 1
+	elseif g_nFontSize = 1 then 
+		webNews01.fontsize = 0
+		g_nFontSize = 0
+	else
+		webNews01.fontsize = -2
+		g_nFontSize = -2
+	end if
+End Sub
+
+
+'============================================================================
+'Form_OnFormInitBefore
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Dim szData, arrData
+
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData,"|")
+	
+	if UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+
+	g_szDate			= arrData(1)
+	g_szTime			= arrData(2)
+	g_szNewCorpName	= arrData(3)
+	g_szNewKey		= arrData(4)
+	g_szNewsCorpCode	= arrData(5)
+	
+	tblHeader01.SetCellString( 0, 0, arrData(0))
+	tblHeader01.SetCellString( 1, 0, g_szDate)
+	tblHeader01.SetCellString( 1, 1, g_szTime)
+	tblHeader01.SetCellString( 1, 2, g_szNewCorpName)
+End Sub
+
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	g_nFontSize = 0
+    	Form.SetScreenName("뉴스/공시")
+	DATAMANAGER.RequestTranData( "ohhts_news_002r" )
+
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_002r", "InBlock1", "FID_INPUT_SRCH_NAME"  		, 0 , g_szNewKey )
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_002r", "InBlock1", "FID_INPUT_NEWS_OFER_ENTP_CODE" , 0 , g_szNewsCorpCode )	
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim szData, szStrTemp, szNewsData
+	
+	If szTranID = "ohhts_news_002r" Then
+	    Dim nCnt, i, szUrlPath
+	    
+	    szData = ""
+	    szStrTemp = ""
+	    szNewsData = ""
+	    
+	    nCnt = DATAMANAGER.GetDataCount( 0, "ohhts_news_002r", "OutBlock1" )	    	    
+
+		for i =0 to nCnt - 1
+		    szStrTemp 	= DATAMANAGER.GetDataValue( 0, "ohhts_news_002r", "OutBlock1", "FID_NEWS_CNTT", i )
+		    szNewsData	= szNewsData & szStrTemp
+	    next
+	    
+	End If
+
+	webNews01.loaddata = szNewsData
+
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_news_002r" trcode="ohhts_news_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_news_002r" title="종합뉴스/시황(본문)" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="140" _ulen="110" >
+
+FID_INPUT_SRCH_NAME^FID입력검색명^40^0^0^0^0^0^0
+FID_INPUT_NEWS_OFER_ENTP_CODE^FID입력뉴스제공업체코드^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="8" inout="out" _len="57" _ulen="45" >
+
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="88" _ulen="76" >
+
+FID_DATE^FID일자^8^0^0^0^0^0^0
+FID_NEWS_CNTT^FID뉴스내용^2048^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
