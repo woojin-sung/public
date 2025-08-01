@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="93110" scrname="종목교체(주식매도) 신청" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,587,1" />
+	<CONTROL_INFO>
+		<EDIT name="EdtPW" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" savecheckpwd="1" ly_vert="283,9,86,39,1" />
+		<TABLE name="TableMain" insidelinecolor="102:255255255" colcount="3" rowcount="4" designorder="1" ly_vert="8,59,360,120,1" >
+			<COL_INFO ly_vert_width="120,120,120" />
+			<ROW_INFO ly_vert_height="30,30,30,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="075:244244244" caption="종목번호" impidxs="" />
+				<CELL cell_ly="1,0,1,0" bgcolor="075:244244244" caption="종목명" impidxs="" />
+				<CELL cell_ly="2,0,2,0" bgcolor="075:244244244" caption="보유수량" impidxs="" />
+				<CELL cell_ly="0,1,0,1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" halign="2" mask="0,0,,,0,,0,1,1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="075:244244244" caption="희망매도수량" impidxs="" />
+				<CELL cell_ly="1,2,2,2" bgcolor="075:244244244" caption="매매예정계좌" impidxs="" />
+				<CELL cell_ly="0,3,0,3" impidxs="" />
+				<CELL cell_ly="1,3,2,3" mask="1,0,,,1,####-####-##,0,1,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="BtnAplt" enable="0" caption="신청" fontstyle="01" btnimage="btn_05.9" ly_vert="121,446,132,35,1" />
+		<LABEL name="Label0" fontsize="-2" caption="* 본인 명의 주식매매 계좌로 대체 출고한 뒤 매도 후 매도" ly_vert="10,191,354,32,1" />
+		<LABEL name="Label1" fontsize="-2" caption="대금을 저축장려 계좌로 입금해야만 저축장려 계좌가" ly_vert="20,211,354,32,1" />
+		<LABEL name="Label2" fontsize="-2" caption="유지됩니다." ly_vert="20,231,78,32,1" />
+		<LABEL name="Label3" fgcolor="006:213049051" fontsize="-2" caption="매도 대금을 재입금하지 않았을 경우 저축장려" ly_vert="93,231,279,32,1" />
+		<LABEL name="Label4" fgcolor="006:213049051" fontsize="-2" caption="계좌가 해지되므로 이 점 유의바랍니다." ly_vert="20,251,279,32,1" />
+		<LABEL name="Label5" fontsize="-2" caption="* 저축장려 계좌로 재입금 후 펀드 매수하시기 바랍니다." ly_vert="10,271,354,32,1" />
+		<LABEL name="Label6" fgcolor="006:213049051" fontsize="-2" caption="매수 기한까지 매수되지 않은 예수금은 자사주(메리츠증권)" ly_vert="20,291,347,32,1" />
+		<LABEL name="Label7" fgcolor="006:213049051" fontsize="-2" caption="매수 처리됩니다." ly_vert="20,311,160,32,1" />
+		<LABEL name="Label8" fontsize="-2" caption="※ 주식 매도 업무처리 프로세스" ly_vert="10,341,354,32,1" />
+		<LABEL name="Label9" fontsize="-2" caption="1. 해당 화면에서 신청 2. 인사팀 승인 처리 3. 본인 명의" ly_vert="10,361,354,32,1" />
+		<LABEL name="Label10" fontsize="-2" caption="위탁계좌로 출고 신청 4. 주식 매도 5. 저축장려계좌로 매도" ly_vert="10,381,354,32,1" />
+		<LABEL name="Label11" fontsize="-2" caption="대금 입금 6. 펀드 매수" ly_vert="10,401,354,32,1" />
+		<COMBO name="CmbAcnt" ly_vert="8,9,270,39,1" />
+		<EDIT name="EdtApltQty" mask="0,0,,,0,,0,1,1" halign="2" imetype="1" ly_vert="8,149,121,30,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6428" _ulen="6196" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 저축장려계좌 투자비율조정
+' 02. 화면설명 : 저축장려계좌 투자비율조정
+' 03. 작    성 : 2021.05.07 장원혁
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'전역 변수 선언
+Dim ACNO
+Dim ASNO
+Dim PASSWORD
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    InitCtrl()
+
+    DATAMANAGER.SetDataValue(0 , "obsai_deal_089r" , "InBlock1" , "CSNO" , 0 , Form.GetSharedData("&CUST_NUM", false ))
+    DATAMANAGER.RequestTranData("obsai_deal_089r")
+    
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	  
+    If szTranID == "obsai_deal_089r" Then
+    
+        ACNO = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "ACNO" , 0)
+        ASNO = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "ASNO" , 0)
+        PRNM = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "PRCD_NAME" , 0)
+        Form.SetCtlProp("CmbAcnt" , "cbadddatatext" , Left(ACNO,4)&"-"&Right(ACNO,4)&"-"&ASNO&" "&PRNM)
+
+    End If
+    
+    If szTranID == "obacp_opop_066r" Then
+        
+        ACNO = Left(REPLACE(CmbAcnt.caption,"-",""),8)
+        ASNO = MID(REPLACE(CmbAcnt.caption,"-",""),9,2) 
+        DATAMANAGER.SetDataValue(0 , "obrtp_save_016r" , "InBlock1" , "ACNO" , 0 , ACNO)
+        DATAMANAGER.SetDataValue(0 , "obrtp_save_016r" , "InBlock1" , "ASNO" , 0 , ASNO)
+        DATAMANAGER.RequestTranData("obrtp_save_016r")
+    End If
+    
+    If szTranID == "obrtp_save_015a" Then
+        InitCtrl()
+          
+        Form.ShowAlert("알림", "신청이 완료되었습니다.")
+    End If
+	  
+    If szTranID == "obrtp_save_016r" Then
+    
+        TKWR_ABLE_QTY = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "TKWR_ABLE_QTY" , 0)
+        DEAL_ACNO  = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "DEAL_ACNO"     , 0)
+        DEAL_ASNO  = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "DEAL_ASNO"     , 0)
+        
+        TableMain.SetCellString(1, 0, "008560"     )
+        TableMain.SetCellString(1, 1, "메리츠증권" )
+        TableMain.SetCellString(1, 2, TKWR_ABLE_QTY)
+        TableMain.SetCellString(3, 0, 0            )
+        TableMain.SetCellString(3, 1, DEAL_ACNO & DEAL_ASNO  )
+	
+        EdtApltQty.enable = True
+        BtnAplt.enable = True
+	
+    End If
+	  
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+    strMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+    If strMsg = "" Then
+        Form.ShowAlert("알림", szErrMsg)
+    Else
+        Form.ShowAlert("알림", szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")")
+    End If	
+    
+    If szTranID == "obacp_opop_066r" Then
+        InitCtrl()
+    End If
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+    
+    If sKeyName == "APLT_YN" Then
+        If sRet == "ok" Then
+            Run()
+        End If
+    End If	
+End Sub
+
+'============================================================================
+Sub EdtPW_OnEditComplete()
+
+    ACNO = Left(REPLACE(CmbAcnt.caption,"-",""),8) '작대기 제거
+    PWD = EdtPW.caption
+
+    DATAMANAGER.SetDataValue(0, "obacp_opop_066r" , "InBlock1" , "ACNO"     , 0 , ACNO)
+    DATAMANAGER.SetDataValue(0, "obacp_opop_066r" , "InBlock1" , "ACNT_PWD" , 0 , PWD )
+    DATAMANAGER.RequestTranData("obacp_opop_066r")
+    
+End Sub
+
+'============================================================================
+Sub InitCtrl()
+    TableMain.SetCellString(1 , 0 , "")
+    TableMain.SetCellString(1 , 1 , "")
+    TableMain.SetCellString(1 , 2 , "")
+    TableMain.SetCellString(3 , 0 , "")
+    TableMain.SetCellString(3 , 1 , "")
+    EdtApltQty.caption = ""
+    EdtApltQty.enable = False
+    BtnAplt.enable = False
+End Sub
+
+'============================================================================
+Sub BtnAplt_OnClick()
+
+	RMND_QTY = TableMain.GetCellString(1 , 2)
+	APLT_QTY = EdtApltQty.caption
+
+    If APLT_QTY == "" Then
+        APLT_QTY = 0
+    End If
+    
+    If RMND_QTY == "" Then
+        RMND_QTY = 0
+    End If
+
+	If CDBL(APLT_QTY) == 0 Then
+         ErrMsg = "희망매도수량을 입력해주세요."
+         Form.ShowAlert("알림", ErrMsg)
+         Exit Sub
+	End If
+	
+	If CDBL(APLT_QTY) > CDBL(RMND_QTY) Then
+         ErrMsg = "신청수량이 출고가능수량보다 큽니다."
+         Form.ShowAlert("알림", ErrMsg)
+         Exit Sub
+	End If
+
+    Form.MsgBox("알림", "신청하시겠습니까?\n(신청수량 : " & APLT_QTY & "주)", "APLT_YN", 1)
+	
+End Sub
+
+'============================================================================
+Sub Run()
+
+    RMND_QTY = TableMain.GetCellString(1 , 2)
+    APLT_QTY = EdtApltQty.caption
+
+    ACNT_NO = Left(REPLACE(CmbAcnt.caption,"-",""),10)
+    DEAL_ACNT_NO = TableMain.GetCellString(3 , 1)
+
+    DATAMANAGER.SetDataValue(0 , "obrtp_save_015a" , "InBlock1" , "PROS_CLS_CODE" , 0 , "I"                  )
+    DATAMANAGER.SetDataValue(0 , "obrtp_save_015a" , "InBlock1" , "ACNO"          , 0 , Left(ACNT_NO,8)      )
+    DATAMANAGER.SetDataValue(0 , "obrtp_save_015a" , "InBlock1" , "ASNO"          , 0 , Right(ACNT_NO,2)     )
+    DATAMANAGER.SetDataValue(0 , "obrtp_save_015a" , "InBlock1" , "ISCD"          , 0 , "A008560"            )
+    DATAMANAGER.SetDataValue(0 , "obrtp_save_015a" , "InBlock1" , "APLT_QTY"      , 0 , APLT_QTY             )
+    DATAMANAGER.SetDataValue(0 , "obrtp_save_015a" , "InBlock1" , "DEAL_ACNO"     , 0 , Left(DEAL_ACNT_NO,8) )
+    DATAMANAGER.SetDataValue(0 , "obrtp_save_015a" , "InBlock1" , "DEAL_ASNO"     , 0 , Right(DEAL_ACNT_NO,2))	
+    
+    DATAMANAGER.RequestTranData("obrtp_save_015a")
+    
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obrtp_save_016r" trcode="obrtp_save_016r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obrtp_save_015a" trcode="obrtp_save_015a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obsai_deal_089r" trcode="obsai_deal_089r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obacp_opop_066r" trcode="obacp_opop_066r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obrtp_save_016r" title="저축장려 대체가능계좌 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="149" _ulen="109" >
+
+DEAL_ACNO^매매계좌번호^8^0^0^0^0^0^0
+DEAL_ASNO^매매계좌일련번호^2^0^0^0^0^0^0
+TKWR_ABLE_QTY^출고가능수량^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrtp_save_015a" title="저축장려계좌 종목교체내역 관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="423" _ulen="315" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+APLY_DATE^적용일자^8^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+PROS_STAT_CLS_CODE^처리상태구분코드^1^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+APLT_QTY^신청수량^19^0^7^0^0^0^0
+DEAL_ACNO^매매계좌번호^8^0^0^0^0^0^0
+DEAL_ASNO^매매계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obsai_deal_089r" title="집합투자증권가입내역조회(저축?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="40" _ulen="32" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="284" _ulen="210" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRCD_NAME^상품코드명^40^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+ACO_CLS_CODE^자회사구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="226" _ulen="170" >
+
+RMND_SRNO^잔고일련번호^3^0^0^0^0^0^0
+JOIN_DATE^가입일자^8^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+ISCD_NAME^종목코드명^40^0^0^0^0^0^0
+TRST_FUND_CLS_CODE^자사주펀드구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_opop_066r" title="계좌Control 비밀번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="196" _ulen="150" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_EMPNO^관리 직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

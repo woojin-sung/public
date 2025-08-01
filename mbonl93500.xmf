@@ -1,0 +1,776 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="93500" scrname="신용공여 고객정보확인서" version="2" writer="이현우" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="cmbAcnt" bgcolor="052:255255255" itemcodetype="100,105,106,119,200" etcfunctions="" accpwdctl="edtPassword" totalacc="1" ly_vert="6,9,271,39,1" />
+		<IMAGE name="imgBg" imgpath="input_03_n.9" ly_vert="12,136,350,160,1" />
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,9,39,39,1" />
+		<EDIT name="edtPassword" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" savecheckpwd="1" ly_vert="283,9,86,39,1" />
+		<BUTTON name="btnOpenpopup" caption="적정성 판단 보고서 ＞" fgcolor="004:000000000" fontsize="-1" btnimage="alpha" halign="2" ly_vert="213,298,146,30,1" />
+		<LABEL name="lblDim" visible="0" transmode="0" ly_vert="375,0,375,562,0" />
+		<LABEL name="lblName" fontsize="3" ly_vert="6,64,363,32,1" />
+		<LABEL name="lblKYC" fontsize="3" ly_vert="6,89,363,32,1" />
+		<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" designorder="1" ly_vert="16,140,343,153,1" >
+			<COL_INFO ly_vert_width="170,173" />
+			<ROW_INFO ly_vert_height="51,51,51" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,1" caption="적정성판단결과" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,1" fontsize="2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,1" caption="등록일" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,1" fontsize="2" mask="1,0,,,1,####.##.##,0,1,1,0,0" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="만기일" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" line="0,0" fontsize="2" mask="1,0,,,1,####.##.##,0,1,1,0,0" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="tblText" insidelinecolor="102:255255255" colcount="1" rowcount="5" outline="0000" designorder="1" ly_vert="6,352,343,100,1" >
+			<COL_INFO ly_vert_width="343" />
+			<ROW_INFO ly_vert_height="20,20,20,20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="146:124124124" halign="0" line="0,0" caption="본 확인서는 [금융소비자 보호에 관한 법률]에 따라 일반금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="146:124124124" halign="0" line="0,0" caption="융소비자의 투자자정보를 파악하여 대출성 상품의 적합, 적" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="146:124124124" halign="0" line="0,0" caption="정성을 판단하기 위한 기초자료로 활용됩니다." fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="146:124124124" halign="0" line="0,0" caption="고객의 상황에 부합하거나 가장 가까운 항목을 정확히 선택" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="146:124124124" halign="0" line="0,0" caption="또는 그 내용을 구체적으로 기재하여 주시기 바랍니다." fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnPwd" btnimage="alpha" ly_vert="283,9,86,39,1" />
+		<BUTTON name="btnContinue" visible="0" caption="약정진행" fgcolor="004:000000000" bgcolor="271:236236236" fontstyle="01" btnimage="btn_pop1.9.png" ly_vert="183,512,194,50,0" />
+		<CALENDAR name="Calendar0" dispmode="543384947" ly_vert="726,605,140,32,1" />
+		<BUTTON name="BtnExecute" enable="0" caption="등록하기" btnimage="btn_15.9" ly_vert="-2,512,380,50,1" />
+		<LINKFORM name="LinkForm" ly_vert="375,0,375,560,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="20828" _ulen="18962" >
+'============================================================================
+' 화 면 명 : 
+' 화면설명 : KYC메인
+' 작    성 : 2021.03.15 : 이현우
+'            2021.10.19 : v001. 당일 진단 회차가 2~3회의 경우 재진단사유 팝업
+'============================================================================
+Dim g_szAcno
+Dim g_szAsno
+Dim g_szEdtPwd
+Dim g_szInputData		'다른폼에서 넘어온 데이터
+Dim g_szCustClsCode	'개인/법인 여부 (1:개인, 2:법인)
+Dim g_szPlainRm		'메모리평문 적용유무 (0:미적용 / 1:적용)
+Dim g_szContClsCode    '접촉구분코드 (4:온라인)
+Dim g_szAnxtAprt_Yn	'부적정여부(Y:부적정, N:적정)
+'v001 START
+Dim g_szApltReasClcd	'신청사유구분코드 0.없음 1.사실관계착오 2.오기 3.기타
+Dim g_szRmrk			'비고
+'v001 END
+Dim QUERY
+Dim EXECUTE
+QUERY   = "1"		'질의문
+EXECUTE = "2"		'입력
+g_szApltReasClcd = "0"
+g_szRmrk         = ""
+
+'v001 START
+Dim g_szPopupYN
+Dim g_szIsncYN
+g_szPopupYN = "N"
+g_szIsncYN  = "N"
+'v001 END
+
+Dim g_nChangeCnt
+Dim g_szChangeData
+Dim g_tChangeData
+Dim g_szCustName
+'============================================================================
+' 폼 초기화
+'============================================================================
+Sub Form_OnFormInit()
+	g_szAnxtAprt_Yn = ""	
+	g_nChangeCnt = 0
+	g_szAcno = cmbAcnt.total				'계좌번호
+	g_szAsno = cmbAcnt.sequence				'일련번호
+	g_szContClsCode = "4"					'접촉구분(4:온라인)
+	btnOpenpopup.visible = 0
+	'LHR 수정
+	if Len(edtPassword.caption) > 0 then
+		edtPassword.caption = ""
+	end if
+	'타폼 링크데이터 처리
+	g_szInputData = Form.GetOpenLinkData()
+	splitData = Split(g_szInputData, "||")
+	szAcno = splitData(0)	'계좌번호
+	if Trim(szAcno) <> "" then
+		g_szPopupYN = "Y"
+	end if
+	
+	'LHR 수정
+	if g_szPopupYN == "N" then
+		BtnExecute.top = 512
+		btnContinue.top = 512
+		LinkForm.height = 565
+	else
+		BtnExecute.top = 557
+		btnContinue.top = 557
+		LinkForm.height = 607
+	end if
+	Form.SetSharedData("mbonl93500_g_szPopupYN" , g_szPopupYN)
+	'LHR 수정
+	DATAMANAGER.RequestTranData("obcsb_acif_000r")
+	btnPwd.bringfront("1")	'20220425 HWG : 계좌비밀번호 입력 개선
+	'대출 고객정보 확인 조회 for 개인/법인 구분
+	'DATAMANAGER.RequestTranData("oblon_basc_102r")
+End Sub
+'============================================================================
+' 폼 종료시 부모폼에 리턴
+'============================================================================
+Sub Form_OnFormClose()
+	'부적정여부 Return to 담보대출신청_약정등록
+	Form.SendReturnToParent( "mbonl93500" , g_szAnxtAprt_Yn )
+End Sub
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+     Dim szAct
+     szAct = cmbAcnt.caption
+     '대출 고객정보 확인 조회 for 개인/법인 구분
+     if szTranID == "oblon_basc_102r" then		
+		g_szAcno = cmbAcnt.total				'계좌번호
+		g_szAsno = cmbAcnt.sequence				'일련번호
+		DATAMANAGER.SetDataValue(0, "oblon_basc_102r", "InBlock1", "ACNO",     0, g_szAcno)
+	End If
+	
+	'대출 고객정보 확인서 응답 등록
+	if szTranID = "oblon_basc_101a" then
+		DATAMANAGER.ClearInputData(0, szTranID )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "PROS_CLS_CODE" 		, 0 , "1" )	'Insert
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO" 				, 0 , cmbAcnt.total )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNT_PWD" 			, 0 , g_szEdtPwd )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "CONT_CLS_CODE" 		, 0 , g_szContClsCode )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "CUST_RLTS_CODE" 		, 0 , "" )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "PXPR_NAME" 			, 0 , "" )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "BRDT" 				, 0 , "" )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "CUST_RLTS_ETC_CNTT" 	, 0 , "" )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "COUN_EMPNO" 			, 0 , "" )
+		
+		'V001
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "APLT_REAS_CLCD"		, 0 , g_szApltReasClcd )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RMRK" 				, 0 , g_szRmrk )
+		
+		Dim DATA_CNT
+		DATA_CNT = 0
+		
+		for i = 0 to #g_tChangeData - 1
+			if g_tChangeData[i] ~= null and g_tChangeData[i] ~= "" then
+				Dim tIndex		
+				tIndex = Split(g_tChangeData[i], "☆")
+				
+				if g_szCustClsCode == "1" then
+					if CInt(tIndex[1]) > -1 then
+						Dim QUES_QSIT_NO
+						QUES_QSIT_NO = Mid(tIndex[0], 5, #tIndex[0])
+						
+						DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "QUES_QSIT_NO" , DATA_CNT , QUES_QSIT_NO )
+						DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "ITEM_NO_VAL"  , DATA_CNT , CInt(tIndex[1])+1 )
+						DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "ITEM_CNTT" 	 , DATA_CNT , tIndex[2] )
+						DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "RSPN_SLCT_YN" , DATA_CNT , "Y" )
+						
+						DATA_CNT = DATA_CNT + 1
+					end if
+				else
+					'법인
+					'LHR 수정
+					Dim QUES_QSIT_NO
+					Dim QUES_QSIT_TYPE
+					QUES_QSIT_NO  = Mid(tIndex[0], 5, #tIndex[0])
+					QUES_QSIT_TYPE= Mid(tIndex[0], 1, 3)
+					
+				    if QUES_QSIT_TYPE == "rdo" then
+					    if CInt(tIndex[1]) > -1 then
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "QUES_QSIT_NO" , DATA_CNT , QUES_QSIT_NO )
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "ITEM_NO_VAL"  , DATA_CNT , CInt(tIndex[1])+1 )
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "ITEM_CNTT" 	, DATA_CNT , tIndex[2] )
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "RSPN_SLCT_YN" , DATA_CNT , "Y" )
+						    DATA_CNT = DATA_CNT + 1
+					    end if
+					else
+					    'if CInt(tIndex[1]) > -1 then
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "QUES_QSIT_NO" , DATA_CNT , QUES_QSIT_NO )
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "ITEM_NO_VAL"  , DATA_CNT , "0" )
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "ITEM_CNTT" 	, DATA_CNT , tIndex[2] )
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "TRGT_AMT" 	, DATA_CNT , tIndex[1] )
+						    DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "RSPN_SLCT_YN" , DATA_CNT , "Y" )
+						    DATA_CNT = DATA_CNT + 1
+					    'end if
+				    end if				
+				end if 
+			end if
+		next	
+	elseif szTranID == "obcsb_acif_000r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "PROS_CLS_CODE" , 0 , "I" 			 )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "ACNO" 		   , 0 , Left( szAct, 8))
+	end If	
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'대출 고객정보 확인 조회 for 개인/법인
+	If szTranID = "oblon_basc_102r" Then
+		'개인/법인
+		g_szCustClsCode = DATAMANAGER.GetDataValue( 0 , "oblon_basc_102r", "OutBlock1", "CUST_CLS_CODE" , 0)	
+		g_szAnxtAprt_Yn  = DATAMANAGER.GetDataValue( 0 , "oblon_basc_102r", "OutBlock1", "ANXT_APRT_YN" , 0)
+		g_nChangeCnt = CInt(DATAMANAGER.GetDataValue( 0 , "oblon_basc_102r", "OutBlock1", "PROS_CSNU" , 0))
+		
+		if g_szAnxtAprt_Yn = "Y" then
+			'lblResult.caption = "부적정"
+			tblInfo.SetCellString(0, 1, "부적정")
+			tblInfo.SetCellFgColor(0, 1, "290")
+			lblKYC.caption = "부적정 입니다."
+			lblKYC.changeTextAttr(0, 3, 290, 3, true)
+			btnOpenpopup.visible = 1
+		elseif g_szAnxtAprt_Yn = "N" then
+			'lblResult.caption = "적정"
+			tblInfo.SetCellString(0, 1, "적정")
+			tblInfo.SetCellFgColor(0, 1, "291")
+			lblKYC.caption = "적정 입니다."
+			lblKYC.changeTextAttr(0, 2, 291, 3, true)
+			btnOpenpopup.visible = 1
+		else
+			'lblResult.caption = g_szAnxtAprt_Yn
+			tblInfo.SetCellString(0, 1, "-")
+			tblInfo.SetCellFgColor(0, 1, "267")
+			lblKYC.caption = "미등록상태 입니다."
+			lblKYC.changeTextAttr(0, 5, 267, 3, true)
+			btnOpenpopup.visible = 0
+		end if
+		
+		If g_szCustClsCode = "1" Then '개인 
+			LinkForm.linkfile = "mbonl93501.xmf"		'개인설문지
+			LinkForm.enable = True
+			'TriggerEvent
+			callTriggerEvent(QUERY)
+		else						   '법인
+			LinkForm.linkfile = "mbonl93502.xmf"		'법인설문지
+			LinkForm.enable = True
+			'TriggerEvent
+			callTriggerEvent(QUERY)
+		End If
+		
+		if g_szPopupYN == "N" and g_szIsncYN == "Y" and DATAMANAGER.GetDataValue(0, "oblon_basc_102r", "OutBlock1", "ANXT_APRT_YN" , 0) == "Y" then
+			g_szIsncYN = "N"
+			Form.MsgBox("알림", "부적정확인서 발급 후 약정이 가능합니다." & Chr(13) &  "발급하시겠습니까?", "ISNC_YN", "1")
+		end if
+		
+		Dim szStartDay
+		Dim szEndDay
+		
+		szStartDay = trim(DATAMANAGER.GetDataValue( 0 , "oblon_basc_102r", "OutBlock1", "REG_DATE" , 0))
+		szEndDay   = trim(DATAMANAGER.GetDataValue( 0 , "oblon_basc_102r", "OutBlock1", "MTRT_DATE" , 0))
+
+		Dim sBtnCaption 
+		'sBtnCaption = "변경하기"
+		
+		'등록일
+		if szStartDay == "" then
+			'lblRegDate.caption = "-"
+			tblInfo.SetCellString(1, 1, "-")
+			sBtnCaption = "등록하기"
+		else
+			'lblRegDate.caption = szStartDay
+			tblInfo.SetCellString(1, 1, szStartDay)
+		end if
+		
+		'만기일
+		if szEndDay == "" then
+			'lblMtrtDate.caption = "-"
+			tblInfo.SetCellString(2, 1, "-")
+		else
+			'lblMtrtDate.caption = szEndDay
+			tblInfo.SetCellString(2, 1, szEndDay)
+			
+			'만기일이 지나면 재등록 
+			Dim sDate
+			sDate = Calendar0.calyear & Calendar0.calmonth & Calendar0.calday
+			if CInt(szEndDay) < CInt(sDate) then
+				sBtnCaption = "재등록하기"
+			else
+				sBtnCaption = "변경하기"
+				if (g_szPopupYN == "Y") then '팝업이거나   
+					if (szStartDay == sDate) then  '등록일이 오늘날짜가 아닌 경우 
+						BtnExecute.left = -2
+						BtnExecute.width = 190
+						
+						btnContinue.visible = 1
+						btnContinue.enable = 1
+						btnContinue.left = 183
+						btnContinue.width = 194			
+					end if 
+				end if 
+			end if 
+		end if		
+		
+		BtnExecute.caption = sBtnCaption
+		
+	elseif szTranID == "oblon_basc_101a" then		
+		g_szAnxtAprt_Yn = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "ANXT_APRT_YN" , 0)	
+		'부적정여부를 공유메모리에 세팅
+		
+		if len(g_szAnxtAprt_Yn) > 0 Then    
+		    if trim(g_szAnxtAprt_Yn) = "" then
+			    Form.ShowAlert("알림", "부적정여부를 수신받지 못했습니다. IT에 연락해주세요.")
+			    exit sub
+		    end if
+		    
+		    g_szIsncYN = "Y"
+	
+		end If
+		
+		Form.MsgBox("알림", "신용공여 고객정보확인서\n등록이 완료되었습니다.", szTranID, 6)
+	elseif szTranID == "obcsb_acif_000r" then
+		g_szCustName = DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "CUST_FULL_NAME", 0)
+		lblName.caption = g_szCustName.."님의 적정성 판단 결과는"
+		DATAMANAGER.RequestTranData("oblon_basc_102r")
+	End If	
+
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID == "oblon_basc_102r" then
+		Form.MsgBox("알림", szErrMsg, "", 0)
+		
+		'Default 개인 설문지
+		LinkForm.linkfile = "mbonl93501.xmf"
+		LinkForm.enable = False
+		Exit Sub
+		
+	else
+		Dim szSubErrMsg
+		szSubErrMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+		
+		if trim(szSubErrMsg) <> "" then
+			szErrMsg = szErrMsg & "\n" & szSubErrMsg
+		end if
+		Form.MsgBox("알림", szErrMsg , "", 0)
+	end if
+End Sub
+'============================================================================
+' Receive Trigger Event
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "ChangeData" then
+		if sParam ~= null and sParam ~= "" then
+			if len(g_szEdtPwd) < 4 Then
+				Form.ShowAlert("알림", "비밀번호를 입력해주세요.")
+				Exit Sub
+			End If
+		'	
+		'	'v001
+		
+			g_szChangeData = sParam
+			if g_nChangeCnt == 0 then
+				g_szApltReasClcd = "0"
+				g_szRmrk = ""
+				
+				'Trigger Event
+				f_ChangeTr()
+			else
+				Form.OpenPopup("mbonl93500_p1.xmf" , "" , "")
+			end if
+		
+		end if
+	elseif sEventName == "CORRECT_PWD" then
+		if nil ~= sParam and "" ~= sParam then
+			edtPassword.encdata = sParam
+			call edtPassword_OnEditComplete()
+		end if
+	end if 
+
+End Sub
+'============================================================================
+' TriggerEvent
+'============================================================================
+Function callTriggerEvent(trigType)
+	
+	g_szAcno = cmbAcnt.total				'계좌번호
+	g_szAsno = cmbAcnt.sequence				'일련번호
+	
+	'MTS 메모리평문 적용유무 (0:미적용 / 1:적용)
+	g_szPlainRm = Form.GetSharedData("&PLAIN_RM", false)
+	
+	'MTS 메모리평문 적용
+	if g_szPlainRm = "1" Then
+		g_szEdtPwd = edtPassword.caption
+	'MTS메모리평문 미적용
+	else
+		g_szEdtPwd = edtPassword.encdata
+	end if
+			
+	g_szData = g_szAcno & "★" & g_szAsno & "★" & g_szEdtPwd & "★" & g_szCustClsCode & "★" &  g_szCustName
+		
+	'트리거타입에 따라 이벤트 처리
+	Form.triggerEvent("LinkForm", "ACNT_INFO", g_szData)
+End Function
+'============================================================================
+' 계좌번호 변경시
+'============================================================================
+Sub cmbAcnt_ChangeAccount()
+	edtPassword.caption = ""
+	'대출 고객정보 확인 조회 for 개인/법인
+	'DATAMANAGER.RequestTranData("oblon_basc_102r")
+	DATAMANAGER.RequestTranData("obcsb_acif_000r")
+	'Trigger Event
+	callTriggerEvent(QUERY)
+	
+	if edtPassword.caption == null or edtPassword.caption == "" then
+		BtnExecute.enable = "0"
+	else
+		BtnExecute.enable = "1"
+	end if
+End Sub
+'============================================================================
+' 비밀번호 변경시
+'============================================================================
+Sub edtPassword_OnEditComplete()
+	'Trigger Event
+	callTriggerEvent(QUERY)
+	
+	if edtPassword.caption == null or edtPassword.caption == "" then
+		BtnExecute.enable = "0"
+	else
+		BtnExecute.enable = "1"
+	end if	
+	
+End Sub
+'============================================================================
+' 조회버튼
+'============================================================================
+Sub btnSearch_OnClick()
+	'Trigger Event
+	callTriggerEvent(QUERY)
+End Sub
+'============================================================================
+' 전송버튼
+'============================================================================
+Sub BtnExecute_OnClick()
+	LinkForm.left = 0
+	lblDim.visible = "1"
+	btnPwd.visible = "0"
+	edtPassword.visible = "0"
+	
+	'Form.ShowAlert("TEST", "HERE")
+	Form.triggerEvent("LinkForm", "SCROLL_UP", "")
+End Sub
+
+'============================================================================
+' 취소버튼
+'============================================================================
+Sub btnContinue_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mblon93500_p1" then
+		RetVal = Split(sRet,"||") '0번은 재진단사유, 1번은 비고
+		
+		g_szApltReasClcd = RetVal(0)
+		g_szRmrk         = RetVal(1)
+		
+		if g_szApltReasClcd == "0" and g_szRmrk = "" then
+			Form.ShowAlert("알림", "재진단시 정확한 사유를 입력해주시기 바랍니다.")
+			exit sub
+		end if
+		
+		'Trigger Event
+		f_ChangeTr()
+	elseif sKeyName == "mbonl93503" then
+		if sRet <> "Y" then
+			Form.ShowAlert("알림", "부적정확인서를 발급하여야 진행하실 수 있습니다.")
+			exit sub
+		end if
+		
+		'DATAMANAGER.RequestTranData("oblon_basc_102r")
+		DATAMANAGER.RequestTranData("obcsb_acif_000r")
+	elseif sKeyName == "CORRECT_PWD" then
+		if nil ~= sRet and "" ~= sRet then
+			Dim tPwd
+			tPwd = Split(sRet, "★") '"nPwdLen★sEncPwd(암호화된 비밀번호)"
+			
+			if UBOUND(tPwd) > 0 then
+				edtPassword.pwdlen = tPwd(1)
+				edtPassword.caption = tPwd(0)
+				
+				call edtPassword_OnEditComplete()
+			end if
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "ISNC_YN" then
+		if sRet == "ok" then
+			Form.MsgBox("알림", "부적정확인서를 발급합니다." , "kyc_report", 1)
+		end if
+	elseif sKeyName == "kyc_report" then
+		if sRet == "ok" then
+			setKycSharedData("mbonl93503")
+			Form.OpenPopup("mbonl93503" , "" , "") '대출 KYC 부적합 보고서
+		else
+			Form.ShowAlert("알림", "부적정확인서를 발급하여야 진행하실 수 있습니다.")
+			exit sub
+		end if
+		
+	elseif sKeyName == "oblon_basc_101a" then
+		LinkForm.left = 375
+		lblDim.visible = "0"
+		btnPwd.visible = "1"
+		edtPassword.visible = "1"
+		
+		
+		g_szAnxtAprt_Yn = ""	
+		g_nChangeCnt = 0
+					
+		'대출 고객정보 확인 조회 for 개인/법인 구분
+		'DATAMANAGER.RequestTranData("oblon_basc_102r")
+		DATAMANAGER.RequestTranData("obcsb_acif_000r")
+	
+	end if
+End Sub
+'============================================================================
+' setKycSharedData : 파일 오픈 공유데이터 설정 : 대출KYC : 2021.03.17
+'============================================================================
+Function setKycSharedData(fileName)
+
+	'MTS 메모리평문 적용유무 (0:미적용 / 1:적용)
+	szPlainRm = Form.GetSharedData("&PLAIN_RM", false)
+	
+	'MTS 메모리평문 적용
+	if szPlainRm = "1" Then
+		szPwd = Form.GetCtlProp( "edtPassword", "caption" )	'비밀번호
+	'MTS메모리평문 미적용
+	else
+		szPwd = Form.GetCtlProp( "edtPassword", "encdata" )
+	end if
+	
+	if fileName = "mbonl93503" Then	
+		'보고서는 Shared Memory로 통신한다.
+		szAcno = Left(g_szAcno, 8)        '계좌번호
+		szCsnm = cmbAcnt.accountname       '고객명
+		szBswrdivcode = "16001"		'해외주식 대출약정'
+		szLoanTypeCode = "00"	
+		Form.SetSharedData( "mbonl93503_acno" 	  		, szAcno )
+		Form.SetSharedData( "mbonl93503_acnopwd" 		, szPwd )
+		Form.SetSharedData( "mbonl93503_csnm"             , szCsnm )
+		Form.SetSharedData( "mbonl93503_loan_type_code"   , szLoanTypeCode )
+		Form.SetSharedData( "mbonl93503_bswr_div_code"    , szBswrdivcode )
+		Form.SetSharedData( "mbonl93503_cont_cls_code"    , "4" )
+	end if
+End Function 
+'============================================================================
+Sub btnOpenpopup_OnClick()
+	Form.OpenPopup("mbonl93500_p2" , g_szData , "")
+End Sub
+
+
+Function f_ChangeTr()
+'	Form.ShowAlert("g_szChangeData", g_szChangeData)
+	DIm szCase
+	szCase = ""
+	
+	g_tChangeData = Split(g_szChangeData, "★")
+	for i = 0 to #g_tChangeData - 1
+		if g_tChangeData[i] ~= null and g_tChangeData[i] ~= "" then
+			Dim tIndex
+			tIndex = Split(g_tChangeData[i], "☆")
+			
+			if g_szCustClsCode == "2" then				
+				if tIndex[1] == null or tIndex[1] == "" or tIndex[1] ==  "-1" then
+					Dim tTitle
+					tTitle = {"대출용도를 선택해 주세요.", "자본금 규모를 입력해 주세요.", "부채현황을 입력해 주세요.", 
+							 "당기 순이익을 입력해 주세요.", "변제계획을 선택해 주세요.", "신용공여 이해도를 선택해 주세요."}
+						  
+					Form.ShowAlert("안내", tTitle[i])
+					
+					return
+				end if
+			else
+				'개인
+				if i == 1 or i == 2 or i == 3 then
+					if CInt(tIndex[1]) < 0 then
+						szCase = "대출용도를 선택해 주세요."
+					else
+						szCase = ""
+					end if
+				else
+					if CInt(tIndex[1]) < 0 then
+						Dim tTitle
+						tTitle = {"연령대", "대출용도-신용거래약정", "대출용도-대주거래약정", "대출용도-담보대출약정", "자산현황", 
+							  "연간소득현황", "부채현황", "원리금 연체여부", "신용점수", "변제계획", "신용공여 이해도"}
+							  
+						Form.ShowAlert("", tTitle[i] & "을 선택해 주세요.")
+						
+						return
+					end if				
+				end if 
+				
+			end if 
+		end if
+	next	
+	
+	if szCase ~= null and szCase ~= "" then
+		Form.ShowAlert("", szCase)
+		szCase = ""
+	else	
+		DATAMANAGER.RequestTranData("oblon_basc_101a")
+	end if
+	
+End Function 
+'============================================================================
+Sub edtPassword_OnClick()
+	'Dim sValue
+	'sValue = cmbAcnt.caption.."☆2"
+	'Form.openPopupAnimation("pwdcheckpopup", sValue ,"","2")
+End Sub
+
+'============================================================================
+Sub btnPwd_OnClick()
+	'call edtPassword_OnClick()
+	Dim sValue
+	sValue = cmbAcnt.caption.."☆2"
+	Form.openPopupAnimation("pwdcheckpopup", sValue ,"","2")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="oblon_basc_102r" trcode="oblon_basc_102r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="oblon_basc_101a" trcode="oblon_basc_101a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_000r" trcode="obcsb_acif_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="oblon_basc_102r" title="대출 고객정보 확인서 응답 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="558" _ulen="430" >
+
+ANXT_APRT_YN^부적정여부^1^0^0^0^0^0^0
+MTRT_DATE^만기일자^8^0^0^0^0^0^0
+CUST_RLTS_CODE^고객관계코드^2^0^0^0^0^0^0
+CUST_RLTS_ETC_CNTT^고객관계기타내용^100^0^0^0^0^0^0
+PXPR_NAME^대리인명^40^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+COUN_EMPNO^상담직원번호^9^0^0^0^0^0^0
+EMPL_NAME^직원명^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+APLT_REAS_CLCD^신청사유구분코드^1^0^0^0^0^0^0
+RMRK^비고^100^0^0^0^0^0^0
+PROS_CSNU^처리건수^8^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="60" inout="out" _len="223" _ulen="173" >
+
+QUES_QSIT_NO^설문문항번호^11^0^7^0^0^0^0
+ITEM_NO_VAL^항목번호값^10^0^0^0^0^0^0
+ITEM_CNTT^항목내용^200^0^0^0^0^0^0
+RSPN_SLCT_YN^응답선택여부^1^0^0^0^0^0^0
+TRGT_AMT^대상금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="oblon_basc_101a" title="대출 고객정보 확인서 응답 등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="490" _ulen="370" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+CUST_RLTS_CODE^고객관계코드^2^0^0^0^0^0^0
+PXPR_NAME^대리인명^40^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+CUST_RLTS_ETC_CNTT^고객관계기타내용^100^0^0^0^0^0^0
+COUN_EMPNO^상담직원번호^9^0^0^0^0^0^0
+APLT_REAS_CLCD^신청사유구분코드^1^0^0^0^0^0^0
+RMRK^비고^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="60" inout="in" _len="223" _ulen="173" >
+
+QUES_QSIT_NO^설문문항번호^11^0^7^0^0^0^0
+ITEM_NO_VAL^항목번호값^10^0^0^0^0^0^0
+ITEM_CNTT^항목내용^200^0^0^0^0^0^0
+RSPN_SLCT_YN^응답선택여부^1^0^0^0^0^0^0
+TRGT_AMT^대상금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="88" _ulen="70" >
+
+ANXT_APRT_YN^부적정여부^1^0^0^0^0^0^0
+MTRT_DATE^만기일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_000r" title="고객정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2185" _ulen="1655" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_CNFR_YN^고객 확인 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호 유형 코드^2^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+RLNM_ASCT_NO^실명 조합 번호^20^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+PSPR_NO^여권 번호^10^0^0^0^0^0^0
+CONO^법인등록번호^13^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인 구분 코드^2^0^0^0^0^0^0
+CNSG_YN^수탁 여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC 전문 투자자 여부^1^0^0^0^0^0^0
+KYC_SPCL_INVR_RGNO^KYC 전문 투자자 등록번호^20^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+SSTS_YN^공매도 여부^1^0^0^0^0^0^0
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+CNSG_RFUS_REAS_CODE^수탁 거부 사유 코드^3^0^0^0^0^0^0
+STA_DATE^시작 일자^8^0^0^0^0^0^0
+FIN_DATE^종료 일자^8^0^0^0^0^0^0
+BRTH_CTCD^출생국가코드^3^0^0^0^0^0^0
+AMRC_YN^미국인여부^1^0^0^0^0^0^0
+AML_BSTP_LRDV_CODE^AML업종대분류코드^2^0^0^0^0^0^0
+AML_BSTP_SMDV_CODE^AML업종소분류코드^5^0^0^0^0^0^0
+GIIN^GIIN^20^0^0^0^0^0^0
+LSTN_YN^상장여부^1^0^0^0^0^0^0
+DSTC_DATE^파기일자^8^0^0^0^0^0^0
+OVRS_TXPM_CHD_YN^해외납세자여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

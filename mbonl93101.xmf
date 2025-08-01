@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="93101" scrname="연금저축_납입한도변경" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,200" etcfunctions="" delegate="1" finaceexcept="1" benefitexcept="1" ly_vert="600,219,270,35,1" />
+		<EDIT name="edtPwd" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" des="비밀번호" ly_vert="283,10,86,35,1" />
+		<TABLE name="tblInfo" visible="0" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="1110" designorder="1" ly_vert="10,343,355,117,0" >
+			<COL_INFO ly_vert_width="130,225" />
+			<ROW_INFO ly_vert_height="39,39,39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="096:102102102" bgcolor="066:238239240" halign="0" caption="미사용 한도" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="096:102102102" bgcolor="066:238239240" halign="0" caption="계좌 납입한도" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="096:102102102" bgcolor="066:238239240" halign="0" caption="변경 한도" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnProcess" caption="신청" btnimage="btn_01.9" ly_vert="18,497,335,45,1" />
+		<EDIT name="edtInput" autofontsize="1" mask="0,0,,원,0,,0,1,1,0,0" halign="2" imetype="1" imagefilepth="login_input.9" ly_vert="10,134,355,34,1" />
+		<LABEL name="Label1" fontstyle="01" caption="변경하실 계약금액을 입력해 주세요." ly_vert="7,55,300,32,1" />
+		<LABEL name="Label2" fontsize="-1" fontstyle="01" caption="계약금액(연간납입한도)" ly_vert="7,100,159,20,1" />
+		<LABEL name="lblRemainLmt" fgcolor="146:124124124" fontsize="-1" halign="2" ly_vert="172,100,192,20,1" />
+		<IMAGE name="imgTooltip" autosize="1" imgpath="icon_question.png" ly_vert="171,101,17,16,1" />
+		<BUTTON name="btnToolTip" btnimage="alpha" ly_vert="163,97,31,28,1" />
+		<COMBO name="cmbAcnt" ly_vert="7,10,270,35,1" />
+		<LABEL name="Label0" fontsize="-2" fontstyle="01" caption="연금 가입금융기관 정보조회" ly_vert="160,182,171,23,1" />
+		<IMAGE name="Image3" imgpath="icon_arrow_right_on" ly_vert="327,177,30,31,1" />
+		<BUTTON name="btnOrgPopup" btnimage="alpha" ly_vert="152,175,213,35,1" />
+		<LABEL name="lblError" fgcolor="006:213049051" fontsize="-2" halign="2" paddinginfo="0,0,1,0" ly_vert="10,170,355,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="21587" _ulen="18791" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 연금저축 납입한도 변경
+' 02. 화면설명 : 
+' 03. 이    력 : 2024.01.25 : 고승연 : v0002 : 연금저축 계좌목록 조회 수정
+'-------------------------------------------------------------------------------------------
+
+
+Dim g_bTimerProc
+Dim g_bPwd					'비밀번호 입력 여부
+Dim g_szCNRC_AMT				'현재한도
+Dim g_szUI_SVNG_LIMT_UNSD_AMT	'잔여한도
+Dim g_DeviceOS
+Dim g_sCsno		'v0002
+Dim g_sElfnId		'v0002
+
+'최초 데이터 조회 Flow
+'화면 접근 또는 계좌변경 후 계좌비밀번호 입력 하면 obaci_acct_265a 조회
+'obaci_acct_265a 조회하여 계좌납입한도 데이터 화면에 세팅 및 obaci_acct_089r 조회
+'obaci_acct_089r 조회 성공시 obaci_acct_089r_1 조회
+'obaci_acct_089r_1 최초 조회 후 타이머 이용하여 obaci_acct_089r_1를 다시 조회
+'obaci_acct_089r 또는 obaci_acct_089r_1의 "OutBlock1" > "PROS_CLS_CODE" 로 은행연합회 응답여부를 체크
+'은행연합회 응답완료 되었다면 obaci_acct_089r_1의 데이터 이용하여 화면 내 미사용 한도 세팅 및 입력필드, 신청버튼 활성화
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    g_DeviceOS = Form.GetSharedData("&OS_TYPE", FALSE) '1.안드로이드 2.iOS
+    g_sCsno = Form.GetSharedData("&CUST_NUM", FALSE)
+    g_sElfnId = Form.GetSharedData("&USER_ID", FALSE)
+    
+    If g_DeviceOS == "2" Or g_DeviceOS == 2 Then
+        edtInput.imagefilepth = "login_input.9"
+        edtInput.SetOnOffImage("login_input.9","login_input.9")
+    End If
+ 
+    edtPwd.caption = ""
+	f_ClearData()
+	
+'	'계좌비번이 입력되어 있을경우? 
+'	Dim szPwd
+'	szPwd = edtPwd.caption
+'	if szPwd <> "" and szPwd <> null then
+'		'신연금저축납입한도정정(온라인) - 내역 조회
+'		DATAMANAGER.RequestTranData( "obaci_acct_265a" )
+'	end if
+	
+	'연금저축계좌 조회
+	Dim szAcntNum
+	szAcntNum = acnt.total
+	if szAcntNum <> "" and szAcntNum <> null then
+		'v0002
+		DATAMANAGER.RequestTranData( "obaci_acct_277r" )
+	else
+		Form.ShowAlert( "오류", "연금계좌 조회 오류" )
+	end if
+
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'확인팝업 리턴 처리
+	if sKeyName == "PROCESS_OK" then
+		'인증완료후 변경 서비스 호출
+		Dim szCertUseType 
+		'0.공인인증서(ID로그인,인증서로그인) 1.간편인증(공인인증서) 2.코스콤지문(공인인증서) 3.결제원(FIDO인증서) 4.금투협(공동인증서)
+		szCertUseType = Form.GetSharedData("&CERT_USE_TYPE", false )  '로그인타입
+		
+		If szCertUseType == "1" Or szCertUseType == 1 Then '간편인증
+		    Form.OpenFramePopup( "mhetc90060_px" , "" , "" )		'공인인증서_비밀번호입력 풀팝업
+		Else
+		    Form.OpenFramePopup( "mhetc90060_p5" , "" , "" )		'공인인증서_비밀번호입력 풀팝업
+		End If
+
+	'공동인증 및 바이오인증 완료
+	ElseIf sKeyName == "mhetc90060_p5" Then 
+	
+		If sRet ~= "cancel" Then
+			'신연금저축납입한도정정(온라인) - 한도정정 실행(1차)
+			DATAMANAGER.RequestTranData( "obaci_acct_265a_1" )
+		End If
+		
+	'간편인증 완료
+	ElseIf sKeyName == "mhetc90060_px" Then 
+	
+		If sRet == "ok" Then
+			'신연금저축납입한도정정(온라인) - 한도정정 실행(1차)
+			DATAMANAGER.RequestTranData( "obaci_acct_265a_1" )
+		End If
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	'한도변경 완료 메시지박스 리턴
+	if sKeyName == "PROC_COMPLETE" then
+		'화면을 초기화 시키고 다시 기본 내용을 조회
+		edtPwd.caption = ""
+		f_ClearData()
+		
+		Dim szPwd
+		szPwd = edtPwd.caption
+		if szPwd <> "" and szPwd <> null then
+			'신연금저축납입한도정정(온라인) - 내역 조회
+			DATAMANAGER.RequestTranData( "obaci_acct_265a" )
+		end if
+	
+	'공동인증 및 바이오인증 완료
+	elseif sKeyName == "mhetc90060_p5" Then 
+		If sRet ~= "cancel" Then
+			'신연금저축납입한도정정(온라인) - 한도정정 실행(1차)
+			DATAMANAGER.RequestTranData( "obaci_acct_265a_1" ) 
+		End If
+		
+	'간편인증 완료
+	elseif sKeyName == "mhetc90060_px" Then 
+		If sRet == "ok" Then
+			'신연금저축납입한도정정(온라인) - 한도정정 실행(1차)
+			DATAMANAGER.RequestTranData( "obaci_acct_265a_1" )
+		End If
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	sTimerID = tonumber(sTimerID)
+	
+	'obaci_acct_089r_1 조회 후 은행연합회 응답 여부를 알기 위해
+	'타이머를 통해 다시 obaci_acct_089r_1를 조회한다
+	if sTimerID == 1000 then
+		DATAMANAGER.RequestTranData( "obaci_acct_089r_1" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim szAcno, szAsno
+	szAcno = Left(cmbAcnt.cbkeydata, 8)
+	szAsno = Right(cmbAcnt.cbkeydata, 2)
+	
+	'신연금저축납입한도정정(온라인) - 내역 조회
+	if szTranID == "obaci_acct_265a" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "PROS_CLS_CODE" , 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" , 0 , szAcno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ASNO" , 0 , szAsno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNT_PWD" , 0 , edtPwd.caption )
+		
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "JOIN_AMT" , 0 , 0 )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "UI_SVNG_LIMT_UNSD_AMT" , 0 , 0 )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "MDAF_CNRC_AMT" , 0 , 0 )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "TRNM_RSLT_YN" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "LNKD_TLMS_MNNO" , 0 , "" )
+	
+	'은행연합회 한도금액 조회(1차)
+	elseif szTranID == "obaci_acct_089r" then
+		Dim szRCNO_PIP
+		szRCNO_PIP = DATAMANAGER.GetDataValue( 0, "obaci_acct_265a" , "OutBlock1", "RCNO_PIP" , 0)
+		
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "BSWR_PROS_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" , 0 , szAcno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "PRCD" , 0 , "131" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RCNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "TXCM_PRCD" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "TXCM_TRPR_CLS_CODE" , 0 , "0" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "CUST_CLS_CODE" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ASNO" , 0 , szAsno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LNKD_TLMS_MNNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RCNO_PIP" , 0 , szRCNO_PIP )
+		
+	'은행연합회 한도금액 조회(2차)
+	elseif szTranID == "obaci_acct_089r_1" then
+		Dim szRCNO_PIP, szLNKD_TLMS_MNNO
+		szLNKD_TLMS_MNNO = DATAMANAGER.GetDataValue( 0, "obaci_acct_089r" , "OutBlock1", "LNKD_TLMS_MNNO" , 0)
+		szRCNO_PIP = DATAMANAGER.GetDataValue( 0, "obaci_acct_265a" , "OutBlock1", "RCNO_PIP" , 0)
+		
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "BSWR_PROS_CLS_CODE" , 0 , "2" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" , 0 , szAcno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "PRCD" , 0 , "131" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RCNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "TXCM_PRCD" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "TXCM_TRPR_CLS_CODE" , 0 , "0" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "CUST_CLS_CODE" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ASNO" , 0 , szAsno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LNKD_TLMS_MNNO" , 0 , szLNKD_TLMS_MNNO )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "RCNO_PIP" , 0 , szRCNO_PIP )
+	
+	'신연금저축납입한도정정(온라인) - 한도정정 실행(1차)
+	elseif szTranID == "obaci_acct_265a_1" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "PROS_CLS_CODE" , 0 , "2" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" , 0 , szAcno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ASNO" , 0 , szAsno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNT_PWD" , 0 , edtPwd.caption )
+		
+		Dim szJOIN_AMT, szUI_SVNG_LIMT_UNSD_AMT
+		szJOIN_AMT = DATAMANAGER.GetDataValue( 0, "obaci_acct_089r_1" , "OutBlock1", "JOIN_LIMT_AMT" , 0)
+		szUI_SVNG_LIMT_UNSD_AMT = DATAMANAGER.GetDataValue( 0, "obaci_acct_089r_1" , "OutBlock1", "UI_SVNG_LIMT_UNSD_AMT" , 0)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "JOIN_AMT" , 0 , szJOIN_AMT )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "UI_SVNG_LIMT_UNSD_AMT" , 0 , szUI_SVNG_LIMT_UNSD_AMT )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "MDAF_CNRC_AMT" , 0 , edtInput.caption )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "TRNM_RSLT_YN" , 0 , "N" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "LNKD_TLMS_MNNO" , 0 , "" )
+	
+	'신연금저축납입한도정정(온라인) - 한도정정 실행(2차)
+	elseif szTranID == "obaci_acct_265a_2" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "PROS_CLS_CODE" , 0 , "2" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" , 0 , szAcno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ASNO" , 0 , szAsno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNT_PWD" , 0 , edtPwd.caption )
+		
+		Dim szJOIN_AMT, szUI_SVNG_LIMT_UNSD_AMT, szLKND_TLMS_MNNO
+		szJOIN_AMT = DATAMANAGER.GetDataValue( 0, "obaci_acct_089r_1" , "OutBlock1", "JOIN_LIMT_AMT" , 0)
+		szUI_SVNG_LIMT_UNSD_AMT = DATAMANAGER.GetDataValue( 0, "obaci_acct_089r_1" , "OutBlock1", "UI_SVNG_LIMT_UNSD_AMT" , 0)
+		szLKND_TLMS_MNNO = DATAMANAGER.GetDataValue( 0, "obaci_acct_265a_1" , "OutBlock1", "LNKD_TLMS_MNNO" , 0)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "JOIN_AMT" , 0 , szJOIN_AMT )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "UI_SVNG_LIMT_UNSD_AMT" , 0 , szUI_SVNG_LIMT_UNSD_AMT )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "MDAF_CNRC_AMT" , 0 , edtInput.caption )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "TRNM_RSLT_YN" , 0 , "Y" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock2" , "LNKD_TLMS_MNNO" , 0 , szLKND_TLMS_MNNO )
+	
+	'연금저축계좌 조회
+	elseif szTranID == "obaci_acct_144r" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" , 0 , acnt.total )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "IQRY_CLS_CODE" , 0 , "0" )
+	
+	'계좌비밀번호 검증
+	elseif szTranID == "obacp_opop_066r" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" , 0 , szAcno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ASNO" , 0 , szAsno )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNT_PWD" , 0 , edtPwd.caption )
+	
+	'v0002
+	'연금저축계좌 목록 조회
+	ELSEIF szTranID == "obaci_acct_277r" THEN
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IQRY_CLS_CODE" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CSNO" , 0 , g_sCsno )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ELFN_ID" , 0 , g_sElfnId )
+	END IF 
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'신연금저축납입한도정정(온라인) - 내역 조회
+	if szTranID == "obaci_acct_265a" then
+		Dim szCNRC_AMT
+		szCNRC_AMT = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "CNRC_AMT" , 0 )		'계좌납입한도 금액
+		tblInfo.SetCellString( 1, 1 , szCNRC_AMT )
+		g_szCNRC_AMT = szCNRC_AMT
+		
+		edtInput.caption = ""
+		edtInput.hintcaption = "현재 당사 계약금액은 " .. FormatNumber(szCNRC_AMT, 0) .. "원 입니다."
+		
+		'은행연합회 한도금액 조회(1차)
+		DATAMANAGER.RequestTranData( "obaci_acct_089r" )
+	
+	'은행연합회 한도금액 조회(1차)
+	elseif szTranID == "obaci_acct_089r" then
+		'은행연합회 한도금액 조회(2차)
+		DATAMANAGER.RequestTranData( "obaci_acct_089r_1" )
+	
+	'은행연합회 한도금액 조회(2차)
+	elseif szTranID == "obaci_acct_089r_1" then
+		'szResultCode
+		'obaci_acct_089r_1 최초 조회시에는 obaci_acct_089r에서 응답코드 가져옴
+		'최초 조회 이후에는 obaci_acct_089r_1에서 응답코드 가져옴
+		Dim szResultCode
+		
+		'obaci_acct_089r_1 최초 조회
+		if g_bTimerProc == false then
+			szResultCode = DATAMANAGER.GetDataValue( 0, "obaci_acct_089r" , "OutBlock1", "PROS_CLS_CODE" , 0 )		'처리구분코드
+			if szResultCode == "1" then
+				if g_bTimerProc == false then
+					g_bTimerProc = true
+				end if
+				Form.SetTimerEvent(1000, 1, 1)
+			else
+				Form.MsgBox( "" , "은행연합회 정보 조회 오류" , "" , 6 )
+			end if
+			
+		'obaci_acct_089r_1 최초 조회 이후
+		'이때 은행연합회 응답여부를 szResultCode보고 판단
+		else
+			szResultCode = DATAMANAGER.GetDataValue( 0, "obaci_acct_089r_1" , "OutBlock1", "PROS_CLS_CODE" , 0 )		'처리구분코드
+			
+			'타이머 off
+			Form.SetTimerEvent(1000, 0, 1)
+			if szResultCode == "2" then		'은행연합회 응답완료
+				g_bTimerProc = false
+			
+				Dim szLimitNotUsed		'미사용 한도
+				szLimitNotUsed = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "UI_SVNG_LIMT_UNSD_AMT" , 0 )
+				g_szUI_SVNG_LIMT_UNSD_AMT = szLimitNotUsed
+				
+				tblInfo.SetCellString( 0 , 1 , szLimitNotUsed )
+				lblRemainLmt.caption = "잔여한도 : " .. FormatNumber(szLimitNotUsed, 0) .. "원"
+				
+				'미사용한도 및 계좌납입한도가 전부 조회되어 세팅 된 후 변경한도 에디트를 활성화
+				edtInput.enable = true
+				btnOrgPopup.enable = true
+				btnProcess.enable = true
+			else							'은행연합회 응답대기
+				'다시 타이머 작동
+				Form.SetTimerEvent(1000, 1, 1)
+			end if 
+		end if 
+	
+	'신연금저축납입한도정정(온라인) - 한도정정 실행(1차)
+	elseif szTranID == "obaci_acct_265a_1" then
+		Dim szMsgCode
+		szMsgCode = DATAMANAGER.GetDataMsgCode(szTranID)
+		'서비스 응답코드가 "6616"일 경우 다음 진행, 아니면 오류 얼럿 노출
+		if szMsgCode == "6616" then
+			'신연금저축납입한도정정(온라인) - 한도정정 실행(2차)
+			DATAMANAGER.RequestTranData( "obaci_acct_265a_2" )
+		else
+			Form.MsgBox( "오류" , "한도 변경 오류입니다" , "" , 6 )
+		end if 
+	
+	'신연금저축납입한도정정(온라인) - 한도정정 실행(2차)
+	elseif szTranID == "obaci_acct_265a_2" then
+		Form.MsgBox( "알림" , "연금저축계좌 납입한도 변경이 완료되었습니다" , "PROC_COMPLETE" , 6 )
+	
+	'연금저축계좌 조회
+	elseif szTranID == "obaci_acct_144r" then
+		Dim nCnt
+		nCnt = DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1")
+		
+		Dim szAcno, szAsno, szCustName
+		szCustName = Form.GetSharedData( "&USER_NAME", false )
+		for i = 0 to nCnt - 1
+			szAcno = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "ACNO" , i )
+			szAsno = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "ASNO" , i )
+			
+			'조회된 계좌들 콤보에 세팅
+			cmbAcnt.cbadddatatext = szAcno .. szAsno .. "`" .. "[연금저축] " .. Left(szAcno, 4) .. "-" .. Right(szAcno, 4) .. "-" .. szAsno .. " " .. szCustName
+		next
+		
+		'다음조회 데이터들이 있다면 연속해서 조회
+		if DATAMANAGER.IsMoreNextData(szTranID) then
+			DATAMANAGER.RequestNextData(szTranID)
+			Exit Sub
+		end if
+		
+		'계좌조회 후 비밀번호 관련 초기화
+		edtPwd.caption = ""
+		g_bPwd = false
+	
+	'v0002
+	ELSEIF szTranID == "obaci_acct_277r" THEN
+		Dim nCnt
+		nCnt = DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1")
+		
+		Dim szAcno, szAsno, szCustName
+		FOR i = 0 TO nCnt - 1
+			szAcno = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "ACNO" , i )
+			szAsno = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "ASNO" , i )
+			szCustName = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "CSNM" , i )
+			
+			'조회된 계좌들 콤보에 세팅
+			cmbAcnt.cbadddatatext = szAcno .. szAsno .. "`" .. "[연금저축] " .. LEFT(szAcno, 4) .. "-" .. RIGHT(szAcno, 4) .. "-" .. szAsno .. " " .. szCustName
+		NEXT
+		
+		'다음조회 데이터들이 있다면 연속해서 조회
+		IF DATAMANAGER.IsMoreNextData(szTranID) THEN
+			DATAMANAGER.RequestNextData(szTranID)
+			EXIT SUB
+		END IF
+		
+		'계좌조회 후 비밀번호 관련 초기화
+		edtPwd.caption = ""
+		g_bPwd = false
+		
+		
+	'계좌비밀번호 검증
+	elseif szTranID == "obacp_opop_066r" then
+		'계좌비밀번호 정상입력
+		f_ClearData()
+		
+		'신연금저축납입한도정정(온라인) - 내역 조회
+		DATAMANAGER.RequestTranData( "obaci_acct_265a" )
+	end if 
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	If szTranID == "obaci_acct_144r" then
+	
+		Form.MsgBox( "오류" , "연금계좌 조회 오류" , "" , 6 )
+		edtPwd.caption = ""
+		
+    ElseIf szTranID == "obacp_opop_066r" Then
+    
+        edtPwd.caption = ""
+        f_ClearData()
+	    If szSubMsg <> "" and szSubMsg <> null Then
+	        Form.ShowAlert("오류", szErrMsg & "\n(" & szSubMsg & ")")
+	    Else
+	        Form.MsgBox( "오류" , szErrMsg , "" , 6 )
+	    End If	
+	
+	Else
+	
+	    If szSubMsg <> "" and szSubMsg <> null Then
+	        Form.ShowAlert("안내", szErrMsg & "\n(" & szSubMsg & ")")
+	    Else
+	        Form.MsgBox( "안내" , szErrMsg , "" , 6 )
+	    End If
+	    
+	End if
+
+End Sub
+
+'============================================================================
+Function f_ClearData()
+
+	'화면 내 컨트롤 초기화 처리
+	tblInfo.SetCellString( 0 , 1 , "" )
+	tblInfo.SetCellString( 1 , 1 , "" )
+	
+	edtInput.caption = ""
+	edtInput.enable = false
+	
+	btnOrgPopup.enable = false
+	btnProcess.enable = false
+	
+	g_bTimerProc = false
+	g_bPwd = false
+	
+End Function
+
+'============================================================================
+Sub edtPwd_OnEditComplete()
+'	'계좌비밀번호 정상 입력시
+'	Dim szPwd
+'	szPwd = edtPwd.caption
+'	if szPwd <> "" and szPwd <> null then
+'		'신연금저축납입한도정정(온라인) - 내역 조회
+'		DATAMANAGER.RequestTranData( "obaci_acct_265a" )
+'	end if
+	
+	if edtPwd.caption == "" then
+		Exit Sub
+	end if
+	
+	'계좌비밀번호 검증
+	DATAMANAGER.RequestTranData( "obacp_opop_066r" )
+End Sub
+
+'============================================================================
+Sub btnProcess_OnClick()
+	'신청 버튼 이벤트
+	Dim szInput
+	szInput = edtInput.caption
+	
+	'변경한도 입력 체크
+	if szInput == "" or szInput == null then
+		Label0.top = 197
+		Image3.top = 192
+		btnOrgPopup.top = 190
+		
+		lblError.caption = "변경 한도를 입력하세요."
+		Exit Sub
+	end if 
+	
+	if tonumber(szInput) <= 0 then
+		Label0.top = 197
+		Image3.top = 192
+		btnOrgPopup.top = 190
+		
+		lblError.caption = "변경 한도를 입력하세요."
+		Exit Sub
+	end if
+	
+	'(입력한도)가 (잔여한도 + 현재한도)를 초과하는지 체크
+	if CInt(szInput) > CInt(g_szCNRC_AMT) + CInt(g_szUI_SVNG_LIMT_UNSD_AMT) then
+		Label0.top = 197
+		Image3.top = 192
+		btnOrgPopup.top = 190
+		
+		lblError.caption = "현재 계약금액 + 잔여한도 금액 이내로 입력해주세요."
+		Exit Sub
+	end if
+	
+	'입력 데이터 문제 없으면 확인팝업 오픈
+	lblError.caption = ""
+	
+	Label0.top = 197 - 15
+	Image3.top = 192 - 15
+	btnOrgPopup.top = 190 - 15
+	
+	Dim szBefore, szAfter
+	szBefore = DATAMANAGER.GetDataValue( 0, "obaci_acct_265a" , "OutBlock1", "CNRC_AMT" , 0 )
+	szAfter = edtInput.caption
+	
+'	Form.OpenPopup("mbonl93101_p1" , szBefore .. "@" .. szAfter , "")
+	Form.openPopupAnimation("mbonl93101_p1", szBefore .. "@" .. szAfter ,"","2")
+End Sub
+
+'============================================================================
+Sub acnt_ChangeAccount()
+	'계좌 컨트롤 변경 이벤트
+	edtPwd.caption = ""
+	f_ClearData()
+	
+	'계좌비번이 입력되어 있을경우? 
+	Dim szPwd
+	szPwd = edtPwd.caption
+	if szPwd <> "" and szPwd <> null then
+		'신연금저축납입한도정정(온라인) - 내역 조회
+		DATAMANAGER.RequestTranData( "obaci_acct_265a" )
+	end if
+End Sub
+
+'============================================================================
+Sub btnToolTip_OnClick()
+	Form.OpenPopup( "mbonl93101_p2" , "" , "" )
+End Sub
+
+'============================================================================
+Sub cmbAcnt_OnEditComplete(iIndex)
+	'계좌 콤보 변경 이벤트
+	edtPwd.caption = ""
+	f_ClearData()
+End Sub
+
+'============================================================================
+Sub btnOrgPopup_OnClick()
+	if edtPwd.caption == "" then
+		Form.ShowAlert( "알림", "비밀번호를 입력해 주세요" )
+		Exit Sub
+	end if
+	
+	'계좌번호★계약금액★잔여한도
+	Dim szSendData, szUI_SVNG_LIMT_UNSD_AMT
+	szUI_SVNG_LIMT_UNSD_AMT = DATAMANAGER.GetDataValue( 0, "obaci_acct_089r_1" , "OutBlock1", "UI_SVNG_LIMT_UNSD_AMT" , 0 )
+	szSendData = cmbAcnt.cbkeydata .. "★" .. g_szCNRC_AMT .. "★" .. szUI_SVNG_LIMT_UNSD_AMT
+'	Form.ShowAlert("szUI_SVNG_LIMT_UNSD_AMT", szUI_SVNG_LIMT_UNSD_AMT)
+	
+	'가입금융기관팝업 오픈
+	Form.OpenFramePopup( "mbonl93101_p3" , szSendData , "")
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_acct_265a" trcode="obaci_acct_265a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_265a_1" trcode="obaci_acct_265a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_265a_2" trcode="obaci_acct_265a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_089r" trcode="obaci_acct_089r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_089r_1" trcode="obaci_acct_089r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_144r" trcode="obaci_acct_144r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_opop_066r" trcode="obacp_opop_066r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_277r" trcode="obaci_acct_277r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_acct_265a" title="신연금저축납입한도정정(온라인)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="170" _ulen="126" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="267" _ulen="199" >
+
+JOIN_AMT^가입금액^19^0^7^0^0^0^0
+UI_SVNG_LIMT_UNSD_AMT^UI저축한도미사용금액^19^0^7^0^0^0^0
+MDAF_CNRC_AMT^변경후계약금액^19^0^7^0^0^0^0
+TRNM_RSLT_YN^전송결과여부^1^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="183" _ulen="139" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CNRC_AMT^계약금액^19^0^7^0^0^0^0
+PROS_YN^처리여부^1^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_089r" title="은행연합회 한도금액 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="488" _ulen="354" >
+
+BSWR_PROS_CLS_CODE^업무 처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+TXCM_PRCD^세금우대 상품코드^2^0^0^0^0^0^0
+TXCM_TRPR_CLS_CODE^세금우대 대상자 구분 코드^1^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="506" _ulen="372" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+JOIN_LIMT_AMT^가입 한도 금액^19^0^7^0^0^0^0
+UI_SVNG_LIMT_UNSD_AMT^UI 저축 한도 미사용 금액^19^0^7^0^0^0^0
+KFB_TRNM_BRCD^은행연합회 전송 지점코드^7^0^0^0^0^0^0
+TXCM_DPLC_ACNT_YN^세금우대 중복 계좌 여부^1^0^0^0^0^0^0
+TXCM_TRPR_CLS_CODE^세금우대 대상자 구분 코드^1^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+ENTP_NAME^업체 명^40^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_144r" title="신연금저축 보유계좌조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="87" _ulen="67" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="1346" _ulen="986" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+OPNG_DATE^개설일자^8^0^0^0^0^0^0
+DRNG_ABLE_AMT^출금가능금액^19^0^7^0^0^0^0
+CASH_TFAM^현금예수금^19^0^7^0^0^0^0
+FNPR_VLTN_AMT^금융상품평가금액^19^0^7^0^0^0^0
+VLTN_AMT^평가금액^19^0^7^0^0^0^0
+PURT_PAYM_AMT^순수납입금액^19^0^7^0^0^0^0
+BCDT_CLS_NAME^자료구분명^40^0^0^0^0^0^0
+THYR_PNSN_PRVS_LIMT_AMT^당년연금지급한도금액^19^0^7^0^0^0^0
+PNSN_PRVS_APLT_ABLE_DATE^연금지급신청가능일자^8^0^0^0^0^0^0
+PNSN_PRVS_FRST_BEGN_DATE^연금지급최초개시일자^8^0^0^0^0^0^0
+PNSN_PRVS_APLT_DATE^연금지급신청일자^8^0^0^0^0^0^0
+PNSN_PRVS_CYCL_CLCD^연금지급주기구분코드^1^0^0^0^0^0^0
+PNSN_PRVS_PRD^연금지급기간^4^0^7^0^0^0^0
+PRVS_AMT^지급금액^19^0^7^0^0^0^0
+PNSN_PRVS_BANK_CODE^연금지급은행코드^3^0^0^0^0^0^0
+PNSN_PRVS_BANK_ACNO^연금지급은행계좌번호^16^0^0^0^0^0^0
+PNSN_PRVS_BEGN_BFAF_CLCD^연금지급개시전후구분코드^1^0^0^0^0^0^0
+PNSN_TACT_ACNT_STAT_CODE^연금이체계좌상태코드^2^0^0^0^0^0^0
+CANC_APLT_STAT_CLCD^해지신청상태구분코드^1^0^0^0^0^0^0
+CANC_APLT_DATE^해지신청일자^8^0^0^0^0^0^0
+CANC_SRNO^해지일련번호^11^0^7^0^0^0^0
+RNMC_YN^실명확인여부^1^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌상태코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_opop_066r" title="계좌Control 비밀번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="196" _ulen="150" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_EMPNO^관리 직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_277r" title="연금저축 계좌번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="160" _ulen="124" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="222" _ulen="168" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+OPNG_DATE^개설일자^8^0^0^0^0^0^0
+RNMC_YN^실명확인여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

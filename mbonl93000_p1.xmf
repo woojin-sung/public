@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="93000" scrname="부동산분리과세 신청종목 수량 입력" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,221,126,1" />
+	<CONTROL_INFO>
+		<EDIT name="Edit0" mask="0,0,,,0,,0,1,1,0,0" halign="2" imetype="1" ly_vert="86,12,116,32,1" />
+		<LABEL name="Label0" fontsize="-3" caption="신청수량" ly_vert="15,12,57,32,1" />
+		<BUTTON name="Button0" caption="입력" fontsize="-2" btnimage="btn_05.9" ly_vert="49,83,58,35,1" />
+		<BUTTON name="Button1" caption="취소" fgcolor="211:222222222" bgcolor="191:255255255" bgcolor2="000:255255255" fontsize="-2" ly_vert="113,83,58,35,1" />
+		<LABEL name="Label1" fontsize="-4" caption="신청가능수량 :" ly_vert="32,45,84,32,1" />
+		<LABEL name="Label2" fontsize="-4" mask="0,0,,,0,,0,1,1,0,0" ly_vert="106,45,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1966" _ulen="1854" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 부동산분리과세 신청종목 수량 입력
+' 02. 화면설명 : 부동산분리과세 신청종목 수량 입력
+' 03. 작    성 : 2020.05.18 장원혁
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'전역 변수 선언
+Dim szData
+Dim szList
+		
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'============================================================================
+Sub Form_OnFormInit()
+
+    szData = Form.GetOpenLinkData()
+    szList = Split(szData, "$")
+    
+    If UBOUND(szList) < 1 Then
+        Form.CloseForm()
+    End If
+	
+    Edit0.caption  = szList(0)
+    Label2.caption = szList(1)
+    
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+
+    Dim APLT_AMT
+    Dim APLT_LIMT_AMT
+    
+    If TRIM(Edit0.caption) = "" Then
+        APLT_AMT = 0
+    Else
+        APLT_AMT = CDBL(Edit0.caption)
+    End If
+    
+    If TRIM(Label2.caption) = "" Then
+        APLT_LIMT_AMT = 0
+    Else
+        APLT_LIMT_AMT = CDBL(Label2.caption)
+    End If
+    
+    If APLT_AMT > APLT_LIMT_AMT Then
+        Form.MsgBox("" , "신청가능수량 초과" , "" , 0)
+        Exit Sub
+    End If
+    
+    Form.SendReturnToParent("APLT_AMT", Edit0.caption)
+    Form.CloseForm()
+    
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+
+    Form.CloseForm()
+    
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

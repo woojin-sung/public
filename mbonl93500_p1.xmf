@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="93500" scrname="대출_KYC_재진단사유" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,285,282,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="pop_header.9" ly_vert="0,0,285,55,1" />
+		<IMAGE name="imgClose1" imgpath="ic_pop_close.png" ly_vert="253,14,24,24,1" />
+		<LABEL name="Label0" fontstyle="01" caption="재진단 사유" halign="1" ly_vert="76,0,133,55,1" />
+		<RADIOGROUP name="RadioGroup0" buttonsnumber="3" ly_vert="8,62,269,116,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="사실관계 착오" transfervalue="1" position="70,0,124,40" />
+				<RADIO no="1" text="오기" transfervalue="2" position="70,40,52,40" />
+				<RADIO no="2" text="기타" transfervalue="3" position="70,80,60,40" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<EDIT name="edtRmrk" imetype="0" hintcaption="기타 선택시 사유를 입력해주세요" ly_vert="29,181,227,32,1" />
+		<BUTTON name="btnCncl" caption="취소" fgcolor="012:000000000" ly_vert="31,225,104,42,1" />
+		<BUTTON name="btnOK" caption="등록" btnimage="btn_05.9" ly_vert="151,225,104,42,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1536" _ulen="1448" >
+--===========================================================================
+--===========================================================================
+
+'============================================================================
+Sub imgClose1_OnClick()
+	Form.SendReturnToParent("mblon93500_p1" , "0" & "||" & "")
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	edtRmrk.enable = false
+End Sub
+
+'============================================================================
+Sub btnCncl_OnClick()
+	Form.SendReturnToParent("mblon93500_p1" , "0" & "||" & "")
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	'미선택시 처리
+	if Clng(RadioGroup0.currentindex) == -1 then
+		Form.ShowAlert("알림", "재진단 사유를 선택해주시기 바랍니다.")
+		exit Sub
+	else
+		if Clng(RadioGroup0.currentindex) == 2 then
+			if trim(edtRmrk.caption) = "" then
+				Form.ShowAlert("알림", "기타일 경우 사유를 입력해주시기 바랍니다.")
+				exit sub
+			end if
+		end if
+
+		Form.SendReturnToParent("mblon93500_p1" , RadioGroup0.currentindex + 1 & "||" & edtRmrk.caption)		
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	if nIndex == 2 then
+		edtRmrk.enable = true
+	else
+		edtRmrk.enable = false
+		edtRmrk.caption = ""
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

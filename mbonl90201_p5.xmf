@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90201" scrname="장외채권 매수 완료" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnList" caption="주문내역 조회" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_20.9" ly_vert="187,597,188,50,1" />
+		<IMAGE name="Image0" imgpath="icon_confirm" ly_vert="150,65,74,74,1" />
+		<LABEL name="lblResult1" fontsize="4" fontstyle="01" caption="채권(장외) 매수가 
+완료되었습니다." halign="1" multiline="1" ly_vert="20,140,335,60,1" />
+		<LABEL name="lblLine" bgcolor="143:049050052" transmode="0" paddinginfo="1,0,0,0" ly_vert="20,250,335,1,1" />
+		<LABEL name="lblTableTitle" fontstyle="01" caption="나의 주문현황" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="20,214,269,25,1" />
+		<LABEL name="lblTableSub1" fontsize="-2" caption="주문계좌" paddinginfo="1,0,0,0" ly_vert="20,263,100,32,1" />
+		<LABEL name="lblTableSub2" fontsize="-2" caption="상품명" paddinginfo="1,0,0,0" ly_vert="20,295,100,32,1" />
+		<LABEL name="lblTableSub3" fontsize="-2" caption="상품분류" paddinginfo="1,0,0,0" ly_vert="20,327,100,32,1" />
+		<LABEL name="lblTableSub4" fontsize="-2" caption="매수금액" paddinginfo="1,0,0,0" ly_vert="20,359,113,32,1" />
+		<LABEL name="lblTableSub5" fontsize="-2" caption="매수수익률" paddinginfo="1,0,0,0" ly_vert="20,391,100,32,1" />
+		<LABEL name="lblTableSub9" fontsize="-2" caption="매수일" paddinginfo="1,0,0,0" ly_vert="20,423,100,32,1" />
+		<LABEL name="lblTableSub10" fontsize="-2" caption="만기일" paddinginfo="1,0,0,0" ly_vert="20,455,100,32,1" />
+		<LABEL name="lblTableData1" fontsize="-2" fontstyle="01" halign="2" autofontsize="1" ly_vert="164,263,190,32,1" />
+		<LABEL name="lblTableData2" fontsize="-2" fontstyle="01" mask="1,0,,,1,########################################...,0,1,1,0,0" halign="2" multiline="1" ly_vert="139,289,215,45,1" />
+		<LABEL name="lblTableData3" fontsize="-2" fontstyle="01" halign="2" ly_vert="164,327,190,32,1" />
+		<LABEL name="lblTableData4" fontsize="-2" fontstyle="01" mask="0,0,,원,0,,0,1,0,0,0" halign="2" ly_vert="164,359,190,32,1" />
+		<LABEL name="lblTableData5" fontsize="-2" fontstyle="01" mask="0,0,,%,0,,2,1,0,0,0" halign="2" ly_vert="164,391,190,32,1" />
+		<LABEL name="lblTableData6" fontsize="-2" fontstyle="01" mask="1,0,,,1,####.##.##,0,1,1,0,0" halign="2" ly_vert="164,423,190,32,1" />
+		<LABEL name="lblTableData7" fontsize="-2" fontstyle="01" mask="1,0,,,1,####.##.##,0,1,1,0,0" halign="2" ly_vert="164,455,190,32,1" />
+		<LABEL name="lblLine0" bgcolor="021:226226226" transmode="0" paddinginfo="1,0,0,0" ly_vert="20,495,335,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2309" _ulen="2041" >
+dim	g_szRet	'리턴값
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	'0 계좌번호
+	'1 주문접수번호
+	'2 종목코드
+	'3 종목명
+	'4 상품코드		
+	'5 계좌번호
+	'6 계좌일련번호
+	'7 계좌명
+	'8 채권분류명
+	'9 매수금액
+	'10 매수수익률
+	'11 매수일자
+	'12 만기일자
+	'13 거래일자
+	'14 거래일련번호
+	'15 정산금액
+	
+	if szOpenData <> "" and szOpenData <> null then
+		dim tData, szProdCd, szProdText
+		tData = Split(szOpenData, "★")
+		
+		szProdCd = Form.GetAccountInfo(tData(0), "productcode")
+		szProdText = Form.GetMetaData("상품코드", szProdCd)
+		
+		'계좌번호
+		lblTableData1.caption 		= "[" & szProdText & "] " & 
+									Left(tData(0),4) & "-" & 
+									Mid(tData(0),5,4) & "-" & 
+									Right(tData(0),2)
+		
+		'상품명
+		lblTableData2.caption 		= tData(3)
+			
+		'종목명 긴 경우, 멀티라인 2줄까지만 출력되도록..
+		if Len(tData(1)) > 40 then
+			lblTableData2.fontsize = -2
+		else
+			lblTableData2.fontsize = 0
+		end if
+		
+		'상품분류
+		lblTableData3.caption 		= tData(8)
+		'매수금액
+		lblTableData4.caption 		= tData(9)
+		'매수수익률
+		lblTableData5.caption 		= tData(10)
+		'매수일
+		lblTableData6.caption 		= tData(11)
+		'만기일
+		lblTableData7.caption 		= tData(12)
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub btnList_OnClick()
+	g_szRet = "ALL_CLOSE"
+	
+	'채권 주문내역 탭으로 이동
+'	Form.OpenNextPopup("mbonl90301", "1", "")
+	Form.OpenScreen(54140, "1")	
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	g_szRet = "ALL_CLOSE"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbonl90201_p5" ,  g_szRet)
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	g_szRet = "ALL_CLOSE"
+	Form.CloseForm()
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

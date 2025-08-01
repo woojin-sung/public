@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90051" scrname="ETF/ETN 보기" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" visible="0" autosize="1" imgpath="pop_header.9.png" ly_vert="0,0,375,45,0" />
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_top_back_light" ly_vert="20,10,20,20,1" />
+		<LABEL name="lblTitle" fontsize="3" caption="채권형 ETF 보기" bgcolor="320:255255255" click="1" ly_vert="40,6,222,30,1" />
+		<FORMTAB name="fmtab0" tabcount="2" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,45,375,602,1" >
+			<PAGE name="page004548" caption="ETF" linkfile="mbonl90051_t1" loadingtype="1" />
+			<PAGE name="page005122" caption="ETN" linkfile="mbonl90051_t2" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2768" _ulen="2636" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : ETF/ETN 보기
+' 02. 화면설명 : ETF/ETN 보기
+' 03. 작    성 : 
+'  2023.11.06 기존에 있던 EFT종합 화면을 개편.
+'             ETF / ETN 상품으로 나누어서 조회함. 
+'             mbtrs11040 -> mbtrs11040_t1 으로 변경
+'             mbtrs11040t2 화면 신규 개발
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim g_szSymbolCode, g_szSymbolName
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()	
+	Dim szScreenNo, szData, szTab
+	Dim szList
+	
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+	
+	szData = Form.GetOpenLinkData()
+'	Form.ShowAlert("50051_FormInit", szData)
+	
+	szList = split(szData, "|")
+	
+	szTab = szList(0)
+	
+	If szTab == "" Or szTab == null then
+		exit Sub
+	end If
+	
+	fmtab0.currenttab = CInt(szTab)
+	
+	g_szSymbolCode = szList(1)
+	g_szSymbolName = szList(2)
+	If g_szSymbolCode == "" or g_szSymbolCode == null then
+		exit Sub
+	end If
+	
+	If g_szSymbolName == "" or g_szSymbolName == null then
+		exit Sub
+	end If
+	
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "Init_Symbol", g_szSymbolCode & "|" & g_szSymbolName)	
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+'	if g_szLastTab <> nCurrentTab then
+'
+'	End if
+	
+	If nCurrentTab = 0 Then		'ETF
+		Form.setTitleCaption( "채권형 ETF 보기" )
+		lblTitle.caption = "채권형 ETF 보기"
+			
+	ElseIf nCurrentTab = 1 Then		'ETN
+		Form.setTitleCaption( "채권형 ETN 보기" )
+		lblTitle.caption = "채권형 ETN 보기"
+		
+	End If
+	
+'	if g_szSymbolCode <> "" then
+'		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "Init_Symbol", g_szSymbolCode)	
+'	end if
+End Sub
+
+
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.CloseForm("")
+End Sub
+
+'============================================================================
+
+
+	</SCRIPT_INFO>
+</ROOT>

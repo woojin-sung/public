@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="000000" scrname="체크리스트_01" version="2" writer="윤형빈" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" ly_vert="0,0,375,505,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="th_cell0" fontsize="2" fontstyle="01" caption="직접적 직무 관련성 Check" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-2" multiline="1" />
+				<LABEL name="bd_cell0" fontstyle="01" mask="0,1,,,1,,0,1,1" halign="1" />
+				<CHKBUTTON name="bd_cell2" margin="10,0,0,0" />
+			</CONTROL_INFO>
+			<DEFAULTINFO bordercolor="144:034034034" inlinecolor="144:034034034" />
+			<COLINFO ly_vert_width="375" ly_vert_visible="0" >
+				<COLUMN colcount="3" >
+					<SUBCOLINFO ly_vert_width="40,295,40" ly_vert_visible="0,0,0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="31" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,2,0" fgcolor="004:000000000" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="70" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell1" cell_ly="1,0,1,0" import="0,1,2" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell2" cell_ly="2,0,2,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<BUTTON name="Button0" caption="확인" fontsize="-2" btnimage="btn_01.9" ly_vert="142,520,90,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5374" _ulen="5172" >
+
+'============================================================================
+' 01.화면명 	: 직접적직무관련성
+' 02.화면설명	: 직접적직무관련성_CheckList
+' 03.작성	: 2016.09.22 윤형빈
+' 04.로직수정	: 허우석
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_DataCount
+Dim R_value
+
+'---------------------------	INIT			-------------------------------
+
+'----------------------------------------------------------------------------
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+'setGridIndex	: 	 그리드 Index를 보정한다.
+'============================================================================
+Function setGridIndex (szCount)
+
+	for i=1 to szCount
+		Grid0.SetCellData("bd_cell0", i-1, i)
+	next
+		
+End Function
+
+'============================================================================
+'calGridCheck	: 	 그리드 Check 숫자를 리턴한다.
+'============================================================================
+Function calGridCheck (szCount)
+	R_value = ""			
+	temp_count = 0
+	temp = 0
+
+	for i=0 to szCount-2
+		if Grid0.GetCellData("bd_cell2", szCount-i-2) == "1" then
+			if temp == 0 then 
+				R_value = "010" & Grid0.GetCellData("bd_cell0", szCount-i-2)
+				temp = temp + 1
+			else 
+				R_value = R_value & ",010" & Grid0.GetCellData("bd_cell0", szCount-i-2)
+			end if
+		end if
+		temp_count = temp_count + Grid0.GetCellData("bd_cell2", szCount-i-2)	
+	next
+		
+	calGridCheck = temp_count
+		
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+'Form_OnFormInitBefore
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	
+End Sub
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	
+	DATAMANAGER.RequestTranData("obcmp_momt_475r" )
+	temp = Form.GetOpenLinkData()
+	if temp == "8989" then
+		Form.SendReturnToParent("Clist1", 1)
+		Form.SetSharedData("Clist1_result", "0000")
+		Form.CloseForm()
+	end if
+	
+End Sub
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	if szTranID = "obcmp_momt_475r" then '직접적 직무 관련성 CheckList만 조회
+		DATAMANAGER.SetDataValue(0, "obcmp_momt_475r", "InBlock1", "LRDV_CODE", 0 , "01")
+		DATAMANAGER.SetDataValue(0,"obcmp_momt_475r", "InBlock1", "SMDV_CODE" , 0 , "%")
+		
+	End if
+	
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	if szTranID = "obcmp_momt_475r" then 
+		g_DataCount = DATAMANAGER.GetDataCount(0,"obcmp_momt_475r", "OutBlock1")
+		setGridIndex(g_DataCount)
+	End if
+
+
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+End Sub
+
+
+'============================================================================
+'Button0_OnClick
+'============================================================================
+Sub Button0_OnClick()
+	
+	count = Cint(calGridCheck(g_DataCount))
+	
+	if R_value == "" then 
+		R_value = "010" & g_DataCount
+	end if
+	
+	if count > 0 then
+		Form.MsgBox("경고", "청탁 금지법 위반 가능성이 높은 행위입니다.", "", "")
+		Form.SendReturnToParent("Clist1", 0)
+		Form.CloseForm()
+	else
+		if Cint(Grid0.GetCellData("bd_cell2", g_DataCount-1))= 0 then
+			Form.MsgBox("경고", "하나라도 반드시 선택하셔야 합니다", "", "")
+		else 
+			Form.SetSharedData("Clist1_result", R_value)
+			Form.SendReturnToParent("Clist1", 1)
+			Form.CloseForm()
+		end if
+	end if
+		
+End Sub
+
+
+'============================================================================
+'Grid0_OnClickUp
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	if  Grid0.GetCellData("bd_cell2", g_DataCount-1) == "1" then
+		if szCellID == "bd_cell2" then
+			if lRow == g_DataCount-1 then
+				for i = 0 to g_DataCount-2
+					Grid0.SetCellData( "bd_cell2",i, "0" )
+				next
+			else
+				Grid0.SetCellData("bd_cell2", g_DataCount-1, "0")
+			end if		
+		end if	
+	end if
+
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcmp_momt_475r" trcode="obcmp_momt_475r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcmp_momt_475r" title="내부통제_체크리스트내역조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="90" _ulen="70" >
+
+LRDV_CODE^대분류코드^12^0^0^0^0^0^0
+SMDV_CODE^소분류코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="141" _ulen="109" >
+
+LRDV_CODE^대분류코드^12^0^0^0^0^0^0
+SMDV_CODE^소분류코드^12^0^0^0^0^0^0
+SMDV_CODE_NAME^소분류코드명^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="90" _ulen="70" >
+
+LRDV_CODE^대분류코드^12^0^0^0^0^0^0
+SMDV_CODE^소분류코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

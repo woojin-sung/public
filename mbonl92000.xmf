@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="92000" scrname="고객 대여불가종목 설정 및 해지" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,567,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt1" itemcodetype="100,105,119,200" accpwdctl="EditPW" finaceexcept="1" ly_vert="6,9,271,39,1" />
+		<EDIT name="EditPW" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" savecheckpwd="1" ly_vert="283,9,86,39,1" />
+		<FORMTAB name="fmtab0" tabcount="2" tabwidthtype="2" tabheadheight="36" ly_vert="0,99,375,469,1" >
+			<PAGE name="page000972" caption="대여불가종목 설정" linkfile="mbonl92000_t1.xmf" loadingtype="1" />
+			<PAGE name="page006053" caption="대여불가종목 해지" linkfile="mbonl92000_t2.xmf" loadingtype="1" />
+		</FORMTAB>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="6,57,363,35,1" >
+			<COL_INFO ly_vert_width="181,182" />
+			<ROW_INFO ly_vert_height="35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="090:238239240" caption="대여약정 여부" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1254" _ulen="1224" >
+'===========================================================================
+Dim g_szAcno
+Dim g_szAsno
+'===========================================================================
+Sub Call_Tran()
+
+	g_szAcno = left(acnt1.caption,8)
+	g_szAsno = right(acnt1.caption,2)
+	
+	
+	if Cint(fmtab0.currenttab) = 0 or Cint(fmtab0.currenttab) = 1 then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "TRANCALL", g_szAcno & "||" & g_szAsno)
+	else
+		Form.ShowAlert("Error", "유효하지않은 탭입니다.")
+		exit sub
+	end if
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	Call_Tran()
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	Call_Tran()
+End Sub
+
+'============================================================================
+Sub acnt1_ChangeAccount()
+	'acnt1.caption = ""	
+	Call_Tran()
+End Sub
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "LNDN_STPL_YN" then
+		if sParam = "Y" then
+			Table0.SetCellString(0, 1, "등록")
+		else
+			Table0.SetCellString(0, 1, "미등록")
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="oblon_lndn_018r" trcode="oblon_lndn_018r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="oblon_lndn_018r" title="주식 대여 불가종목 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="159" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="291" _ulen="221" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+KOR_ISSU_ABWR_NAME^한글종목약어명^40^0^0^0^0^0^0
+LNDN_RMND_QTY^대여잔고수량^19^0^7^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="42" _ulen="34" >
+
+STPL_YN^약정여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="40" _ulen="32" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="93102" scrname="연금저축_타사에서가져오기_완료" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="check_red.png" ly_vert="155,75,66,60,1" />
+		<LABEL name="lblTitle" fontsize="7" fontstyle="01" caption="연금 이전 신청이
+완료되었습니다. " halign="1" valign="0" multiline="1" ly_vert="0,158,375,60,1" />
+		<IMAGE name="Image1" imgpath="img_bgbox.9" ly_vert="20,242,335,178,1" />
+		<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="2" rowcount="2" outline="0000" transmode="1" designorder="1" ly_vert="30,331,315,78,1" >
+			<COL_INFO ly_vert_width="155,160" />
+			<ROW_INFO ly_vert_height="39,39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="096:102102102" halign="0" line="0,0" caption="연금이전 신청일" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="096:102102102" halign="0" line="0,0" caption="이전의사 확인 가능일" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" mask="1,0,~,,1,####.##.##,0,1,1,0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnOK" caption="확인" bgcolor2="062:255255255" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+		<LABEL name="lblText" fgcolor="146:124124124" fontsize="-2" halign="1" valign="0" multiline="1" ly_vert="20,438,335,40,1" />
+		<TABLE name="tblInfo2" insidelinecolor="102:255255255" colcount="2" rowcount="2" outline="0000" transmode="1" designorder="1" ly_vert="30,253,315,78,1" >
+			<COL_INFO ly_vert_width="110,205" />
+			<ROW_INFO ly_vert_height="39,39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="096:102102102" halign="0" line="0,0" caption="이전하는 계좌" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="096:102102102" halign="0" line="0,0" caption="이전받는 계좌" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1345" _ulen="1199" >
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szToday, szNextBizDay
+	szToday = Form.GetSharedData( "&HOST_DATE", false )
+	szNextBizDay = Form.GetSharedData( "&BIZ_NXT_DT", false )
+	
+	tblInfo.SetCellString(0, 1, szToday)			'연금이전 신청일
+	tblInfo.SetCellString(1, 1, szNextBizDay)	'이전의사 확인 가능일
+	
+	Dim szMaskDate
+	szMaskDate = Left(szNextBizDay, 4) & "." & Mid(szNextBizDay, 5, 2) & "." & Right(szNextBizDay, 2)
+	lblText.caption = szMaskDate & "까지 이전의사 미확인 시\n계약이전이 취소됩니다."
+	
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	If szOpenData <> "" And szOpenData <> null Then
+		Dim tData
+		tData = Split(szOpenData, "★")
+		'0:받는계좌번호, 1:보내는기관명, 2:보내는계좌번호
+		If UBound(tData) > 0 Then
+			'이전하는 계좌
+			tblInfo2.SetCellString(0, 1, tData[1] & " " & tData[2])
+			
+			'이전받는 계좌
+			Dim szMaskAcnt
+			szMaskAcnt = Left(tData[0], 4) & "-" & Mid(tData[0], 5, 4) & "-" & Right(tData[0], 2)
+			tblInfo2.SetCellString(1, 1, "메리츠증권 " & szMaskAcnt)
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	Form.SendReturnToParent( "mbonl93102_p5" , "" )
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

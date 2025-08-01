@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="92020" scrname="대여 수익금 확인하기" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="cmbAccount" bgcolor="052:255255255" itemcodetype="100,119,200" etcfunctions="" accpwdctl="edtPwd" delegate="1" finaceexcept="1" benefitexcept="1" ly_vert="10,5,355,40,1" />
+		<CONTAINER name="ContAcct" scroll_pos="0,0" ly_vert="0,50,375,517,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="lblTopBg" bgcolor="126:093104123" transmode="0" ly_vert="0,0,375,195,1" />
+				<IMAGE name="imgBG" imgpath="btn_10_o.9" ly_vert="-10,0,395,195,1" />
+				<LABEL name="lblFee" visible="0" mask="0,0,,,0,,0,1,1,0,0" ly_vert="9,33,356,32,0" />
+				<LABEL name="lblInfo0" fgcolor="145:255255255" fontsize="-2" caption="대차중개약정을 통해 제공 받은 수익금을 확인해보세요." ly_vert="6,7,344,32,1" />
+				<LABEL name="lblFeeCdName" fgcolor="145:255255255" fontsize="5" halign="1" valign="2" click="1" ly_vert="60,63,235,32,1" />
+				<LABEL name="lblInfo1" fgcolor="145:255255255" fontsize="1" fontstyle="01" caption="동안 제공 받은 금액은?" halign="1" ly_vert="20,100,335,25,1" />
+				<IMAGE name="imgArrow" autosize="1" imgpath="icon_arrow_down" ly_vert="300,80,12,12,1" />
+				<LABEL name="lblAmt" fontsize="5" fontstyle="01" halign="1" valign="0" multiline="1" ly_vert="20,134,335,45,1" />
+				<LABEL name="lblSubTitle" fontsize="-1" fontstyle="01" caption="수익금 상세" ly_vert="10,210,120,32,1" />
+				<IMAGE name="imgLndn" imgpath="img_bgbox.9.png" ly_vert="20,239,335,80,1" />
+				<LABEL name="lblLndnCodeNm" fontsize="-1" fontstyle="01" caption="대여수익" ly_vert="20,243,150,31,1" />
+				<IMAGE name="imgLndnArrow" imgpath="icon_arrow_down" ly_vert="333,254,12,12,1" />
+				<LABEL name="lblLndnText" fgcolor="127:162162162" fontsize="-2" caption="주식 (세전)" ly_vert="20,270,80,20,1" />
+				<LABEL name="lblLndnText2" fgcolor="127:162162162" fontsize="-2" caption="채권 (세전)" ly_vert="20,290,80,20,1" />
+				<LABEL name="lblLndnAmt" fontstyle="01" mask="0,0,, 원,0,,0,1,0,0,0" halign="2" autofontsize="1" ly_vert="170,243,170,31,1" />
+				<LABEL name="lblLndnAmt2" fgcolor="127:162162162" fontsize="-2" mask="0,0,,원,0,,0,1,1,0,0" halign="2" ly_vert="170,270,170,20,1" />
+				<LABEL name="lblLndnAmt3" fgcolor="127:162162162" fontsize="-2" mask="0,0,,원,0,,0,1,1,0,0" halign="2" ly_vert="170,290,170,20,1" />
+				<BUTTON name="btnLndn" btnimage="alpha" ly_vert="20,239,335,80,1" />
+				<CALENDAR name="CalPsntDate" visible="0" dispmode="57891104" ly_vert="-17,534,140,32,0" />
+				<CALENDAR name="CalStaDate" dispmode="57891104" ly_vert="228,530,140,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8101" _ulen="7755" >
+'--===========================================================================
+'2023.06.22 : 대여수익금조회화면 개발
+'--===========================================================================
+Dim g_LndnFeeYN		'Y : 포함하여 조회, N : 미포함하여 조회, default = N
+Dim g_LndnStplYN
+Dim g_StaDate
+Dim g_FinDate
+Dim g_PrdCd
+Dim g_AplyYN           'default = N
+'--===========================================================================
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'ContNoAcct.Image1.setMaintainingRatio("1")
+	ContAcct.imgArrow.setMaintainingRatio("1")
+	'ContAcct.imgWonArrow.setMaintainingRatio("1")
+	'ContAcct.imgUsdArrow.setMaintainingRatio("1")
+	ContAcct.imgLndnArrow.setMaintainingRatio("1")
+	'위치조정
+	ContAcct.lblFeeCdName.setNeighborCtlPos("imgArrow","right",5,"")
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	g_LndnFeeYN = "N"
+	g_AplyYN = "N"
+	
+	f_Init()
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "oblon_lndn_050r" then
+		DATAMANAGER.SetDataValue(0, "oblon_lndn_050r", "InBlock1", "PROS_CLS_CODE" , 0 , g_LndnFeeYN)
+		DATAMANAGER.SetDataValue(0, "oblon_lndn_050r", "InBlock1", "STA_DATE"      , 0 , g_StaDate)
+		DATAMANAGER.SetDataValue(0, "oblon_lndn_050r", "InBlock1", "FIN_DATE"      , 0 , g_FinDate)
+		DATAMANAGER.SetDataValue(0, "oblon_lndn_050r", "InBlock1", "ACNO"          , 0 , cmbAccount.total )
+		DATAMANAGER.SetDataValue(0, "oblon_lndn_050r", "InBlock1", "ASNO"          , 0 , cmbAccount.sequence)
+	end if
+End Sub
+'============================================================================
+Function f_Init()
+	ContAcct.lblTopBg.visible = false
+	BtnLndnControl(false)
+	f_SetInit()
+	'초기 개월수는 1개월로 셋팅
+	g_PrdCd = "1"
+	
+	tmpDate = LEFT(ContAcct.CalPsntDate.caption,4) & "-" & RIGHT(LEFT(ContAcct.CalPsntDate.caption,6),2) & "-" & RIGHT(ContAcct.CalPsntDate.caption,2)
+	tmpPrd1month = CStr(DateAdd("d",0,DateAdd("m",-1,CDate(CStr(tmpDate)))))
+	tmpPrd1month = Replace(tmpPrd1month, "-", "")
+	
+	g_StaDate = tmpPrd1month
+	g_FinDate = ContAcct.CalPsntDate.caption
+	
+	f_SetFlag()
+	g_LndnStplYN = "N"
+	
+	f_CallTran(0)
+End Function
+
+'============================================================================
+Function f_SetInit()
+	'수익금 합산
+	ContAcct.lblAmt.caption = ""	'초기화
+	ContAcct.lblAmt.fontsize = 27
+	ContAcct.lblAmt.fgcolor  = 290
+	
+	ContAcct.lblLndnAmt.caption  = ""
+	ContAcct.lblLndnAmt2.caption = ""
+	ContAcct.lblLndnAmt3.caption = ""	
+End Function
+
+'============================================================================
+Function BtnLndnControl(bStat)
+	ContAcct.imgLndn.visible 		= bStat
+	ContAcct.lblLndnCodeNm.visible 	= bStat
+	ContAcct.lblLndnAmt.visible 	= bStat
+	ContAcct.lblLndnText.visible 	= bStat
+	ContAcct.lblLndnText2.visible 	= bStat
+	ContAcct.lblLndnAmt2.visible 	= bStat
+	ContAcct.lblLndnAmt3.visible 	= bStat
+	ContAcct.imgLndnArrow.visible 	= bStat
+	ContAcct.BtnLndn.visible 		= bStat
+	ContAcct.lblSubTitle.visible    = bStat
+End Function
+
+'============================================================================
+Function f_SetFlag()
+	Dim tCodeName1
+	Dim sStaDate, sFinDate
+	
+	if g_PrdCd == "1" then
+		tCodeName1 = "1개월"		
+		ContAcct.imgArrow.left = 215
+	elseif g_PrdCd == "2" then		
+		tCodeName1 = "3개월"
+		ContAcct.imgArrow.left = 215
+	elseif g_PrdCd == "3" then				
+		sStaDate = Mid(g_StaDate,3,2) & "." & Mid(g_StaDate,5,2) & "." & Right(g_StaDate,2)
+		sFinDate = Mid(g_FinDate,3,2) & "." & Mid(g_FinDate,5,2) & "." & Right(g_FinDate,2)
+
+		tCodeName1 = sStaDate&" ~ "&sFinDate
+		
+		ContAcct.imgArrow.left = 285
+	else 
+		tCodeName1 = ""
+	end if
+	
+	ContAcct.lblFeeCdName.caption = tCodeName1
+End Function
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "oblon_lndn_050r" then
+		dim nStaOffset
+		dim nTotal, nLndnStckAmt, nLndnBondAmt
+		
+		g_LndnStplYN = DATAMANAGER.GetDataValue(0, "oblon_lndn_050r", "OutBlock4", "STPL_YN" , 0)
+		nTotal       = Clng(DATAMANAGER.GetDataValue(0, "oblon_lndn_050r", "OutBlock1", "TOTAL_FEE", 0))
+		nLndnStckAmt = Clng(DATAMANAGER.GetDataValue(0, "oblon_lndn_050r", "OutBlock2", "STCK_FEE", 0))
+		nLndnBondAmt = Clng(DATAMANAGER.GetDataValue(0, "oblon_lndn_050r", "OutBlock3", "BOND_FEE", 0))
+		g_AplyYN     = DATAMANAGER.GetDataValue(0, "oblon_lndn_050r", "OutBlock4", "APLY_YN" , 0)
+		
+		ContAcct.lblFee.caption = Clng(nTotal)
+		ContAcct.lblAmt.caption = ContAcct.lblFee.dispcaption&" 원"
+		nStaOffset = ContAcct.lblAmt.getLen(ContAcct.lblAmt.caption) -2
+		
+		ContAcct.lblAmt.changeTextAttr(nStaOffset, 2, 290, 5, true)
+		ContAcct.lblLndnAmt.caption = nTotal
+		ContAcct.lblLndnAmt2.caption = nLndnStckAmt
+		ContAcct.lblLndnAmt3.caption = nLndnBondAmt
+		
+		'대차약정 & 수익있음 = 수익란 보임
+		'대차약정 & 수익없음 = 수익란 보임
+		'대차미약정 & 수익있음 = 수익란 보임
+		'대차이먁정 & 수익없음 = 수익란 안보임
+		if g_LndnStplYN == "Y" and nTotal > 0 then
+			BtnLndnControl(true)
+		elseif g_LndnStplYN == "Y" and nTotal <= 0 then
+			BtnLndnControl(true)
+		elseif g_LndnStplYN == "N" and nTotal > 0 then
+			BtnLndnControl(true)
+		elseif g_LndnStplYN == "N" and nTotal <= 0 then
+			BtnLndnControl(false)
+		else
+			BtnLndnControl(false)
+		end if
+	end if
+End Sub
+
+'============================================================================
+'TR오류시..
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if szSubErr <> null and Trim(szSubErr) <> "" then
+		Form.ShowAlert( "안내" , szErrMsg.."("..szSubErr..")")
+	else
+		Form.ShowAlert( "안내" , szErrMsg)
+	end if
+End Sub
+
+'============================================================================
+' 기간 및 수수료구분 선택팝업창 띄움
+'============================================================================
+Sub ContAcct_lblFeeCdName_OnClick()
+	dim sSendData
+	sSendData = g_PrdCd&"★"&g_StaDate&"★"&g_FinDate&"★"&g_AplyYN&"★"&g_LndnFeeYN
+	
+	Form.openPopupAnimation("mbonl88029_p2", sSendData,"","2")	
+End Sub
+
+'============================================================================
+' PopUp Return 처리
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "mbonl88029_p2" then
+		if sRet <> "" and sRet <> null then
+			Dim tData
+			tData = Split(sRet, "★")
+
+			g_PrdCd    = tData(0)		'1:1개월 2:3개월 3:직접입력
+			g_StaDate  = tData(1)
+			g_FinDate  = tData(2)
+			g_LndnFeeYN= tData(3)
+				
+			f_SetInit()
+			f_SetFlag()
+			
+			f_CallTran(0)
+		end if
+	end if
+End Sub
+
+'============================================================================
+' 대여수수료 상세조회
+'============================================================================
+Sub ContAcct_BtnLndn_OnClick()
+	dim sSendData
+	sSendData = cmbAccount.total&"★"&cmbAccount.sequence&"★"&g_StaDate&"★"&g_FinDate&"★3"&"★"&g_LndnFeeYN&"★"&ContAcct.lblFeeCdName.caption
+	
+	Form.openPopupAnimation("mbonl88029_p4", sSendData, "", "2")
+End Sub
+
+'============================================================================
+Sub cmbAccount_ChangeAccount()
+	f_Init()	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	'상단 유의사항 아이콘 클릭 이벤트
+	if sEventName == "INFO_CLICK" Then
+		Form.OpenPopup("mbonl92020_p1" , "" , "")
+	End If	
+End Sub
+
+'============================================================================
+Function f_CallTran(nIndex)
+	if nIndex == 0 then
+		if trim(cmbAccount.itemcodetype) <> "" then
+			DATAMANAGER.RequestTranData("oblon_lndn_050r")
+		end if
+	end if
+End Function
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="oblon_lndn_050r" trcode="oblon_lndn_050r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="oblon_lndn_050r" title="슈퍼365 대여수익 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="200" _ulen="152" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="86" _ulen="68" >
+
+TOTAL_FEE^총수수료^19^0^7^0^0^0^0
+ACML_ERT^누적수익률^11^6^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="99" _ulen="75" >
+
+STCK_FEE^주식수수료^19^0^7^0^0^0^0
+STCK_ACML_ERT^주식누적수익률^20^9^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="99" _ulen="75" >
+
+BOND_FEE^채권수수료^19^0^7^0^0^0^0
+BOND_ACML_ERT^채권누적수익률^20^9^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="78" _ulen="62" >
+
+STPL_YN^약정여부^1^0^0^0^0^0^0
+APLY_YN^적용여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="78" _ulen="62" >
+
+STPL_YN^약정여부^1^0^0^0^0^0^0
+APLY_YN^적용여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

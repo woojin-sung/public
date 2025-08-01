@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90301" scrname="채권주문현황 상세조회" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" imgpath="bg_dim40.9.png" ly_vert="0,0,375,650,1" />
+		<CONTAINER name="cont1" ly_vert="0,246,375,401,1" scroll_ly_vert="0,246,375,401,1" >
+			<CONTROL_INFO>
+				<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,0,375,351,1" />
+				<LABEL name="lblName" fontsize="4" fontstyle="01" caption="나의 주문현황" bgcolor="064:188030030" autofontsize="1" ly_vert="10,17,355,47,1" />
+				<LABEL name="lblLine0" bgcolor="132:215215215" transmode="0" ly_vert="10,66,355,1,1" />
+				<TABLE name="tbl2" insidelinecolor="102:255255255" colcount="2" rowcount="10" outline="0000" designorder="1" ly_vert="10,80,355,230,1" >
+					<COL_INFO ly_vert_width="100,255" />
+					<ROW_INFO ly_vert_height="23,23,23,23,23,23,23,23,23,23" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="계좌번호" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,0,1,0" halign="2" line="0,0" fontsize="-1" impidxs="" />
+						<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="상품명" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,1,1,1" halign="2" line="0,0" fontsize="-1" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="상품분류" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,2,1,2" halign="2" line="0,0" fontsize="-1" impidxs="" />
+						<CELL cell_ly="0,3,0,3" halign="0" line="0,0" caption="수량" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,3,1,3" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,4,0,4" halign="0" line="0,0" caption="가격" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,4,1,4" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,5,0,5" halign="0" line="0,0" caption="수수료" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,5,1,5" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,6,0,6" halign="0" line="0,0" caption="제세금" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,6,1,6" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,7,0,7" halign="0" line="0,0" caption="결제금액" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,7,1,7" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,8,0,8" halign="0" line="0,0" caption="매매일" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,8,1,8" halign="2" line="0,0" fontsize="-1" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,9,0,9" halign="0" line="0,0" caption="만기일" fontsize="-1" paddinginfo="1,0,0,0" impidxs="" />
+						<CELL cell_ly="1,9,1,9" halign="2" line="0,0" fontsize="-1" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<BUTTON name="btnOK" caption="확인" fontsize="3" fontstyle="01" btnimage="btn_20.9" ly_vert="0,350,375,51,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3026" _ulen="2686" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 장외채권 상품 목록 조회
+' 02. 화면설명 : 장외채권 상품 목록 간단필터 팝업
+'                
+
+' 03. 이    력 : 
+' - 2023.11.01 : 윤혁 : v0001 : 신규개발
+
+
+'-------------------------------------------------------------------------------------------
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim g_szLinkData, g_szList
+Dim g_ACNo, g_ASNo, g_szSymbolCode
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szLinkData = Form.GetOpenLinkData()
+	
+'	Form.ShowAlert("90301_p5_FormInit", g_szLinkData)
+
+	if g_szLinkData == "" or g_szLinkData == null then
+		Exit Sub
+	end if 
+	
+	g_szList = split(g_szLinkData, "|")
+	'0 매매구분코드
+	'1 상품유형코드
+	'2 종목코드
+	'3 종목명
+	'4 채권분류명
+	'5 매수일자
+	'6 만기일자
+	'7 수량
+	'8 단가
+	'9 매매금액
+	'10 거래일자
+	'11 거래일련번호
+	'12 매수수익률
+	'13 수수료수익금액
+	'14 제세금금액
+	'15 주문처리결과구분코드
+	'16 취소여부
+	'17 계좌번호+이름
+	
+	cont1.tbl2.SetCellString(0, 1, g_szList(17))	'계좌번호
+	cont1.tbl2.SetCellString(1, 1, g_szList(3))	'상품명
+	
+	if g_szList(1) == "12" then
+		cont1.tbl2.SetCellString(2, 1, "단기사채")	'상품분류
+	else
+		cont1.tbl2.SetCellString(2, 1, g_szList(4))	'상품분류
+	end if
+	
+	cont1.tbl2.SetCellString(3, 1, g_szList(7))	'수량	
+	cont1.tbl2.SetCellString(4, 1, g_szList(8))	'가격
+	cont1.tbl2.SetCellString(5, 1, g_szList(13))	'수수료
+	cont1.tbl2.SetCellString(6, 1, g_szList(14))	'제세금		
+	cont1.tbl2.SetCellString(7, 1, g_szList(9))	'결제금액
+'	cont1.tbl2.SetCellString(5, 1, g_szList(12))	'매수수익률
+	cont1.tbl2.SetCellString(8, 1, g_szList(5))	'매매일
+	cont1.tbl2.SetCellString(9, 1, g_szList(6))	'만기일
+	
+End Sub
+
+'============================================================================
+Sub imgDim_OnClick()
+	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub Container0_btnOK_OnClick()
+	Dim szData
+	
+	
+	Form.SendReturnToParent("SEARCH_DATE" , szData)
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+Sub cont1_btnOK_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

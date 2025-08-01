@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="신용거래설명서" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="web01" urlpath="about:blank" ly_vert="0,0,375,565,1" />
+		<BUTTON name="BtnOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="0,561,375,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1472" _ulen="1390" >
+'============================================================================
+' 01.화면명 	: 신용거래설명서
+' 02.화면설명	: 신용거래설명서
+' 03.작성	: 2021.03.19 이현우
+' 04.수정	
+'============================================================================
+dim	g_szRet	'리턴값
+g_szRet	=	"0"
+Dim g_ServerMode
+Dim g_URLheader
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_ServerMode = Form.GetSharedData("&SERVER_MODE", false)
+	
+	If g_ServerMode == "1" Then       '테스트
+		g_URLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf_test/"
+	Else
+		g_URLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/"
+	End If
+	
+	web01.viewtype = 0
+	web01.urlpath = g_URLheader & "/meritz_info_03.pdf"	
+	
+	Form.SetScreenName("신용거래설명서")
+End Sub
+
+'============================================================================
+'BtnOK_OnClick
+'============================================================================
+Sub BtnOK_OnClick()
+	g_szRet	=	"1"
+	Form.CloseForm()    
+End Sub
+'============================================================================
+'Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("CREDIT_POLICY" , g_szRet)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

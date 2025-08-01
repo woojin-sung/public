@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="92010" scrname="주식 대여 반환청구 및 취소" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,567,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt1" itemcodetype="100,105,119,200" etcfunctions="" accpwdctl="EditPW" finaceexcept="1" ly_vert="6,9,271,39,1" />
+		<EDIT name="EditPW" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" savecheckpwd="1" ly_vert="283,9,86,39,1" />
+		<FORMTAB name="fmtab0" tabcount="2" tabwidthtype="2" tabheadheight="36" ly_vert="0,142,375,426,1" >
+			<PAGE name="page006980" caption="반환 신청" linkfile="mbonl92010_t1.xmf" loadingtype="1" />
+			<PAGE name="page006053" caption="반환 취소 신청" linkfile="mbonl92010_t2.xmf" loadingtype="1" />
+		</FORMTAB>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="6,57,363,35,1" >
+			<COL_INFO ly_vert_width="181,182" />
+			<ROW_INFO ly_vert_height="35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="090:238239240" caption="대여약정 여부" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<RADIOGROUP name="RadioGroup0" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="4,99,367,36,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="주식" position="2,2,182,32" />
+				<RADIO no="1" text="채권" position="184,2,182,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1936" _ulen="1906" >
+'===========================================================================
+Dim g_szAcno
+Dim g_szAsno
+Dim g_szSTPLYN
+'===========================================================================
+Sub Call_Tran()
+
+	g_szAcno = left(acnt1.caption,8)
+	g_szAsno = right(acnt1.caption,2)
+	
+	
+	if Cint(fmtab0.currenttab) = 0 or Cint(fmtab0.currenttab) = 1 then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "TRANCALL", g_szAcno & "||" & g_szAsno & "||" & RadioGroup0.currentindex )
+	else
+		Form.ShowAlert("Error", "유효하지않은 탭입니다.")
+		exit sub
+	end if
+	
+	DATAMANAGER.SetDataValue(0, "oblon_lndn_018r", "InBlock1", "ACNO", 0 	 , g_szAcno)
+	DATAMANAGER.SetDataValue(0, "oblon_lndn_018r", "InBlock1", "ASNO", 0 	 , g_szAsno)
+	DATAMANAGER.SetDataValue(0, "oblon_lndn_018r", "InBlock1", "ACNT_PWD", 0  , EditPW.caption)
+	
+	DATAMANAGER.RequestTranData("oblon_lndn_018r")
+	
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	Call_Tran()
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	Call_Tran()
+End Sub
+
+'============================================================================
+Sub acnt1_ChangeAccount()
+	EditPW.caption = ""	
+	Call_Tran()
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "oblon_lndn_018r" then
+		g_szSTPLYN = DATAMANAGER.GetDataValue(0, "oblon_lndn_018r", "OutBlock2", "STPL_YN" , 0)
+		
+		if g_szSTPLYN = "Y" then
+			Table0.SetCellString(0, 1, "등록")
+		else
+			Table0.SetCellString(0, 1, "미등록")
+		end if
+	end if
+End Sub
+'============================================================================
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	Call_Tran()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="oblon_lndn_018r" trcode="oblon_lndn_018r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="oblon_lndn_018r" title="주식 대여 불가종목 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="159" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="291" _ulen="221" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+KOR_ISSU_ABWR_NAME^한글종목약어명^40^0^0^0^0^0^0
+LNDN_RMND_QTY^대여잔고수량^19^0^7^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="42" _ulen="34" >
+
+STPL_YN^약정여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="40" _ulen="32" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

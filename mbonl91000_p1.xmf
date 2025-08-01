@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="91000" scrname="금품제공기관등록팝업" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,381,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="기관종류" ly_vert="16,68,100,32,1" />
+		<LABEL name="Label1" caption="기관명" ly_vert="16,105,100,32,1" />
+		<LABEL name="Label2" caption="청탁기관여부" ly_vert="16,142,100,32,1" />
+		<COMBO name="Combo0" cbinputdatatext="행정기관
+공직유관단체
+공공기관
+교육기관
+언론사
+기타기관" ly_vert="148,68,210,32,1" />
+		<EDIT name="Edit0" imetype="0" ly_vert="148,105,210,32,1" />
+		<COMBO name="Combo1" cbinputdatatext="청탁금지대상
+청탁금지비대상" ly_vert="148,142,210,32,1" />
+		<BUTTON name="Button0" caption="등록" btnimage="btn_05.9" ly_vert="46,237,110,50,1" />
+		<BUTTON name="Button1" caption="취소" btnimage="btn_05.9" ly_vert="212,237,110,50,1" />
+		<COMBO name="Combo2" cbinputdatatext="기타기관" ly_vert="148,68,210,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5304" _ulen="5090" >
+'============================================================================
+' 01.화면명 	: 기관등록팝업화면
+' 02.화면설명	: 청탁기관등록팝업화면
+' 03.작성	: 2016.09.22
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim g_szInstitution_type
+dim g_szInstitution_name
+dim g_szInstitution_check
+dim g_szPartCode
+dim g_szEmpl_No
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Button1_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szEmpl_No = Form.GetSharedData("&EMPL_NO", false )
+	g_szPartCode = "" '"2123"법규준수 ,"2139"시스템개발  ,"2140"시스템운영만 행정/공직/공공/교육/언론사 가능, 기타기관은 모두 가능
+	
+	'DATAMANAGER.SetDataValue(0, "obcpp_cusr_031r", "InBlock1", "EMPNO" , 0 , g_szEmpl_No)
+	
+	DATAMANAGER.RequestTranData("obcpp_cusr_031r")
+	
+	'if g_szPartCode == "" or g_szPartCode == "" or g_szPartCode == "" then
+		
+
+
+	'g_szInstitution_type = "1"
+	'g_szInstitution_name = ""
+	'g_szInstitution_check = "Y"
+	
+	
+End Sub
+
+'============================================================================
+Sub Combo0_OnEditComplete(iIndex)
+	g_szInstitution_type = Cstr(iIndex+1)
+	
+	if g_szInstitution_type == "6" then
+		Combo1.currentindex = 1
+	end if
+
+End Sub
+
+'============================================================================
+Sub Combo1_OnEditComplete(iIndex)
+	if iIndex == 0 then
+		g_szInstitution_check = "Y"
+	elseif iIndex == 1 then
+		g_szInstitution_check = "N"
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditComplete()
+	g_szInstitution_name = Edit0.caption
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	if g_szInstitution_name == "" then
+		Form.ShowAlert("알림", "기관명을 입력해주십시오")
+		exit sub
+	end if
+	
+	if g_szInstitution_type == "6" then
+		if g_szInstitution_check = "Y" then
+			Form.ShowAlert("알림", "기타기관은 청탁금지대상이 될 수 없습니다.")
+			exit sub
+		end if
+	end if
+	
+	DATAMANAGER.SetDataValue(0,  "obcmp_momt_473a", "InBlock1", "PROS_CLS_CODE"		 , 0 , "I"			   )
+	'DATAMANAGER.SetDataValue(0,  "obcmp_momt_473a", "InBlock1", "SRNO" 		 		 , 0 , "" 			   )
+	DATAMANAGER.SetDataValue(0,  "obcmp_momt_473a", "InBlock1", "RQST_TRGT_CLS_CODE" 	 , 0 , g_szInstitution_type )
+	DATAMANAGER.SetDataValue(0,  "obcmp_momt_473a", "InBlock1", "RQST_TRGT_INNM"		 , 0 , g_szInstitution_name )
+	DATAMANAGER.SetDataValue(0,  "obcmp_momt_473a", "InBlock1", "TRGT_YN"			 , 0 , g_szInstitution_check)
+	
+	DATAMANAGER.SetEventFlag("obcmp_momt_473a", "A")
+	
+	DATAMANAGER.RequestTranData("obcmp_momt_473a")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcmp_momt_473a" then
+		Form.Toast(0, "등록이 완료되었습니다", 0.5)
+		
+		Form.CloseForm()
+		
+		Form.SendReturnToParent("INST_NAME" , g_szInstitution_name)
+		
+	elseif szTranID == "obcpp_cusr_031r" then
+		g_szPartCode = DATAMANAGER.GetDataValue(0, "obcpp_cusr_031r", "OutBlock1", "DPCD", 0)
+		
+		if g_szPartCode == "2139" or g_szPartCode == "2123" or g_szPartCode == "2140" then
+			Combo2.visible = false
+			Combo2.enable = false
+			Combo0.visible = true
+			Combo0.enable = true
+			
+			g_szInstitution_type = "1"
+			g_szInstitution_name = ""
+			Edit0.caption = g_szInstitution_name
+			g_szInstitution_check = "Y"
+			Combo1.currentindex = 0
+			
+			
+		else
+			Combo0.visible = false
+			Combo0.enable = false
+			Combo2.visible = true
+			Combo2.enable = true
+			
+			g_szInstitution_type = "6"
+			g_szInstitution_name = ""
+			Edit0.caption = g_szInstitution_name
+			g_szInstitution_check = "N"
+			Combo1.currentindex = 1
+			
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcpp_cusr_031r" then
+		DATAMANAGER.SetDataValue(0, "obcpp_cusr_031r", "InBlock1", "EMPNO" , 0 , g_szEmpl_No)
+	end if
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub Combo2_OnEditComplete(iIndex)
+	g_szInstitution_type = "6"
+	
+	if g_szInstitution_type == "6" then
+		Combo1.currentindex = 1
+	end if
+End Sub
+
+'============================================================================
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcmp_momt_473a" trcode="obcmp_momt_473a" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcpp_cusr_031r" trcode="obcpp_cusr_031r" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcmp_momt_473a" title="내부통제_청탁금지거래상대방처?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" occurs="30" inout="in" _len="246" _ulen="186" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+RQST_TRGT_CLS_CODE^요청대상구분코드^2^0^0^0^0^0^0
+RQST_TRGT_INNM^요청대상기관명^100^0^0^0^0^0^0
+TRGT_YN^대상여부^1^0^0^0^0^0^0
+CNFT_INNM^상대기관명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="_calc_" />
+			</TRAN>
+			<TRAN name="obcpp_cusr_031r" title="인사기본 단건조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="40" _ulen="32" >
+
+EMPNO^직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="940" _ulen="724" >
+
+EMPNO^직원번호^9^0^0^0^0^0^0
+TNOF_CLS_CODE^재직구분코드^2^0^0^0^0^0^0
+DPCD^부서코드^4^0^0^0^0^0^0
+CLPS_CODE^직급코드^4^0^0^0^0^0^0
+RSPS_CODE^직책코드^4^0^0^0^0^0^0
+EMPL_JBTT_CODE^직원직위코드^4^0^0^0^0^0^0
+ENCO_DATE^입사일자^8^0^0^0^0^0^0
+GRP_ENCO_DATE^그룹입사일자^8^0^0^0^0^0^0
+RTRM_DATE^퇴직일자^8^0^0^0^0^0^0
+MVBL_DATE^이동일자^8^0^0^0^0^0^0
+PMTN_DATE^승진일자^8^0^0^0^0^0^0
+PYIN_DATE^승급일자^8^0^0^0^0^0^0
+IY_DATE^임용일자^8^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+GNDR_CLS_CODE^성별구분코드^1^0^0^0^0^0^0
+FLNM^성명^40^0^0^0^0^0^0
+ENG_NAME^영문명^40^0^0^0^0^0^0
+EMPL_BRDT^직원생년월일^8^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+DRCM_WHOL_TELNO^직통전체전화번호^16^0^0^0^0^0^0
+DPNM^부서명^40^0^0^0^0^0^0
+CODE_VAL_NAME^코드값명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

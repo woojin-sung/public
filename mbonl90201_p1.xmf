@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90201" scrname="장외채권 정렬조건" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,407,375,240,1" />
+		<CONTAINER name="Container0" ly_vert="0,407,375,240,1" scroll_ly_vert="0,407,375,240,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="선택해주세요." bgcolor="064:239059036" halign="1" ly_vert="0,30,375,18,1" />
+				<IMAGE name="imgClose" visible="0" autosize="1" imgpath="icon_main_11" ly_vert="331,30,24,24,0" />
+				<BUTTON name="btnClose" visible="0" btnimage="alpha" ly_vert="320,30,45,45,0" />
+				<IMAGE name="Image0" imgpath="btn_line2_n.9" ly_vert="20,68,163,44,1" />
+				<IMAGE name="Image1" imgpath="btn_line2_n.9" ly_vert="193,68,162,44,1" />
+				<IMAGE name="Image2" imgpath="btn_line2_n.9" ly_vert="20,122,163,44,1" />
+				<IMAGE name="Image3" imgpath="btn_line2_n.9" ly_vert="193,122,162,44,1" />
+				<IMAGE name="Image4" imgpath="btn_line2_n.9" ly_vert="20,176,163,44,1" />
+				<IMAGE name="Image5" imgpath="btn_line2_n.9" ly_vert="193,176,162,44,1" />
+				<LABEL name="Label0" fgcolor="146:124124124" fontsize="-2" caption="수익률 높은 순" halign="1" ly_vert="20,68,163,44,1" />
+				<LABEL name="Label1" fgcolor="146:124124124" fontsize="-2" caption="표면금리 낮은 순" halign="1" ly_vert="193,68,162,44,1" />
+				<LABEL name="Label2" fgcolor="146:124124124" fontsize="-2" caption="투자기간 짧은 순" halign="1" ly_vert="20,122,163,44,1" />
+				<LABEL name="Label3" fgcolor="146:124124124" fontsize="-2" caption="투자기간 긴 순" halign="1" ly_vert="193,122,162,44,1" />
+				<LABEL name="Label4" fgcolor="146:124124124" fontsize="-2" caption="가능 수량 많은 순" halign="1" ly_vert="20,176,163,44,1" />
+				<LABEL name="Label5" fgcolor="146:124124124" fontsize="-2" caption="신용등급 높은 순" halign="1" ly_vert="193,176,162,44,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="BtnClear" visible="0" caption="닫기" fgcolor="013:051051051" fontstyle="01" btnimage="btn_21.9" ly_vert="0,587,188,60,0" />
+		<BUTTON name="btnSearch" visible="0" caption="적용" fontstyle="01" btnimage="btn_20.9" ly_vert="187,587,188,60,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5593" _ulen="5467" >
+
+'============================================================================
+' 01. 화 면 명 : 장외채권 상품 목록 조회
+' 02. 화면설명 : 장외채권 상품 목록 조회
+'                기본적인 조건은 단기사채 화면의 로직을 기본으로 개발함.
+
+' 03. 이    력 : 
+' - 2023.11.01 : 윤혁 : v0001 : 신규개발
+
+
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_szRet
+g_szRet = ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+Sub f_setBtn(iIndex)	
+	Container0.Image0.imgpath = "btn_line2_n.9"
+	Container0.Image1.imgpath = "btn_line2_n.9"
+	Container0.Image2.imgpath = "btn_line2_n.9"
+	Container0.Image3.imgpath = "btn_line2_n.9"
+	Container0.Image4.imgpath = "btn_line2_n.9"
+	Container0.Image5.imgpath = "btn_line2_n.9"
+	
+	select case CInt(iIndex)		
+		case 0	Container0.Image0.imgpath = "btn_line2_o.9.png"
+	     case 1	Container0.Image1.imgpath = "btn_line2_o.9.png"
+	     case 2	Container0.Image2.imgpath = "btn_line2_o.9.png"
+	     case 3	Container0.Image3.imgpath = "btn_line2_o.9.png"
+	     case 4	Container0.Image4.imgpath = "btn_line2_o.9.png"
+	     case 5	Container0.Image5.imgpath = "btn_line2_o.9.png"
+	end select
+end Sub
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szLinkData
+	
+	szLinkData = Form.GetOpenLinkData()
+'	Form.ShowAlert("FormInit", szLinkData)
+	select case szLinkData		
+		case "11"	
+'			Container0.Image0.imgpath = "input_03_o.9.png"
+			Container0.Image0.imgpath = "btn_line2_o.9.png"
+			
+			g_szRet = "0"
+			
+	     case "21"	
+'		     Container0.Image1.imgpath = "input_03_o.9.png"
+		     Container0.Image1.imgpath = "btn_line2_o.9.png"
+		     g_szRet = "1"
+		     
+	     case "31"	
+'		     Container0.Image2.imgpath = "input_03_o.9.png"
+		     Container0.Image2.imgpath = "btn_line2_o.9.png"
+		     g_szRet = "2"
+		     
+	     case "32"	
+'		     Container0.Image3.imgpath = "input_03_o.9.png"
+		     Container0.Image3.imgpath = "btn_line2_o.9.png"
+		     g_szRet = "3"
+		     
+	     case "41"	
+'		     Container0.Image4.imgpath = "input_03_o.9.png"
+		     Container0.Image4.imgpath = "btn_line2_o.9.png"
+		     g_szRet = "4"
+		     
+	     case "42"	
+'		     Container0.Image5.imgpath = "input_03_o.9.png"
+		     Container0.Image5.imgpath = "btn_line2_o.9.png"
+		     g_szRet = "5"
+		     
+	end select
+	
+End Sub
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub Container0_imgClose_OnClick()
+'	Form.CloseForm("")
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub Container0_btnClose_OnClick()
+	Form.CloseForm("")	
+End Sub
+
+'============================================================================
+Sub Container0_Image0_OnClick()
+	g_szRet = "0"
+	f_setBtn(g_szRet)
+	
+	btnSearch_OnClick()
+'	Form.SendReturnToParent("SORT_CONDITION", "0")
+'	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub Container0_Image1_OnClick()
+	g_szRet = "1"
+	f_setBtn(g_szRet)
+	
+	btnSearch_OnClick()
+'	Form.SendReturnToParent("SORT_CONDITION", "1")
+'	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub Container0_Image2_OnClick()
+	g_szRet = "2"
+	f_setBtn(g_szRet)
+	
+	btnSearch_OnClick()
+'	Form.SendReturnToParent("SORT_CONDITION", "2")
+'	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub Container0_Image3_OnClick()
+	g_szRet = "3"
+	f_setBtn(g_szRet)
+	
+	btnSearch_OnClick()
+'	Form.SendReturnToParent("SORT_CONDITION", "3")
+'	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub Container0_Image4_OnClick()
+	g_szRet = "4"
+	f_setBtn(g_szRet)
+	
+	btnSearch_OnClick()
+'	Form.SendReturnToParent("SORT_CONDITION", "4")
+'	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub Container0_Image5_OnClick()
+	g_szRet = "5"
+	f_setBtn(g_szRet)
+	
+	btnSearch_OnClick()
+'	Form.SendReturnToParent("SORT_CONDITION", "5")
+'	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub imgDim_OnClick()
+	Form.CloseForm("")	
+End Sub
+
+'============================================================================
+Sub BtnClear_OnClick()
+	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Form.SendReturnToParent("SORT_CONDITION", g_szRet)
+	Form.CloseForm("")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

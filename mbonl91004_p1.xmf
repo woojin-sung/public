@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="91004" scrname="통합승인_상세내용" version="2" writer="윤형빈" />
+	<FORM_INFO name="Form" ly_vert="0,0,350,390,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fontsize="-2" fontstyle="01" caption="신청일자 :" ly_vert="10,51,100,25,1" />
+		<LABEL name="Label1" fontsize="-2" fontstyle="01" caption="신청번호 :" ly_vert="10,76,100,25,1" />
+		<LABEL name="Label2" fontsize="-2" fontstyle="01" caption="신청내용" ly_vert="10,148,100,32,1" />
+		<CONTAINER name="Container0" vscroll="1" scroll_pos="0,0" ly_vert="20,179,310,150,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="Label5" fontsize="-1" valign="0" multiline="1" ly_vert="0,10,310,200,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="Label6" border="1" bordercolor="144:034034034" ly_vert="20,179,310,150,1" />
+		<LABEL name="Label7" fontsize="-2" fontstyle="01" caption="신청제목 :" ly_vert="10,126,100,25,1" />
+		<LABEL name="Label9" fontsize="-2" fontstyle="01" caption="신청업무 :" ly_vert="10,101,100,25,1" />
+		<LABEL name="Label3" fontsize="-2" caption="일자" mask="1,0,,,1,####-##-##,0,1,1" ly_vert="74,51,100,25,1" />
+		<LABEL name="Label4" fontsize="-2" caption="번호" mask="1,1,,,1,,0,0,0" ly_vert="74,76,126,25,1" />
+		<LABEL name="Label8" fontsize="-2" caption="업무" ly_vert="74,101,265,25,1" />
+		<LABEL name="Label10" fontsize="-2" caption="제목" ly_vert="74,126,268,25,1" />
+		<BUTTON name="Button0" caption="승인" fontsize="-2" btnimage="btn_05.9" ly_vert="68,344,90,32,1" />
+		<BUTTON name="Button1" caption="반려" fgcolor="012:000000000" fontsize="-2" btnimage="btn_02.9" ly_vert="184,344,90,32,1" />
+		<LABEL name="Label11" fontsize="-2" fontstyle="01" caption="신청부서 :" ly_vert="183,76,100,25,1" />
+		<LABEL name="Label12" fontsize="-2" caption="부서이름" ly_vert="244,76,94,25,1" />
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,350,43,1" />
+		<IMAGE name="Image1" imgpath="ic_pop_close.png" ly_vert="307,0,43,43,1" />
+		<LABEL name="Label13" fontsize="2" fontstyle="01" caption="승인 / 반려 " halign="1" ly_vert="0,1,350,43,1" />
+		<LABEL name="Label14" fontsize="-2" fontstyle="01" caption="신청직원 :" ly_vert="183,51,100,25,1" />
+		<LABEL name="Label15" fontsize="-2" caption="이름" ly_vert="244,51,94,25,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6598" _ulen="6294" >
+'============================================================================
+' 01.화면명 	: 통합승인
+' 02.화면설명	: 통합승인_메인
+' 03.작성	: 2016.09.22
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_prcs_id 		'승인프로세스ID
+Dim g_aplt_date		'승인신청일자
+Dim g_aplt_no			'승인신청번호
+Dim g_aplt_no_temp	'승인신청번호_임시
+Dim g_empno			'승인직원번호
+Dim g_dpnm			'신청부서명
+Dim g_name			'승인신청자명
+Dim g_aprv_name		'승인자명
+Dim g_prcs_name 		'승인신청업무명
+Dim g_titl_cntt 		'승인신청제목
+Dim g_aprv_aplt_expl	'승인신청설명
+Dim g_flag			'승인/반려 플래그
+'---------------------------	INIT			-------------------------------
+	
+	g_flag = 0
+	
+'----------------------------------------------------------------------------
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+'Form_OnFormInitBefore
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	g_szID 			= Form.GetSharedData("&USER_ID", false )	
+	g_prcs_id 		= Form.GetSharedData("aprv_prcs_id", true )
+	g_aplt_date		= Form.GetSharedData("aprt_aplt_date", true )
+	g_aplt_no 		= Form.GetSharedData("aprv_aplt_no", true )
+	g_aplt_no_temp	= Right(g_aplt_no,5)
+	g_empno 			= Form.GetSharedData("aprv_empno", true )
+	g_dpnm 			= Form.GetSharedData("aprv_dpnm", true )
+	g_name 			= Form.GetSharedData("empl_name", true )
+	g_prcs_name 		= Form.GetSharedData("aprv_prcs_name", true )	
+	g_titl_cntt 		= Form.GetSharedData("aprv_aplt_titl_cntt", true )	
+	g_aprv_aplt_expl 	= Form.GetSharedData("aprv_aplt_expl", true )	
+	g_aprv_name 		= Form.GetSharedData("", false )
+		
+	
+End Sub
+
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	
+	Label3.caption 			= g_aplt_date
+	Label4.caption 			= Cint(g_aplt_no_temp)
+	Label8.caption 			= g_prcs_name
+	Label10.caption 			= g_titl_cntt
+	Label12.caption 			= g_dpnm
+	Label15.caption 			= g_name
+	Container0.Label5.caption 	= g_aprv_aplt_expl
+	
+	
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	Form.CloseForm()
+
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if	len(trim(szSubMsg))	>	0	then
+		Form.ShowAlert(g_szAlertTitle, szErrMsg & "(" & szSubMsg & ")")
+	else
+		Form.ShowAlert(g_szAlertTitle, szErrMsg )
+	end	if
+	
+	g_flag= 3
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'Button0_OnClick
+'============================================================================
+Sub Button0_OnClick() '승인
+	g_flag = 1
+	
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_PRCS_ID", 	0 , g_prcs_id)
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_APLT_DATE", 	0 , g_aplt_date)
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_APLT_NO", 	0 , g_aplt_no)
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_EMPNO", 		0 , g_empno)
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_CLS_CODE", 	0 , "01")
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "RMRK_CNTT", 		0 , "승인 완료 (MTS / 모바일 통합승인)")
+		
+	DATAMANAGER.RequestTranData("obcpp_aprv_060a")
+	
+	Form.Toast(0, "승인이 진행 중 입니다. 잠시 기다려주세요.", 400)
+	
+	
+End Sub
+
+
+'============================================================================
+'Button1_OnClick
+'============================================================================
+Sub Button1_OnClick() '반려
+	g_flag = 2
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_PRCS_ID", 	0 , g_prcs_id)
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_APLT_DATE", 	0 , g_aplt_date)
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_APLT_NO", 	0 , g_aplt_no)
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_EMPNO", 		0 , g_empno)
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "APRV_CLS_CODE", 	0 , "03")
+	DATAMANAGER.SetDataValue(0,"obcpp_aprv_060a", "InBlock1", "RMRK_CNTT", 		0 ,  "승인 반려 (MTS / 모바일 통합승인)")
+	
+	DATAMANAGER.RequestTranData("obcpp_aprv_060a")	
+	
+	Form.Toast(0, "반려가 진행 중 입니다. 잠시 기다려주세요." ,400)
+	
+End Sub
+
+
+'============================================================================
+'Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+	
+		if	g_flag = 0 then
+			
+			Form.SendReturnToParent("POPUP_CLOSE" , "0")
+		
+		elseif g_flag = 1 then
+			Form.SendReturnToParent("POPUP_CLOSE" , "1")
+				
+		elseif g_flag = 2 then
+			
+			Form.SendReturnToParent("POPUP_CLOSE" , "2")
+				
+		else
+			Form.SendReturnToParent("POPUP_CLOSE" , "3")
+		
+		end if
+		
+End Sub
+
+
+'============================================================================
+'Image1_OnClick
+'============================================================================
+Sub Image1_OnClick()
+	g_flag = 0
+	Form.CloseForm()
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_aprv_060a" trcode="obcpp_aprv_060a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_aprv_060a" title="승인처리관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="285" _ulen="217" >
+
+APRV_PRCS_ID^승인프로세스ID^7^0^0^0^0^0^0
+APRV_APLT_DATE^승인신청일자^8^0^0^0^0^0^0
+APRV_APLT_NO^승인신청번호^13^0^0^0^0^0^0
+APRV_EMPNO^승인직원번호^9^0^0^0^0^0^0
+APRV_CLS_CODE^승인구분코드^2^0^0^0^0^0^0
+RMRK_CNTT^비고내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

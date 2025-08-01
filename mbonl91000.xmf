@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="91000" scrname="금품제공기관관리" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label3" caption="기관명" halign="1" ly_vert="-4,24,84,32,1" />
+		<EDIT name="Edit1" imetype="0" maxlength="100" ly_vert="72,23,190,32,1" />
+		<GRID name="Grid0" colcount="3" ly_vert="0,75,375,395,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-2" />
+				<LABEL name="th_cell0" fontsize="-2" fontstyle="01" caption="기관종류" halign="1" />
+				<LABEL name="bd_cell2" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-2" multiline="1" />
+				<LABEL name="th_cell1" fontsize="-2" fontstyle="01" caption="기관명" halign="1" />
+				<LABEL name="th_cell2" fontsize="-2" fontstyle="01" caption="청탁금지대상여부" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="100,174,99" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="100" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="50" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="1,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="174" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="50" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" import="1,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="99" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell2" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="50" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" import="1,1,5" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<BUTTON name="Button2" caption="기   관   등   록" fontsize="2" fontstyle="01" btnimage="btn_05.9" ly_vert="74,489,227,50,1" />
+		<BUTTON name="Button0" caption="조회" btnimage="btn_05.9" ly_vert="284,23,70,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4291" _ulen="4147" >
+'============================================================================
+' 01.화면명 	: 기관등록화면
+' 02.화면설명	: 청탁기관등록화면
+' 03.작성	: 2016.09.22
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim g_Institution_name
+dim nRow
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Form.ShowAlert(szErrCode, szErrMsg)
+End Sub
+'============================================================================
+'여기부터가 검색부분
+
+'============================================================================
+Sub Grid0_OnScrollEnd()
+	DATAMANAGER.RequestNextData("obcmp_momt_473r")
+End Sub
+
+'============================================================================
+Sub Button2_OnClick()
+	temp = Form.GetSharedData("&EMPL_NO", false )
+	
+	if temp == null then
+		Form.ShowAlert("오류", "접근이 불가능합니다")
+		exit sub
+	end if
+
+	Form.OpenPopup("mbonl91000_p1.xmf" , "" , 0)
+End Sub
+
+'============================================================================
+Sub Edit1_OnEditComplete()
+	g_Institution_name = "%"&Edit1.caption&"%"
+	
+	if g_Institution_name == "" then
+		g_Institution_name = "%"
+	end if
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_Institution_name = "%"
+	nRow = 0	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+if szTranID == "obcmp_momt_473r" then
+		temp_count = DATAMANAGER.GetDataCount(0, "obcmp_momt_473r", "OutBlock1")
+	
+		for i = 0 to temp_count-1
+			if DATAMANAGER.GetDataValue(0, "obcmp_momt_473r", "OutBlock1", "RQST_TRGT_CLS_CODE" , i) == "1"
+				then Grid0.SetCellData("bd_cell0", nRow, "행정기관")
+			elseif DATAMANAGER.GetDataValue(0, "obcmp_momt_473r", "OutBlock1", "RQST_TRGT_CLS_CODE" , i) == "2"
+				then Grid0.SetCellData("bd_cell0", nRow, "공직유관단체")
+			elseif DATAMANAGER.GetDataValue(0, "obcmp_momt_473r", "OutBlock1", "RQST_TRGT_CLS_CODE" , i) == "3"
+				then Grid0.SetCellData("bd_cell0", nRow, "공공기관")
+			elseif DATAMANAGER.GetDataValue(0, "obcmp_momt_473r", "OutBlock1", "RQST_TRGT_CLS_CODE" , i) == "4"
+				then Grid0.SetCellData("bd_cell0", nRow, "교육기관")
+			elseif DATAMANAGER.GetDataValue(0, "obcmp_momt_473r", "OutBlock1", "RQST_TRGT_CLS_CODE" , i) == "5"
+				then Grid0.SetCellData("bd_cell0", nRow, "언론사")
+			elseif DATAMANAGER.GetDataValue(0, "obcmp_momt_473r", "OutBlock1", "RQST_TRGT_CLS_CODE" , i) == "6"
+				then Grid0.SetCellData("bd_cell0", nRow, "기타기관")
+			else
+				Grid0.SetCellData("bd_cell0", nRow, "기타기관")
+			end if
+			
+			
+			nRow = nRow+1
+		next
+	end if	
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	nRow = 0
+	
+	DATAMANAGER.SetDataValue(0, "obcmp_momt_473r", "InBlock1", "RQST_TRGT_INNM", 0 , g_Institution_name)
+	
+	DATAMANAGER.RequestTranData("obcmp_momt_473r")
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "INST_NAME" then
+		Edit1.caption = sRet
+		g_Institution_name = sRet
+		
+		nRow = 0
+		DATAMANAGER.SetDataValue(0, "obcmp_momt_473r", "InBlock1", "RQST_TRGT_INNM", 0 , g_Institution_name)
+	
+		DATAMANAGER.RequestTranData("obcmp_momt_473r")
+	end if
+End Sub
+
+'============================================================================
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcmp_momt_473a" trcode="obcmp_momt_473a" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcmp_momt_473r" trcode="obcmp_momt_473r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcmp_momt_473a" title="내부통제_청탁금지거래상대방처?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" occurs="30" inout="in" _len="246" _ulen="186" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+RQST_TRGT_CLS_CODE^요청대상구분코드^2^0^0^0^0^0^0
+RQST_TRGT_INNM^요청대상기관명^100^0^0^0^0^0^0
+TRGT_YN^대상여부^1^0^0^0^0^0^0
+CNFT_INNM^상대기관명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="_calc_" />
+			</TRAN>
+			<TRAN name="obcmp_momt_473r" title="내부통제_청탁금지거래상대방내?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="60" _ulen="46" >
+
+RQST_TRGT_INNM^요청대상기관명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="285" _ulen="215" >
+
+RQST_TRGT_CLS_CODE^요청대상구분코드^2^0^0^0^0^0^0
+RQST_TRGT_INNM^요청대상기관명^100^0^0^0^0^0^0
+MNPL_YMDH^조작일시^19^0^0^0^0^0^0
+MNPL_TRNO^조작단말번호^39^0^0^0^0^0^0
+MNPL_EMPNO^조작직원번호^20^0^0^0^0^0^0
+TRGT_YN^대상여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="60" _ulen="46" >
+
+RQST_TRGT_INNM^요청대상기관명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
