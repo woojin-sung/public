@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11000" scrname="주식현재가_팝업_종목메모" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,385,1" />
+	<CONTROL_INFO>
+		<EDIT name="edtMemo" fonttype="3" multiline="1" imetype="0" maxlength="4000" senddatafield="ohhts_memo_013r.InBlock1.FID_ISSU_MEMO_CNTT" recvdatafield="ohhts_memo_013r.OutBlock1.FID_ISSU_MEMO_CNTT" ly_vert="15,65,279,234,1" export="0,0,10" import="0,1,6" />
+		<IMAGE name="Image0" autosize="1" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblMemo" fgcolor="063:255255255" fontsize="2" fontstyle="01" caption="종목메모" bgcolor="092:185046046" halign="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="275,15,24,24,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" bgcolor="232:232078084" bgcolor2="233:102101101" btnimage="btn_02.9" ly_vert="15,314,134,45,1" />
+		<BUTTON name="btnSave" caption="수정" btnimage="btn_01.9" ly_vert="159,315,135,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4605" _ulen="4455" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 주식현재가
+' 02. 화면설명 : 주식현재가 종목정보 팝업
+' 03. 작    성 : 2016.04.30 LJS
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szItemCode, g_szItemMarket, g_szItemName
+Dim b_SaveFg
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_szItemCode   =  Form.GetSharedData( "&ITEM_STOCK", 0 )
+	g_szItemMarket = Form.GetItemCodeInfo( g_szItemCode , "market")
+	g_szItemName   = Form.GetItemCodeInfo( g_szItemCode , "name")
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	b_SaveFg = false
+	DATAMANAGER.RequestTranData( "ohhts_memo_013r" )	' 20210622 HWG : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	' 20210622 HWG START : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+	If szTranID = "ohhts_memo_013r" Then
+		Dim szUserID
+		szUserID = Form.GetSharedData("&USER_ID", false )
+	
+		If b_SaveFg = false Then
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_USER_ID" 			, 0 ,  szUserID)
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_MEMO_MANG_CLS_CODE" 	, 0 , "2" )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_SLCT_YN" 		, 0 , "1" )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_CLS_CODE" 		, 0 , "1" )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_SHRN_ISCD" 			, 0 , g_szItemCode )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_KOR_ISNM" 			, 0 , "" )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_MRKT_CLS_CODE" 	, 0 , g_szItemMarket )
+		
+		Else
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_USER_ID" 			, 0 ,  szUserID)
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_MEMO_MANG_CLS_CODE" 	, 0 , "2" )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_SLCT_YN" 		, 0 , "3" )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_CLS_CODE" 		, 0 , "" )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_SHRN_ISCD" 			, 0 , g_szItemCode )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_KOR_ISNM" 			, 0 , g_szItemName )
+			DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_MRKT_CLS_CODE" 	, 0 , g_szItemMarket )
+		
+		End If
+	End If
+	' 20210622 HWG END
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	' 20210622 HWG START : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+	If szTranID = "ohhts_memo_013r" Then
+		b_SaveFg = True
+	End If	
+	' 20210622 HWG END
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("11000_pb_Close" , "")
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm( )	
+	
+End Sub
+
+'============================================================================
+Sub btnSave_OnClick()
+	If Trim( edtMemo.caption ) = "" Then
+		Form.ShowAlert("알림", "저장할 메모내용이 없습니다.")
+		Exit Sub
+	End If
+	
+	DATAMANAGER.RequestTranData( "ohhts_memo_013r" )	' 20210622 HWG : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm( )
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_memo_013r" trcode="ohhts_memo_013r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_memo_013r" title="메모관리자(신규)" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="640" _ulen="512" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+FID_MEMO_MANG_CLS_CODE^FID메모관리구분코드^1^0^0^0^0^0^0
+FID_INPUT_SLCT_YN^FID입력선택여부^2^0^0^0^0^0^0
+FID_INPUT_CLS_CODE^FID입력구분코드^2^0^0^0^0^0^0
+FID_MEMO_CLS_CODE^FID메모구분코드^8^0^0^0^0^0^0
+FID_MOD_YMDH^FID변경일시^14^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_GNRL_CNTT^FID일반내용^2048^0^0^0^0^0^0
+FID_NEW_ISSU_CODE^FID신규종목코드^20^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_ISSU_MEMO_CNTT^FID종목메모내용^4000^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="420" _ulen="338" >
+
+FID_MOD_YMDH^FID변경일시^14^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_GNRL_CNTT^FID일반내용^2048^0^0^0^0^0^0
+FID_MEMO_CLS_CODE^FID메모구분코드^8^0^0^0^0^0^0
+FID_NEW_ISSU_CODE^FID신규종목코드^20^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_ISSU_MEMO_CNTT^FID종목메모내용^4000^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

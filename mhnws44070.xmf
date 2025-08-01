@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44070" scrname="MY종목뉴스" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,602,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" resize="0001" tabcount="3" tabwidthtype="1" tabheadheight="40" ly_vert="0,40,375,562,1" >
+			<PAGE name="page1" caption="최근조회" linkfile="mhnws44070_t1.xmf" loadingtype="1" />
+			<PAGE name="page2" caption="보유종목" linkfile="mhnws44070_t1.xmf" loadingtype="1" />
+			<PAGE name="page3" caption="관심종목" linkfile="mhnws44070_t1.xmf" loadingtype="1" />
+		</FORMTAB>
+		<GRID name="grdGroup" enable="0" colcount="3" ly_vert="576,77,215,50,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_code" halign="2" />
+				<LABEL name="bd_name" halign="2" />
+				<LABEL name="bd_count" halign="2" />
+				<LABEL name="bd_memo" halign="2" ly_vert="0,0,100,20,1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" cursorstyle="1" cursorcolor="180:242242242" cellbg="000:255255255" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="95,95,95" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="95" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_code" cell_ly="0,0,0,0" import="0,2,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="95" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_name" cell_ly="0,0,0,0" import="0,2,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="95" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_count" cell_ly="0,0,0,0" import="0,2,2" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_code" rangecellid="bd_code" hlcolorcellid="bd_code" />
+		</GRID>
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_main_01" ly_vert="7,10,25,20,1" />
+		<LABEL name="lblTitle" fontsize="4" caption="MY종목 뉴스" multiline="1" autofontsize="1" click="1" ly_vert="40,5,126,30,1" />
+		<IMAGE name="ImgOpenGroup" autosize="1" imgpath="icon_groupchoice" ly_vert="336,9,22,22,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8911" _ulen="8341" >
+'============================================================================
+' 화 면 명 : MY종목뉴스(mhnws44070.xmf)
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szGSID
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Form_OnRefresh()
+	Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "refresh", "Y")
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+
+	if FormTab0.currenttabpageid == "page1" then
+		Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "TAB_CHANGE", "BB")
+		
+	elseif FormTab0.currenttabpageid == "page2" then
+		Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "TAB_CHANGE", "CC")
+		
+	elseif FormTab0.currenttabpageid == "page3" then
+		Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "TAB_CHANGE", g_szGSID)
+		g_szGSID = ""
+	end if
+	
+End Sub
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBackPress.setMaintainingRatio("1")
+	ImgOpenGroup.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szGSID = ""
+	' 관심 동기화-----------------------------------------------------------
+	g_szCloud = Form.GetEnvData("common.interest_cloud")
+	
+	if Trim(g_szCloud) == "" then	' 초기값 : 1(동기화 사용)
+		g_szCloud = "1"
+	end if
+	
+	if Form.LoadConfigData("GW_SET2", "RECENT") == "0" then
+		FormTab0.deletepage = "page1"
+	end if 
+	
+	if Form.LoadConfigData("GW_SET2", "HOLD") == "0" then
+		FormTab0.deletepage = "page2"
+	end if 
+	
+	Dim szSave
+	szSave = Form.GetEnvData("SELECT_GWGROUP")
+	
+	' 20240715 HSZ START: 해외주식고도화 - HOME
+	szOpenData = Form.GetOpenLinkData()
+	if Instr(szOpenData, "HOME★") > 0 then
+		szOpenArray = Split(szOpenData, "★")
+		szSave = CStr(szOpenArray(1))
+	end if
+	' 20240715 HSZ END
+	
+	
+	if szSave == "BB" then
+'		FormTab0.currenttab = 0
+		FormTab0.currenttabpageid = "page1"
+	elseif szSave == "CC" then
+'		FormTab0.currenttab = 1
+		FormTab0.currenttabpageid = "page2"
+	else
+'		FormTab0.currenttab = 2
+		FormTab0.currenttabpageid = "page3"
+	end if
+	
+	g_Ostype = Form.GetSharedData("&OS_TYPE", false )	'iOS("2") Android("1") 기타("9")
+	if g_Ostype = "2" then 	
+		FormTab0.callTabChanged()	'iOS - ontabchanged호출됨(currenttabpageid로 세팅할 경우, ontabchange 안타는 현상 조치)	
+	end if
+	
+	Call init_GWGroup()		' 관심그룹만 설정
+
+End Sub
+
+'============================================================================
+' f_ShowGroupList : 관심그룹리스트 보이기
+'============================================================================
+Function f_ShowGroupList()
+	dim nRowCnt, szSendData
+	nRowCnt = CInt(grdGroup.rowcount)
+	szSendData = ""
+	
+	if nRowCnt > 0 then
+		for i=0 to nRowCnt-1
+			dim sKey, sName, sStr
+			sKey = grdGroup.GetCellData( "bd_code", i )
+			sName = grdGroup.GetCellData( "bd_name", i )
+			sStr = sKey & "`" & sName
+			
+			if szSendData == "" then
+				szSendData = sStr
+			else
+				'szSendData = szSendData & "★" & sStr
+				szSendData = szSendData & "‡" & sStr
+			end if
+		next
+	end if
+	'20211116 아이티젠 김성수 추가
+	'종목편집 창에서 Env가 바뀌는 것때문에 현재 선택 그룹키 값을 저장
+'	Form.SetSharedData( "PresentSelectKey", cmbGroup.cbkeydata)
+	
+'	g_Ostype = Form.GetSharedData("&OS_TYPE", false )	'iOS("2") Android("1") 기타("9")
+	if g_Ostype = "2" then 
+		Form.OpenPopup("mhprc11010_p8" , szSendData, "", "")
+	else 
+		Form.OpenPopup("mhprc11010_p8" , szSendData, "", "1")
+	end if
+	
+End Function
+
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	szUSER_ID = Form.GetSharedData("&USER_ID", false)
+
+	' ----------------------------------------------------------------------
+	' 관심그룹 조회
+	' ----------------------------------------------------------------------
+	if szTranID == "ohhts_intr_006r" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "FID_USER_ID",			0, szUSER_ID)
+	end if
+end Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "ohhts_intr_006r" then
+		Save_GWGroup()
+	end if
+End Sub
+
+'============================================================================
+' 관심그룹 재설정 (로컬/서버)
+'============================================================================
+Function init_GWGroup()
+	grdGroup.rowcount = 0
+	
+	' 서버
+	if g_szCloud == "1" then
+		DATAMANAGER.RequestTranData("ohhts_intr_006r")
+		
+	' 로컬 저장된 관심그룹 가져오기
+	else
+		Call Load_GWGroup()
+	end if
+
+End Function
+
+'============================================================================
+' 로컬에 저장된 관심그룹 가져오기
+'============================================================================
+Function Load_GWGroup()
+	Dim tGroup, tList
+	
+	szGroup = Form.LoadConfigData("GWANSIM", "GROUP")
+	
+	if szGroup <> "" then	
+		tGroup = Split(szGroup, "♣")
+		
+		for i = 0 to #tGroup - 1
+			tList = Split(tGroup(i), "★")
+			
+			grdGroup.insertrow = i
+	
+			grdGroup.SetCellData("bd_code",  i, tList(0))
+			grdGroup.SetCellData("bd_name",  i, tList(1))
+			grdGroup.SetCellData("bd_count", i, tList(2))
+		next
+		
+	end if
+	
+End Function
+
+'촤상단 < 클리시 이전화면으로 돌아감.
+'============================================================================
+Sub ImgBackPress_OnClick()
+	'20231012_01 HWG : 뒤로가기 로직 변경
+	Form.OpenPrevScreen()    
+End Sub
+
+'============================================================================
+' imgOpenGroup_OnClick : 그룹메뉴 버튼
+'============================================================================
+Sub ImgOpenGroup_OnClick()
+'	Form.triggerEvent("fmTab0." & fmTab0.currenttabpageid, "CLOSE_RIGHT", "")
+'	SetVisibleButton() '종목추가,편집,공유,그룹추가버튼이 겹치는 현상 수정
+	f_ShowGroupList()
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "mhprc11010_p8_edit" then '그룹팝업에서 리턴
+		'편집 팝업 오픈	
+		if g_szCloud == "1" then
+			Form.OpenFramePopup("mhprc11010_p12" , "", "") 	
+		else '0823 JJH 뉴스화면 동기화off시 t6호출
+			Form.OpenFramePopup("mhprc11010_t6" , "" , "")	' 종목편집창 열기
+		end if
+	elseif sKeyName = "mhprc11010_p8_select" then '그룹팝업에서 리턴 
+		 '특정그룹 선택
+		if sRet == "BB" then		
+			FormTab0.currenttabpageid = "page1"
+		elseif sRet ==  "CC" then	
+			FormTab0.currenttabpageid =  "page2"
+		else
+			g_szGSID = sRet
+			FormTab0.currenttabpageid =  "page3"
+		end if 
+
+		if g_Ostype == "2" then 'iOS일 경우
+			'cmbGroup.currentindex = FormTab0.currenttab
+			FormTab0.callTabChanged()	'iOS - ontabchanged호출됨(currenttabpageid로 세팅할 경우, ontabchange 안타는 현상 조치)	
+	
+		end if 
+	elseif sKeyName == "GW_SET2" then
+		if sRet == "1" then
+'			' 그룹편집
+			Call init_GWGroup()
+			Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "refresh", "Y")
+		end if
+	end if
+End Sub
+
+'============================================================================
+' Save_GWGroup :  관심그룹을 로컬에 저장
+'============================================================================
+Function Save_GWGroup()
+	Dim szGroup
+	szGroup = ""
+	
+	For i = 0 to grdGroup.rowcount-1
+		DIm szCode, szName, szCnt
+		
+		szCode = grdGroup.GetCellData("bd_code",  i)
+		szName = grdGroup.GetCellData("bd_name",  i)
+		szCnt  = grdGroup.GetCellData("bd_count", i)
+		
+		if i == 0 then
+			szGroup = szCode & "★" & szName & "★" & szCnt
+		else
+			szGroup = szGroup & "♣" & szCode & "★" & szName & "★" & szCnt
+		end if
+	Next
+	
+	Form.SaveConfigData("GWANSIM", "GROUP", szGroup)
+End Function
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData( "TEMP_CMBKEY" , "" )
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_intr_006r" trcode="ohhts_intr_006r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_intr_006r" title="MTS관심종목 최초조회시(관심그?" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="49" _ulen="43" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="46" _ulen="42" >
+
+FID_VRSN_ID^FID버전ID^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="170" _ulen="138" >
+
+FID_CNCN_ISSU_NEW_GRP_ID^FID관심종목신규그룹ID^3^0^0^0^0^0^0
+FID_CNCN_GRP_NAME^FID관심그룹명^40^0^0^0^0^0^0
+FID_ISSU_CNT^FID종목수^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="100" inout="out" _len="349" _ulen="277" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_APLY_YN^FID적용여부^1^0^0^0^0^0^0
+FID_SELN_SHNU_CLS^FID매도매수구분^1^0^0^0^0^0^0
+FID_INPUT_SLCT_YN^FID입력선택여부^2^0^0^0^0^0^0
+FID_COND_PRC^FID조건가격^9^0^0^0^0^0^0
+FID_ABNR_LOEQ_CLS^FID이상이하구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" occurs="100" inout="out" _len="243" _ulen="195" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_HLDN_QTY^FID보유수량^18^0^0^0^0^0^0
+FID_CNTG_UNPR^FID체결단가^18^0^0^0^0^0^0
+FID_SELN_SHNU_CLS^FID매도매수구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

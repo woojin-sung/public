@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11000" scrname="주식현재가_탭_시세" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,410,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab1" tabcount="2" tabwidthtype="1" tabheadheight="0" autosave="1" ly_vert="0,52,375,358,1" >
+			<PAGE name="page000782" caption="시간별" linkfile="mhprc11000_t2" loadingtype="1" />
+			<PAGE name="page1" caption="일별" linkfile="mhprc11000_t3" loadingtype="1" />
+		</FORMTAB>
+		<RADIOGROUP name="rdo0" fontstyle="01" fontsize="-2" buttonshape="1" initselectionuse="1" initselection="0" autosave="1" eventtr="ohhts_1146_001r" ly_vert="20,14,335,33,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="시간별" forecolor="100:102102102" selforecolor="095:000000000" position="0,0,167,33" />
+				<RADIO no="1" text="일자별" forecolor="100:102102102" selforecolor="095:000000000" position="167,0,168,33" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2529" _ulen="2423" >
+ '===========================================================================
+' 01. 화 면 명 : 주식현재가_시세
+' 02. 화면설명 : 시간별/일지별 시세
+' 03. 작    성 : 2023.04.11 신규작성 KKM
+'===========================================================================
+'[[ 전역변수 ]]
+Dim g_sItemCode
+
+'============================================================================
+'[[ 트리거 이벤트 ]]
+'============================================================================
+
+Sub Form_OnFormInitBefore()
+	g_szItemCode =  Form.GetSharedData( "&ITEM_STOCK", 0 )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'20230724 HSZ START: 조회 탭 저장
+	dim szKey
+	szTab00 = Form.GetCtlProp("#fmTab00", "visible")
+	szTab01 = Form.GetCtlProp("#fmTab01", "visible")
+	szTab02 = Form.GetCtlProp("#fmTab02", "visible")
+	
+	if szTab00 == "true" or szTab00 == "1" then
+		szKey = "szTab00"
+	elseif szTab01 == "true" or szTab01 == "1" then
+		szKey = "szTab01"
+	elseif szTab02 == "true" or szTab02 == "1" then
+		szKey = "szTab02"
+	end if
+	szIndex = Trim(Form.LoadConfigData("mhprc11000_th", szKey))
+
+	if szIndex == "" then
+		szIndex = 0
+	end if
+	
+	rdo0.currentindex = szIndex
+	call rdo0_OnClick(szIndex)
+	'20230724 HSZ END
+End Sub
+
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "RequestData" or sEventName == "INIT_CODE" then
+		g_sItemCode = sParam
+		FormTab1_OnTabChanged()
+	end if
+End Sub
+
+'[[ 폼탭 변경시 ]]
+'============================================================================
+Sub FormTab1_OnTabChanged(nCurrentTab)
+	Form.TriggerEvent( "FormTab1." .. FormTab1.currenttabpageid, "INIT_CODE", g_sItemCode)
+End Sub
+
+'============================================================================
+Sub rdo0_OnClick(nIndex)
+	FormTab1.currenttab = nIndex
+	FormTab1_OnTabChanged()
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormClose()
+	'20230724 HSZ START: 조회 탭 저장
+	dim szKey
+	szTab00 = Form.GetCtlProp("#fmTab00", "visible")
+	szTab01 = Form.GetCtlProp("#fmTab01", "visible")
+	szTab02 = Form.GetCtlProp("#fmTab02", "visible")
+	
+	if szTab00 == "true" or szTab00 == "1" then
+		szKey = "szTab00"
+	elseif szTab01 == "true" or szTab01 == "1" then
+		szKey = "szTab01"
+	elseif szTab02 == "true" or szTab02 == "1" then
+		szKey = "szTab02"
+	end if
+	Form.SaveConfigData("mhprc11000_th", szKey, rdo0.currentindex)
+	'20230724 HSZ END
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

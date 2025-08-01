@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44050" scrname="키워드뉴스_뉴스" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,630,1" />
+	<CONTROL_INFO>
+		<GRID name="grd01" colcount="4" ly_vert="0,0,375,610,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" halign="2" autofontsize="1" fonttype="2" />
+				<LABEL name="bd_cell1" fontsize="-4" halign="2" fonttype="2" />
+				<LABEL name="bd_cell3" fontsize="-4" mask="1,0,,,1,####/##/##,0,1,1,0,0" valign="0" fonttype="3" />
+				<LABEL name="bd_cell4" halign="2" fonttype="2" />
+				<LABEL name="bd_cell5" fontsize="-4" mask="1,0,,,1,##:##:##,0,1,1,0,0" halign="2" valign="0" fonttype="3" />
+				<LABEL name="bd_cell9" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell6" fontsize="-1" fonttype="3" />
+				<LABEL name="bd_cell7" fonttype="2" />
+				<LABEL name="bd_cell8" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell11" fontsize="-4" valign="0" fonttype="3" />
+				<LABEL name="bd_cell2" fontsize="-4" halign="2" fonttype="3" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" cursorstyle="1" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="70,369,70,70" ly_vert_visible="1,0,1,1" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="39,28" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,1" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="3" >
+					<SUBCOLINFO ly_vert_width="84,63,222" ly_vert_visible="0,0,0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="39,28" />
+						<CELLINFO>
+							<CELL name="bd_cell7" cell_ly="0,0,2,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell3" cell_ly="0,1,0,1" line="0,1" fgcolor="146:124124124" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell5" cell_ly="1,1,1,1" line="0,1" fgcolor="146:124124124" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell11" cell_ly="2,1,2,1" line="0,1" fgcolor="146:124124124" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="39,28" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell2" cell_ly="0,1,0,1" line="0,1" fgcolor="146:124124124" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="39,28" />
+						<CELLINFO>
+							<CELL name="bd_cell4" cell_ly="0,0,0,0" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell6" cell_ly="0,1,0,1" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="Label0" halign="1" multiline="1" ly_vert="20,226,335,50,1" />
+		<LABEL name="Label1" caption="MY종목 뉴스로 이동" halign="1" click="1" ly_vert="20,300,341,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="14627" _ulen="13881" >
+Dim g_flag
+Dim keyword
+Dim g_cnt
+g_cnt = 0
+
+Dim g_sDate
+Dim g_nRow
+Dim g_ErrCnt
+g_ErrCnt = 0		'20171016_01 LKM
+'============================================================================
+Sub Form_OnFormInit()
+	g_flag = "N"
+	g_sDate = ""
+	g_nRow = 0
+	Label0.visible = false
+	Label1.visible = false
+	keyword = Form.GetOpenLinkData()
+	Form.SetScreenName("#"&keyword)
+	DATAMANAGER.SetDataValue(0, "ohhts_news_001r", "InBlock1", "FID_INPUT_TITL", 0 , keyword)
+	DATAMANAGER.RequestTranData("ohhts_news_001r")
+	
+	
+End Sub
+
+'============================================================================
+
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	'20220124 SWJ START
+	'DATAMANAGER.CancelRealData("ohhts_news_real")
+	for i = 0 to 15 
+		DATAMANAGER.CancelRealData("ohhts_news_real")
+	next
+	'20220124 SWJ END
+	
+	'g_cnt = 0 
+	g_cnt = g_cnt + DATAMANAGER.GetDataCount(0, "ohhts_news_001r" ,"OutBlock1" )
+	
+	nTotal = DATAMANAGER.GetDataCount(0, "ohhts_news_001r", "OutBlock1")
+	
+	if szTranID = "ohhts_news_001r" then
+		if g_cnt < 1 then
+			Label0.visible = true
+			Label0.caption = "'" & keyword & "'" & " 키워드에 \n관련된 기사가 존재하지 않습니다."
+				
+		else
+		
+			For nIndex = 0 To nTotal -1
+				
+				szTitle 			= DATAMANAGER.GetDataValue(0, "ohhts_news_001r", "OutBlock1", "FID_TITL", nIndex)
+				szDate 			= DATAMANAGER.GetDataValue(0, "ohhts_news_001r", "OutBlock1", "FID_DATE", nIndex)
+				szTime 			= DATAMANAGER.GetDataValue(0, "ohhts_news_001r", "OutBlock1", "FID_CNTG_HOUR", nIndex)
+				szNewsCorpName 	= DATAMANAGER.GetDataValue(0, "ohhts_news_001r", "OutBlock1", "FID_KOR_ISNM", nIndex)
+				szNewKey 		= DATAMANAGER.GetDataValue(0, "ohhts_news_001r", "OutBlock1", "FID_NEWS_KEY", nIndex)
+				szNewsCorpCode 	= DATAMANAGER.GetDataValue(0, "ohhts_news_001r", "OutBlock1", "FID_NEWS_OFER_ENTP_CODE", nIndex)
+				
+				'20210622 LES START
+				'szCode 			= DATAMANAGER.GetDataValue(0, "ohhts_news_001r", "OutBlock1", "FID_SHRN_ISCD", nIndex)
+				szCode 			= DATAMANAGER.GetDataValue(0, "ohhts_news_001r", "OutBlock1", "FID_NEW_SHRN_ISCD", nIndex)
+				'20210622 LES END
+			
+			    grd01.insertrow = nIndex+g_nRow
+			
+				grd01.SetCellData( "bd_cell7", nIndex+g_nRow,szTitle )
+				grd01.SetCellData( "bd_cell3", nIndex+g_nRow,szDate )
+				grd01.SetCellData( "bd_cell5", nIndex+g_nRow ,szTime)
+				grd01.SetCellData( "bd_cell11", nIndex+g_nRow,szNewsCorpName )
+				grd01.SetCellData( "bd_cell1", nIndex+g_nRow,szNewKey )
+				grd01.SetCellData( "bd_cell2", nIndex+g_nRow,szNewsCorpCode )
+				grd01.SetCellData( "bd_cell4", nIndex+g_nRow,szCode )
+					
+				
+				
+			NEXT
+			g_nRow = grd01.rowcount
+			'Label0.visible = false
+			'For i = grd01.rowcount -1 To 0 Step -1
+			'	Dim szNewsCorpCode
+			'	szNewsCorpCode = grd01.GetCellData("bd_cell2", i)
+			
+			'	if szNewsCorpCode = "EY" Then
+			'		grd01.SetDeleteRow( i )
+			'	End If
+			'Next
+			
+			if g_cnt < 10 then	'기사가 10개 미만일때 스크롤이 생기지 않아 임의 호출 로직 뺌
+				g_ErrCnt = 0		
+'				grd01_OnScrollEnd()
+			end if
+		
+		end if
+		
+		'20220124 SWJ START
+		for i = 0 to 15
+			Set_Real_Corp(i)
+		next
+		'DATAMANAGER.RequestRealData("ohhts_news_real")
+		'20220124 SWJ END
+		
+		'if g_cnt < 10 then
+		'	grd01_OnScrollEnd()
+		'end if
+		
+	end if 
+End Sub
+
+
+'============================================================================
+'grd01_OnClickUp
+'============================================================================
+Sub grd01_OnClickUp(lRow, szCellID)
+	Dim szTitle, szDate, szTime, szNewCorpName, szNewKey, szNewsCorpCode, szMsg, szCode, szName
+
+	szTitle			= grd01.GetCellData( "bd_cell7", lRow )	' 제목			-- FID_TITL
+	szDate			= grd01.GetCellData( "bd_cell3", lRow )	' 날짜   		-- FID_DATE
+	szTime			= grd01.GetCellData( "bd_cell5", lRow )	' 시간    		-- FID_CNTG_HOUR
+	szNewCorpName		= grd01.GetCellData( "bd_cell11", lRow )	' 뉴스제공업체명 	-- FID_KOR_ISNM
+	szNewKey			= grd01.GetCellData( "bd_cell1", lRow )	' 뉴스키       	-- FID_NEWS_KEY
+	szNewsCorpCode	= grd01.GetCellData( "bd_cell2", lRow )	' 뉴스제공업체코드-- FID_NEWS_OFER_ENTP_CODE
+	szCode			= grd01.GetCellData( "bd_cell4", lRow )	' 종목코드
+	szName			= Form.GetItemCodeInfo(szCode, "name")
+	
+	szMsg = "mhnws44050_p3" & "★" & szTitle & "|" & szDate & "|" & szTime & "|" & szNewCorpName & "|" & szNewKey & "|" & szNewsCorpCode & "|" &  szName 
+	
+	Form.OpenPopup( "mhprc11000_p6" , szMsg, "" )
+	'Form.triggerEvent('szFromName, szEventName, szParam)
+	
+End Sub
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	
+	if sKeyName == "mhnws44050_p3" then
+		
+		if sRet = "Y" then
+			g_flag = "Y"
+			'Form.triggerEvent("FormTab0", "mhnws44050_p3", "Y")
+		end if
+	end if
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnFormClose()
+	if g_flag == "Y" then
+		Form.SendReturnToParent("mhnws44050_p3" , "Y")
+	end if
+	
+		
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	
+	'20220124 SWJ START
+	'DATAMANAGER.CancelRealData("ohhts_news_real")
+	for i = 0 to 15 
+		DATAMANAGER.CancelRealData("ohhts_news_real")
+	next
+	'20220124 SWJ END
+'
+'	
+	if g_cnt < 1 then
+		Label0.visible = true
+		Label1.visible = true
+		Label0.caption = "'" & keyword & "'" & " 키워드와 관련된 최근 한달 간 뉴스가 존재하지 않습니다."
+		Label1.caption = "MY종목 뉴스로 이동 > "
+	else
+'	
+'	
+	
+'	
+'	end if
+
+	if szErrCode == "9900" Then
+	
+		'20171016_01 LKM START
+		g_ErrCnt = g_ErrCnt+1
+		
+		if g_ErrCnt > 5 then 
+			exit sub
+		end if
+		'20171016_01 LKM END
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_TITL" 				, 0 , keyword) 	'사용자ID
+		DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_NEWS_ITN_EXCP_CLCD" 					, 0 , "Y") 		'실명확인번호
+
+		'20171016_01 LKM START
+		'1달 이전 데이터 조회 요청
+		szYear = Mid(g_sDate,1,4)
+		szMon  = Mid(g_sDate,5,2)
+		szDay  = Mid(g_sDate,7,2)
+		g_sDate = szYear &"-"& szMon &"-"& szDay
+		g_sDate = dateadd("m",-1, g_sDate)
+		szDate = Split(g_sDate,"-")
+		g_sDate = szDate(0)&szDate(1)&szDate(2)				
+		
+		'ORG
+		'g_sDate = grd01.GetCellData("bd_cell3", grd01.rowcount-1 )	
+		'20171016_01 LKM END
+		
+
+		
+		'szYear = Mid(g_sDate,1,4)
+		'szMon  = Mid(g_sDate,5,2)
+		'szDay  = Mid(g_sDate,7,2)
+		
+		'g_sDate = szYear &"-"& szMon &"-"& szDay
+		'g_sDate = dateadd("d",-1, g_sDate)
+		
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_DATE" 				, 0 , g_sDate )
+		DATAMANAGER.RequestTranData("ohhts_news_001r")	
+	End if
+	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub grd01_OnScrollEnd()
+	if DATAMANAGER.IsMoreNextData("ohhts_news_001r") == False Then
+'		ShowAlert "test", DATAMANAGER.IsMoreNextData("ohhts_news_001r") 
+		DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_TITL" 				, 0 , keyword ) 	'사용자ID
+		DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_NEWS_ITN_EXCP_CLCD" 					, 0 , "Y") 		'실명확인번호
+
+		g_sDate = grd01.GetCellData("bd_cell3", grd01.rowcount-1 )
+		szYear = Mid(g_sDate,1,4)
+		szMon  = Mid(g_sDate,5,2)
+		szDay  = Mid(g_sDate,7,2)
+		
+		g_sDate = szYear &"-"& szMon &"-"& szDay
+		g_sDate = dateadd("d",-1, g_sDate)
+		szDate = Split(g_sDate,"-")
+		g_sDate = szDate(0)&szDate(1)&szDate(2)
+	'	
+	'	
+	'	Form.ShowAlert("g_sDate", g_sDate)
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_DATE" 				, 0 , g_sDate )
+		DATAMANAGER.RequestTranData("ohhts_news_001r")
+	else
+		DATAMANAGER.RequestNextData("ohhts_news_001r")
+	End if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_NEWS_OFER_ENTP_CODE"	, 0 , "SKPEY" )
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_NEWS_ITN_EXCP_CLCD"	, 0 , "Y" )
+	
+	'20210622 LES START
+	'DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock2", "FID_INPUT_ISCD"				, 0 , "")
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock2", "FID_NEW_INPUT_ISCD"				, 0 , "")
+	'20210622 LES END
+	
+End Sub
+
+
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveRealComplete(szTranID)
+	Dim szTitle, szDate, szTime, szNewKey, szNewCorpName, szNewsCorpCode
+	Dim	szDiv
+	
+	szDiv = DATAMANAGER.GetDataValue( 1, "ohhts_news_real", "OutBlock1", "FIDR_NEWS_ITN_EXCP_CLCD" , 0 )
+	szNewsCorpCode = DATAMANAGER.GetDataValue( 1, "ohhts_news_real", "OutBlock1", "FIDR_NEWS_OFER_ENTP_CODE" , 0)
+	szTitle		= DATAMANAGER.GetDataValue( 1, "ohhts_news_real", "OutBlock1", "FIDR_NEWS_TITL", 0 )
+	
+	If  szDiv = "N" Then
+	    Exit Sub
+	End If
+    
+    '이데일리뉴스는 제외
+    if 	szNewsCorpCode == "EY" then
+	    Exit Sub
+    End If
+    
+    '해당 키워드에 대한 기사 인지 아닌지 판별
+    if InStr(szTitle,keyword) == 0 then
+	    Exit Sub
+	end if
+    
+    
+    szDate		= DATAMANAGER.GetDataValue( 1, "ohhts_news_real", "OutBlock1", "FIDR_DATE", 0 )
+    szTime		= DATAMANAGER.GetDataValue( 1, "ohhts_news_real", "OutBlock1", "FIDR_BSOP_HOUR", 0 )
+    szNewKey		= DATAMANAGER.GetDataValue( 1, "ohhts_news_real", "OutBlock1", "FIDR_NEWS_KEY", 0 )
+    
+    If 		szNewsCorpCode == "n0" then szNewCorpName = "시황속보"
+    elseif 	szNewsCorpCode == "HK" then szNewCorpName = "한경뉴스"
+    elseif 	szNewsCorpCode == "EY" then szNewCorpName = "이데일리뉴스"
+    elseif 	szNewsCorpCode == "F0" then szNewCorpName = "공시정보"
+    elseif 	szNewsCorpCode == "MT" then szNewCorpName = "머니투데이"
+    elseif 	szNewsCorpCode == "SD" then szNewCorpName = "이투데이"
+    elseif 	szNewsCorpCode == "IS" then szNewCorpName = "인포스탁"
+    elseif 	szNewsCorpCode == "MK" then szNewCorpName = "매경뉴스"
+    elseif 	szNewsCorpCode == "FN" then szNewCorpName = "파이낸셜뉴스"
+    elseif 	szNewsCorpCode == "YN" then szNewCorpName = "연합뉴스"
+    elseif 	szNewsCorpCode == "NP" then szNewCorpName = "뉴스핌"
+    elseif 	szNewsCorpCode == "AE" then szNewCorpName = "아시아경제"
+    elseif 	szNewsCorpCode == "HE" then szNewCorpName = "헤럴드경제"
+    elseif 	szNewsCorpCode == "CD" then szNewCorpName = "CEO스코어데일리"
+    '20161226 LES START - 서울경제, 컨슈머타임스 추가
+    elseif 	szNewsCorpCode == "SE" then szNewCorpName = "서울경제"
+    elseif 	szNewsCorpCode == "PAX" then szNewCorpName = "딜사이트"		'20221227 SWJ START : 팍스넷뉴스 사명변경
+    elseif 	szNewsCorpCode == "CT" then szNewCorpName = "컨슈머타임스"
+    elseif 	szNewsCorpCode == "YIIFX" then szNewCorpName = "연합인포맥스"
+    
+    end if
+    
+    grd01.insertrow = 0
+    
+    grd01.SetCellData( "bd_cell7", 0, szTitle 		)	'제목
+    grd01.SetCellData( "bd_cell3", 0, szDate 		)	'일자
+    grd01.SetCellData( "bd_cell5", 0, szTime )	'시간
+    grd01.SetCellData( "bd_cell11", 0, szNewCorpName 	)	'뉴스제공업체명
+    grd01.SetCellData( "bd_cell1", 0, szNewKey 		)	'뉴스키
+    grd01.SetCellData( "bd_cell2", 0, szNewsCorpCode )	'뉴스제공업체코드
+    
+  
+	
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendRealBefore(szTranID)
+	'20220124 SWJ START
+	'DATAMANAGER.SetDataValue( 1 , "ohhts_news_real", "InBlock1", "FIDR_NEWS_OFER_ENTP_CODE" 		, 0 , "*" )
+	'20220124 SWJ END
+End Sub
+'============================================================================
+'20220124 SWJ START : 뉴스 제공업체 함수
+'============================================================================
+Function Set_Real_Corp(nidx)
+	Select Case nidx
+	
+	Case 0
+		'시황속보
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "n0")
+	Case 1
+		'공시정보
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "F0")
+	Case 2
+		'머니투데이
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "MT")
+	Case 3
+		'이투데이
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "SD")
+	Case 4
+		'인포스탁
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "IS")
+	Case 5
+		'매경뉴스
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "MK")
+	Case 6
+		'파이낸셜뉴스
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "FN")
+	Case 7
+		'연합뉴스
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "YN")
+	Case 8
+		'뉴스핌
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "NP")
+	Case 9
+		'아시아경제
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "AE")
+	Case 10
+		'헤럴드경제
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "HE")
+	Case 11
+		'CEO스코어데일리
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "CD")
+	Case 12
+		'서울경제
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "SE")
+	Case 13
+		'컨슈머타임스
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "CT")
+	Case 14
+		'팍스넷뉴스
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "PAX")
+	Case 15
+		'연합인포맥스
+		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "YIIFX")
+'	Case 15
+'		'중국/홍콩
+'		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "YICHN")
+'	Case 16
+'		'미국
+'		DATAMANAGER.SetDataValue( 1, "ohhts_news_real" , "InBlock1" , "FIDR_NEWS_OFER_ENTP_CODE" , nidx, "YIUSA")
+		
+	End Select
+
+	DATAMANAGER.RequestRealData("ohhts_news_real")
+End Function
+'============================================================================
+Sub DATAMANAGER_OnReceiveRealData(szTranID)
+	
+End Sub
+
+'============================================================================
+Sub Label1_OnClick()
+	Form.OpenScreen("44070" , "")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_news_real" trcode="ohhts_news_real" />
+			<TRAN tranid="ohhts_news_001r" trcode="ohhts_news_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_news_real" title="뉴스 실시간 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="75" _ulen="59" >
+
+FIDR_NEWS_OFER_ENTP_CODE^FIDR뉴스제공업체코드^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1364" _ulen="1072" >
+
+FIDR_NEWS_OFER_ENTP_CODE^FIDR뉴스제공업체코드^5^0^0^0^0^0^0
+FIDR_NEWS_KEY^FIDR뉴스키^25^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_NEWS_NO^FIDR뉴스번호^5^0^0^0^0^0^0
+FIDR_SRNO^FIDR일련번호^20^0^0^0^0^0^0
+FIDR_NEWS_SMAL_CLCD1^FIDR뉴스소구분코드1^8^0^0^0^0^0^0
+FIDR_NEWS_SMAL_CLCD2^FIDR뉴스소구분코드2^8^0^0^0^0^0^0
+FIDR_NEWS_SMAL_CLCD3^FIDR뉴스소구분코드3^8^0^0^0^0^0^0
+FIDR_NEWS_SMAL_CLCD4^FIDR뉴스소구분코드4^8^0^0^0^0^0^0
+FIDR_NEWS_TITL^FIDR뉴스제목^265^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD^FIDR신규단축종목코드^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD2^FIDR신규단축종목코드2^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD3^FIDR신규단축종목코드3^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD4^FIDR신규단축종목코드4^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD5^FIDR신규단축종목코드5^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD6^FIDR신규단축종목코드6^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD7^FIDR신규단축종목코드7^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD8^FIDR신규단축종목코드8^20^0^0^0^0^0^0
+FIDR_CTGR1^FIDR카테고리1^8^0^0^0^0^0^0
+FIDR_CTGR2^FIDR카테고리2^8^0^0^0^0^0^0
+FIDR_CTGR3^FIDR카테고리3^8^0^0^0^0^0^0
+FIDR_CTGR4^FIDR카테고리4^8^0^0^0^0^0^0
+FIDR_NEWS_ITN_EXCP_CLCD^FIDR뉴스대내외구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_news_001r" title="종합뉴스/시황(제목)" realdata="0" dessvr="N" >
+				<TRBLOCK name="InBlock1" inout="in" _len="474" _ulen="372" >
+
+FID_INPUT_NEWS_OFER_ENTP_CODE^FID입력뉴스제공업체코드^5^0^0^0^0^0^0
+FID_NEWS_MDDV_CODE^FID뉴스중분류코드^8^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+FID_INPUT_TITL^FID입력제목^265^0^0^0^0^0^0
+FID_INPUT_DATE^FID입력일자^8^0^0^0^0^0^0
+FID_INPUT_HOUR^FID입력시간^6^0^0^0^0^0^0
+FID_NEWS_KEY^FID뉴스키^25^0^0^0^0^0^0
+FID_INPUT_NEWS_ITN_EXCP_CLCD^FID입력뉴스대내외구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="1" inout="in" _len="69" _ulen="53" >
+
+FID_NEW_INPUT_ISCD^FID신규입력종목코드^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="803" _ulen="643" >
+
+FID_SRNO2^FID일련번호2^20^0^0^0^0^0^0
+FID_DATE^FID일자^8^0^0^0^0^0^0
+FID_CNTG_HOUR^FID체결시간^6^0^0^0^0^0^0
+FID_1_CTGR^FID1카테고리^8^0^0^0^0^0^0
+FID_2_CTGR^FID2카테고리^8^0^0^0^0^0^0
+FID_3_CTGR^FID3카테고리^8^0^0^0^0^0^0
+FID_4_CTGR^FID4카테고리^8^0^0^0^0^0^0
+FID_NEWS_SMAL_1_CLCD^FID뉴스소1구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_2_CLCD^FID뉴스소2구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_3_CLCD^FID뉴스소3구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_4_CLCD^FID뉴스소4구분코드^8^0^0^0^0^0^0
+FID_NEWS_OFER_ENTP_CODE^FID뉴스제공업체코드^5^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_NEWS_KEY^FID뉴스키^25^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_NEW_SHRN_ISCD^FID신규단축종목코드^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

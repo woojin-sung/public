@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90021" scrname="모바일 OTP 인증" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image5" imgpath="icon_main_11" ly_vert="340,2,30,28,1" />
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="36" ly_vert="0,32,375,617,1" >
+			<PAGE name="page1" caption="PC/ARS 인증" linkfile="mhetc90060_motp" />
+			<PAGE name="page2" caption="온라인(PG)결제" linkfile="mhetc90060_motp2" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4773" _ulen="4293" >
+'============================================================================
+' 2021.01.25 SWJ START : 모바일OTP인증 껍데기화면
+'============================================================================
+' 2021.05.27 : 정민영 : v001 : T2105070009 : 개인신용정보동의제도 개편안 반영
+'            : obcsb_efif_060a IO변경분 적용
+'============================================================================
+Dim nTab, g_mSBValue
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_DeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	
+	if g_DeviceOS == "1" then
+		Form.requestMOTP("MOTP_GET_VERSION" , "" , "10003")     'mSB 버전값 획득위한 호출
+		Form.requestMOTP("MOTP_GETINFO"     , "" , "10003")     '등록된 OTP alias 존재하는지 확인
+	end if	
+End Sub
+'============================================================================
+Sub Form_OnFormInitAfter()
+	if g_DeviceOS == "2" then
+		Form.requestMOTP("MOTP_GET_VERSION" , "" , "10003")     'mSB 버전값 획득위한 호출
+		Form.requestMOTP("MOTP_GETINFO"     , "" , "10003")     '등록된 OTP alias 존재하는지 확인
+	end if
+End Sub
+'============================================================================
+Sub Image5_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+'FormTab으로 연결하니까 자식화면에서 호출이 안되서 부모화면에서 호출
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "menu_entering" then
+		Form.requestMOTP("MOTP_GET_VERSION" , "" , "10003")     'mSB 버전값 획득위한 호출
+		Form.requestMOTP("MOTP_GETINFO"     , "" , "10003")     '등록된 OTP alias 존재하는지 확인
+	elseif sEventName == "menu_entering_pg" then
+		Form.requestMOTP("MOTP_GET_VERSION" , "" , "10003")     'mSB 버전값 획득위한 호출(PG거래)
+		Form.requestMOTP("MOTP_GETINFO"     , "" , "10003")     '등록된 OTP alias 존재하는지 확인(PG거래)
+	elseif sEventName == "menu_entering2" then
+		Form.requestMOTP("MOTP_REQ_OTP_ENC", sParam , "10003")  'OTP 번호 생성(일반 비로그인성 인증)
+	elseif sEventName == "menu_entering3" then
+		Form.requestMOTP("MOTP_REQ_OTP", sParam, "10003")
+	elseif sEventName == "AUTH_COMPLETE" then
+		Form.OpenNextPopup("mhetc90060_motpS" , "" , "") '인증완료 창으로 전환
+	elseif sEventName == "ios_formclose" then
+		Form.CloseForm()
+	end if
+End Sub
+'============================================================================
+'Form.requestMOTP로 호출하면 여기로 리턴됨
+'============================================================================
+Sub Form_OnTriggerEventMOTP(sEventName, sParam)
+'모바일OTP 화면번호10000번으로 (이것과 별개지만 참고로 푸시도 내려줄때 10000번으로 인식)
+'호출받을 때 _10000(화면번호)로 받기
+
+	if sEventName == "MOTP_GET_VERSION_RETURN_10003" then
+		g_mSBValue = Split(sParam,"★")		'resultcode★resultMsg★mSBVersion
+		
+		if g_mSBValue(0) <> "00000" then
+			Form.MsgBox( "알림", g_mSBValue(1), "", 6 )
+		end if
+			
+		if g_mSBValue(2) ~= "" or g_mSBValue(2) ~= null then
+			Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "MOTP_VERSION", g_mSBValue(2))
+		end if
+		
+		
+	elseif sEventName == "MOTP_GETINFO_RETURN_10003" then
+		g_mOTPInfo  = Split(sParam,"★")    'resultcode★resultMsg★otpAlias(일련번호)
+
+		if Ubound(g_mOTPInfo) < 1 then
+			exit sub
+		else
+			if g_mOTPInfo(0) <> "00000" then
+				Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "MOTP_ALIAS", "NO_MOTP")
+			else
+				Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "MOTP_ALIAS", g_mOTPInfo(2))
+			end if
+		end if
+		
+			
+	elseif sEventName == "MOTP_REQ_OTP_ENC_RETURN_10003" then
+		g_mOTPData = Split(sParam,"★")
+		
+		if g_mOTPData(0) <> "00000" then
+			Form.MsgBox( "알림", g_mOTPData(1), "", 6 )
+		else
+			Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "MOTP_RETURN", g_mOTPData(2))
+		end if
+		
+	elseif sEventName == "MOTP_REQ_OTP_RETURN_10003" then
+		g_mOTPData = Split(sParam,"★")
+		if g_mOTPData(0) <> "00000" then
+			Form.MsgBox( "알림", g_mOTPData(1), "", 6 )
+		else
+			Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "MOTP_RETURN2", g_mOTPData(2))
+		end if
+	end if
+	
+End Sub
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "MOTP_SHOWKEYPAD", "")
+	Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "MOTP_PWDCLEAR", "")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_174a" trcode="obcsb_oimf_174a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_176a" trcode="obcsb_oimf_176a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_520r" trcode="obcsb_oimf_520r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_172r" trcode="obcsb_oimf_172r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_efif_060a" trcode="obcsb_efif_060a" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_174a" title="모바일OTP 거래등록 및 시간요청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="559" _ulen="423" >
+
+MOTP_PROS_CLCD^모바일OTP처리구분코드^4^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_DATA_CNTT^모바일OTP인증데이터내용^256^0^0^0^0^0^0
+MOTP_TR_CNTT^모바일OTP거래내용^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="450" _ulen="332" >
+
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_TR_NO^모바일OTP거래번호^20^0^0^0^0^0^0
+MOTP_TR_REG_YMDH^모바일OTP거래등록일시^14^0^0^0^0^0^0
+MOTP_HOUR_VAL^모바일OTP시간값^64^0^0^0^0^0^0
+MOTP_TR_REG_YN^모바일OTP거래등록여부^1^0^0^0^0^0^0
+MOTP_TR_CNTT^모바일OTP거래내용^64^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_176a" title="모바일OTP 번호등록 및 검증" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="391" _ulen="303" >
+
+MOTP_PROS_CLCD^모바일OTP처리구분코드^4^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+MOTP_TR_NO^모바일OTP거래번호^20^0^0^0^0^0^0
+MOTP_PWD_PIP^모바일OTP비밀번호PIP^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="116" _ulen="88" >
+
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_520r" title="개인별보안매체상태조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="205" _ulen="157" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="614" _ulen="460" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+HTS_STPL_YN^HTS 약정 여부^1^0^0^0^0^0^0
+SCRC_STAT_CODE^보안카드 상태 코드^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT1^부가정보 확인 질문 내용1^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT2^부가정보 확인 질문 내용2^2^0^0^0^0^0^0
+ACNT_OPNG_YN^계좌 개설 여부^1^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+ELFN_ID_EXST_YN^전자금융 ID 존재 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+UI_SMRT_OTP_YN^UI스마트OTP여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_172r" title="OTP조회(실물&모바일)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="161" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1257" _ulen="937" >
+
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_STAT_CODE^모바일OTP상태코드^2^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_ISNC_YMDH^모바일OTP발급일시^14^0^0^0^0^0^0
+MOTP_LOCK_YMDH^모바일OTPLOCK일시^14^0^0^0^0^0^0
+MOTP_MISS_YMDH^모바일OTP분실일시^14^0^0^0^0^0^0
+MOTP_DSCD_YMDH^모바일OTP폐기일시^14^0^0^0^0^0^0
+VALD_PRD_STA_DATE^유효기간시작일자^8^0^0^0^0^0^0
+VALD_PRD_EXPI_DATE^유효기간만료일자^8^0^0^0^0^0^0
+MOTP_MTRT_GUDE_YN^모바일OTP만기안내여부^1^0^0^0^0^0^0
+LAST_VRFC_YMDH^최종검증일시^14^0^0^0^0^0^0
+MOTP_MSTK_CSNU^모바일OTP오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_MSTK_CSNU^모바일OTP인증오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_LOCK_YN^모바일OTP인증LOCK여부^1^0^0^0^0^0^0
+MOTP_ATHN_LOCK_YMDH^모바일OTP인증LOCK일시^14^0^0^0^0^0^0
+MOTP_ATHN_LAST_MOD_YMDH^모바일OTP인증최종수정일시^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="315" _ulen="247" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_USE_RANG_CODE^OTP사용범위코드^1^0^0^0^0^0^0
+OTP_STAT_CODE^OTP상태코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="131" _ulen="103" >
+
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+UI_PRHB_REAS^UI불가사유^30^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_efif_060a" title="HTS고객등록처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="389" _ulen="293" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+CONN_PWD^접속 비밀번호^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="43" _ulen="35" >
+
+SUCS_YN^성공 여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44050" scrname="키워드뉴스_키워드뉴스" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,560,1" />
+	<CONTROL_INFO>
+		<GRID name="grd01" colcount="3" ly_vert="0,48,375,472,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" halign="1" autofontsize="1" fonttype="2" />
+				<LABEL name="bd_cell3" fontsize="-1" valign="2" fonttype="2" />
+				<LABEL name="bd_cell1" fontsize="-4" mask="1,0,,,1,####/##/##,0,1,1,0,0" fonttype="2" />
+				<LABEL name="bd_cell2" fontsize="-4" mask="1,0,,,1,##:##:##,0,1,1,0,0" fonttype="2" />
+				<LABEL name="bd_cell5" fontstyle="01" mask="1,0,,,1,##:##:##,0,1,1,0,0" halign="1" autofontsize="1" fonttype="2" />
+				<LABEL name="bd_cell9" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell6" fontsize="-1" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell7" fonttype="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell8" fontsize="-3" mask="1,0,,,1,####/##/##,0,1,1,0,0" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell11" fontsize="-3" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell13" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell15" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell17" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell4" fontsize="-4" fonttype="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" initrowsel="0" usetopheader="0" initrowcount="0" cursorstyle="1" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="84,251,40" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="84" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="29,30" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="3" >
+					<SUBCOLINFO ly_vert_width="80,63,108" ly_vert_visible="0,0,0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="29,30" />
+						<CELLINFO>
+							<CELL name="bd_cell3" cell_ly="0,0,2,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell1" cell_ly="0,1,0,1" line="0,1" fgcolor="000:127127127" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell2" cell_ly="1,1,1,1" line="0,1" fgcolor="000:127127127" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell4" cell_ly="2,1,2,1" line="0,1" fgcolor="000:127127127" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="40" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="29,30" />
+						<CELLINFO>
+							<CELL name="bd_cell5" cell_ly="0,0,0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="Label0" visible="0" caption="등록된 키워드가 없습니다." multiline="1" ly_vert="90,250,210,32,0" />
+		<IMAGE name="Image0" imgpath="ic_add.9.png" ly_vert="244,5,38,38,1" />
+		<IMAGE name="Image1" imgpath="ic_edit.9.png" ly_vert="287,5,38,38,1" />
+		<IMAGE name="Image2" imgpath="ic_refresh.9.png" ly_vert="330,5,38,38,1" />
+		<IMAGE name="Image3" imgpath="ic_question.9.png" ly_vert="200,5,38,38,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="15298" _ulen="14586" >
+Dim g_Keyword
+g_Keyword = ""
+
+Dim g_KeywordList
+'g_KeywordList = {}
+
+
+Dim g_KeywordNum
+g_KeywordNum = 0
+
+Dim g_UserID
+
+'20170529 NOHES START : 첫 실행시 키워드뉴스 가이드 리스트
+Dim g_szFirstList
+g_szFirstList = Array( "메리츠증권", "계약", "체결", "영업이익" )
+Dim g_szFirstKey		
+'20170529 NOHES END
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'저장되어있는 키워드를 불러옴
+	g_UserID = Form.GetSharedData("&USER_ID" , false)
+	'20170529 NOHES START : 첫 키워드 실행 여부 판단
+	g_szFirstKey = Form.LoadConfigData("KeywordNews", g_UserID)	
+	'20170529 NOHES END
+	
+	DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001r", "InBlock1", "FID_USER_ID" , 0 , g_UserID)
+	DATAMANAGER.RequestTranData("ohhts_kwdn_001r")
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	if szTranID == "ohhts_kwdn_001r" then
+	
+		g_KeywordNum = DATAMANAGER.GetDataCount(0, "ohhts_kwdn_001r", "OutBlock1")
+		g_Keyword = ""
+		if Cint(g_KeywordNum) < 1 then
+			'20170529 NOHES START : 키워드뉴스 첫 실행시 기본 키워드 설정	
+			g_szFirstKey = Form.LoadConfigData("KeywordNews", g_UserID)	
+		
+			if g_szFirstKey <> "Y" Then
+				g_KeywordNum = 4
+				
+				for nIdx = 0 to Ubound(g_szFirstList)
+					DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_2", "InBlock1", "FID_CLS" , 			0 , "1")
+					DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_2", "InBlock1", "FID_USER_ID" , 		0 , g_UserID)
+					
+					if g_KeywordNum < 10 then
+						DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_2", "InBlock1", "FID_SRCH_COND_GRP" , 	0 , "0" & nIdx)
+					else
+						DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_2", "InBlock1", "FID_SRCH_COND_GRP" , 	0 , nIdx)
+					end if
+					sRet = 	g_szFirstList(nIdx)
+	
+					DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_2", "InBlock1", "FID_SRCH_COND" , 		0 , sRet)
+					DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_2", "InBlock1", "FID_CHAN_MDIA_CLCD" ,	0 , "010")
+					DATAMANAGER.RequestTranData("ohhts_kwdn_001a_2")			
+				Next 
+			else
+				Label0.visible = true
+				grd01.visible = false
+			end if
+			'20170529 NOHES END
+		else
+			Label0.visible = false
+			grd01.visible = true
+			grd01.SetClear()
+			for i = 0 to g_KeywordNum -1 
+				grd01.AddRow()
+				keyword = DATAMANAGER.GetDataValue(0, "ohhts_kwdn_001r", "OutBlock1", "FID_SRCH_COND" , i)
+				grd01.SetCellData("bd_cell0", i, "#" & keyword)
+			
+				'키워드를 배열 형태로 관리
+				if i == 0 then
+					g_Keyword = keyword
+			
+				else
+					g_Keyword = g_Keyword & "★" & keyword
+				
+				end if
+			
+			next
+			
+			g_KeywordList = Split(g_Keyword,"★")
+			
+			for i = 0 to g_KeywordNum -1
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_kwdn_002r", "InBlock1", "FID_SRCH_COND", i , g_KeywordList(i))
+				'DATAMANAGER.RequestTranData("ohhts_kwdn_002r")
+				
+			next
+			
+			DATAMANAGER.RequestTranData("ohhts_kwdn_002r")
+		
+		end if
+		
+		
+		
+	elseif szTranID = "ohhts_kwdn_002r" then
+	
+				
+		
+		for i = 0 to g_KeywordNum -1
+		
+			szDate = ""
+			szTime = ""
+			szNewCorpName = ""
+			szTitle = ""
+		
+			
+			szDate 			=  DATAMANAGER.GetDataValue(0, "ohhts_kwdn_002r", "OutBlock1", "FID_DATE" , i)
+			szTime			=  DATAMANAGER.GetDataValue(0, "ohhts_kwdn_002r", "OutBlock1", "FID_HOUR" , i)
+			szNewsCorpCode 	=  DATAMANAGER.GetDataValue(0, "ohhts_kwdn_002r", "OutBlock1", "FID_NEWS_OFER_ENTP_CODE" , i)
+			szTitle 	=  DATAMANAGER.GetDataValue(0, "ohhts_kwdn_002r", "OutBlock1", "FID_TITL" , i)
+		   
+		    
+		    szNewCorpName = GetSourceName(szNewsCorpCode)
+		    
+		    if szDate = "" then
+			    szTitle = "최근 한달 간 뉴스가 존재하지 않습니다."
+			    szDate =  Replace(Now("yyyyMMdd"),"-","")
+			    szTime = Replace(FormatDateTime(now,4),":","") & Right(szDate,2) 
+			    szNewCorpName="[검색결과]"
+			    grd01.SetCellFgColor("bd_cell3", i, "98")
+			    
+			    
+			end if
+		  
+			
+			grd01.SetCellData("bd_cell1", i, szDate)
+			grd01.SetCellData("bd_cell2", i, szTime)
+			grd01.SetCellData("bd_cell4", i, szNewCorpName)
+			grd01.SetCellData("bd_cell3", i, szTitle)
+			grd01.SetCellData("bd_cell5", i ,">")
+		next
+		
+	elseif szTranId = "ohhts_kwdn_002r_1" then	'키워드 추가시 로딩 줄이기위해 추가된 키워드 한건만 조회하여 셋팅
+	
+			szDate = ""
+			szTime = ""
+			szNewCorpName = ""
+			szTitle = ""
+			
+			
+			szDate 			=  DATAMANAGER.GetDataValue(0, "ohhts_kwdn_002r_1", "OutBlock1", "FID_DATE" , 0)
+			szTime			=  DATAMANAGER.GetDataValue(0, "ohhts_kwdn_002r_1", "OutBlock1", "FID_HOUR" , 0)
+			szNewsCorpCode 	=  DATAMANAGER.GetDataValue(0, "ohhts_kwdn_002r_1", "OutBlock1", "FID_NEWS_OFER_ENTP_CODE" , 0)
+			szTitle 			=  DATAMANAGER.GetDataValue(0, "ohhts_kwdn_002r_1", "OutBlock1", "FID_TITL" , 0)
+			
+			
+		    szNewCorpName = GetSourceName(szNewsCorpCode)
+			
+			
+			if szDate = "" then
+				szTitle = "최근 한달 간 뉴스가 존재하지 않습니다."
+				szDate =  Replace(Now(),"-","")
+				szTime = Replace(FormatDateTime(now,4),":","") & Right(szDate,2) 
+				szNewCorpName="[검색결과]"
+				grd01.SetCellFgColor("bd_cell3", g_KeywordNum-1, "98")
+				
+			end if
+			
+			
+			
+			grd01.SetCellData("bd_cell1", g_KeywordNum-1, szDate)
+			grd01.SetCellData("bd_cell2", g_KeywordNum-1, szTime)
+			grd01.SetCellData("bd_cell4", g_KeywordNum-1, szNewCorpName)
+			grd01.SetCellData("bd_cell3", g_KeywordNum-1, szTitle)
+			grd01.SetCellData("bd_cell5", g_KeywordNum-1 ,">")
+		
+		
+		
+	elseif szTranID = "ohhts_kwdn_001a_1" then
+	
+			Grid_reDraw("mod","")
+	elseif szTranID = "ohhts_kwdn_001a_2" then
+		'20170529 NOHES START : 키워드뉴스 첫 실행 여부
+		Form.SaveConfigData("KeywordNews", g_UserID, "Y")
+		DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001r", "InBlock1", "FID_USER_ID" , 0 , g_UserID)
+		DATAMANAGER.RequestTranData("ohhts_kwdn_001r")
+		'20170529 NOHES END
+	end if
+
+	
+End Sub
+
+
+
+
+
+'============================================================================
+' 추가 버튼 클릭 이벤트
+'============================================================================
+Sub Image0_OnClick()
+	if Cint(g_KeywordNum) > 19 then
+		Form.ShowAlert("알림", "키워드는 최대 20개까지만 등록가능 합니다.")
+	else
+		Form.OpenPopup("mhnws44050_p1",g_KeywordNum & "★" & g_Keyword,"")
+	end if
+End Sub
+
+'============================================================================
+' 편집 버튼 클릭 이벤트
+'============================================================================
+Sub Image1_OnClick()
+	Form.OpenPopup("mhnws44050_p2" , g_Keyword & "●" & g_KeywordNum  ,"")
+	
+End Sub
+
+'============================================================================
+Sub Image2_OnClick()
+	
+	DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001r", "InBlock1", "FID_USER_ID" , 0 , g_UserID)
+	DATAMANAGER.RequestTranData("ohhts_kwdn_001r")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	if sKeyName == "keywordAdd" then
+		
+		if Cint(g_KeywordNum) < 1 then
+			g_Keyword = sRet
+			g_KeywordNum = g_KeywordNum +1
+		elseif Cint(g_KeywordNum) >= 1 then
+			g_Keyword =g_Keyword & "★" & sRet
+			g_KeywordNum = g_KeywordNum + 1
+		end if
+		
+		g_KeywordList = Split(g_Keyword, "★")
+		
+		
+		Check_Keyword_Exist()
+		Setting_Keyword(sRet)
+		
+		
+		
+		DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a", "InBlock1", "FID_CLS" , 			0 , "1")
+		DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a", "InBlock1", "FID_USER_ID" , 		0 , g_UserID)
+		
+		if g_KeywordNum < 10 then
+			DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a", "InBlock1", "FID_SRCH_COND_GRP" , 	0 , "0" & g_KeywordNum)
+		else
+			DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a", "InBlock1", "FID_SRCH_COND_GRP" , 	0 , g_KeywordNum)
+		end if
+		
+		DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a", "InBlock1", "FID_SRCH_COND" , 		0 , sRet)
+		DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a", "InBlock1", "FID_CHAN_MDIA_CLCD" ,	0 , "010")
+		DATAMANAGER.RequestTranData("ohhts_kwdn_001a")
+		
+		Grid_reDraw("add",sRet)
+		
+		
+		'Form.SaveConfigData("mhnws44050", "keyword", g_Keyword)
+		'Form.SaveConfigData("mhnws44050", "keywordNum", g_KeywordNum)
+		
+	elseif sKeyName == "keywordDelete" then
+		
+		g_KeywordList(Cint(sRet)) = ""
+		g_Keyword = ""
+		
+		for i = 0 to g_KeywordNum -1 
+			if i == 0 then
+				if g_KeywordList(i) == "" then
+				
+				else
+					g_Keyword = g_KeywordList(i)
+				end if
+			
+			else		
+					
+				if g_KeywordList(i) == "" then
+					
+				else
+					if Cint(sRet) == 0 and i == 1 then'
+					g_Keyword = g_KeywordList(i)'
+					else'
+					g_Keyword = g_Keyword & "★" & g_KeywordList(i)
+					end if'
+				end if
+			end if
+		next
+		
+		g_KeywordList = Split(g_Keyword, "★")
+		
+		g_KeywordNum = g_KeywordNum -1 		
+						
+		Grid_reDraw()
+		
+		Form.SaveConfigData("mhnws44050", "keyword", g_Keyword)
+		Form.SaveConfigData("mhnws44050", "keywordNum", g_KeywordNum)
+	
+	elseif sKeyName == "keywordMod" then
+		temp = Split(sRet,"●")
+		g_Keyword = ""
+		g_Keyword = temp[0]
+		g_KeywordNum = Cint(temp[1])
+		g_KeywordList = ""
+		g_KeywordList = Split(g_Keyword, "★")
+		
+		DATAMANAGER.ClearInputData(0,"ohhts_kwdn_001a_1" )
+		
+		if g_KeywordNum == 0 then
+			DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_1", "InBlock1", "FID_CLS" , 0 , "3")
+			DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_1", "InBlock1", "FID_USER_ID" , 0 , g_UserID)
+			DATAMANAGER.RequestTranData("ohhts_kwdn_001a_1")
+		else
+			for i = 0 to g_KeywordNum - 1
+			
+				DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_1", "InBlock1", "FID_CLS" , i , "2")
+				DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_1", "InBlock1", "FID_USER_ID" , i , g_UserID)
+				
+				if i < 10 then
+					DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_1", "InBlock1", "FID_SRCH_COND_GRP" , i , "0"&i)
+				else
+					DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_1", "InBlock1", "FID_SRCH_COND_GRP" , i , i)
+				end if
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_1", "InBlock1", "FID_SRCH_COND" , i , g_KeywordList(i))
+				DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001a_1", "InBlock1", "FID_CHAN_MDIA_CLCD" , i , "010")
+			next
+			
+			DATAMANAGER.RequestTranData("ohhts_kwdn_001a_1")
+		
+		end if
+		
+		'Form.SaveConfigData("mhnws44050", "keyword", g_Keyword)
+		'Form.SaveConfigData("mhnws44050", "keywordNum", g_KeywordNum)
+		
+	elseif sKeyName == "mhnws44050_p3" then
+		Form.triggerEvent("#", "mhnws44050_p3", Cstr(sRet))
+	end if
+	
+	
+End Sub
+
+
+
+'=============================================================================
+'키워드 등록 여부 검사
+'=============================================================================
+Sub Check_Keyword_Exist()
+
+	if Cint(g_KeywordNum) >= 1 then
+		Label0.visible = false
+		grd01.visible = true
+	else
+		Label0.visible = true
+		grd01.visible = false
+		
+	end if
+	
+End Sub
+
+
+'=============================================================================
+'키워드 새로 고침
+'=============================================================================
+Sub Setting_Keyword(new_Keyword)
+	rIdx = grd01.rowcount
+	
+	grd01.insertrow = g_KeywordNum - 1 
+	
+	grd01.SetCellData("bd_cell0", rIdx , "#" & new_Keyword)
+End Sub
+
+'=============================================================================
+' 그리드 다시 그리기
+'=============================================================================
+Sub Grid_reDraw(Cls,sRet)
+		if g_KeywordNum == 0 then
+			Label0.visible = true
+			grd01.visible = false
+		else
+			Label0.visible = false
+			grd01.visible = true
+					
+			if Cls == "add" then
+			'grd01.AddRow()
+				if g_KeywordNum == 1 then
+					grd01.SetClear()
+					grd01.AddRow()
+				end if
+				
+				grd01.SetCellData("bd_cell0", g_KeywordNum-1 , "#" & sRet)
+				DATAMANAGER.SetDataValue(0, "ohhts_kwdn_002r_1", "InBlock1", "FID_SRCH_COND" , 0 , sRet)
+				DATAMANAGER.RequestTranData("ohhts_kwdn_002r_1")
+			
+			elseif Cls == "mod" then		
+				grd01.SetClear()
+				DATAMANAGER.SetDataValue(0, "ohhts_kwdn_001r", "InBlock1", "FID_USER_ID" , 0 , g_UserID)
+				DATAMANAGER.RequestTranData("ohhts_kwdn_001r")
+			end if			
+		end if
+End Sub
+
+ '============================================================================
+Sub Form_OnFormClose()
+
+	Form.SetSharedData("keyword" , g_Keyword)
+	Form.SetSharedData("keywordNum" , g_KeywordNum)
+	
+	
+	Form.SaveConfigData("mhnws44050", "keyword", g_Keyword)
+	Form.SaveConfigData("mhnws44050", "keywordNum", g_KeywordNum)
+	'Form.LoadConfigData("keyword", g_Keyword)
+	'Form.LoadConfigData("keywordNum", g_KeywordNum)
+	
+End Sub
+
+'============================================================================
+Sub grd01_OnClickUp(lRow, szCellID)
+	Form.OpenFramePopup("mhnws44050_p3" , Mid(grd01.GetCellData("bd_cell0", lRow),2) ,"")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "refresh" then
+		'20170529 NOHES START : 초기 안내 팝업 제공
+		sCheck = Form.LoadConfigData("KeywordNews", "KeyPopup")
+	
+		if sCheck <> "1" then
+			Form.OpenPopup("mhnws44050_p5","1","")
+		end if
+		'20170529 NOHES END
+		Image2_OnClick()
+	end if
+		
+End Sub
+
+
+'============================================================================
+Sub Image3_OnClick()
+	Form.OpenPopup("mhnws44050_p5","1★Click","")
+	
+End Sub
+
+'============================================================================
+Function GetSourceName(code)
+	Dim szNewCorpName
+	szNewCorpName = ""
+	
+    If 		szNewsCorpCode == "n0" then szNewCorpName = "[시황속보]"
+    elseif 	szNewsCorpCode == "HK" then szNewCorpName = "[한경뉴스]"
+    elseif 	szNewsCorpCode == "EY" then szNewCorpName = "[이데일리뉴스]"
+    elseif 	szNewsCorpCode == "F0" then szNewCorpName = "[공시정보]"
+    elseif 	szNewsCorpCode == "MT" then szNewCorpName = "[머니투데이]"
+    elseif 	szNewsCorpCode == "SD" then szNewCorpName = "[이투데이]"
+    elseif 	szNewsCorpCode == "IS" then szNewCorpName = "[인포스탁]"
+    elseif 	szNewsCorpCode == "MK" then szNewCorpName = "[매경뉴스]"
+    elseif 	szNewsCorpCode == "FN" then szNewCorpName = "[파이낸셜뉴스]"
+    elseif 	szNewsCorpCode == "YN" then szNewCorpName = "[연합뉴스]"
+    elseif 	szNewsCorpCode == "NP" then szNewCorpName = "[뉴스핌]"
+    elseif 	szNewsCorpCode == "AE" then szNewCorpName = "[아시아경제]"
+    elseif 	szNewsCorpCode == "HE" then szNewCorpName = "[헤럴드경제]"
+    elseif 	szNewsCorpCode == "CD" then szNewCorpName = "[CEO스코어데일리]"
+    '20161226 LES START - 서울경제, 컨슈머타임스 추가
+    elseif 	szNewsCorpCode == "SE" then szNewCorpName = "[서울경제]"
+    elseif 	szNewsCorpCode == "CT" then szNewCorpName = "[컨슈머타임스]"
+    '20200909 SWJ START - 팍스넷뉴스 추가
+    elseif	szNewsCorpCode == "PAX" then szNewCorpName = "[딜사이트]"		'20221227 SWJ START : 사명 변경
+    elseif	szNewsCorpCode == "YICHN" then szNewCorpName = "[중국/홍콩]"
+    elseif	szNewsCorpCode == "YIUSA" then szNewCorpName = "[미국]"
+    elseif	szNewsCorpCode == "YIIFX" then szNewCorpName = "[연합인포맥스]"
+    '20240626_01 KBC : 뉴스원추가
+    elseif 	szNewsCorpCode == "NSP" then szNewCorpName = "[NSP통신]"
+    end if
+
+    GetSourceName = szNewCorpName
+End Function
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_news_real" trcode="ohhts_news_real" />
+			<TRAN tranid="ohhts_kwdn_001r" trcode="ohhts_kwdn_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_kwdn_002r" trcode="ohhts_kwdn_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_kwdn_001a" trcode="ohhts_kwdn_001a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_kwdn_002r_1" trcode="ohhts_kwdn_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_kwdn_001a_1" trcode="ohhts_kwdn_001a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_kwdn_001a_2" trcode="ohhts_kwdn_001a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_news_real" title="뉴스 실시간 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="75" _ulen="59" >
+
+FIDR_NEWS_OFER_ENTP_CODE^FIDR뉴스제공업체코드^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1364" _ulen="1072" >
+
+FIDR_NEWS_OFER_ENTP_CODE^FIDR뉴스제공업체코드^5^0^0^0^0^0^0
+FIDR_NEWS_KEY^FIDR뉴스키^25^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_NEWS_NO^FIDR뉴스번호^5^0^0^0^0^0^0
+FIDR_SRNO^FIDR일련번호^20^0^0^0^0^0^0
+FIDR_NEWS_SMAL_CLCD1^FIDR뉴스소구분코드1^8^0^0^0^0^0^0
+FIDR_NEWS_SMAL_CLCD2^FIDR뉴스소구분코드2^8^0^0^0^0^0^0
+FIDR_NEWS_SMAL_CLCD3^FIDR뉴스소구분코드3^8^0^0^0^0^0^0
+FIDR_NEWS_SMAL_CLCD4^FIDR뉴스소구분코드4^8^0^0^0^0^0^0
+FIDR_NEWS_TITL^FIDR뉴스제목^265^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD^FIDR신규단축종목코드^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD2^FIDR신규단축종목코드2^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD3^FIDR신규단축종목코드3^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD4^FIDR신규단축종목코드4^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD5^FIDR신규단축종목코드5^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD6^FIDR신규단축종목코드6^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD7^FIDR신규단축종목코드7^20^0^0^0^0^0^0
+FIDR_NEW_SHRN_ISCD8^FIDR신규단축종목코드8^20^0^0^0^0^0^0
+FIDR_CTGR1^FIDR카테고리1^8^0^0^0^0^0^0
+FIDR_CTGR2^FIDR카테고리2^8^0^0^0^0^0^0
+FIDR_CTGR3^FIDR카테고리3^8^0^0^0^0^0^0
+FIDR_CTGR4^FIDR카테고리4^8^0^0^0^0^0^0
+FIDR_NEWS_ITN_EXCP_CLCD^FIDR뉴스대내외구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_kwdn_001r" title="키워드 뉴스검색 (키워드 검색)" realdata="0" dessvr="N" >
+				<TRBLOCK name="InBlock1" inout="in" _len="49" _ulen="43" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="20" inout="out" _len="169" _ulen="133" >
+
+FID_SRCH_COND_GRP^FID검색조건그룹^2^0^0^0^0^0^0
+FID_SRCH_COND^FID검색조건^40^0^0^0^0^0^0
+FID_CHAN_MDIA_CLCD^FID채널매체구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_kwdn_002r" title="키워드 뉴스검색 서비스 (제목 ?" realdata="0" dessvr="N" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="52" _ulen="44" >
+
+FID_SRCH_COND^FID검색조건^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="1" inout="out" _len="223" _ulen="187" >
+
+FID_SRCH_COND^FID검색조건^40^0^0^0^0^0^0
+FID_DATE^FID일자^8^0^0^0^0^0^0
+FID_HOUR^FID시간^6^0^0^0^0^0^0
+FID_NEWS_OFER_ENTP_CODE^FID뉴스제공업체코드^5^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_kwdn_001a" title="키워드 뉴스검색 서비스 (등록수" realdata="0" dessvr="N" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="245" _ulen="199" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+FID_SRCH_COND_GRP^FID검색조건그룹^2^0^0^0^0^0^0
+FID_SRCH_COND^FID검색조건^40^0^0^0^0^0^0
+FID_CHAN_MDIA_CLCD^FID채널매체구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="52" _ulen="44" >
+
+FID_NEWS_CSNU^FID뉴스건수^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

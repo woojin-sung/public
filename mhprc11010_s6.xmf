@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11010" scrname="관심종목_스타일2(해외)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,148,517,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblBack" bgcolor="028:255255255" transmode="0" border="1" ly_vert="0,0,148,517,1" />
+		<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="2" rowcount="5" outline="0000" designorder="1" ly_vert="0,1,148,462,1" >
+			<COL_INFO ly_vert_width="60,88" />
+			<ROW_INFO ly_vert_height="22,23,107,21,289" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,1,0" fgcolor="069:102102102" valign="2" halign="0" line="0,0" fontsize="-2" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,1,1" valign="2" halign="0" line="0,0" fontsize="1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,1,2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:102102102" halign="0" line="0,0" caption="주기" fontsize="-3" autofontsize="1" paddinginfo="6,0,0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" line="0,0" fontsize="-2" autofontsize="1" paddinginfo="0,0,6,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,0" impidxs="" />
+				<CELL cell_ly="1,4,1,4" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<CHARTEX name="ChartEx0" markettype="6" ly_vert="6,57,134,88,1" >
+			<DATASETTING>
+				<DATAITEM name="chart" open="0,3,2" close="0,3,1" volume="0,3,5" realtime="2,1,2;1,1,2;0,1,2" reallast="2,1,3;1,1,3;0,1,3" realopen="2,1,7;1,1,7;0,1,7" realhigh="2,1,8;1,1,8;0,1,8" reallow="2,1,9;1,1,9;0,1,9" realdayvol="1,1,10;0,1,10" realtickbuy="1,1,4;2,1,4;0,1,4" realticksell="2,1,5;0,1,5;1,1,5" >
+					<ADJDATAITEM/>
+				</DATAITEM>
+			</DATASETTING>
+		</CHARTEX>
+		<BUTTON name="btnChart" caption="차트" fgcolor="004:000000000" btnimage="btn_etc9.9.png" ly_vert="0,476,148,41,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8543" _ulen="7915" >
+
+'============================================================================
+' 화 면 명 : 관심종목_스타일2(해외)
+' 화면설명 : 관심종목_스타일2에서 해외지수 선택시 조회
+' 작    성 : 2016.01.05 ~ 2016.  .       ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szCd, g_szMk
+
+Dim g_szGwanData
+g_szGwanData = ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' Init_tblInfo
+'============================================================================
+Function Init_tblInfo()
+	tblInfo.SetCellString(0, 0, "")
+	tblInfo.SetCellString(1, 0, "")
+	tblInfo.SetCellString(3, 1, "")
+	
+	ChartEx0.SetDataClear()
+End Function
+
+'============================================================================
+' Set_ChartType
+'============================================================================
+Function Set_ChartType()
+	ChartEx0.setMarketCategory(1)	
+		
+	if g_szMk == "EN" then
+		ChartEx0.setDecimal("4")	' 소수점 4자리
+	else
+		ChartEx0.setDecimal("2")	' 소수점 2자리
+	end if
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInitBefore
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ChartEx0.setChartType("minibong")
+End Sub
+
+
+'============================================================================
+' Form_OnTriggerEvent
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	' 스타일2화면에서 트리거 받음
+	if sEventName == "JMCODE" then
+		DATAMANAGER.CancelRealData("ohhts_nfut_cntg")			' 해외선물 체결 자동갱신
+		DATAMANAGER.CancelRealData("ohhts_ovrs_nmix")			' 해외지수/종목 체결 자동갱신
+		DATAMANAGER.CancelRealData("ohhts_exrt_cntg")			' 환율 체결 자동갱신
+		
+		Init_tblInfo()
+	
+		if Trim(sParam) <> "" then
+			tData = Split(sParam, "★")
+			tblInfo.SetCellString(0, 0, tData(0))
+			tblInfo.SetCellString(1, 0, tData(2))
+			
+			g_szCd = tData(0)
+			g_szMk = tData(1)
+			
+			' 기본 세팅후 주기 가져오기
+			szCycle = gf_GetForeignCycle(tData(0))
+			tblInfo.SetCellString(3, 1, szCycle)
+			
+			Set_ChartType()
+			DATAMANAGER.RequestTranData("ohhts_5040_001r")	' 해외조회(차트)
+		end if
+		
+		g_szGwanData = Form.GetSharedData("PRE_GWAN_GRID_POS", true )
+	end if
+End Sub
+
+'============================================================================
+' Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+	DATAMANAGER.CancelRealData("ohhts_nfut_cntg")			' 해외선물 체결 자동갱신
+	DATAMANAGER.CancelRealData("ohhts_ovrs_nmix")			' 해외지수/종목 체결 자동갱신
+	DATAMANAGER.CancelRealData("ohhts_exrt_cntg")			' 환율 체결 자동갱신
+End Sub
+		
+'============================================================================
+'해외 지수/종목 주기를 리턴해준다 . ( 종가 또는 지연)
+'============================================================================
+Function gf_GetForeignCycle(szCode)
+	Select Case szCode  
+		Case "DJI@DJI", "NAS@IXIC", "SPI@SPX", "DJI@DJC", "NYS@NYA", "USI@SOXX" '미국
+			return "종가"  
+		Case  "CME@ND",  "CME@NQ", "CME@ES"		', "USI@RUT" '미국 PSM3 러셀2000지수 삭제 "CME@SP" '20220126 HSZ S&P500선물 삭제
+			return"지연(15분)"
+		Case "HSI@HSCE", "SHS@000001", "SHS@000002", "SHS@000003","SZS@399107", "SZS@399108", "HSI@HSI"  '아시아
+	    		return "지연(15분)"  
+		Case "TWS@TI01","NII@NI225" 	'아시아
+			return "지연(20분)"    	    
+		Case "ILI@TA100" 				'아시아
+			return "종가"  
+		Case "NLI@AEX", "PAS@CAC40"   	'유럽(네덜란드 AEX, 프랑스 CAC 40)
+			return "종가"
+		Case "TRI@ISE100"   			'유럽(터키 ISE100)
+			return "지연(15분)"	    
+		Case "AUI@AORD" 				'미주/오세아니아주 
+			return "지연(20분)"   
+		Case "JPYKRWCOMP","CNYKRWCOMP" 	'원화포함 환율   "USDKRWSMBS", 
+			return "지연(5분)"   
+		Case "USDKRWSMBS", "EURUSDCOMP", "USDJPYCOMP","EURJPYCOMP", "GBPUSDCOMP", "USDCHFCOMP", "USDCADCOMP", "AUDUSDCOMP", "USDHKDCOMP", "USDSGDCOMP"  '원화가 없는 이종통화환율 실시간 	
+			return "실시간" 	
+	End Select
+End Function
+
+'============================================================================
+' DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	DATAMANAGER.ClearInputData(0, szTranID)
+	
+	' ----------------------------------------------------------------------
+	' 해외조회(차트)
+	' ----------------------------------------------------------------------	
+	if szTranID == "ohhts_5040_001r" then
+		DATAMANAGER.SetDataValue(0, "ohhts_5040_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szMk)
+		DATAMANAGER.SetDataValue(0, "ohhts_5040_001r", "InBlock1", "FID_INPUT_ISCD",               0, g_szCd)
+		
+		DATAMANAGER.SetDataValue(0, "ohhts_5040_001r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szMk)
+		DATAMANAGER.SetDataValue(0, "ohhts_5040_001r", "InBlock2", "FID_INPUT_ISCD",               0, g_szCd)
+		DATAMANAGER.SetDataValue(0, "ohhts_5040_001r", "InBlock2", "FID_INPUT_DATE1",              0, Form.GetSharedData("&HOST_DATE", 0))
+		DATAMANAGER.SetDataValue(0, "ohhts_5040_001r", "InBlock2", "FID_INPUT_DAY_WEEK_MONTH_YR",  0, "D")  'D/W/M/Y 일/주/월/년 
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	' ----------------------------------------------------------------------
+	' 해외조회(차트)
+	' ----------------------------------------------------------------------	
+	if szTranID == "ohhts_5040_001r" then
+		if g_szMk == "N" then				' 대표지수/국가별업종지수(N)
+			DATAMANAGER.RequestRealData("ohhts_ovrs_nmix")
+		elseif g_szMk == "FN" then			' CME선물/상품선물(FN)
+			DATAMANAGER.RequestRealData("ohhts_nfut_cntg")	
+		elseif g_szMk == "EN" then			' 세계환율(EN)
+			DATAMANAGER.RequestRealData("ohhts_exrt_cntg")
+		end if
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnSendRealBefore
+'============================================================================
+Sub DATAMANAGER_OnSendRealBefore(szTranID)
+	' ----------------------------------------------------------------------
+	' 해외지수/종목 체결 자동갱신
+	' ----------------------------------------------------------------------	
+	if szTranID == "ohhts_ovrs_nmix" then
+		DATAMANAGER.SetDataValue(1, "ohhts_ovrs_nmix", "InBlock1", "FIDR_SYMB", 0, g_szCd)
+	' ----------------------------------------------------------------------
+	' 해외선물 체결 자동갱신
+	' ----------------------------------------------------------------------	
+	elseif szTranID == "ohhts_nfut_cntg" then
+		DATAMANAGER.SetDataValue(1, "ohhts_nfut_cntg", "InBlock1", "FIDR_SYMB", 0, g_szCd)
+	' ----------------------------------------------------------------------
+	' 환율 체결 자동갱신
+	' ----------------------------------------------------------------------	
+	elseif szTranID == "ohhts_exrt_cntg" then
+		DATAMANAGER.SetDataValue(1, "ohhts_exrt_cntg", "InBlock1", "FIDR_SYMB", 0, g_szCd)		
+	end if
+End Sub
+
+'============================================================================
+' btnChart_OnClick
+'============================================================================
+Sub btnChart_OnClick()
+	Form.OpenScreen("42050" , g_szCd)
+	
+	Form.SetSharedData("PRE_GWAN_GRID_POS" ,g_szGwanData)
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_nfut_cntg" trcode="ohhts_nfut_cntg" />
+			<TRAN tranid="ohhts_ovrs_nmix" trcode="ohhts_ovrs_nmix" />
+			<TRAN tranid="ohhts_exrt_cntg" trcode="ohhts_exrt_cntg" />
+			<TRAN tranid="ohhts_5040_001r" trcode="ohhts_5040_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_nfut_cntg" title="해외선물 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="589" _ulen="499" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_ovrs_nmix" title="해외지수/종목 체결 자동갱신" realdata="1" dessvr="1" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="589" _ulen="499" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_exrt_cntg" title="환율 체결 자동갱신" realdata="1" dessvr="" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="43" _ulen="39" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="584" _ulen="484" >
+
+FIDR_SYMB^FIDR심볼^16^0^0^0^0^0^0
+FIDR_DATE^FIDR일자^8^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_EXRT_PRPR^FIDR환율현재가^14^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_EXRT_PRDY_VRSS^FIDR환율전일대비^14^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_EXRT_OPRC^FIDR환율시가^14^4^7^0^0^1^0
+FIDR_EXRT_HPRC^FIDR환율고가^14^4^7^0^0^1^0
+FIDR_EXRT_LPRC^FIDR환율저가^14^4^7^0^0^1^0
+FIDR_KOREA_DATE^FIDR한국일자^8^0^0^0^0^0^0
+FIDR_KOREA_HOUR^FIDR한국시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5040_001r" title="해외조회(차트)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="274" toutblk="OutBlock2" _ulen="222" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_DAY_WEEK_MONTH_YR^FID입력일주월년^2^0^0^9104^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="595" _ulen="497" >
+
+FID_PRDY_VRSS2^FID전일대비2^14^4^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN2^FID전일대비부호2^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_PRDY_CLPR2^FID전일종가2^14^4^7^13^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^4^7^4^1000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+FID_OPRC2^FID시가2^14^4^7^17^1000^0^0
+FID_HPRC2^FID고가2^14^4^7^18^1000^0^0
+FID_LPRC2^FID저가2^14^4^7^19^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="308" _ulen="268" >
+
+FID_DATE^FID일자^8^0^0^67^1003^0^0
+FID_PRPR^FID현재가^14^4^7^4^1003^0^0
+FID_OPRC2^FID시가2^14^4^7^17^1003^0^0
+FID_HPRC2^FID고가2^14^4^7^18^1003^0^0
+FID_LPRC2^FID저가2^14^4^7^19^1003^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1003^0^0
+FID_MOD_YN^FID수정여부^2^0^0^1911^1003^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

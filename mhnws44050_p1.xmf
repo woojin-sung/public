@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44050" scrname="키워드뉴스_키워드추가" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,310,210,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" fontstyle="01" btnimage="btn_02.9" ly_vert="15,150,135,39,1" />
+		<BUTTON name="btnok" caption="추가" fontstyle="01" btnimage="btn_05.9" ly_vert="160,150,137,39,1" />
+		<IMAGE name="Image1" imgpath="pop_header.9" ly_vert="0,0,310,50,1" />
+		<IMAGE name="Image0" imgpath="ic_pop_close.png" ly_vert="270,10,30,30,1" />
+		<LABEL name="Label6" fgcolor="006:213049051" fontstyle="01" caption="키워드 추가" halign="1" ly_vert="20,12,270,32,1" />
+		<EDIT name="Edit0" fonttype="3" imetype="0" hintcaption="추가할 키워드를 입력하세요" ly_vert="15,80,280,39,1" />
+		<BUTTON name="btnok0" caption="수정" fontstyle="01" btnimage="btn_05.9" ly_vert="160,150,137,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2035" _ulen="1885" >
+Dim g_Keyword
+Dim g_modIdx
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	temp = Form.GetOpenLinkData()
+	g_Keyword = temp
+	
+	szData = Split(temp,"★")
+	
+	if CStr(szData(0)) =="keywordMod" then
+		g_modIdx = szData(2)
+		Edit0.hintcaption = "수정할 키워드를 입력하세요"
+		Edit0.caption = Cstr(szData(1))
+		Label6.caption = "키워드 수정"
+		btnok.visible = false
+		btnok0.visible = true
+		
+		
+	else
+		'g_Keyword = Split(temp, "★")
+		btnok.visible = true
+		btnok0.visible = false
+		
+	end if
+	
+End Sub
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnok_OnClick()
+	
+	if Edit0.caption == "" then
+		Form.ShowAlert("알림","등록할 키워드를 입력해주세요.")
+	
+	else
+		if check_dup(g_Keyword) then
+			Form.ShowAlert("알림", "이미 등록된 키워드 입니다.")
+			
+		else
+			Form.SendReturnToParent("keywordAdd",Edit0.caption)
+			Form.Toast(0,"'"&Edit0.caption&"' 을(를) 키워드에 등록하였습니다." , 0.5)
+			Form.CloseForm()
+		end if
+	
+	end if
+	
+	
+	
+End Sub
+
+
+'============================================================================
+Sub btnok0_OnClick()
+
+	Form.SendReturnToParent("keywordMod",Trim(Edit0.caption) & "★" & g_modIdx)
+	Form.Toast(0,"'"&Edit0.caption&"' (으)로 키워드를 수정하였습니다." , 0.5)
+	Form.CloseForm()
+	
+End Sub
+
+
+'=============================================================================
+Function check_dup(keyword)
+
+	temp = Split(keyword,"★")
+	
+	
+	for i = 1 to Cint(temp(0))
+		
+		if Cstr(Edit0.caption) == Cstr(temp(i)) then
+			return true
+		end if	
+		
+	next
+	
+	return false
+
+
+
+End Function
+
+'===============================================================================
+
+	</SCRIPT_INFO>
+</ROOT>

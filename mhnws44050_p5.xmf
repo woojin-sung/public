@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="8888" scrname="MY뉴스_소개" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="info06.png" ly_vert="-1,0,377,648,1" />
+		<LABEL name="Label0" transmode="0" ly_vert="0,602,375,45,1" />
+		<BUTTON name="Button0" caption="확인" fgcolor="004:000000000" btnimage="btn_02.9.png" ly_vert="268,607,101,35,1" />
+		<CHKBUTTON name="ChkButton0" chkcaption="다시 보지 않음" unchkcaption="다시 보지 않음" ly_vert="8,609,217,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="911" _ulen="885" >
+Dim g_szList			' Split Array
+'20170529 NOHES  : 다시보지않음 체크버튼 추가
+
+'============================================================================
+Sub Button0_OnClick()
+	if UBOUND(g_szList) < 1  then
+		sCheck = ChkButton0.checkstate
+
+		if g_szList(0) = "1" then
+			Form.SaveConfigData("KeywordNews", "KeyPopup", sCheck)
+		elseif g_szList(0) = "2" then
+			Form.SaveConfigData("KeywordNews", "MyPopup", sCheck)
+		end if
+	end if
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	sTemp = Form.GetOpenLinkData()
+	g_szList = Split(sTemp,"★")	
+	
+	If g_szList(0) = "1" then
+		Image0.imgpath = "info05.png"
+	ElseIf g_szList(0) = "2" then
+		Image0.imgpath = "info06.png"
+	End If
+	
+	if UBOUND(g_szList) < 1 Then
+		Exit Sub
+	end if
+	
+	if g_szList(1) = "Click" then
+		ChkButton0.visible = False
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

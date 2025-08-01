@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44050" scrname="키워드뉴스" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="40" usepg="1" pgbarheight="1" ly_vert="-1,-1,380,570,1" >
+			<PAGE name="page1" caption="키워드뉴스" linkfile="mhnws44050_t1.xmf" loadingtype="1" />
+			<PAGE name="page2" caption="MY뉴스" linkfile="mhnws44050_t2.xmf" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1460" _ulen="1438" >
+'20170529 NOHES : 키워드뉴스 초기 팝업 제공
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "mhnws44050_p3" then
+		if sParam == "Y" then
+			Form.triggerEvent("FormTab0.page2", "mhnws44050_p3", "Y")
+		end if
+	end if 
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	if nCurrentTab == 0 then
+		Form.triggerEvent("FormTab0.page1", "refresh", "Y")
+	elseif 	nCurrentTab == 1 then
+		Form.triggerEvent("FormTab0.page2", "refresh", "Y")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	nTab = FormTab0.currenttab
+	
+	if nTab = 0 or nTab == "0"Then
+		sCheck = Form.LoadConfigData("KeywordNews", "KeyPopup")
+		if sCheck <> "1" then
+			Form.OpenPopup("mhnws44050_p5","1","")
+		end if
+	elseif nTab = 1 or nTab == "1" Then
+		sCheck = Form.LoadConfigData("KeywordNews", "MyPopup")
+	
+		if sCheck <> "1" then
+			Form.OpenPopup("mhnws44050_p5","2","")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+
+	nTab = FormTab0.currenttab
+	
+	if nTab == 0 or nTab == "0" then
+		Form.triggerEvent("FormTab0.page1", "refresh", "Y")
+	elseif nTab == 1 or nTab == "1" then
+		Form.triggerEvent("FormTab0.page2", "refresh", "Y")
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

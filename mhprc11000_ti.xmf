@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11000" scrname="주식현재가_탭_종목토론" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,410,1" />
+	<CONTROL_INFO>
+		<RADIOGROUP name="rdo0" fontstyle="01" fontsize="-2" buttonshape="1" buttonsnumber="4" ly_vert="20,14,335,33,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="네이버" forecolor="100:102102102" selforecolor="095:000000000" position="0,0,84,33" />
+				<RADIO no="1" text="다음" forecolor="100:102102102" selforecolor="095:000000000" position="84,0,84,33" />
+				<RADIO no="2" text="팍스넷" forecolor="100:102102102" selforecolor="095:000000000" position="168,0,83,33" />
+				<RADIO no="3" text="씽크풀" forecolor="100:102102102" selforecolor="095:000000000" position="251,0,84,33" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<WEBVIEW name="webNews" urlpath="about:blank" ly_vert="0,55,375,355,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3721" _ulen="3607" >
+'----------------------------------------------------------------------------
+' 01. 화 면 명 : 주식현재가
+' 02. 화면설명 : 주식현재가의   종목토론탭
+' 03. 작    성 : 2023.04.14 신규작성 KKM
+'----------------------------------------------------------------------------
+
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim g_szItemCode, g_szItemName
+Dim g_nIndex
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+Function Btn_Click( nIndex )
+	Dim szUrl
+
+	szUrl = g_szItemCode  & "|" &  nIndex
+	Form.OpenFramePopup( "mhprc11000_p9" , szUrl, "")
+	
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_szItemCode   = Form.GetSharedData( "&ITEM_STOCK", 0 )
+	g_szItemName = Form.GetItemCodeInfo( g_szItemCode , "name")
+	g_nIndex = 0
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	If Trim(g_szItemCode) = "" Then
+		Exit Sub
+	End If
+	
+	rdo0.currentindex = g_nIndex	
+End Sub
+
+'============================================================================
+Sub rdo0_OnClick(nIndex)
+	g_nIndex = nIndex
+	news_view( nIndex )
+End Sub
+
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if sKey = "ITEMCODE" then
+		g_szItemCode = sValue
+		news_view(g_nIndex)
+	end	if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName = "INIT_CODE" then
+		If sParam = "" Then
+			Form.GetCtlProp("lblItemCode", "caption")
+'			Form.triggerEvent( "#", "REQUEST_ITEMCODE", "")
+			Exit Sub
+		End If
+		
+		g_szItemCode   =  sParam
+		news_view(g_nIndex)
+	 end if	
+End Sub
+
+'============================================================================
+Function news_view( nIndex )
+	Dim szUrl, szMarket
+	szMarket = Form.GetItemCodeInfo( g_szItemCode, "market")
+	
+	If nIndex = 0 Then
+		szUrl = "http://m.stock.naver.com/item/main.nhn#/stocks/" & g_szItemCode & "/discuss"
+	
+	ElseIf nIndex = 1 Then
+'PENTA13 START => 2020.11.03			"다음" 종목코드 연동 오류 수정
+		if szMarket = "J" then			'코스피/코스닥/ETF
+			szUrl = "http://m.finance.daum.net/quotes/A" & g_szItemCode & "/talks"
+		elseif szMarket = "Q" then		'ETN
+			szUrl = "http://m.finance.daum.net/quotes/" & g_szItemCode & "/talks"
+		else
+			szUrl = "http://m.finance.daum.net/quotes/"
+		end if
+'PENTA13 ORGSRC
+'		szUrl = "http://m.finance.daum.net/m/item/bbs.daum?code=" & g_szItemCode
+'PENTA13 END
+		
+	ElseIf nIndex = 2 Then
+		'20231208 HSZ START: URL변경 대응
+		szItmCode = right(g_szItemCode, 6)
+		
+		if szMarket = "J" or szMarket = "Q" then			'코스피/코스닥/ETF/ETN
+			szUrl = "http://www.paxnet.co.kr/tbbs/list?tbbsType=L&id=" & szItmCode
+		elseif szMarket = "W" then		'ELW
+			szUrl = "http://www.paxnet.co.kr/tbbs/list?tbbsType=L&id=N10548"
+		else
+			szUrl = "http://www.paxnet.co.kr"
+		end if
+		'20231208 HSZ END
+	
+	ElseIf nIndex = 3 Then
+		szUrl = "http://m.thinkpool.com/item/discuss/pdsView.jsp?code=" & g_szItemCode		
+	
+	End If
+	
+	webNews.urlpath = szUrl
+
+End Function
+
+
+	</SCRIPT_INFO>
+</ROOT>

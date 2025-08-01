@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11010" scrname="관심종목_빈칸추가/변경" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" acecnt="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<GRID name="grdGroup" visible="0" colcount="3" ly_vert="1000,181,311,233,0" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_code" halign="1" />
+				<LABEL name="bd_name" />
+				<LABEL name="bd_move" halign="1" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_mk" halign="2" ly_vert="0,0,100,20,1" />
+				<IMAGE name="bd_mod" />
+				<IMAGE name="bd_cancel" imgpath="pop_btn_no_n.9.png" />
+				<LABEL name="bd_count" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" border="0100" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="80,150,70" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="80" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_code" cell_ly="0,0,0,0" line="0,1" import="-1,-1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="150" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_name" cell_ly="0,0,0,0" line="0,1" import="-1,-1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_count" cell_ly="0,0,0,0" line="0,1" import="-1,-1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_code" rangecellid="bd_code" hlcolorcellid="bd_code" />
+		</GRID>
+		<IMAGE name="ImgClose" autosize="1" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,347,375,300,1" />
+		<BUTTON name="btnAdd" caption="등록하기" fontsize="1" btnimage="btn_20.9" ly_vert="187,599,188,48,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" fontsize="1" btnimage="btn_21.9" ly_vert="0,599,187,48,1" />
+		<EDIT name="edtBlank" fonttype="3" imetype="0" maxlength="40" hintcaption="최대 20자 입력" ly_vert="20,427,335,40,1" />
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" caption="빈칸 추가/변경" bgcolor="092:185046046" halign="1" ly_vert="4,360,365,24,1" />
+		<LABEL name="lblMemo" fgcolor="146:124124124" caption="추가 할 빈칸의 이름을 정해주세요" halign="1" ly_vert="4,398,365,20,1" />
+		<LABEL name="Label0" caption="빈칸색상" ly_vert="20,484,80,40,1" />
+		<LABEL name="Label1" caption="이름정렬" ly_vert="20,539,80,40,1" />
+		<LABEL name="lblColor" bgcolor="322:226228229" transmode="0" border="1" bordercolor="050:132132132" click="1" ly_vert="110,484,70,40,1" />
+		<RADIOGROUP name="rdoNameAlign" buttonshape="1" buttonsnumber="3" initselectionuse="1" initselection="0" ly_vert="110,539,242,47,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="왼쪽" radioimage="input_06_o.9.png" position="0,0,70,40" />
+				<RADIO no="1" text="가운데" radioimage="input_06_o.9.png" position="80,0,70,40" />
+				<RADIO no="2" text="오른쪽" radioimage="input_06_o.9.png" position="160,0,70,40" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5646" _ulen="5234" >
+'============================================================================
+' 화 면 명 : 관심종목_관심종목편집_빈칸삽입
+' 화면설명 : 관심종목편집창에서 종목리스트에 빈칸 삽입하는 팝업
+' 작    성 : 2015.12.16 ~ 2015.12.17 ssang
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_szCloud		' 관심동기화(0:미사용(로컬), 1:사용(서버))
+Dim g_szChk
+Dim g_szGCode
+g_szGCode = ""
+
+Dim g_szTitle
+g_szTitle = "알림"
+Dim g_exInputString
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' Load_GWGroup :  로컬에 저장된 관심그룹 가져오기
+'============================================================================
+Function Load_GWGroup()
+	Dim tGroup, tList
+	
+	grdGroup.rowcount = 0	
+	szGroup = Form.LoadConfigData("GWANSIM", "GROUP")
+	
+	if Trim(szGroup ) <> "" then
+		tGroup = Split(szGroup, "♣")
+		
+		For i = 0 to #tGroup-1
+			tList = Split(tGroup(i), "★")
+			
+			grdGroup.insertrow = i
+	
+			grdGroup.SetCellData("bd_code",  i, tList(0))
+			grdGroup.SetCellData("bd_name",  i, tList(1))
+			grdGroup.SetCellData("bd_count", i, tList(2))
+		Next
+	end if
+End Function	
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	' 관심 동기화 //////////////////////////////////////////////////////////
+	g_szCloud = Form.GetEnvData("common.interest_cloud")
+	
+	if Trim(g_szCloud) == "" then	' 초기값 : 1(동기화 사용)
+		g_szCloud = "1"
+	end if
+	' //////////////////////////////////////////////////////////////////////
+	
+	szData = Form.GetOpenLinkData()
+	
+	'KBC : BLANK_ADD, BLANK_MOD 두 case만 진입함
+	if szData <> "" then
+		tData = Split(szData, "★")
+		g_szChk = tData(0)
+			
+		if tData(0) == "BLANK_ADD" then
+			'20240524_01 KBC START : 해외주식 고도화
+			lblColor.bgcolor = "231230230"  '기본값 처리 (현재 관심종목에서 보여주는 색상값) - 네이티브에도 로직있음 public void setMemoColor( String colorIdx )
+			rdoNameAlign.currentindex = "0"
+			'20240524_01 KBC END
+			
+		elseif tData(0) == "BLANK_MOD" then
+			lblMemo.caption = "변경 할 빈칸의 이름을 정해주세요"
+			edtBlank.caption = tData(1)
+			
+			'20240524_01 KBC START : 해외주식 고도화
+			'MsgBox tData(2) & ":" & tData(3)
+			
+			memoAlign = tData(2)
+			memoColor = tData(3)
+			
+			if memoAlign == "C" then
+				rdoNameAlign.currentindex = "1"
+			elseif memoAlign == "R" then
+				rdoNameAlign.currentindex = "2"
+			else
+				rdoNameAlign.currentindex = "0"
+			end if
+			
+			if memoColor == "" then
+			   memoColor = "231230230" ' 기본값 처리 (현재 관심종목에서 보여주는 색상값) - 네이티브에도 로직있음 public void setMemoColor( String colorIdx )
+			end if
+			
+			lblColor.bgcolor = memoColor			
+			'20240524_01 KBC END
+		end if
+	end if
+End Sub
+
+
+'============================================================================
+' btnAdd_OnClick : Add버튼 클릭
+'============================================================================
+Sub btnAdd_OnClick()
+	'20240524_01 KBC START : 해외주식 고도화 START
+	if rdoNameAlign.currentindex == "1" then
+		sMemoAlign = "C"
+	elseif rdoNameAlign.currentindex == "2" then
+		sMemoAlign = "R"
+	else
+		sMemoAlign = "L"
+	end if	
+	
+	sMemoColor = lblColor.bgcolor
+
+	sRslt = edtBlank.caption & "★" & sMemoAlign & "★" & sMemoColor
+	
+	Form.SendReturnToParent(g_szChk , sRslt)
+	Form.CloseForm()
+	'20240524_01 KBC END
+End Sub
+
+'============================================================================
+' btnCancel_OnClick : 취소버튼 클릭
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub ImgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub edtBlank_OnEditChar(CharCode)
+	nTextLen = edtBlank.getLenByte(edtBlank.caption)
+		
+	if Cint(nTextLen) > 40 then
+		edtBlank.caption = g_exInputString
+		edtBlank.SetFocus()
+	else
+		g_exInputString = CharCode
+	end if
+End Sub
+
+'============================================================================
+Sub lblColor_OnClick()
+	Form.OpenPopupAnimation("mhprc11010_p18", "", "","2")	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "COLOR_SECLECT" then
+		lblColor.bgcolor = sRet
+	end if
+End Sub
+'============================================================================
+Sub Form_OnFormInitBefore()
+	lblColor.bgcolor = "255255255"
+	lblColor.setRound("1")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44050" scrname="키워드뉴스_키워드편집" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,310,415,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image1" visible="0" imgpath="pop_header.9" ly_vert="0,0,310,50,0" />
+		<IMAGE name="Image0" imgpath="ic_pop_close.png" ly_vert="270,10,30,30,1" />
+		<LABEL name="Label6" fgcolor="006:213049051" fontstyle="01" caption="키워드 편집" halign="1" ly_vert="20,12,270,32,1" />
+		<GRID name="Grid0" colcount="4" ly_vert="0,53,310,302,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell20" fonttype="2" />
+				<IMAGE name="bd_cell0" imgpath="icon_sub_03.9.png" />
+				<IMAGE name="bd_cell60" imgpath="icon_sub_02.9.png" />
+				<IMAGE name="bd_cell40" imgpath="icon_sub_04.9.png" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" border="1110" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="50,160,50,50" ly_vert_visible="0,0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="50" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="50" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="160" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="50" />
+						<CELLINFO>
+							<CELL name="bd_cell20" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="50" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="50" />
+						<CELLINFO>
+							<CELL name="bd_cell40" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="50" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="50" />
+						<CELLINFO>
+							<CELL name="bd_cell60" cell_ly="0,0,0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="Label0" caption="등록된 키워드가 없습니다." halign="1" ly_vert="40,180,240,51,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" fontstyle="01" btnimage="btn_02.9" ly_vert="15,365,135,39,1" />
+		<BUTTON name="btnok" caption="완료" fontstyle="01" btnimage="btn_05.9" ly_vert="160,365,137,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2530" _ulen="2422" >
+
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Grid0.SetClear()
+	Grid0.rowmove= "1"
+	temp = Split(Form.GetOpenLinkData(), "●" )
+	temp_arrKeyword = temp[0]
+	
+	arrKeyword = Split(temp_arrKeyword, "★")
+	arrLen = temp[1]
+	
+	if Cint(arrLen) < 1 then
+		Label0.visible = true
+		Grid0.visible = false
+		btnok.visible = false
+		btnCancel.visible = false
+		Image1.visible = true
+		
+	
+	else
+		Label0.visible = false
+		Image1.visible = false
+		Grid0.visible = true
+		btnok.visible = true
+		btnCancel.visible = true
+		
+		for i = 0 to arrLen-1
+			Grid0.AddRow()
+			Grid0.SetCellData("bd_cell20", i, arrKeyword(i))
+		next
+	
+	end if
+		
+	
+End Sub
+
+'============================================================================
+'
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	
+	
+	if szCellID == "bd_cell0" then
+	' 20170529 NOHES : 건별 키워드삭제 시 toast 너무 많이 떠서 성가심. 제거함.	
+	'	Form.Toast(0,"'" & Grid0.GetCellData("bd_cell20", lRow) & "'" & "(을)를 키워드에서 삭제하였습니다.", 0.5)
+		Grid0.SetDeleteRow(lRow)
+		'Form.SendReturnToParent("keywordDelete" , IRow)
+		'Form.CloseForm()
+		
+	elseif szCellID == "bd_cell40" then
+	
+		Form.OpenPopup("mhnws44050_p1","keywordMod★"& Grid0.GetCellData("bd_cell20", lRow) & "★"& lRow,"")
+	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnok_OnClick()
+	g_Keyword = ""
+	g_KeywordNum = 0
+	for i = 0 to Grid0.rowcount -1
+		if i == 0 then
+			g_Keyword = Grid0.GetCellData("bd_cell20", i)
+		else
+			g_Keyword = g_Keyword & "★" & Grid0.GetCellData("bd_cell20", i)
+		end if
+		
+		g_KeywordNum = g_KeywordNum + 1
+		
+	next
+	'Form.ShowAlert("g_Keyword", g_Keyword)
+	
+	Form.SendReturnToParent("keywordMod" , g_Keyword&"●"&g_KeywordNum)
+	Form.Toast(0,"키워드 편집이 완료되었습니다.", 0.5)
+	Form.CloseForm()
+		
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "keywordMod" then
+		temp = Split(sRet,"★")
+		
+		Grid0.SetCellData("bd_cell20", temp(1), Cstr(temp(0)))
+	end if
+		
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11000" scrname="주식현재가_팝업_뉴스연동" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="webNews" urlpath="about:blank" ly_vert="0,59,375,550,1" />
+		<RADIOGROUP name="rdo0" buttonshape="1" buttonsnumber="4" ly_vert="6,10,363,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="네이버" forecolor="100:102102102" position="0,0,90,39" />
+				<RADIO no="1" text="다음" forecolor="100:102102102" position="90,0,90,39" />
+				<RADIO no="2" text="팍스넷" forecolor="100:102102102" position="180,0,90,39" />
+				<RADIO no="3" text="씽크풀" forecolor="100:102102102" position="270,0,90,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2447" _ulen="2319" >
+'----------------------------------------------------------------------------
+' 01. 화 면 명 : 팝업_뉴스연동
+' 02. 화면설명 : 탭_뉴스에서 Naver, Daum, PAX 클릭시 해당 Web의 뉴스를 조회
+' 03. 작    성 : 2016.04.30 LJS
+'----------------------------------------------------------------------------
+
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim 	g_szItemCode, g_nIndex
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Dim szData, arrData, szItemName
+
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData,"|")
+	
+	if UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+
+	g_szItemCode	= arrData(0)
+	g_nIndex		= arrData(1)	
+	
+	Form.SetScreenName( "종목 토론" )
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	If Trim(g_szItemCode) = "" Then
+		Exit Sub
+	End If
+	
+	rdo0.currentindex = g_nIndex	
+	'20170928 HAMWG START : 종목토론방 연동오류 수정
+	'news_view( CInt( g_nIndex ) )
+	'20170928 HAMWG END
+End Sub
+
+'============================================================================
+Sub rdo0_OnClick(nIndex)
+	news_view( nIndex )
+End Sub
+
+'============================================================================
+Function news_view( nIndex )
+	Dim szUrl
+
+	If nIndex = 0 Then
+		szUrl = "http://m.stock.naver.com/item/main.nhn#/stocks/" & g_szItemCode & "/discuss"
+	
+	ElseIf nIndex = 1 Then
+'PENTA13 START => 2020.11.03			"다음" 종목코드 연동 오류 수정
+		szMarket = Form.GetItemCodeInfo( g_szItemCode, "market")
+		if szMarket = "J" then			'코스피/코스닥/ETF
+			szUrl = "http://m.finance.daum.net/quotes/A" & g_szItemCode & "/talks"
+		elseif szMarket = "Q" then		'ETN
+			szUrl = "http://m.finance.daum.net/quotes/" & g_szItemCode & "/talks"
+		else
+			szUrl = "http://m.finance.daum.net/quotes/"
+		end if
+'PENTA13 ORGSRC
+'		szUrl = "http://m.finance.daum.net/m/item/bbs.daum?code=" & g_szItemCode
+'PENTA13 END
+		
+	ElseIf nIndex = 2 Then
+		szUrl = "http://board.moneta.co.kr/cgi-bin/mpax/bulList.cgi?code=" & g_szItemCode & "&boardid=" & g_szItemCode
+	
+	ElseIf nIndex = 3 Then
+		szUrl = "http://m.thinkpool.com/item/discuss/pdsView.jsp?code=" & g_szItemCode		
+	
+	End If
+	
+	webNews.urlpath = szUrl
+
+End Function
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11010" scrname="관심종목_환경설정" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,138,375,509,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" fontsize="1" btnimage="btn_21.9" ly_vert="0,586,187,60,1" />
+		<BUTTON name="btnSave" caption="확인" fontsize="1" btnimage="btn_20.9" ly_vert="187,586,187,60,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="관심종목 환경설정" bgcolor="092:185046046" halign="1" ly_vert="0,138,375,60,1" />
+		<LABEL name="Label2" fontstyle="01" caption="종목 선택시 연결화면" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="20,198,300,30,1" />
+		<RADIOGROUP name="RgStyle" fontsize="-2" buttonshape="1" buttonsnumber="4" ly_vert="20,236,336,90,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="종목상세" radioimage="input_06.9.png" position="0,0,163,40" />
+				<RADIO no="1" text="현재가" radioimage="input_06.9.png" position="173,0,162,40" />
+				<RADIO no="2" text="주문" radioimage="input_06.9.png" position="0,50,163,40" />
+				<RADIO no="3" text="차트" radioimage="input_06.9.png" position="173,50,162,40" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="Label6" fontstyle="01" caption="시세변동표시" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="20,406,165,40,1" />
+		<LABEL name="Label7" fontstyle="01" caption="좌우스크롤 그룹 변경" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="20,466,173,40,1" />
+		<LABEL name="Label8" fontstyle="01" caption="관심종목 설정 초기화" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="20,526,178,40,1" />
+		<RADIOGROUP name="RgBorder" fontsize="-2" buttonshape="1" ly_vert="193,406,162,40,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="사용" radioimage="input_06.9.png" position="0,0,76,40" />
+				<RADIO no="1" text="미사용" radioimage="input_06.9.png" position="86,0,76,40" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<RADIOGROUP name="RgSwipe" fontsize="-2" buttonshape="1" ly_vert="193,466,167,40,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="사용" radioimage="input_06.9.png" position="0,0,76,40" />
+				<RADIO no="1" text="미사용" radioimage="input_06.9.png" position="86,0,76,40" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<BUTTON name="btnInit" caption="초기화" fgcolor="004:000000000" fontsize="-2" btnimage="input_06.9.png" ly_vert="193,526,167,40,1" />
+		<LABEL name="Label0" fontstyle="01" caption="종목추가 위치" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="20,346,165,40,1" />
+		<RADIOGROUP name="RgPosition" fontsize="-2" buttonshape="1" ly_vert="193,346,162,40,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="맨위" radioimage="input_06.9.png" transfervalue="T" position="0,0,76,40" />
+				<RADIO no="1" text="맨아래" radioimage="input_06.9.png" transfervalue="B" position="86,0,76,40" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6015" _ulen="5393" >
+'============================================================================
+' 화 면 명 : 관심종목_환경설정
+' 화면설명 : 관심종목의 설정팝업
+' 작    성 : 2016.01.15     ssang
+'20230522 KKM START Bottom 팝업으로 변경, Watching 종목/최근조회 종목/보유종목 삭제
+'============================================================================
+'
+' -- 종목 사용시 연결 화면	: GW_MOVE --
+' 연결버튼 표시			: 0
+' 현재가 화면으로 이동		: 1
+' 주문 화면으로 이동		: 2
+' 차트 화면으로 이동		: 3
+
+' -- 기타 --
+' 좌.우 스크롤시 관심그룹 변경	: GW_SWIPE
+' 시세 변동 표시				: GW_RORDER
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+' 설정테이블
+'Dim g_tSetTable()
+'g_tSetTable = {}
+
+' 항목 사용여부
+Dim g_szClick
+g_szClick = ""
+
+Dim g_bFrist
+g_bFirst = false
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' Init_Control : 설정 초기화(0: 화면오픈, 1:초기화버튽클릭)
+'============================================================================
+Function Init_Control(nIdx)
+	if nIdx == 1 then							' 초기화 버튼 클릭시
+		RgStyle.currentindex = 0 '종목선택 연결화면(종목상세)
+		RgBorder.currentindex = 0 '시세 변동 표시(사용)	
+		RgSwipe.currentindex = 0 '좌.우 스크롤시 관심그룹 변경(사용)
+		RgPosition.currentindex = 0 '20230731 KKM 종목추가 위치(맨위)	
+	else										' Form_init
+		if Form.GetEnvData("GW_MOVE") == "1" then
+			RgStyle.currentindex = 1
+		elseif Form.GetEnvData("GW_MOVE") == "2" then
+			RgStyle.currentindex = 2
+		elseif Form.GetEnvData("GW_MOVE") == "3" then
+			RgStyle.currentindex = 3
+		else
+			RgStyle.currentindex = 0			
+		end if
+		
+		if Form.GetEnvData("GW_SWIPE") == "" then	' 20160325 초기화 사용으로 변경
+			RgSwipe.currentindex = 0
+		else
+			if Form.GetEnvData("GW_SWIPE") == "1" then
+				RgSwipe.currentindex = 0
+			else
+				RgSwipe.currentindex = 1
+			end if
+		end if
+		
+		if Form.GetEnvData("GW_RORDER")	== "" then
+			RgBorder.currentindex = 0
+		else
+			if Form.GetEnvData("GW_RORDER")	== "1" then
+				RgBorder.currentindex = 0
+			else
+
+				RgBorder.currentindex = 1
+			end if
+		end if
+		
+		'20230731 KKM 종목추가 위치
+		if Form.GetEnvData("GW_POSITION")	== "" then
+			RgPosition.currentindex = 0
+		else
+			if Form.GetEnvData("GW_POSITION")	== "B" then '맨아래
+				RgPosition.currentindex = 1
+			else '맨위
+				RgPosition.currentindex = 0
+			end if
+		end if		
+	end if
+End Function
+
+Function Save_Control()
+	Form.SetEnvData("1", "GW_MOVE", RgStyle.currentindex)  '종목선택 연결화면
+
+	if RgSwipe.currentindex == "1" then	
+		Form.SetEnvData("1", "GW_SWIPE", 0)		' 좌.우 스크롤시 관심그룹 변경
+	else
+		Form.SetEnvData("1", "GW_SWIPE", 1)		' 좌.우 스크롤시 관심그룹 변경
+	end if	
+	
+	if RgBorder.currentindex == "1" then
+		Form.SetEnvData("1", "GW_RORDER", 0)		' 시세 변동 표시	
+	else
+		Form.SetEnvData("1", "GW_RORDER", 1)		' 시세 변동 표시	
+	end if	
+	
+	'20230731 KKM 종목추가 위치
+	if RgPosition.currentindex == "1" then
+		Form.SetEnvData("1", "GW_POSITION", "B")		' 맨아래
+	else
+		Form.SetEnvData("1", "GW_POSITION", "T")		' 맨위
+	end if	
+	
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szDefault
+
+	Form.SetScreenName("환경설정")
+	Init_Control(0)
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+	' 관심종목화면에 셋팅 적용 알림
+	'Form.SendReturnToParent("GW_SET", g_szClick)
+End Sub
+
+'============================================================================
+' btnInit_OnClick : 초기화버튼 클릭
+'============================================================================
+Sub btnInit_OnClick()
+	Init_Control(1)
+End Sub
+
+'============================================================================
+Sub RgStyle_OnClick(nIndex)
+	g_szClick = "CLICK"
+End Sub
+
+'============================================================================
+Sub RgSwipe_OnClick(nIndex)
+	g_szClick = "CLICK"
+End Sub
+
+'20230731 KKM 종목추가 위치 
+'============================================================================
+Sub RgPosition_OnClick(nIndex)
+	g_szClick = "CLICK"	
+End Sub
+
+'============================================================================
+Sub RgBorder_OnClick(nIndex)
+	g_szClick = "CLICK"
+End Sub
+'
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnSave_OnClick()
+	'저장
+	Save_Control() 
+	' 관심종목화면에 셋팅 적용 알림
+	Form.SendReturnToParent("GW_SET", g_szClick)
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	'저장하지 않고 닫기
+	Form.CloseForm()	
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11010" scrname="관심종목등록" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<RADIOGROUP name="rdoChange" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="6,9,363,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="종목추가등록" forecolor="100:102102102" position="0,0,182,39" />
+				<RADIO no="1" text="그룹편집" forecolor="100:102102102" position="182,0,181,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<FORMTAB name="fmTab" tabcount="2" tabheadheight="0" ly_vert="0,54,375,554,1" >
+			<PAGE name="page000877" caption="종목편집" linkfile="empty" loadingtype="1" />
+			<PAGE name="page004278" caption="그룹편집" linkfile="empty" loadingtype="1" />
+		</FORMTAB>
+		<EDIT name="edtChange" enable="0" visible="0" imetype="0" ly_vert="411,4,41,50,0" />
+		<BUTTON name="BtnCancel" visible="0" caption="닫    기" fgcolor="095:000000000" ly_vert="15,563,170,39,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3045" _ulen="2885" >
+'============================================================================
+' 화 면 명 : 관심종목_관심종목편집
+' 화면설명 : 관심종목화면의 종목과 그룹을 편집하는 화면
+' 작    성 : 2015.12.15 ~ 2015.12.24  ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+Dim g_arrData()
+g_arrData = {}
+
+Dim g_nRdo
+
+'============================================================================
+' rdoChange_OnClick
+'============================================================================
+Sub rdoChange_OnClick(nIndex)
+	fmTab.currenttab = nIndex
+	BtnCancel.visible = false
+	
+	if g_nRdo <> nIndex then
+		if nIndex == "0" or nIndex == 0 then
+			g_arrData = Split(sTemp,"★")
+			If g_arrData(0) == "FreeAdd" then
+				BtnCancel.visible = true
+				Form.triggerEvent("fmTab."& fmTab.currenttabpageid, "FreeAdd", g_arrData(1) )
+			end if
+		end if
+		g_nRdo = nIndex
+	end if
+End Sub
+
+'============================================================================
+' fmTab_OnTabChanged
+'============================================================================
+Sub fmTab_OnTabChanged(nCurrentTab)
+	rdoChange.currentindex = nCurrentTab
+
+End Sub
+
+'============================================================================
+' Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+	' 종목편집이나 그룹편집을 작업했는지 여부판단
+	if Trim(edtChange.caption) <> "" then
+		Form.SendReturnToParent("GW_SET2", edtChange.caption)
+	end if
+End Sub
+
+'20160906 NOHES START 관심그룹선택을 활성화
+'============================================================================
+Sub Form_OnFormInit()
+	sTemp = Form.GetOpenLinkData()
+	'20170227 NOHES START : 관심종목 자유추가 로직
+	g_arrData = Split(sTemp,"★")
+	g_nRdo = rdoChange.currentindex
+	BtnCancel.visible = false
+	
+	If g_arrData(0) == "FreeAdd" then
+		BtnCancel.visible = true
+		Form.triggerEvent("fmTab."& fmTab.currenttabpageid, "FreeAdd", g_arrData(1) )
+	'20170227 NOHES END	
+	ElseIf sTemp = "AddGroup" Then
+		Form.SetCtlProp("rdoChange", "currentindex", "1")
+	End If
+End Sub
+'20160906 NOHES END
+
+'============================================================================
+Sub BtnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
