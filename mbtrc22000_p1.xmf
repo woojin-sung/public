@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="22000" scrname="CFD배당내역조회_기간선택팝업" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,434,375,221,1" />
+		<LABEL name="lblAllText" fontsize="1" fontstyle="01" caption="선택해주세요" halign="1" ly_vert="11,443,352,35,1" />
+		<BUTTON name="BtnMod" caption="확인" bgcolor="289:255255255" bgcolor2="233:102101101" fontsize="2" btnimage="btn_26.9" ly_vert="-3,597,381,50,1" />
+		<LABEL name="Label1" fontstyle="01" caption="거래일자" ly_vert="16,475,100,32,1" />
+		<IMAGE name="imgExit" imgpath="ic_close.png" ly_vert="331,449,21,21,1" />
+		<IMAGE name="imgRdo3" imgpath="input_01_n.9" ly_vert="17,509,100,32,1" />
+		<IMAGE name="imgRdo4" imgpath="input_01_n.9" ly_vert="137,509,100,32,1" />
+		<IMAGE name="imgRdo5" imgpath="input_01_n.9" ly_vert="257,509,100,32,1" />
+		<CALENDAR name="CalStaDate" visible="0" dispmode="1735215461" ly_vert="32,550,140,32,0" />
+		<CALENDAR name="CarFinDate" visible="0" dispmode="-291017025" ly_vert="202,550,140,32,0" />
+		<LABEL name="Label2" visible="0" caption="~" halign="1" ly_vert="177,550,19,32,0" />
+		<LABEL name="lblPrd1week" fontsize="-2" caption="1개월" halign="1" click="1" ly_vert="17,509,100,32,1" />
+		<LABEL name="lblPrd1mon" fontsize="-2" caption="3개월" halign="1" click="1" ly_vert="137,509,100,32,1" />
+		<LABEL name="lblPrdIsrt" fontsize="-2" caption="직접입력" halign="1" click="1" ly_vert="257,509,100,32,1" />
+		<CALENDAR name="CalPsntDate" visible="0" dispmode="54989568" ly_vert="229,336,140,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5766" _ulen="5388" >
+'============================================================================
+' 화 면 명 : CFD배당내역조회(mbtrc22000.xmf)
+'============================================================================
+
+
+'============================================================================
+' 전역변수
+'============================================================================
+Dim g_PrdClsCd	' 1 : 1개월 / 2 : 3개월 / 3 : 직접입력
+Dim g_Sta_Date	' 조회 시작일
+Dim g_Fin_Date	' 조회 종료일
+Dim g_EndAbleYn
+
+'============================================================================
+' 							FORM 함수
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 							CONTROL 함수
+'============================================================================
+' X버튼 클릭시
+'============================================================================
+Sub imgExit_OnClick()	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 여백클릭시 꺼지도록 함
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 기간선택
+'============================================================================
+Sub lblPrd1week_OnClick()
+	f_SetToggleUI(3)
+End Sub
+
+Sub lblPrd1mon_OnClick()
+	f_SetToggleUI(4)
+End Sub
+
+Sub lblPrdIsrt_OnClick()
+	f_SetToggleUI(5)
+End Sub
+
+Sub CalStaDate_OnEditComplete()
+	g_Sta_Date = CalStaDate.caption
+End Sub
+
+Sub CarFinDate_OnEditComplete()
+	g_Fin_Date = CarFinDate.caption
+End Sub
+
+'============================================================================
+' 확인 버튼
+'============================================================================
+Sub BtnMod_OnClick()
+	g_EndAbleYn = "Y"
+
+	if g_PrdClsCd = "" or g_PrdClsCd = null then
+		g_EndAbleYn = "N"
+		Form.ShowAlert("안내", "거래일자 구분이 선택되지 않았습니다.")
+		
+	elseif g_PrdClsCd = "3" then
+	
+		if g_Sta_Date == "" then
+			g_EndAbleYn = "N"
+			Form.ShowAlert("안내", "시작일자를 확인하세요.")
+			
+		elseif g_Fin_Date == "" then
+			g_EndAbleYn = "N"
+			Form.ShowAlert("안내", "종료일자를 확인하세요.")
+			
+		elseif g_Sta_Date > g_Fin_Date then
+			g_EndAbleYn = "N"
+			Form.ShowAlert("안내", "조회시작일("&g_Sta_Date&")이 종료일("&g_Fin_Date&")이후입니다.")
+		end if
+		
+	end if
+	
+	if g_EndAbleYn == "Y" then
+		Dim sSendData
+		sSendData = g_PrdClsCd&"★"&g_Sta_Date&"★"&g_Fin_Date
+	
+		Form.SendReturnToParent("mbtrc22000_p1", sSendData)
+		Form.CloseForm()
+	end if
+
+End Sub
+
+'============================================================================
+'f_SetToggleUI(nFlag) : 항목 클릭에 따른 색깔 변동 처리
+'============================================================================
+Function f_SetToggleUI(nFlag)
+	Dim szToggleImg0, szToggleImg1, szToggleColor0, szToggleColor1, szToggleImg2
+	szToggleImg0 		= "input_01_n.9.png" 	'비활성 이미지
+	szToggleImg1 		= "input_01_o.9.png" 	'활성화 이미지
+	szToggleImg2 		= "input_02_d.9.png" 	'비활성 이미지
+	szToggleColor0 	= "127" 				'비활성 컬러
+	szToggleColor1 	= "67" 				'활성화 컬러
+	
+	if g_PrdClsCd <> "3" then
+		CalStaDate.visible 	= false
+		CarFinDate.visible 	= false
+		Label2.visible 		= false
+	end if
+	
+	'거래일자:1개월
+	if nFlag == 3 then
+	
+		if g_PrdClsCd == "1" then
+			imgRdo3.imgpath	= szToggleImg0
+			g_PrdClsCd 		= ""
+			g_Sta_Date 		= ""
+			g_Fin_Date 		= ""
+		else			
+			CalStaDate.visible	= false
+			CarFinDate.visible 	= false
+			Label2.visible 		= false
+		
+			imgRdo3.imgpath = szToggleImg1
+			imgRdo4.imgpath = szToggleImg0
+			imgRdo5.imgpath = szToggleImg0	
+
+			tmp_date 	= LEFT(CalPsntDate.caption, 4) & "-" & RIGHT(LEFT(CalPsntDate.caption, 6), 2) & "-" & RIGHT(CalPsntDate.caption, 2)
+			tmpPrd1month 	= CStr(DateAdd("d", 0, DateAdd("m", - 1,CDate(CStr(tmp_date)))))
+			tmpPrd1month 	= Replace(tmpPrd1month, "-", "")
+
+			g_Sta_Date = tmpPrd1month
+			g_Fin_Date = CalPsntDate.caption
+			g_PrdClsCd = "1"
+		end if
+		
+	'거래일자:3개월
+	elseif nFlag == 4 then
+	
+		if g_PrdClsCd == "2" then
+			imgRdo4.imgpath 	= szToggleImg0
+			g_PrdClsCd 		= ""
+			g_Sta_Date 		= ""
+			g_Fin_Date 		= ""				
+		else			
+			CalStaDate.visible 	= false
+			CarFinDate.visible 	= false
+			Label2.visible 		= false
+			
+			imgRdo3.imgpath = szToggleImg0
+			imgRdo4.imgpath = szToggleImg1
+			imgRdo5.imgpath = szToggleImg0	
+
+			tmp_date 	= LEFT(CalPsntDate.caption, 4) & "-" & RIGHT(LEFT(CalPsntDate.caption, 6), 2) & "-" & RIGHT(CalPsntDate.caption, 2)
+			tmpPrd3month 	= CStr(DateAdd("d", 0, DateAdd("m",-3,CDate(CStr(tmp_date)))))
+			tmpPrd3month 	= Replace(tmpPrd3month, "-", "")
+
+			g_Sta_Date = tmpPrd3month
+			g_Fin_Date = CalPsntDate.caption
+			g_PrdClsCd = "2"
+		end if
+		
+	'거래일자:직접입력
+	elseif nFlag == 5 then
+	
+		if g_PrdClsCd == "3" then
+			imgRdo5.imgpath 	= szToggleImg0
+			g_PrdClsCd 		= ""	
+			g_Sta_Date 		= ""
+			g_Fin_Date 		= ""				
+			
+			CalStaDate.visible 	= false
+			CarFinDate.visible 	= false
+			Label2.visible 		= false
+		else
+			imgRdo3.imgpath = szToggleImg0
+			imgRdo4.imgpath = szToggleImg0
+			imgRdo5.imgpath = szToggleImg1	
+
+			CalStaDate.visible 	= true
+			CarFinDate.visible 	= true
+			Label2.visible 		= true	
+			
+			g_Sta_Date = CalPsntDate.caption
+			g_Fin_Date = CalPsntDate.caption
+			g_PrdClsCd = "3"
+		end if
+		
+	end if
+			
+	CalStaDate.caption = g_Sta_Date
+	CarFinDate.caption = g_Fin_Date
+End Function
+
+	</SCRIPT_INFO>
+</ROOT>

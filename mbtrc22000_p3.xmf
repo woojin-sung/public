@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16404" scrname="해외CFD 결제통화 변경" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="cmbAccount" bgcolor="052:255255255" itemcodetype="137" etcfunctions="" accpwdctl="edtPassword" delegate="1" ly_vert="6,10,271,39,1" />
+		<EDIT name="edtPassword" fontsize="-2" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="279,10,90,39,1" />
+		<BUTTON name="btnPwd" btnimage="alpha" ly_vert="279,10,91,39,1" />
+		<LABEL name="Label2" fontstyle="01" caption="현재 결제방식(입금)" ly_vert="6,80,172,30,1" />
+		<LABEL name="Label0" fontstyle="01" caption="변경 결제방식(입금)" ly_vert="6,124,172,30,1" />
+		<IMAGE name="Image0" imgpath="img_bgbox.9.png" ly_vert="187,80,170,32,1" />
+		<LABEL name="Label1" fgcolor="096:102102102" fontstyle="01" caption="원화" halign="1" ly_vert="196,84,151,25,1" />
+		<RADIOGROUP name="RadioGroup0" fontstyle="01" ly_vert="189,121,169,36,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="원화" transfervalue="1" position="2,2,100,32" />
+				<RADIO no="1" text="외화" transfervalue="2" position="80,2,100,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="lblLine0" bgcolor="017:216216216" transmode="0" ly_vert="10,178,355,1,1" />
+		<LABEL name="Label4" fontstyle="01" caption="현재 결제방식(출금)" ly_vert="6,206,172,30,1" />
+		<IMAGE name="Image1" imgpath="img_bgbox.9.png" ly_vert="187,206,170,32,1" />
+		<LABEL name="Label3" fgcolor="096:102102102" fontstyle="01" caption="외화" halign="1" ly_vert="196,210,151,25,1" />
+		<IMAGE name="Image2" imgpath="img_bgbox.9.png" ly_vert="11,331,354,77,1" />
+		<BUTTON name="btnChange" enable="0" resize="0100" caption="변경" btnimage="btn_15.9" ly_vert="10,557,355,40,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="5" outline="0000" transmode="1" designorder="1" ly_vert="22,346,324,53,1" >
+			<COL_INFO ly_vert_width="10,5,309" />
+			<ROW_INFO ly_vert_height="25,25,25,25,-47" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" caption="*" impidxs="" />
+				<CELL cell_ly="1,0,1,0" line="0,0" impidxs="" />
+				<CELL cell_ly="2,0,2,0" halign="0" line="0,0" caption="입금결제(청산이익, 월정산이익)는 원화 또는" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" line="0,0" impidxs="" />
+				<CELL cell_ly="2,1,2,1" valign="0" halign="0" line="0,0" caption="외화 선택이 가능합니다." impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" caption="*" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="0,0" impidxs="" />
+				<CELL cell_ly="2,2,2,2" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" line="0,0" impidxs="" />
+				<CELL cell_ly="2,3,2,3" valign="0" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,0" impidxs="" />
+				<CELL cell_ly="1,4,1,4" line="0,0" impidxs="" />
+				<CELL cell_ly="2,4,2,4" halign="0" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="Label5" fgcolor="215:011138235" caption="※ 출금결제(비용 및 청산손실, 월정산손실)는
+     외화로 결제됩니다." multiline="1" ly_vert="6,253,344,40,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6734" _ulen="6204" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim g_szSavePwd
+dim g_sPlain_rm
+dim g_MNRC_STLM_CRNC_CLCD '입금결제통화구분코드  1 원화, 2 외화
+dim g_DRNG_STLM_CRNC_CLCD '출금결제통화구분코드  1 원화, 2 외화
+'============================================================================
+Sub Form_OnFormInit()
+	f_InitUI()
+	btnPwd.bringfront("1")
+End Sub
+
+
+Sub btnPwd_OnClick()
+	btnChange.enable = false
+	if cmbAccount.caption = null or cmbAccount.caption = "" then
+		Form.ShowAlert("알림", "선택할 수 있는 계좌가 없습니다.")
+		Exit Sub
+	end if
+	Form.openPopupAnimation("pwdcheckpopup",cmbAccount.caption,"","2")
+End Sub
+
+Sub cmbAccount_ChangeAccount()
+	f_InitUI()
+End Sub
+
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'==============================================
+	'*********** 계좌비번 수신 ************
+	'==============================================
+	if sKeyName = "CORRECT_PWD" then
+		if sRet <> "" then
+			Dim szAcnt
+			
+			tData = Split(sRet, "★")
+			
+			if UBOUND(tData) > 0 then
+				edtPassword.pwdlen = tData(1)
+				edtPassword.caption = tData(0)
+				edtPassword_OnEditComplete()
+			end if
+			
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+			if g_szSavePwd == "0" then
+				'edtPwdIcon.imgpath = "icon_save_password_n.9"
+			else
+				'edtPwdIcon.imgpath = "icon_save_password_o.9"
+			end if
+		else
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+			if g_szSavePwd == "0" then
+				'edtPwdIcon.imgpath = "icon_save_password_n.9"
+				edtPassword.caption = ""
+			else
+				szCurAcc = cmbAccount.caption
+				nCnt = Cint(cmbAccount.accountcount)
+				For i = 0 to nCnt - 1
+					szCompAcc = cmbAccount.getAccountByIndex(i)
+					
+					if szCurAcc == szCompAcc then
+						cmbAccount.currentindex = i
+						Exit For
+					end if
+				Next
+				
+				'edtPwdIcon.imgpath = "icon_save_password_o.9"
+			end if
+			
+		end if
+	end if
+End Sub
+
+
+'f_InitUI() : 컨트롤 위치, 체크 상태, 이미지 등 초기화
+'============================================================================
+Sub f_InitUI()
+	g_MNRC_STLM_CRNC_CLCD = 0 '입금결제통화구분코드  1 원화, 2 외화
+	g_DRNG_STLM_CRNC_CLCD = 0 '출금결제통화구분코드  1 원화, 2 외화
+	Label1.caption = ""
+	RadioGroup0.currentindex = -1
+	Label3.caption = ""
+	btnChange.enable = false
+	
+	if cmbAccount.caption <> null and cmbAccount.caption <> "" then
+		DATAMANAGER.RequestTranData("obtre_acnt_002r") '계좌정보(영문명) 조회
+	end if
+End Sub
+
+Sub f_SetNextBtnEnable()
+	btnChange.enable = cmbAccount.caption <> null and cmbAccount.caption <> "" and edtPassword.caption <> null and edtPassword.caption <> "" and CInt(RadioGroup0.currentindex) <> -1
+end Sub
+
+Sub edtPassword_OnEditComplete()
+'	if Len(edtPassword.caption) > 3 then
+'		f_SetNextBtnEnable()
+'	end if
+	f_SetNextBtnEnable()
+End Sub
+
+Function f_GetRadioValue()
+	dim nChangeValue
+	
+	if CInt(RadioGroup0.currentindex) = 0 then
+		nChangeValue = "1"
+	elseif CInt(RadioGroup0.currentindex) = 1 then
+		nChangeValue = "2"
+	else
+		nChangeValue = ""
+	end if
+
+	return nChangeValue
+End Function
+
+
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	g_sPlain_rm = Form.GetSharedData("&PLAIN_RM" , false) '암호화 여부
+	dim szPwd
+	szPwd = ""
+	'패스워드 암호화여부
+	If g_sPlain_rm = "1" Then
+		szPwd = edtPassword.caption
+	Else
+		szPwd = edtPassword.encdata
+	    if Trim(szPwd) == "" or Trim(szPwd) == null then
+		    szPwd = edtPassword.caption
+	    end if
+	End If
+	
+	if szTranID = "obtre_acnt_002r" then  ' 현재결제통화 조회
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO" , 0 , cmbAccount.total)	
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ASNO" , 0 , cmbAccount.sequence)'계좌번호
+		'DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNT_PWD" , 0 , szPwd)
+
+	elseif szTranID = "obtre_acnt_002a" then ' 결제통화 변경
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO" , 0 , cmbAccount.total)	
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ASNO" , 0 , cmbAccount.sequence)'계좌번호
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNT_PWD" , 0 , szPwd)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "MDBF_VAL" , 0 , g_MNRC_STLM_CRNC_CLCD)  '현재 결제방식입금
+		
+		dim nChangeValue
+	
+		nChangeValue = f_GetRadioValue()
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "MNRC_STLM_CRNC_CLCD" , 0 , nChangeValue) '변경 할 결제방식입금
+
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "MDBF_1_VAL" , 0 , g_DRNG_STLM_CRNC_CLCD)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "DRNG_STLM_CRNC_CLCD" , 0 , g_DRNG_STLM_CRNC_CLCD)
+	end if
+End Sub
+
+
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	if szTranID = "obtre_acnt_002r" then  ' 현재결제통화 조회
+		dim sMNRC_STLM_CRNC_CLCD
+		g_MNRC_STLM_CRNC_CLCD = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1", "MNRC_STLM_CRNC_CLCD", 0)  '입금결제통화구분코드
+		g_DRNG_STLM_CRNC_CLCD = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1", "DRNG_STLM_CRNC_CLCD", 0)  '출금결제통화구분코드
+		
+		if g_MNRC_STLM_CRNC_CLCD = "1" then
+			Label1.caption = "원화"
+		elseif g_MNRC_STLM_CRNC_CLCD = "2" then
+			Label1.caption = "외화"
+		end if
+		
+		if g_DRNG_STLM_CRNC_CLCD = "1" then
+			Label3.caption = "원화"
+		elseif g_DRNG_STLM_CRNC_CLCD = "2" then
+			Label3.caption = "외화"
+		end if
+		
+	elseif szTranID = "obtre_acnt_002a" then ' 결제통화 변경
+		Form.ShowAlert( "알림" , "해외CFD 결제통화 변경이 완료되었습니다.")
+		f_InitUI()
+	end if
+End Sub
+
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if szSubErr <> null or Trim(szSubErr) <> "" then
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+	else
+		Form.ShowAlert( "알림" , szErrMsg)
+	end if
+End Sub
+
+'============================================================================
+Sub btnChange_OnClick()
+	if edtPassword.caption = "" or edtPassword.caption == null then
+		Form.MsgBox("알림", "비밀번호를 입력해주세요.", "", 0)
+		Exit Sub
+	end if
+	
+	dim nChangeValue
+	
+	if g_MNRC_STLM_CRNC_CLCD = f_GetRadioValue() then
+		Form.ShowAlert("알림", "변경하실 결제방식이 현재 결재방식과 동일합니다.")
+		Exit Sub
+	end if
+	
+	DATAMANAGER.RequestTranData("obtre_acnt_002a") '계좌정보(영문명) 조회
+End Sub
+
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	f_SetNextBtnEnable()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtre_acnt_002r" trcode="obtre_acnt_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtre_acnt_002a" trcode="obtre_acnt_002a" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtre_acnt_002r" title="해외주식CFD 결제통화 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="122" _ulen="90" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="138" _ulen="98" >
+
+MNRC_STLM_CRNC_CLCD^입금결제통화구분코드^1^0^0^0^0^0^0
+DRNG_STLM_CRNC_CLCD^출금결제통화구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtre_acnt_002a" title="해외주식CFD 결제통화 변경처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="426" _ulen="314" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+MDBF_VAL^변경전값^40^0^0^0^0^0^0
+MNRC_STLM_CRNC_CLCD^입금결제통화구분코드^1^0^0^0^0^0^0
+MDBF_1_VAL^변경전1값^40^0^0^0^0^0^0
+DRNG_STLM_CRNC_CLCD^출금결제통화구분코드^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

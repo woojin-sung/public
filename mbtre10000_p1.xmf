@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16111" scrname="해외CFD종목검색_상세조건_설정" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="ContSet" scroll_pos="0,0" ly_vert="0,39,375,607,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fontsize="-2" caption=" 대상제외" bgcolor="090:238239240" transmode="0" ly_vert="0,105,375,32,1" />
+				<CHKBUTTON name="ChkMasu" chkcaption="신규매수 불가종목" unchkcaption="신규매수 불가종목" ly_vert="19,150,160,32,1" />
+				<CHKBUTTON name="ChkMado" chkcaption="신규매도 불가종목" unchkcaption="신규매도 불가종목" ly_vert="192,150,172,32,1" />
+				<CHKBUTTON name="ChkETF" chkcaption="ETF" unchkcaption="ETF" ly_vert="19,196,105,32,1" />
+				<LABEL name="Label4" fontsize="-2" caption=" 검색설정" bgcolor="090:238239240" transmode="0" ly_vert="0,0,375,32,1" />
+				<LABEL name="Label1" caption="증거금률" ly_vert="9,50,71,39,1" />
+				<EDIT name="Edit0" mask="0,0,,%,0,,0,1,0,0,0" halign="2" imetype="1" maxlength="4" minlength="0" hintcaption="최소" ly_vert="83,51,90,34,1" />
+				<EDIT name="Edit1" autofontsize="1" mask="0,0,,%,0,,0,1,0,0,0" halign="2" imetype="0" maxlength="4" minlength="0" hintcaption="최대" ly_vert="231,51,90,34,1" />
+				<LABEL name="Label2" caption="이상 ~" ly_vert="167,52,75,32,1" />
+				<LABEL name="Label3" caption="이하" ly_vert="319,52,50,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="Label5" fgcolor="062:255255255" fontstyle="01" caption="상세설정" bgcolor="064:188030030" transmode="0" halign="1" ly_vert="0,0,378,40,1" />
+		<BUTTON name="btnReset" caption="초기화" fgcolor="145:255255255" fontsize="-2" fontstyle="01" btnimage="btn_05.9" ly_vert="5,6,50,28,1" />
+		<IMAGE name="Image1" imgpath="icon_main_03.png" ly_vert="345,8,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4956" _ulen="4640" >
+'****************************************************************************
+'               G  R  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szRate1, g_szRate2, g_szCheck1, g_szCheck2, g_szCheck3
+
+'****************************************************************************
+'			P  E  R  S  O  N  A  L     F  U  N  C  T  I  O  N
+'****************************************************************************
+
+'============================================================================
+'f_InitFilterValue 설정 값 초기화
+'============================================================================
+Function f_InitFilterValue()
+	g_szRate1 	= "0"
+	g_szRate2 	= "100"
+	g_szCheck1 	= "Y"
+	g_szCheck2 	= "Y"
+'	g_szCheck3 	= "N"
+	g_szCheck3 	= "Y" '20220121 아이티젠 김성수 수정
+	
+End Function 
+
+'============================================================================
+'f_LoadFilterValue 설정 값 LOAD
+'============================================================================
+Function f_LoadFilterValue()
+	Dim tData1, szTemp1
+	szTemp1 = Form.LoadConfigData("SET_mbtre10000", "SET_VALUE_POP"	) '상세팝업에서 설정한 필터 값
+	
+	if szTemp1 <> "" then
+		tData1 = Split(szTemp1, "★")
+		'0증거금률 이상 % 값|1증거금률 이하 % 값|2신규매수 불가종목 제외여부|3신규매도 불가종목 제외여부|4ETF 제외여부
+		
+		g_szRate1 	= tData1(0)
+		g_szRate2 	= tData1(1)
+		g_szCheck1 	= tData1(2)
+		g_szCheck2 	= tData1(3)
+		g_szCheck3 	= tData1(4)
+		
+	else '초기화
+		Call f_InitFilterValue()
+	end if
+	
+End Function
+
+'============================================================================
+'f_SaveFilterValue 설정 값 SAVE
+'============================================================================
+Function f_SaveFilterValue()
+	'상세설정에서 설정한 필터 값
+	Dim szData, szRate1, szRate2, szChk1, szChk2, szChk3
+	
+	szRate1 = ContSet.Edit0.caption 
+	szRate2 = ContSet.Edit1.caption
+	
+	if ContSet.ChkMasu.checkstate == "1" or ContSet.ChkMasu.checkstate == 1 then
+		szChk1 = "N"
+	else
+		szChk1 = "Y"
+	end if
+	
+	if ContSet.ChkMado.checkstate == "1" or ContSet.ChkMado.checkstate == 1 then
+		szChk2 = "N"
+	else
+		szChk2 = "Y"
+	end if
+	
+	if ContSet.ChkETF.checkstate == "1" or ContSet.ChkETF.checkstate == 1 then
+'		szChk3 = "Y" '20220121 아이티젠 김성수 수정
+		szChk3 = "N"
+	else
+'		szChk3 = "N" '20220121 아이티젠 김성수 수정
+		szChk3 = "Y"
+	end if
+	
+	szData = szRate1 & "★" & szRate2 & "★" & szChk1 & "★" & szChk2 & "★" & szChk3
+	Form.SaveConfigData("SET_mbtre10000", "SET_VALUE_POP", szData )
+'	Form.ShowAlert("", szData)
+End Function
+
+'============================================================================
+'f_SetDataInCtrl 설정 값 컨트롤에 SET
+'============================================================================
+Function f_SetDataInCtrl()
+	if g_szRate1 <> "" then
+		ContSet.Edit0.caption = g_szRate1
+	end if
+	
+	if g_szRate2 <> "" then
+		ContSet.Edit1.caption = g_szRate2
+	end if
+	
+	if g_szCheck1 <> "Y" then
+		ContSet.ChkMasu.checkstate = "1"
+	else
+		ContSet.ChkMasu.checkstate = "0"
+	end if 
+	
+	if g_szCheck2 <> "Y" then
+		ContSet.ChkMado.checkstate = "1"
+	else
+		ContSet.ChkMado.checkstate = "0"
+	end if 
+	
+'	if g_szCheck3 == "Y" then
+	if g_szCheck3 == "N" then '20220121 아이티젠 김성수 수정 값 반대로 SET
+		ContSet.ChkETF.checkstate = "1"
+	else
+		ContSet.ChkETF.checkstate = "0"
+	end if 
+	
+End Function 
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Call f_LoadFilterValue()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Call f_SetDataInCtrl()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	f_SaveFilterValue()
+	
+	Form.SendReturnToParent( "POP_SET" , "" )
+End Sub
+
+'============================================================================
+Sub btnReset_OnClick()
+	Call f_InitFilterValue()
+	Call f_SetDataInCtrl()
+End Sub
+
+'============================================================================
+Sub Image1_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+Sub ContSet_Edit1_OnEditComplete()
+	if ContSet.Edit0.caption <> "" or Cint(ContSet.Edit0.caption) <> 0 then
+		if Cint(ContSet.Edit1.caption) < Cint(ContSet.Edit0.caption) then
+			Form.ShowAlert("알림", "최소 증거금률보다 작을 수 없습니다. 다시 입력해주세요")
+			ContSet.Edit1.caption = g_szRate2
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

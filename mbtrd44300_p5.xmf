@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44300" scrname="해외파생주문_매도주문확인창" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,489,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="해외파생 매도주문" bgcolor="092:185046046" halign="1" ly_vert="0,0,309,55,1" />
+		<TABLE name="tblData" insidelinecolor="102:255255255" colcount="3" rowcount="8" outline="0000" designorder="1" ly_vert="10,70,289,280,1" >
+			<COL_INFO ly_vert_width="89,120,80" />
+			<ROW_INFO ly_vert_height="35,35,35,35,35,35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="069:102102102" bgcolor="042:255255255" halign="0" line="0,0" caption="계좌번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" mask="1,0,,,1,####-####-##,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,0,2,0" halign="2" line="0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="069:102102102" bgcolor="042:255255255" halign="0" line="0,0" caption="종      목" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,2,1" halign="2" line="0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="069:102102102" bgcolor="042:255255255" halign="0" line="0,0" caption="종 목 명" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,2,2" halign="2" line="0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="069:102102102" bgcolor="042:255255255" halign="0" line="0,0" caption="주문구분" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,3,2,3" halign="2" line="0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="069:102102102" bgcolor="042:255255255" halign="0" line="0,0" caption="기      간" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,4,2,4" halign="2" line="0,0" mask="1,0,,,1,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,5,0,5" fgcolor="069:102102102" bgcolor="042:255255255" halign="0" line="0,0" caption="주문가격" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,5,2,5" fgcolor="007:030080200" halign="2" line="0,0" mask="0,0,,,0,,-1,1,1,2,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,6,0,6" fgcolor="069:102102102" bgcolor="042:255255255" halign="0" line="0,0" caption="조건가격" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,6,2,6" fgcolor="007:030080200" halign="2" line="0,0" mask="0,0,,,0,,-1,1,1,2,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,7,0,7" fgcolor="069:102102102" bgcolor="042:255255255" halign="0" line="0,0" caption="수      량" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,7,2,7" halign="2" line="0,0" mask="0,0,,,0,,0,1,1,0,0" fontstyle="01" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="lblLine" bgcolor="017:216216216" transmode="0" ly_vert="15,365,279,1,1" />
+		<LABEL name="lblText" fontstyle="01" caption="매도 하시겠습니까?" halign="1" ly_vert="10,365,289,60,1" />
+		<BUTTON name="btnClose" caption="닫기" fgcolor="018:102102102" btnimage="btn_02.9" ly_vert="25,430,125,39,1" />
+		<BUTTON name="btnSel" caption="매도" btnimage="btn_06.9" ly_vert="157,430,127,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2074" _ulen="1936" >
+--===========================================================================
+--===========================================================================
+
+Dim g_szOrder_Acc			' 계좌번호
+Dim g_szOrder_AccName		' 고객명
+Dim g_szOrd_ItmCode		' 종목코드
+Dim g_szOrd_ItmName		' 종목명
+Dim g_szOrd_OrdType		' 주문구분
+Dim g_szOrd_Day			' 기간
+Dim g_nOrd_Limit_Price		' 주문가격
+Dim g_nOrd_Stop_Price		' 조건가격
+Dim g_nOrd_Qty			' 주문수량
+Dim g_nOrd_OrdNo			' 원주문번호
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData
+	szData = Form.GetOpenLinkData( )
+	
+	if szData <> "" then
+		Dim tData
+		tData = Split(szData, "|")
+		
+		if UBOUND(tData) < 1 then
+		    Exit sub
+		End if
+		
+		g_szOrder_Acc = tData(0)		' 계좌번호
+		g_szOrder_AccName = tData(1)	' 고객명
+		g_szOrd_ItmCode = tData(2)		' 종목코드
+		g_szOrd_ItmName = tData(3)		' 종목명
+		g_szOrd_OrdType = tData(4)		' 주문구분
+		g_szOrd_Day = tData(5)			' 기간
+		g_nOrd_Limit_Price = tData(6)	' 주문가격
+		g_nOrd_Stop_Price = tData(7)	' 조건가격
+		g_nOrd_Qty = tData(8)			' 주문수량
+		
+		tblData.SetCellString( 0, 1, g_szOrder_Acc 		)
+		tblData.SetCellString( 0, 2, g_szOrder_AccName	)
+		tblData.SetCellString( 1, 1, g_szOrd_ItmCode		)
+		tblData.SetCellString( 2, 1, g_szOrd_ItmName 		)
+		tblData.SetCellString( 3, 1, g_szOrd_OrdType		)
+		tblData.SetCellString( 4, 1, g_szOrd_Day			)
+		tblData.SetCellString( 5, 1, g_nOrd_Limit_Price	)
+		tblData.SetCellString( 6, 1, g_nOrd_Stop_Price	)
+		tblData.SetCellString( 7, 1, g_nOrd_Qty			)
+	end if
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnSel_OnClick()
+	Form.SendReturnToParent( "ODER" , "")
+	Form.CloseForm( )
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

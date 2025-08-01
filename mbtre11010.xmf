@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="19300" scrname="해외CFD잔고평가" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" itemcodetype="137" etcfunctions="" delegate="1" ly_vert="10,9,310,39,1" />
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,9,39,39,1" />
+		<FORMTAB name="fmtab0" currenttab="1" tabcount="6" tabwidthtype="2" tabheadheight="40" usepg="1" autosave="1" ly_vert="0,54,375,509,1" >
+			<PAGE name="page008561" caption="잔고" linkfile="mbtre11010_t1" loadingtype="1" />
+			<PAGE name="page004795" caption="계좌현황" linkfile="mbtre11010_t2" loadingtype="1" />
+			<PAGE name="page008634" caption="체결" linkfile="mbtre11000_t3" loadingtype="1" />
+			<PAGE name="page006973" caption="손익현황" linkfile="mbtre11000_t4" loadingtype="1" />
+			<PAGE name="page006813" caption="청산손익" linkfile="mbtre11010_t5" loadingtype="1" />
+			<PAGE name="page006815" caption="월정산내역" linkfile="mbtre11010_t6" loadingtype="1" />
+		</FORMTAB>
+		<LABEL name="lblAcntNation" ly_vert="400,300,59,32,1" import="0,1,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7442" _ulen="6852" >
+'--===========================================================================
+'--===========================================================================
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim g_szACNO, g_szASNO, g_szItemCode
+Dim g_nSNSType '1 카카오톡 , 2 카카오톡 화면 공유 , 3 트위터 , 4페이스북
+Dim g_szLastTab
+Dim g_szTitle
+g_szTitle = "알림"
+g_szLastTab = 0
+Dim g_MargGrade '안심/일반여부 판단
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+Function f_RequestAcntInfo()
+	if acnt0.total <> "" and acnt0.total <> null then
+		DATAMANAGER.RequestTranData( "obtre_comm_017r" )
+		DATAMANAGER.RequestTranData( "obtrc_comm_200r" )		'20230315 SWJ START
+	end if
+	
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'iOS만 currenttab 전에 세팅 -  폼탭 SetUseAnimation 활성화 위해
+	szOsType 	= Form.GetSharedData("&OS_TYPE", False)  '1.안드로이드 2.iOS
+	if szOsType = "2" then
+		fmtab0.setTabHeaderImage("tab_01_o.9.png","tab_01_n.9.png", 0.5)	
+	end if
+	
+	Dim szScreenNo, szTab
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+	szTab = Form.GetOpenLinkData()
+	
+	If ( szTab = "" Or szTab = null ) And (fmtab0.currenttab <> 0 and fmtab0.currenttab <> "0") Then
+		szTab = fmtab0.currenttab
+	End If
+	
+	If Trim(szTab) <> "" Then '티커에서 넘어올 때
+		fmtab0.currenttab = szTab
+		fmtab0_OnTabChanged( CInt(szTab) )
+	Else		
+		If szScreenNo = "16300" Then		'계좌평가, (v002) 잔고평가
+			fmtab0.currenttab = "0"
+			Form.setTitleCaption( "해외CFD 잔고" )
+		ElseIf szScreenNo = "16301" Then	'증거금/예수금, (v003) 계좌현황으로 명칭 변경
+			fmtab0.currenttab = "1"
+			Form.setTitleCaption( "해외CFD 계좌현황" )
+		ElseIf szScreenNo = "16302" Then	'체결
+			fmtab0.currenttab = "2"
+			Form.setTitleCaption( "해외CFD 체결" )
+		ElseIf szScreenNo = "16304" Then	'손익현황
+			fmtab0.currenttab = "3"
+			Form.setTitleCaption( "해외CFD 손익현황" )
+		ElseIf szScreenNo = "16305" Then	'청산손익
+			fmtab0.currenttab = "4"
+			Form.setTitleCaption( "해외CFD 청산손익" )
+		ElseIf szScreenNo = "16308" Then	'월정산
+			fmtab0.currenttab = "5"
+			Form.setTitleCaption( "해외CFD 월정산내역" )	
+		Else
+			fmtab0.currenttab = "0"
+		
+		End If
+	End If
+	
+	fmtab0.SetUseAnimation("1")
+	
+	f_RequestAcntInfo()
+	
+'	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName = "SCREEN_MENU" Then
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns1" , "", "")
+		end if
+		
+	End If
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	'Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+	f_RequestAcntInfo()
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName = "MOVEPOP_RETURN"	then
+		Dim szListItems
+		szListItems	=	split(sRet,"★")
+		
+		if	szListItems(1)	=	"0"	then			'현재가
+'			Form.OpenScreen("11000" , g_szItemCode & "★" & "0") 
+		elseif 	szListItems(1)	=	"1"	then		'매수
+'			Form.OpenScreen("12000" , g_szItemCode & "★" & "0") 
+		elseif 	szListItems(1)	=	"2"	then		'매도
+'			Form.OpenScreen("12000" , g_szItemCode & "★" & "1") 
+		else
+		end if
+		
+	elseif sKeyName = "snsshare" Then			' 폼탭 초기화
+		g_nSNSType = Cint(sRet)
+		
+		If g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+			
+		End If		
+	end if 
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+'	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ACCTNO", "")
+	f_RequestAcntInfo()
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+
+	fmtab0.currenttab = 	nCurrentTab	' 탭 애니메이션 효과
+	
+	If nCurrentTab = 0 Then                       '잔고평가, (v002) 잔고평가
+		Form.SetRotateEnable("0")
+		'Form.SetRotateEnable("1")
+		Form.setTitleCaption( "해외CFD 잔고" )
+		
+	ElseIf nCurrentTab = 1 Then		'예수금/증거금 > 탭명은 유지(현업 요청), (v003) 계좌현황으로 명칭 변경
+		Form.SetRotateEnable("0")
+		'Form.SetRotateEnable("1")
+		Form.setTitleCaption( "해외CFD 계좌현황" )
+		
+'		if acnt0.itemcodetype == "101" then 'v0001
+'		
+'			Form.MsgBox("알림", "선택하신 계좌는 '선물옵션'계좌입니다. 해당 계좌는 '선물옵션 예탁금상세조회' 화면을 이용하시기 바랍니다.", "yesno", 1)
+'		
+'		end if
+	
+	ElseIf nCurrentTab = 2 Then		'체결
+		Form.SetRotateEnable("0")
+		'Form.SetRotateEnable("1")
+		Form.setTitleCaption( "해외CFD 체결" )
+	
+'	ElseIf nCurrentTab = 3 Then		'매매내역
+'		Form.SetRotateEnable("1")
+'		Form.setTitleCaption( "CFD 매매내역" )
+	
+	ElseIf nCurrentTab = 3 Then		'손익현황
+		Form.SetRotateEnable("0")
+		'Form.SetRotateEnable("1")
+		Form.setTitleCaption( "해외CFD 손익현황" )
+	
+	ElseIf nCurrentTab = 4 Then		'청산손익
+		Form.SetRotateEnable("0")
+		'Form.SetRotateEnable("1")
+		Form.setTitleCaption( "해외CFD 청산손익" )
+	elseif nCurrentTab = 5 Then		'월정산내역
+		Form.SetRotateEnable("0")
+		'Form.SetRotateEnable("1")
+		Form.setTitleCaption( "해외CFD 월정산내역" )	
+	End If
+	
+	g_szLastTab = nCurrentTab
+	
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+	
+	f_RequestAcntInfo()
+
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	btnSearch_OnClick()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obtre_comm_017r" or szTranID == "obtrc_comm_200r" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ACNO", 0, acnt0.total )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ASNO", 0, acnt0.sequence )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obtre_comm_017r" then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ACCTNO", "")
+	
+	'안심/일반계좌 여부 판단
+	elseif szTranID == "obtrc_comm_200r" then
+		g_MargGrade = DATAMANAGER.GetDataValue( 0, "obtrc_comm_200r", "OutBlock1", "CFD_MARG_GRAD_CODE" , 0)
+		
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ACCTINFO", g_MargGrade)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtre_comm_017r" trcode="obtre_comm_017r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtrc_comm_200r" trcode="obtrc_comm_200r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtre_comm_017r" title="해외CFD_계좌 국가 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="39" _ulen="31" >
+
+CTCD^국가코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrc_comm_200r" title="CFD_계좌정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="98" _ulen="76" >
+
+CFD_MARG_GRAD_CODE^CFD증거금등급코드^1^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

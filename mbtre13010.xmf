@@ -1,0 +1,1216 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16210" scrname="해외CFD_예약주문" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="LinkForm2" linkfile="mhtro16000_p5" ly_vert="0,0,375,100,1" />
+		<IMAGE name="edtPwdBg" autosize="1" imgpath="input_01_n.9" ly_vert="283,101,90,35,1" />
+		<ITEMCODE name="ItemCode0" itemtype="11" marketcodelist="" ly_vert="555,86,209,39,1" />
+		<LINKFORM name="LinkForm0" enable="0" visible="0" ly_vert="554,132,375,39,0" />
+		<FORMTAB name="FormTab0" fontstyle="01" tabcount="6" tabwidthtype="1" tabheadheight="35" ly_vert="0,138,375,425,1" >
+			<PAGE name="page0" caption="예약매수" linkfile="mbtre13010_t1" />
+			<PAGE name="page1" caption="예약매도" linkfile="mbtre13010_t2" />
+			<PAGE name="page3" caption="예약청산" linkfile="mbtre13010_t3" />
+			<PAGE name="page2" caption="예약내역" linkfile="mbtre13010_t4" />
+			<PAGE name="page4" caption="처리결과" linkfile="mbtre13010_t5" />
+			<PAGE name="page5" caption="유의사항" linkfile="mbtre13010_t6" />
+		</FORMTAB>
+		<EDIT name="edtPwd" fontsize="-2" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" des="비밀번호" imagefilepth="alpha" ly_vert="283,101,63,35,1" />
+		<ACCOUNT name="acnt" itemcodetype="137" etcfunctions="" accpwdctl="edtPwd" delegate="1" finaceexcept="1" benefitexcept="1" ly_vert="7,100,270,35,1" />
+		<EDIT name="edtOrgNo" imetype="0" ly_vert="500,10,235,32,1" />
+		<IMAGE name="Image0" imgpath="pop_btn_drop.png" ly_vert="500,76,30,25,1" />
+		<CONTAINER name="Container0" visible="0" ly_vert="0,139,375,423,0" scroll_ly_vert="0,139,375,423,0" >
+			<CONTROL_INFO>
+				<LABEL name="Label7" transmode="0" border="1" bordercolor="274:021056082" click="1" ly_vert="0,2,375,421,1" />
+				<LABEL name="Label4" fontsize="2" caption="(단, 잔고와 매매내역이 모두 없는 경우 익월" ly_vert="21,168,337,32,1" />
+				<LABEL name="Label5" fontsize="2" caption="자동 해지)" ly_vert="21,201,352,32,1" />
+				<LABEL name="Label6" fontsize="2" caption="입니다." ly_vert="20,134,278,32,1" />
+				<BUTTON name="Button0" caption="시세 이용신청" fgcolor="274:021056082" fontsize="2" fontstyle="01" ly_vert="72,297,230,44,1" />
+				<LABEL name="Label0" fontsize="2" caption="2024년 6월까지 실시간시세 사용료는 무료" ly_vert="21,103,341,32,1" />
+				<LABEL name="Label9" fontsize="2" caption="신청이 필요합니다." ly_vert="21,66,317,32,1" />
+				<LABEL name="Label10" fontsize="2" fontstyle="11" ly_vert="21,32,52,32,1" />
+				<LABEL name="Label8" fontsize="2" caption="주식CFD 거래를 위해 실시간 시세" ly_vert="55,32,261,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<IMAGE name="edtPwdIcon" autosize="1" imgpath="icon_save_password_n.9" ly_vert="343,108,26,21,1" />
+		<BUTTON name="btnPwd" btnimage="alpha" ly_vert="283,101,90,35,1" />
+		<LINKFORM name="LinkForm1" linkfile="mbtre13000_L1" ly_vert="974,139,375,423,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="30852" _ulen="28784" >
+Dim g_sDecimalLen
+Dim sData
+
+'주문설정값
+Dim g_szChangeInit
+Dim g_szBuyPrc
+Dim g_szSelPrc
+Dim g_szModPrc
+Dim g_szAfterOrg
+
+' 계좌비밀번호 저장여부
+Dim g_szSavePwd 
+g_szSavePwd  = "0"
+
+Dim g_pros_cls_code, g_mrkt_code, g_qttn_aplt_clcd, g_pros_cls_code1, g_pros_cls_code2, g_pros_cls_code3, g_pros_cls_code4, g_mrkt_name
+
+Dim g_szLinkCode
+
+Dim g_szAcnoAB, g_szPopupYn
+
+Dim g_szIntrGrpCnt
+g_szIntrGrpCnt = 0
+
+'20240724 SWJ START
+Dim g_sAGRM_YN
+g_sAGRM_YN = ""
+'============================================================================
+' Load_OrderSet : 환경설정값 정의
+'============================================================================
+Function Load_OrderSet()
+	g_szChangeInit = Form.LoadConfigData("SET_ORDER", "CHANGE_INIT")		' 종목/탭 변경시 초기화
+	g_szBuyPrc  = Form.LoadConfigData("SET_ORDER", "AUTO_STOCK_BUYPRC")		' 주식매수주문가격 자동입력
+	g_szSelPrc  = Form.LoadConfigData("SET_ORDER", "AUTO_STOCK_SELPRC")		' 주식매도주문가격 자동입력
+	g_szModPrc  = Form.LoadConfigData("SET_ORDER", "AUTO_STOCK_MODPRC")		' 주식정정주문가격 자동입력
+	g_szAfterOrg = Form.LoadConfigData("SET_ORDER", "AUTO_ORGNO")			' 원주문번호 자동입력
+	
+	g_szSavePwd = Form.GetEnvData("order.save_orderpwd")					' 계좌비밀번호 저장여부
+
+	' 주식매수주문가격 자동입력(기본값 : 미사용, 11:현재가)
+	if Trim(g_szBuyPrc) = "" then
+		g_szBuyPrc = "0"
+	end if
+
+	' 주식매도주문가격 자동입력(기본값 : 미사용, 11:현재가)
+	if Trim(g_szSelPrc) = "" then
+		g_szSelPrc = "0"
+	end if
+	
+	' 주식정정주문가격 자동입력(기본값 : 미사용, 11:현재가)
+	if Trim(g_szModPrc) = "" then
+		g_szModPrc = "0"
+	end if
+	
+	' 원주문번호 자동입력(기본값 : 사용)
+	if Trim(g_szAfterOrg) = "" then
+		g_szAfterOrg = "1"
+	end if
+	
+	' 종목/탭 변경시 초기화(기본값 : 사용)
+	if Trim(g_szChangeInit) = "" then
+		g_szChangeInit = "1"
+	end if	
+	
+	' 계좌비밀번호사용여부 초기화(기본값 : 미사용)
+	if Trim(g_szSavePwd) = "" then
+		g_szSavePwd = "0"
+	end if	
+	
+	'20220425 HWG START : 계좌비밀번호 입력 개선
+	if g_szSavePwd == "0" then
+		edtPwdIcon.imgpath = "icon_save_password_n.9"
+		edtPwd.caption = ""
+	else
+		edtPwdIcon.imgpath = "icon_save_password_o.9"
+	end if
+	'20220425 HWG END
+
+End Function
+
+'============================================================================
+' 거래소 ID 시장명으로 변환
+'============================================================================
+Function Transform_Market(sValue)
+	if sValue == "HK" then
+		return "홍콩"
+	elseif sValue == "CN" then
+		return "중국"
+	elseif sValue == "JP" then
+		return "일본"
+	elseif sValue == "US" then
+		return "미국"
+	end if
+end Function
+
+Function RequestTranData_Intr()
+	DATAMANAGER.ClearInputData(0, "ohhts_intr_006r")
+	DATAMANAGER.SetDataValue(0, "ohhts_intr_006r", "InBlock1", "FID_USER_ID", 0, Form.GetSharedData("&USER_ID", false))
+	DATAMANAGER.RequestTranData("ohhts_intr_006r")
+End Function
+
+Function ResponseTranData_Intr()
+	g_szIntrGrpCnt = DATAMANAGER.GetDataCount(0, "ohhts_intr_006r" , "OutBlock1")
+End Function
+
+'============================================================================
+'[[ 폼 초기화 ]]
+'============================================================================
+Sub Form_OnFormInit()
+
+	btnPwd.bringfront("1")	'20220425 HWG : 계좌비밀번호 입력 개선
+	
+	Form.setSearchType("26")
+	f_EventPopup()
+	
+	Load_OrderSet()
+	
+	Form.requestIntrItemList("00")
+	
+	'============================================================================
+	'외부화면 연동
+	'============================================================================
+	if Form.GetOpenLinkData( ) == "0" or Form.GetOpenLinkData( ) == 0	then			'매수
+		FormTab0.currenttabpageid = "page0"
+		
+	elseif Form.GetOpenLinkData( ) == "1" or Form.GetOpenLinkData( ) == 1	then		'매도
+		FormTab0.currenttabpageid = "page1"	
+		
+	else
+		szData = Form.GetOpenLinkData()
+		arrData = Split(szData, "★")
+
+		if UBOUND(arrData) > 0 then
+			temp = 0
+			if arrData(0) <> "" then
+				Dim arrData2
+				'20220510 LES START
+				szLinkCode = arrData(2)
+				if CheckMasterFile(szLinkCode) then
+							
+				else
+					Form.ShowAlert("안내", "MTS에서 거래가 불가능한 종목입니다")
+					Exit Sub
+				end if
+				'20220510 LES END 
+				if arrData(0) == "잔고" then
+				
+					'잔고★탭순서★종목코드★수량♥매도매수구분코드
+					arrData2 = Split(arrData(3), "♥")
+					if UBOUND(arrData2) > 0 then
+						if arrData2(0) == "0" then
+							szQty = 0
+						else
+							szQty = Fix(arrData2(0))
+						end if
+						
+						szMaedosuGbn = arrData2(1)
+						Form.SetSharedData("JANGO" , szMaedosuGbn.."★"..szQty)
+						
+						szName = Form.GetItemCodeInfo(arrData(2), "name")
+						Form.setOverStockItemCode(arrData(2).."★"..szName)
+					end if
+				elseif arrData(0) == "미체결" then
+					'미체결★탭순서★종목코드★주문번호♥미체결수량♥주문유형♥주문가♥""♥매매구분♥신규청산구분명
+					arrData2 = Split(arrData(3), "♥")
+					if UBOUND(arrData2) > 0 then
+						szOrgNo = arrData2(0)
+						szQty = Fix(arrData2(1))
+						szOrdType = arrData2(2)
+						szOrdPrc = arrData2(3)
+						szMaedosuGbn = arrData2(5)
+						szGbn = arrData2(6)
+						
+						Form.SetSharedData("MICHE" , szOrgNo.."★"..szQty.."★"..szOrdType.."★"..szOrdPrc.."★"..szMaedosuGbn.."★"..szGbn)
+				
+						szName = Form.GetItemCodeInfo(arrData(2), "name")
+						Form.setOverStockItemCode(arrData(2).."★"..szName)
+					end if
+				elseif arrData(0) == "기타" then
+				
+					'기타★탭순서★종목코드★종목명
+					Form.setOverStockItemCode(arrData(2).."★"..arrData(3))
+				end if
+				
+				if arrData(1) == "0" then
+					FormTab0.currenttabpageid = "page0"
+					
+				elseif arrData(1) == "1" then
+					FormTab0.currenttabpageid = "page1"
+					
+				elseif arrData(1) == "2" then
+					FormTab0.currenttabpageid = "page3"
+					
+				elseif arrData(1) == "3" then
+					FormTab0.currenttabpageid = "page2"
+				end if
+			end if
+		end if
+	end if
+	
+	
+	'============================================================================
+	'종목코드 초기화
+	'============================================================================
+	ItemCode0.code = Form.GetSharedData("&ITEM_CODE", false)
+	if Len(ItemCode0.code) > 0 then
+		Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "InitCode", ItemCode0.code )
+		Form.triggerEvent( "LinkForm2", "RequestData", ItemCode0.code)
+		DATAMANAGER.RequestTranData("ohhts_6000_001r")
+		DATAMANAGER.RequestTranData("ohhts_6000_002r")
+	end if
+	
+	'============================================================================
+	'해외시세 이용신청 검증 -> 계좌변경 이벤트
+	'============================================================================
+	szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    DATAMANAGER.RequestTranData("obtre_acnt_001r")
+    else
+	    Form.SetTimerEvent("1", 1, 1)
+    end if
+	
+	'20220823 SWJ START : 일반계좌인 경우 증거금율 표시
+    Form.triggerEvent("LinkForm2", "16200_cfdmgrt", acnt.total & "@" & acnt.sequence & "@" & FormTab0.currenttab )	'20230821 SWJ START : 현재 탭 추가
+    '20220823 SWJ END
+	'20230809 htw start
+    DATAMANAGER.RequestTranData( "obtre_comm_004r" )
+    '20230809 htw end
+    
+    RequestTranData_Intr()
+end Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'Form.setSearchType("26")
+'	Dim szPopup
+'	szPopup = Form.LoadConfigData( "mhtro16061", "mhtro16061_p1" )
+'	
+'	If szPopup <> "1" Then
+'		Form.OpenPopup( "mhtro16061_p1", "" , "")
+'	End If
+End Sub
+
+'============================================================================
+'계좌변경 이벤트 발생(타이밍 1초)
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if sTimerID == 1 then
+		Form.SetTimerEvent("1", 0, 1)
+		Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "ChangeAcnt", "" )
+	end if
+End Sub
+
+
+'============================================================================
+'[[ 폼 리프레시 ]]
+'============================================================================
+Sub Form_OnRefresh()
+	ItemCode0_OnEditComplete(ItemCode0.code)
+end Sub
+ 
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	'============================================================================
+	'폼 리프레시
+	'============================================================================
+	if sEventName == "SCREEN_REFRESH" then
+		ItemCode0_OnEditComplete(ItemCode0.code)
+	
+	'============================================================================
+	'관심종목 추가(우측상단) - 해외주식 공유
+	'============================================================================
+	elseif sEventName == "REG_INTR" then 
+		'Form.OpenPopup( "mhtro16010_p5" , ItemCode0.code , "" )
+		isIntrItem = Form.isIntrItemList(ItemCode0.code)
+	
+		if isIntrItem = true then
+			Form.OpenPopup("mhprc11000_pe", ItemCode0.code& "★"& "DEL","", "")
+		else
+			if CInt(g_szIntrGrpCnt) < 1 then
+				g_szAction = "GROUP_ADD2"			
+				Form.OpenPopup("mhprc11000_pf", g_szAction & "★" & ItemCode0.code & "★", "")
+			else
+				Form.OpenPopupAnimation("mhprc11000_pd", ItemCode0.code& "★"& "ADD","", "2")	'종목등록
+			end if
+		end if
+		
+	'============================================================================
+	'연결메뉴(우측상단) - 해외주식 공유
+	'============================================================================
+	elseif sEventName = "SCREEN_MENU" then						
+		
+		if sParam = "REG_INTR" Then									' 관심종목등록
+			'Form.OpenPopup( "mhtro16010_p5" , ItemCode0.code , "" )
+			
+			isIntrItem = Form.isIntrItemList(ItemCode0.code)
+	
+			if isIntrItem = true then
+				Form.OpenPopup("mhprc11000_pe", ItemCode0.code& "★"& "DEL","", "")
+			else
+				if CInt(g_szIntrGrpCnt) < 1 then
+					g_szAction = "GROUP_ADD2"			
+					Form.OpenPopup("mhprc11000_pf", g_szAction & "★" & ItemCode0.code & "★", "")
+				else
+					Form.OpenPopupAnimation("mhprc11000_pd", ItemCode0.code& "★"& "ADD","", "2")	'종목등록
+				end if
+			end if
+
+		elseif sParam = "SET_SCREEN" Then							' 화면설정
+			Form.OpenScreen("90000" , "1")
+
+		end if
+	
+	'============================================================================
+	' 상단바 클릭 시
+	'============================================================================
+	'20220922 SWJ START : 상단 바 클릭 시, 종목선택창 팝업 추가
+	elseif sEventName == "TITLE_CLICK" then
+		Form.OpenCommonDialog("SEARCH", "26", "")
+	'20220922 SWJ END
+	
+	'============================================================================
+	'차입잔고 연동(매도)
+	'============================================================================
+	elseif sEventName == "13000_BORROW" then
+		'20220510 LES START
+		arrLinkCode = Split(sParam,"★")
+		szLinkCode = arrLinkCode(0)
+		
+		if CheckMasterFile(szLinkCode) then
+			
+		else
+			Form.ShowAlert("안내", "MTS에서 거래가 불가능한 종목입니다")
+			Exit Sub
+		end if
+		'20220510 LES END 
+		Form.setOverStockItemCode(sParam)
+
+	'============================================================================
+	'잔고 연동(청산)
+	'============================================================================
+	elseif sEventName == "13000_BALANCE" then
+		'20220510 LES START
+		arrLinkCode = Split(sParam,"★")
+		szLinkCode = arrLinkCode(0)
+		
+		if CheckMasterFile(szLinkCode) then
+			
+		else
+			Form.ShowAlert("안내", "MTS에서 거래가 불가능한 종목입니다")
+			Exit Sub
+		end if
+		'20220510 LES END 
+		Form.setOverStockItemCode(sParam)
+		
+	'============================================================================
+	'체결/미체결 연동(전체)
+	'============================================================================
+	elseif sEventName == "13000_CONTRACT" then
+		'20220510 LES START
+		arrLinkCode = Split(sParam,"★")
+		szLinkCode = arrLinkCode(0)
+		
+		if CheckMasterFile(szLinkCode) then
+			
+		else
+			Form.ShowAlert("안내", "MTS에서 거래가 불가능한 종목입니다")
+			Exit Sub
+		end if
+		'20220510 LES END 
+		Form.setOverStockItemCode(sParam)
+		
+	elseif sEventName = "REFRESH_INTR_ITEM" then
+		
+		isIntrItem = Form.isIntrItemList(ItemCode0.code)
+		if isIntrItem == true then
+			Form.SetInterestTitle("Y")
+		else
+			Form.SetInterestTitle("N")
+		end if
+	end if
+	
+end Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if "&ITEM_CODE" == sKey then
+		edtOrgNo.caption = ""
+		ItemCode0_OnEditComplete(sValue)
+	end if
+End Sub
+
+'============================================================================
+'종목코드 변경
+'============================================================================
+Sub ItemCode0_OnEditComplete(sCode)
+	'20220526 SWJ START : 종목코드 다시 세팅
+	ItemCode0.code = sCode
+	'20220526 SWJ END
+	
+	Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "ChangeCode", ItemCode0.code )
+	Form.triggerEvent( "LinkForm2", "RequestData", ItemCode0.code)
+End Sub
+
+'============================================================================
+'주문탭 변경
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	if Len(ItemCode0.code) > 0 then
+		'============================================================================
+		'원주문번호 연동(정정/취소탭)
+		'============================================================================
+		if nCurrentTab = 3 then
+			if g_szAfterOrg == "1" then		'주문연동시
+				if edtOrgNo.caption <> "" then
+					Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "AFTER_ORGNO", edtOrgNo.caption) '주문번호 연동
+				end if
+			end if
+		end if
+			
+		Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "ChangeTab", ItemCode0.code )	
+		Form.triggerEvent("LinkForm2", "16200_cfdmgrt", acnt.total & "@" & acnt.sequence & "@" & FormTab0.currenttab )	'20230821 SWJ START : 현재 탭 추가
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "ohhts_6000_001r" or szTranID == "ohhts_6000_002r" then
+
+		Dim sCodeData, szDelay
+	
+		sCodeData = {}	' sCodeData[1] 마켓, sCodeData[2] 코드
+		sCodeData = Split( ItemCode0.code, "@" )
+		
+		szDelay = Form.GetSharedData("REALTIME_"..sCodeData[0], 0 )
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" , 0 , "OV" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "FID_INPUT_OVRS_ISCD" , 0 , sCodeData[1])
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "FID_COND_MRKT_CLS_CODE" , 0 , sCodeData[0])
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , szDelay)
+		
+	elseif szTranID == "obtre_acnt_001r" then
+		
+		DATAMANAGER.SetDataValue( 0, "obtre_acnt_001r", "InBlock1", "ACNO" , 0 , acnt.total )
+		DATAMANAGER.SetDataValue( 0, "obtre_acnt_001r", "InBlock1", "ASNO" , 0 , acnt.sequence )
+		
+	elseif szTranID == "obcsb_acif_077r" then	
+		
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_077r", "InBlock1", "ACNO" , 0 , acnt.total )
+
+		'MTS메모리평문제거 적용상태일 때
+		if plain_rm == "1" then
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_077r", "InBlock1", "ACNT_PWD"		, 0, Form.GetTopCtlProp("edtPwd", "caption"))		' 계좌 비밀번호
+		'MTS메모리평문제거 미적용상태일 때	
+		else	
+			DATAMANAGER.SetDataValue(0, "obcsb_acif_077r", "InBlock1", "ACNT_PWD"		, 0, Form.GetTopCtlProp("edtPwd", "encdata"))		' 계좌 비밀번호
+		end if
+	elseif szTranID == "obtre_comm_004r" then	
+		DATAMANAGER.SetDataValue( 0, "obtre_comm_004r", "InBlock1", "ACNO" , 0 , acnt.total )
+		DATAMANAGER.SetDataValue( 0, "obtre_comm_004r", "InBlock1", "ASNO" , 0 , acnt.sequence )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obtre_acnt_001r" then
+		g_pros_cls_code  = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PROS_CLS_CODE", 0 )
+		g_mrkt_code    = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "OVRS_STCK_MRKT_TR_CLS_CODE", 0 )
+		g_qttn_aplt_clcd = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "QTTN_APLT_CLCD", 0 )
+		g_pros_cls_code1 = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PROS_CLS_CODE1", 0 )
+		g_pros_cls_code2 = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PROS_CLS_CODE2", 0 )
+		g_pros_cls_code3 = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PROS_CLS_CODE3", 0 )
+		g_pros_cls_code4 = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PROS_CLS_CODE4", 0 )
+		'g_mrkt_name    = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "MRKT_NAME"	 , 0 )
+		
+		select case g_mrkt_code
+			case "01"
+				g_mrkt_name = "미국"
+			case "02"
+				g_mrkt_name = "홍콩"
+			case "03", "04"
+				g_mrkt_name = "중국"
+			case "05"
+				g_mrkt_name = "일본"
+		end select
+		
+		Container0.Label10.caption = g_mrkt_name
+		
+		Form.triggerEvent("LinkForm1", "CFD_AbroadMarket", g_mrkt_name )	'20230921 SWJ START
+		
+		'pros_cls_code
+		' 0 : 아무처리 안한다.   
+		' 1 : 1-2팝업화면 open
+		' 2 : 팝업화면 open 
+		if g_pros_cls_code = "1" then
+		
+			'20230921 SWJ START
+			'Container0.visible = true
+			 LinkForm1.left = 0
+			 LinkForm1.visible = True
+			 '20230921 SWJ END
+			 
+			'DATAMANAGER.RequestTranData("obcsb_acif_077r")
+		
+		'20230809 SWJ START : 삭제
+'		elseif g_pros_cls_code = "2" then
+'			Container0.visible = false
+'			Form.OpenPopup("mbtre13000_p9" , "2"&"@"&g_mrkt_name, "")
+		'20230809 SWJ END
+		
+		else
+			Container0.visible = false
+			
+			'20230921 SWJ START
+			 LinkForm1.visible = False
+			 '20230921 SWJ END
+			 
+			'DATAMANAGER.RequestTranData("obcsb_acif_077r")
+		end if
+		
+		Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "ChangeAcnt", "" )
+		
+	elseif szTranID == "obtre_acnt_001a" then
+		'DATAMANAGER.RequestTranData("obcsb_acif_077r")
+		
+	elseif szTranID == "obcsb_acif_077r" then
+		szAgrmRfusClcd = DATAMANAGER.GetDataValue(0, "obcsb_acif_077r", "OutBlock1", "AGRM_RFUS_CLCD" , 0)
+		szAgrmValdYN   = DATAMANAGER.GetDataValue(0, "obcsb_acif_077r", "OutBlock1", "AGRM_VALD_YN" , 0) 
+		g_sAGRM_YN     = DATAMANAGER.GetDataValue(0, "obcsb_acif_077r", "OutBlock1", "AGRM_YN" , 0) 		'20240724 SWJ START: CFD 과세정보 제공동의 여부
+		
+		if szAgrmRfusClcd ~= "2" and (szAgrmValdYN == "Y" or szAgrmValdYN == "X" ) then	'20230821 SWJ START: 헷지수수료 관련 X 추가
+			'거래가능
+		'20230809 htw start
+			if g_szAcnoAB == "B" and g_szPopupYn == "Y" then
+				Form.OpenPopup("mbtre13000_p10" , "3", "")	'20240724 SWJ START: 헷지수수료 맵파일 변경(13000_p12 -> 13000_p10)
+			
+			'20240724 SWJ START
+			else
+				if g_sAGRM_YN <> "Y" then
+					Form.OpenPopup("mbtre13000_p10" , "2" , "")
+				end if
+			'20240724 SWJ END
+			
+			end if
+		else
+			Form.OpenPopup("mbtre13000_p10" , "", "")
+		end if
+	elseif szTranID == "obtre_comm_004r" then	
+		g_szAcnoAB = DATAMANAGER.GetDataValue( 0, "obtre_comm_004r", "OutBlock1", "CFD_MARG_GRAD_CODE" , 0 ) 	'A:일반, B:안심
+		g_szPopupYn	= DATAMANAGER.GetDataValue( 0, "obtre_comm_004r", "OutBlock1", "PPP_YN" , 0 ) 	'팝업여부
+		g_szCTCD 	= DATAMANAGER.GetDataValue( 0, "obtre_comm_004r", "OutBlock1", "CTCD" , 0 ) 		'국가코드 	'20231130 HSZ 추가
+		
+		DATAMANAGER.RequestTranData("obcsb_acif_077r")
+		
+		'일반/안심계좌 여부 판단
+		Form.SetSharedData("CFD_IlbanAnsim",g_szAcnoAB)	'20230809 htw end
+		Form.SetSharedData("CFD_ctcd",g_szCTCD)			'20231130 HSZ 추가
+		
+	elseif szTranID == "ohhts_intr_006r" then
+		ResponseTranData_Intr()
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID == "obtre_acnt_001r" then
+		exit sub
+	end if
+	
+	'20231123 HSZ START: 계좌없는 경우 오류메시지 SKIP처리
+	if szTranID == "obtre_comm_004r" then
+		szAcnt = acnt.caption
+		if Trim(szAcnt) = "" then
+			exit sub
+		end if
+	end if
+	'20231123 HSZ END
+	
+	Dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+		
+	if Trim(szSubMsg) <> "" then
+		Form.ShowAlert(g_szTitle, szErrMsg & "(" & szSubMsg & ")")
+	else
+		Form.ShowAlert(g_szTitle, szErrMsg)
+	end if
+End Sub
+
+'============================================================================
+'계좌변호 변경 -> 해외주식 시세신청 검증
+'============================================================================
+Sub acnt_ChangeAccount()
+	'20220425 HWG START : 계좌비밀번호 입력 개선
+	if g_szSavePwd == "0" then
+		edtPwd.caption = ""
+		edtPwdIcon.imgpath = "icon_save_password_n.9"
+	else
+		edtPwdIcon.imgpath = "icon_save_password_o.9"
+	end if
+	'20220425 HWG END
+	
+	szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    DATAMANAGER.RequestTranData("obtre_acnt_001r")
+    else
+	    Form.SetTimerEvent("1", 1, 1)
+    end if
+    
+    '20220823 SWJ START : 일반계좌인 경우 증거금율 표시
+    Form.triggerEvent("LinkForm2", "16200_cfdmgrt", acnt.total & "@" & acnt.sequence & "@" & FormTab0.currenttab )	'20230821 SWJ START : 현재 탭 추가
+    '20220823 SWJ END
+    '20230809 htw start
+    g_szAcnoAB = ""
+    g_szPopupYn = ""
+    DATAMANAGER.RequestTranData( "obtre_comm_004r" )
+    '20230809 htw end
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "REG" then
+		if sRet == "ok" then
+			Form.OpenScreen("87051" , "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+' 해외주식 공지팝업
+'============================================================================
+function f_EventPopup()
+    Dim szEndDate
+    Dim szToday
+    Dim szDate
+    Dim nDiffDay
+    
+    '20200526 SWJ START : MTS 해외주식 실시간 서비스 비용 변동 안내 팝업
+    szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    szEndDate = "20200612"                            	' 팝업노출일
+	    szToday = Form.GetSharedData("&HOST_DATE", false )    ' 현재일
+	    szDate = Form.GetEnvData("EVENT_DATE_YH")            ' 일주일간 열지 않기 체크한 날짜
+    
+	    if tonumber(Form.DiffDate(szToday, szEndDate)) >= 0 then
+			if szDate == null or szDate == "" then
+			    Form.OpenPopup("popup_noti", "" , "")
+			else
+			    nDiffDay =  tonumber(Form.DiffDate(szDate, szToday))
+			    if nDiffDay > 7 then
+					Form.SetEnvData(0, "EVENT_DATE_YH", "")
+					Form.OpenPopup("popup_noti", "" , "")
+			    end if
+			end if
+	    end if
+	end if
+	'20200526 SWJ END
+end function
+
+'============================================================================
+'종목 상세정보 화면 
+'============================================================================
+Sub Image0_OnClick()
+	Form.OpenPopup( "mhtro16000_p0" , "", "" )
+	Image0.visible = false
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "ITEMINFO_POP_CLOSE" then
+		Image0.visible = true
+	
+	' 해외CFD 종목검색 화면 리턴
+	elseif sKeyName == "MBTRE10000_ITEMCODE" then
+		edtOrgNo.caption = ""
+		'20220510 LES START
+		arrLinkCode = Split(sRet,"★")
+		szLinkCode = arrLinkCode(0)
+		
+		if CheckMasterFile(szLinkCode) then
+			
+		else
+			Form.ShowAlert("안내", "MTS에서 거래가 불가능한 종목입니다")
+			Exit Sub
+		end if
+		'20220510 LES END 
+		Form.setOverStockItemCode(sRet)
+		'ItemCode0_OnEditComplete(sRet)
+		
+	elseif sKeyName == "SISECHECK2" then
+		if sRet == "N" then
+			DATAMANAGER.RequestTranData("obcsb_acif_077r")
+		elseif sRet == "Y-1" then
+'			Form.OpenScreen("16090" , "")
+			Form.OpenScreen("16095" , "")	'20231226 HSZ: 해외CFD용 시세신청화면 추가
+		elseif sRet == "Y-2" then
+			DATAMANAGER.SetDataValue( 0, "obtre_acnt_001a", "InBlock1", "ACNO" 					 , 0, acnt.total )	
+			DATAMANAGER.SetDataValue( 0,"obtre_acnt_001a", "InBlock1", "ASNO" 				    	 , 0, acnt.sequence )	
+			DATAMANAGER.SetDataValue( 0,"obtre_acnt_001a", "InBlock1", "QTTN_APLT_CLCD" 			 , 0, g_qttn_aplt_clcd)	
+			DATAMANAGER.SetDataValue( 0,"obtre_acnt_001a", "InBlock1", "OVRS_STCK_MRKT_TR_CLS_CODE" , 0, g_mrkt_code)	
+			DATAMANAGER.SetDataValue( 0,"obtre_acnt_001a", "InBlock1", "PROS_CLS_CODE1" 			 , 0, g_pros_cls_code1)	
+			DATAMANAGER.SetDataValue( 0,"obtre_acnt_001a", "InBlock1", "PROS_CLS_CODE2" 			 , 0, g_pros_cls_code2)	
+			DATAMANAGER.SetDataValue( 0,"obtre_acnt_001a", "InBlock1", "PROS_CLS_CODE3" 			 , 0, g_pros_cls_code3)	
+			DATAMANAGER.SetDataValue( 0,"obtre_acnt_001a", "InBlock1", "PROS_CLS_CODE4" 			 , 0, g_pros_cls_code4)	
+			DATAMANAGER.RequestTranData("obtre_acnt_001a")   
+		end if
+		
+	'20230809 SWJ START : 동의 화면으로 이동
+	elseif sKeyName == "HEDGE_AGREECHECK" then
+		if sRet == "Y" then
+			Form.OpenScreen("88080" , "")
+		
+		'20240724 SWJ START
+		else
+			if g_sAGRM_YN <> "Y" then
+				Form.OpenPopup("mbtre13000_p10" , "2" , "")
+			end if
+		'20240724 SWJ END
+		
+		end if 
+	
+	'20240724 SWJ START
+	elseif sKeyName == "ImposeTaxCheck" then
+		if sRet == "Y" then
+			Form.OpenScreen("31004" , "")
+		end if
+	'20240123 SWJ END
+	
+	elseif sKeyName == "AGREECHECK" then
+		if sRet == "Y" then
+			Form.OpenScreen("81040" , "")
+		
+		'20240724 SWJ START
+		else
+			if g_sAGRM_YN <> "Y" then
+				Form.OpenPopup("mbtre13000_p10" , "2" , "")
+			end if
+		'20240724 SWJ END
+		
+		end if 
+	'20220425 HWG START : 계좌비밀번호 입력 개선
+	elseif sKeyName = "CORRECT_PWD" then
+		if sRet <> "" then
+			Dim szAcnt
+			
+			tData = Split(sRet, "★")
+			
+			if UBOUND(tData) > 0 then
+				edtPwd.pwdlen = tData(1)
+				edtPwd.caption = tData(0)
+			end if
+			
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+			if g_szSavePwd == "0" then
+				edtPwdIcon.imgpath = "icon_save_password_n.9"
+			else
+				edtPwdIcon.imgpath = "icon_save_password_o.9"
+			end if
+		else
+			g_szSavePwd = Form.GetEnvData("order.save_orderpwd")
+			
+			if g_szSavePwd == "0" then
+				edtPwdIcon.imgpath = "icon_save_password_n.9"
+				edtPwd.caption = ""
+			else
+				szCurAcc = acnt.caption
+				nCnt = Cint(acnt.accountcount)
+				For i = 0 to nCnt - 1
+					szCompAcc = acnt.getAccountByIndex(i)
+					
+					if szCurAcc == szCompAcc then
+						acnt.currentindex = i
+						Exit For
+					end if
+				Next
+				edtPwdIcon.imgpath = "icon_save_password_o.9"
+			end if
+			
+		end if 
+	'20220425 HWG END
+	
+	elseif sKeyName = "mhprc11000_save" then '관심등록 완료 후
+		
+		arrRet = split(sRet, "★")
+		
+		if arrRet(2) = "DEL" then
+			Form.delIntrItemList(ItemCode0.code)
+			Form.SetInterestTitle("N")
+		else
+			Form.addIntrItemList(ItemCode0.code)
+			RequestTranData_Intr()
+			Form.SetInterestTitle("Y")
+		end if
+	end if
+End Sub
+
+'============================================================================
+'해외주식 시세신청
+'============================================================================
+Sub Container0_Button0_OnClick()
+	'Form.OpenPopup("mbtre13000_p9" , "1"&"@"&g_mrkt_name, "")
+'	Form.OpenScreen("16090" , "주문" .."★".. g_mrkt_code)
+	Form.OpenScreen("16095" , "주문" .."★".. g_mrkt_code)	'20231226 HSZ: 해외CFD용 시세신청화면 추가
+End Sub
+
+'============================================================================
+' 종목검색창 호출 명령 들어올 경우
+'============================================================================
+Sub Form_OnOpenSearchDialog()
+	szAcntClsNm = acnt.proclsname
+	szLinkData = ""
+	
+	if  Cint(instr(szAcntClsNm, "미국")) > 0 then
+		szLinkData = "840"
+	elseif Cint(instr(szAcntClsNm, "중국")) > 0 then
+		szLinkData = "156"
+	elseif Cint(instr(szAcntClsNm, "홍콩")) > 0 then
+		szLinkData = "344"
+	elseif Cint(instr(szAcntClsNm, "일본")) > 0 then
+		szLinkData = "392"
+	end if
+	
+	'LES START => 20220826
+	'ORGNSRC
+	'Form.OpenFramePopup("mbtre10000_p2", szLinkData, "")
+	
+	Form.OpenCommonDialog("SEARCH", "19", "")
+	'LES END => 20220826
+End Sub
+
+'20220425 HWG START : 계좌비밀번호 입력 개선
+'============================================================================
+Sub btnPwd_OnClick()
+	Form.openPopupAnimation("pwdcheckpopup", acnt.caption ,"","2")
+End Sub
+'20220425 HWG END
+'============================================================================
+'20220510 LES START : 마스터파일에 있는 종목인지 체크
+'============================================================================
+Function Transform_Exid(szExid)
+
+	if szExid = "HKS" then
+		Transform_Exid = "HK"
+		exit Function
+	elseif szExid = "SHS" then
+		Transform_Exid = "SH"
+		exit Function
+	elseif szExid = "SZS" then
+		Transform_Exid = "SZ"
+		exit Function
+	elseif szExid = "NYS" then
+		Transform_Exid = "NY"
+		exit Function
+	elseif szExid = "AMX" then
+		Transform_Exid = "AX"
+		exit Function
+	elseif szExid = "NAS" then
+		Transform_Exid = "OQ"
+		exit Function
+	elseif szExid = "TSE" then
+		Transform_Exid = "JP"
+		exit Function
+	else
+		Transform_Exid = szExid
+	end if
+
+End Function
+
+'============================================================================
+'20220510 LES START : 마스터파일에 있는 종목인지 체크
+'============================================================================
+Function CheckMasterFile(szCode)
+	arrCode = Split(szCode,"@")
+	szTransExidCode = Transform_Exid(arrCode(0))
+	
+	szTransItemCode = szTransExidCode .. "@" .. arrCode(1)
+
+	szCheckData = Form.GetItemCodeInfo(szTransItemCode, "exchid")
+	
+	if szCheckData = "" or szCheckData = null then
+		CheckMasterFile = false
+		Exit Function
+	end if
+	
+	CheckMasterFile = true
+	
+End Function
+'============================================================================
+'LES START => 20220826
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)		
+	
+	'sReturn1 = 거래소코드★종목코드
+	'name = 종목명 
+	name = Form.GetItemCodeInfo(sReturn1, "name")
+	
+	Form.setOverStockItemCode(sReturn1.."★"..name)
+	ItemCode0_OnEditComplete(sReturn1.."★"..name)
+	
+End Sub
+'============================================================================
+'LES END => 20220826
+'============================================================================
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_6000_001r" trcode="ohhts_6000_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_6000_002r" trcode="ohhts_6000_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtre_acnt_001r" trcode="obtre_acnt_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtre_acnt_001a" trcode="obtre_acnt_001a" compress="1" encryption="1" inputcheck="1" digitalsign="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_077r" trcode="obcsb_acif_077r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obtre_comm_004r" trcode="obtre_comm_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_intr_006r" trcode="ohhts_intr_006r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_6000_001r" title="해외주식 현재가 조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2418" _ulen="2056" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_52_WEEK_HGPR^FIDX52주최고가^14^4^7^32^1000^0^0
+FIDX_52_WEEK_LWPR^FIDX52주최저가^14^4^7^35^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_EPS^FIDXEPS^11^4^7^210^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_BSTP_CLS_CODE^FIDX업종구분코드^4^0^0^335^1000^0^0
+FIDX_BSTP_LRDV_NAME^FIDX업종대분류명^80^0^0^5133^1000^0^0
+FIDX_BSTP_MDDV_NAME^FIDX업종중분류명^80^0^0^5134^1000^0^0
+FIDX_BSTP_SMDV_NAME^FIDX업종소분류명^80^0^0^5135^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_SHNU_ASPR_UNIT^FIDX매수호가단위^14^4^7^5125^1000^0^0
+FIDX_SELN_ASPR_UNIT^FIDX매도호가단위^14^4^7^5126^1000^0^0
+FIDX_SHNU_ODER_QTY_UNIT^FIDX매수주문수량단위^9^0^7^5127^1000^0^0
+FIDX_SELN_ODER_QTY_UNIT^FIDX매도주문수량단위^9^0^7^5128^1000^0^0
+FIDX_CRNC_CODE^FIDX통화코드^4^0^0^5114^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_TICK_CLS^FIDX틱구분^4^0^0^5136^1000^0^0
+FID_PBR^FIDPBR^9^2^7^43^1000^0^0
+FIDX_PER^FIDXPER^9^2^7^42^1000^0^0
+BSTP_KOR_ISNM^업종한글종목명^100^0^0^822^1000^0^0
+FIDX_CAS_TRGT_ISSU_YN^FIDXCAS대상종목여부^1^0^0^5181^1000^0^0
+FIDX_VCM_STAT_CLS_CODE^FIDXVCM상태구분코드^1^0^0^5166^1000^0^0
+FIDX_ENG_ISNM^FIDX영문종목명^65^0^0^5112^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_VCM_STA_HOUR^FIDXVCM시작시간^6^0^0^5167^1000^0^0
+FIDX_VCM_FIN_HOUR^FIDXVCM종료시간^6^0^0^5168^1000^0^0
+FIDX_SELL_ONLY^FIDXSELLONLY^2^0^7^5173^1000^0^0
+FIDX_ISSU_STAT_CLS_CODE^FIDX종목상태구분코드^1^0^0^6016^1000^0^0
+FIDX_CAS_IEP^FIDXCASIEP^11^4^7^5215^1000^0^0
+FIDX_CAS_IEV^FIDXCASIEV^11^4^7^5216^1000^0^0
+FIDX_ETF_YN^FIDXETF여부^1^0^0^5159^1000^0^0
+FID_LVRG^FID레버리지^14^6^7^81^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_002r" title="해외주식 호가조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2588" _ulen="2134" >
+
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ASKP1^FIDX매도호가1^14^4^7^500^1000^0^0
+FIDX_ASKP2^FIDX매도호가2^14^4^7^501^1000^0^0
+FIDX_ASKP3^FIDX매도호가3^14^4^7^502^1000^0^0
+FIDX_ASKP4^FIDX매도호가4^14^4^7^503^1000^0^0
+FIDX_ASKP5^FIDX매도호가5^14^4^7^504^1000^0^0
+FIDX_ASKP6^FIDX매도호가6^14^4^7^505^1000^0^0
+FIDX_ASKP7^FIDX매도호가7^14^4^7^506^1000^0^0
+FIDX_ASKP8^FIDX매도호가8^14^4^7^507^1000^0^0
+FIDX_ASKP9^FIDX매도호가9^14^4^7^508^1000^0^0
+FIDX_ASKP10^FIDX매도호가10^14^4^7^509^1000^0^0
+FIDX_BIDP1^FIDX매수호가1^14^4^7^510^1000^0^0
+FIDX_BIDP2^FIDX매수호가2^14^4^7^511^1000^0^0
+FIDX_BIDP3^FIDX매수호가3^14^4^7^512^1000^0^0
+FIDX_BIDP4^FIDX매수호가4^14^4^7^513^1000^0^0
+FIDX_BIDP5^FIDX매수호가5^14^4^7^514^1000^0^0
+FIDX_BIDP6^FIDX매수호가6^14^4^7^515^1000^0^0
+FIDX_BIDP7^FIDX매수호가7^14^4^7^516^1000^0^0
+FIDX_BIDP8^FIDX매수호가8^14^4^7^517^1000^0^0
+FIDX_BIDP9^FIDX매수호가9^14^4^7^518^1000^0^0
+FIDX_BIDP10^FIDX매수호가10^14^4^7^519^1000^0^0
+FIDX_ASKP_RSQN1^FIDX매도호가잔량1^13^0^7^520^1000^0^0
+FIDX_ASKP_RSQN2^FIDX매도호가잔량2^13^0^7^521^1000^0^0
+FIDX_ASKP_RSQN3^FIDX매도호가잔량3^13^0^7^522^1000^0^0
+FIDX_ASKP_RSQN4^FIDX매도호가잔량4^13^0^7^523^1000^0^0
+FIDX_ASKP_RSQN5^FIDX매도호가잔량5^13^0^7^524^1000^0^0
+FIDX_ASKP_RSQN6^FIDX매도호가잔량6^13^0^7^525^1000^0^0
+FIDX_ASKP_RSQN7^FIDX매도호가잔량7^13^0^7^526^1000^0^0
+FIDX_ASKP_RSQN8^FIDX매도호가잔량8^13^0^7^527^1000^0^0
+FIDX_ASKP_RSQN9^FIDX매도호가잔량9^13^0^7^528^1000^0^0
+FIDX_ASKP_RSQN10^FIDX매도호가잔량10^13^0^7^529^1000^0^0
+FIDX_BIDP_RSQN1^FIDX매수호가잔량1^13^0^7^530^1000^0^0
+FIDX_BIDP_RSQN2^FIDX매수호가잔량2^13^0^7^531^1000^0^0
+FIDX_BIDP_RSQN3^FIDX매수호가잔량3^13^0^7^532^1000^0^0
+FIDX_BIDP_RSQN4^FIDX매수호가잔량4^13^0^7^533^1000^0^0
+FIDX_BIDP_RSQN5^FIDX매수호가잔량5^13^0^7^534^1000^0^0
+FIDX_BIDP_RSQN6^FIDX매수호가잔량6^13^0^7^535^1000^0^0
+FIDX_BIDP_RSQN7^FIDX매수호가잔량7^13^0^7^536^1000^0^0
+FIDX_BIDP_RSQN8^FIDX매수호가잔량8^13^0^7^537^1000^0^0
+FIDX_BIDP_RSQN9^FIDX매수호가잔량9^13^0^7^538^1000^0^0
+FIDX_BIDP_RSQN10^FIDX매수호가잔량10^13^0^7^539^1000^0^0
+FIDX_TOTAL_ASKP_RSQN^FIDX총매도호가잔량^19^0^7^560^1000^0^0
+FIDX_TOTAL_BIDP_RSQN^FIDX총매수호가잔량^19^0^7^561^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtre_acnt_001r" title="해외주식CFD 실시간시세 신청정?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="424" _ulen="318" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+QTTN_APLT_CLCD^시세신청구분코드^1^0^0^0^0^0^0
+PROS_CLS_CODE1^처리구분코드1^1^0^0^0^0^0^0
+PROS_CLS_CODE2^처리구분코드2^1^0^0^0^0^0^0
+PROS_CLS_CODE3^처리구분코드3^1^0^0^0^0^0^0
+PROS_CLS_CODE4^처리구분코드4^1^0^0^0^0^0^0
+MRKT_NAME^시장명^50^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtre_acnt_001a" title="해외주식CFD 실시간시세 신청 및" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="412" _ulen="304" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+QTTN_APLT_CLCD^시세신청구분코드^1^0^0^0^0^0^0
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+PROS_CLS_CODE1^처리구분코드1^1^0^0^0^0^0^0
+PROS_CLS_CODE2^처리구분코드2^1^0^0^0^0^0^0
+PROS_CLS_CODE3^처리구분코드3^1^0^0^0^0^0^0
+PROS_CLS_CODE4^처리구분코드4^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_077r" title="금융거래정보제공동의내역조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="83" _ulen="63" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="516" _ulen="398" >
+
+MANG_BRCD^관리지점^4^0^0^0^0^0^0
+BRNM^지점명^80^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNM^계좌명^40^0^0^0^0^0^0
+AGRM_RFUS_CLCD^동의거부구분코드^1^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+AGRM_VALD_YN^동의유효여부^1^0^0^0^0^0^0
+PROS_EMPNO^처리직원번호^9^0^0^0^0^0^0
+EMPL_NAME^직원명^40^0^0^0^0^0^0
+PROS_TRNO^처리단말번호^39^0^0^0^0^0^0
+PROS_YMDH^처리일시^19^0^0^0^0^0^0
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtre_comm_004r" title="해외CFD_계좌 상태 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="122" _ulen="90" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1262" _ulen="926" >
+
+CFD_DEAL_ABLE_YN_CODE^CFD매매가능여부코드^1^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+CFD_MARG_RATE^CFD증거금비율^20^13^7^0^0^0^0
+ACNT_LVRG^계좌레버리지^20^6^7^0^0^0^0
+HTS_ODER_FERT^HTS주문수수료율^20^13^7^0^0^0^0
+BRNC_ODER_FERT^지점주문수수료율^20^13^7^0^0^0^0
+SECO_BYOV_RLOV_SPEAD^증권회사매수롤오버스프레드^20^13^7^0^0^0^0
+ACNT_LVRG_LIMT_RATE^계좌레버리지한도비율^20^6^7^0^0^0^0
+CFD_CUST_LIMT_AMT^CFD고객한도금액^20^6^7^0^0^0^0
+CFD_MARG_GRAD_CODE^CFD증거금등급코드^1^0^0^0^0^0^0
+MARG_GRAD_NAME^증거금등급명^40^0^0^0^0^0^0
+CTCD^국가코드^3^0^0^0^0^0^0
+INVT_FIN_DATE^투자종료일자^8^0^0^0^0^0^0
+CFD_MNTN_MARG_RATE^CFD유지증거금비율^20^6^7^0^0^0^0
+CFD_ATMT_LSCT_MARG_RATE^CFD자동로스컷증거금비율^20^6^7^0^0^0^0
+FRCR_DFPR_HFERT^외화부족분헷지수수료율^20^12^7^0^0^0^0
+FRCR_HDPR_HFERT^외화보유분헷지수수료율^20^12^7^0^0^0^0
+CFD_MARG_RATE_APLY_TYPE^CFD증거금비율적용유형^2^0^0^0^0^0^0
+CFD_RELF_AGRM_YN^CFD안심동의여부^1^0^0^0^0^0^0
+FRCR_ATBY_APLT_YN^외화자동매수신청여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+SFCN_YN^충족여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_intr_006r" title="MTS관심종목 최초조회시(관심그?" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="49" _ulen="43" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="46" _ulen="42" >
+
+FID_VRSN_ID^FID버전ID^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="170" _ulen="138" >
+
+FID_CNCN_ISSU_NEW_GRP_ID^FID관심종목신규그룹ID^3^0^0^0^0^0^0
+FID_CNCN_GRP_NAME^FID관심그룹명^40^0^0^0^0^0^0
+FID_ISSU_CNT^FID종목수^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="100" inout="out" _len="349" _ulen="277" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_APLY_YN^FID적용여부^1^0^0^0^0^0^0
+FID_SELN_SHNU_CLS^FID매도매수구분^1^0^0^0^0^0^0
+FID_INPUT_SLCT_YN^FID입력선택여부^2^0^0^0^0^0^0
+FID_COND_PRC^FID조건가격^9^0^0^0^0^0^0
+FID_ABNR_LOEQ_CLS^FID이상이하구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" occurs="100" inout="out" _len="243" _ulen="195" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_HLDN_QTY^FID보유수량^18^0^0^0^0^0^0
+FID_CNTG_UNPR^FID체결단가^18^0^0^0^0^0^0
+FID_SELN_SHNU_CLS^FID매도매수구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

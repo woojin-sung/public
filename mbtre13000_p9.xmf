@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16200" scrname="해외CFD_주문_실시간 시세신청" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,324,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9.png" ly_vert="0,0,309,45,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="해외주식CFD 시세신청" bgcolor="064:188030030" halign="1" ly_vert="-2,2,309,45,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="254,3,45,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,11,24,24,1" />
+		<BUTTON name="btnClose2" caption="닫기" fgcolor="004:000000000" bgcolor="232:232078084" bgcolor2="233:102101101" btnimage="btn_pop1.9.png" ly_vert="0,279,155,45,1" />
+		<BUTTON name="btnReceive" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="155,279,154,45,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="7" outline="0000" designorder="1" ly_vert="7,74,295,190,1" >
+			<COL_INFO ly_vert_width="295" />
+			<ROW_INFO ly_vert_height="30,30,10,30,30,30,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="        주식 CFD 거래를 위해 실시간" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="시세 신청이 필요합니다." impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" halign="0" line="0,0" caption="2022년 12월까지 실시간 시세를 무료로" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="0,0" caption="제공하며, 무료 이벤트 기간이 종료되면" impidxs="" />
+				<CELL cell_ly="0,5,0,5" halign="0" line="0,0" caption="지연시세(무료)로 전환됩니다." impidxs="" />
+				<CELL cell_ly="0,6,0,6" halign="0" line="0,0" caption="실시간 시세 신청을 진행하시겠습니까? " impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="Table1" insidelinecolor="102:255255255" colcount="1" rowcount="9" outline="0000" designorder="1" ly_vert="7,51,295,215,1" >
+			<COL_INFO ly_vert_width="295" />
+			<ROW_INFO ly_vert_height="25,25,15,25,25,25,25,25,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="메리츠증권 해외주식CFD 거래를 이용해" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="주셔서 감사합니다." impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" halign="0" line="0,0" caption="기존           주식 실시간 시세를 이용중인" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="0,0" caption="고객님에게는 2023년 12월까지 실시간 " impidxs="" />
+				<CELL cell_ly="0,5,0,5" halign="0" line="0,0" caption="시세를 무료로 제공합니다." impidxs="" />
+				<CELL cell_ly="0,6,0,6" halign="0" line="0,0" caption="(단, 잔고와 매매내역이 모두 없는 경우" impidxs="" />
+				<CELL cell_ly="0,7,0,7" halign="0" line="0,0" caption=" 익월 자동 해지)" impidxs="" />
+				<CELL cell_ly="0,8,0,8" halign="0" line="0,0" caption="많은 이용바랍니다. 감사합니다." impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="Label0" fontstyle="11" ly_vert="45,113,56,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2968" _ulen="2870" >
+'============================================================================
+' 화 면 명 : 해외주식주문_정산금팝업
+' 화면설명 : 해외주식주문 정산금팝업
+' 작    성 : 2017.12
+'============================================================================
+
+'****************************************************************************
+'               G  R  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szGbn
+'****************************************************************************
+'			P  E  R  S  O  N  A  L     F  U  N  C  T  I  O  N
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	szLinkData = Form.GetOpenLinkData()
+	
+	szData = Split(szLinkData, "@")
+	
+	if UBOUND(szData) > 0 then
+		g_szGbn = szData(0)
+		if szData(0) == "1" then
+			Table0.visible = true
+			Table1.visible = false
+			
+			Label0.caption = szData(1)
+			Label0.left = 8
+			Label0.top = 73
+			
+		elseif szData(0) == "2" then
+			Table0.visible = false
+			Table1.visible = true
+			
+			Label0.caption = szData(1)
+			Label0.left = 44
+			Label0.top = 112		'20220627 SWJ START : 문구 변경으로 인한 위치 변경
+			
+			btnClose2.visible = false
+			btnReceive.left = 0
+			btnReceive.width = 309
+		end if
+	end if
+End Sub
+
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.SendReturnToParent("SISECHECK2" , "N")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub btnClose_OnClick()
+	Form.SendReturnToParent("SISECHECK2" , "N")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose2_OnClick : 닫기
+'============================================================================
+Sub btnClose2_OnClick()
+	Form.SendReturnToParent("SISECHECK2" , "N")
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnReceive_OnClick()
+	if g_szGbn == "1" then
+		Form.SendReturnToParent("SISECHECK2" , "Y-1")
+	elseif g_szGbn == "2" then
+		Form.SendReturnToParent("SISECHECK2" , "Y-2")
+	else
+		Form.SendReturnToParent("SISECHECK2" , "Y")
+	end if
+	
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

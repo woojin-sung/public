@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="21004" scrname="CFD 증거금유형 변경" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" bgcolor="052:255255255" itemcodetype="136,137" etcfunctions="" accpwdctl="EditPW" ly_vert="6,10,271,39,1" />
+		<EDIT name="EditPW" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="283,9,86,39,1" />
+		<LABEL name="lblNow" caption="현재 증거금 등급" ly_vert="10,69,130,32,1" />
+		<LABEL name="lblType" fontsize="-1" border="1" paddinginfo="20,0,0,0" ly_vert="150,69,215,32,1" />
+		<LABEL name="lblAfter" caption="변경 증거금 등급" ly_vert="10,121,130,32,1" />
+		<RADIOGROUP name="rdoType" ly_vert="150,121,215,64,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="CFD일반계좌" transfervalue="A" position="0,0,120,32" />
+				<RADIO no="1" text="CFD안심계좌" transfervalue="B" position="0,32,120,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<BUTTON name="btnChange" caption="변경" fgcolor="095:000000000" ly_vert="10,506,355,46,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6591" _ulen="6197" >
+'============================================================================
+' 01. 화 면 명 : CFD 권리예정내역 조회
+' 02. 화면설명 : CFD 권리예정내역 조회
+' 03. 작    성 : 2021. 07. 21. KSJ
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_szPlain_rm	'메모리 평문적용 여부
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+'===========================================================================
+' 계좌비밀번호 입력체크함수
+'===========================================================================
+Function f_GetPWCkeck()
+	Dim szACNT_PWD 
+	szACNT_PWD = Form.GetCtlProp( "EditPW", "caption" )
+	
+	if szACNT_PWD == null or szACNT_PWD == "" then
+		Form.MsgBox( "알림", "비밀번호를 입력해주세요.", "", 6 )	
+		return true
+	end if
+	
+	return false
+End Function	
+
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Sub Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	'메모리평문적용여부(0:미적용 / 1:적용)
+	g_szPlain_rm = Form.GetSharedData("&PLAIN_RM", false)
+End Sub
+'============================================================================
+' acnt0_ChangeAccount() : 계좌변경
+'============================================================================
+Sub acnt0_ChangeAccount()
+	EditPW.caption = ""
+	lblType.caption = ""
+	rdoType.currentindex = "-1"
+End Sub
+'============================================================================
+' EditPW_OnEditComplete() : 비밀번호 입력
+'============================================================================
+Sub EditPW_OnEditComplete()
+	If f_GetPWCkeck() == false Then
+		DATAMANAGER.RequestTranData( "obaci_acct_261r" )
+	End If
+End Sub
+'============================================================================
+' btnChange_OnClick() : 증거금유형 변경
+'============================================================================
+Sub btnChange_OnClick()
+	if f_GetPWCkeck() then
+		Exit Sub
+	end if
+	
+	If rdoType.currentindex == "-1" or rdoType.currentindex == -1 Then
+		Form.ShowAlert("알림", "변경 증거금을 선택해 주세요")
+		Exit Sub
+	End If
+	
+	if rdoType.GetRadioCaption( rdoType.currentindex ) == lblType.caption then
+		Form.ShowAlert("알림", "변경 증거금 등급이 기존 등급과 같습니다.")
+		Exit Sub
+	end if
+	
+	DATAMANAGER.RequestTranData( "obaci_acct_260a" )
+End Sub
+'============================================================================
+' Form_OnRefresh()
+'============================================================================
+Sub Form_OnRefresh()
+	if EditPW.caption ~= null and EditPW.caption ~= "" then
+		DATAMANAGER.RequestTranData( "obaci_acct_261r" )
+	end if
+End Sub
+
+
+'****************************************************************************
+'				     	D A T A M A N A G E R
+'****************************************************************************
+'============================================================================
+' DATAMANAGER_OnSendTranBefore()
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)   		
+	Dim szACNT_PWD 
+	if g_szPlain_rm == "1" then  			'MTS메모리평문 적용상태일때
+	    szACNT_PWD = EditPW.caption
+	else  								'MTS메모리평문 미적용상태일때
+	    szACNT_PWD = Form.GetEncData(EditPW.caption)
+	end if	
+	
+	If szTranID == "obaci_acct_261r" Then
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ACNO" , 0 , acnt0.total)'Left(cmb0.caption , 8))		'계좌번호
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ASNO" , 0 , acnt0.sequence)'Right(cmb0.caption , 2))	'계좌일련번호
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ACNT_PWD" , 0 , szACNT_PWD)							'비밀번호
+	ElseIf szTranID == "obaci_acct_260a" Then
+			
+		Dim szCFD_MARG_GRAD_CODE, nCFD_ACNT_MGRT
+		
+		if rdoType.currentindex == "0" or rdoType.currentindex == 0 then
+			szCFD_MARG_GRAD_CODE = "A"
+			nCFD_ACNT_MGRT = 0
+		else
+			szCFD_MARG_GRAD_CODE = "B"
+			nCFD_ACNT_MGRT = 100
+		end if
+		
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ACNO" , 0 , acnt0.total)'Left(cmb0.caption , 8))		'계좌번호
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ASNO" , 0 , acnt0.sequence)'Right(cmb0.caption , 2))	'계좌일련번호
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ACNT_PWD" , 0 , szACNT_PWD)							'비밀번호
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "CFD_MARG_GRAD_CODE" , 0 , szCFD_MARG_GRAD_CODE)			'CFD증거금등급코드
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "CFD_ACNT_MGRT" , 0 , nCFD_ACNT_MGRT)					'CFD계좌증거금율
+	End If
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete()
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If szTranID == "obaci_acct_261r" Then
+		Dim szCFD_MARG_GRAD_CODE
+		szCFD_MARG_GRAD_CODE = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "CFD_MARG_GRAD_CODE", 0)
+		If szCFD_MARG_GRAD_CODE == "A" Then
+			lblType.caption = "CFD일반계좌"
+		ElseIf szCFD_MARG_GRAD_CODE == "B" Then
+			lblType.caption = "CFD안심계좌"
+		End If
+	ElseIf szTranID == "obaci_acct_260a" Then
+		DATAMANAGER.RequestTranData( "obaci_acct_261r" )
+	End If
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranError()
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if szSubMsg ~= null and Trim(szSubMsg) ~= "" then
+		szErrMsg = szErrMsg.."("..szSubMsg..")"
+	end if
+	
+	if szTranID == "obaci_acct_260a" or szTranID == "obaci_acct_261r" then
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+	end if
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_acct_261r" trcode="obaci_acct_261r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_260a" trcode="obaci_acct_260a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_acct_261r" title="CFD계좌 증거금유형 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="122" _ulen="90" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="117" _ulen="91" >
+
+CFD_MARG_GRAD_CODE^CFD증거금등급코드^1^0^0^0^0^0^0
+CFD_ACNT_MGRT^CFD계좌증거금율^20^6^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_260a" title="CFD계좌 증거금유형 관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="278" _ulen="208" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+CFD_MARG_GRAD_CODE^CFD증거금등급코드^1^0^0^0^0^0^0
+CFD_ACNT_MGRT^CFD계좌증거금율^20^6^7^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

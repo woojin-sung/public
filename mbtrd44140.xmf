@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44140" scrname="예탁자산현황_메인" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab" fontsize="-2" tabcount="2" tabwidthtype="1" tabheadheight="36" ly_vert="0,55,375,508,1" >
+			<PAGE name="page0" caption="예탁자산(평가)" linkfile="mbtrd44140_t1" loadingtype="1" />
+			<PAGE name="page1" caption="개별통화금액" linkfile="mbtrd44140_t2" loadingtype="1" />
+		</FORMTAB>
+		<ACCOUNT name="acnt" bgcolor="052:255255255" itemcodetype="135" accpwdctl="edtPwd" delegate="1" ly_vert="10,10,306,39,1" />
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,10,39,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1275" _ulen="1267" >
+
+Dim g_szACNO
+Dim g_szASNO
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szScreenNo
+	
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+	
+	g_szACNO = Form.GetCtlProp("acnt", "total")
+	g_szASNO = Form.GetCtlProp("acnt", "sequence")
+	
+	If szScreenNo = "44140" Then
+		fmtab.currenttab = "0"
+	elseif szScreenNo = "44150" then
+		fmtab.currenttab = "1"
+	end if
+	
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szACNO & "★" & g_szASNO)
+End Sub
+
+'============================================================================
+Sub fmtab_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szACNO & "★" & g_szASNO)
+End Sub
+
+'============================================================================
+Sub acnt_ChangeAccount()
+	g_szACNO = Form.GetCtlProp("acnt", "total")
+	g_szASNO = Form.GetCtlProp("acnt", "sequence")
+	
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szACNO & "★" & g_szASNO)
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szACNO & "★" & g_szASNO)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

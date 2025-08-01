@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44300" scrname="해외파생주문_가격선택창" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,250,466,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9.png" ly_vert="0,0,250,55,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" bgcolor="064:188030030" halign="1" ly_vert="0,0,250,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="206,15,24,24,1" />
+		<BUTTON name="btnClose0" btnimage="alpha" ly_vert="195,5,45,45,1" />
+		<IMAGE name="imgBg" imgpath="pop_header.9.png" ly_vert="0,61,250,336,1" />
+		<CONTAINER name="contPrc" vscroll="1" scroll_pos="0,0" ly_vert="0,61,250,330,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<GRID name="grdPrc" colcount="2" ly_vert="0,0,250,0,1" ver="1" itemcodeid="ItemCode" >
+					<CONTROL_INFO>
+						<LABEL name="Prc" mask="0,0,,,0,,-1,1,1,2,0" halign="1" />
+						<LABEL name="ItemCode" halign="2" />
+					</CONTROL_INFO>
+					<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" border="0000" inlinecolor="025:255255255" />
+					<COLINFO ly_vert_width="250,70" ly_vert_visible="0,2" >
+						<COLUMN colcount="1" >
+							<SUBCOLINFO ly_vert_width="250" ly_vert_visible="0" />
+							<BODY rowcount="1" >
+								<ROWINFO ly_vert_height="30" />
+								<CELLINFO>
+									<CELL name="Prc" cell_ly="0,0,0,0" >
+										<STATECOMP_INFO desttype="1" />
+									</CELL>
+								</CELLINFO>
+							</BODY>
+						</COLUMN>
+						<COLUMN colcount="1" >
+							<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+							<BODY rowcount="1" >
+								<ROWINFO ly_vert_height="30" />
+								<CELLINFO>
+									<CELL name="ItemCode" cell_ly="0,0,0,0" >
+										<STATECOMP_INFO desttype="1" />
+									</CELL>
+								</CELLINFO>
+							</BODY>
+						</COLUMN>
+					</COLINFO>
+					<UPDATETR_INFO/>
+					<UPDATEBC_INFO keycellid="Prc" rangecellid="Prc" hlcolorcellid="Prc" />
+				</GRID>
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="btnClose1" caption="닫기" fgcolor="004:000000000" bgcolor="028:255255255" bgcolor2="028:255255255" btnimage="btn_03.9.png" ly_vert="25,412,200,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2428" _ulen="2356" >
+--===========================================================================
+--===========================================================================
+
+Dim g_szType
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData, tData
+	szData = Form.GetOpenLinkData( )
+	
+	if szData <> "" then
+		tData = Split(szData, "★")
+		
+		g_szType = tData(0)
+		
+		if g_szType = "LIMIT_PRC" then '주문가격선택
+			lblTitle.caption = "주문가격선택"
+		elseif g_szType = "STOP_PRC" then '조건가격선택
+			lblTitle.caption = "조건가격선택"
+		end if
+
+		if tData(1) <> "" and tData(2) <> "" and tData(3) <> "" then
+			f_SetData(tData(1), tData(2), tData(3))
+		end if
+	end if
+End Sub
+
+'============================================================================
+' 데이터 셋팅
+'============================================================================
+Function f_SetData(szItemCode, szCurPrc, szCtrt)
+	contPrc.grdPrc.rowcount = 101
+	contPrc.grdPrc.height = contPrc.grdPrc.rowheight
+	contPrc.SetScrollAutoSize()
+	contPrc.scroll_pos = 45*30
+	'Form.GetSpinPrice(g_szItemCode, szLPrc, 1)
+	Dim szPrc
+	
+	for i = 0 to 101 step 1
+		if i = 50 then
+			szPrc = szCurPrc
+		else
+			szPrc = Form.GetSpinPrice(szItemCode, szCurPrc, 50-i)
+			if tonumber(szPrc) < 0 then
+				szPrc = "0"
+			end if
+		end if
+		
+		contPrc.grdPrc.SetCellData("ItemCode", i, szItemCode)
+		contPrc.grdPrc.SetCellData("Prc", i, szPrc)
+		
+		if tonumber(szPrc) > tonumber(szCtrt) then
+			contPrc.grdPrc.SetCellFgColor( "Prc", i, "1" ) '빨간색
+		elseif tonumber(szPrc) < tonumber(szCtrt) then
+			contPrc.grdPrc.SetCellFgColor( "Prc", i, "2" ) '파란색
+		end if
+'		if i < 50 then
+'			contPrc.grdPrc.SetCellFgColor( "Prc", i, "1" )
+'		elseif i > 50 then
+'			contPrc.grdPrc.SetCellFgColor( "Prc", i, "2" )
+'		end if
+	next
+End Function
+
+'============================================================================
+Sub btnClose0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnClose1_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub contPrc_grdPrc_OnClickUp(lRow, szCellID)
+	Dim szPrc
+	
+	Prc = contPrc.grdPrc.GetCellData("Prc", lRow)
+	
+	if Trim(Prc) <> "" then
+		Form.SendReturnToParent(g_szType , Prc)
+	end if
+	
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

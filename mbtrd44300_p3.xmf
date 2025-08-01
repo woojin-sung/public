@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44300" scrname="해외파생주문_가격입력창" version="2" writer="김철중" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" imgpath="bg_dim40.9.png" ly_vert="0,0,375,256,1" />
+		<LABEL name="lblBack" bgcolor="038:255255255" transmode="0" ly_vert="0,256,375,431,1" />
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9.png" ly_vert="0,256,375,45,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="가격입력" bgcolor="064:188030030" halign="1" ly_vert="0,256,375,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="341,266,24,24,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="330,256,45,45,1" />
+		<LABEL name="lblPrc" ly_vert="20,315,105,39,1" />
+		<EDIT name="edtPrc" autofontsize="1" mask="0,0,,,0,,-1,1,1,2,0" halign="2" imetype="0" clearall="0" ly_vert="125,315,152,39,1" />
+		<BUTTON name="btnPrc" btnimage="alpha" ly_vert="125,315,151,39,1" />
+		<BUTTON name="btnPPlus" btnimage="btn_etc12.9.png" ly_vert="276,315,39,39,1" />
+		<BUTTON name="btnPMinus" btnimage="btn_etc13.9.png" ly_vert="314,315,39,39,1" />
+		<BUTTON name="btnPlus1" caption="1" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,379,94,67,1" />
+		<BUTTON name="btnPlus2" caption="2" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="94,379,94,67,1" />
+		<BUTTON name="btnPlus3" caption="3" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="188,379,94,67,1" />
+		<BUTTON name="btnPlus4" caption="4" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,446,94,67,1" />
+		<BUTTON name="btnPlus5" caption="5" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="94,446,94,67,1" />
+		<BUTTON name="btnPlus6" caption="6" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="188,446,94,67,1" />
+		<BUTTON name="btnPlus7" caption="7" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,513,94,67,1" />
+		<BUTTON name="btnPlus8" caption="8" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="94,513,94,67,1" />
+		<BUTTON name="btnPlus9" caption="9" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="188,513,94,67,1" />
+		<BUTTON name="btnDisposition" caption="'" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,580,94,67,1" />
+		<BUTTON name="btnHidden" btnimage="alpha" ly_vert="0,580,94,67,1" />
+		<BUTTON name="btnPlus0" caption="0" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="94,580,94,67,1" />
+		<BUTTON name="btnDot" caption="." fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="188,580,94,67,1" />
+		<BUTTON name="btnBack" btnimage="btn_keypad3.9.png" ly_vert="282,379,94,67,1" />
+		<BUTTON name="btnClear" caption="C" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="282,446,94,67,1" />
+		<BUTTON name="btnConfirm" caption="확인" fgcolor="128:188030030" fontsize="6" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="282,513,93,134,1" />
+		<LABEL name="lblTemp" mask="0,0,,,0,,-1,0,1,2,0" transmode="0" halign="2" ly_vert="482,48,279,57,1" />
+		<BUTTON name="btnPM" caption="+/-" fgcolor="004:000000000" fontsize="17" fontstyle="01" btnimage="btn_keypad.9.png" ly_vert="0,580,94,67,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7283" _ulen="7063" >
+--===========================================================================
+--===========================================================================
+
+Dim g_szType '타입
+Dim g_szItemCode '종목코드
+Dim g_szTickSize '틱사이즈
+Dim g_bInitFlag '이닛플레그
+
+g_bInitFlag = true
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData, tData
+	szData = Form.GetOpenLinkData( )
+	
+	if szData <> "" then
+		Dim szDispositionType
+		tData = Split(szData, "★")
+
+		g_szType = tData(0)
+		g_szItemCode = tData(1)
+		edtPrc.caption = tonumber(Replace(Form.GetDecimalMaskData(tData(2)),",",""))
+		g_szTickSize = tData(3)
+		szDispositionType = tData(4)
+		
+		if g_szType = "LIMIT_PRC" then '주문가격
+			lblPrc.caption = "주문가격"
+		elseif g_szType = "STOP_PRC" then '조건가격
+			lblPrc.caption = "조건가격"
+		end if
+		
+		if szDispositionType = "0" then
+			btnDisposition.caption = ""
+		elseif szDispositionType = "1" then
+			btnHidden.visible = false
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub btnPPlus_OnClick()
+	Dim szPrc
+	szPrc = edtPrc.caption
+	if szPrc = "" then
+		szPrc = "0"
+	end if
+	
+	szPrc = Form.GetDecimalMaskData(szPrc)
+	
+	'20200428 HWG START : 해외파생 마이너스 호가 추가
+	if CDbl(szPrc) > 0 then
+		lblTemp.caption = Form.GetSpinPrice(g_szItemCode, szPrc, 1)
+		edtPrc.caption = lblTemp.dispcaption
+	else
+		Calc_Price(0, g_szItemCode)
+	end if
+	'20200428 HWG END
+	
+End Sub
+
+'============================================================================
+Sub btnPMinus_OnClick()
+	Dim szPrc
+	szPrc = edtPrc.caption
+	if CDbl(szPrc) = "" then	'20200428 HWG START : 해외파생 마이너스 호가 추가
+		szPrc = "0"
+		edtPrc.caption = "0"
+	end if
+	
+	szPrc = Form.GetDecimalMaskData(szPrc)
+	
+	'20200428 HWG START : 해외파생 마이너스 호가 추가
+'	if tonumber(szPrc) >= tonumber(g_szTickSize) then
+	if CDbl(szPrc) > 0 then
+		lblTemp.caption = Form.GetSpinPrice(g_szItemCode, szPrc, -1)
+		edtPrc.caption = lblTemp.dispcaption
+	else
+		Calc_Price(1, g_szItemCode)
+	end if
+	'20200428 HWG END
+	
+End Sub
+
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnPlus1_OnClick()
+	f_CalcPlus("1")
+End Sub
+
+'============================================================================
+Sub btnPlus2_OnClick()
+	f_CalcPlus("2")
+End Sub
+
+'============================================================================
+Sub btnPlus3_OnClick()
+	f_CalcPlus("3")
+End Sub
+
+'============================================================================
+Sub btnPlus4_OnClick()
+	f_CalcPlus("4")
+End Sub
+
+'============================================================================
+Sub btnPlus5_OnClick()
+	f_CalcPlus("5")
+End Sub
+
+'============================================================================
+Sub btnPlus6_OnClick()
+	f_CalcPlus("6")
+End Sub
+
+'============================================================================
+Sub btnPlus7_OnClick()
+	f_CalcPlus("7")
+End Sub
+
+'============================================================================
+Sub btnPlus8_OnClick()
+	f_CalcPlus("8")
+End Sub
+
+'============================================================================
+Sub btnPlus9_OnClick()
+	f_CalcPlus("9")
+End Sub
+
+'============================================================================
+Sub btnPlus0_OnClick()
+	f_CalcPlus("0")
+End Sub
+
+'============================================================================
+Sub btnDisposition_OnClick()
+	if Len(edtPrc.caption) < 9 then
+		if edtPrc.caption <> "" and InStr(edtPrc.caption, "'") = 0 then
+			edtPrc.caption = edtPrc.caption & "'"
+		end if
+	end if
+	g_bInitFlag = false
+End Sub
+
+'============================================================================
+Sub btnDot_OnClick()
+	if Len(edtPrc.caption) < 9 then
+		if edtPrc.caption <> "" and InStr(edtPrc.caption, ".") = 0 then
+			edtPrc.caption = edtPrc.caption & "."
+		end if
+	end if
+	g_bInitFlag = false
+End Sub
+
+'============================================================================
+Sub btnBack_OnClick()
+	Dim nLen
+	nLen = Len(edtPrc.caption)
+
+	if nLen <> 0 then
+		szQty = Left(edtPrc.caption, nLen-1)
+		edtPrc.caption = szQty
+	end if
+	
+	g_bInitFlag = false
+End Sub
+
+'============================================================================
+Sub btnClear_OnClick()
+	edtPrc.caption = ""
+	g_bInitFlag = false
+End Sub
+
+'============================================================================
+Sub btnConfirm_OnClick()
+	Dim szPrc
+	szPrc = edtPrc.caption
+	
+	if szPrc = "" then
+		Form.SendReturnToParent(g_szType, "")
+	else
+'		Dim nTempPrc, nTemp
+'		nTempPrc = tonumber(Replace(Form.GetDecimalMaskData(szPrc),",",""))
+'		
+'		nTemp = Len(g_szTickSize) - tonumber(InStr(g_szTickSize , "." )) 
+'		nTemp = math.pow(10,nTemp)
+'		
+'		if CInt(nTempPrc*nTemp) Mod CInt(tonumber(g_szTickSize)*nTemp) = 0 then
+'			Form.SendReturnToParent(g_szType, nTempPrc)
+'		end if
+		
+		Dim nTempPrc
+		nTempPrc = tonumber(Replace(Form.GetDecimalMaskData(szPrc),",",""))
+		
+		Form.SendReturnToParent(g_szType, nTempPrc)
+	end if
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 숫자키패드 탭
+'============================================================================
+Function f_CalcPlus(szPlus)	
+	if Len(edtPrc.caption) < 9 then
+		if edtPrc.caption = "0" or g_bInitFlag = true then
+			edtPrc.caption = szPlus
+		else
+			edtPrc.caption = edtPrc.caption & szPlus
+		end if
+	end if
+	
+	g_bInitFlag = false
+End Function
+
+'20200428 HWG START : 해외파생 마이너스 호가 추가
+'============================================================================
+' Calc_Price : +, - 버튼클릭시 호가단위로 가격계산 -> 2016.03.24 수정
+'============================================================================
+Function Calc_Price(nGbn, szCode)
+	Dim szPrc, szUnit, szHigh, szLow, szHyun, szOld, szRight
+	
+	szPrc  = edtPrc.caption
+	'szHigh = Form.GetCtlProp("#lblHigh", "caption")	
+	'szLow  = Form.GetCtlProp("#lblLow", "caption")
+	'szHyun = Form.GetCtlProp("#lblHyun", "caption")
+	'szOld  = szPrc
+
+	if CDbl(szPrc) == "" then
+		szPrc = 0	
+	else		
+		szUnit = Form.getItemCodeInfo(szCode, "ticksize") 
+		'szPrc = ReSet_Prc(szPrc, nGbn)
+		'szPrc = Set_Unit(szPrc)
+		
+		' + 버튼 클릭 /////////////////////////////
+		if nGbn == 0 then							
+			szPrc = CDbl(szPrc) + CDbl(szUnit)
+
+		' - 버튼 클릭 ////////////////////////////
+		elseif nGbn == 1 then		
+			szPrc = CDbl(szPrc) - CDbl(szUnit)
+		end if
+	end if
+	
+	lblTemp.caption = szPrc
+	
+	edtPrc.caption = lblTemp.dispcaption
+End Function
+
+'============================================================================
+Sub btnPM_OnClick()
+	'if Len(edtPrc.caption) < 9 then
+		if edtPrc.caption = "" or Cdbl(edtPrc.caption) = 0 then
+			'edtPrc.caption = szPlus"
+		else
+			if Left(edtPrc.caption, 1) = "-" then
+				edtPrc.caption = replace(edtPrc.caption, "-", "")
+			else
+				edtPrc.caption = "-" & edtPrc.caption
+			end if
+		end if
+	'end if
+End Sub
+'20200428 HWG END
+	</SCRIPT_INFO>
+</ROOT>

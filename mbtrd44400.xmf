@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44400" scrname="체결/거래내역_메인" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt" bgcolor="052:255255255" itemcodetype="135" accpwdctl="edtPwd" delegate="1" ly_vert="10,10,306,39,1" />
+		<FORMTAB name="fmtab" tabcount="4" tabwidthtype="1" tabheadheight="36" ly_vert="0,55,375,508,1" >
+			<PAGE name="page0" caption="주문체결내역" linkfile="mbtrd44400_t1" loadingtype="1" />
+			<PAGE name="page1" caption="청산내역" linkfile="mbtrd44410" loadingtype="1" />
+			<PAGE name="page2" caption="기간별손익" linkfile="mbtrd44420" loadingtype="1" />
+			<PAGE name="page3" caption="거래내역" linkfile="mbtrd44430" loadingtype="1" />
+		</FORMTAB>
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,10,39,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1819" _ulen="1773" >
+'============================================================================
+'============================================================================
+
+Dim g_szACNO
+Dim g_szASNO
+Dim g_szPwd
+
+Dim g_bFlag
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szScreenNo, szTab
+	
+	g_szACNO = Form.GetCtlProp("acnt", "total")
+	g_szASNO = Form.GetCtlProp("acnt", "sequence")
+	
+	g_bFlag = false
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO", false )
+	
+	if szScreenNo = "44400" then
+		szTab = "0"
+	elseif szScreenNo = "44410" then
+		szTab = "1"
+	elseif szScreenNo = "44420" then
+		szTab = "2"
+	elseif szScreenNo = "44430" then
+		szTab = "3"
+	end if
+	
+	fmtab.currenttab = szTab
+	
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szACNO & "★" & g_szASNO)
+End Sub
+
+'============================================================================
+Sub fmtab_OnTabChanged(nCurrentTab)
+	Select Case nCurrentTab
+		Case 0
+			Form.SetTitleCaption("주문체결내역")
+		Case 1
+			Form.SetTitleCaption("청산내역")
+		Case 2
+			Form.SetTitleCaption("기간별손익")
+		Case 3
+			Form.SetTitleCaption("거래내역")
+	End Select
+	
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szACNO & "★" & g_szASNO)
+End Sub
+
+'============================================================================
+Sub acnt_ChangeAccount()
+	g_szACNO = Form.GetCtlProp("acnt", "total")
+	g_szASNO = Form.GetCtlProp("acnt", "sequence")
+	
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szACNO & "★" & g_szASNO)
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szACNO & "★" & g_szASNO)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
