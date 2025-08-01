@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_내보내기(비밀번호확인)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="7" outline="0101" designorder="1" ly_vert="0,0,375,562,1" >
+			<COL_INFO ly_vert_width="89,64,222" />
+			<ROW_INFO ly_vert_height="29,38,23,23,30,51,368" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,2,0" bgcolor="066:238239240" halign="0" caption="인증서 비밀번호 입력" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,2,1" valign="2" halign="0" line="0,0" fontsize="-1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="1,2,2,2" halign="0" line="0,0" fontsize="-1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="1,3,2,3" halign="0" line="0,0" fontsize="-1" mask="1,0,발급일 : ,,1,####-##-##,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,1" impidxs="" />
+				<CELL cell_ly="1,4,2,4" valign="0" halign="0" fontsize="-1" mask="1,0,만료일 : ,,1,####-##-##,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,5,1,5" fgcolor="065:102102102" halign="0" caption="인증서 비밀번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,5,2,5" impidxs="" />
+				<CELL cell_ly="0,6,0,6" line="0,1" impidxs="" />
+				<CELL cell_ly="1,6,1,6" line="0,1" impidxs="" />
+				<CELL cell_ly="2,6,2,6" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="Edit0" password="1" imetype="0" ly_vert="159,149,210,39,1" />
+		<IMAGE name="Image0" autosize="1" ly_vert="15,40,70,100,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4218" _ulen="3832" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_내보내기(비밀번호확인)
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+'20201126 SWJ START : 공인인증서 '공인' 글자 삭제 
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'20161110_01 KBC START : 인증서비밀번호 모의해킹결과 대응
+Dim gPasswdFailCnt
+gPasswdFailCnt = 0
+'20161110_01 KBC END
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "TabChange" then
+		Dim sCertInfo, sTemp, sIndex, sDate, sCalDate 
+		
+		sIndex = Form.GetSharedData("CERT_INDEX" , false)
+		sCalDate = Form.calcDateTime( 0, 0, 30, 0, 0, 0 )
+		sCalDate = Left(sCalDate, 8)
+		sCertInfo = Form.GetCertListDataAt(CInt(sIndex))
+		sTemp = Split(sCertInfo, ";")
+			
+		'sTemp[0] 성명
+		'sTemp[1] DN
+		'sTemp[2] 종류(범용개인)
+		'sTemp[3] 발급기관
+		'sTemp[5] 사용가능여부(가능1)
+		'sTemp[6] 만기일
+		'sTemp[7] 시작일
+		
+		Table0.SetCellString( 1, 1, sTemp[0] )
+		'NOHES START 20160609 발급기관 정보 추가
+		Table0.SetCellString( 2, 1, sTemp[2].." ("..sTemp[3]..")"  )
+		'NOHES END
+		sDate = sTemp[7]
+		sDate = Replace(sDate, "-", "")
+		sDate = Replace(sDate, ".", "")
+		Table0.SetCellString( 3, 1, "20"..sDate )
+		
+		sDate = sTemp[6]
+		sDate = Replace(sDate, "-", "")
+		sDate = Replace(sDate, ".", "")
+		Table0.SetCellString( 4, 1, "20"..sDate )
+		
+		if tonumber("20"..sDate) > tonumber(sCalDate) then
+'PENTA13 START => 2019.01.03
+			Image0.imgpath = "icon_sub_11.png"
+'PENTA13 ORGSRC
+			'Image0.imgpath = "icon_sub_05.9.png"
+'PENTA13 END
+		else
+'PENTA13 START => 2019.01.03
+			Image0.imgpath = "icon_sub_12.png"
+'PENTA13 ORGSRC
+			'Image0.imgpath = "icon_sub_06.9.png"
+'PENTA13 END
+		end if
+	elseif sEventName == "NextCheck" then
+		if Edit0.caption == null or Edit0.caption == "" then
+			Form.MsgBox( "알림", "인증서 비밀번호를 입력하세요.", "", 6 )
+		else '인증서 비밀번호 유효성체크
+			Dim sDN
+			sDN = Form.GetSharedData("CERT_DN" , false)
+			Form.RequestCertCommand( "ReqCheckIsValidPassword", sDN, Edit0.caption )
+		end if
+	elseif sEventName == "BeforeCheck" then	
+		Form.triggerEvent( "#", "BeforeStep", "0" )	
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnCertEvent(sType, sParam1, sParam2)
+	if sType == "RetIsCertPasswordValid" then
+		if sParam1 == "Success" then
+			gPasswdFailCnt = 0 '20161110_01 KBC : 인증서비밀번호 모의해킹결과 대응
+			Form.triggerEvent( "#", "NextStep", "2" )
+		else
+			'20161110_01 KBC START : 인증서비밀번호 모의해킹결과 대응
+			gPasswdFailCnt = gPasswdFailCnt + 1
+			
+			Form.MsgBox( "알림", sParam2 + "\n(비밀번호 " + gPasswdFailCnt + "회 오류입니다. 5회오류 시 화면이 종료됩니다.)", "FAIL", 0)
+			'20161110_01 KBC END
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Edit0.certname = "인증서 비밀번호 입력"
+End Sub
+
+'============================================================================
+'20161110_01 KBC START : 인증서비밀번호 모의해킹결과 대응
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "FAIL" then
+		if gPasswdFailCnt >= 5 then
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+'20161110_01 KBC END
+	</SCRIPT_INFO>
+</ROOT>

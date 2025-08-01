@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_내보내기(인증번호)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="40" ly_vert="0,0,375,435,1" >
+			<PAGE name="page008436" caption="스마트폰 → PC" linkfile="mhetc90060_crt3" loadingtype="1" />
+			<PAGE name="page002106" caption="스마트폰 → 스마트폰" linkfile="mhetc90060_crt4" loadingtype="1" />
+		</FORMTAB>
+		<EDIT name="Edit2" halign="1" imetype="1" maxlength="4" ly_vert="274,240,90,40,1" />
+		<EDIT name="Edit1" halign="1" imetype="1" maxlength="4" ly_vert="178,240,90,40,1" />
+		<EDIT name="Edit0" halign="1" imetype="1" maxlength="4" ly_vert="82,240,90,40,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2163" _ulen="2035" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_내보내기(인증번호)
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+'20201126 SWJ START : 공인인증서 공인 글자 삭제
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "NextCheck" then
+		if (Edit0.caption == null or Edit0.caption == "") or
+			(Edit1.caption == null or Edit1.caption == "") or
+			(Edit2.caption == null or Edit2.caption == "") then
+			Form.MsgBox( "알림", "인증서 인증번호를 입력하세요.", "", 6 )
+		else '인증서 비밀번호 유효성체크
+			Dim sNum 
+			sNum = Edit0.caption..Edit1.caption..Edit2.caption
+			Form.SetSharedData("CERT_EXPORT_NUM" , sNum)
+			Form.triggerEvent( "#", "NextStep", "3" )
+		end if
+	elseif sEventName == "BeforeCheck" then	
+		Form.triggerEvent( "#", "BeforeStep", "1" )	
+	end if
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditChar(CharCode)
+	if #CharCode == 4 then
+		Edit1.SetShowKeypad( true )
+	end if
+End Sub
+
+'============================================================================
+Sub Edit1_OnEditChar(CharCode)
+	if #CharCode == 4 then
+		Edit2.SetShowKeypad( true )
+	end if
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

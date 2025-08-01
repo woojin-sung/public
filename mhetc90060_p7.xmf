@@ -1,0 +1,1517 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_발급/타기관풀팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelTitle" fontsize="5" halign="1" ly_vert="0,0,375,40,1" />
+		<IMAGE name="Image0" imgpath="icon_main_13" ly_vert="343,8,24,24,1" />
+		<BUTTON name="ButtonOK" caption="다음" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+		<LINKFORM name="LinkForm0" ly_vert="0,40,375,557,1" />
+		<LABEL name="LabelCSNO" ly_vert="488,91,100,32,1" import="5,1,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="40714" _ulen="34750" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_발급/타기관풀팝업
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim G_CERT_CONFIRM_FILE 	'인증서본인확인화면
+Dim G_CERT_ACCPW_FILE 		'인증서계좌확인화면
+Dim G_CERT_AGREE_FILE 		'인증서약관동의화면
+Dim G_CERT_LIST_FILE 		'인증서목록화면
+Dim G_CERT_CUSTOMINFO_FILE 	'인증서고객연락처화면
+Dim G_CERT_NEWPW_FILE 		'인증서신규비밀번호화면
+Dim G_CERT_PW_FILE 		'인증서비밀번호입력풀팝업
+
+Dim G_CERT_ADD_FILE 		'추가인증풀팝업
+
+'20160502 NOHES : 인증서 발급/재발급용 풀팝업 추가
+Dim	G_CERT_ADD_FILE02		'추가인증풀팝업2
+
+'20201119 SWJ START : 보안매체 팝업 방식 변경
+Dim G_CERT_SECURITY_FILE1 	'보안카드풀팝업
+Dim G_CERT_QUESTION_FILE1 	'부가정보풀팝업
+Dim G_CERT_OTP_FILE1 		'일반/스마트OTP풀팝업
+
+Dim G_CERT_SECURITY_FILE 	'보안카드풀팝업
+Dim G_CERT_QUESTION_FILE 	'부가정보풀팝업
+Dim G_CERT_OTP_FILE		'일반/스마트OTP풀팝업
+'20201119 SWJ END
+
+'발급   = 본인확인0, 계좌확인1, 약관동의2, 고객연락처3, 신규비밀번호4
+'타기관 = 본인확인0, 계좌확인1, 약관동의2, 목록3
+Dim g_nStepIndex 
+Dim g_sRevData 			'발급/타기관 구분값
+Dim g_sGubunCode 			'보안매체구분코드
+
+Dim sCsno, sAgrmYN
+
+'20201021 SWJ START : 고객 연락처 정보 추가
+Dim sEmail
+Dim sTeNo
+Dim sCellNo
+Dim sAddR
+Dim nCnt, sPost, sDtad, sArCd, sToNo, sTelNo, sArCd2, sToNo2, sTelNo2
+'20201021 SWJ END
+
+' 20201116 SWJ START : 실명확인번호 암호화 적용구분값
+Dim rcno_plain_rm
+rcno_plain_rm =""
+
+Dim g_MediaType
+g_MediaType =""
+
+' 20201119 SWJ START : 개인/법인 구분
+Dim sCONO
+
+'20231113 LES START : 내국인/외국인 구분
+Dim g_sNFTR
+
+'20210216 SWJ START : 모바일OTP 인증매체 구분값
+Dim sSMRT_OTP_YN
+
+'20210707 SWJ START : 모바일OTP 인증 시, 절차 플래그
+Dim g_PhoneAuth
+
+Dim g_sAsctRcno	'20231211 SWJ
+
+'20240117 LES START
+'해외개인 조합주민번호가 아닌 이외 번호(외국인등록번호 등..) 인증서 발급 시 인증서발급유형코드 변경
+'해외개인이 조합주민번호로 인증서발급 시에만 03 으로 올림. 그렇지않을 경우 01로 올림
+Dim g_sRcnoPip
+
+Dim g_bNeedConnect
+g_bNeedConnect = False
+'--------------------------------------------------------------------------------------------------------------------------
+'20160923_01 LKM START 
+'인증서 발급시 온라인 신원확인 조회 약정 서비스 로직 추가
+'1) 약정되어있고, 동의상태 		- 기존로직 그대로 적용
+'2) 약정되어있고, 미동의 상태 	- 진행불가 (팝업창 오픈)
+'3) 미약정 상태 				- 	인증서 발급시 사전동의 팝업 추가 
+'								(본인확인 > 계좌확인 > 추가인증 > 보안매체 확인 > 인증서 발급시 사전동의 팝업 
+'					  			 > 인증서 발급시 온라인 사전동의 약정"obpds_srvc_173a"> 정보확인 > 인증서 비밀번호 적용 > 인증서 발급)
+
+'20160923_01 LKM END
+
+'--------------------------------------------------------------------------------------------------------------------------
+'20231211 SWJ START : 외국인투자자 등록제도 폐지
+'외국인인 경우 마지막 단계에서 조합여권번호로 올려야 함, 나머지는 해당 필드에서 실명확인번호로 내려옴
+'20201021 SWJ START
+'인증서 발급 시 가입자의 최신 연락처 코스콤 인증센터로 전달
+'20201022 SWJ START
+'사고계좌 여부 확인 (진행절차 : 사전동의 여부 확인 > 사고계좌 여부 확인)
+'20201116 SWJ START : 실명확인번호 암호화 (rcno_plain_rm = 0 미적용 / rcno_plain_rm = 1 적용)
+'20201119 SWJ START : (인증서 발급/등록 단계) 개인고객 스텝 추가 (보안매체 단계 대신 휴대폰 인증> 본인확인 단계로 대체 가능) (12.9 이후 운영 반영)
+'20201126 SWJ START : 공인인증서에서 '공인' 글자 삭제 (12.9 운영 반영)
+'20210707 SWJ START : 모바일OTP 인증 시, 앱 삭제 등의 이유로 앱에는 정보가 없지만, 기간계에는 등록된 것으로 나오는 경우
+   '                  현재는 모바일OTP 다운로드가 아닌, 모바일OTP를 발급하라는 메시지 이후 업무신청 화면으로 넘어감.
+   '			         이 부분이 불편하다고 접수되어 절차 개선(휴대폰 본인인증으로 인증서 발급/재발급 가능하도록)
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' 단계별 화면변경
+'============================================================================
+Function SetControlChange()
+	if g_sRevData == "new" then
+		
+		if g_nStepIndex == 0 then
+			LinkForm0.linkfile = G_CERT_CONFIRM_FILE		'인증서본인확인화면
+			
+			'20240418 SWJ START
+			'클라우드 인증서 목록이 있는지 확인하는 함수
+			'(함수의 목적과 달리 연결 여부를 판단하려고 호출)
+			'(일단 무언가를 호출해야 CLOUD_EVENT_ACQUIREUSERINFO 이벤트가 발생)
+			Form.requestCertCommand("CLOUD_REQ_CERT_LIST", "CLOUD", "90060")
+			'20240418 SWJ END
+			
+		elseif g_nStepIndex == 1 then
+		
+			LinkForm0.linkfile = G_CERT_ACCPW_FILE		'인증서계좌확인화면
+			
+		elseif g_nStepIndex == 2 then			
+			LinkForm0.linkfile = G_CERT_AGREE_FILE		'인증서약관동의화면
+		elseif g_nStepIndex == 3 then
+			LinkForm0.linkfile = G_CERT_CUSTOMINFO_FILE	'인증서고객연락처화면
+		elseif g_nStepIndex == 4 then
+			LinkForm0.linkfile = G_CERT_NEWPW_FILE		'인증서신규비밀번호화면
+		else
+			LinkForm0.linkfile = ""
+		end if
+		
+	elseif g_sRevData == "regi" then
+	
+		if g_nStepIndex == 0 then
+			LinkForm0.linkfile = G_CERT_CONFIRM_FILE		'인증서본인확인화면
+		elseif g_nStepIndex == 1 then
+			LinkForm0.linkfile = G_CERT_ACCPW_FILE		'인증서계좌확인화면
+		elseif g_nStepIndex == 2 then
+			LinkForm0.linkfile = G_CERT_LIST_FILE		'인증서목록화면
+		else
+			LinkForm0.linkfile = ""
+		end if
+	end if
+	
+	Form.triggerEvent( "LinkForm0", "TabChange", g_sRevData )
+End Function
+
+'============================================================================
+' 보안매체별 화면오픈
+'============================================================================
+Function SetSecurityOpen()
+
+'20201119 SWJ START : 개인고객은 휴대폰본인인증 화면으로 대체가능
+	'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+	
+	if sCONO = "1" or Trim(sCONO) = "1" then '개인고객 '20210118 SWJ START : 개인/법인 구분방식 변경(법인이 실명확인번호로 등록되어 있는 경우도 있어서)
+		
+		if g_sGubunCode == "0" then '보안카드
+			Form.OpenFramePopup( G_CERT_SECURITY_FILE , "individual_check" , "" )	'보안카드풀팝업
+		
+		elseif g_sGubunCode == "1" then '부가정보
+			Form.OpenFramePopup( G_CERT_QUESTION_FILE , "individual_check" , "" )	'부가정보풀팝업
+			
+		elseif g_sGubunCode == "3" then 'OTP
+			Form.OpenFramePopup( G_CERT_OTP_FILE , "individual_check" , "" )	  	'일반/스마트OTP풀팝업
+			
+		'20210216 SWJ START : 모바일OTP 인증매체 추가
+		elseif g_sGubunCode == "4" then '모바일OTP
+			
+			'20210707 SWJ START
+			if g_PhoneAuth then
+				Form.OpenFramePopup("mhetc90060_ph"  , ""  ,"")
+			else
+				'20240321 SWJ START
+				'모바일OTP 및 OTP 인증 시
+				'로그아웃 상태에서 USERID와 다른 계정으로
+				'발급 시도할 때 문제가 될 수 있어서 추가 함
+				'보수적으로 motp 인증 시에만 이렇게 처리(다음 화면에서 쉐어드변수 바로 클리어 가능)
+				szAcno = Form.GetSharedData("CERT_ACNO" , false)
+				
+				Form.SetSharedData("BioCommonAuth_RegYN", "Y") 
+				Form.SetSharedData("BioCommonAuth_Acno", szAcno)
+				'20240321 SWJ END
+				
+				Form.OpenPopup( G_CERT_MOTP_FILE, "motp_success","")                 	'모바일 OTP
+			end if
+			'20210707 SWJ END
+			
+		'20210216 SWJ END														'motp_check값 넘겨주면 인증완료시 인증완료 화면 안뜨고 그냥 넘어가도록
+		
+		elseif g_sGubunCode == "2" then '없을경우
+		
+			'20240219 SWJ START
+			'Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 사고등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+			RegisterOTP()
+			'20240219 SWJ END
+			
+		else '에러
+			Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+			
+		end if
+		
+	else
+
+		if g_sGubunCode == "0" then '보안카드
+			Form.OpenFramePopup( G_CERT_SECURITY_FILE , "" , "" )	'보안카드풀팝업
+			
+		elseif g_sGubunCode == "1" then '부가정보
+			Form.OpenFramePopup( G_CERT_QUESTION_FILE , "" , "" )	'부가정보풀팝업
+			
+		elseif g_sGubunCode == "3" then 'OTP
+			Form.OpenFramePopup( G_CERT_OTP_FILE , "" , "" )	  	'일반/스마트OTP풀팝업
+		
+		elseif g_sGubunCode == "4" then '모바일OTP
+			Form.OpenPopup( G_CERT_MOTP_FILE,"motp_success","")                          	'모바일 OTP
+			
+		elseif g_sGubunCode == "2" then '없을경우
+		
+			'20240219 SWJ START
+			'법인은 그대로
+			Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 사고등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+			'RegisterOTP()
+			'20240219 SWJ END
+			
+		else '에러
+			Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+			
+		end if
+	end if
+'20201119 SWJ END
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	G_CERT_CONFIRM_FILE 	= "mhetc90060_s6"		'인증서본인확인화면
+	G_CERT_ACCPW_FILE 	= "mhetc90060_s7"		'인증서계좌확인화면
+	G_CERT_AGREE_FILE 	= "mhetc90060_s8"		'인증서약관동의화면
+	G_CERT_LIST_FILE 		= "mhetc90060_s1"		'인증서목록화면
+	G_CERT_PW_FILE 		= "mhetc90060_p5"		'인증서비밀번호입력풀팝업
+	G_CERT_CUSTOMINFO_FILE = "mhetc90060_s9"		'인증서고객연락처화면
+	G_CERT_NEWPW_FILE 	= "mhetc90060_sa"		'인증서신규비밀번호화면
+	
+	G_CERT_ADD_FILE 		= "mhetc90060_p8"		'추가인증풀팝업
+	
+'20201119 SWJ START : 개인고객 인증서 발급/등록 단계에 한해 보안매체 팝업 변경	
+	G_CERT_SECURITY_FILE 	= "mhetc90060_p9"		'보안카드풀팝업
+	G_CERT_QUESTION_FILE	= "mhetc90060_pa"		'부가정보풀팝업
+	G_CERT_OTP_FILE 		= "mhetc90060_pb"		'일반/스마트OTP풀팝업
+	
+	'20210216 SWJ START
+	G_CERT_MOTP_FILE       = "mhetc90060_motp"    'MOTP
+	'20210216 SWJ END
+	
+'20201119 SWJ END
+	
+	'20240418 SWJ START : p8과 합침
+	'20160502 NOHES : 인증서 발급/재발급용 풀팝업 추가
+	G_CERT_ADD_FILE02 	= "mhetc90060_p8"	'추가인증풀팝업2
+	'20240418 SWJ END
+	
+	g_sGubunCode = ""
+	g_nStepIndex = 0
+	g_sRevData = Form.GetOpenLinkData( )
+	
+	if g_sRevData == null or g_sRevData == "" then
+		g_sRevData = "new"
+	elseif g_sRevData == "new" then
+		LabelTitle.caption = "인증서 발급/재발급"
+	elseif g_sRevData == "regi" then
+		LabelTitle.caption = "타기관 인증서 등록"
+	end if
+	
+	'20201116 SWJ START : 실명확인번호 암호화
+	'rcno_plain_rm = ( 0 : 미적용/ 1 : 적용)
+	rcno_plain_rm = Form.GetSharedData("&RCNO_PLAIN_RM", false)
+	
+	g_MediaType   = Form.GetSharedData("&MEDIA_CODE"   , false)
+	'20201116 SWJ END
+	
+	'20210707 SWJ START : 모바일OTP 앱에 존재하는지 체크
+	g_DeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	
+	if g_DeviceOS = "1" then
+		Form.requestMOTP("MOTP_GETINFO"     , "" , "90060")     '등록된 OTP alias 존재하는지 확인
+	end if
+	'20210707 SWJ END
+	
+	SetControlChange()
+End Sub
+'============================================================================
+'20210707 SWJ START : 모바일OTP 앱에 존재하는지 체크
+Sub Form_OnFormInitAfter()
+	if g_DeviceOS == "2" then
+		Form.requestMOTP("MOTP_GETINFO"     , "" , "90060")     '등록된 OTP alias 존재하는지 확인		
+	end if
+End Sub
+'20210707 SWJ END
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "NextStep" then
+	
+		if g_sRevData == "new" then
+			if g_nStepIndex < 4 then
+				if g_nStepIndex == 2 then '단말지정확인
+					'16-04-02 YCJ 단말지정약정 내역 조회 TR을 바꿔서 구분
+					DATAMANAGER.RequestTranData( "obcsb_oimf_638r" ) '추가인증대상,단말기지정약정조회
+'					DATAMANAGER.RequestTranData( "obpds_srvc_405a" ) '단말지정약정내역조회
+				
+'20160923_01 LKM START
+				elseif g_nStepIndex == 0 then '본인확인
+					
+					'인증 발급시 온라인 신원확인 동의 조회
+					DATAMANAGER.RequestTranData("obpds_srvc_173r")
+'20160923_01 LKM END
+				else
+					g_nStepIndex = g_nStepIndex+1
+					SetControlChange()
+				end if
+
+			elseif g_nStepIndex == 4 then '발급/재발급실행
+				DATAMANAGER.RequestTranData( "obcsb_acif_000r" ) '고객번호조회
+				
+				'20201021 SWJ START: 고객 연락처 정보 추가
+				DATAMANAGER.ReqeustTranData( "obcsb_acad_002r" )
+				'20201021 SWJ END
+			end if
+			
+		elseif g_sRevData == "regi" then
+			if g_nStepIndex < 2 then
+				if g_nStepIndex == 1 then '추가인증확인
+					'16-04-13 YCJ 전요셉 과장님 요청으로 TR 서비스 변경
+					DATAMANAGER.RequestTranData( "obcsb_oimf_638r" ) '추가인증대상,단말기지정약정조회
+'					DATAMANAGER.RequestTranData( "obcsb_oimf_625r" ) '추가인증대상조회
+				else
+					g_nStepIndex = g_nStepIndex+1
+					
+					SetControlChange()
+				end if
+			elseif g_nStepIndex == 2 then 
+				'20160602 NOHES START
+				Form.OpenFramePopup( G_CERT_PW_FILE , "regi" , "" )
+				'20160602 NOHES END
+			end if
+		end if
+		
+	elseif sEventName == "BeforeStep" then
+	
+		if g_nStepIndex > 0 then
+			g_nStepIndex = g_nStepIndex-1
+			
+			SetControlChange()
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == G_CERT_PW_FILE then
+		if sRet ~= "cancel" then '타기관등록실행
+			Dim sTemp, sDN, sRValue, sSignData
+			'20161101 NOHES START ">"빠짐 대응
+			sCertPass = Form.GetSharedData("CERT_IMSI_PSWD", 1 )
+			sCertDn = Form.GetSharedData("CERT_IMSI_DN", 1 )
+			sTemp = Split(sRet, ";")
+			
+			if sCertDn <> null and sCertDn <> "" then
+				sDN = sCertDN
+			else
+				sDN = Form.GetSharedData("CERT_DN" , false)
+			end if
+			
+			if sCertPass <> null and sCertPass <> "" then
+				sRValue = Form.GetRvalue( sDN , sCertPass)
+				sSignData = Form.GetCertSignData( sDN , sCertPass)
+			else
+				sRValue = Form.GetRvalue( sDN , sTemp[1])
+				sSignData = Form.GetCertSignData( sDN , sTemp[1])
+			end if
+			'20161101 NOHES END
+			
+			DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "UI_R_VAL" , 0 , sRValue )
+			DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "UI_ELCT_SGNT_DATA_CNTT" , 0 , sSignData )
+			
+			DATAMANAGER.RequestTranData( "obcsb_acif_000r" ) '고객번호조회
+		end if 
+		
+	'20160502 NOHES START : 인증서 발급/재발급 시 풀팝업2
+	elseif sKeyName == G_CERT_ADD_FILE02 then
+		if sRet == "ok" then
+			'20210118 SWJ START : 보안매체별 화면 오픈 구분값(개인고객/법인고객)
+			DATAMANAGER.RequestTranData("obcsb_acif_000r_1")
+			'DATAMANAGER.RequestTranData( "obcsb_oimf_625r" ) '추가인증대상조회
+			'20210118 SWJ END
+		else
+			g_sGubunCode = ""
+		end if
+	'20160502 NOHES END	
+	
+	elseif sKeyName == G_CERT_ADD_FILE then
+		if sRet == "ok" then
+			'16-04-14 YCJ 수정
+			DATAMANAGER.RequestTranData( "obcsb_oimf_625r" ) '추가인증대상조회
+			
+'			SetSecurityOpen()
+		else
+			g_sGubunCode = ""
+		end if
+	
+	elseif sKeyName == G_CERT_SECURITY_FILE or sKeyName == G_CERT_QUESTION_FILE or 
+			sKeyName == G_CERT_OTP_FILE or sKeyName == G_CERT_MOTP_FILE then '20210216 SWJ START : 모바일OTP 추가
+		if sRet == "ok" then
+
+'20160923_01 LKM START
+			'인증서 발급/재발급
+			if g_sRevData == "new" Then
+				DATAMANAGER.RequestTranData("obpds_srvc_173r")
+		
+			else
+				g_nStepIndex = g_nStepIndex+1
+				SetControlChange()
+			end if
+		end if
+	
+	'인증서 발급시 온라인 신원확인 사전동의 팝업창 동의
+	elseif sKeyName == "mhetc90060_p13" then 
+		'약정(동의)
+		if sRet == "AgreeY" then
+			
+			'20201022 SWJ START : 사고계좌 인증서 발급 제한
+			DATAMANAGER.RequestTranData("obpds_srvc_173r")
+			'g_nStepIndex = g_nStepIndex+1
+			'SetControlChange()
+			'20201022 SWJ END
+			
+		'약정(미동의) 또는 발급/재발급 업무 중단 
+		else
+			Form.CloseForm()
+		end if
+	
+	'20170418 LES START - 미지정단말 인증서 발급 프로세스 변경
+	elseif sKeyName == "mhetc90060_p14" then
+		Form.OpenFramePopup( G_CERT_ADD_FILE02 , g_sRevData&"_otp", "" )		
+	'20170418 LES END
+	
+'20201119 SWJ START
+	'개인고객 본인확인 단계이후 절차진행
+	elseif sKeyName == "mhetc90060_opt_success" then
+		
+		if sRet == "ok" then
+			'인증서 발급/재발급
+			if g_sRevData == "new" Then
+				DATAMANAGER.RequestTranData("obpds_srvc_173r")
+		
+			else
+				g_nStepIndex = g_nStepIndex+1
+				SetControlChange()
+			end if
+		end if
+		
+	'개인고객 휴대폰본인인증 단계
+	elseif sKeyName == "mhetc90060_ph" then
+		Form.OpenFramePopup("mhetc90060_ph","","")
+		
+	'개인고객 휴대폰본인인증 성공 후 본인확인 단계
+	elseif sKeyName == "mhetc90060_opt" then
+		Form.OpenFramePopup("mhetc90060_opt","","")
+'20201119 SWJ END
+
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "REG_MSG" then
+		if sRet == "ok" then
+			Form.OpenScreen( "86010" , "" ) '단말등록화면이동
+		end if
+	end if
+	
+	'20201022 SWJ START : 사고계좌 인증서 발급 제한
+	if sKeyName == "ACCI_MSG" then
+		Form.CloseForm()
+	end if
+	'20201022 SWJ END
+	
+End Sub
+
+'============================================================================
+Sub Form_OnCertEvent(sType, sParam1, sParam2)
+	if sType == "RetCertFileNew" then
+		if sParam1 == "Success" then
+			'20171026_HAMWG START: 인증서발급 FDS 로깅추가
+			sUserID = Form.GetSharedData("CERT_ID" , false)
+			Form.sendHWInformation("003", sUserID)
+			'20171026_HAMWG END
+			DATAMANAGER.RequestTranData( "obcsb_padc_002a" ) '발급SMS전송
+		else
+			Form.MsgBox( "알림", sParam2, "", 6 )
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim sDeviceID, sACNO, sACNO_PWD, sUserID, sRCNO, sUserName
+	
+	sDeviceID = Form.GetDeviceID()
+	sACNO = Form.GetSharedData("CERT_ACNO" , false)
+	sACNO_PWD = Form.GetSharedData("CERT_ACNT_PWD" , false)
+	sUserID = Form.GetSharedData("CERT_ID" , false)
+	sUserName = Form.GetSharedData("CERT_USER_NAME" , false)
+	sRCNO = Form.GetSharedData("CERT_RCNO" , false)
+	
+	if szTranID == "obcsb_oimf_625r" then	
+		DATAMANAGER.SetUserID( sUserID ) '20160620 KBC 추가 : 발급(170a)와 동일하게 등록도 헤더에 값 지정해준다.
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PROS_CLS_CODE" , 0 , "5" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "REG_CLCD" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "DRNG_ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PWD" , 0 , sACNO_PWD )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_BANK_CODE" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_ACNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "TACT_AMT" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "UI_TERM_IDNT_KEY" , 0 , sDeviceID )
+		
+	elseif szTranID == "obpds_srvc_405a" then
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_405a", "InBlock1", "PROS_CLS_CODE" , 0 , "4" )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_405a", "InBlock1", "REG_CLCD" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_405a", "InBlock1", "ELFN_ID" , 0 , sUserID )
+	
+	elseif szTranID == "obcsb_acif_000r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "ACNT_PWD" , 0 ,sACNO_PWD  )
+		
+	elseif szTranID == "obcpp_pcrt_173a" then
+		DATAMANAGER.SetUserID( sUserID ) '20160519_01 KBC 추가 : 발급(170a)와 동일하게 등록도 헤더에 값 지정해준다.
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "USER_ID" , 0 , sUserID )
+		
+		'20201116 SWJ START : 실명확인번호 암호화 (RCNO > RCNO_PIP로 변경/고유MTS에는 미적용)
+		if rcno_plain_rm <> "1" or g_MediaType == "158" or g_MediaType == "159" then
+			DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "RCNO" , 0 , sRCNO )
+		else
+			DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "CRPT_YN"  , 0 , "Y"   )
+			DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "RCNO_PIP" , 0 , g_sAsctRcno )	'20231211 SWJ
+		end if
+		'20201116 SWJ END
+		
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "USER_NAME" , 0 , sUserName )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "CSNO" , 0 , LabelCSNO.caption )
+		
+	'20201021 SWJ START : 고객연락처 추가
+	elseif szTranID == "obcsb_acad_002r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_acad_002r", "InBlock1", "ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acad_002r", "InBlock1", "PWD"  , 0 , sACNO_PWD )
+	'20201021 SWJ END
+	
+	elseif szTranID == "obcpp_pcrt_170a" then
+		DATAMANAGER.SetUserID( sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "USER_ID" , 0 , sUserID )
+		
+		'20201116 SWJ START : 실명확인번호 암호화 (RCNO > RCNO_PIP로 변경)
+		if rcno_plain_rm <> "1" or g_MediaType == "158" or g_MediaType == "159" then
+			DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "RCNO"     , 0 , sRCNO )
+		else
+			DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "CRPT_YN"  , 0 , "Y"   )
+			DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "RCNO_PIP" , 0 ,  g_sAsctRcno )	'20231211 SWJ
+		end if
+		'20201116 SWJ END
+		
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "USER_NAME" , 0 , sUserName )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "CSNO" , 0 , LabelCSNO.caption )
+		
+		'20201021 SWJ START : 고객 연락처 추가
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "EMAIL_INFO"      , 0 , sEmail )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "TELNO_INFO"      , 0 , sTeNo )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "CRAL_TELNO_INFO" , 0 , sCellNo )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_170a", "InBlock1", "ADDR_INFO"       , 0 , sAddR )
+		'20201021 SWJ END
+		
+		'=================================================================
+		'20231113 LES START : 외국인투자자 등록제도 폐지
+		'=================================================================
+		'
+		'-----------------------------------------------------------------
+		'(내국인/외국인 구분) g_sNFTR =>  내국인 = 1,4 / 외국인 = 2,3,9
+		'(개인/법인 구분)	    sCONO   =>  개인 = 1 / 법인 = 2
+		'-----------------------------------------------------------------
+		'발급/재발급 시, 인증서 유형을 채워야함. 
+		'00 : N/A or Legacy  / 01: 국내 개인 / 02 : 국내법인 / 03: 해외개인 / 04 : 해외법인
+		'-----------------------------------------------------------------
+		sCertType = "00"
+		
+		if g_sNFTR == "1" or g_sNFTR == "4" then
+		
+			'국내개인
+			if sCONO == "1" then
+				sCertType = "01"
+			'국내법인
+			elseif sCONO == "2" then
+				sCertType = "02"
+			end if
+			
+		
+		elseif g_sNFTR == "2" or g_sNFTR == "3" or g_sNFTR == "9" then
+		
+			'해외개인
+			if sCONO == "1" then
+				sCertType = "03"
+			'해외법인
+			elseif sCONO == "2" then
+				sCertType = "04"
+			end if
+		
+		end if
+		
+		'20240117 LES START
+		'해외개인(03)일 경우 efif_011r에서 내려받은 조합주민번호와 실명확인번호가
+		'동일한 경우 조합주민번호가 정상적으로 추출되지 않은 경우임. 이런 경우 
+		'해외개인일 경우라도 인증서 발급유형을 "01"로 올리도록 수정.
+		'참고) 조합주민번호가 정상적으로 추출될 경우 => 실명확인번호와 조합주민번호가 다름.
+		if sCertType == "03" then
+			
+			if g_sAsctRcno == g_sRcnoPip then
+				sCertType = "01"
+			end if
+		
+		end if
+		'20240117 LES END
+		
+		DATAMANAGER.SetDataValue(0, "obcpp_pcrt_170a", "InBlock1", "FID_UNIN_NTAT_TYPE" , 0 , sCertType)
+		'20231113 LES END
+	
+	'20231211 SWJ START : 외국인투자자 등록제도 폐지
+	elseif szTranID == "obcsb_efif_011r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_efif_011r", "InBlock1", "RCNO_PIP" , 0 , sRCNO )
+	'20231211 SWJ END
+	
+	elseif szTranID == "obcsb_padc_002a" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_padc_002a", "InBlock1", "ELFN_ID" , 0 , sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_padc_002a", "InBlock1", "UI_ISNC_CLS_CODE" , 0 , "1" )
+		
+	elseif szTranID == "obcpp_logn_003a" then
+		DATAMANAGER.SetDataValue( 0, "obcpp_logn_003a", "InBlock1", "USER_ID" , 0 , sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcpp_logn_003a", "InBlock1", "PBCR_PWD_MSTK_TMNU" , 0 , "0007" ) '20160527_02 KBC : 인증서 비밀번호오류횟수초기화 "0" -> "0007"로 수정
+		DATAMANAGER.SetDataValue( 0, "obcpp_logn_003a", "InBlock1", "SUCS_YN" , 0 , "Y" )
+		
+	elseif szTranID == "obcsb_oimf_638r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_638r", "InBlock1", "ELFN_ID" , 0 , sUserID )
+'		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_638r", "InBlock1", "ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_638r", "InBlock1", "UI_TERM_IDNT_KEY" , 0 , Form.GetDeviceID() )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_638r", "InBlock1", "SVCD" , 0 , "100" ) '인증서신규
+	
+'20160923_01 LKM START
+	elseif szTranID == "obpds_srvc_173r" then
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_173r", "InBlock1", "ELFN_ID" , 0 , sUserID )		'ID
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_173r", "InBlock1", "SVCD"	  , 0 ,"073" )		'서비스 코드
+'21060923_01 LKM END
+
+
+'20201022 SWJ START : 사고계좌 여부 확인	
+	elseif szTranID == "obpds_srvc_173r_1" then
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_173r_1", "InBlock1", "ELFN_ID" , 0 , sUserID )		'ID
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_173r_1", "InBlock1", "SVCD"	  , 0 ,"ZZZ" )		'서비스 코드
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_173r_1", "InBlock1", "CSNO"	  , 0 , sCsno)		'고객번호
+'20201022 SWJ END
+
+'20201119 SWJ START : 인증서 프로세스 변경 및 개선 (개인고객 법인고객 구분)
+	elseif szTranID == "obcsb_acif_000r_1" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r_1", "InBlock1", "ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r_1", "InBlock1", "ACNT_PWD" , 0 , sACNO_PWD )
+'20201119 SWJ END
+
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_oimf_625r" then
+		Dim sSPLM_ATHN_NCSR_YN 
+'		sSPLM_ATHN_NCSR_YN = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_625r", "OutBlock1", "SPLM_ATHN_NCSR_YN" , 0 )
+		g_sGubunCode = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_625r", "OutBlock2", "SCRC_OTP_CLS_CODE" , 0 )
+		
+		'16-04-11 YCJ 
+'		if sSPLM_ATHN_NCSR_YN == "Y" then '추가인증필요
+'			Form.OpenFramePopup( G_CERT_ADD_FILE , g_sRevData , "" )
+'		else
+			SetSecurityOpen()
+'		end if
+
+
+		'16-04-02 YCJ 서비스 TR 변경으로 내용 이동
+'	elseif szTranID == "obpds_srvc_405a" then
+'		Dim sIF_TR_CLS_CODE
+'		sIF_TR_CLS_CODE = DATAMANAGER.GetDataValue( 0, "obpds_srvc_405a", "OutBlock1", "IF_TR_CLS_CODE" , 0 )
+'	
+'		if sIF_TR_CLS_CODE == "2" then
+'			Dim sText
+'			sText = "고객님께서는 [단말기지정]서비스 고객이므로 지정단말에서만 인증서 발급/재발급이 가능합니다.\n"..
+'					"단말기를 등록하시겠습니까?"
+'			Form.MsgBox( "알림", sText, "REG_MSG", 1 )
+'		else
+'			DATAMANAGER.RequestTranData( "obcsb_oimf_625r" ) '추가인증대상조회
+'		end if
+
+	elseif szTranID == "obcsb_acif_000r" then
+		
+		if g_sRevData == "new" then
+			
+			'20201021 SWJ START : 고객 연락처 정보 추가
+			'DATAMANAGER.RequestTranData( "obcpp_pcrt_170a" ) '인증서발급
+			DATAMANAGER.RequestTranData( "obcsb_acad_002r" )
+			'20201021 SWJ END
+			
+		elseif g_sRevData == "regi" then
+			DATAMANAGER.RequestTranData( "obcpp_pcrt_173a" ) '타기관등록
+		end if
+		
+	'20201021 SWJ START : 고객 연락처 정보 추가
+	elseif szTranID == "obcsb_acad_002r" then
+		
+		nCnt = DATAMANAGER.GetDataCount( 0, "obcsb_acad_002r", "OutBlock1" )
+		
+		if nCnt > 0 then
+			for i = 0 to nCnt-1
+				sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "INAG_TYPE_CODE" , i )
+				
+				if sINAG_TYPE_CODE == "01" then '자택주소
+					sPost  = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "POST", i )
+					sDtad  = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "DTAD", i )
+					
+					sAddR   = sPost.." "..sDtad
+				elseif sINAG_TYPE_CODE == "21" then 'E-mail
+					sEmail = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "EMAIL_ADDR" , i )
+				end if
+			next
+		end if
+		
+		nCnt = DATAMANAGER.GetDataCount( 0, "obcsb_acad_002r", "OutBlock3" )
+		
+		if nCnt > 0 then
+			for i = 0 to nCnt-1
+				sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "INAG_TYPE_CODE" , i )
+				
+				if sINAG_TYPE_CODE == "11" then '자택전화번호
+					
+					sArCd  = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "ARCD" , i )
+					sToNo  = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TONO" , i )
+					sTelNo = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TELNO" , i )
+					
+					sTeNo   = sArCd..sToNo..sTelNo
+				elseif sINAG_TYPE_CODE == "13" then '휴대폰번호
+					
+					sArCd2  = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "ARCD" , i )
+					sToNo2  = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TONO" , i )
+					sTelNo2 = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TELNO" , i )
+					
+					sCellNo = sArCd2..sToNo2..sTelNo2
+				end if
+			next
+		end if		
+		
+		DATAMANAGER.RequestTranData("obcpp_pcrt_170a") '고객연락처추가로 인한 서비스 순서 변경(obcsb_acad_002r -> obcpp_pcrt_170a)
+	'20201021 SWJ END
+	
+	'20231211 SWJ START
+	elseif szTranID == "obcsb_efif_011r" then
+		g_sAsctRcno = DATAMANAGER.GetDataValue( 0, "obcsb_efif_011r", "OutBlock1", "ASCT_PSPR_NO_PIP", 0 )
+		
+		'20240117 LES START
+		g_sRcnoPip = DATAMANAGER.GetDataValue(0, "obcsb_efif_011r", "OutBlock1", "RCNO_PIP" , 0)
+		'20240117 LES END
+		
+	'20231211 SWJ END
+	
+	elseif szTranID == "obcpp_pcrt_173a" then
+		DATAMANAGER.RequestTranData( "obcpp_logn_003a" ) '인증접속로그
+		
+	elseif szTranID == "obcpp_pcrt_170a" then
+		Dim sCertPW, sRefNo, sAuthCode
+		sCertPW = Form.GetSharedData("CERT_NEW", false)	
+		sRefNo = DATAMANAGER.GetDataValue( 0, "obcpp_pcrt_170a", "OutBlock1", "NTAT_REF_NO" , 0 )
+		sAuthCode = DATAMANAGER.GetDataValue( 0, "obcpp_pcrt_170a", "OutBlock1", "NTAT_ATHZ_NO" , 0 )
+		Form.RequestCertCommand( "ReqCertFileNew", sRefNo.."^SEPARATOR^"..sAuthCode, sCertPW )	
+		
+	elseif szTranID == "obcsb_padc_002a" then
+		DATAMANAGER.RequestTranData( "obcpp_logn_003a" ) '인증접속로그
+		
+	elseif szTranID == "obcpp_logn_003a" then	
+		Form.SendReturnToParent( "mhetc90060_p7" , g_sRevData )
+		Form.CloseForm( )
+		
+	elseif szTranID == "obcsb_oimf_638r" then	'단말기 지정여부 팝업 오픈
+		if DATAMANAGER.GetDataValue( 0 , "obcsb_oimf_638r", "OutBlock1", "UI_SPLM_YN" , 0) == "Y" then
+			Dim sText
+			'sText = "고객님께서는 [단말기지정]서비스 고객이므로 지정단말에서만 인증서 발급/재발급이 가능합니다.\n"..
+			'		"단말기를 등록하시겠습니까?"
+			'Form.MsgBox( "알림", sText, "REG_MSG", 1 )
+			
+			'20170418 LES START - 미지정단말 인증서 발급 프로세스 변경
+			Form.OpenPopup("mhetc90060_p14",g_sRevData,"")
+			'20170418 LES END
+					
+		else
+			if DATAMANAGER.GetDataValue( 0 , "obcsb_oimf_638r", "OutBlock1", "SPLM_ATHN_NCSR_YN" , 0) == "Y" then
+			'	Form.OpenFramePopup( G_CERT_ADD_FILE , g_sRevData , "" )			
+				Form.OpenFramePopup( G_CERT_ADD_FILE02 , g_sRevData , "" )	'20160502 NOHES : 인증서 발급/재발급 시 풀팝업2 
+			else
+				'20201119 SWJ START : 보안매체별 화면 오픈 구분값(개인고객/법인고객)
+				DATAMANAGER.RequestTranData("obcsb_acif_000r_1")
+				'DATAMANAGER.RequestTranData( "obcsb_oimf_625r" ) '추가인증대상조회
+				'20201119 SWJ END
+			end if
+		end if
+		
+		DATAMANAGER.RequestTranData("obcsb_efif_011r") '20231211 SWJ START
+		
+'20160923_01 LKM START
+	'인증서 온라인 신원확인 사전동의 조회 
+	elseif szTranID == "obpds_srvc_173r" then
+		
+		sCsno = DATAMANAGER.GetDataValue( 0, "obpds_srvc_173r", "OutBlock2", "CSNO" , 0 )
+
+		'약정(고객번호 있으면 약정으로 판단)
+		if sCsno ~= null and Trim(sCsno) ~= "" then
+			
+			sAgrmYN = DATAMANAGER.GetDataValue( 0, "obpds_srvc_173r", "OutBlock1", "AGRM_YN" , 0 )
+			
+			'동의
+			if sAgrmYN == "Y" Then
+			
+			'20201022 SWJ START : 사고계좌 여부 확인
+				DATAMANAGER.RequestTranData("obpds_srvc_173r_1")
+				'g_nStepIndex = g_nStepIndex+1
+				'SetControlChange()
+			'20201022 SWJ END
+			
+			'미동의 - 진행불가 
+			else
+				Form.OpenPopup("mhetc90060_p12","","")
+			end if
+	    
+	    '미약정 	
+		else	
+			'본인확인 스텝 
+			if g_nStepIndex == 0 then
+		
+				g_nStepIndex = g_nStepIndex+1
+				SetControlChange()
+					
+			else			
+				' 인증서 발급시 온라인 신원확인 사전동의 진행
+				Form.OpenPopup("mhetc90060_p13","","")
+			end if
+			
+		end if
+'20160923_01 LKM END	
+	
+	'20201022 SWJ START : 사고계좌 여부 확인 절차 추가
+	elseif szTranID == "obpds_srvc_173r_1" then
+		Dim sAgrmYN2
+		
+		sAgrmYN2 = DATAMANAGER.GetDataValue( 0 , "obpds_srvc_173r_1", "OutBlock1", "AGRM_YN" , 0)
+		
+		if sAgrmYN2 == "N" then
+			g_nStepIndex = g_nStepIndex+1
+			SetControlChange()
+		else
+			sText = "사고의심계좌로 등록된 계좌는 인증서 발급/재발급 진행이 불가합니다."
+			Form.MsgBox("알림", sText, "ACCI_MSG", 1)
+		end if
+	'20201022 SWJ END	
+	
+	'20201119 SWJ START : 인증서 발급 프로세스 변경(개인고객에 한해 휴대폰 본인인증 단계 선택 가능)
+	elseif szTranID == "obcsb_acif_000r_1" then
+	
+		'20210118 SWJ START : 개인/법인 구분방식 변경
+		'1:개인 / 2:법인
+		sCONO = DATAMANAGER.GetDataValue( 0, "obcsb_acif_000r_1", "OutBlock1", "CUST_CLS_CODE" , 0 ) 
+		
+		'=================================================================
+		'20231113 LES START
+		'=================================================================
+		'내국인/외국인 구분코드 
+		'1:내국인 / 2:외국인 / 3:내국민대우외국인 / 4:재외국민 / 9:기타사업소득외국인
+		'내국인 = 1,4 , 외국인 = 2,3,9
+		g_sNFTR = DATAMANAGER.GetDataValue(0, "obcsb_acif_000r_1", "OutBlock1", "NTFR_CLS_CODE" , 0)
+		
+		DATAMANAGER.RequestTranData( "obcsb_oimf_625r" ) '추가인증대상조회
+		
+	'20201119 SWJ END
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+		szErrMsg = szErrMsg.." "..sSubMsg
+	end if
+	
+	if szTranID == "obpds_srvc_405a" then
+		Form.MsgBox( "알림", "전자금융사기예방 고객정보 조회가 실패했습니다.", "", 6 )
+	elseif szTranID == "obcpp_pcrt_173a" then
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+	elseif szTranID == "obcpp_pcrt_170a" then
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+	elseif szTranID == "obcsb_padc_002a" then
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+	elseif szTranID == "obcpp_logn_003a" then
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+'20160923_01 LKM START
+	elseif szTranID == "obpds_srvc_173r" then
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+'20160923_01 LKM END	
+	end if
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	if g_sRevData == "new" then
+		if g_nStepIndex < 5 then
+			Form.triggerEvent( "LinkForm0", "NextCheck", "" )	
+		end if
+	elseif g_sRevData == "regi" then
+		if g_nStepIndex < 2 then
+			Form.triggerEvent( "LinkForm0", "NextCheck", "" )	
+		elseif g_nStepIndex == 2 then 
+			Form.MsgBox( "알림", "타기관 등록할 인증서를 선택해주세요.", "", 6 ) '20201126 SWJ : 공인 글자 삭제
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("CERT_ID" , "")
+	Form.SetSharedData("CERT_RCNO" , "")
+	Form.SetSharedData("CERT_ACNO" , "")
+	Form.SetSharedData("CERT_ACNT_PWD" , "")
+	Form.SetSharedData("CERT_USER_NAME" , "")
+	Form.SetSharedData("CERT_NEW", "")	
+	Form.SetSharedData("CERT_DN" , "")
+	Form.SetSharedData("CERT_INDEX" , "")
+End Sub
+
+'============================================================================
+'20210707 SWJ START
+'============================================================================
+'Form.requestMOTP로 호출하면 여기로 리턴됨
+Sub Form_OnTriggerEventMOTP(sEventName, sParam)
+
+	if sEventName == "MOTP_GETINFO_RETURN_90060" then
+
+		g_mOTPInfo  = Split(sParam,"★")    'resultcode★resultMsg★otpAlias(일련번호)
+		
+		if Ubound(g_mOTPInfo) < 1 then
+			exit sub
+		else	
+			if g_mOTPInfo(0) <> "00000" then					
+				g_PhoneAuth = True 		'True이면 휴대폰인증으로 바로 가도록
+			else
+				g_PhoneAuth = False
+			end if
+		end if
+	end if
+End Sub
+
+'============================================================================
+'20240219 SWJ START
+'============================================================================
+Sub RegisterOTP()
+	szAcno = Form.GetSharedData("CERT_ACNO" , false)
+	
+	'계좌번호★주민번호(필수아님)★Y/N( 모바일OTP/타기관OTP 발급 완료 후 인증 처리 진행여부를 판단함)★Y/N(처리 완료시 화면닫기)	
+	Form.OpenNextPopup("mhetc90190_p1", szAcno &"★"& "" &"★"& "N" &"★"& "", "")
+End Sub
+'============================================================================
+'보안매체없음 팝업일 때 다음 스텝으로 이동
+'============================================================================
+'Sub Form_OnLinkData(sKey, sValue)
+'	if sKey == "&CommonNoSecurity" then
+'		if Cint(sValue) == 6 then
+'			if g_sRevData == "new" Then
+'				DATAMANAGER.RequestTranData("obpds_srvc_173r")
+'			else
+'				g_nStepIndex = g_nStepIndex+1
+'				SetControlChange()
+'			end if
+'		end if
+'	end if
+'End Sub
+'============================================================================
+'20240418 SWJ START : 클라우드 인증서 도입
+'============================================================================
+Sub Form_onTriggerEventCloudCert(sCommand, sResult)
+	Dim sErrorCd, sErrorMsg
+
+	szItem = Split(sResult,"★")
+
+	'처리코드,처리메시지 처리
+	if #szItem >= 2 then
+		sErrorCd		= szItem(0)
+		sErrorMsg	= szItem(1)	
+	
+		'오류이면
+		if sErrorCd <> "0" then
+			Form.MsgBox(sCommand, sErrorMsg, "", 0)
+			exit sub
+		end if		
+	end if
+	
+	'클라우드 연결 여부 확인
+	'연결이 필요하면 이벤트 발생
+	if sCommand == "CLOUD_EVENT_ACQUIREUSERINFO" then
+		g_bNeedConnect = True
+		Form.SetSharedData("CLOUD_CONNECT_FROM_CERT", g_bNeedConnect)
+	end if
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_625r" trcode="obcsb_oimf_625r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_405a" trcode="obpds_srvc_405a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_pcrt_173a" trcode="obcpp_pcrt_173a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_003a" trcode="obcpp_logn_003a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_padc_002a" trcode="obcsb_padc_002a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_000r" trcode="obcsb_acif_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_638r" trcode="obcsb_oimf_638r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_015a" trcode="obcpp_logn_015a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_014a" trcode="obcpp_logn_014a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_173a" trcode="obpds_srvc_173a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acad_002r" trcode="obcsb_acad_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_pcrt_170a" trcode="obcpp_pcrt_170a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_173r" trcode="obpds_srvc_173r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_173r_1" trcode="obpds_srvc_173r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_000r_1" trcode="obcsb_acif_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_efif_011r" trcode="obcsb_efif_011r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_625r" title="추가인증대상조회(스마트폰)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="358" _ulen="272" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+REG_CLCD^등록구분코드^1^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="213" _ulen="165" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="67" _ulen="51" >
+
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_405a" title="전자금융사기예방 서비스 약정등" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="187" _ulen="143" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+REG_CLCD^등록구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+IF_TR_CLS_CODE^IF거래구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="218" _ulen="170" >
+
+IF_TR_CLS_CODE^IF거래구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_pcrt_173a" title="타기관 공인인증서 등록" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="344" _ulen="268" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_R_VAL^UIR값^96^0^0^0^0^0^0
+UI_ELCT_SGNT_DATA_CNTT^UI전자서명데이터내용^4000^0^0^0^0^0^0
+CRPT_YN^암호화여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="173" _ulen="133" >
+
+NEW_YN^최신 인증서 여부^1^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_LNGT^UI공인인증키길이^4^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_VAL^UI공인인증키값^1024^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_003a" title="공인인증 접속로그" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="152" _ulen="112" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_padc_002a" title="공인인증서발급시SMS발송처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="102" _ulen="82" >
+
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+UI_ISNC_CLS_CODE^UI 발급 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_000r" title="고객정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2185" _ulen="1655" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_CNFR_YN^고객 확인 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호 유형 코드^2^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+RLNM_ASCT_NO^실명 조합 번호^20^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+PSPR_NO^여권 번호^10^0^0^0^0^0^0
+CONO^법인등록번호^13^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인 구분 코드^2^0^0^0^0^0^0
+CNSG_YN^수탁 여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC 전문 투자자 여부^1^0^0^0^0^0^0
+KYC_SPCL_INVR_RGNO^KYC 전문 투자자 등록번호^20^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+SSTS_YN^공매도 여부^1^0^0^0^0^0^0
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+CNSG_RFUS_REAS_CODE^수탁 거부 사유 코드^3^0^0^0^0^0^0
+STA_DATE^시작 일자^8^0^0^0^0^0^0
+FIN_DATE^종료 일자^8^0^0^0^0^0^0
+BRTH_CTCD^출생국가코드^3^0^0^0^0^0^0
+AMRC_YN^미국인여부^1^0^0^0^0^0^0
+AML_BSTP_LRDV_CODE^AML업종대분류코드^2^0^0^0^0^0^0
+AML_BSTP_SMDV_CODE^AML업종소분류코드^5^0^0^0^0^0^0
+GIIN^GIIN^20^0^0^0^0^0^0
+LSTN_YN^상장여부^1^0^0^0^0^0^0
+DSTC_DATE^파기일자^8^0^0^0^0^0^0
+OVRS_TXPM_CHD_YN^해외납세자여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_638r" title="전자금융사기예방 고객조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="376" _ulen="290" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="30" inout="in" _len="330" _ulen="242" >
+
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+DRNG_ASNO^출금계좌일련번호^2^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+MNRC_ASNO^입금계좌일련번호^2^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1142" _ulen="840" >
+
+TERM_DSGT_STPL_YN^단말지정약정여부^1^0^0^0^0^0^0
+SPLM_ATHN_STPL_YN^추가인증약정여부^1^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TLPH_SRNO^자택전화일련번호^4^0^0^0^0^0^0
+WRPL_TLPH_ARCD^직장전화지역번호^4^0^0^0^0^0^0
+WRPL_TLPH_TONO^직장전화국번호^4^0^0^0^0^0^0
+WRPL_TLPH_SRNO^직장전화일련번호^4^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+ACML_TR_PBMN^누적거래대금^19^0^7^0^0^0^0
+UI_SPLM_YN^UI추가여부^1^0^0^0^0^0^0
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+REG_YN^등록여부^1^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+UI_CUST_ATHN_NO^UI고객인증번호^6^0^0^0^0^0^0
+UI_CUST_ATHN_NO2^UI고객인증번호2^6^0^0^0^0^0^0
+SVC_ECPT_CLS_CODE^서비스예외구분코드^1^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="10" inout="out" _len="309" _ulen="243" >
+
+TERM_NAME^단말명^30^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+REG_EMPNO^등록직원번호^9^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="111" _ulen="85" >
+
+TOTAL_TACT_AMT^총이체금액^19^0^7^0^0^0^0
+SECU_MDIA_EXLS_YN^보안매체제외여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_015a" title="MTS로그인_공인인증서 접속로그" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="64" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_014a" title="HTS_HOME로그인_공인인증서 접속" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="152" _ulen="112" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_173a" title="공인인증서온라인신원확인 사전?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="576" _ulen="426" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+SVC_MANG_UNIT_CODE^서비스관리단위코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="172" _ulen="128" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acad_002r" title="고객연락처정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="206" _ulen="158" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="973" _ulen="731" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+ADDR_REG_DATE^주소 등록 일자^8^0^0^0^0^0^0
+SNBC_YN^반송 여부^1^0^0^0^0^0^0
+SNBC_CANC_REAS_CODE^반송해지사유코드^2^0^0^0^0^0^0
+SNBC_CANC_REAS_NAME^반송해지사유명^40^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총 반송 횟수^4^0^7^0^0^0^0
+CNNT_SNBC_TMNU^연속 반송 횟수^4^0^7^0^0^0^0
+REGN_ZIP^지역 우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세 우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일 주소^200^0^0^0^0^0^0
+INAG_RCTF_REAS_CODE^통보처 정정 사유 코드^1^0^0^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="30" inout="out" _len="427" _ulen="323" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+UI_CUST_TELNO^UI고객전화번호^40^0^0^0^0^0^0
+CNPL_REG_DATE^연락처 등록 일자^8^0^0^0^0^0^0
+ARCD^지역번호^4^0^0^0^0^0^0
+TONO^국번호^4^0^0^0^0^0^0
+TELNO^전화번호^4^0^0^0^0^0^0
+TENO^교환번호^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="890" _ulen="658" >
+
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물 통보처 일련번호^4^0^7^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물 통보처 일련번호^4^0^7^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_SRNO^운용 보고서 통보처 일련번호^4^0^7^0^0^0^0
+STPL_YN^약정 여부^1^0^0^0^0^0^0
+SNDN_YN^발송 여부^1^0^0^0^0^0^0
+PRFN_CNPL_CLCD^선호연락처구분코드^2^0^0^0^0^0^0
+TRUST_CLS_CODE^신탁 구분 코드^1^0^0^0^0^0^0
+FUND_RMND_RCMS_CLS_CODE^펀드잔고수신구분코드^1^0^0^0^0^0^0
+UI_ITEM_NAME1^UI항목명1^40^0^0^0^0^0^0
+UI_ITEM_NAME2^UI항목명2^40^0^0^0^0^0^0
+UI_ITEM_NAME3^UI항목명3^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="476" _ulen="350" >
+
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock9" inout="out" _len="432" _ulen="316" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="232" _ulen="164" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+INAG_TYPE_CODE^통보처유형코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처일련번호^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_pcrt_170a" title="공인인증서 발급" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="486" _ulen="370" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+EMAIL_INFO^이메일정보^50^0^0^0^0^0^0
+TELNO_INFO^전화번호정보^20^0^0^0^0^0^0
+CRAL_TELNO_INFO^휴대전화번호정보^20^0^0^0^0^0^0
+ADDR_INFO^주소정보^200^0^0^0^0^0^0
+CRPT_YN^암호화여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+FID_UNIN_NTAT_TYPE^FID공동인증서유형^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="192" _ulen="146" >
+
+NTAT_REF_NO^인증서참조번호^30^0^0^0^0^0^0
+NTAT_ATHZ_NO^인증서인가번호^30^0^0^0^0^0^0
+DN_DATA^DN데이터^256^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_173r" title="공인인증서온라인신원확인 사전?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="195" _ulen="147" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="89" _ulen="67" >
+
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="40" _ulen="32" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_efif_011r" title="조합여권번호 정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="53" _ulen="41" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="341" _ulen="253" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+ASCT_PSPR_NO_PIP^조합여권번호PIP^68^0^0^0^0^0^0
+CUST_CNFR_YN^고객확인여부^1^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+GNDR_CLS_CODE^성별구분코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적국가코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

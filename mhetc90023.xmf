@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90023" scrname="업무신청_브릿지화면" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="labTitle" fontsize="5" fontstyle="01" caption="업무신청" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="ImgBackPress" imgpath="icon_arrow_left_on" ly_vert="17,15,24,33,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="8" outline="0000" designorder="1" ly_vert="20,61,335,400,1" >
+			<COL_INFO ly_vert_width="335" />
+			<ROW_INFO ly_vert_height="50,50,50,50,50,50,50,50" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,1" caption="계좌비밀번호 재설정" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,1" caption="온라인서비스 신청" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,1" caption="온라인 이체한도 등록 및 증액" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,3,0,3" halign="0" line="0,1" caption="단기다수개설 출금/고 제한 해지" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="0,1" caption="온라인개설계좌 실명확인" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,5,0,5" halign="0" line="0,1" caption="인증서 온라인 신원확인 동의" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,6,0,6" halign="0" line="0,1" caption="타기관 은행이체 등록" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,7,0,7" halign="0" line="0,0" caption="메리츠 종합계좌간 대체 등록" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image0" imgpath="icon_arrow_right_on" ly_vert="337,74,24,24,1" />
+		<IMAGE name="Image1" imgpath="icon_arrow_right_on" ly_vert="337,124,24,24,1" />
+		<IMAGE name="Image2" imgpath="icon_arrow_right_on" ly_vert="337,174,24,24,1" />
+		<IMAGE name="Image3" imgpath="icon_arrow_right_on" ly_vert="337,224,24,24,1" />
+		<IMAGE name="Image4" imgpath="icon_arrow_right_on" ly_vert="337,274,24,24,1" />
+		<IMAGE name="Image5" imgpath="icon_arrow_right_on" ly_vert="337,324,24,24,1" />
+		<IMAGE name="Image6" imgpath="icon_arrow_right_on" ly_vert="337,374,24,24,1" />
+		<IMAGE name="Image7" imgpath="icon_arrow_right_on" ly_vert="337,424,24,24,1" />
+		<IMAGE name="Image8" imgpath="icon_arrow_right_on" ly_vert="433,474,24,24,1" />
+		<IMAGE name="Image9" imgpath="icon_arrow_right_on" ly_vert="433,524,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1708" _ulen="1420" >
+Dim gSelectYn
+gSelectYn = false
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData("MeritzAuth_Security", "") '사설인증 진행 사항 초기화 (업무신청에서는 들어올 수 없음)
+	Form.SetSharedData("BDM_NMETBSWRGB" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	
+	if gSelectYn = True then
+		Form.OpenPopup("mbbdm86130", "" , "" ) '비대면휴대폰인증
+	end if
+
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Table0_OnClick(lRow , lColumn)
+	Dim Num
+	gSelectYn = True
+
+	' 계좌비밀번호 재설정
+	if lRow == 0 then
+		Num = "002"
+	' 온라인서비스 신청
+	elseif lRow == 1 then
+		Num = "004"
+	' 온라인 이체한도 등록 및 증액
+	elseif lRow == 2 then
+		Num = "005"
+'2024-02-20 타기관OTP 이용등록 /모바일 OTP발급 항목 삭제		
+'	' 타기관OTP등록
+'	elseif lRow == 3 then
+'		Num = "006"
+'	' 모바일OTP 발급
+'	elseif lRow == 4 then
+'		Num = "009"
+	' 단기다수개설 출금/고 제한 해지
+	elseif lRow == 3 then
+		Num = "010"
+	' 온라인개설계좌 실명확인
+	elseif lRow == 4 then
+		Num = "001"
+	' 인증서 온라인 신원확인 동의
+	elseif lRow == 5 then
+		Num = "003"
+	' 타기관 은행이체 등록
+	elseif lRow == 6 then
+		Num = "007"
+	' 메리츠 종합계좌간 대체 등록
+	elseif lRow == 7 then
+		Num = "008"
+	end if
+	
+	Form.SetSharedData("BDM_NMETBSWRGB" , Num)
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

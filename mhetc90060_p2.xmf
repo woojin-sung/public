@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_가져오기풀팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fgcolor="063:255255255" fontsize="5" caption="인증서 가져오기" bgcolor="064:188030030" transmode="0" halign="1" ly_vert="0,0,375,40,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_main_03" ly_vert="343,8,24,24,1" />
+		<BUTTON name="ButtonOK" caption="가져오기" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="186,602,187,45,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,602,186,45,1" />
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="40" ly_vert="12,43,355,543,1" >
+			<PAGE name="page000658" caption="PC → 스마트폰" linkfile="mhetc90060_crt1" loadingtype="1" />
+			<PAGE name="page001787" caption="스마트폰 → 스마트폰" linkfile="mhetc90060_crt2" loadingtype="1" />
+		</FORMTAB>
+		<EDIT name="Edit2" enable="0" fontstyle="01" halign="1" imetype="1" maxlength="4" ly_vert="291,99,75,39,1" />
+		<EDIT name="Edit0" enable="0" fontstyle="01" halign="1" imetype="1" maxlength="4" ly_vert="109,99,75,39,1" />
+		<EDIT name="Edit1" enable="0" fontstyle="01" halign="1" imetype="1" maxlength="4" ly_vert="200,99,75,39,1" />
+		<LABEL name="Label1" fontstyle="01" caption="인증번호" ly_vert="11,99,74,39,1" />
+		<LABEL name="Label2" caption="-" halign="1" ly_vert="184,99,16,39,1" />
+		<LABEL name="Label3" caption="-" halign="1" ly_vert="275,99,16,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2531" _ulen="2393" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_가져오기풀팝업
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+'20201126 SWJ START : 공인인증서 '공인'글자 삭제
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.RequestCertCommand( "ReqCertNum", "", "" )
+End Sub
+
+'============================================================================
+Sub Form_OnCertEvent(sType, sParam1, sParam2)
+	if sType == "RetCertNum" then
+		if sParam1 == "Success" then
+			if #sParam2 >= 12 then
+				Edit0.caption = Left(sParam2,4)
+				Edit1.caption = Mid(sParam2,5,4)
+				Edit2.caption = Mid(sParam2,9,4)
+			end if
+		else
+			Form.MsgBox( "알림22", sParam2, "", 6 )
+		end if
+	elseif sType == "RetCertFileImport" then
+		if sParam1 == "Success" then
+			Form.SendReturnToParent( "mhetc90060_p2" , "ok" )
+			Form.CloseForm( )
+		else
+			'20170410 LES START - 에러코드 메세지 수정
+			if InStr(sParam2,"PT115") == 0 then
+				Form.MsgBox( "알림", sParam2, "", 6 )
+			else
+				Form.MsgBox("알림","[PT115] 인증서가 존재하지 않습니다.", "",6)
+			end if
+			'20170410 LES END 
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	'가져오기 실행
+	Form.RequestCertCommand( "ReqCertFileImport", "", "" )
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm( )
+End Sub
+
+
+
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

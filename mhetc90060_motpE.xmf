@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="모바일OTP 만기도래 안내 팝업" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBack" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg_common.9" ly_vert="32,207,312,231,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="안내" halign="1" ly_vert="33,225,310,32,1" />
+		<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="1" rowcount="6" outline="0000" designorder="1" ly_vert="33,267,310,95,1" >
+			<COL_INFO ly_vert_width="310" />
+			<ROW_INFO ly_vert_height="10,10,20,10,20,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,1" line="0,0" caption="모바일OTP 유효기간이" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" caption="2024.03.01까지 입니다." impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,0" caption="유효기간 이후 사용이 불가하오니" impidxs="" />
+				<CELL cell_ly="0,5,0,5" line="1,0" caption="모바일OTP를 재발급 바랍니다." impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnQuit" caption="취소" fgcolor="004:000000000" fontsize="2" btnimage="btn_25.9" ly_vert="32,380,157,60,1" />
+		<BUTTON name="btnOk" caption="재등록" fontsize="2" btnimage="btn_26.9" ly_vert="189,380,156,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1681" _ulen="1539" >
+Dim g_OSType
+g_OSType = ""
+
+'============================================================================
+Sub btnOk_OnClick()
+	'로그인 여부 체크
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )		
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+'		If g_MotpSrno == Null Or Len(g_MotpSrno) == 0 Then
+'			Form.ShowAlert("알림", "스마트폰에 발급된 OTP정보가 없습니다.")
+'			Exit Sub
+'		End If
+		'Form.OpenNextPopup( "mbotp86125.xmf" , "" , "" )				
+		Form.OpenNextPopup( "mbotp86100.xmf", "", "" )		
+	else
+		if g_OSType == "2" then 'iOS
+			Form.OpenScreen("86100", "POPUP_ALL_CLOSE")
+		else
+			Form.OpenScreen("86100", "")
+		end if
+		
+		'Form.CloseForm()		
+		'iOS는 부모화면이 닫히면 자식화면도 같이 닫혀서 자식도 FormClose하면 창이 다 꺼짐
+		if Form.GetSharedData("&OS_TYPE", false) == "1" then
+			Form.CloseForm()
+		end if		
+	end if
+End Sub
+
+'============================================================================
+Sub btnQuit_OnClick()
+	
+'	if g_szOpenData == "CommonAuthPopup" then
+'		'리턴 보낼 필요 없음
+'		Form.CloseForm()
+'		exit sub
+'	end if
+'	
+	Form.SendReturnToParent("mhetc90060_motpE" , "cancel")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_OSType = Form.GetSharedData("&OS_TYPE", false)
+	if g_OSType == "2" then 'iOS
+		imgBack.visible = True
+	else
+		imgBack.visible = False
+	end if
+
+	szData = Form.GetOpenLinkData()
+'szData = "20240220" 'for TEST
+	tblInfo.SetCellString(1, 0, Left(szData, 4) & "." &  Mid(szData, 5, 2) & "." &  Mid(szData, 7, 8) & "까지 입니다")
+	 
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

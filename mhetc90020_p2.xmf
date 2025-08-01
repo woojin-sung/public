@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90020" scrname="로그인_ID관리" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="labTitle" fontsize="5" fontstyle="01" caption="ID관리" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="ImgBackPress" imgpath="icon_arrow_left_on" ly_vert="17,15,24,33,1" />
+		<TABLE name="Table0" insidelinecolor="026:186186186" colcount="1" rowcount="5" outline="0000" designorder="1" ly_vert="15,61,345,250,1" >
+			<COL_INFO ly_vert_width="345" />
+			<ROW_INFO ly_vert_height="50,50,50,50,50" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,1" caption="ID등록" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,1" caption="ID찾기" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,1" caption="ID계좌연결" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,3,0,3" halign="0" line="0,1" caption="ID비밀번호 변경" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="0,0" caption="ID비밀번호 재설정" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image0" imgpath="icon_arrow_right_on" ly_vert="340,75,20,20,1" />
+		<IMAGE name="Image1" imgpath="icon_arrow_right_on" ly_vert="340,125,20,20,1" />
+		<IMAGE name="Image2" imgpath="icon_arrow_right_on" ly_vert="340,175,20,20,1" />
+		<IMAGE name="Image3" imgpath="icon_arrow_right_on" ly_vert="340,225,20,20,1" />
+		<IMAGE name="Image4" imgpath="icon_arrow_right_on" ly_vert="340,275,20,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3808" _ulen="3546" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 로그인_ID관리
+' 02. 화면설명 : 
+' 03. 작    성 : 2016.03.07 김은숙
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_POP_YN
+g_POP_YN= ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	if Form.GetOpenLinkData() <> "" and Form.GetOpenLinkData() <> null then
+		g_POP_YN = Form.GetOpenLinkData() 'g_POP_YN = mhetc90020_pa_ELFN_ID'
+	end if
+	
+	'20220805_01 KBC : 로그인개선
+	Form.SetScreenName("ID관리")
+	
+	Form.SetSharedData("&SCREEN_AUTH","") '20230308 SWJ START (비대면 권한 초기화)
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	if sKeyName == "mhetc90020_pa" then
+		Form.SendReturnToParent("mhetc90020_pa", sRet)
+		Form.CloseForm()
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Table0_OnClick(lRow , lColumn)
+	
+	'ID등록
+	if lRow == 0 then
+		Form.OpenPopup("mhetc90024", sOpenData, sPosInfo)
+	'ID찾기
+	elseif lRow == 1 then
+		Form.OpenPopup("mhetc90020_pa", g_POP_YN, sPosInfo)
+	'ID계좌연결
+	elseif lRow == 2 then
+	
+		'20230623 SWJ START
+		'iOS로 OpenScreen할 때
+		'POPUP_ALL_CLOSE 파라미터 추가(뒤에 깔린 화면들 다 닫으면서 열어줌)
+		'안드로이드는 파라미터 없어도 잘 됨
+		Form.OpenScreen("85000" , "POPUP_ALL_CLOSE")
+		'20230623 SWJ END
+		
+'		Form.OpenFramePopup("mbonl85000", sOpenData, sPosInfo)
+	'ID비밀번호 변경
+	elseif lRow == 3 then
+		'20230623 SWJ START
+		'iOS로 OpenScreen할 때
+		'POPUP_ALL_CLOSE 파라미터 추가(뒤에 깔린 화면들 다 닫으면서 열어줌)
+		'안드로이드는 파라미터 없어도 잘 됨
+		Form.OpenScreen("85010" , "POPUP_ALL_CLOSE")
+		
+		'Form.OpenScreen("85010" , sOpenData)
+'		Form.OpenFramePopup("mbonl85010", sOpenData, sPosInfo)
+	'ID비밀번호 재설정
+	elseif lRow == 4 then
+		Form.OpenFramePopup("mhetc90020_pb", sOpenData, sPosInfo)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.OpenPopup("mhetc90024", sOpenData, sPosInfo)
+End Sub
+
+'============================================================================
+Sub Image1_OnClick()
+	Form.OpenPopup("mhetc90020_pa", g_POP_YN, sPosInfo)
+End Sub
+
+'============================================================================
+Sub Image2_OnClick()
+	Form.OpenScreen("85000" , "POPUP_ALL_CLOSE")
+End Sub
+
+'============================================================================
+Sub Image3_OnClick()
+	Form.OpenScreen("85010" , "POPUP_ALL_CLOSE")
+End Sub
+
+'============================================================================
+Sub Image4_OnClick()
+	Form.OpenFramePopup("mhetc90020_pb", sOpenData, sPosInfo)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

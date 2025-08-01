@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90021" scrname="계좌알림팝업" version="2" writer="노은솔" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,343,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnOK" caption="닫기" fontstyle="01" btnimage="btn_01.9" ly_vert="16,290,276,39,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="4" rowcount="4" designorder="1" ly_vert="6,66,296,180,1" >
+			<COL_INFO ly_vert_width="74,74,74,74" />
+			<ROW_INFO ly_vert_height="25,65,25,65" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,1,0" bgcolor="039:242242242" caption="주식반대" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,0,3,0" bgcolor="039:242242242" caption="파생반대 / 추가증거금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,1,1" impidxs="" />
+				<CELL cell_ly="2,1,3,1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="039:242242242" caption="미수동결" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" bgcolor="039:242242242" caption="미수발생" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,2,2,2" bgcolor="039:242242242" caption="권리발생" fontsize="-2" impidxs="" />
+				<CELL cell_ly="3,2,3,2" bgcolor="039:242242242" caption="대출만기" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" impidxs="" />
+				<CELL cell_ly="1,3,1,3" impidxs="" />
+				<CELL cell_ly="2,3,2,3" impidxs="" />
+				<CELL cell_ly="3,3,3,3" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="ImageStock" imgpath="ic_01off.png" ly_vert="51,100,56,44,1" />
+		<IMAGE name="ImageRights" imgpath="ic_01off.png" ly_vert="163,190,56,44,1" />
+		<IMAGE name="ImageFot" imgpath="ic_01off.png" ly_vert="202,100,56,44,1" />
+		<IMAGE name="ImageFreeze" imgpath="ic_01off.png" ly_vert="16,190,56,44,1" />
+		<IMAGE name="ImageOccurrence" imgpath="ic_01off.png" ly_vert="89,190,56,44,1" />
+		<IMAGE name="ImageLoan" imgpath="ic_01off.png" ly_vert="236,189,56,44,1" />
+		<LABEL name="lblContents" fgcolor="071:107107107" fontsize="-2" caption="※알림버튼을 선택하시면 해당 화면으로 이동합니다." halign="1" click="1" ly_vert="-20,255,350,28,1" />
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="계좌상태 알림" bgcolor="092:185046046" halign="1" ly_vert="-2,0,309,55,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4345" _ulen="4231" >
+'============================================================================
+' 계좌안내 알림팝업 제공
+'============================================================================
+Dim gStock
+Dim gFuop
+Dim gFreeze
+Dim gOccur
+Dim gRights
+Dim gLoan
+
+ gStock = "N"
+ gFuop = "N"
+ gFreeze = "N"
+ gOccur = "N"
+ gRights = "N"
+ gLoan = "N"
+ 
+ '20230321 LES START
+ Dim bSelect
+ bSelect = "N"
+ '20230321 LES END
+ 
+ 
+'============================================================================
+Sub Form_OnFormInit()
+	sData = Form.GetOpenLinkData( )
+	tCode = Split(sData, "★")
+	
+	For k=0 to #tCode-1
+		tData = Split(tCode(k), "♥")
+		DrawIcon(tData(0), tData(1))
+	Next
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub btnOK_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub DrawIcon(szCode, szData)
+	
+	Select Case szCode
+	Case "Stock"
+		if szData == "Y" then
+			ImageStock.imgpath = "ic_01on.png"
+			gStock = szData
+		end if
+	Case "Fuop"
+		if szData == "Y" then
+			ImageFot.imgpath = "ic_01on.png"
+			gFuop = szData
+		end if
+	
+	Case "Freeze"
+		if szData == "Y" then
+			ImageFreeze.imgpath = "ic_01on.png"
+			gFreeze = szData
+		end if
+	
+	Case "Occur"
+		if szData == "Y" then
+			ImageOccurrence.imgpath = "ic_01on.png"
+			gOccur = szData
+		end if
+	
+	Case "Rights"
+		if szData == "Y" then
+			ImageRights.imgpath = "ic_01on.png"
+			gRights = szData
+		end if
+	
+	Case "Loan"
+		if szData == "Y" then
+			ImageLoan.imgpath = "ic_01on.png"
+			gLoan = szData
+		end if
+	End Select
+	
+End Sub
+
+'주식반대
+'============================================================================
+Sub ImageStock_OnClick()
+	if gStock = "Y" then
+		
+		'20230321 LES START
+		 bSelect = "Y"
+		'20230321 LES END
+	
+		Form.OpenScreen("71030" , "")
+		Form.CloseForm()
+	end if
+End Sub
+
+'권리발생
+'============================================================================
+Sub ImageRights_OnClick()
+	if gRights = "Y" then
+		
+		'20230321 LES START
+		 bSelect = "Y"
+		'20230321 LES END
+	
+		Form.OpenScreen("83000" , "")
+		Form.CloseForm()		
+	end if	
+End Sub
+
+'미수발생
+'============================================================================
+Sub ImageOccurrence_OnClick()
+	if gOccur = "Y" then
+		
+		'20230321 LES START
+		 bSelect = "Y"
+		'20230321 LES END
+	
+		Form.OpenScreen("71020" , "")
+		Form.CloseForm()		
+	end if	
+End Sub
+
+'대출만기
+'============================================================================
+Sub ImageLoan_OnClick()
+	if gLoan = "Y" then
+		
+		'20230321 LES START
+		 bSelect = "Y"
+		'20230321 LES END
+	
+		Form.OpenScreen("82023" , "")
+		Form.CloseForm()		
+	end if	
+	
+End Sub
+
+'미수동결
+'============================================================================
+Sub ImageFreeze_OnClick()
+	if gFreeze = "Y" then
+		
+		'20230321 LES START
+		 bSelect = "Y"
+		'20230321 LES END
+	
+		Form.OpenScreen("71020" , "")
+		Form.CloseForm()		
+	end if	
+	
+End Sub
+'파생반대/추가증거금
+'============================================================================
+Sub ImageFot_OnClick()
+	if gFuop = "Y" then
+		
+		'20230321 LES START
+		 bSelect = "Y"
+		'20230321 LES END
+	
+		Form.OpenScreen("72020" , "")
+		Form.CloseForm()		
+	end if	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mhetc90021_p6" , "")
+	
+	'20230320 LES START
+	'풀팝업유형의 화면이 떠있는 경우, close처리
+	if Form.GetSharedData("&OS_TYPE", false) == "2" then
+		
+		'20230321 LES START
+		if bSelect == "Y" then
+			Form.closePopup()
+		end if
+		'20230321 LES END
+		
+	end if
+	'20230320 LES END
+	
+End Sub
+
+'============================================================================
+Sub Table0_OnClick(lRow , lColumn)
+	if lRow == 1 then
+		if lColumn == 0 then
+			Call ImageStock_OnClick()
+		elseif lColumn == 2 then
+			Call ImageFot_OnClick()
+		end if
+	elseif lRow == 3 then
+		if lColumn == 0 then
+			Call ImageFreeze_OnClick()
+		elseif lColumn == 1 then
+			Call ImageOccurrence_OnClick()
+		elseif lColumn == 2 then 
+			Call ImageRights_OnClick()
+		elseif lColumn == 3 then
+			Call ImageLoan_OnClick()
+		end if	
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

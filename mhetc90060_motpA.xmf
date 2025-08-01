@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90021" scrname="모바일 OTP 인증" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" scroll_pos="0,0" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<EDIT name="EditSerial" imetype="1" hintcaption=" " imagefilepth="input_03.9" ly_vert="31,193,313,77,1" />
+				<IMAGE name="Image5" imgpath="icon_main_11" ly_vert="339,4,30,28,1" />
+				<EDIT name="EditAuthNum" imetype="1" hintcaption=" " imagefilepth="input_03.9" ly_vert="31,274,313,77,1" />
+				<LABEL name="Label0" fontsize="2" fontstyle="01" caption="온라인(PG)결제 인증 확인" ly_vert="28,43,238,37,1" />
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="5" outline="0000" designorder="1" ly_vert="31,95,314,43,1" >
+					<COL_INFO ly_vert_width="17,187,110" />
+					<ROW_INFO ly_vert_height="7,7,7,14,8" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,4" bgcolor="271:236236236" line="0,0" impidxs="" />
+						<CELL cell_ly="1,0,2,2" bgcolor="271:236236236" halign="0" line="0,0" caption="온라인(PG)결제 시 일련번호와 6자리 인증" impidxs="" />
+						<CELL cell_ly="1,3,2,4" bgcolor="271:236236236" halign="0" line="0,0" caption="번호를 입력해주시기 바랍니다." impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<TABLE name="Table1" insidelinecolor="102:255255255" colcount="3" rowcount="5" outline="0000" designorder="1" ly_vert="12,369,320,43,1" >
+					<COL_INFO ly_vert_width="17,187,116" />
+					<ROW_INFO ly_vert_height="7,7,7,14,8" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,4" line="0,0" impidxs="" />
+						<CELL cell_ly="1,0,2,2" halign="0" line="0,0" caption="· 인증번호는 1분간 유효하며 경과시에는 다시" fontsize="-1" impidxs="" />
+						<CELL cell_ly="1,3,2,4" halign="0" line="0,0" caption=" 시도해주시기 바랍니다." fontsize="-1" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<LABEL name="Label1" fgcolor="006:213049051" caption="(인증유효시간 : 1분 00초)" ly_vert="31,168,185,17,1" />
+				<BUTTON name="Buttonok" caption="확인" fontsize="4" btnimage="btn_01.9" ly_vert="0,588,375,61,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2952" _ulen="2720" >
+'============================================================================
+' 2021.01.25 SWJ START : 모바일OTP 온라인결제 인증 확인 화면
+'============================================================================
+' 2021.05.27 : 정민영 : v001 : T2105070009 : 개인신용정보동의제도 개편안 반영
+'            : obcsb_efif_060a IO변경분 적용
+'============================================================================
+
+Dim szData, szMOTPData, g_Sec
+g_Sec = 60
+'============================================================================
+Sub Form_OnFormInit()
+	Container0.EditSerial.SetApplyLabel("일련번호" 				,0 , 267 , "left" , true)
+	Container0.EditAuthNum.SetApplyLabel("인증번호" 				,0 , 267 , "left" , true)
+	
+	szMOTPData = Form.GetOpenLinkData()
+	szData = Split(szMOTPData, "★")
+	
+		if Ubound(szData) < 1 then
+			exit sub
+		else	
+			Container0.EditSerial.caption = szData(0)
+			Container0.EditAuthNum.caption = szData(1)
+			Form.SetTimerEvent(1, 1, 1) '1분 타이머 이벤트 시작
+			
+			Container0.EditSerial.enable = false
+			Container0.EditAuthNum.enable = false
+		end if
+	
+End Sub
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if sTimerID == 1 or sTimerID == "1" then
+			
+		if g_Sec = 0 then
+			Form.SetTimerEvent(1, 0, 1)
+			
+			Call InitCountTimer()         '1분 타이머 초기화					
+			
+			Form.MsgBox("안내", "인증시간이 만료되었습니다. \n다시 시도하여 주시기 바랍니다.", "TIME_END",0)
+			
+			Container0.EditSerial.enable = false
+			Container0.EditAuthNum.enable = false
+			Container0.EditAuthNum.caption = ""
+			Container0.EditSerial.caption = ""
+			
+			Container0.ButtonOK.enable = false	
+			
+		else
+			Dim nMin, nSec
+			
+			nMin  = int(g_Sec / 60 )
+			nSec  =  g_Sec mod  60
+			
+			if len(nSec) == 1 then 
+				nSec = "0"..nSec
+				nSec = nSec
+			end if 	
+			
+			Container0.Label1.caption = "(남은 시간: "..nMin.." 분  "..nSec.." 초)"
+			
+			g_Sec = g_Sec-1		
+		
+		end if
+	end if
+End Sub
+'============================================================================
+'1분 타이머 초기화 함수
+'============================================================================
+Sub InitCountTimer()
+	Container0.Label1.caption	= "(남은 시간: 1 분  00 초)"
+	Container0.Label1.visible  = false
+	g_Sec = 60
+	Form.SetTimerEvent(1, 0, 1)	'1분타이머 종료
+End Sub
+'============================================================================
+Sub Container0_Image5_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container0_Buttonok_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "TIME_END" then
+		Form.CloseForm()
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_174a" trcode="obcsb_oimf_174a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_176a" trcode="obcsb_oimf_176a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_520r" trcode="obcsb_oimf_520r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_172r" trcode="obcsb_oimf_172r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_efif_060a" trcode="obcsb_efif_060a" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_174a" title="모바일OTP 거래등록 및 시간요청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="559" _ulen="423" >
+
+MOTP_PROS_CLCD^모바일OTP처리구분코드^4^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_DATA_CNTT^모바일OTP인증데이터내용^256^0^0^0^0^0^0
+MOTP_TR_CNTT^모바일OTP거래내용^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="450" _ulen="332" >
+
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_TR_NO^모바일OTP거래번호^20^0^0^0^0^0^0
+MOTP_TR_REG_YMDH^모바일OTP거래등록일시^14^0^0^0^0^0^0
+MOTP_HOUR_VAL^모바일OTP시간값^64^0^0^0^0^0^0
+MOTP_TR_REG_YN^모바일OTP거래등록여부^1^0^0^0^0^0^0
+MOTP_TR_CNTT^모바일OTP거래내용^64^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_176a" title="모바일OTP 번호등록 및 검증" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="391" _ulen="303" >
+
+MOTP_PROS_CLCD^모바일OTP처리구분코드^4^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+MOTP_TR_NO^모바일OTP거래번호^20^0^0^0^0^0^0
+MOTP_PWD_PIP^모바일OTP비밀번호PIP^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="116" _ulen="88" >
+
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_520r" title="개인별보안매체상태조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="205" _ulen="157" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="614" _ulen="460" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+HTS_STPL_YN^HTS 약정 여부^1^0^0^0^0^0^0
+SCRC_STAT_CODE^보안카드 상태 코드^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT1^부가정보 확인 질문 내용1^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT2^부가정보 확인 질문 내용2^2^0^0^0^0^0^0
+ACNT_OPNG_YN^계좌 개설 여부^1^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+ELFN_ID_EXST_YN^전자금융 ID 존재 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+UI_SMRT_OTP_YN^UI스마트OTP여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_172r" title="OTP조회(실물&모바일)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="161" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1257" _ulen="937" >
+
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_STAT_CODE^모바일OTP상태코드^2^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_ISNC_YMDH^모바일OTP발급일시^14^0^0^0^0^0^0
+MOTP_LOCK_YMDH^모바일OTPLOCK일시^14^0^0^0^0^0^0
+MOTP_MISS_YMDH^모바일OTP분실일시^14^0^0^0^0^0^0
+MOTP_DSCD_YMDH^모바일OTP폐기일시^14^0^0^0^0^0^0
+VALD_PRD_STA_DATE^유효기간시작일자^8^0^0^0^0^0^0
+VALD_PRD_EXPI_DATE^유효기간만료일자^8^0^0^0^0^0^0
+MOTP_MTRT_GUDE_YN^모바일OTP만기안내여부^1^0^0^0^0^0^0
+LAST_VRFC_YMDH^최종검증일시^14^0^0^0^0^0^0
+MOTP_MSTK_CSNU^모바일OTP오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_MSTK_CSNU^모바일OTP인증오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_LOCK_YN^모바일OTP인증LOCK여부^1^0^0^0^0^0^0
+MOTP_ATHN_LOCK_YMDH^모바일OTP인증LOCK일시^14^0^0^0^0^0^0
+MOTP_ATHN_LAST_MOD_YMDH^모바일OTP인증최종수정일시^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="315" _ulen="247" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_USE_RANG_CODE^OTP사용범위코드^1^0^0^0^0^0^0
+OTP_STAT_CODE^OTP상태코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="131" _ulen="103" >
+
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+UI_PRHB_REAS^UI불가사유^30^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_efif_060a" title="HTS고객등록처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="389" _ulen="293" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+CONN_PWD^접속 비밀번호^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="43" _ulen="35" >
+
+SUCS_YN^성공 여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

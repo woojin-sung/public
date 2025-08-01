@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_해외체류자인증면제" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label2" fontsize="-2" fontstyle="01" caption="개인정보 수집.이용.제공에 대한 동의" bgcolor="066:238239240" transmode="0" ly_vert="0,0,376,29,1" />
+		<CHKBUTTON name="ChkButton0" chkcaption="필수정보 동의" unchkcaption="필수정보 동의" ly_vert="6,199,181,39,1" />
+		<CHKBUTTON name="ChkButton1" chkcaption="고유식별번호 동의" unchkcaption="고유식별번호 동의" ly_vert="187,199,181,39,1" />
+		<CHKBUTTON name="ChkButton4" chkcaption="출국정보 이용 제한에 대한 안내문을 읽고 관련 내용을 이해하였음을 확인합니다." unchkcaption="출국정보 이용 제한에 대한 안내문을 읽고 관련 내용을 이해하였음을 확인합니다." ly_vert="6,445,357,51,1" />
+		<CHKBUTTON name="ChkButton2" chkcaption="필수정보 동의" unchkcaption="필수정보 동의" ly_vert="6,322,181,39,1" />
+		<CHKBUTTON name="ChkButton3" chkcaption="고유식별번호 동의" unchkcaption="고유식별번호 동의" ly_vert="187,322,181,39,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="6,115,363,84,1" />
+		<WEBVIEW name="WebView1" urlpath="about:blank" ly_vert="6,238,363,84,1" />
+		<WEBVIEW name="WebView2" urlpath="about:blank" ly_vert="6,361,363,84,1" />
+		<LABEL name="Label0" fontsize="-2" caption="법무부 출입국관리사무소로의 장애 또는 출국정보 업데이트 지연에 따른 출국정보 이용이 제한될 수 있으며, 이로 인하여 이체 및 인증서 발급 등의 서비스 이용이 제한될 수 있습니다." valign="0" multiline="1" ly_vert="3,502,367,51,1" />
+		<LABEL name="Label1" fontsize="-2" caption="『개인정보보호법』 제15조(개인정보의 수집,이용), 제17조(개인정보의 제공), 제18조(개인정보의 이용.제공에 대한 제한)에 따라, 다음의 내용을 고지하고 고객님의 동의를 요청합니다." valign="0" multiline="1" ly_vert="3,39,367,70,1" />
+		<BUTTON name="ButtonOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+		<LABEL name="LabelLine" bgcolor="017:216216216" transmode="0" ly_vert="0,29,375,1,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10696" _ulen="8632" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_해외체류자인증면제
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+'20201116 SWJ START 실명확인번호 암호화 (rcno_plain_rm = 0 미적용 / rcno_plain_rm = 1 적용)
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRetData
+Dim g_sIP 'IP
+Dim g_sFlag '송신/수신 플래그
+Dim g_sRCNO, g_sName, g_sTime '주민번호, 이름, 시간
+Dim g_sCLSCODE, g_sSRNO, g_sErrCode, g_sErrMsg '출국구분코드, 금융결제원일련번호, 에러코드, 에러메세지
+
+' 20201116 SWJ START : 실명확인번호 암호화 적용구분값
+Dim rcno_plain_rm
+rcno_plain_rm =""
+
+Dim g_MediaType
+g_MediaType =""
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_sFlag = "1"
+	g_sRetData = "cancel"
+	g_sIP = Form.GetSharedData("&IP_ADDRESS", false )
+	
+	'20201116 SWJ START : 실명확인번호 암호화
+	'rcno_plain_rm = ( 0 : 미적용/ 1 : 적용)
+	rcno_plain_rm = Form.GetSharedData("&RCNO_PLAIN_RM", false)
+	
+	g_MediaType   = Form.GetSharedData("&MEDIA_CODE"   , false)
+	'20201116 SWJ END
+	
+'20160531 LKM START 이체시 주민번호/이름 세팅하지 못하는 오류 수정 
+	Dim sLOGIN_TYPE 
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE",		false )		'로그인 상태		
+	
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태 (이체업무)
+	     g_sRCNO	= Form.GetSharedData("&JUMIN_NUM", 		false )     '실명확인번호
+	     g_sName	= Form.GetSharedData("&USER_NAME", 		false )     '고객명
+	else							'인증서업무 
+		g_sRCNO = Form.GetSharedData("CERT_RCNO",		false)
+		g_sName = Form.GetSharedData("CERT_USER_NAME",	false)
+	
+	end if
+
+'ORG
+'	g_sRCNO = Form.GetSharedData("CERT_RCNO" , false)
+'	g_sName = Form.GetSharedData("CERT_USER_NAME" , false)
+'20160531 LKM END
+
+	g_sTime = Form.GetSharedData("&HOST_TIME", false )
+	g_sCLSCODE = ""
+	g_sSRNO = ""
+	g_sErrCode = ""
+	g_sErrMsg = ""
+	
+	Form.SetScreenName( "해외체류자인증" )
+	
+	Dim sText, sText1, sText2
+	sText = "<html><body>개인정보 수집.이용<br>"..
+			"개인정보 수집.이용 목적 : 추가 본인인증 절차를 생략하기 위해 법무부 출입국관리사무소로부터 출국사실 확인<br>"..
+			"개인정보 수집.이용 항목<br>"..
+			"- 필수 정보 : 성명, 주민등록번호, 사용하는 단말의 IP Add 및 단말정보<br>"..
+			"- 고유식별번호 : 주민등록번호<br>"..
+			"보유.이용기간 : 전자금융거래기록의 생성 및 보존을 위해 동의일로부터 (금융)거래 종료일까지<br>"..
+			"고객님께서는 개인정보 수집.이용에 대한 동의를 거부할 권리를 갖습니다. 반면에 동의거부 시 "..
+			"사용자 출국사실 여부 확인 실패로 사용자 확인과 인증 등이 필요한 서비스의 이용이 제한됩니다.</body></html>"
+			
+	WebView0.loaddata = sText
+	
+	sText1 = "<html><body>개인정보 제공<br>"..
+			"개인정보의를 제공받는 자 : 출입국관리사무소, 금융결제원, KOSCOM<br>"..
+			"개인정보 제공 목적 : 법무부 출입국관리사무소로부터 출국사실 확인<br>"..
+			"제공할 개인정보 항목<br>"..
+			"- 필수 정보 :  성명, 주민등록번호<br>"..
+			"- 고유식별번호 : 주민등록번호<br>"..
+			"제공받는 자의 개인정보 보유.이용 기간 : 개인정보의 보유 이용목적 달성 즉시 폐기<br>"..
+			"(단, 회사의 내부 방침 및 관계법령에 의한 보유사유가 있을 경우 예외)<br>"..
+			"고객님께서는 개인정보 제공에 대한 동의를 거부할 권리를 갖습니다. 반면에 동의거부 시 사용자 "..
+			"본인확인 실패로 사용자 확인과 인증 등이 필요한 서비스의 이용이 제한됩니다.</body></html>"
+  
+	WebView1.loaddata = sText1
+	
+	sText2 = "<html><body>출국정보는 주민번호 보유 개인고객님께만 제공이 가능합니다. 그리고, 해외 IP로 확인된 경우에만 출국정보를 이용하실 수 있으며, 법무부 출입국관리사무소 시스템에 장애가 발생하거나 출입국정보 업데이트가 지연될 경우 출국정보 이용이 제한될 수 있습니다.<br>"..
+			"※ 출입국정보 업데이트 주기.통상 출입국 후 최소 12시간에서 최대 36시간</body></html>"
+
+	WebView2.loaddata = sText2
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "ohhts_logn_whos" then
+		DATAMANAGER.SetDataValue( 0, "ohhts_logn_whos", "InBlock1", "IPAD" , 0 , g_sIP )
+	elseif szTranID == "obcsb_oimf_609a" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "SDRC_CLS_CODE" , 0 , g_sFlag )
+		
+		'20201116 SWJ START : 실명확인번호 암호화 (RRNO > RRNO_PIP로 변경)
+		if rcno_plain_rm <> "1" or g_MediaType == "158" or g_MediaType == "159" then '고유MTS 미적용
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "RRNO"     , 0 , g_sRCNO )
+		else
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "RRNO_PIP" , 0 , g_sRCNO )
+		end if
+		'20201116 SWJ END
+		
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "CUST_FULL_NAME" , 0 , g_sName )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "PROS_HOUR" , 0 , g_sTime )
+	
+		if g_sFlag == "3" then '출입국조회서비스수신
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "DPCN_CLS_CODE" , 0 , g_sCLSCODE )
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "KFTC_IQRY_SRNO" , 0 , g_sSRNO )
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "ERR_CODE" , 0 , g_sErrCode )
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_609a", "InBlock1", "ERR_MSG" , 0 , g_sErrMsg )
+		end if
+	elseif szTranID == "ohhts_logn_immg" then
+		
+		'20201116 SWJ START : 실명확인번호 암호화 (RRNO > RRNO_PIP로 변경)
+		if rcno_plain_rm <> "1" or g_MediaType == "158" or g_MediaType == "159" then '고유MTS 미적용
+			DATAMANAGER.SetDataValue( 0, "ohhts_logn_immg", "InBlock1", "RRNO" , 0 , g_sRCNO )
+		else
+			DATAMANAGER.SetDataValue( 0, "ohhts_logn_immg", "InBlock1", "CRPT_YN"  , 0 , "Y" )
+			DATAMANAGER.SetDataValue( 0, "ohhts_logn_immg", "InBlock1", "RRNO_PIP" , 0 , g_sRCNO )
+		end if
+		'20201116 SWJ END
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_logn_immg", "InBlock1", "FLNM" , 0 , g_sName )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "ohhts_logn_whos" then
+		Dim sPROS_RSLT_CODE 
+		sPROS_RSLT_CODE = DATAMANAGER.GetDataValue( 0, "ohhts_logn_whos", "OutBlock1", "PROS_RSLT_CODE" , 0 )		
+		
+		if sPROS_RSLT_CODE == "00" then '국내
+			Form.MsgBox( "알림", "IP검증 결과 해외가 아닙니다.", "", 6 )	
+		elseif sPROS_RSLT_CODE == "01" then '국외
+			g_sFlag = "1" '송신
+			DATAMANAGER.RequestTranData( "obcsb_oimf_609a" ) '해외체류자조회
+			DATAMANAGER.RequestTranData( "ohhts_logn_immg" ) '출입국조회
+		elseif sPROS_RSLT_CODE == "02" then '모름
+			Form.MsgBox( "알림", "식별이 불가능한 IP, 고객지원센터 문의바랍니다.", "", 6 )	
+		end if
+	elseif szTranID == "ohhts_logn_immg" then
+		g_sFlag = "3" 	
+		g_sCLSCODE = DATAMANAGER.GetDataValue( 0, "ohhts_logn_immg", "OutBlock1", "PROS_RSLT_CODE" , 0 )
+		'20160705  서비스 아웃풋 변경
+		g_sSRNO = DATAMANAGER.GetDataValue( 0, "ohhts_logn_immg", "OutBlock1", "FID_IQRY_SRNO" , 0 )
+		g_sErrCode = DATAMANAGER.GetDataMsgCode( szTranID )
+		g_sErrMsg = DATAMANAGER.GetDataMsgText( szTranID )
+		
+		DATAMANAGER.RequestTranData( "obcsb_oimf_609a" ) '해외체류자조회	
+		
+		if g_sCLSCODE == "01" then '미출국
+			Form.MsgBox( "알림", "출국사실 조회 결과 해외가 아닙니다. 법무부 출입국관리사무소에 문의하여 주시기 바랍니다.", "", 6 )
+		elseif g_sCLSCODE == "00" then '출국
+			Form.MsgBox( "알림", "출국사실 조회 결과 해외거주입니다. 추가인증절차가 생략됩니다.", "OK_MSG", 6 )			
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID == "ohhts_logn_whos" then
+		Form.MsgBox( "알림", "식별이 불가능한 IP, 고객지원센터 문의바랍니다.", "", 6 )
+	elseif szTranID == "ohhts_logn_immg" then
+		Form.MsgBox( "알림", "출국여부 조회 불가능합니다.", "", 6 )
+		
+		g_sFlag = "3" 	
+		g_sErrCode = szErrCode
+		g_sErrMsg = szErrMsg
+		
+		DATAMANAGER.RequestTranData( "obcsb_oimf_609a" ) '해외체류자조회
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "OK_MSG" then
+		g_sRetData = "ok"
+		Form.CloseForm( )
+	end if
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	if ChkButton0.chksilence == "0" or ChkButton1.chksilence == "0" then
+		Form.MsgBox( "알림", "개인정보 수집.이용 동의를 확인하시기 바랍니다.", "", 6 )
+	elseif ChkButton2.chksilence == "0" or ChkButton3.chksilence == "0" then
+		Form.MsgBox( "알림", "개인정보 제공 동의를 확인하시기 바랍니다.", "", 6 )
+	elseif ChkButton4.chksilence == "0" then
+		Form.MsgBox( "알림", "출국정보 이용제한에 대한 동의를 확인하시기 바랍니다.", "", 6 )
+	else
+		DATAMANAGER.RequestTranData( "ohhts_logn_whos" ) 'IP국적조회
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()	
+	Form.SendReturnToParent( "mhetc90060_pc" , g_sRetData )
+End Sub
+
+
+
+
+
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_logn_whos" trcode="ohhts_logn_whos" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_609a" trcode="obcsb_oimf_609a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_logn_immg" trcode="ohhts_logn_immg" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_logn_whos" title="IP 국적 조회(WHOIS)" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="36" _ulen="32" >
+
+IPAD^IP주소^39^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="88" _ulen="68" >
+
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+CTCD^국가코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_609a" title="해외체류자조회내역 정보" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="418" _ulen="312" >
+
+SDRC_CLS_CODE^송수신구분코드^1^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CUST_FULL_NAME^고객풀명^100^0^0^0^0^0^0
+DPCN_CLS_CODE^출국구분코드^2^0^0^0^0^0^0
+KFTC_IQRY_SRNO^금융결제원조회일련번호^10^0^0^0^0^0^0
+PROS_HOUR^처리시간^6^0^0^0^0^0^0
+ERR_CODE^에러코드^4^0^0^0^0^0^0
+ERR_MSG^에러메시지^200^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_logn_immg" title="출입국 조회 TR" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="160" _ulen="122" >
+
+RRNO^주민등록번호^13^0^0^0^0^0^0
+FLNM^성명^40^0^0^0^0^0^0
+CRPT_YN^암호화여부^1^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="107" _ulen="83" >
+
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+FID_IQRY_SRNO^FID조회일련번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

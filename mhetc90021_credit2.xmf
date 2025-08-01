@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90021" scrname="신용공여 이벤트 안내" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CHKBUTTON name="ChkButton0" fontsize="-1" chkcaption="다시보지 않기" unchkcaption="다시보지 않기" ly_vert="9,610,187,27,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="notice_mts.png" ly_vert="0,0,375,600,1" />
+		<BUTTON name="Button0" caption="닫기" fgcolor="004:000000000" fontsize="-2" ly_vert="288,611,77,25,1" />
+		<BUTTON name="Button1" btnimage="alpha" ly_vert="90,545,202,54,1" />
+		<IMAGE name="Image5" imgpath="icon_main_11" ly_vert="344,0,30,28,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3259" _ulen="3033" >
+'============================================================================
+'20221115 SWJ START
+'신용공여 이벤트 만기연장 대상 + 이자율 인상안내 / 이자율 인상안내 (두 고객군에 따른 팝업)
+'다시보지않기, 닫기처리 데이터 저장
+'============================================================================
+Dim g_szData, g_closeType
+'============================================================================
+Sub Form_OnFormInit()
+		
+	g_szData = Form.GetOpenLinkData()
+	
+	'신용공여 + 이자율 인상 대상
+	if g_szData == "001" then
+		Image0.imgpath = "notice_mts.png"
+	'이자율 인상 대상
+	elseif g_szData == "002" then
+		Image0.imgpath = "mobile_pop_nftf.png"
+	end if
+	
+	'if szData <> "" then
+	'	szData = Split(szData,"★")
+		
+	'	szYear = Left(szData(0),4)
+	'	szMon = Mid(szData(0),5,2)
+	'	szDay = Right(szData(0),2)
+		
+	'	szYear2 = Left(szData(1),4)
+	'	szMon2 = Mid(szData(1),5,2)
+	'	szDay2 = Right(szData(1),2)
+		
+	'	Container0.Table1.SetCellString(16, 6, szYear&". "&szMon&". "&szDay)
+	'	Container0.Table1.SetCellString(17, 6, szYear2&". "&szMon2&". "&szDay2)
+	'end if
+	
+End Sub
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	g_closeType = "2"
+	DATAMANAGER.RequestTranData("oblon_basc_110a")
+	
+	'Form.SetEnvData(1, UserID&"BDMEVENTPOPUP_NEW4", "1")		'20220413 SWJ START : 4차 이벤트 적용으로 인해 키값변경
+	
+End Sub
+'============================================================================
+Sub Button0_OnClick()
+	g_closeType = "1"
+	DATAMANAGER.RequestTranData("oblon_basc_110a")
+End Sub
+'============================================================================
+Sub Image5_OnClick()
+	g_closeType = "1"
+	DATAMANAGER.RequestTranData("oblon_basc_110a")
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "oblon_basc_110a" then
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_110a", "InBlock1", "TRGT_EVNT_ID"  , 0 , g_szData)		'001: 만기연장 + 이자율 인상 '002: 이자율 인상
+		DATAMANAGER.SetDataValue( 0, "oblon_basc_110a", "InBlock1", "PROS_CLS_CODE" , 0 , g_closeType)  '1: 그냥 닫기 '2: 다시보지않기
+	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	if szTranID == "oblon_basc_110a" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID == "oblon_basc_110a" then
+		Form.CloseForm()
+	end if
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mhetc90021_credit2" , "")
+End Sub
+'============================================================================
+Sub Button1_OnClick()
+	
+	'자세히 보기
+	Form.OpenPopup("notice_p8" , g_szData , "")
+End Sub
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	g_closeType = "1"
+	DATAMANAGER.RequestTranData("oblon_basc_110a")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="oblon_basc_110a" trcode="oblon_basc_110a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="oblon_basc_110a" title="대출 안내화면 확인 처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="100" _ulen="78" >
+
+TRGT_EVNT_ID^대상이벤트ID^3^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

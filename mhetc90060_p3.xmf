@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_갱신풀팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fgcolor="063:255255255" fontsize="5" caption="인증서 갱신" bgcolor="064:188030030" transmode="0" halign="1" ly_vert="0,0,375,40,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_main_03" ly_vert="343,8,24,24,1" />
+		<LINKFORM name="LinkForm0" ly_vert="0,40,375,562,1" />
+		<BUTTON name="ButtonOK" visible="0" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,602,188,45,0" />
+		<BUTTON name="ButtonCancel" visible="0" caption="이전" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,602,187,45,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4060" _ulen="3894" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_갱신풀팝업
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim G_CERT_LIST_FILE '인증서목록화면
+Dim G_CERT_UPDATE_FILE '인증서갱신화면
+Dim g_nStepIndex '목록0, 갱신1
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' 단계별 화면변경
+'============================================================================
+Function SetControlChange()	
+	Dim sFlag, sHeight	
+	sHeight = "562"
+	
+	if g_nStepIndex == 0 then
+		sFlag = "0"
+		sHeight = "607"
+
+		LinkForm0.linkfile = G_CERT_LIST_FILE
+	elseif g_nStepIndex == 1 then
+		sFlag = "1"
+			
+		Form.SetSharedData( "RENEW_TYPE" , "1")
+		LinkForm0.linkfile = G_CERT_UPDATE_FILE
+	else
+		sFlag = "0"
+		LinkForm0.linkfile = ""
+	end if
+	
+	LinkForm0.height = sHeight
+	ButtonCancel.visible = sFlag
+	ButtonOK.visible = sFlag
+	Form.triggerEvent( "LinkForm0", "TabChange", "update" )
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	G_CERT_LIST_FILE = "mhetc90060_s1"
+	G_CERT_UPDATE_FILE = "mhetc90060_s4"
+	g_nStepIndex = 0
+	
+	SetControlChange()	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "NextStep" then
+		if g_nStepIndex < 1 then
+			g_nStepIndex = g_nStepIndex+1
+			
+			SetControlChange()
+		elseif g_nStepIndex == 1 then
+			'갱신 실행
+			Dim sDN, sOldNew
+			sDN = Form.GetSharedData("CERT_DN" , false)
+			sOldNew = Form.GetSharedData("CERT_OLDNEW" , false)
+			
+			Form.RequestCertCommand( "ReqCertFileUpdate", sDN, sOldNew )
+		end if
+	elseif sEventName == "BeforeStep" then
+		if g_nStepIndex > 0 then
+			g_nStepIndex = g_nStepIndex-1
+			
+			SetControlChange()
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnCertEvent(sType, sParam1, sParam2)
+	if sType == "RetCertFileUpdate" then
+		if sParam1 == "Success" then
+			Form.SendReturnToParent( "mhetc90060_p3" , "ok" )
+			Form.CloseForm( )
+		else
+			'20170410 LES START - 에러메세지 수정
+			if InStr(sParam2,"-4100") == 0 then
+				Form.MsgBox( "알림", sParam2, "", 6 )
+			else
+				Form.MsgBox("알림","[-4100] 인증서 갱신은 인증서 만료 32일 전부터 가능합니다.", "", 6)
+			end if
+			'20170410 LES END
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.triggerEvent( "LinkForm0", "BeforeCheck", "" )	
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	if g_nStepIndex < 2 then
+		Form.triggerEvent( "LinkForm0", "NextCheck", "" )	
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("CERT_DN" , "")
+	Form.SetSharedData("CERT_INDEX" , "")
+	Form.SetSharedData("CERT_OLDNEW" , "")
+	
+	Form.SetSharedData( "RENEW_TYPE" , "")
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

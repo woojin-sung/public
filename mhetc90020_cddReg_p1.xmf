@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="13010" scrname="고객정보입력_직종선택" version="2" writer="노은솔" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,518,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="pop_header.9.png" ly_vert="0,0,313,55,1" />
+		<LABEL name="Label0" caption="국가명" ly_vert="7,65,65,39,1" />
+		<GRID name="Grid0" colcount="2" ly_vert="15,114,279,327,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" />
+				<LABEL name="th_cell0" fontsize="-2" caption="국가명" halign="1" />
+				<LABEL name="bd_cell1" halign="2" />
+				<LABEL name="bd_cell2" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="th_cell1" fontsize="-2" caption="국가코드" halign="1" />
+				<LABEL name="th_cell2" fontsize="-2" caption="소분류코드" halign="1" ly_vert="0,0,100,20,1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" nexteventtr="obcpp_code_002r" border="0000" bordercolor="042:255255255" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="279,70" ly_vert_visible="0,1" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="279" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="28" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="35" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,1" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="28" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="35" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" line="0,1" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="Label10" fontsize="2" fontstyle="01" caption="국가선택" bgcolor="064:188030030" halign="1" ly_vert="0,0,310,55,1" />
+		<BUTTON name="BtnOK" caption="확인" btnimage="btn_01.9" ly_vert="9,460,290,44,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_vert="267,14,24,24,1" />
+		<EDIT name="Edit0" imetype="0" ly_vert="77,70,216,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3342" _ulen="3168" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 고객정보입력
+' 02. 화면설명 : 고객정보입력_직종선택
+' 03. 작    성 : 2016.02.29 노은솔
+' 04. 수    정 : 2017.09.07 윤유정 : 대분류 자동셋팅 제거 v0001
+'              : 2018.09.13 윤유정 : 그리드 멈춤 높이 수정(그리드 바디 높이 축소) v0002
+'-------------------------------------------------------------------------------------------
+Dim	g_lCellID
+Dim	g_lRow
+	g_lRow = -1
+Dim g_sRetData
+Dim g_isNextFlag
+'============================================================================
+Sub BtnOK_OnClick()
+	If g_lRow < 0 Then
+		ShowAlert("확인", "국가를 선택하여주시기 바랍니다.")
+		Exit Sub
+	End If
+	
+	sName = Grid0.GetCellData("bd_cell0", g_lRow)
+	lLrdv = Grid0.GetCellData("bd_cell1", g_lRow)	
+	
+	Form.SetSharedData("cddReg_CODE_NAME" , sName)
+	Form.SetSharedData("cddReg_CODE"      , lLrdv)		
+	Form.SendReturnToParent("mhetc90020_cddReg_p1" , sName)	
+
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+
+	If g_lRow >= 0 Then
+		nIndex = g_lRow%2
+		If nIndex = 0 Then
+			Grid0.SetCellFgColor("bd_cell0",g_lRow,"4")				
+		Else
+			Grid0.SetCellFgColor("bd_cell0",g_lRow,"4")		
+		End If
+	End If
+	Grid0.SetCellFgColor(szCellID,lRow,"10")
+	
+	g_lRow = lRow
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranMessage(szTranID, szMsgCode, szMessage, szSubMessage)
+	if szTranID == "obcpp_code_002r" then
+		nCnt = tonumber(DATAMANAGER.GetDataCount( 0, "obcpp_code_002r", "OutBlock1" ))
+		
+		If DATAMANAGER.IsMoreNextData(szTranID) == true Then
+			g_isNextFlag = true
+		Else
+			g_isNextFlag = False
+		End If
+	end if
+
+End Sub
+
+
+'============================================================================
+Sub Grid0_OnScrollEnd()
+	If g_isNextFlag == true Then
+		DATAMANAGER.RequestNextData("obcpp_code_002r")		
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	DATAMANAGER.SetDataValue(0, "obcpp_code_002r", "InBlock1", "IQRY_CLS_CODE" 			, 0 , "1")
+	DATAMANAGER.SetDataValue(0, "obcpp_code_002r", "InBlock1", "META_TERM_PHSC_NAME" 		, 0 , "국가코드")
+	DATAMANAGER.SetDataValue(0, "obcpp_code_002r", "InBlock1", "CODE_VALD_VAL_KOR_NAME" 	, 0 , Edit0.caption)
+	DATAMANAGER.SetDataValue(0, "obcpp_code_002r", "InBlock1", "CODE_VALD_VAL" 			, 0 , "")
+	
+	DATAMANAGER.RequestTranData("obcpp_code_002r")
+End Sub
+
+Sub Edit0_OnEditComplete()
+	DATAMANAGER.SetDataValue(0, "obcpp_code_002r", "InBlock1", "IQRY_CLS_CODE" 			, 0 , "1")
+	DATAMANAGER.SetDataValue(0, "obcpp_code_002r", "InBlock1", "META_TERM_PHSC_NAME" 		, 0 , "국가코드")
+	DATAMANAGER.SetDataValue(0, "obcpp_code_002r", "InBlock1", "CODE_VALD_VAL_KOR_NAME" 	, 0 , Edit0.caption)
+	DATAMANAGER.SetDataValue(0, "obcpp_code_002r", "InBlock1", "CODE_VALD_VAL" 			, 0 , "")
+	
+	DATAMANAGER.RequestTranData("obcpp_code_002r")
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+
+'============================================================================
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_code_002r" trcode="obcpp_code_002r" compress="1" encryption="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_code_002r" title="공통 코드 값 목록조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="225" _ulen="173" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+META_TERM_PHSC_NAME^메타용어물리명^200^0^0^0^0^0^0
+CODE_VALD_VAL_KOR_NAME^코드유효값한글명^200^0^0^0^0^0^0
+CODE_VALD_VAL^코드유효값^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="21" inout="out" _len="177" _ulen="137" >
+
+CODE_VALD_VAL^코드유효값^100^0^0^0^0^0^0
+CODE_VALD_VAL_KOR_NAME^코드유효값한글명^200^0^0^0^0^0^0
+CODE_VALD_VAL_EXPL^코드유효값설명^1000^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="120" _ulen="92" >
+
+CODE_VALD_VAL_SORT_SEQ^코드유효값정렬순서^10^0^0^0^0^0^0
+CODE_VALD_VAL^코드유효값^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

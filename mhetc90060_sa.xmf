@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_발급(비밀번호입력)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="7" outline="0101" designorder="1" ly_vert="0,0,375,562,1" >
+			<COL_INFO ly_vert_width="226,149" />
+			<ROW_INFO ly_vert_height="29,80,29,51,51,80,242" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,1,0" bgcolor="066:238239240" halign="0" line="0,0" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,1,1" halign="0" line="0,1" caption="인증서 비밀번호는 프로그램에 의하여 별도로 관리되지 
+않습니다.
+인증서 비밀번호를 분실하지 않도록 주의하시기 바랍니다." fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,1,2" fgcolor="065:102102102" halign="0" line="0,1" caption="신규 인증서 비밀번호 입력" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:102102102" halign="0" line="0,1" caption="신규 인증서 비밀번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,3,1,3" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="065:102102102" halign="0" line="0,1" caption="신규 인증서 비밀번호(확인)" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,4,1,4" impidxs="" />
+				<CELL cell_ly="0,5,1,5" valign="0" halign="0" line="0,0" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,6,0,6" line="0,1" impidxs="" />
+				<CELL cell_ly="1,6,1,6" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="Edit1" password="1" imetype="0" ly_vert="232,144,137,39,1" />
+		<EDIT name="Edit2" password="1" imetype="0" ly_vert="232,195,137,39,1" />
+		<TABLE name="Table1" insidelinecolor="102:255255255" colcount="7" rowcount="1" outline="0000" designorder="1" ly_vert="0,0,375,29,1" >
+			<COL_INFO ly_vert_width="83,14,83,14,83,14,84" />
+			<ROW_INFO ly_vert_height="29" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="066:238239240" line="0,1" caption="본인 확인" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" bgcolor="066:238239240" line="0,1" caption="〉" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="2,0,2,0" bgcolor="066:238239240" line="0,1" caption="계좌확인" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="3,0,3,0" bgcolor="066:238239240" line="0,1" caption="〉" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="4,0,4,0" bgcolor="066:238239240" line="0,1" caption="약관동의" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="5,0,5,0" bgcolor="066:238239240" line="0,1" caption="〉" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="6,0,6,0" fgcolor="006:213049051" bgcolor="066:238239240" line="0,1" caption="발급/재발급" fontsize="-2" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8770" _ulen="7662" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_발급(비밀번호입력)
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+'20200910 SWJ START 메모리평문제거 (plain_rm = 0 : 미적용/ 1: 적용)
+'                                  (인증서 비밀번호 체크로직 변경)
+'20201126 SWJ START 공인인증서 '공인' 글자 삭제
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'20200910 SWJ START
+'메모리평문제거 적용구분값
+Dim plain_rm
+plain_rm =""
+'20200910 SWJ END
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Edit1.certname = "인증서 비밀번호 입력"
+	Edit2.certname = "인증서 비밀번호 입력"
+	
+	'20200910 SWJ START
+	'MTS메모리평문 적용유무
+	'plain_rm = ( 0 : 미적용/ 1 : 적용)
+	plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	'20200910 SWJ END
+	
+End Sub
+
+'============================================================================
+'20161216_02 KBC START : 인증서 비밀번호 규칙 체크로직 제거
+Function CheckValidPassword( str )
+	dim i		'루프용 
+	dim chk_n	'숫자 체크
+	dim chk_c	'영문 체크
+	dim chk_t	'특수 체크
+
+	CheckValidPassword = ""
+	chk_n = 0
+	chk_c = 0
+	chk_t = 0
+	
+	'체크1) 10자이상 30자이하
+    if Len(str) < 10 or Len(str) > 30 then
+		CheckValidPassword = "10~30 자리만 사용 가능합니다."
+		exit function
+	end if
+	
+	For i = 1 to Len(str)
+		nAscii = Asc(Mid(str, i, 1))
+	    
+		If nAscii >= 48 and nAscii <= 57 Then '0~9
+		    chk_n = 1
+		Elseif   (nAscii >= 65 and nAscii <= 90) or ( nAscii >= 97 and nAscii <= 122) Then 'A~Z, a~z
+		    chk_c = 1
+		Else
+		    chk_t = 1 
+		End if
+		
+		'체크2) 일부 특수기호 불가
+		if nAscii == 39 or nAscii == 34 or nAscii == 92 or nAscii == 124 then
+			CheckValidPassword = "특수문자(',\",\\,|)는 사용이 불가합니다."           			'"
+			exit function
+		end if
+	Next
+	
+	'체크3) 영어,숫자,특수문자 필수
+	If ((chk_n + chk_c + chk_t) < 3) Then
+		CheckValidPassword = "영어,숫자,특수문자 혼합필수입니다."
+		exit function
+	End if
+	
+	'체크4) 연속된 4자리 숫자/문자, 동일한 4자리 숫자/문자
+	dim nAscii
+	dim nPrvAscii
+	dim nSameCnt
+	dim nContiCntUp
+	dim nContiCntDn
+	
+	nPrvAscii = 0
+	nSameCnt = 0
+	nContiCntUp = 0
+	nContiCntDn = 0
+		
+	For i = 1 to Len(str)
+		nAscii = Asc(Mid(str, i, 1))
+		
+		If (nAscii >= 48 and nAscii <= 57) or ((nAscii >= 65 and nAscii <= 90) or ( nAscii >= 97 and nAscii <= 122)) Then 
+		
+			if nPrvAscii == nAscii then
+				nSameCnt = nSameCnt + 1
+				
+				if nSameCnt >= 3 then
+					CheckValidPassword = "4자리이상 같은 경우에는 사용이 불가합니다."
+					exit function
+				end if				
+			else
+				nSameCnt = 0
+			end if
+			
+			if nPrvAscii + 1 == nAscii then
+				nContiCntUp = nContiCntUp + 1
+				
+				if nContiCntUp >= 3 then
+					CheckValidPassword = "4자리이상 연속되는 경우에는 사용이 불가합니다."
+					exit function
+				end if
+			else
+				nContiCntUp = 0
+			end if
+			
+			if nPrvAscii - 1 == nAscii then
+				nContiCntDn = nContiCntDn + 1
+				
+				if nContiCntDn >= 3 then
+					CheckValidPassword = "4자리이상 연속되는 경우에는 사용이 불가합니다."
+					exit function
+				end if				
+			else 
+				nContiCntDn = 0
+			end if
+			
+			nPrvAscii = nAscii
+			
+		Else
+			nPrvAscii = 0
+			nSameCnt = 0
+			nContiCnt = 0
+		End If
+	Next
+
+	'체크5) 3자리 동일패턴 2번이상
+	dim nPattnEqlCnt
+	dim nPattnEqlPos
+	dim sPattnBase
+	dim sPattnComp
+	
+	nPattnEqlCnt = 0
+	nPattnEqlPos = 0
+	sPattnBase = ""
+	sPattnComp = ""	
+	
+	For i = 1 to Len(str) - 2
+		nPattnEqlCnt = 0
+		nPattnEqlPos = 0
+		sPattnBase = Mid(str, i, 3)
+
+		for j = 1 to Len(str) - 2
+			sPattnComp = Mid(str, j, 3)
+			
+			if j > (nPattnEqlPos+2) then
+				if sPattnBase == sPattnComp then
+					nPattnEqlCnt = nPattnEqlCnt + 1
+					nPattnEqlPos = j
+				end if
+			end if
+
+			if nPattnEqlCnt >= 2 then
+				CheckValidPassword = "3자리 동일문자 2회이상 중복이 불가합니다.(" & nPattnEqlCnt & ")"
+				exit function
+			end if					
+		next
+	Next	
+	
+	'체크6) 2자리 동일패턴 3번이상
+	nPattnEqlCnt = 0
+	nPattnEqlPos = 0
+	sPattnBase = ""
+	sPattnComp = ""
+	
+	For i = 1 to Len(str) - 1
+		nPattnEqlCnt = 0
+		nPattnEqlPos = 0
+		sPattnBase = Mid(str, i, 2)
+		
+		for j = 1 to Len(str) - 1
+			sPattnComp = Mid(str, j, 2)
+			
+			if j > (nPattnEqlPos+1) then
+				if sPattnBase == sPattnComp then
+					nPattnEqlCnt = nPattnEqlCnt + 1
+					nPattnEqlPos = j
+				end if
+			end if
+			
+			if nPattnEqlCnt >= 3 then
+				CheckValidPassword = "2자리 동일문자 3회이상 중복이 불가합니다.(" & nPattnEqlCnt & ")"
+				exit function
+			end if
+		next
+	Next	
+	
+	CheckValidPassword = ""
+End Function
+'20161216_02 KBC END
+
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "TabChange" then
+		Dim sText
+		sText = "\n10자 이상 - 30자 이하\n"..
+				"숫자, 영문자, 특수문자 반드시 포함(' \" \\ | 제외)\n"..
+				"영문자 대/소문자 구분"
+		Table0.SetCellString( 5, 0, sText )
+	elseif sEventName == "NextCheck" then
+		if (Edit1.caption == null or Edit1.caption == "") or
+			(Edit2.caption == null or Edit2.caption == "") then
+			Form.MsgBox( "안내", "인증서 비밀번호를 입력하세요.", "", 6 )
+		else '인증서 비밀번호 유효성체크
+			if Trim(Edit1.caption) ~= Trim(Edit2.caption) then '신규 비밀번호 불일치
+				Form.MsgBox( "오류", "신규 인증서 비밀번호가 서로 일치하지 않습니다.", "", 6 )
+			else
+				
+				'20200910 SWJ START : 인증서 비밀번호 체크로직 변경(서비스 단에서 처리)
+				'메모리평문제거 적용상태일 때
+				if plain_rm == "1" then
+					
+					DATAMANAGER.RequestTranData("obacp_comm_058r")
+					
+				'메모리평문제거 미적용상태일 때
+				else
+					Dim sResult 
+				
+					'20161216_02 KBC START : 인증서 비밀번호 규칙 체크로직 제거
+					'sResult = Form.CheckValidPassword( Edit1.caption, "C" )
+					sResult = CheckValidPassword( Edit1.caption)
+					'20161216_02 KBC END
+					
+					if sResult == null or Trim(sResult) == "" then '인증서 비밀번호 유효성 성공
+						Form.SetSharedData("CERT_NEW", Edit1.caption)	
+						
+						Form.triggerEvent( "#", "NextStep", "5" )
+					else
+						Form.MsgBox( "오류", sResult, "", 6 )
+					end if
+				end if
+				'20200910 SWJ END
+			end if
+		end if
+	elseif sEventName == "BeforeCheck" then	
+		Form.triggerEvent( "#", "BeforeStep", "3" )	
+	end if
+End Sub
+
+'============================================================================
+'20200910 SWJ START : MTS메모리평문제거 관련 비밀번호 유효성 검증 체크(서비스 단에서 처리)
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	if szTranID == "obacp_comm_058r" then
+		if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+			Form.MsgBox("알림", "[TR] " & szErrMsg & "\n(" & sSubMsg & ")" , "", 0)
+		end if
+	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obacp_comm_058r" then
+		Form.SetSharedData("CERT_NEW", Edit1.caption)	
+		Form.triggerEvent( "#", "NextStep", "5" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obacp_comm_058r" then
+		DATAMANAGER.SetDataValue(0, "obacp_comm_058r" , "InBlock1" , "PROS_CLS"     , 0 , "6")   				'처리구분(5: 변경 / 6: 신규)
+		DATAMANAGER.SetDataValue(0, "obacp_comm_058r" , "InBlock1" , "PWD_PIP"      , 0 , Edit1.caption)    		'신규비밀번호
+		DATAMANAGER.SetDataValue(0, "obacp_comm_058r" , "InBlock1" , "CNFR_PWD_PIP" , 0 , Edit2.caption)      	'비밀번호확인
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacp_comm_058r" trcode="obacp_comm_058r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacp_comm_058r" title="비밀번호 유효성 검증체크" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="485" _ulen="367" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+LOGN_ID^로그인ID^16^0^0^0^0^0^0
+MDBF_PWD_PIP^변경전비밀번호PIP^68^0^0^0^0^0^0
+PWD_PIP^비밀번호PIP^68^0^0^0^0^0^0
+CNFR_PWD_PIP^확인비밀번호PIP^68^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+WRPL_TELNO^직장전화번호^15^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

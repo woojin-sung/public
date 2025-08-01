@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증방법 선택" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="6" outline="0101" designorder="1" ly_vert="0,0,375,621,1" >
+			<COL_INFO ly_vert_width="375" />
+			<ROW_INFO ly_vert_height="30,80,29,51,51,380" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="066:238239240" halign="0" caption="인증방법 선택" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,1" impidxs="" />
+				<CELL cell_ly="0,2,0,5" bgcolor="028:255255255" halign="0" line="0,1" fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<RADIOGROUP name="RadioGroup0" initselectionuse="1" initselection="0" ly_vert="7,35,262,68,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="보안매체(OTP 또는 보안카드 등)" position="2,2,260,32" />
+				<RADIO no="1" text="휴대폰 본인명의 인증" position="2,30,180,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LINKFORM name="LinkForm0" ly_vert="0,109,379,498,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5326" _ulen="5012" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 공인인증서
+' 02. 화면설명 : 공인인증서_인증방법
+' 03. 작    성 : 2020.10.28 성우진
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim G_CERT_PHONE
+Dim g_sGubunCode '보안매체 구분코드
+'-----------------------------------------------------------------------
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+Function SetControlChange()
+
+	if RadioGroup0.currentindex == "0" then
+		SetSecurityOpen()
+	elseif RadioGroup0.currentindex == "1" then
+		LinkForm0.linkfile = G_CERT_PHONE
+	end if
+		
+End Function
+'============================================================================
+' 보안매체별 화면오픈
+'============================================================================
+Function SetSecurityOpen()
+	
+	'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+	
+	if g_sGubunCode == "0" then '보안카드
+		LinkForm0.linkfile = G_CERT_SECURITY_FILE2	'보안카드풀팝업
+		'LinkForm0.linkfile = G_CERT_OTP_FILE2	'일반/스마트OTP풀팝업
+		
+	elseif g_sGubunCode == "1" then '부가정보
+		LinkForm0.linkfile = G_CERT_QUESTION_FILE2	'부가정보풀팝업
+		
+	elseif g_sGubunCode == "3" then 'OTP
+		LinkForm0.linkfile = G_CERT_OTP_FILE2		'일반/스마트OTP풀팝업
+		
+	elseif g_sGubunCode == "2" then '없을경우
+		Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 사고등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+		
+	else '에러
+		Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+		
+	end if
+	
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	G_CERT_PHONE          =  "mhetc90060_ph"
+	G_CERT_SECURITY_FILE2 =  "mhetc90060_ph2"
+	G_CERT_QUESTION_FILE2 =  "mhetc90060_ph3"
+	G_CERT_OTP_FILE2      =  "mhetc90060_ph4"
+	
+	DATAMANAGER.RequestTranData("obcsb_oimf_625r")
+	
+End Sub
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	SetControlChange()
+End Sub
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mhetc90060_opt" then
+		Form.OpenFramePopup("mhetc90060_opt","","")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "NextPhone" then
+		Form.CloseForm()
+		Form.SendReturnToParent("PhoneNext","")
+	
+	elseif sEventName == "mhetc90060_ph2" then
+		Form.CloseForm()
+		Form.SendReturnToParent("mhetc90060_ph2","")
+		
+	elseif sEventName == "mhetc90060_ph3" then
+		Form.CloseForm()
+		Form.SendReturnToParent("mhetc90060_ph3","")
+		
+	elseif sEventName == "mhetc90060_ph4" then
+		Form.CloseForm()
+		Form.SendReturnToParent("mhetc90060_ph4","")
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_oimf_625r" then
+		g_sGubunCode = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_625r", "OutBlock2", "SCRC_OTP_CLS_CODE" , 0 )
+		SetSecurityOpen()
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim sDeviceID, sACNO, sACNO_PWD, sUserID, sRCNO, sUserName
+	
+	sDeviceID = Form.GetDeviceID()
+	sACNO = Form.GetSharedData("CERT_ACNO" , false)
+	sACNO_PWD = Form.GetSharedData("CERT_ACNT_PWD" , false)
+	sUserID = Form.GetSharedData("CERT_ID" , false)
+	sUserName = Form.GetSharedData("CERT_USER_NAME" , false)
+	sRCNO = Form.GetSharedData("CERT_RCNO" , false)
+	
+	if szTranID == "obcsb_oimf_625r" then	
+		DATAMANAGER.SetUserID( sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PROS_CLS_CODE" , 0 , "5" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "REG_CLCD" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "DRNG_ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PWD" , 0 , sACNO_PWD )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_BANK_CODE" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_ACNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "TACT_AMT" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "UI_TERM_IDNT_KEY" , 0 , sDeviceID )
+	end if
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_625r" trcode="obcsb_oimf_625r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_625r" title="추가인증대상조회(스마트폰)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="358" _ulen="272" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+REG_CLCD^등록구분코드^1^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="213" _ulen="165" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="67" _ulen="51" >
+
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

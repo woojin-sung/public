@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="간편인증전용" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" visible="0" fgcolor="006:213049051" fontstyle="01" caption="간편인증 공통팝업창" halign="1" border="1" ly_vert="43,2,296,34,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10357" _ulen="8889" >
+'============================================================================
+' 01. 화 면 명 : 간편인증전용 팝업
+' 02. 화면설명 : 간편인증 검증만 수행한다.
+'----------------------------------------------------------------------------
+' 2018.08.16 : 길병철 
+'   20180911_01 KBC : 스크립트 정리
+'                     소스수정부분이 많아서 라인별로 달지 않았다.
+' 2020.11.13 : 정민영 : v0002 : [T2008250015] 실명확인번호 메모리 내 평문 노출 취약점 조치(HTS, MTS)
+'            : - obhts_ocsp_001r IO 변경분 반영
+'            : 정민영 : v0002 : [T2011240020] 공인인증서 명칭 변경('공인'단어 삭제)
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sResult
+Dim g_sID
+
+'sPinpad 필요 변수
+Dim g_spad_sCertSerialNo 	'인증서 시리얼 번호
+Dim g_spad_sCusNo 		'고객번호
+Dim g_spad_sCertPass 		'인증서 비밀번호
+
+Dim g_OStype				'iOS("2")Android("1")
+Dim g_sLoginType     		'0.권한없음, 1.시세조회전용, 2.공인인증서, 3.ID/간편/바이오
+g_OStype		= ""
+g_sLoginType	= "0"
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_OStype = Form.GetSharedData( "&OS_TYPE", false ) 'iOS("2")Android("1")
+	
+	if g_OStype == "1" Then
+		pro_init()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitAfter()
+	'KBC : 팝업유형의 경우 iOS에 문제점이 있어서 InitAfer로 분리 함
+	
+	g_OStype = Form.GetSharedData( "&OS_TYPE", false ) 'iOS("2")Android("1")
+	
+	if g_OStype == "2" Then
+		pro_init()
+	end if
+End Sub
+
+'============================================================================
+Sub pro_init()
+	g_sResult = "cancel"
+	g_sID = Form.GetSharedData( "&USER_ID", false )
+
+	'저장된 인증서 DN값으로 serialnumber를 받아 선택된 인증서 정보를 찾음.
+	'g_sLoginType : 0.권한없음, 1.시세조회전용, 2.공인인증서, 3.ID/간편/바이오
+	g_sLoginType = Form.GetSharedData( "&LOGIN_TYPE", false ) 
+	
+	if CInt(g_sLoginType) >= 2 Then
+		sDN = Form.GetSharedData( "CERT_IMSI_DN", false )
+		
+		if sDN == null or sDN == "" then
+			sDN = Form.GetSharedData( "&USER_CERT_DN" , false )
+		end if
+		
+		'0.공인인증서 1.간편인증(공인인증서) 2.코스콤지문(공인인증서) 3.결제원(FIDO인증서) 4.금투협(공동인증서)
+		if Form.GetSharedData("&CERT_USE_TYPE", 0) == "1" Then
+			Form.SetScreenName("간편인증 검증")
+			
+			g_spad_sCertSerialNo = Form.GetAutoCertSerialNumber(sDN)
+			g_spad_sCusNo = Form.GetSharedData("&CUST_NUM", 0)
+
+			sParam = "3" & "★" & g_sID & "★" & g_spad_sCertSerialNo & "★" & g_spad_sCusNo
+			Form.requestOneShotPad("reqPush", sParam, "")	
+		else
+			ShowAlert "알림", "간편인증 로그인을 하지 않으셨습니다. 재로그인 하시기 바랍니다."
+			Form.CloseForm()
+		end If			
+	else		
+		ShowAlert "알림", "로그인을 하지 않으셨습니다. 로그인 하시기 바랍니다."
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+' 간편인증 응답용 TriggerEventSpin
+'============================================================================
+Sub Form_OnTriggerEventSpin(sEventName, sParam)
+	if g_OStype == "2" And sErrorCode == "1300" Then
+		ShowAlert "알림", "고객님 단말기의 PUSH 알림이 허용되지 않았습니다.\n"&"단말기의 “설정→알림→메리츠 SMART” 알림을 허용하신 후, 간편인증 서비스를 이용해주시기 바랍니다."
+		Form.CloseForm()		
+	end if
+
+	Dim sRet, sErrorCode, sErrorMsg
+	sRet = Split(sParam, "★")
+	
+	if #sRet > 1 then
+		sErrorCode	= sRet[0]
+		sErrorMsg	= sRet[1]
+	else
+		exit sub		
+	end if
+
+	Select Case sEventName
+	'spinpad 인증용 푸쉬 요청
+	Case "reqPush"
+		If sErrorCode <> "0000" Then
+			ShowAlert "알림", sErrorMsg & " (" & sErrorCode & ")"
+			Form.CloseForm()
+		End If
+		
+	'비밀번호 인증 요청	
+	Case "reqAuthPinPad"	
+		If  sErrorCode == "0000" Then
+			sCertPass = Form.GetSharedData("CERT_IMSI_PSWD", 1)
+			
+			if sCertPass <> null and sCertPass <> ""  then
+				g_spad_sCertPass = sCertPass
+			else	
+				g_spad_sCertPass = sRet[3]
+			end if
+			
+			if g_spad_sCertPass == null or g_spad_sCertPass == "" or  g_spad_sCertPass == "0" then
+				ShowAlert "알림", "인증서 확인 후 이체하시기 바랍니다."
+				Exit Sub
+			else 
+				'공인인증서 비밀번호 유효성체크
+				sDN = Form.GetSharedData("CERT_DN" , false)
+				
+				if sDN == null or sDN == "" then
+					sDN = Form.GetSharedData("&USER_CERT_DN" , false)
+				end if
+				
+				Form.RequestCertCommand( "ReqAutoCheckIsValidPassword", sDN, g_spad_sCertPass )
+			end if		
+			
+		Else	
+			g_sResult = "cancel"
+		
+			If sErrorCode == "2005" Then	'비밀번호 오류
+				If #sRet> 2 Then
+					sPassFailCnt = sRet[2]
+					sCertPass = Form.GetSharedData( "CERT_IMSI_PSWD", 1 )
+					
+					if sCertPass<> null and sCertPass <> "" then
+						g_spad_sCertPass = sCertPass
+					else	
+						g_spad_sCertPass = sRet[3]
+					end if
+
+					ShowAlert "알림", "간편인증 비밀번호 " & sPassFailCnt & "회 오류입니다."	
+				End If
+			Else
+				ShowAlert "알림", sErrorMsg & " (" & sErrorCode & ")"
+			End If	
+			
+			Form.CloseForm()
+		End If
+		
+	Case "pinpadNoInput"
+		'20221109 HSZ START : 신규이체화면 분기처리 추가
+		szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+		if szScreenNo == "63010" then
+			exit Sub
+		end if
+		'20221109 HSZ END
+		ShowAlert "알림", sErrorMsg & " (" & sErrorCode & ")"
+		Form.CloseForm()
+		
+	Case Else	
+		ShowAlert "알림", sErrorMsg & " (" & sErrorCode & ")"
+		Form.CloseForm()		
+	End Select	
+End Sub
+
+'============================================================================
+Sub Form_OnCertEvent(sType, sParam1, sParam2)
+	if sType = "RetIsAutoCertPasswordValid" then		
+		if sParam1 == "Success" then
+			'g_sLoginType : 0.권한없음, 1.시세조회전용, 2.공인인증서, 3.ID/간편/바이오
+			If CInt(g_sLoginType) <= 1 Then
+				ShowAlert "알림", "인증서 검증 권한이 없습니다. 재로그인 하십시오."
+				Form.CloseForm()
+				Exit Sub
+			End If
+			
+			Request_ohhts_ocsp_001r()
+
+		elseif sParam1 == "Error" then
+			ShowAlert "알림", sParam2
+			Request_obcpp_logn_015a("N")
+			Form.CloseForm()
+
+		else
+			ShowAlert "알림", sParam2
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Request_ohhts_ocsp_001r()
+	sUserID		= Form.GetSharedData( "&USER_ID"		, false )	'사용자ID
+	sRcNo 		= Form.GetSharedData( "&JUMIN_NUM"		, false )	'실명확인번호  v0002 메모리취약점보완이후 암호화된실명번호로 내려옴
+	sUserName 	= Form.GetSharedData( "&USER_NAME"		, false )	'고객명
+	sCsNo 		= Form.GetSharedData( "&CUST_NUM"		, false )	'고객번호
+	sDN 			= Form.GetSharedData( "&USER_CERT_DN"	, false )	'DN
+	sCertPass 	= g_spad_sCertPass								'인증서비밀번호
+	
+	'20231211 SWJ START : 외국인 투자자 등록제도 폐지 관련, 외국인의 경우 마지막 검증단계에서 조합여권번호로 비교하므로 변경
+	'(참고 : 일반 고객은 이 쉐어드변수에서 &JUMIN_NUM과 동일한 값 받는다)
+	sCombRcno = Form.GetSharedData("&COMB_JUMIN_NUM", false)
+	
+	sRValue		= Form.GetAutoRvalue(sDN, sCertPass)
+	sSignData	= Form.GetAutoCertSignData(sDN, sCertPass)
+	sSerialNum	= Form.GetAutoCertSerialNumber(sDN)
+	
+	szTranID = "ohhts_ocsp_001r"
+
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "USER_ID" 				, 0, sUserID) 	'사용자ID
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RCNO_PIP"				, 0, sCombRcno) 	'실명확인번호 v0002 RCNO->RCNO_PIP	'20231211 SWJ START
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "USER_NAME" 				, 0, sUserName)	'고객명
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "CSNO" 					, 0, sCsNo) 		'고객번호
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "UI_R_VAL" 				, 0, sRValue) 	'R 값	
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "UI_ELCT_SGNT_DATA_CNTT"	, 0, sSignData) 	'전자서명데이타
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "NTAT_SRNO" 				, 0, sSerialNum)	'인증서 일련번호
+	
+	DATAMANAGER.RequestTranData(szTranID)
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent( "mhetc90060_px" , g_sResult )
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "ohhts_ocsp_001r" then
+		sStatCode =  DATAMANAGER.GetDataValue(0, "ohhts_ocsp_001r", "OutBlock1", "STAT_CLS_CODE", 0) '상태구분코드
+		
+		if sStatCode == "Y" then
+			g_sResult = "ok"
+		else
+			g_sResult = "cancel"
+		end if
+		
+		Request_obcpp_logn_015a("Y")
+		
+	elseif szTranID == "obcpp_logn_015a" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	If szTranID == "ohhts_ocsp_001r" Then
+		szErrMsg2 = szErrMsg & "\n\n간편인증 서비스 신청 시 사용한 인증서는 더이상 사용하실 수 없습니다.\n\n" & "유효한 인증서로 로그인(ID+인증)하신 후 간편인증 서비스를 재등록 해주시기 바랍니다."
+		ShowAlert "알림", szErrMsg2 		
+	Else
+		sSubmsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+		ShowAlert "알림", "[TR]" &  szErrMsg & " " & sSubMsg
+	End If
+	
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub Request_obcpp_logn_015a(sSuccYN)
+	szTranID = "obcpp_logn_015a"
+	
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "USER_ID" 			, 0, g_sID )		'사용자ID
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "SUCS_YN" 			, 0, sSuccYN) 	'성공여부	
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ATHN_MDIA_TYPE_CODE"	, 0, "06")		'06.간편인증
+	
+	DATAMANAGER.RequestTranData(szTranID)
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_ocsp_001r" trcode="ohhts_ocsp_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_015a" trcode="obcpp_logn_015a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_ocsp_001r" title="공인인증서검증요청" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="392" _ulen="302" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_R_VAL^UIR값^96^0^0^0^0^0^0
+UI_ELCT_SGNT_DATA_CNTT^UI전자서명데이터내용^4000^0^0^0^0^0^0
+NTAT_SRNO^인증서일련번호^32^0^0^0^0^0^0
+CRPT_YN^암호화여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="210" _ulen="164" >
+
+NEW_YN^신규여부^1^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_LNGT^UI공인인증키길이^4^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_VAL^UI공인인증키값^1024^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_015a" title="MTS로그인_공인인증서 접속로그" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="138" _ulen="108" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+ATHN_MDIA_TYPE_CODE^인증매체유형코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

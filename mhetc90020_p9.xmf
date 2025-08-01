@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90020" scrname="은행/지점 개설계좌ID등록_온라인이용약관" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="web0" urlpath="about:blank" ly_vert="0,0,375,562,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+		<BUTTON name="btnOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3120" _ulen="2760" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 은행/지점 개설계좌ID등록_온라인이용약관
+' 02. 화면설명 : 은행/지점 개설계좌ID등록_온라인서비스이용약관
+' 03. 작    성 : 2016.03.13 유창재
+' 04. 수    정 : 2017.11.29 윤유정 : 개인신용정보제공동의서 개편에 따른 파일 및 url 변경 v0001
+'			 : 2020.03.31 김유경 : 약관 URL 변경 v0002
+' 2020.11.11 : 정민영 : v0003 : 개인정보처리방침 파일변경
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szData
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_szData = Form.GetOpenLinkData()
+	
+	if g_szData == "" or g_szData == Null then
+		Exit Sub
+	end if
+	
+	'v0001 sta
+	g_ServerMode = Form.GetSharedData("&SERVER_MODE", false)
+'	If g_ServerMode == "1" Then	'개발기
+'		g_URLheader = "http://211.201.184.87/include/resource/comm/"	' 20191007 HWG : 테스트 웹서버 변경대응(211.201.184.164->211.201.184.87)
+'	Else
+'		g_URLheader = "http://home.imeritz.com/include/resource/comm/"
+'	End If
+	'v0001 fin
+	
+	If g_ServerMode == "1" Then	'개발기
+		g_URLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf_test/"
+	Else
+		g_URLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/"
+	End If
+	
+	if g_szData == "OnlineService" then
+		Form.SetScreenName( "온라인서비스 이용약관")
+		web0.urlpath = g_URLheader &  "meritz_yk_13.html"	'20191007 HWG : 온라인서비스 이용약관 변경 (홈페이지연동)
+	
+	elseif g_szData == "Disposal" then
+		Form.SetScreenName( "개인정보 처리방침")
+		'v0003 최신+이전정보 파일 -> 최신정보만 있는 파일로 교체
+		'web0.urlpath = g_URLheader & "privacy3.html"
+		web0.urlpath = "https://home.imeritz.com/comm/ctcn/privacy2.html"
+	
+	elseif g_szData == "Personal" then
+		Form.SetScreenName( "개인(신용)정보 필수동의서")
+		web0.urlpath = g_URLheader & "/comm/ctcn/ctcn012.html"
+	end if
+	
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	Form.SendReturnToParent( "mhetc90020_p9" , g_szData )
+	Form.CloseForm( )
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

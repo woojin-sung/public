@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90000" scrname="환경설정_개인_메모관리(종목메모)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,567,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" colcount="4" ly_vert="0,0,375,522,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_codename" autofontsize="1" />
+				<LABEL name="th_cell0" fontsize="-2" caption="종목명" halign="1" />
+				<LABEL name="bd_text" autofontsize="1" />
+				<LABEL name="th_cell1" fontsize="-2" caption="내용" halign="1" />
+				<LABEL name="bd_code" halign="2" />
+				<LABEL name="bd_market" halign="2" />
+				<LABEL name="th_cell2" caption="종목코드" halign="1" />
+				<LABEL name="th_cell3" caption="시장구분" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" initrowcount="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="150,225,70,70" ly_vert_visible="0,0,2,2" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="150" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="29" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_codename" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="225" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="29" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_text" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="29" />
+						<CELLINFO>
+							<CELL name="th_cell2" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_code" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="29" />
+						<CELLINFO>
+							<CELL name="th_cell3" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_market" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_codename" rangecellid="bd_codename" hlcolorcellid="bd_codename" />
+		</GRID>
+		<BUTTON name="ButtonAll" caption="전체삭제" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,522,187,45,1" />
+		<BUTTON name="ButtonAdd" caption="메모추가" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,522,188,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5875" _ulen="5517" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 환경설정
+' 02. 화면설명 : 환경설정_개인_메모관리(종목메모)
+' 03. 작    성 : 2016.02.16 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sType '처리구분값
+Dim G_DETAIL_FILE '메모상세보기팝업
+Dim G_MEMOADD_FILE '메모추가팝업
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	G_DETAIL_FILE = "mhetc90000_p5"
+	G_MEMOADD_FILE = "mhetc90000_p6"
+	g_sType = "2"
+	
+	DATAMANAGER.RequestTranData( "ohhts_memo_013r" ) '메모조회	' 20210622 HWG : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == G_DETAIL_FILE or sKeyName == G_MEMOADD_FILE then
+		g_sType = "2"
+	
+		DATAMANAGER.RequestTranData( "ohhts_memo_013r" ) '메모조회	' 20210622 HWG : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "allclear" then
+		if sRet == "ok" then
+			g_sType = "9"
+			Grid0.rowcount = "0"
+			
+			DATAMANAGER.RequestTranData( "ohhts_memo_013r" ) '전체삭제	' 20210622 HWG : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Grid0.rowcount = 0
+
+	' 20210622 HWG START : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+	if szTranID == "ohhts_memo_013r" then
+		Dim sUserID 
+		sUserID = Form.GetSharedData("&USER_ID", false )
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_USER_ID" , 0 , sUserID )
+		'일반1,종목2
+		DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_MEMO_MANG_CLS_CODE" , 0 , "2" ) 
+		'입력검색1,전체검색2,추가3,수정4,선택삭제5,전체삭제9
+		DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_SLCT_YN" , 0 , g_sType )
+		'종목코드1,내용2
+		DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_CLS_CODE" , 0 , "1" )
+	end if
+	' 20210622 HWG END
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+End Sub
+
+'============================================================================
+' 상세보기
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	Dim codename, text, code, market
+	codename = Grid0.GetCellData( "bd_codename", lRow )
+	text = Grid0.GetCellData( "bd_text", lRow )
+	code = Grid0.GetCellData( "bd_code", lRow )
+	market = Grid0.GetCellData( "bd_market", lRow )
+	
+	Form.SetSharedData("mhetc90000_t6_codename" , codename)
+	Form.SetSharedData("mhetc90000_t6_text" , text)
+	Form.SetSharedData("mhetc90000_t6_code" , code)
+	Form.SetSharedData("mhetc90000_t6_market" , market)
+	
+	Form.OpenPopup(G_DETAIL_FILE , "2" , "")
+End Sub
+
+'============================================================================
+' 전체삭제
+'============================================================================
+Sub ButtonAll_OnClick()
+	if Grid0.rowcount == "0" or Grid0.rowcount == 0 then
+		Form.MsgBox( "알림", "삭제할 메모가 없습니다.", "", 6 )
+		Exit Sub
+	end if
+	
+	Form.MsgBox( "알림", "종목메모 전체 내용을 삭제 하시겠습니까?", "allclear", 1 )
+End Sub
+
+'============================================================================
+' 메모추가
+'============================================================================
+Sub ButtonAdd_OnClick()
+	Form.OpenPopup(G_MEMOADD_FILE , "2" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("mhetc90000_t6_codename" , "")
+	Form.SetSharedData("mhetc90000_t6_text" , "")
+	Form.SetSharedData("mhetc90000_t6_code" , "")
+	Form.SetSharedData("mhetc90000_t6_market" , "")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	Dim nCnt
+	
+	' 20210622 HWG START : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+	nCnt = DATAMANAGER.GetDataCount( 0, "ohhts_memo_013r", "OutBlock1" )
+	
+	For i = 0 To nCnt -1
+		Grid0.insertrow = 0
+		Grid0.SetCellData("bd_codename"	, 0, DATAMANAGER.GetDataValue( 0, "ohhts_memo_013r", "OutBlock1", "FID_KOR_ISNM" 			, i ) )
+		Grid0.SetCellData("bd_text"		, 0, DATAMANAGER.GetDataValue( 0, "ohhts_memo_013r", "OutBlock1", "FID_ISSU_MEMO_CNTT" 	, i ) )
+		Grid0.SetCellData("bd_code"		, 0, DATAMANAGER.GetDataValue( 0, "ohhts_memo_013r", "OutBlock1", "FID_NEW_ISSU_CODE" 		, i ) )
+		Grid0.SetCellData("bd_market"	, 0, DATAMANAGER.GetDataValue( 0, "ohhts_memo_013r", "OutBlock1", "FID_INPUT_MRKT_CLS_CODE" , i ) )
+		
+	Next
+	' 20210622 HWG END
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_memo_013r" trcode="ohhts_memo_013r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_memo_013r" title="메모관리자(신규)" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="640" _ulen="512" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+FID_MEMO_MANG_CLS_CODE^FID메모관리구분코드^1^0^0^0^0^0^0
+FID_INPUT_SLCT_YN^FID입력선택여부^2^0^0^0^0^0^0
+FID_INPUT_CLS_CODE^FID입력구분코드^2^0^0^0^0^0^0
+FID_MEMO_CLS_CODE^FID메모구분코드^8^0^0^0^0^0^0
+FID_MOD_YMDH^FID변경일시^14^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_GNRL_CNTT^FID일반내용^2048^0^0^0^0^0^0
+FID_NEW_ISSU_CODE^FID신규종목코드^20^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_ISSU_MEMO_CNTT^FID종목메모내용^4000^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="420" _ulen="338" >
+
+FID_MOD_YMDH^FID변경일시^14^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_GNRL_CNTT^FID일반내용^2048^0^0^0^0^0^0
+FID_MEMO_CLS_CODE^FID메모구분코드^8^0^0^0^0^0^0
+FID_NEW_ISSU_CODE^FID신규종목코드^20^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_ISSU_MEMO_CNTT^FID종목메모내용^4000^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

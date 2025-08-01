@@ -1,0 +1,1172 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="공동(공인)인증및바이오인증" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="ButtonAtonOk" caption="확인" fontsize="4" btnimage="btn_20.9" ly_vert="0,547,375,61,1" />
+		<CONTAINER name="ContAton" ly_vert="0,-1,375,528,1" scroll_ly_vert="0,-1,375,528,1" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fontsize="3" fontstyle="01" caption="간편비밀번호를 입력해주세요." halign="1" multiline="1" fonttype="1" ly_vert="0,115,375,58,1" />
+				<EDIT name="EditReal" visible="0" password="2" imetype="1" maxlength="6" minlength="6" ly_vert="394,84,262,34,0" />
+				<IMAGE name="Pwdbasic0" autosize="1" imgpath="txt_circle_02" ly_vert="82,207,22,22,1" />
+				<IMAGE name="Pwdbasic1" autosize="1" imgpath="txt_circle_02" ly_vert="120,207,22,22,1" />
+				<IMAGE name="Pwdbasic2" autosize="1" imgpath="txt_circle_02" ly_vert="158,207,22,22,1" />
+				<IMAGE name="Pwdbasic3" autosize="1" imgpath="txt_circle_02" ly_vert="196,207,22,22,1" />
+				<IMAGE name="Pwdbasic4" autosize="1" imgpath="txt_circle_02" ly_vert="234,207,22,22,1" />
+				<IMAGE name="Pwdbasic5" autosize="1" imgpath="txt_circle_02" ly_vert="272,207,22,22,1" />
+				<IMAGE name="PwdInsert0" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="83,208,20,20,0" />
+				<IMAGE name="PwdInsert1" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="121,208,20,20,0" />
+				<IMAGE name="PwdInsert2" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="159,208,20,20,0" />
+				<IMAGE name="PwdInsert3" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="197,208,20,20,0" />
+				<IMAGE name="PwdInsert4" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="235,208,20,20,0" />
+				<IMAGE name="PwdInsert5" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="273,208,20,20,0" />
+				<IMAGE name="PwdFail0" visible="0" autosize="1" imgpath="pwd_red" ly_vert="83,208,20,20,0" />
+				<IMAGE name="PwdFail1" visible="0" autosize="1" imgpath="pwd_red" ly_vert="121,208,20,20,0" />
+				<IMAGE name="PwdFail2" visible="0" autosize="1" imgpath="pwd_red" ly_vert="159,208,20,20,0" />
+				<IMAGE name="PwdFail3" visible="0" autosize="1" imgpath="pwd_red" ly_vert="197,208,20,20,0" />
+				<IMAGE name="PwdFail4" visible="0" autosize="1" imgpath="pwd_red" ly_vert="235,208,20,20,0" />
+				<IMAGE name="PwdFail5" visible="0" autosize="1" imgpath="pwd_red" ly_vert="273,208,20,20,0" />
+				<BUTTON name="Button0" btnimage="alpha" ly_vert="31,184,332,73,1" />
+				<LABEL name="Label1" caption="간편비밀번호를 잊어버리셨나요?" halign="1" fonttype="1" ly_vert="-5,378,375,26,1" />
+				<IMAGE name="ImgRegi" imgpath="icon_arrow_right_on" ly_vert="301,379,14,24,1" />
+				<BUTTON name="BtnRegi" btnimage="alpha" ly_vert="21,363,337,51,1" />
+				<LABEL name="Label2" visible="0" fgcolor="010:213049051" fontstyle="11" caption="간편인증(아톤) 인증센터 전용" halign="1" ly_vert="18,15,343,32,0" />
+				<IMAGE name="Image0" visible="0" imgpath="icon_qr_ceri" ly_vert="163,61,50,50,0" />
+				<IMAGE name="ImgAtonPIN" autosize="1" imgpath="icon_meritz_certi_02" ly_vert="159,82,56,36,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="36416" _ulen="32024" >
+'============================================================================
+' 01. 화 면 명 : 메리츠간편인증(아톤)PIN인증 전용
+' 02. 화면설명 : 간편인증 생체인증추가에서만 사용
+' 03. 작    성 : 20230612 KBC
+'
+' 사용처
+'	- 인증센터용 인증증화면 (생체인증 추가, 인증해지 등에서 사용)
+'	- QR 직접입력 창 (인증기능 아님)
+'	- 간편발급화면 (기존 발급기기 인 경우, PIN인증 후 바로 발급진행)
+' 2024.01.19 : 전상일 : v0001 : obcsb_oimf_658a ui_cust_cont_cls_code 추가 (별도 맵핑 x)
+'============================================================================
+  
+Dim g_CharFlag, g_nCnt, g_CountSave
+g_CharFlag 		= ""
+g_nCnt 			= 0
+g_CountSave 		= 0
+
+Dim g_sLinkBioTranCntt
+g_sLinkBioTranCntt = ""
+
+Dim g_CustNo
+g_CustNo 		= ""
+
+Dim g_SBAlias
+g_SBAlias 		= ""
+
+Dim g_SBVersion
+g_SBVersion 		= ""
+
+Dim g_DeviceID
+g_DeviceID 		= ""
+
+Dim g_Signature
+g_Signature 		= ""
+		
+Dim g_sResult
+g_sResult 		= ""
+
+Dim g_sBIOTermOS
+g_sBIOTermOS 		= ""
+
+'인증유형구분
+Dim DEF_ATON_PIN
+Dim DEF_ATON_BIO
+DEF_ATON_PIN		= "10"
+DEF_ATON_BIO		= "20"
+
+Dim g_AhtnTchnCode
+g_AhtnTchnCode 	= ""
+
+Dim g_sOpenData
+g_sOpenData 		= ""
+
+Dim g_sButtonText
+g_sButtonText		= "간편인증 비밀번호를 입력해주세요."
+
+'20230614 SWJ START
+Dim g_register
+g_register        = ""
+'20230614 SWJ END
+
+Dim g_TmpAlias
+g_TmpAlias 		= ""
+
+Dim g_OSVersion
+g_OSVersion		= ""
+
+Dim g_DeviceModel
+g_DeviceModel 	= ""
+
+Dim g_CustName
+g_CustName		= ""
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	Form.SetScreenName("메리츠 간편인증")
+	g_sResult = "cancel"
+
+	g_DeviceID = Form.GetDeviceID2()
+	g_sBIOTermOS = Form.GetSharedData("&OS_TYPE", false) 'iOS("2")Android("1")	'20230613 SWJ START
+	g_sOpenData = Form.GetOpenLinkData()
+	g_OSVersion = Form.GetSharedData("&OS_VERSION", false)
+	'g_DeviceModel	= Form.GetSharedData("&DEVICE_MODEL", false)
+
+	'위 쉐어드 변수 사용하면 아이폰은 iPhone이라고만 나옴
+	g_DeviceModel	= Form.getDeviceModel()				'모델명
+'임시
+'g_sOpenData = "mhetc90190_s1"
+	
+	'--------------------------------------------------------
+	'로그인 여부에 따른 분기
+	'--------------------------------------------------------
+	sLoginType = Form.GetSharedData("&LOGIN_TYPE", 0 )
+	
+	g_CustName	= Form.GetSharedData("&USER_NAME", false)
+	
+	if CInt(sLoginType) > 1 then '로그인상태
+		g_CustNo 	= Form.GetSharedData("&CUST_NUM" , false )	 '고객번호
+	else
+		'간편발급할때 (이용동의 팝업)
+		'간편인증 등록한 사용자가 앱 재설치 했을 때 간편하게 발급할 수 있는 프로세스
+		if Form.GetSharedData("&USER_ID", false) == "" then
+			g_CustNo	= Form.GetSharedData("Meritz_OTP_CSNO" , false ) '앱 설치 후 고객번호가 &CUST_NUM에 없음(발급 시 고객번호로 우선 정의)
+		'QR인증
+		else
+			g_CustNo = Form.GetSharedData("&CUST_NUM" , false )	 '고객번호
+		end if
+	end if
+	
+	'--------------------------------------------------------
+	'QR직접입력으로 사용
+	'--------------------------------------------------------
+	if g_sOpenData == "mhetc90120_qrinput" then
+		'QR번호 직접입력 (인증아님)
+		
+		Form.SetScreenName("")
+		ContAton.Label0.caption = "PC화면의 QR인증번호\n6자리를 입력해주세요."
+		g_sButtonText = "인증번호를 입력해주세요."
+		ContAton.EditReal.SetEncExcept()
+		
+		ContAton.Image0.visible = true
+		ContAton.ImgAtonPIN.visible = false
+		ContAton.Label1.visible = false
+		ContAton.BtnRegi.visible = false
+		ContAton.ImgRegi.visible = false
+		
+		'비밀번호 입력키패드 Show
+		Form.SetTimerEvent2(1, 1, 0.5)
+		
+	'--------------------------------------------------------
+	'간편발급으로 사용
+	'갱신으로 사용
+	'--------------------------------------------------------
+	elseif g_sOpenData == "mhetc90190_s1" or g_sOpenData == "mhetc90192_Renew" or g_sOpenData == "mpopupAuth_Login" then
+		fnGetSBInfo("ISSUE")
+	
+		g_AhtnTchnCode = DEF_ATON_PIN '10
+
+		'비밀번호 입력키패드 Show
+		Form.SetTimerEvent2(1, 1, 0.5)
+	
+	
+	'--------------------------------------------------------
+	'인증으로 사용
+	'--------------------------------------------------------
+	else 
+		'인증수행
+		
+		if fnGetSBInfo("") == False then 
+			exit sub
+		end if
+	
+		'직전 인증방식 가져오기
+		g_AhtnTchnCode = Form.GetEnvData("login.input.atonathntchncode") '10.PIN 100.지문 200.FACEID
+		
+		'생체인증 추가 시, 무조건 핀인증
+		if g_sOpenData == "mhetc90190" or g_sOpenData == "mhetc90192_Cancel" then
+		
+			g_AhtnTchnCode = DEF_ATON_PIN '10
+			
+			'비밀번호 입력키패드 Show
+			Form.SetTimerEvent2(1, 1, 0.5)
+			
+		else	
+		
+			'그 외, 직전 인증방식에 맞게 인증수행
+			if g_AhtnTchnCode == DEF_ATON_PIN then
+				'비밀번호 입력키패드 Show
+				Form.SetTimerEvent2(1, 1, 0.5)
+			else
+				g_AhtnTchnCode = DEF_ATON_BIO '20
+				
+				'BIO
+				Form.SetTimerEvent2(2, 1, 0.5) 'KBC : 아이폰은 바로 호출하면 이벤트 응답을 못받아서 timer처리 함 'procVerifyBioSignature()
+				
+			end if
+		end if	
+	end if	
+	
+End Sub
+
+
+'============================================================================
+Sub procVerifyBioSignature()
+	'-----------------------------------------------------------------------
+	'ATON_CHECKBIOSIGNATURE
+	'-----------------------------------------------------------------------
+	sRet = Form.requestAtonAuth("ATON_CHECKBIOSIGNATURE" , "" , "")
+	
+	sRetItem = Split(sRet, "★")
+	
+	sErrorCode	= sRetItem[0]
+	sErrorMsg	= sRetItem[1]
+	
+	if sErrorCode <> "00000" then 
+		'iOS전용 (인증 실패 초과 시)
+		if sErrorCode == "E4106" then
+			Form.MsgBox("안내", "시도 횟수가 너무 많습니다.\n잠시 후 다시 시도하거나\n간편비밀번호로 인증해주세요.", "E4106", 7, "간편비밀번호 인증","확인")
+			exit sub
+		
+		elseif sErrorCode == "E4102" then
+			if g_sBIOTermOS == "1" then
+				szErrMsg = "스마트폰에 등록된 지문이 없습니다.\n지문 등록 후 이용해주세요."
+			else
+				szErrMsg = "스마트폰에 등록된 생체 정보가 없습니다.\n생체 정보 등록 후 이용해주세요."
+			end if
+			
+			Form.Msgbox("안내", szErrMsg, "", 6)
+			exit sub
+		elseif sErrorCode == "E4103" then
+			Form.Msgbox("안내", "간편비밀번호를 사용중입니다.\n로그인 후 생체인증 추가 등록해주세요.", "", 6)
+			exit sub
+		end if
+		
+		Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+		exit sub
+	end if	
+
+	'-----------------------------------------------------------------------
+	'ATON_VERIFYBIOSIGNATURE
+	'-----------------------------------------------------------------------
+	Form.requestAtonAuth("ATON_VERIFYBIOSIGNATURE" , "" , "90060PY")	
+End Sub
+
+'============================================================================
+Sub Form_onTriggerEventAton(sEventName, sParam)
+	'ATON_SETBIOSIGNATURE, ATON_VERIFYBIOSIGNATURE 만 여기로만 진입
+	
+	if sEventName == "ATON_SETBIOSIGNATURE_RETURN_90060PY" or sEventName == "ATON_VERIFYBIOSIGNATURE_RETURN_90060PY" then
+	
+		sRet = Split(sParam, "★")
+	
+		sErrorCode	= sRet[0]
+		sErrorMsg	= sRet[1]			
+		
+		if sErrorCode <> "00000" then
+			
+			if sErrorCode == "E4102" then
+				if g_sBIOTermOS == "1" then
+					szErrMsg = "스마트폰에 등록된 지문이 없습니다.\n지문 등록 후 이용해주세요."
+				else
+					szErrMsg = "스마트폰에 등록된 생체 정보가 없습니다.\n생체 정보 등록 후 이용해주세요."
+				end if
+				
+				Form.Msgbox("안내", szErrMsg, "", 6)
+				exit sub
+			elseif sErrorCode == "E4103" then
+				Form.Msgbox("안내", "간편비밀번호를 사용중입니다.\n로그인 후 생체인증 추가 등록해주세요.", "", 6)
+			'안드로이드 전용 (인증 실패 초과 시)
+			'7은 현재 테스트앱 기준이고, e4106으로 앱에서 에러코드 맞춰줄 것
+			'안드는 해당 이벤트에서 지문인증 실패초과 메시지 뿌려준다
+			elseif sErrorCode == "E4105" then
+				exit sub
+			elseif sErrorCode == "E4106" or sErrorCode == "7" then
+				Form.MsgBox("안내", "시도 횟수가 너무 많습니다.\n잠시 후 다시 시도하거나\n간편비밀번호로 인증해주세요.", "E4106", 7, "간편비밀번호 인증","확인")
+				exit sub
+			end if
+			
+			'바이오->간편비밀번호인증 수행 START
+			g_AhtnTchnCode = DEF_ATON_PIN
+				
+			'비밀번호 입력키패드 Show
+			Form.SetTimerEvent2(1, 1, 0.5)
+			'바이오->간편비밀번호인증 수행 END
+	
+			Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+			exit sub
+		end if
+	
+		sBioSignature	= sRet[2]
+	end if
+	
+	if sEventName == "ATON_VERIFYBIOSIGNATURE_RETURN_90060PY" then
+		procRequestAtonTR_AUTHUSER(sBioSignature)
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+
+	'20230614 SWJ START
+	if g_register = "Y" then
+		Form.OpenPopup("mhetc90190_s1","mhetc90060_py","") '간편인증 등록 팝업
+	end if
+	'20230614 SWJ END
+	
+	Form.SendReturnToParent( "mhetc90060_py" , g_sResult )
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	'비밀번호 입력키패드 Show
+	if sTimerID == "1" or sTimerID == 1 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.5)
+		ContAton.EditReal.SetShowKeypad(True)
+	elseif sTimerID == "2" or sTimerID == 2 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.5)
+		procVerifyBioSignature()
+	end if
+End Sub
+
+'============================================================================
+'SafeBox 정보획득
+function fnGetSBInfo(sParam)
+	'-----------------------------------------------------------------------
+	'ATON_GETALLINFO
+	'-----------------------------------------------------------------------
+	sRet = Form.requestAtonAuth("ATON_GETALLINFO" , "" , "")
+	sRetItem = Split(sRet, "★")
+	
+	sErrorCode	= sRetItem[0]
+	sErrorMsg	= sRetItem[1]
+	g_SBVersion  	= sRetItem[2] 'SafeBox 버전 (에러여도 값있음)
+	g_SBAlias 	= sRetItem[3] '인증서일련번호(식별자)
+	
+	if sErrorCode == "00000" then
+		ContAton.EditReal.setHashSalt(g_CustNo)
+		g_sLinkBioTranCntt = g_CustNo
+	else
+		if sParam <> "ISSUE" then
+			Form.MsgBox("안내", sErrorCode & "," & sErrorMsg, "", 0)
+			return False
+		end if
+		
+		ContAton.EditReal.setHashSalt(g_CustNo)
+	end if
+	
+	return True
+end function
+
+'============================================================================
+Sub ContAton_EditReal_OnEditComplete()
+	'입력완료 시에만 타게끔(취소는 안타고)
+	if g_sBIOTermOS == "2"  then 'iOS
+		g_CharFlag = "N"
+		PasswordInsert()
+	end if
+	
+	if g_nCnt <> 6 then
+		'OS별로 비밀번호 최소글자 입력안했을 시에 시스템팝업메시지 내용이 달라서 
+		'시스템팝업과 내용 맞춰주기 위한 분기처리
+		if g_sBIOTermOS == "2"  then
+			Form.MsgBox("안내", "최소 6자리 이상 입력해야 합니다.", "", 6 )
+		elseif g_sBIOTermOS == "1" then
+			Form.MsgBox("안내", "6글자 이상 입력해 주세요.", "", 6 )
+		end if
+		
+	elseif g_nCnt = 6 then
+		if g_sOpenData == "mhetc90120_qrinput" then
+			Form.SetSharedData("90060py_QrCd", ContAton.EditReal.caption) 'QR번호 (여기서는 인증번호 아님)
+			
+			g_sResult = "ok_qrinput"
+			Form.CloseForm()		
+		else
+			procRequestAtonTR_AUTHUSER(ContAton.EditReal.caption)
+		end if	
+	end if
+	
+	g_nCnt = 0
+End Sub
+
+'============================================================================
+Sub procRequestAtonTR_AUTHUSER(paramCrtcDataCon)				
+	sTranID = "ohhts_pauth_121" '사용자인증
+	
+	g_Signature = paramCrtcDataCon
+	
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_RQST_CHNL_DCD" 			, 0 , "MERITZSMART")	'매체구분코드 (1인 1단말 정책이라, 채널코드 고정)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_CUST_NO" 					, 0 , g_CustNo)		'고객번호
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_MSB_VRSN_VL" 				, 0 , g_SBVersion)	'mSB버전값 (라이브러리 버전 정보)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_ID" 			, 0 , g_DeviceID)		'이용자접속기기ID
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_CRTC_PTRN_DCD" 			, 0 , g_AhtnTchnCode)	'인증유형구분코드 (10:PIN, 20:BIO, 30:Pattern)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_CRTC_DATA_CON" 			, 0 , paramCrtcDataCon)'인증유형데이터내용 (HexString, 64Byte)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_BIO_CRTC_SUCC_YN" 			, 0 , "Y")			'바이오인증성공여부(Y:인증성공, N:인증실패) 인증유형구분코드가 '20(BIO)' 인 경우에만 해당 필드가 유효함
+
+	DATAMANAGER.RequestTranData(sTranID)		
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	if szTranID == "ohhts_pauth_121" then '사용자인증
+		sErrorCode	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PAU_ERR_CD" ,0)
+
+		if sErrorCode <> "000000" then
+			g_Signature = ""
+			
+			'20230614 SWJ START : 에러 카운트 메시지처리 추가
+			if PwdErrorCount(sErrorCode) == true then			
+				exit sub
+			end if
+			'20230614 SWJ END
+			
+			'전문에러 : metaimsi 등 활용해서 에러메시지 처리필요
+			sErrorMsg = Form.requestAtonAuth("ATON_GETERRORMSG_SVR", sErrorCode, "")
+
+			Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+			exit sub
+		end if
+		
+		
+		'사용자인증 -> 간편발급
+		if g_sOpenData == "mhetc90190_s1" then
+			
+			'-----------------------------------------------------------------------
+			'ATON_ISSUE
+			'-----------------------------------------------------------------------
+			g_TmpAlias = "612110190000001"
+			
+			sRet = Form.requestAtonAuth("ATON_ISSUE" , g_TmpAlias , "") '발급 시, 임의의 인증서일련번호를 사용하고 전문응답에서 수신받은 일련번호로 변경함
+			
+			sRetItem = Split(sRet, "★")
+			
+			sErrorCode	= sRetItem[0]
+			sErrorMsg	= sRetItem[1]
+			sPublicKey 	= sRetItem[2] '공개키
+				
+			if sErrorCode <> "00000" then
+				Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+				exit sub
+			end if
+			
+			'-----------------------------------------------------------------------
+			'전문전송
+			'-----------------------------------------------------------------------
+			procRequestAtonTR_ISSUECERT(g_Signature, sPublicKey)		
+		
+		'갱신
+		elseif g_sOpenData == "mhetc90192_Renew" or g_sOpenData == "mpopupAuth_Login" then
+			
+			'-----------------------------------------------------------------------
+			'인증서 조회를 통해서 갱신기간이 아닌 경우, 아래 로직을타서는 안된다. 
+			'ATON_ISSUE 수행 시 기존인증서 SafeBox에서 삭제됨
+			'-----------------------------------------------------------------------
+				
+			'-----------------------------------------------------------------------
+			'ATON_ISSUE
+			'-----------------------------------------------------------------------
+			g_TmpAlias = "612110190000001"
+				
+			sRet = Form.requestAtonAuth("ATON_ISSUE" , g_TmpAlias , "")
+				
+			sRetItem = Split(sRet, "★")
+				
+			sErrorCode	= sRetItem[0]
+			sErrorMsg	= sRetItem[1]
+			sPublicKey 	= sRetItem[2] '공개키
+					
+			if sErrorCode <> "00000" then
+				Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+				exit sub
+			end if
+				
+			'-----------------------------------------------------------------------
+			'PIN데이터입력받아야함
+			'-----------------------------------------------------------------------
+			sPinData = ContAton.EditReal.caption
+				
+			if sPinData == "" then
+				exit sub
+			end if
+				
+			'-----------------------------------------------------------------------
+			'전문전송
+			'-----------------------------------------------------------------------
+			procRequestAtonTR_REISSUECERT(sPinData, sPublicKey)	
+			
+		'사용자인증 종료
+		else
+			'핀이나 바이오 등록 정보 Set(인증서 폐지 등의 업무에서 사용)
+			Form.SetSharedData("90060py_AuthPwd", g_Signature)
+			Form.SetSharedData("90060py_AuthType", g_AhtnTchnCode)
+			
+			'무조건 PIN인증 하는 경우를 제외하고 인증방식 저장함
+			'위의 갱신과 간편발급의 경우도 마찬가지
+			if g_sOpenData <> "mhetc90190" and g_sOpenData <> "mhetc90192" and g_sOpenData <> "mhetc90120_qrinput" then
+				'마지막 인증 방식 저장
+				Form.SetEnvData(1, "login.input.atonathntchncode", g_AhtnTchnCode)
+				Form.SetSharedData("&CERT_USE_ATON_TYPE", g_AhtnTchnCode)
+			end if
+			
+			g_sResult = "ok"
+			Form.CloseForm()	
+		
+		end if
+			
+	elseif szTranID == "ohhts_pauth_001" then
+		sErrorCode	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PAU_ERR_CD" ,0)
+		sKeyAlias	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PAU_CERT_SEQ_NO" ,0)	'인증서일련번호
+		sCert 		= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PAU_CERT_DATA_CON" ,0)	'인증서데이터내용
+	
+		if sErrorCode <> "000000" then
+			'전문에러 : metaimsi 등 활용해서 에러메시지 처리필요
+			sErrorMsg = Form.requestAtonAuth("ATON_GETERRORMSG_SVR", sErrorCode, "")
+
+			Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+			exit sub
+		end if
+		
+		'-----------------------------------------------------------------------
+		'ATON_SAVECERT
+		'-----------------------------------------------------------------------		
+		sRet = Form.requestAtonAuth("ATON_SAVECERT" , g_TmpAlias & "★" & sCert , "") '발급 시, 임의의 인증서일련번호를 사용하고 전문응답에서 수신받은 일련번호로 변경함
+		sRetItem = Split(sRet, "★")
+		
+		sErrorCode	= sRetItem[0]
+		sErrorMsg	= sRetItem[1]
+		
+		if sErrorCode <> "00000" then
+			Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+			exit sub
+		end if
+		
+		'-----------------------------------------------------------------------
+		'ATON_RENAMEALIAS
+		'-----------------------------------------------------------------------		
+		sRet = Form.requestAtonAuth("ATON_RENAMEALIAS" , g_TmpAlias & "★" & sKeyAlias , "") '수신받은 일련번호로 변경함
+		sRetItem = Split(sRet, "★")
+		
+		sErrorCode	= sRetItem[0]
+		sErrorMsg	= sRetItem[1]
+		
+		if sErrorCode <> "00000" then
+			Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+			exit sub
+		end if		
+		
+		Form.SetEnvData(1, "meritzauth.custname", g_CustName)	 '발급 시, 고객명을 앱에 저장 (인증관리 화면에서 사용)		
+		
+		g_sResult = "ok_reuse"
+		
+		'-------------------------------------------------------------------------	
+'		'바이오 등록여부, 지원여부
+'		'-------------------------------------------------------------------------	
+		if g_sBioType == "0" then
+			Form.SetSharedData("MERITZAUTH_ALIAS" , g_SBAlias)
+			Form.OpenNextPopup("mhetc90190_p2" , "0" , "")
+			exit sub
+		end if
+		
+		'지문/얼굴 등록여부 판단
+		sFingerEnrolled = Form.isTouchIDSupported()
+		if sFingerEnrolled <> "1" then	
+			Form.SetSharedData("MERITZAUTH_ALIAS" , g_SBAlias)
+			Form.OpenNextPopup("mhetc90190_p2" , "0" , "")
+			exit sub	
+		end if
+		
+		'-----------------------------------------------------------------------
+		'ATON_CHECKBIOSIGNATURE
+		'-----------------------------------------------------------------------
+		sRet = Form.requestAtonAuth("ATON_CHECKBIOSIGNATURE" , "" , "")
+		
+		sRetItem = Split(sRet, "★")
+		
+		sErrorCode	= sRetItem[0]
+		sErrorMsg	= sRetItem[1]
+			
+		'바이오 등록시에는 아래 에러는 무시 (더 있는지 테스트필요)
+		'E4100	생체 데이터에 오류가 발생하였습니다.
+		'E4101	생체 등록 정보가 변경되었습니다.
+		'E4102	단말에 등록된 생체 정보가 없습니다.
+		'E4103	생체 인증 등록 키가 존재하지 않습니다.
+		'E4104	생체 인증에 실패하였습니다.
+		'E4105	생체 인증을 취소하였습니다.
+		'E4106	TouchID/FaceID가 잠겨있습니다.
+		'E4107	단말에 등록된 패스워드가 없습니다.
+		'E4108	생체 정보를 사용할 수 없습니다.
+		
+		if sErrorCode <> "00000" and sErrorCode <> "E4101" and sErrorCode <> "E4103" and sErrorCode <> "E4105" then 
+			Form.SetSharedData("MERITZAUTH_ALIAS" , g_SBAlias)
+			Form.OpenNextPopup("mhetc90190_p2" , "0" , "")
+			exit sub
+		end if	
+		
+		'간편발급 (발급 후 생체등록 연계)
+		'mhetc90190_s5 연계 START
+		Form.SetSharedData("MERITZAUTH_ALIAS" , g_SBAlias)
+		Form.SetSharedData("Meritz_OTP_PINPWD", g_Signature)
+		sBioType = Form.getBiometryType()
+		Form.OpenNextPopup("mhetc90190_s5" , sBioType , "")
+		'mhetc90190_s5 연계 END
+		
+		'Form.CloseForm()
+		
+	'갱신
+	elseif szTranID == "ohhts_pauth_002" then
+		sErrorCode	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PAU_ERR_CD" ,0)
+		sKeyAlias	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PAU_CERT_SEQ_NO" ,0)	'인증서일련번호(갱신 후)
+		sCert 		= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PAU_CERT_DATA_CON" ,0)	'인증서데이터내용
+		
+		if sErrorCode <> "000000" then
+			'전문에러 : metaimsi 등 활용해서 에러메시지 처리필요
+			sErrorMsg = Form.requestAtonAuth("ATON_GETERRORMSG_SVR", sErrorCode, "")
+
+			Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "renew", 0)
+			exit sub
+		end if
+		
+		'-----------------------------------------------------------------------
+		'ATON_SAVECERT
+		'-----------------------------------------------------------------------		
+		sRet = Form.requestAtonAuth("ATON_SAVECERT" , g_TmpAlias & "★" & sCert , "") '발급 시, 임의의 인증서일련번호를 사용하고 전문응답에서 수신받은 일련번호로 변경함
+		sRetItem = Split(sRet, "★")
+		
+		sErrorCode	= sRetItem[0]
+		sErrorMsg	= sRetItem[1]
+		
+		if sErrorCode <> "00000" then
+			Form.MsgBox("안내", sErrorMsg & "(" & sErrorCode & ")", "renew", 0)
+			exit sub
+		end if
+		
+		'-----------------------------------------------------------------------
+		'ATON_RENAMEALIAS
+		'-----------------------------------------------------------------------		
+		sRet = Form.requestAtonAuth("ATON_RENAMEALIAS" , g_TmpAlias & "★" & sKeyAlias , "")
+		sRetItem = Split(sRet, "★")
+		
+		sErrorCode	= sRetItem[0]
+		sErrorMsg	= sRetItem[1]
+		
+		if sErrorCode <> "00000" then
+			Form.MsgBox("알림", sErrorMsg & "(" & sErrorCode & ")", "renew", 0)
+			exit sub
+		end if
+		
+		sRegiType = Form.GetSharedData( "MERITZAUTH_REGITYPE" , false )
+		
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_658a", "InBlock1", "PROS_CLS"			, 0 , "4"       ) '갱신
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_658a", "InBlock1", "UI_EASY_ATHN_KEY_VAL" , 0 , sRegiType  ) '간편인증/지문/Face ID
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_658a", "InBlock1", "CSNO" 				, 0 , g_CustNo  ) 
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_658a", "InBlock1", "REG_YN_IQRY_KEY"		, 0 , g_SBAlias  ) 
+		
+		'알리미 발송
+		DATAMANAGER.RequestTranData("obcsb_oimf_658a")
+	
+	end if 
+	
+	if szTranID == "obcsb_oimf_658a" then
+		szProsYN = DATAMANAGER.GetDataValue(0, "obcsb_oimf_658a", "OutBlock1", "PROS_YN" ,0)
+		
+		if szProsYN == "Y" then
+			g_sResult = "RenewOK"
+			Form.MsgBox("안내", "간편인증이 갱신되었습니다.", "renew" , 6)
+		else
+			Form.MsgBox("안내", "간편인증이 갱신되었습니다.(알리미서비스 오류).", "close" , 6)
+		end if
+	end if	
+End Sub
+
+'============================================================================
+Sub procRequestAtonTR_ISSUECERT(paramPinData, paramPublicKey)
+	sTranID = "ohhts_pauth_001"
+	
+	'안드로이드
+	if g_sBIOTermOS == "1" then
+		szDeviceOS = "02"
+	else
+		szDeviceOS = "01"
+	end if
+	
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_RQST_CHNL_DCD" 			, 0 , "MERITZSMART")	'매체구분코드 (1인 1단말 정책이라, 채널코드 고정)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_MSB_VRSN_VL" 				, 0 , g_SBVersion )	'mSB버전값 (라이브러리 버전 정보)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_CUST_NO" 					, 0 , g_CustNo)		'고객번호
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_ID" 			, 0 , g_DeviceID)		'이용자접속기기ID
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_OPSS_DCD" 	, 0 , szDeviceOS)		'이용자접속기기OS구분코드 (01 : 아이폰, 02 : 안드로이드)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_OPSS_VRSN_VL"	, 0 , g_OSVersion)	'이용자접속기기OS버전값
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_MDL_NM" 		, 0 , g_DeviceModel)	'이용자접속기기모델명	
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_PIN_DATA_CON" 				, 0 , paramPinData)	'PIN데이터내용 (예: SHA-256 HexString, 64Byte)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_CERT_BASE_KEY" 			, 0 , paramPublicKey)	'인증서기본키 (이용자공개키)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_OTP_ISNC_YN" 				, 0 , "N")			'OTP발급여부 (기존 MOTP상관없이 'N' 고정하면 됨)
+	
+	DATAMANAGER.RequestTranData(sTranID)
+End Sub
+'============================================================================
+Sub procRequestAtonTR_REISSUECERT(paramPinData, paramPublicKey)	
+	sTranID = "ohhts_pauth_002"
+	
+	'안드로이드
+	if g_DeviceOS == "1" then
+		szDeviceOS = "02"
+	else
+		szDeviceOS = "01"
+	end if
+	
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_RQST_CHNL_DCD" 			, 0 , "MERITZSMART")		'매체구분코드
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_MSB_VRSN_VL" 				, 0 , g_SBVersion)	'mSB버전값 (라이브러리 버전 정보)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_CUST_NO" 					, 0 , g_CustNo)		'고객번호
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_FMTS_CERT_SEQ_NO" 			, 0 , g_SBAlias)		'이전인증서일련번호
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_ID" 			, 0 , g_DeviceID)		'이용자접속기기ID
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_OPSS_DCD" 	, 0 , szDeviceOS)		'이용자접속기기OS구분코드 (01 : 아이폰, 02 : 안드로이드)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_OPSS_VRSN_VL"	, 0 , g_OSVersion)	'이용자접속기기OS버전값
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_MDL_NM" 		, 0 , g_DeviceModel)	'이용자접속기기모델명
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_PIN_DATA_CON" 				, 0 , paramPinData)	'PIN데이터내용 (예: SHA-256 HexString, 64Byte)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_CERT_BASE_KEY" 			, 0 , paramPublicKey)	'인증서기본키 (이용자공개키)
+	
+	DATAMANAGER.RequestTranData(sTranID)
+End Sub
+'============================================================================
+'20230614 SWJ START : 에러 카운트 메시지처리 추가
+'============================================================================
+Sub PwdErrorCount(sErrorCode)
+	Select Case sErrorCode
+	
+	Case "050201"
+		szErrorcnt = "1"
+	Case "050202"
+		szErrorcnt = "2"
+	Case "050203"
+		szErrorcnt = "3"
+	Case "050204"
+		szErrorcnt = "4"
+	Case "050205"
+		'20230614 SWJ START
+		Form.OpenPopup("mpopup_auth", "PinError5", "")
+		return true
+		'20230614 SWJ END
+	Case "050101"
+		Form.OpenPopup("mpopup_auth", "PinError5", "")
+		return true
+	Case Else
+		szErrorcnt = ""
+		return false
+	End Select
+	
+	Form.MsgBox("안내", "간편비밀번호 "&szErrorcnt&"회 오류입니다.\n연속 5회 오류 시 접속이 제한됩니다.", "PinError", 6)
+	
+	return true
+End Sub
+'============================================================================
+'20230614 SWJ END
+'============================================================================
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ContAton.Pwdbasic0.setMaintainingRatio("1")
+	ContAton.Pwdbasic1.setMaintainingRatio("1")
+	ContAton.Pwdbasic2.setMaintainingRatio("1")
+	ContAton.Pwdbasic3.setMaintainingRatio("1")
+	ContAton.Pwdbasic4.setMaintainingRatio("1")
+	ContAton.Pwdbasic5.setMaintainingRatio("1")
+	
+	ContAton.Pwdinsert0.setMaintainingRatio("1")
+	ContAton.Pwdinsert1.setMaintainingRatio("1")
+	ContAton.Pwdinsert2.setMaintainingRatio("1")
+	ContAton.Pwdinsert3.setMaintainingRatio("1")
+	ContAton.Pwdinsert4.setMaintainingRatio("1")
+	ContAton.Pwdinsert5.setMaintainingRatio("1")
+	
+	ContAton.PwdFail0.setMaintainingRatio("1")
+	ContAton.PwdFail1.setMaintainingRatio("1")
+	ContAton.PwdFail2.setMaintainingRatio("1")
+	ContAton.PwdFail3.setMaintainingRatio("1")
+	ContAton.PwdFail4.setMaintainingRatio("1")
+	ContAton.PwdFail5.setMaintainingRatio("1")
+	
+	ContAton.ImgRegi.setMaintainingRatio("1")
+	
+	ContAton.Image0.SetMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub ContAton_BtnRegi_OnClick()
+	Form.OpenPopup("mpopup_auth","CommonAuthPopup","")
+End Sub
+
+'============================================================================
+'20230614 SWJ START
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mpopup_auth" then
+		if sRet == "register" then		'핀 5회 에러 후 재등록 클릭 시
+			g_register = "Y"
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+'20230614 SWJ END
+
+'============================================================================
+'인증성공 시 에디트 파란색으로 변환
+'============================================================================
+Sub ButtonAtonOk_OnClick()
+	if ContAton.EditReal.caption == null or ContAton.EditReal.caption == "" then
+		Form.MsgBox( "안내", g_sButtonText, "", 6 )
+	else	
+		Call PasswordInsert()
+	end if
+	
+	g_nCnt = 0
+End Sub
+
+
+'============================================================================
+'고객에게 보여지는 에디트 위치 클릭시 키패드 활성화(에디트 위치에 버튼 올려서)
+'============================================================================
+Sub ContAton_Button0_OnClick()
+	
+	g_AhtnTchnCode = DEF_ATON_PIN '10
+	
+	ContAton.EditReal.SetShowKeypad(True)
+	
+	'인증 에디트 초기화
+	g_nCnt = 0
+	PasswordInsert()	
+End Sub
+
+'============================================================================
+'패스워드 글자 개수 카운트
+'============================================================================
+Sub ContAton_EditReal_OnEditChar(CharCode)
+	Select Case CharCode
+	
+	Case "0"
+		'입력값 6초과할 때 초과 카운팅 방지
+		if g_nCnt == 6 then
+			g_nCnt = 6
+		else
+			g_nCnt = g_nCnt + 1
+		end if
+		
+		g_CountSave = g_nCnt
+	Case "1"	
+		'입력값 없을 때 마이너스 카운팅 방지
+		if g_nCnt == 0 then
+			g_nCnt = 0
+		else
+			g_nCnt = g_nCnt - 1
+		end if
+		
+		g_CountSave = g_nCnt
+	'취소, 입력완료일 때
+	Case "2"
+		g_nCnt = 0
+	End Select
+
+	PasswordInsert()
+	
+	'20240717 SWJ START: 입력완료 전에 완료 처리
+	if g_nCnt = 6 then		
+		'입력완료 호출 API
+		ContAton.EditReal.runSecKeypadFinish()
+	end if
+	'20240717 SWJ END
+	
+End Sub
+
+'============================================================================
+'사용자에게 보여지는 패스워드 함수
+'============================================================================
+Function PasswordInsert()
+	
+	'입력완료일 시에 따로 개수 세이브해서 UI보이기
+	if g_CharFlag == "N" then
+		g_nCnt = g_CountSave
+		g_CharFlag = ""
+	end if
+	
+	Select Case g_nCnt
+	
+	Case 0
+		ContAton.Pwdbasic0.visible = true	
+		ContAton.Pwdbasic1.visible = true	
+		ContAton.Pwdbasic2.visible = true	
+		ContAton.Pwdbasic3.visible = true	
+		ContAton.Pwdbasic4.visible = true	
+		ContAton.Pwdbasic5.visible = true
+		ContAton.PwdInsert0.visible = false	
+		ContAton.PwdInsert1.visible = false	
+		ContAton.PwdInsert2.visible = false	
+		ContAton.PwdInsert3.visible = false	
+		ContAton.PwdInsert4.visible = false	
+		ContAton.PwdInsert5.visible = false	
+	Case 1
+		ContAton.Pwdbasic1.visible = true	
+		ContAton.Pwdbasic2.visible = true	
+		ContAton.Pwdbasic3.visible = true	
+		ContAton.Pwdbasic4.visible = true	
+		ContAton.Pwdbasic5.visible = true
+		ContAton.PwdInsert0.visible = true
+		ContAton.Pwdbasic0.visible = false	
+		ContAton.PwdInsert1.visible = false	
+		ContAton.PwdInsert2.visible = false	
+		ContAton.PwdInsert3.visible = false	
+		ContAton.PwdInsert4.visible = false	
+		ContAton.PwdInsert5.visible = false	
+	Case 2	
+		ContAton.PwdInsert0.visible = true	
+		ContAton.PwdInsert1.visible = true
+		ContAton.Pwdbasic2.visible = true	
+		ContAton.Pwdbasic3.visible = true	
+		ContAton.Pwdbasic4.visible = true	
+		ContAton.Pwdbasic5.visible = true
+		ContAton.Pwdbasic0.visible = false	
+		ContAton.Pwdbasic1.visible = false
+		ContAton.PwdInsert2.visible = false	
+		ContAton.PwdInsert3.visible = false	
+		ContAton.PwdInsert4.visible = false	
+		ContAton.PwdInsert5.visible = false	
+	Case 3
+		ContAton.PwdInsert0.visible = true	
+		ContAton.PwdInsert1.visible = true	
+		ContAton.PwdInsert2.visible = true
+		ContAton.Pwdbasic3.visible = true	
+		ContAton.Pwdbasic4.visible = true	
+		ContAton.Pwdbasic5.visible = true		
+		ContAton.Pwdbasic0.visible = false	
+		ContAton.Pwdbasic1.visible = false	
+		ContAton.Pwdbasic2.visible = false	
+		ContAton.PwdInsert3.visible = false	
+		ContAton.PwdInsert4.visible = false	
+		ContAton.PwdInsert5.visible = false
+	Case 4
+		ContAton.Pwdbasic4.visible = true	
+		ContAton.Pwdbasic5.visible = true		
+		ContAton.PwdInsert0.visible = true	
+		ContAton.PwdInsert1.visible = true	
+		ContAton.PwdInsert2.visible = true	
+		ContAton.PwdInsert3.visible = true
+		ContAton.Pwdbasic0.visible = false	
+		ContAton.Pwdbasic1.visible = false	
+		ContAton.Pwdbasic2.visible = false	
+		ContAton.Pwdbasic3.visible = false		
+		ContAton.PwdInsert4.visible = false	
+		ContAton.PwdInsert5.visible = false	
+	Case 5
+		ContAton.Pwdbasic5.visible = true		
+		ContAton.PwdInsert0.visible = true	
+		ContAton.PwdInsert1.visible = true	
+		ContAton.PwdInsert2.visible = true	
+		ContAton.PwdInsert3.visible = true	
+		ContAton.PwdInsert4.visible = true
+		ContAton.Pwdbasic0.visible = false	
+		ContAton.Pwdbasic1.visible = false	
+		ContAton.Pwdbasic2.visible = false	
+		ContAton.Pwdbasic3.visible = false	
+		ContAton.Pwdbasic4.visible = false		
+		ContAton.PwdInsert5.visible = false	
+	Case 6
+		ContAton.PwdInsert0.visible = true	
+		ContAton.PwdInsert1.visible = true	
+		ContAton.PwdInsert2.visible = true	
+		ContAton.PwdInsert3.visible = true	
+		ContAton.PwdInsert4.visible = true	
+		ContAton.PwdInsert5.visible = true	
+		ContAton.Pwdbasic0.visible = false		
+		ContAton.Pwdbasic1.visible = false		
+		ContAton.Pwdbasic2.visible = false		
+		ContAton.Pwdbasic3.visible = false		
+		ContAton.Pwdbasic4.visible = false		
+		ContAton.Pwdbasic5.visible = false
+	Case else
+		Form.ShowAlert("안내", "6자리를 입력해주세요.")
+	End Select
+	
+	ContAton.PwdFail0.visible = false
+	ContAton.PwdFail1.visible = false
+	ContAton.PwdFail2.visible = false
+	ContAton.PwdFail3.visible = false
+	ContAton.PwdFail4.visible = false
+	ContAton.PwdFail5.visible = false
+End Function
+
+'============================================================================
+'인증 실패 UI
+'============================================================================
+Function PasswordFail()
+	ContAton.PwdFail0.visible = true
+	ContAton.PwdFail1.visible = true
+	ContAton.PwdFail2.visible = true
+	ContAton.PwdFail3.visible = true
+	ContAton.PwdFail4.visible = true
+	ContAton.PwdFail5.visible = true
+	ContAton.Pwdbasic0.visible = false		
+	ContAton.Pwdbasic1.visible = false		
+	ContAton.Pwdbasic2.visible = false		
+	ContAton.Pwdbasic3.visible = false		
+	ContAton.Pwdbasic4.visible = false		
+	ContAton.Pwdbasic5.visible = false
+	ContAton.PwdInsert0.visible = false	
+	ContAton.PwdInsert1.visible = false	
+	ContAton.PwdInsert2.visible = false	
+	ContAton.PwdInsert3.visible = false	
+	ContAton.PwdInsert4.visible = false	
+	ContAton.PwdInsert5.visible = false
+End Function
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	'20230614 SWJ START
+	'PIN 오류 후 키패드 바로 올려달라는 요건
+	if sKeyName == "PinError" then
+		'인증 에디트 초기화
+		g_nCnt = 0
+		PasswordInsert()
+				
+		'비밀번호 입력키패드 Show
+		Form.SetTimerEvent2(1, 1, 0.6)
+		
+	elseif sKeyName == "E4106" then
+		if sRet == "ok" then
+		else
+			Form.CloseForm()
+		end if
+	elseif sKeyName == "renew" then
+		Form.CloseForm()
+	end if
+	'20230614 SWJ END
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_pauth_121" trcode="ohhts_pauth_121" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_pauth_001" trcode="ohhts_pauth_001" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_658a" trcode="obcsb_oimf_658a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_pauth_002" trcode="ohhts_pauth_002" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_pauth_121" title="(사설인증) 인증서 사용자인증" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="412" _ulen="320" >
+
+PAU_RQST_CHNL_DCD^PAU매체구분코드^20^0^0^0^0^0^0
+PAU_CUST_NO^PAU고객번호^20^0^0^0^0^0^0
+PAU_MSB_VRSN_VL^PAUmSB버전값^32^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_ID^PAU이용자접속기기ID^200^0^0^0^0^0^0
+PAU_CRTC_PTRN_DCD^PAU인증유형구분코드^2^0^0^0^0^0^0
+PAU_BIO_CRTC_SUCC_YN^PAU바이오인증성공여부^1^0^0^0^0^0^0
+PAU_CRTC_DATA_CON^PAU인증유형데이터내용^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="428" _ulen="320" >
+
+PAU_ERR_CD^PAU에러코드^6^0^0^0^0^0^0
+PAU_CRTC_PTRN_DCD^PAU인증유형구분코드^2^0^0^0^0^0^0
+PAU_CRTC_MAX_EROR_ALWN_CNT^PAU인증유형최대오류허용횟수^3^0^0^0^0^0^0
+PAU_CRTC_EROR_CNT^PAU인증유형오류횟수^3^0^0^0^0^0^0
+PAU_CRTC_USE_YN^PAU인증유형사용여부^1^0^0^0^0^0^0
+PAU_CRTC_LOCK_YN^PAU인증유형잠김여부^1^0^0^0^0^0^0
+PAU_BIO_CRTC_DCD^PAUBIO인증구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_pauth_001" title="(사설인증) 인증서발급" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="858" _ulen="682" >
+
+PAU_RQST_CHNL_DCD^PAU매체구분코드^20^0^0^0^0^0^0
+PAU_MSB_VRSN_VL^PAUmSB버전값^32^0^0^0^0^0^0
+PAU_CUST_NO^PAU고객번호^20^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_ID^PAU이용자접속기기ID^200^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_OPSS_DCD^PAU아용자접속기기OS구분코드^2^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_OPSS_VRSN_VL^PAU이용자접속기기OS버전값^50^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_MDL_NM^PAU이용자접속기기모델명^100^0^0^0^0^0^0
+PAU_PIN_DATA_CON^PAUPIN데이터내용^64^0^0^0^0^0^0
+PAU_PTN_DATA_CON^PAUPATTERN데이터내용^64^0^0^0^0^0^0
+PAU_BIO_ELSG_CON^PAUBIO전자서명내용^64^0^0^0^0^0^0
+PAU_BIO_CRTC_DCD^PAUBIO인증구분코드^2^0^0^0^0^0^0
+PAU_CERT_BASE_KEY^PAU인증서기본키^2048^0^0^0^0^0^0
+PAU_OTP_ISNC_YN^PAUOTP발급여부^1^0^0^0^0^0^0
+PAU_OTP_PIN_DATA_CON^PAUOTPPIN데이터내용^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="970" _ulen="786" >
+
+PAU_ERR_CD^PAU에러코드^6^0^0^0^0^0^0
+PAU_CERT_SEQ_NO^PAU인증서일련번호^12^0^0^0^0^0^0
+PAU_CERT_DATA_CON^PAU인증서데이터내용^4096^0^0^0^0^0^0
+PAU_ISNC_YMD^PAU발급일자^8^0^0^0^0^0^0
+PAU_CERT_VNDR_CD^PAU인증서벤더코드^3^0^0^0^0^0^0
+PAU_MSB_CERT_SEQ_NO^PAUMSB인증서일련번호^15^0^0^0^0^0^0
+PAU_PIN_EROR_CNT^PAUPIN오류횟수^3^0^0^0^0^0^0
+PAU_PIN_MAX_EROR_ALWN_CNT^PAUPIN최대오류허용건수^3^0^0^0^0^0^0
+PAU_OTP_SEQ_NO^PAUOTP일련번호^12^0^0^0^0^0^0
+PAU_OTP_KEY1_CON^PAUOTP생성키^32^0^0^0^0^0^0
+PAU_OTP_KEY2_CON^PAUOTP통신암호화키^32^0^0^0^0^0^0
+PAU_OTP_EXPY_GDNC_YN^PAUOTP만료공지여부^1^0^0^0^0^0^0
+PAU_OTP_ISNC_YMD^PAUOTP발급일자^8^0^0^0^0^0^0
+PAU_OTP_VNDR_CD^PAUOTP벤더코드^3^0^0^0^0^0^0
+PAU_MSB_OTP_SEQ_NO^PAUMSBOTP일련번호^15^0^0^0^0^0^0
+PAU_OTP_PIN_EROR_CNT^PAUOTPPIN오류횟수^3^0^0^0^0^0^0
+PAU_OTP_PIN_MAX_EROR_ALWN_CNT^PAUOTPPIN최대오류허용건수^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_658a" title="간편 인증 완료 알리미 전송 처?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="253" _ulen="195" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+UI_EASY_ATHN_KEY_VAL^UI간편인증키값^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+REG_YN_IQRY_KEY^등록여부조회키^64^0^0^0^0^0^0
+UI_CUST_CONT_CLS_CODE^UI고객접촉구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_pauth_002" title="(사설인증) 인증서 갱신" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="640" _ulen="498" >
+
+PAU_RQST_CHNL_DCD^PAU매체구분코드^20^0^0^0^0^0^0
+PAU_MSB_VRSN_VL^PAUmSB버전값^32^0^0^0^0^0^0
+PAU_CUST_NO^PAU고객번호^20^0^0^0^0^0^0
+PAU_FMTS_CERT_SEQ_NO^PAU이전인증서일련번호^12^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_ID^PAU이용자접속기기ID^200^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_OPSS_DCD^PAU이용자접속기기OS구분코드^2^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_OPSS_VRSN_VL^PAU이용자접속기기OS버전값^50^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_MDL_NM^PAU이용자접속기기모델명^100^0^0^0^0^0^0
+PAU_PIN_DATA_CON^PAUPIN데이터내용^64^0^0^0^0^0^0
+PAU_CERT_BASE_KEY^PAU인증서기본키^2048^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="393" _ulen="309" >
+
+PAU_ERR_CD^PAU에러코드^6^0^0^0^0^0^0
+PAU_CERT_SEQ_NO^PAU인증서일련번호^12^0^0^0^0^0^0
+PAU_CERT_DATA_CON^PAU인증서데이터내용^4096^0^0^0^0^0^0
+PAU_ISNC_YMD^PAU발급일자^8^0^0^0^0^0^0
+PAU_CERT_VNDR_CD^PAU인증서벤더코드^3^0^0^0^0^0^0
+PAU_PIN_EROR_CNT^PAUPIN오류횟수^3^0^0^0^0^0^0
+PAU_PIN_MAX_EROR_ALWN_CNT^PAUPIN최대오류허용건수^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

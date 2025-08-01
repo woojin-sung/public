@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_발급(고객연락처)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="5" outline="0101" designorder="1" ly_vert="0,0,375,562,1" >
+			<COL_INFO ly_vert_width="120,255" />
+			<ROW_INFO ly_vert_height="35,35,35,35,422" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" line="0,1" caption="이메일 주소" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" line="0,1" caption="휴대폰번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="0" line="0,1" mask="1,0,,,1,###-####-####,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" line="0,1" caption="전화번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="0" line="0,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" line="0,1" caption="주소" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,3,1,3" halign="0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,1" impidxs="" />
+				<CELL cell_ly="1,4,1,4" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3926" _ulen="3846" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_발급(고객연락처)
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "TabChange" then
+		DATAMANAGER.RequestTranData( "obcsb_acad_002r" )
+	elseif sEventName == "NextCheck" then
+		Form.triggerEvent( "#", "NextStep", "4" )
+	elseif sEventName == "BeforeCheck" then
+		Form.triggerEvent( "#", "BeforeStep", "2" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_acad_002r" then	
+		Dim sACNO, sACNT_PWD
+		sACNO = Form.GetSharedData("CERT_ACNO" , false)
+		sACNT_PWD = Form.GetSharedData("CERT_ACNT_PWD" , false)
+	
+		DATAMANAGER.SetDataValue( 0, "obcsb_acad_002r", "InBlock1", "ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acad_002r", "InBlock1", "PWD" , 0 , sACNT_PWD )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_acad_002r" then	
+		Dim nCnt, sPOST, sDTAD, sARCD, sTONO, sTELNO, sEMAIL_ADDR, sINAG_TYPE_CODE
+		
+		nCnt = DATAMANAGER.GetDataCount( 0, "obcsb_acad_002r", "OutBlock1" )
+		
+		if nCnt > 0 then
+			for i = 0 to nCnt-1
+				sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "INAG_TYPE_CODE" , i )
+				
+				if sINAG_TYPE_CODE == "01" then '자택주소
+					sPOST = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "POST" , i )
+					sDTAD = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "DTAD" , i )
+					
+					Table0.SetCellString( 3, 1, sPOST.." "..sDTAD )
+				elseif sINAG_TYPE_CODE == "21" then 'E-mail
+					sEMAIL_ADDR = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "EMAIL_ADDR" , i )
+			
+					Table0.SetCellString( 0, 1, sEMAIL_ADDR )
+				end if
+			next
+		end if
+		
+		nCnt = DATAMANAGER.GetDataCount( 0, "obcsb_acad_002r", "OutBlock3" )
+		
+		if nCnt > 0 then
+			for i = 0 to nCnt-1
+				sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "INAG_TYPE_CODE" , i )
+				
+				if sINAG_TYPE_CODE == "11" then '자택전화번호
+					sARCD = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "ARCD" , i )
+					sTONO = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TONO" , i )
+					sTELNO = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TELNO" , i )
+					
+					Table0.SetCellString( 2, 1, sARCD.."-"..sTONO.."-"..sTELNO )
+				elseif sINAG_TYPE_CODE == "13" then '휴대폰번호
+					sARCD = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "ARCD" , i )
+					sTONO = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TONO" , i )
+					sTELNO = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TELNO" , i )
+					
+					Table0.SetCellString( 1, 1, sARCD..sTONO..sTELNO )
+				end if
+			next
+		end if	
+	end if
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acad_002r" trcode="obcsb_acad_002r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acad_002r" title="고객연락처정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="206" _ulen="158" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="973" _ulen="731" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+ADDR_REG_DATE^주소 등록 일자^8^0^0^0^0^0^0
+SNBC_YN^반송 여부^1^0^0^0^0^0^0
+SNBC_CANC_REAS_CODE^반송해지사유코드^2^0^0^0^0^0^0
+SNBC_CANC_REAS_NAME^반송해지사유명^40^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총 반송 횟수^4^0^7^0^0^0^0
+CNNT_SNBC_TMNU^연속 반송 횟수^4^0^7^0^0^0^0
+REGN_ZIP^지역 우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세 우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일 주소^200^0^0^0^0^0^0
+INAG_RCTF_REAS_CODE^통보처 정정 사유 코드^1^0^0^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="30" inout="out" _len="427" _ulen="323" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+UI_CUST_TELNO^UI고객전화번호^40^0^0^0^0^0^0
+CNPL_REG_DATE^연락처 등록 일자^8^0^0^0^0^0^0
+ARCD^지역번호^4^0^0^0^0^0^0
+TONO^국번호^4^0^0^0^0^0^0
+TELNO^전화번호^4^0^0^0^0^0^0
+TENO^교환번호^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="950" _ulen="700" >
+
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물 통보처 일련번호^4^0^7^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물 통보처 일련번호^4^0^7^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_SRNO^운용 보고서 통보처 일련번호^4^0^7^0^0^0^0
+STPL_YN^약정 여부^1^0^0^0^0^0^0
+SNDN_YN^발송 여부^1^0^0^0^0^0^0
+PRFN_CNPL_CLCD^선호연락처구분코드^2^0^0^0^0^0^0
+TRUST_CLS_CODE^신탁 구분 코드^1^0^0^0^0^0^0
+FUND_RMND_RCMS_CLS_CODE^펀드잔고수신구분코드^1^0^0^0^0^0^0
+UI_ITEM_NAME1^UI항목명1^40^0^0^0^0^0^0
+UI_ITEM_NAME2^UI항목명2^40^0^0^0^0^0^0
+UI_ITEM_NAME3^UI항목명3^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MBL_PRTY_INFR_YN^모바일우선통보여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="476" _ulen="350" >
+
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock9" inout="out" _len="432" _ulen="316" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="232" _ulen="164" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+INAG_TYPE_CODE^통보처유형코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처일련번호^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

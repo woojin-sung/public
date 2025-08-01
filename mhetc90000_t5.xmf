@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90000" scrname="환경설정_개인" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,522,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Cont0" vscroll="1" scroll_pos="0,0" ly_vert="0,0,375,522,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="2" outline="1110" designorder="1" ly_vert="0,0,375,102,1" >
+					<COL_INFO ly_vert_width="215,137,23" />
+					<ROW_INFO ly_vert_height="51,51" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,2,0" halign="0" line="0,1" caption="계좌 순서/별명 설정" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,1,0,1" halign="0" line="0,1" caption="메모관리" autofontsize="1" impidxs="" />
+						<CELL cell_ly="1,1,1,1" fgcolor="128:188030030" halign="2" line="0,1" autofontsize="1" impidxs="" />
+						<CELL cell_ly="2,1,2,1" autofontsize="1" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<IMAGE name="Image1" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="356,14,13,22,1" />
+				<IMAGE name="Image0" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="357,63,13,22,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4850" _ulen="4352" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 환경설정
+' 02. 화면설명 : 환경설정_개인
+' 03. 작    성 : 2016.02.16 김보라
+'2023.05.25 HSZ : ID해지 삭제
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim G_BNKSET_FILE '자주쓰는은행계좌팝업
+Dim G_MEMOSET_FILE '메모관리팝업
+
+'20220511 LES START
+Dim G_IDUNREG_FILE	'ID해지
+'20220511 LES END
+
+'20231212 SWJ START
+Dim G_ACCOUNT_NICK_FILE
+'20231212 SWJ END
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	G_BNKSET_FILE = "mbbnk61080"
+	G_MEMOSET_FILE = "mhetc90000_p2"
+	
+	'20231212 SWJ START
+	G_ACCOUNT_NICK_FILE = "mhetc90000_p9"
+	'20231212 SWJ END
+	
+	'20220511 LES START
+	G_IDUNREG_FILE = "mbonl85020"
+	'20220511 LES END
+	
+End Sub
+
+'============================================================================
+Sub Cont0_Table0_OnClick(lRow , lColumn)
+	'20231212 SWJ START : 계좌별명 및 설정 추가
+	'20231103 SWJ START : 자주쓰는은행계좌관리 삭제
+	'계좌순서 및 별명설정
+	if lRow = 0 then
+		Dim sLOGIN_TYPE 
+		sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+
+		if CInt(sLOGIN_TYPE) > 1 then '로그인 상태
+			Form.OpenFramePopup( G_ACCOUNT_NICK_FILE , "", "")
+		else
+			Form.MsgBox( "알림", "로그인이 필요한 화면입니다.\n로그인 하시겠습니까?", "NEED_LOGIN", 2 )
+		end if
+
+	elseif lRow == 1 then '자주쓰는은행계좌관리
+		'메모관리
+		Form.OpenFramePopup(G_MEMOSET_FILE , "" , "")
+'		Dim sLOGIN_TYPE 
+'		sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+'
+'		if CInt(sLOGIN_TYPE) > 1 then '로그인 상태
+'			Form.OpenFramePopup(G_BNKSET_FILE , "" , "")
+'		else
+'			Form.MsgBox( "알림", "로그인이 필요한 화면입니다.\n로그인 하시겠습니까?", "NEED_LOGIN", 2 )
+'		end if
+	'elseif lRow == 1 then '메모관리
+		'Form.OpenFramePopup(G_MEMOSET_FILE , "" , "")
+	'20231103 SWJ END
+	
+	'20220511 LES START 
+'	elseif lRow == 2 then 'ID해지 - 20230525 HSZ 주석처리
+'		
+'		Dim sLOGIN_TYPE 
+'		sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+'	
+'		if CInt(sLOGIN_TYPE) > 1 then '로그인 상태
+'			Form.OpenPopup(G_IDUNREG_FILE , "" , "")
+'		else
+'			Form.MsgBox( "알림", "로그인이 필요한 화면입니다.\n로그인 하시겠습니까?", "NEED_LOGIN", 2 )
+'		end if
+		
+	'20220511 LES END 
+	
+	end if
+End Sub
+
+'============================================================================
+' 자주쓰는은행계좌관리
+'============================================================================
+
+
+'============================================================================
+' 메모관리
+'============================================================================
+Sub Cont0_Image0_OnClick()
+	Form.OpenFramePopup(G_MEMOSET_FILE , "" , "")
+End Sub
+'============================================================================
+'20231212 SWJ START
+' 계좌별명/설정
+'============================================================================
+Sub Cont0_Image1_OnClick()
+	Dim sLOGIN_TYPE 
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+
+	if CInt(sLOGIN_TYPE) > 1 then '로그인 상태
+		Form.OpenFramePopup( G_ACCOUNT_NICK_FILE , "", "")
+	else
+		Form.MsgBox( "알림", "로그인이 필요한 화면입니다.\n로그인 하시겠습니까?", "NEED_LOGIN", 2 )
+	end if
+End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if (sKeyName == "NEED_LOGIN") then
+		if (sRet == "ok") then	
+			Form.OpenPopup( "mhetc90021" , "2" , "" )
+		end if 
+	end if 
+End Sub
+'============================================================================
+'20231212 SWJ START : 로그인 후 계좌 순서/별명 설정 바로 띄우기 위함
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "Login_Type" then
+		if Cint(sRet) > 1 then
+			Form.OpenFramePopup(G_ACCOUNT_NICK_FILE , "" , "")
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_관리(비번변경/삭제선택)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="4" outline="0101" designorder="1" ly_vert="0,0,375,114,1" >
+			<COL_INFO ly_vert_width="90,285" />
+			<ROW_INFO ly_vert_height="38,23,23,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" valign="2" halign="0" line="0,0" fontsize="-1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="0" line="0,0" fontsize="-1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="0" line="0,0" fontsize="-1" mask="1,0,발급일 : ,,1,####-##-##,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" valign="0" halign="0" line="1,0" fontsize="-1" mask="1,0,만료일 : ,,1,####-##-##,0,1,1,0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="Button0" caption="비밀번호 변경" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="6,123,117,39,1" />
+		<BUTTON name="Button1" caption="인증서 삭제" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="129,123,117,39,1" />
+		<BUTTON name="Button2" caption="취소" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="252,123,117,39,1" />
+		<IMAGE name="Image0" ly_vert="15,11,70,100,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6349" _ulen="5933" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_관리(비번변경/삭제선택)
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+'20201126 SWJ START : 공인인증서 '공인' 글자 삭제
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim G_PW_CERT_FILE '인증서비밀번호입력풀팝업
+Dim G_CHANGEG_PW_CERT_FILE '인증서비밀번호변경풀팝업
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	G_PW_CERT_FILE = "mhetc90060_p5"
+	G_CHANGEG_PW_CERT_FILE = "mhetc90060_p6"
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == G_PW_CERT_FILE then
+		if sRet ~= "cancel" then
+			Dim sTemp, sDN
+			'20161101 NOHES START ">"빠짐현상대응
+			sCertPass = Form.GetSharedData("CERT_IMSI_PSWD", 1 )
+			sCertDN = Form.GetSharedData("CERT_IMSI_DN", 1 )
+			
+			sTemp = Split(sRet, ";")
+			
+			if sCertDN <> "" and sCertDN <> null then
+				sDN = sCertDN
+			else
+				sDN = Form.GetSharedData("CERT_DN" , false)
+			end if
+			
+			if sCertPass <> "" and sCertPass <> null then
+				Form.RequestCertCommand( "ReqCertFileDelete", sDN, sCertPass )
+			else
+				Form.RequestCertCommand( "ReqCertFileDelete", sDN, sTemp[1] )
+			end if
+			'20161101 NOHES END
+			
+		end if 
+	elseif sKeyName == G_CHANGEG_PW_CERT_FILE then
+		if sRet ~= "cancel" then
+			Dim sDN
+			'20161101 NOHES START ">"빠짐현상대응
+			sCertPass = Form.GetSharedData("CERT_IMSI_PSWD", 1 )
+			sCertDN = Form.GetSharedData("CERT_IMSI_DN", 1 )
+			
+			sTemp = Split(sRet, ";")
+			
+			if sCertDN <> "" and sCertDN <> null then
+				sDN = sCertDN
+			else
+				sDN = Form.GetSharedData("CERT_DN" , false)
+			end if
+			
+			if sCertPass <> "" and sCertPass <> null then
+				Form.RequestCertCommand( "ReqCertPasswordChange", sDN, sCertPass )
+			else
+				Form.RequestCertCommand( "ReqCertPasswordChange", sDN, sTemp[1] )
+			end if
+			'20161101 NOHES END
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "DELETE_MSG" then
+		if sRet == "ok" then
+			Form.OpenFramePopup( G_PW_CERT_FILE , "del" , "" ) '20161110_01 KBC : 인증서비밀번호 모의해킹결과 대응
+		end if
+	end if
+	
+	'20230620 SWJ START
+	if sKeyName == "GOTOCERTLOGIN" Then
+		if sRet == "ok" then
+			g_bCertLogin = true
+			'Form.CloseForm()
+			
+			if g_szData <> "1" Then
+				Form.SetEnvData(1, "login.input.savetab", "1" )	'인증서로그인 '20220805_01 KBC : 로그인개선
+				Form.OpenScreen("90020" , "90120") '20180911_01 KBC : 바이오인증 인증방식 추가
+			end if
+		end if
+	end if
+	'20230620 SWJ END
+End Sub
+
+'============================================================================
+Sub Form_OnCertEvent(sType, sParam1, sParam2)
+	if sType == "RetCertFileDelete" then
+		if sParam1 == "Success" then
+			Form.triggerEvent( "#", "NextStep", "delete" )
+		else
+			Form.MsgBox( "알림", sParam2, "", 6 )
+		end if
+	elseif sType == "RetCertPasswordChange" then
+		if sParam1 == "Success" then
+			Form.MsgBox( "알림", "인증서 비밀번호 변경을 완료하였습니다.", "", 6 )
+		else
+			Form.MsgBox( "알림", sParam2, "", 6 )
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "TabChange" then
+		Dim sCertInfo, sTemp, sIndex, sDate, sCalDate 
+		
+		sIndex = Form.GetSharedData("CERT_INDEX" , false)
+		sCalDate = Form.calcDateTime( 0, 0, 30, 0, 0, 0 )
+		sCalDate = Left(sCalDate, 8)
+		sCertInfo = Form.GetCertListDataAt(CInt(sIndex))
+		sTemp = Split(sCertInfo, ";")
+			
+		'sTemp[0] 성명
+		'sTemp[1] DN
+		'sTemp[2] 종류(범용개인)
+		'sTemp[3] 발급기관
+		'sTemp[5] 사용가능여부(가능1)
+		'sTemp[6] 만기일
+		'sTemp[7] 시작일
+		
+		Table0.SetCellString( 0, 1, sTemp[0] )
+		'NOHES START 20160609 발급기관 정보 추가
+		Table0.SetCellString( 1, 1, sTemp[2].." ("..sTemp[3]..")" )
+		'NOHES END
+		sDate = sTemp[7]
+		sDate = Replace(sDate, "-", "")
+		sDate = Replace(sDate, ".", "")
+		Table0.SetCellString( 2, 1, "20"..sDate )
+		
+		sDate = sTemp[6]
+		sDate = Replace(sDate, "-", "")
+		sDate = Replace(sDate, ".", "")
+		Table0.SetCellString( 3, 1, "20"..sDate )
+		
+		if tonumber("20"..sDate) > tonumber(sCalDate) then
+			Image0.imgpath = "icon_sub_11.png"
+		else
+			Image0.imgpath = "icon_sub_12.png"
+		end if
+	end if
+End Sub
+
+'============================================================================
+' 비밀번호 변경
+'============================================================================
+Sub Button0_OnClick()
+	Form.OpenFramePopup( G_CHANGEG_PW_CERT_FILE , "" , "" )
+End Sub
+
+'============================================================================
+' 인증서 삭제
+'============================================================================
+Sub Button1_OnClick()
+	Form.MsgBox( "알림", "인증서를 삭제하시겠습니까?", "DELETE_MSG", 1 )
+End Sub
+
+'============================================================================
+' 이전화면
+'============================================================================
+Sub Button2_OnClick()
+	Form.triggerEvent( "#", "BeforeStep", "0" )
+End Sub
+
+
+'============================================================================
+'20230620 SWJ START : 간편인증센터 위치 옮김. . .
+'============================================================================
+
+
+	</SCRIPT_INFO>
+</ROOT>

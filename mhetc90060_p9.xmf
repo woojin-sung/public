@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_보안카드" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fgcolor="067:049081150" fontstyle="01" mask="0,0,[,],1,,0,0,0,0,0" ly_vert="116,105,50,39,1" import="0,1,6" />
+		<LABEL name="Label1" caption="번 앞 두자리" ly_vert="150,105,100,39,1" />
+		<LABEL name="Label3" fgcolor="067:049081150" fontstyle="01" mask="0,0,[,],1,,0,0,0,0,0" ly_vert="116,225,50,39,1" import="0,1,7" />
+		<LABEL name="Label4" caption="번 뒤 두자리" ly_vert="150,225,100,39,1" />
+		<EDIT name="EditInput1" halign="1" password="1" imetype="1" maxlength="2" ly_vert="85,145,100,39,1" />
+		<EDIT name="Edit1" enable="0" caption="●●" halign="1" imetype="0" ly_vert="195,145,100,39,1" />
+		<EDIT name="Edit2" enable="0" caption="●●" halign="1" imetype="0" ly_vert="85,265,100,39,1" />
+		<EDIT name="EditInput2" halign="1" password="1" imetype="1" maxlength="2" ly_vert="195,265,100,39,1" />
+		<LABEL name="Label2" fontstyle="01" caption="* 보안매체관련 문의는 고객지원센터" multiline="1" ly_vert="26,471,290,30,1" />
+		<LABEL name="Label5" fontstyle="01" caption="(1588 - 3400)로 문의하여 주시기 바랍니다." multiline="1" ly_vert="36,494,330,30,1" />
+		<LABEL name="Label6" visible="0" caption="별도의 본인확인 후 처리 가능합니다." multiline="1" ly_vert="20,399,329,30,0" />
+		<LABEL name="Label7" visible="0" caption="* 보안매체 확인이 불가능한 경우(분실, 고장 등)" multiline="1" ly_vert="9,376,341,30,0" />
+		<BUTTON name="ButtonPhone" enable="0" visible="0" caption="본인명의 휴대폰 인증" fgcolor="004:000000000" ly_vert="22,430,170,34,0" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="1" outline="0101" designorder="1" ly_vert="0,0,375,40,1" >
+			<COL_INFO ly_vert_width="375" />
+			<ROW_INFO ly_vert_height="40" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="066:238239240" line="0,0" caption="보안카드 번호입력" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" fontsize="2" btnimage="btn_25.9" ly_vert="0,557,187,50,1" />
+		<BUTTON name="ButtonOK" enable="0" caption="확인" fontsize="2" btnimage="btn_26.9" ly_vert="187,557,188,50,1" />
+		<TABLE name="Table1" visible="0" outlinecolor="004:000000000" insidelinecolor="102:255255255" colcount="1" rowcount="6" outline="0100" designorder="1" ly_vert="0,437,375,120,0" >
+			<COL_INFO ly_vert_width="375" />
+			<ROW_INFO ly_vert_height="25,20,20,10,20,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="146:124124124" line="0,0" caption="보안매체 확인이 불가능한 경우(분실 등)" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="146:124124124" line="0,0" caption="모바일OTP 발급 후 이용해주세요." fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,0" caption="모바일OTP 발급" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,5,0,5" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="16638" _ulen="13840" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 공인인증서
+' 02. 화면설명 : 공인인증서_보안카드
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+' 2020.09.10 : 정민영 : v0001 : [T2008250015] 메모리취약점 보완
+' 2020.11.19 : 정민영 : v0002 : [T2008250015] 실명확인번호 메모리 내 평문 노출 취약점 조치(HTS, MTS)
+'            : - obcsb_oimf_520r,obcsb_simf_000r IO 변경분 반영
+'            : 정민영 : v0003 : [T2011240020] 공인인증서 명칭 변경('공인'단어 삭제)
+' 2020.12.15 : 성우진 : v0004 : [T2010080018] 인증서 발급/등록 프로세스 변경(개인고객의 경우 보안인증 과정없이 인증서 발급 가능한 프로세스 추가)
+' 2021.05.27 : 정민영 : v0005 : T2105070009 : 개인신용정보동의제도 개편안 반영
+'            : obcsb_efif_060a IO변경분 적용
+' 2023.06.09 : 전상일 : v0006 : 인증서 보안카드 사설인증 추가
+' 2023.07.12 : 전상일 : v0007 : id비밀번호 변경시 로직 제거 (추가 로직 생성)
+' 2023.11.07 : 양현정 : v0008 : obcsb_efif_060a 없는io매핑 삭제
+' 2023.12.21 : 전상일 : v0009 : ID 등록 시 주문내역 존재 체크 
+'-------------------------------------------------------------------------------------------
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRetData
+Dim g_sUserID 
+Dim g_plain_rm  'v0001 메모리평문적용여부
+
+'-----------------------------------------------------------------------
+Dim g_nLinkGubn		'1:지점개설계좌ID등록 화면에서 팝업, 2:ID비밀번호재설정 화면에서 팝업, 0:그외 화면에서 팝업
+Dim g_sSendData		'마지막 팝업화면으로 각 페이지의 입력 데이터 전달
+Dim g_szList			'g_sSendData Split Array
+Dim g_rcnoPip          '사설인증용 v0006
+Dim g_sSecurity, g_sMeritzAuth		'20230803 SWJ START
+g_sSecurity = ""
+g_sMeritzAuth = ""
+'지점개설계좌ID등록 화면에서 팝업한 경우(g_nLinkGubn = 1)
+'g_szList(0)  : "은행" / "지점" / "지점/모바일" '20160610 추가
+'g_szList(1)  : [은행만 사용] 개인정보필수동의_수집/이용
+'g_szList(2)  : [은행만 사용] 개인정보필수동의_조회
+'g_szList(3)  : [은행만 사용] 개인정보필수동의_업무위탁
+'g_szList(4)  : [은행만 사용] 개인정보필수동의_제공
+'g_szList(5)  : [은행만 사용] 개인정보필수동의_고유식별정보의 처리
+'g_szList(6)  : [은행만 사용] 개인정보필수동의_민감정보의 처리
+'g_szList(7)  : [은행/지점 공통] 필수정보입력_고객구분("1":내국인/"2":외국인/"3":법인)
+'g_szList(8)  : [은행/지점 공통] 필수정보입력_고객식별번호
+'g_szList(9)  : [은행/지점 공통] 필수정보입력_계좌번호
+'g_szList(10) : [은행/지점 공통] 필수정보입력_계좌비밀번호 
+'v0001 => MTS메모리평문 적용/미적용 상관없이 암호화된 정보로 넘어와야함(연계화면 변동시 확인필수!)
+'g_szList(11) : [은행/지점 공통] 필수정보입력_사용자ID
+'g_szList(12) : [은행/지점 공통] 필수정보입력_ID비밀번호
+'v0001 => MTS메모리평문 적용/미적용 상관없이 암호화된 정보로 넘어와야함(연계화면 변동시 확인필수!)
+'g_szList(13) : [지점만 사용] 보안매체종류("0":보안카드/"3":OTP)
+
+'ID비밀번호재설정 화면에서 팝업(g_nLinkGubn = 2)
+'g_szList(0) : "ChangePswd"
+'g_szList(1) : 사용자ID
+'g_szList(2) : 계좌번호
+'g_szList(3) : 신규비밀번호
+
+		
+'-----------------------------------------------------------------------
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	EditInput1.certname = "보안카드 "&Label0.caption&Label1.caption
+	EditInput2.certname = "보안카드 "&Label0.caption&Label1.caption
+
+	g_sRetData = "cancel"
+	g_nLinkGubn = 0
+	Form.SetScreenName( "보안매체 인증" )
+
+	'v0001 메모리평문적용여부(0:미적용 / 1:적용)
+	g_plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	if g_plain_rm == "1" then
+	     '화면 마스킹표시/평문데이터로 설정(컨트롤속성-일반비밀번호사용 적용필수)
+		EditInput1.SetEncExcept()
+		EditInput2.SetEncExcept()
+	end if 
+	
+	g_sSendData = Form.GetOpenLinkData()
+	g_szList = Split(g_sSendData,"★")		
+	
+	'그외 화면에서 팝업시
+	if UBOUND(g_szList) < 1 then
+		g_sUserID = Form.GetSharedData("CERT_ID" , false)
+		if g_sUserID == null or g_sUserID == "" then
+			g_sUserID = Form.GetSharedData("&USER_ID" , false)
+		end if
+
+		if g_sUserID ~= null and g_sUserID ~= "" then
+			DATAMANAGER.RequestTranData( "obcsb_oimf_520r" ) '보안매체상태조회
+		end if
+		
+	
+	else
+		'ID비밀번호 재설정 화면에서 팝업시
+		if g_szList(0) == "ChangePswd" then
+			g_nLinkGubn = 2
+			g_sUserID = g_szList(1)
+			DATAMANAGER.RequestTranData( "obcsb_oimf_520r" ) '보안매체상태조회
+		
+		'사설인증등록 화면에서 팝업시
+		elseif g_szList(0) == "MeritzAuth" then
+			g_nLinkGubn = 3
+			g_rcnoPip = Form.GetSharedData("Meritz_OTP_RCNOPIP",false)
+			DATAMANAGER.RequestTranData( "obcsb_oimf_520r" ) '보안매체상태조회
+		else '지점개설계좌ID등록 화면에서 팝업시
+			g_nLinkGubn = 1
+			'20160610 NOHES 팝업창이름 변경
+			Form.SetScreenName( g_szList(0).."개설계좌 ID등록")
+			DATAMANAGER.RequestTranData( "obcsb_oimf_520r" ) '보안매체상태조회
+		end if
+	End if
+
+	' 20230613 MOTP 분기처리 START ----------------------------------------
+	g_sMeritzAuth = Form.GetSharedData("MeritzAuth_Security", true)		'20230803 SWJ START(true로 바꿈)
+	szCONO    = Form.GetSharedData("&LOGIN_CUST_CLS_CODE", false) '1: 개인, 2: 법인	
+	if (szCONO <> "2") and g_sMeritzAuth == "MOTP" then	'20240320 법인이 아닐 경우
+		g_sSecurity = Form.GetSharedData("CommonNoSecurity", true)		'20230803 SWJ START(간편인증 외 타 업무화면 구분)
+		
+		Table1.SetCellString(4, 0, "모바일OTP 발급 >")
+		Table1.visible = True
+		Label2.visible = False
+		Label5.visible = False
+		Label7.visible = False
+		Label6.visible = False
+		ButtonPhone.visible = False
+		ButtonPhone.enable = False
+	else
+		'20201215 SWJ START : 개인고객은 라벨 및 버튼이 추가되는 화면으로 변경(휴대폰 본인인증)
+		szBtnAble = Form.GetOpenLinkData()
+		
+		if szBtnAble == "individual_check" then
+			Label7.visible = True
+			Label6.visible = True
+			ButtonPhone.visible = True
+			ButtonPhone.enable = True
+		else
+			Label7.visible = False
+			Label6.visible = False
+			ButtonPhone.visible = False
+			ButtonPhone.enable = False
+		end if
+		'20201215 SWJ END
+	end if
+	' 20230613 MOTP 분기처리 END ----------------------------------------
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mhetc90060_p5" then
+		if sRet == "ok" then
+			g_sRetData = "ok"
+			Form.CloseForm( )
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_oimf_520r" then
+		if g_nLinkGubn == 1 then	'지점개설계좌ID 화면에서 팝업시
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "INPUT_CLS" , 0 , "3" ) '계좌번호
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "ACNO" , 0 , g_szList(9) )
+	     elseif g_nLinkGubn == 3 then	'사설인증화면에서 팝업시
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "INPUT_CLS" , 0 , "2" ) 'rcno_pip
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "RCNO_PIP" , 0 , g_rcnoPip )
+	     
+		else
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "INPUT_CLS" , 0 , "1" ) '전자금융ID
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		end if
+		
+	elseif szTranID == "obcsb_simf_000r" then
+		if g_nLinkGubn == 1 then	'지점개설계좌ID 화면에서 팝업시
+			DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "INPUT_CLS" , 0 , "3" ) '계좌번호
+			DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "ACNO" , 0 , g_szList(9) )
+		elseif g_nLinkGubn == 3 then	'사설인증화면에서 팝업시
+			DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "INPUT_CLS" , 0 , "1" ) 'rcno_pip
+			DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "RCNO_PIP" , 0 , g_rcnoPip )
+		else
+			DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "INPUT_CLS" , 0 , "2" ) '전자금융ID
+			DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		end if
+		
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_IDX_NO1" , 0 , Label0.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_IDX_NO2" , 0 , Label3.caption )
+		'v0001 값은 평문으로 전송(서비스에서 해쉬암호화처리해서 체크함)
+		'MTS메모리평문적용(g_plain_rm == "1")시에는 OnFormInit()에서 평문데이터로 설정하므로 caption으로 전송가능
+	    DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_NO1" , 0 , EditInput1.caption )
+	    DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_NO2" , 0 , EditInput2.caption )	    
+	end if
+	
+	'ID등록요청
+	if szTranID == "obcsb_efif_060a" then	
+		DATAMANAGER.SetUserID("meritz")		'ID등록요청시 헤더 ID 영역에 'meritz'로 강제처리
+
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO" , 0 , g_szList(9) )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_PWD" , 0 , g_szList(10) )
+		'v0008 DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP" , 0 , g_szList(8) )  'v0002 RCNO->RCNO_PIP, mhetc90020_p5 에서 암호화된 정보로 넘어옴
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CUST_CLS_CODE" , 0 , g_szList(7) )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ELFN_ID" , 0 , g_szList(11) )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CONN_PWD" , 0 , g_szList(12) )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_oimf_520r" then
+		Dim sRSLT_CLS, sSCRC_STAT_CODE
+		
+		'결과구분 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "RSLT_CLS" , 0 )
+		'보안카드상태코드 0:정상, 1:매체사고, 2:비번오류횟수초과, 6:사용등록안됨
+		sSCRC_STAT_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "SCRC_STAT_CODE" , 0 )
+	
+		if sRSLT_CLS == "0" then '보안카드
+			if sSCRC_STAT_CODE == "0" then '정상
+				ButtonOK.enable = true
+			elseif sSCRC_STAT_CODE == "1" then '매체사고	
+				Form.MsgBox( "알림", "매체사고 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "2" then '비번오류횟수초과	
+				Form.MsgBox( "알림", "비밀번호 오류초과 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "6" then '사용등록안됨	
+				Form.MsgBox( "알림", "사용등록이 안되었습니다.", "", 6 )
+			else '그외
+				Form.MsgBox( "알림", "미지정 상태입니다.", "", 6 )
+			end if
+		end if
+		
+		EditInput1.certname = "보안카드 "..tonumber(Label0.caption).."번 앞 두자리"
+		EditInput2.certname = "보안카드 "..tonumber(Label3.caption).."번 뒤 두자리"
+	elseif szTranID == "obcsb_simf_000r" then
+		Dim sRSLT_CLS, sSCRC_PWD_MSTK_TMNU
+		
+		'결과구분 0:정상 그외에러
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_simf_000r", "OutBlock1", "RSLT_CLS" , 0 )
+		'보안카드오류횟수
+		sSCRC_PWD_MSTK_TMNU = DATAMANAGER.GetDataValue( 0, "obcsb_simf_000r", "OutBlock1", "SCRC_PWD_MSTK_TMNU" , 0 )
+		
+		if sRSLT_CLS == "0" then '정상
+			if CInt(sSCRC_PWD_MSTK_TMNU) > 5 then '에러
+				Form.MsgBox( "알림", "보안카드 입력 오류 횟수 초과입니다.", "", 6 )
+			else
+				'지점개설계좌ID등록 화면에서 팝업시
+				if g_nLinkGubn == 1 then	
+					DATAMANAGER.RequestTranData( "obcsb_efif_060a" ) 		'ID등록요청
+				
+				'v0007
+				'ID비밀번호재설정 화면에서 팝업시
+				'elseif g_nLinkGubn == 2 then	
+				'	Form.OpenFramePopup( "mhetc90060_p5" , g_sSendData , sPosInfo)	'공인인증서 인증 화면 팝업
+				
+				'그외 화면에서 팝업시
+				else							
+					g_sRetData = "ok"
+					Form.CloseForm( )
+				end if
+			end if
+		else
+			Dim sMsg, sSubMsg 
+			sMsg = DATAMANAGER.GetDataMsgText( szTranID )
+			sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+			Form.MsgBox( "알림", sMsg.." "..sSubMsg, "", 6 )
+		end if
+	end if
+	
+	'ID 등록요청
+	if szTranID == "obcsb_efif_060a" then	
+		if DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "SUCS_YN" , 0) == "Y" then
+			Form.MsgBox( "알림", "ID등록이 정상처리 되었습니다.", "close", 6 )
+		else
+			Form.MsgBox( "알림", "ID등록이 실패하였습니다. 해당 영업점 또는 고객지원센터(1588-3400)로 문의 바랍니다.", "", 6 )
+		end if
+	end if
+End Sub
+ 
+'============================================================================
+Sub ButtonOK_OnClick()
+	if (EditInput1.caption == null or EditInput1.caption == "" ) or
+		(EditInput2.caption == null or EditInput2.caption == "" ) then
+		Form.MsgBox( "알림", "보안카드 번호를 입력해주세요.", "", 6 )
+	else
+		DATAMANAGER.RequestTranData( "obcsb_simf_000r" ) '보안카드정보확인
+	end if
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()	
+	Form.SendReturnToParent( "mhetc90060_p9" , g_sRetData )
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	'메세지박스 팝업시 메세지 박스 확인 후 Form Close
+	if sKeyName == "close" then
+		g_sRetData = "ok"
+		Form.CloseForm()		'첫페이지(ID등록)로 이동
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID == "obcsb_efif_060a" then
+		'v0009 : ID 등록 시 주문내역 존재 체크 
+		if szTranID == "obcsb_efif_060a" and (szErrCode == 6049 or szErrCode == "6049") then	
+			Dim sSubMsg
+			sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+			Form.MsgBox( "알림", szErrMsg.."\n("..sSubMsg..")\n".."주문 취소 후 다시 ID등록을 진행하시기 바랍니다.", "", 6 )
+		else
+			Dim sSubMsg
+			sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+		
+			if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+				szErrMsg = szErrMsg.."("..sSubMsg..")"
+			end if
+			
+			Form.MsgBox( "알림", szErrMsg, "", 6 )
+		end if
+	end if
+End Sub
+'============================================================================
+'20201215 SWJ START
+Sub ButtonPhone_OnClick()
+	Form.SendReturnToParent("mhetc90060_ph","")
+	Form.CloseForm()
+End Sub
+'20201215 SWJ END
+
+
+'============================================================================
+Sub Table1_OnClick(lRow , lColumn)
+	
+	'모파일OTP 발급
+	if lRow == 4 then
+		Dim Meritz_OTP_RCNOPIP
+		Form.SetSharedData( "mOTP_IntoClcd"	, "MTS" )
+		Meritz_OTP_RCNOPIP = Form.GetSharedData("Meritz_OTP_RCNOPIP", false)
+		
+		'20230803 SWJ START : 쉐어드 변수 초기화 후, 다음 스텝으로 갈 때 변수 재설정 해준다
+		if g_sMeritzAuth == "MOTP" then
+			Form.SetSharedData("MeritzAuth_Security", "MOTP")
+		end if
+		
+		if g_sSecurity == "Y" then
+			Form.SetSharedData("CommonNoSecurity" , "Y")
+		end if
+		'20230803 SWJ END
+		
+		Form.SetSharedData("BDM_RCNO_PIP", Meritz_OTP_RCNOPIP)
+
+		Form.OpenNextPopup("mbotp86100", "", "")
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_520r" trcode="obcsb_oimf_520r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_simf_000r" trcode="obcsb_simf_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_efif_060a" trcode="obcsb_efif_060a" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="PROS_CLS_CODE" idx="6" defconst="2" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_520r" title="개인별보안매체상태조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="205" _ulen="157" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="614" _ulen="460" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+HTS_STPL_YN^HTS 약정 여부^1^0^0^0^0^0^0
+SCRC_STAT_CODE^보안카드 상태 코드^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT1^부가정보 확인 질문 내용1^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT2^부가정보 확인 질문 내용2^2^0^0^0^0^0^0
+ACNT_OPNG_YN^계좌 개설 여부^1^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+ELFN_ID_EXST_YN^전자금융 ID 존재 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+UI_SMRT_OTP_YN^UI스마트OTP여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_simf_000r" title="보안카드정보확인" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="540" _ulen="400" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_NO1^보안카드 번호1^68^0^0^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+SCRC_NO2^보안카드 번호2^68^0^0^0^0^0^0
+CONN_CUST_OUTS_IPAD^접속고객외부IP주소^39^0^0^0^0^0^0
+CONN_CUST_INS_IPAD^접속고객내부IP주소^39^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="118" _ulen="86" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+SCRC_PWD_MSTK_TMNU^보안카드 비밀번호 오류 횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_efif_060a" title="HTS고객등록처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="389" _ulen="293" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+CONN_PWD^접속 비밀번호^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="43" _ulen="35" >
+
+SUCS_YN^성공 여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

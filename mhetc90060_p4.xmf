@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="인증서_관리풀팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fgcolor="063:255255255" fontsize="5" caption="인증서 관리" bgcolor="064:188030030" transmode="0" halign="1" ly_vert="0,0,375,40,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_main_03" ly_vert="343,8,24,24,1" />
+		<LINKFORM name="LinkForm0" ly_vert="0,40,375,607,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2716" _ulen="2596" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_관리풀팝업
+' 03. 작    성 : 2016.01.13 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim G_CERT_LIST_FILE '인증서목록화면
+Dim G_CERT_PWCONFIRM_FILE '인증서비밀번호변경/삭제선택화면
+Dim g_nStepIndex '목록0, 비밀번호확인1
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' 단계별 화면변경
+'============================================================================
+Function SetControlChange()	
+	if g_nStepIndex == 0 then
+		LinkForm0.linkfile = G_CERT_LIST_FILE
+	elseif g_nStepIndex == 1 then
+		LinkForm0.linkfile = G_CERT_PWCONFIRM_FILE
+	else
+		LinkForm0.linkfile = ""
+	end if
+	
+	Form.triggerEvent( "LinkForm0", "TabChange", "management" )
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	G_CERT_LIST_FILE = "mhetc90060_s1"
+	G_CERT_PWCONFIRM_FILE = "mhetc90060_s5"
+	g_nStepIndex = 0
+	
+	SetControlChange()	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "NextStep" then
+		if g_nStepIndex < 1 then
+			g_nStepIndex = g_nStepIndex+1
+			
+			SetControlChange()
+		elseif g_nStepIndex == 1 then
+			Form.SendReturnToParent( "mhetc90060_p4" , sParam )
+			Form.CloseForm( )
+		end if
+	elseif sEventName == "BeforeStep" then
+		if g_nStepIndex > 0 then
+			g_nStepIndex = g_nStepIndex-1
+			
+			SetControlChange()
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("CERT_DN" , "")
+	Form.SetSharedData("CERT_INDEX" , "")
+End Sub
+
+
+
+
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

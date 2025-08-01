@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90020" scrname="인증방법선택" version="2" writer="노은솔" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,286,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="LabelTitle" fontsize="2" fontstyle="01" caption="인증방법선택" bgcolor="092:185046046" halign="1" autofontsize="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="269,14,24,24,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,241,155,45,1" />
+		<BUTTON name="btnOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="155,241,155,45,1" />
+		<CONTAINER name="Cont0" scroll_pos="0,0" ly_vert="7,55,295,180,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="4" outline="0000" designorder="1" ly_vert="0,8,295,168,1" >
+					<COL_INFO ly_vert_width="295" />
+					<ROW_INFO ly_vert_height="42,42,42,42" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" halign="0" line="0,1" impidxs="" />
+						<CELL cell_ly="0,1,0,1" halign="0" line="0,1" impidxs="" />
+						<CELL cell_ly="0,2,0,2" halign="0" line="0,1" impidxs="" />
+						<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<RADIOGROUP name="RdoCert" buttonsnumber="4" ly_vert="12,7,284,178,1" >
+					<RADIO_INFO>
+						<RADIO no="0" text=" 간편인증" position="2,2,92,42" />
+						<RADIO no="1" text=" 바이오인증" position="2,44,108,42" />
+						<RADIO no="2" text=" 뱅킹전용" position="2,86,92,42" />
+						<RADIO no="3" text=" ID인증" position="2,128,76,42" />
+					</RADIO_INFO>
+				</RADIOGROUP>
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="Cont1" scroll_pos="0,0" ly_vert="7,55,295,180,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="4" outline="0000" designorder="1" ly_vert="0,8,295,168,1" >
+					<COL_INFO ly_vert_width="295" />
+					<ROW_INFO ly_vert_height="42,42,42,42" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" halign="0" line="0,1" impidxs="" />
+						<CELL cell_ly="0,1,0,1" halign="0" line="0,1" impidxs="" />
+						<CELL cell_ly="0,2,0,2" halign="0" line="0,0" impidxs="" />
+						<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<RADIOGROUP name="RdoCert" buttonsnumber="3" ly_vert="12,7,284,178,1" >
+					<RADIO_INFO>
+						<RADIO no="0" text="간편인증" position="2,2,250,42" />
+						<RADIO no="1" text="뱅킹전용" position="2,44,250,42" />
+						<RADIO no="2" text="ID인증" position="2,86,250,42" />
+					</RADIO_INFO>
+				</RADIOGROUP>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3425" _ulen="3013" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 로그인 인증방법 선택
+' 02. 화면설명 : 인증방법 팝업
+' 03. 작    성 : 2016.11.10 NOHES 
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'Dim g_sCertLogin		'0 : ID로그인, 1 : 인증서 로그인, 2 : 간편인증 로그인, 3 : 바이오인증 로그인
+Dim g_sRet			'바이오인증 지원 여부   0:미지원 1:지원
+Dim g_bChk			'초기 선택 여부
+g_bChk = 0
+
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()
+
+	'20170111 NOHES : Android)결제원 앱 설치 상관없이 바이오인증 지원 가능 단말 여부
+	'				IOS)결제원 앱에서 판단하는 바이오인증 지원 가능 단말 여부
+	g_sRet = Form.GetKftcBioDeviceEnbl()	'바이오인증 지원 여부   0:미지원 1:지원
+	
+	'20170111 NOHES : IOS) 결제원 앱 미설치 및 비정상 시 바이오인증 지원여부 확인이 불가하므로,
+	' 무조건 전체 선택창 보여주는 방식으로 변경함
+	s_OSTYPE = Form.GetSharedData("&OS_TYPE", false ) 'iOS("2")Android("1")
+	if s_OSTYPE == "2" Then
+		g_sRet = "1"
+	end if
+	
+	if g_sRet == "1" then
+		Cont0.visible = True
+		Cont1.visible = False
+
+		if szData == NULL or szData == "" then
+			Cont0.RdoCert.currentindex = "3" 
+		else
+			Cont0.RdoCert.currentindex = szData
+		end if
+	else
+		Cont0.visible = False
+		Cont1.visible = True
+		
+		if szData == NULL or szData == "" or szData == "1" then
+			Cont1.RdoCert.currentindex = "2" 
+		elseif szData == "0" then
+			Cont1.RdoCert.currentindex = szData
+		elseif szData == "2" or szData == "3"then
+			Cont1.RdoCert.currentindex = CInt(szData)-1
+		end if
+	end if	
+	
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	Dim sTemp
+	If g_sRet == "1" Then	
+		sTemp = Cont0.RdoCert.currentindex()
+		
+		if sTemp == NULL or sTemp == "" or sTemp == "-1" then
+			Form.MsgBox( "알림", "로그인 인증방법을 선택하세요", "", 0 )
+			return
+		end if
+	else
+		sTemp = Cont1.RdoCert.currentindex()
+		if sTemp == NULL or sTemp == "" or sTemp == "-1" then
+			Form.MsgBox( "알림", "로그인 인증방법을 선택하세요", "", 0 )
+			return
+		elseif sTemp <> "0" then
+			sTemp = CInt(sTemp)+1
+		end if
+		
+	end if
+	
+	Form.SendReturnToParent("mhetc90020_pf" , sTemp )
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub Cont0_RdoCert_OnClick(nIndex)
+	if g_bChk == 0 or g_bChk == "0" Then
+		g_bChk = 1
+		return
+	end if
+	
+	call btnOK_OnClick()
+End Sub
+
+'============================================================================
+Sub Cont1_RdoCert_OnClick(nIndex)
+	if g_bChk == 0 or g_bChk == "0" Then
+		g_bChk = 1
+		return
+	end if
+
+	call btnOK_OnClick()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="서비스 이용동의 안내" version="2" writer="노은솔" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" scroll_pos="0,0" ly_vert="2,3,371,643,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<EDIT name="Edit0" imetype="1" maxlength="11" ly_vert="110,194,165,39,1" />
+				<LABEL name="Label0" fgcolor="146:124124124" caption="휴대폰번호" des="전화번호" ly_vert="10,194,85,39,1" />
+				<LABEL name="Label1" fgcolor="146:124124124" caption="인증번호" ly_vert="10,246,67,39,1" />
+				<EDIT name="Edit1" enable="0" imetype="1" maxlength="4" ly_vert="110,247,165,39,1" />
+				<BUTTON name="btnReqNo" caption="인증요청" fgcolor="012:000000000" fontsize="-3" fontstyle="01" btnimage="btn_02.9" ly_vert="281,194,69,39,1" />
+				<BUTTON name="btnConfirm" enable="0" caption="확 인" fgcolor="004:000000000" fontsize="-3" fontstyle="01" btnimage="btn_02.9" ly_vert="282,246,69,39,1" />
+				<BUTTON name="btnArsPopup" visible="0" caption="ARS 팝업요청" fgcolor="004:000000000" fontsize="-1" fontstyle="01" ly_vert="48,553,288,39,0" />
+				<LABEL name="Label2" fontsize="-1" caption="서비스 제공을 위해 고객님의 휴대폰 인증이 필요합니다." ly_vert="12,97,358,32,1" />
+				<LABEL name="Label3" fontstyle="01" caption="보이는 ARS 서비스" ly_vert="12,60,147,32,1" />
+				<LABEL name="Label4" fontsize="-1" caption="현재 이용 중인 휴대폰 번호를 입력해주세요." ly_vert="12,119,355,32,1" />
+				<LABEL name="LblTime" fontsize="-2" caption="(남은 시간: 3 분  00 초)" ly_vert="111,282,159,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5171" _ulen="4553" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 보이는 ARS 인증 샘플
+' 02. 화면설명 : 전화번호 인증요청, 전화번호 및 인증번호 확인
+' 03. 작    성 : 
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Container0.Edit0.SetShowKeypad(true)
+End Sub
+
+'============================================================================
+' 필수항목 체크 
+'============================================================================
+Function CheckData()
+	CheckData = "0" 
+		
+	if Trim(Container0.Edit0.caption) == "" then
+		ShowAlert("오류", "휴대폰번호를 입력해주시기 바랍니다.")
+		CheckData = "0"
+		exit function  
+	elseif LEN(Trim(Container0.Edit0.caption)) < 10 then
+		ShowAlert("오류", "올바른 휴대폰번호를 입력해주시기 바랍니다.")
+		CheckData = "0"
+		exit function  
+	end if
+	
+	CheckData = "1" 
+	
+end Function
+'============================================================================
+' 휴대폰 인증번호 요청 
+'============================================================================
+Sub Container0_btnReqNo_OnClick()
+	Container0.Edit1.enable = true
+	Container0.Edit1.caption = ""	'기존 인증번호 Clear
+	
+	rtn = CheckData()		'필수항목체크
+	
+	if rtn == "1" then
+		'콜게이트 휴대폰인증 요청
+		Dim sPhoneNo
+		sPhoneNo = Container0.Edit0.caption
+		Form.requestAuthCodeForMDN(sPhoneNo)
+		
+		
+		InitCountTimer()							'타이머 초기화
+		
+		Form.SetTimerEvent(2, 1, 1)
+		
+		Container0.Edit1.enable = true
+		Container0.btnConfirm.visible = true
+		Container0.btnConfirm.enable = true
+		ShowAlert("인증번호가 정상적으로 발송 되었습니다.")
+		Container0.Edit1.SetShowKeypad(true)
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_btnArsPopup_OnClick()
+	Form.RequestCommand("CALLGATE_POPUP", "", "")
+End Sub
+
+'============================================================================
+Sub Container0_btnConfirm_OnClick()
+	Dim sPhoneNo, sCertNo
+	sPhoneNo = Container0.Edit0.caption
+	sCertNo = Container0.Edit1.caption
+	
+	if LEN(sCertNo) < 4 then
+		ShowAlert("오류", "4자리의 인증번호를 입력해주시기 바랍니다.")
+	else 
+		Form.requestAuthorizationForMDN(sPhoneNo, sCertNo)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEventArs(sEventName, sParam)
+	if sEventName = "CALLGATE_ARS" then
+		if sParam = "0" then
+			Form.ShowAlert("알림","보이는 ARS 인증성공")		
+			Form.CloseForm()
+		else
+			Form.ShowAlert("ARS 인증실패", sParam)
+		end if
+	end if
+End Sub
+'============================================================================
+' 인증번호 만료기간 3분 타이머 초기화 
+'============================================================================
+Sub InitCountTimer()
+	Container0.LblTime.caption	= "(남은 시간: 3 분  00 초)"
+	
+	g_HPSec = 180
+	Form.SetTimerEvent(2, 0, 1)	'3분타이머 종료
+End Sub
+'============================================================================
+' 본인인증용 타이머 
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+
+	if sTimerID == 0 or sTimerID == "0" then 
+		Form.SetTimerEvent(0, 0, 1)
+		g_nCnt = g_nCnt + 1
+		
+		if g_nCnt > 10 then
+			Form.ShowAlert("오류", "본인인증에 실패하였습니다. 다시 시도하여 주시기 바랍니다.")
+			exit sub 
+		end if 
+		
+		'DATAMANAGER.RequestTranData "obcsb_oimf_634a"	
+		
+	elseif sTimerID == 1 or sTimerID == "1" then
+		Form.SetTimerEvent(1, 0, 1)
+		g_nCnt = g_nCnt+1
+		
+		if g_nCnt > 10 then
+			'20160509 LKM START
+			Form.ShowAlert("오류", "SMS 검증요청이 실패하였습니다.\n잠시 후 다시 시도해 주십시오.")
+			Edit1.caption	= ""
+			Call InitCountTimer()		'3분 타이머 초기화	
+			'20160509 LKM END
+			exit sub 
+		end if
+
+		'DATAMANAGER.RequestTranData "obcsb_oimf_635r"
+	
+	'휴대폰3분 만료 
+	elseif sTimerID == 2 or sTimerID == "2" then
+		
+		if g_HPSec ==  0 then
+			Form.SetTimerEvent(2, 0, 1)
+			Call InitCountTimer()					'3분 타이머 초기화
+			Form.ShowAlert("오류", "인증시간이 만료되었습니다. \n다시 시도하여 주시기 바랍니다.")
+			
+			Container0.Edit1.enable = false
+			Container0.Edit1.caption = ""
+			Container0.btnConfirm.enable = false		
+			Container0.btnConfirm.visible = false	
+			
+		else
+			Dim nMin, nSec
+			nMin  = int(g_HPSec / 60 )
+			nSec  =  g_HPSec mod  60
+			if len(nSec) == 1 then 
+				nSec = "0"..nSec
+				nSec = nSec
+			end if 	
+			Container0.LblTime.caption = "(남은 시간: "..nMin.." 분  "..nSec.." 초)"
+			g_HPSec = g_HPSec-1		
+		end if
+	
+	end if 
+		
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

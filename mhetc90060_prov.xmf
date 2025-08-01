@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90060" scrname="이용약관 동의" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label1" fgcolor="095:000000000" fontsize="-1" fontstyle="01" caption="인증서비스 이용약관 확인 및 동의" ly_vert="11,5,333,32,1" />
+		<WEBVIEW name="WebView1" urlpath="about:blank" ly_vert="18,42,339,126,1" />
+		<LABEL name="Label3" fgcolor="095:000000000" fontsize="-1" fontstyle="01" caption="개인정보 수집 및 이용 동의" ly_vert="11,176,264,32,1" />
+		<WEBVIEW name="WebView2" urlpath="about:blank" ly_vert="18,215,339,126,1" />
+		<LABEL name="Label5" fgcolor="095:000000000" fontsize="-1" fontstyle="01" caption="개인정보 제3자 제공에 대한 동의" ly_vert="11,358,254,32,1" />
+		<WEBVIEW name="WebView3" urlpath="about:blank" ly_vert="18,397,339,126,1" />
+		<LABEL name="Label6" border="1" bordercolor="178:222222222" ly_vert="16,39,342,132,1" />
+		<LABEL name="Label7" border="1" bordercolor="178:222222222" ly_vert="16,212,342,132,1" />
+		<LABEL name="Label8" border="1" bordercolor="178:222222222" ly_vert="16,395,342,132,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+		<BUTTON name="ButtonOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1660" _ulen="1508" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 인증서
+' 02. 화면설명 : 인증서_발급(이용약관팝업)
+' 03. 작    성 : 2020.12.11 성우진
+'-------------------------------------------------------------------------------------------
+'============================================================================
+Sub Form_OnFormInit()
+
+	sMode = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+	
+	'운영
+	if sMode == "0" then
+		WebView1.urlpath = "https://home.imeritz.com/comm/ctcn/signkorea01.html"
+		WebView2.urlpath = "https://home.imeritz.com/comm/ctcn/signkorea02.html"
+		WebView3.urlpath = "https://home.imeritz.com/comm/ctcn/signkorea03.html"
+	
+	'테스트
+	elseif sMode == "1" then
+		WebView1.urlpath = "https://testhome.imeritz.com/comm/ctcn/signkorea01.html"
+		WebView2.urlpath = "https://testhome.imeritz.com/comm/ctcn/signkorea02.html"
+		WebView3.urlpath = "https://testhome.imeritz.com/comm/ctcn/signkorea03.html"	
+	end if
+	
+	
+	
+	
+End Sub
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub ButtonOK_OnClick()
+	Form.SendReturnToParent("AllAgree","")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'팝업을 닫고 약관동의 화면으로 갔을 때 
+	'모두동의 이미지가 활성화안돼서 활성화시키기 위함
+	Form.SendReturnToParent("BtnEnable","")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

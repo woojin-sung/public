@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90022" scrname="로그인NEW" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image10" autosize="1" imgpath="input_01_n.9" ly_vert="640,514,150,40,1" />
+		<IMAGE name="Image9" autosize="1" imgpath="input_01_n.9" ly_vert="586,113,150,40,1" />
+		<IMAGE name="Image8" autosize="1" imgpath="input_01_n.9" ly_vert="418,113,150,40,1" />
+		<IMAGE name="Image2" autosize="1" imgpath="input_01_n.9" ly_vert="472,514,150,40,1" />
+		<IMAGE name="Image6" autosize="1" imgpath="bg_infobox_n.9" ly_vert="20,148,335,120,1" />
+		<LABEL name="Label0" fgcolor="334:034034034" fontstyle="01" caption="신규 계좌개설하기" ly_vert="95,170,247,40,1" />
+		<LABEL name="Label1" fgcolor="321:115118124" fontsize="-2" caption="메리츠증권이 처음이신 고객님!" ly_vert="95,193,244,35,1" />
+		<IMAGE name="ImageAcctOpen" autosize="1" imgpath="icon_account_01" ly_vert="49,189,40,40,1" />
+		<IMAGE name="Image3" imgpath="icon_request" ly_vert="445,123,20,20,1" />
+		<LABEL name="Label4" fontstyle="01" caption="업무신청" click="1" ly_vert="468,117,74,32,1" />
+		<LABEL name="Label5" fontstyle="01" caption="진행상태확인" click="1" ly_vert="622,117,100,32,1" />
+		<IMAGE name="Image4" imgpath="icon_progress" ly_vert="600,123,20,20,1" />
+		<LABEL name="Label6" fontstyle="01" caption="ID관리" click="1" ly_vert="522,519,70,32,1" />
+		<IMAGE name="Image7" autosize="1" imgpath="bg_infobox_n.9" ly_vert="20,273,335,120,1" />
+		<LABEL name="Label2" fgcolor="334:034034034" fontstyle="01" caption="바로 로그인하기" ly_vert="95,306,158,35,1" />
+		<LABEL name="Label3" fgcolor="321:115118124" fontsize="-2" caption="MTS거래를 위해 로그인하세요." ly_vert="95,328,208,35,1" />
+		<IMAGE name="ImageLoginSelect" autosize="1" imgpath="icon_account_02" ly_vert="49,314,40,40,1" />
+		<BUTTON name="ButtonIDmanager" visible="0" btnimage="input_01_n.9" ly_vert="431,527,150,40,0" />
+		<BUTTON name="ButtonBsnsReq" btnimage="alpha" ly_vert="464,272,150,40,1" />
+		<BUTTON name="ButtonBsnsQuery" btnimage="alpha" ly_vert="442,191,150,40,1" />
+		<IMAGE name="ImageClose" visible="0" imgpath="icon_close" ly_vert="334,21,22,22,0" />
+		<IMAGE name="Image1" enable="0" visible="0" autosize="1" imgpath="input_01_n.9" ly_vert="28,426,318,40,0" />
+		<IMAGE name="imgLogo" enable="0" visible="0" autosize="1" imgpath="bank090" ly_vert="45,435,20,20,0" />
+		<LABEL name="Label7" visible="0" fontsize="-1" caption="카카오뱅크 고객님 거래 시작하기" ly_vert="65,428,288,35,0" />
+		<LABEL name="Label8" fontstyle="01" caption="인증센터" click="1" ly_vert="676,518,100,32,1" />
+		<BUTTON name="ButtonKeyQuery" visible="0" btnimage="alpha" ly_vert="599,527,150,40,0" />
+		<LABEL name="LblInfo0" fgcolor="334:034034034" fontsize="3" fontstyle="01" caption="메리츠증권" ly_vert="22,60,229,35,1" />
+		<LABEL name="LblInfo2" fgcolor="334:034034034" fontsize="3" fontstyle="01" caption="이신가요?" ly_vert="58,80,157,35,1" />
+		<LABEL name="LblInfo1" fgcolor="334:034034034" fontsize="3" fontstyle="01" caption="처음" ly_vert="21,80,49,35,1" />
+		<LABEL name="Label9" fgcolor="321:115118124" fontsize="-2" caption="쉽고, 간편하게 계좌를 개설하세요." ly_vert="95,209,265,35,1" />
+		<LABEL name="lblApply" fgcolor="071:107107107" fontsize="-1" fontstyle="01" caption="업무신청" bgcolor="320:246247248" transmode="0" halign="1" click="1" ly_vert="21,546,116,44,1" />
+		<LABEL name="lblAuth" fgcolor="071:107107107" fontsize="-1" fontstyle="01" caption="인증/OTP" bgcolor="320:246247248" transmode="0" halign="1" click="1" ly_vert="238,546,111,44,1" />
+		<LABEL name="lblID" fgcolor="071:107107107" fontsize="-1" fontstyle="01" caption="ID관리" bgcolor="320:246247248" transmode="0" halign="1" click="1" ly_vert="131,546,112,44,1" />
+		<LABEL name="Label10" fgcolor="347:217217217" bgcolor="347:217217217" transmode="0" ly_vert="133,560,1,15,1" />
+		<LABEL name="Label11" bgcolor="017:216216216" transmode="0" ly_vert="241,560,1,15,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8281" _ulen="7425" >
+'20220805_01 KBC : 로그인개선
+'20230404 v001 비대면화면 변경
+'============================================================================
+Sub Form_OnFormInit()
+	'20240405_01 HWG START : 간편인증 등록 오류현상 임시조치 
+	'삼성단말 ONE UI 6.0(OS14) - 
+	szOSType = Form.GetSharedData("&OS_TYPE", false)
+	szOSVer  = Form.GetSharedData("&OS_VERSION", false)
+	
+	' 안드로이드 OS14 한정 
+	if szOSType = "1" and Cint(szOSVer) > 13 then
+	
+		szConfUserID = Form.GetEnvData("login.input.userid")
+		
+		' ConfigUtil에 저장된 ID값 이 없는 경우(최초설치&미로그인 상태만 해당)
+		if szConfUserID = "" then
+			isBackground = Form.getEnvData("common.background_run")
+			
+			' 백그라운드 기능을 실행하지 않은 상태 확인
+			if isBackground = "0" then
+				Form.SetEnvData(1, "ROLLBACK_BACKGROUND_RUN", "1")
+				Form.SetEnvData(1, "common.background_run", "1")
+				Form.SendMessageToMain("BACKGROUND_RUN", "", "")
+			end if
+		end if
+	end if
+	'20240405_01 HWG END 
+	
+	'20230612 KBC START : 앱설치하고 
+	'                     "메리츠증권 처음이신가요? 시작화면에서 인증/OTP->OTP관리 실행화면 진행이 안되는 문제
+	'                     기본 로그인타입을 메리츠 간편인증으로 지정함
+	DEF_TAB_ATON	= "8"	'아톤인증
+	
+	szTab = Form.GetEnvData("login.input.savetab")
+		
+	if Trim(szTab) == "" then
+		'로그인 방식 미선택시
+		Form.SetEnvData(1, "login.input.savetab", DEF_TAB_ATON)
+	end if
+	'20230612 KBC END	
+	
+	g_sMockDealCheck = Form.GetEnvData("login.input.mockdeal")
+	
+	if g_sMockDealCheck == "1" then
+		Form.SetSharedData("&SCREEN_AUTH" , "")
+		Form.OpenNextPopup("mhetc90021" , "" , "")
+	end if
+	
+	UserID = Form.GetSharedData("&USER_ID", false)
+	
+	if UserID <> "" and UserID <> null then
+		ImageClose.visible = true
+	end if
+	
+	'20230524 SWJ START
+	LblInfo1.setHighlight(332)
+	LblInfo2.setNeighborCtlPos("LblInfo1", "left", -3,"")
+	'20230524 SWJ END
+End Sub
+
+'============================================================================
+'Sub Form_OnTimerEvent(sTimerID)
+'	Form.SetTimerEvent2(1, 0, 0.1)
+'	Form.SetSharedData("&SCREEN_AUTH" , "")
+'	Form.OpenNextPopup("mhetc90021" , "mhetc90022" , "")	
+'End Sub
+
+'============================================================================
+' 계좌개설
+'============================================================================
+Sub ImageAcctOpen_OnClick()
+	
+	'무조건 로그아웃 시켜야함
+	'인증/OTP 화면에 로그인하고 들어가는 화면들이 생겨서
+	'본 화면에 진입할 수 있는 케이스가 생김
+	'이 상태에서 계좌개설 등 진행하면 'ID를 확인하세요' 오류남
+	if  Form.GetSharedData("&USER_ID", false) <> "" and Cint(Form.GetSharedData("&LOGIN_TYPE", false )) > 1 then
+		Form.logout(0, 1)
+	end if
+	
+	Form.SetSharedData("&SCREEN_AUTH" , "99")
+	'v001
+	Form.OpenPopup("mbbdm85100" , "" , "")
+	'Form.OpenPopup("mbbdm86100" , "" , "")
+End Sub
+
+'============================================================================
+' 로그인 방식선택
+'============================================================================
+Sub ImageLoginSelect_OnClick()
+	
+	'Form.SetTimerEvent2(1, 1, 0.1)
+	Form.SetSharedData("&SCREEN_AUTH" , "")
+	
+	'KBC : 로그인화면 실행 시 90022화면이 종료되어야 함. OpenScreen은 iOS에서 로그인이 안닫히는 현상으로 OpenNextPopup을 사용 'Form.OpenScreen("90020" , "90022") '앱수정, 같이 배포해야 함 : OpenScreen, 90020을 오픈할때는 2번 오픈되는것 방지 	
+	Form.OpenNextPopup("mhetc90021" , "mhetc90022" , "")
+End Sub
+
+'============================================================================
+'20230524 SWJ START
+'============================================================================
+' ID관리
+'============================================================================
+Sub lblID_OnClick()
+
+	'무조건 로그아웃 시켜야함
+	if  Form.GetSharedData("&USER_ID", false) <> "" and Cint(Form.GetSharedData("&LOGIN_TYPE", false )) > 1 then
+		Form.logout(0, 1)
+	end if
+	
+	if g_sMockDealCheck == "1" then
+		Form.SetSharedData("&SCREEN_NO" , "00012")		
+		Form.OpenFramePopup("mhtrd00010.xmf" , "" , 0) 'mhtrd00010.xmf : 모의투자 웹링크화면 (모의투자 참가신청/취소)
+		exit sub
+	end if
+	
+	Form.SetSharedData("&SCREEN_AUTH","")
+	Form.OpenPopup("mhetc90020_p2" , "" , "")	
+End Sub
+
+'============================================================================
+' 업무신청
+'============================================================================
+Sub lblApply_OnClick()
+
+	'무조건 로그아웃 시켜야함
+	if  Form.GetSharedData("&USER_ID", false) <> "" and Cint(Form.GetSharedData("&LOGIN_TYPE", false )) > 1 then
+		Form.logout(0, 1)
+	end if
+	
+	Form.SetSharedData("&SCREEN_AUTH" , "99")
+	
+	'20230608 SWJ START : 맵파일 변경
+	'Form.OpenPopup("mhetc90023" , "" , "")
+	Form.OpenPopup( "mbbdm85200" , "" , "")
+	'20230608 SWJ END
+End Sub
+
+'============================================================================
+' 진행상태확인
+'============================================================================
+Sub ButtonBsnsQuery_OnClick()
+	Form.SetSharedData("&SCREEN_AUTH" , "99")
+	Form.SetSharedData("BDM_CONNECTING"  , "1"   ) 	'v001
+	Form.SetSharedData("BDM_NMETBSWRGB", "999")
+	
+	'v001
+	'Form.OpenPopup("mbbdm85110" , "" , "")
+	'Form.OpenPopup("mbbdm85183" , "" , "")
+	Form.OpenPopup("mbbdm86130" , "" , "")
+End Sub
+'============================================================================
+' 인증센터
+'============================================================================
+Sub LblAuth_OnClick()
+	'무조건 로그아웃 시켜야함
+	if  Form.GetSharedData("&USER_ID", false) <> "" and Cint(Form.GetSharedData("&LOGIN_TYPE", false )) > 1 then
+		Form.logout(0, 1)
+	end if
+	
+	Form.SetSharedData("&SCREEN_AUTH" , "99")
+	'Form.OpenPopup("mhetc90120" , "1" , "")
+	
+	'Form.SetSharedData("&SCREEN_AUTH","")
+	Form.OpenPopup("mhetc90120" , "1" , "")	
+End Sub
+
+'============================================================================
+Sub ImageClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'Sub Form_OnPopupReturn(sKeyName, sRet)
+'	if sKeyName == "mhetc90021" then
+'		if sRet == "close" then
+'			Form.CloseForm()
+'		end if
+'	end if	
+'End Sub
+'
+'============================================================================
+'계좌개설 테두리
+Sub Image6_OnClick()
+	ImageAcctOpen_OnClick()
+End Sub
+
+'============================================================================
+'로그인 테두리
+Sub Image7_OnClick()
+	ImageLoginSelect_OnClick()
+End Sub
+
+'============================================================================
+'카카오뱅크 테두리
+Sub Image1_OnClick()	
+	Form.SetSharedData("&SCREEN_AUTH" , "")	
+	'Form.OpenPopup("mbact73000" , "" , "")	
+	Form.OpenNextPopup("mbact73000" , "" , "")	
+End Sub
+
+'============================================================================
+'ID관리
+Sub Label6_OnClick()
+	ButtonIDmanager_OnClick()
+End Sub
+
+'============================================================================
+'업무신청
+Sub Label4_OnClick()
+	ButtonBsnsReq_OnClick()
+End Sub
+
+'============================================================================
+'진행상태확인
+Sub Label5_OnClick()
+	ButtonBsnsQuery_OnClick()
+End Sub
+
+'============================================================================
+'20221006 HSZ START
+'비대면계좌개설-바이오인증 등록 후 로그인
+Sub Form_OnLinkData(sKey, sValue)
+	szChk = Form.GetSharedData("BDM_BIOREG", false )
+	
+	if szChk == "Y" then
+'		Form.ShowAlert(sKey, sValue)
+		if sKey == "&LOGIN_AUTH" and CInt(sValue) == 3 then
+			Form.CloseForm()
+		end if
+	end if
+	
+	'간편인증 등록 후 창 닫기 위한 조치
+	szChk2 = Form.GetSharedData("ATON_Regi", true )
+	
+	if szChk2 == "Y" then
+'		if sKey == "&LOGIN_AUTH" then
+'			Form.CloseForm()
+'		end if
+		
+		if sKey == "&ATON_Regi" then
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+'20221006 HSZ END
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgLogo.setMaintainingRatio("1")
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

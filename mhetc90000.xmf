@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90000" scrname="환경설정" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" fontstyle="01" tabcount="4" tabwidthtype="1" tabheadheight="38" ly_vert="0,0,375,562,1" >
+			<PAGE name="page0" caption="공통" linkfile="mhetc90000_t1" loadingtype="1" />
+			<PAGE name="page1" caption="주문" linkfile="mhetc90000_t2" loadingtype="1" />
+			<PAGE name="page2" caption="알림" linkfile="mhetc90000_t3" loadingtype="1" />
+			<PAGE name="page4" caption="개인" linkfile="mhetc90000_t5" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2088" _ulen="1988" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 환경설정
+' 02. 화면설명 : 환경설정
+' 03. 작    성 : 2016.02.16 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData
+	szData = Form.GetOpenLinkData()
+	
+	If Trim(szData) <> "" Then
+		'20240806 HSZ START: 알림톡 링크 추가
+		if Instr(szData, "기타★") > 0 then
+			szAryData = Split(szData, "★")
+			szData = szAryData(2)
+		end if
+		'20240806 HSZ END
+		
+		FormTab0.currenttab = szData
+	End If
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendMessageToMain("CONFIG_CHANGE", "", "")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEventArs(sEventName, sParam)
+			
+	if sEventName = "CALLGATE_ARS" then
+		if sParam = "0" then
+			if FormTab0.currenttab = 0 or FormTab0.currenttab = "0" then
+				Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "CALLGATE_RETURN", "0")
+			end if
+			'PENTA13 START => 2019.12.09	GetEnvData 받아서 허용인지 아닌지 여부 받아서 다시 셋팅
+			'GetConfigData(g_sViewARSKey, 13, 1)			
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
