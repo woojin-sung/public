@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="15000" scrname="잔고평가" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" itemcodetype="100,102,105,107,108,112,119,131,132,138,139,140,200" etcfunctions="" delegate="1" ly_vert="10,9,310,39,1" />
+		<BUTTON name="btnSearch" visible="0" btnimage="btn_refresh.9" ly_vert="326,9,39,39,0" />
+		<FORMTAB name="fmtab0" currenttab="2" tabcount="6" tabheadwidth="68" tabheadheight="40" autosave="1" ly_vert="1,54,375,509,1" >
+			<PAGE name="page008561" caption="잔고" linkfile="mbtrs15000_t11" loadingtype="1" />
+			<PAGE name="page004795" caption="예수금" linkfile="mbact71000" loadingtype="1" />
+			<PAGE name="page008634" caption="매매일지" linkfile="mbtrs15000_t3" loadingtype="1" />
+			<PAGE name="page009371" caption="주문체결" linkfile="mbtrs12040" loadingtype="1" />
+			<PAGE name="page006973" caption="담보상세" linkfile="mbtrs15000_t2" loadingtype="1" />
+			<PAGE name="page002337" caption="일별체결" linkfile="mbtrs12050" loadingtype="1" />
+		</FORMTAB>
+		<ACCOUNT name="acnt1" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,136,137,138,139,140,200" etcfunctions="" delegate="1" ly_vert="10,9,310,39,1" />
+		<BUTTON name="btnMy" caption="MY
+자산" fgcolor="146:124124124" fontsize="-2" btnimage="btn_line.9" ly_vert="326,9,39,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10811" _ulen="9817" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 잔고평가
+' 02. 화면설명 : 주식잔고평가
+' 03. 작    성 : 2016.04.30 LJS
+'                2018.11.12. 장원혁 : v0001 : 선물옵션 계좌 선택시 선물옵션 예수금 상세조회 화면으로 고객 유도
+'                2022.03.23. 장원혁 : v0002 : 예수금 메뉴로 진입 시 예금자보호 안내 문구 추가
+'                2023.04.21. 홍수지 : 가로화면 모드 세팅 삭제 (Form.SetRotateEnable("1"))
+'                2023.11.16  김인택 : v0004 : 계좌콤보에 계좌가 있는 경우만 조회  
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim g_szACNO, g_szASNO, g_szItemCode
+Dim g_nSNSType '1 카카오톡 , 2 카카오톡 화면 공유 , 3 트위터 , 4페이스북
+Dim g_szLastTab
+Dim g_szTitle
+g_szTitle = "알림"
+g_szLastTab = 0
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+Function Account_Check()
+	If tbl0.GetCellString(1, 1) = "" Or tbl0.GetCellString(1, 1) = "0" Or tbl0.GetCellString(1, 1) = 0 Then
+		Form.ShowAlert(g_szTitle, "조회를 먼저 하셔야 합니다.")
+		Return False
+	End If
+
+	Return true
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	Dim szScreenNo, szTab
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+	
+	'2016.03.05 YCJ 수정 (예수금탭이 포함됨에 따라 계좌컨트롤 추가)
+	acnt0.visible = true
+	acnt1.visible = false
+	
+	szTab = Form.GetOpenLinkData()
+	
+	If ( szTab = "" Or szTab = null ) And (fmtab0.currenttab <> 0 and fmtab0.currenttab <> "0") Then
+		szTab = fmtab0.currenttab
+	End If
+
+	If Trim(szTab) <> "" Then
+		fmtab0.currenttab = szTab
+		fmtab0_OnTabChanged( CInt(szTab) )
+	Else	
+		If szScreenNo = "15000" Then		'잔고평가
+			fmtab0.currenttab = "0"
+			
+		ElseIf szScreenNo = "71000" Then	'예수금
+			acnt1.visible = true
+			acnt0.visible = false
+			fmtab0.currenttab = "1"
+		'20230626 htw start 주문체결 탭 추가 + 순서 변경
+		ElseIf szScreenNo = "12040" Then	'주문체결
+			fmtab0.currenttab = "3"
+		ElseIf szScreenNo = "15030" Then	'담보
+			fmtab0.currenttab = "4"
+		'20230621 htw start 매매일지 추가
+		ElseIf szScreenNo = "12040" Then	'일별체결
+			fmtab0.currenttab = "5"
+		'20230626 htw end 주문체결 탭 추가 + 순서 변경
+		ElseIf szScreenNo = "15020" Then	'매매일지
+			fmtab0.currenttab = "2"
+		'20230621 htw end 매매일지 추가
+		Else
+			fmtab0.currenttab = "0"
+		End If
+	End If
+	f_SetBtn()
+	
+	'v0004
+	if szScreenNo = "71000"  then
+	    if acnt1.total <> "" and acnt1.total <> null then
+		    Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+	    end if
+	else
+	    if acnt0.total <> "" and acnt0.total <> null then
+		    Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+	    end if
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	'Dim szData	
+	'szData = chk1.checkstate & "|" & chk2.checkstate
+
+	If sEventName = "CHANGE_ORIENTATION" Then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ORIENTATION", "")
+		
+'		Form.OpenPopup( "mbtrs15000_h0" , szData , "" )
+
+	ElseIf sEventName = "SCREEN_MENU" Then
+		
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns1" , "", "")
+		end if
+		
+        If Trim(sParam) == "CAUTION_CALL" Then 'v0002
+            Form.OpenPopup("mbtrs15000_p4.xmf" , "" , "")
+        End If		
+		
+		'20230711 htw start 유의사항
+		If Trim(sParam) == "INFO" Then 'v0002
+			Form.OpenFramePopup("mbtrs15000_p5" , "" , "")
+		end if
+		'20230711 htw end 유의사항
+	End If
+
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	if CInt(fmtab0.currenttab) == 0 then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "REFRESH", "")
+	else
+		'v0004
+		if szScreenNo = "71000"  then
+		    if acnt1.total <> "" and acnt1.total <> null then
+			    Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+		    end if
+		else
+		    if acnt0.total <> "" and acnt0.total <> null then
+			    Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+		    end if
+		end if
+		'Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	If sKeyName = "mbtrs15000" Then
+		Dim arrData
+	
+		arrData = Split(sRet,"|")
+		
+		if UBOUND(arrData) < 1 then
+		    Exit sub
+		End if
+		
+		chk1.checkstate = CInt( arrData(0) )
+		chk2.checkstate = CInt( arrData(1) )
+		
+		If chk1.checkstate = "1" Then
+			DATAMANAGER.RequestTranData( "obtrs_comn_329r" )
+		Else
+			DATAMANAGER.RequestTranData( "obtrs_comn_310r" )
+		End If
+		
+	ElseIf sKeyName = "MOVEPOP_RETURN"	then
+		Dim szListItems
+		szListItems	=	split(sRet,"★")
+		
+		if	szListItems(1)	=	"0"	then			'현재가
+			Form.OpenScreen("11000" , g_szItemCode & "★" & "0") 
+		elseif 	szListItems(1)	=	"1"	then		'매수
+			Form.OpenScreen("12000" , g_szItemCode & "★" & "0") 
+		elseif 	szListItems(1)	=	"2"	then		'매도
+			Form.OpenScreen("12000" , g_szItemCode & "★" & "1") 
+		else
+		end if
+		
+	elseif sKeyName = "snsshare" Then			' 폼탭 초기화
+		g_nSNSType = Cint(sRet)
+		
+		If g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+			
+		End If		
+	end if 
+	
+End Sub
+
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+
+    'v0004
+    if szScreenNo = "71000"  then
+	    if acnt1.total <> "" and acnt1.total <> null then
+		    Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ACCTNO", "")
+	    end if
+	else
+	    if acnt0.total <> "" and acnt0.total <> null then
+		    Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ACCTNO", "")
+	    end if
+	end if
+	'Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ACCTNO", "")
+	
+End Sub
+
+'============================================================================
+'2016.03.05 YCJ 수정 (예수금탭이 포함됨에 따라 계좌컨트롤 추가)
+Sub acnt1_ChangeAccount()
+	
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ACCTNO", "")
+	
+	if acnt1.itemcodetype == "101" then 'v0001
+		
+		Form.MsgBox("알림", "선택하신 계좌는 '선물옵션'계좌입니다. 해당 계좌는 '선물옵션 예탁금상세조회' 화면을 이용하시기 바랍니다.", "yesno", 1)
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	f_SetBtn()
+	'2016.03.05 YCJ 수정 (예수금탭이 포함됨에 따라 계좌컨트롤 추가)
+	acnt0.visible = true
+	acnt1.visible = false
+
+	'2016.03.22 HWM 수정 (계좌컨트롤 탭이동시 선택 동기화 추가)
+	if g_szLastTab <> nCurrentTab then
+		if nCurrentTab == 1 then
+			acnt1.caption = acnt0.caption
+		else
+			if g_szLastTab == 1 then
+				acnt0.caption = acnt1.caption
+			end if
+		end if
+	End if
+	
+	If nCurrentTab = 0 Then		'잔고평가
+		Form.setTitleCaption( "국내주식 잔고" )
+		
+	ElseIf nCurrentTab = 1 Then		'예수금
+		acnt1.visible = true
+		acnt0.visible = false
+		Form.setTitleCaption( "예수금" )
+		
+		if acnt1.itemcodetype == "101" then 'v0001
+		
+			Form.MsgBox("알림", "선택하신 계좌는 '선물옵션'계좌입니다. 해당 계좌는 '선물옵션 예탁금상세조회' 화면을 이용하시기 바랍니다.", "yesno", 1)
+		
+		end if
+	
+'	ElseIf nCurrentTab = 2 Then		'주문체결
+'		Form.setTitleCaption( "주문체결" )
+	ElseIf nCurrentTab = 2 Then		'매매일지
+		Form.setTitleCaption( "매매일지(실현손익)" )
+	
+	ElseIf nCurrentTab = 3 Then		'주문체결
+		Form.setTitleCaption( "주문체결" )
+	ElseIf nCurrentTab = 4 Then		'담보상세
+		Form.setTitleCaption( "담보상세" )
+	ElseIf nCurrentTab = 5 Then		'일별체결
+		Form.setTitleCaption( "일별체결" )
+	End If
+	
+	g_szLastTab = nCurrentTab
+	
+	
+	'v0004
+	if szScreenNo = "71000"  then
+	    if acnt1.total <> "" and acnt1.total <> null then
+		    Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+	    end if
+	else
+	    if acnt0.total <> "" and acnt0.total <> null then
+		    Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+	    end if
+	end if
+	'Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	btnSearch_OnClick()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+'	Dim szPopup, strScrNo
+'	szPopup = Form.LoadConfigData( "mbtrs15000", "mbtrs15000_p2" )
+'	strScrNo = Form.GetSharedData("&SCREEN_NO", false )	'화면번호 
+'	if strScrNo = "15000" then	'예수금화면일때 코치마크 출력되는 현상 수정
+'		If szPopup <> "1" Then
+'			Form.OpenPopup( "mbtrs15000_p2", "" , "")
+'		End If	
+'	end if
+	
+End Sub
+'============================================================================
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet) 'v0001
+
+	if sKeyName == "yesno" then
+	
+		if sRet == "ok" then
+		
+			Form.OpenScreen( "72040" , "")	'선옵예탁금
+		
+		end if
+	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub btnMy_OnClick()
+	'20230728 htw start 잔고탭에서 버튼 클릭 시 마이자산현황화면으로 이동
+	Form.OpenScreen("71052","")
+End Sub
+
+function f_SetBtn()
+	if CInt(fmtab0.currenttab) == 0 then
+		btnMy.visible = true
+		btnSearch.visible = false
+	else
+		btnMy.visible = false
+		btnSearch.visible = true
+	end if
+end function
+
+	</SCRIPT_INFO>
+</ROOT>

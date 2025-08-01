@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="15020" scrname="매매일지" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" itemcodetype="100,102,105,107,108,112,131,132,138,139,140,200" delegate="1" finaceexcept="1" benefitexcept="1" ly_vert="10,9,310,39,1" />
+		<FORMTAB name="fmtab0" tabcount="3" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,54,375,509,1" >
+			<PAGE name="page008561" caption="기간별" linkfile="mbtrs15020_t1" loadingtype="1" />
+			<PAGE name="page004795" caption="종목별" linkfile="mbtrs15020_t2" loadingtype="1" />
+			<PAGE name="page008634" caption="일별수익률" linkfile="mbtrs15020_t3" loadingtype="1" />
+		</FORMTAB>
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,9,39,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2477" _ulen="2387" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 매매일지
+' 02. 화면설명 : 매매일지 메인
+' 03. 작    성 : 2016.04.30 LJS
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_nSNSType '1 카카오톡 , 2 카카오톡 화면 공유 , 3 트위터 , 4페이스북
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", "")
+
+
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName = "CHANGE_ORIENTATION" Then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ORIENTATION", "")		
+		
+	ElseIf sEventName = "SCREEN_MENU" Then
+		
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns1" , "", "")
+		end if
+		
+	End If
+End Sub
+
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+	btnSearch_OnClick()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "snsshare" Then			' 폼탭 초기화
+		g_nSNSType = Cint(sRet)
+		
+		If g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+			
+		End If		
+	end if 	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	btnSearch_OnClick()
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

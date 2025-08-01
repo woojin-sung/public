@@ -1,0 +1,1686 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="13200" scrname="CFD주문_청산" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,401,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblBack" bgcolor="038:255255255" transmode="0" ly_vert="0,-2,375,401,1" />
+		<COMBO name="cmbType" cbinputdatatext="00`보통
+01`시장가
+" ly_vert="180,54,186,39,1" />
+		<COMBO name="cmbOrdType" cbinputdatatext="112`매수
+111`매도
+" ly_vert="180,238,186,39,1" />
+		<BUTTON name="btnCash" caption="가능수량" fgcolor="004:000000000" btnimage="btn_02.9.png" ly_vert="180,101,115,39,1" />
+		<COMBO name="cmbQtyPer" cbinputdatatext="100`100%
+90`90%
+80`80%
+70`70%
+60`60%
+50`50%
+40`40%
+30`30%
+20`20%
+10`10%" ly_vert="300,101,66,39,1" />
+		<EDIT name="edtQty" mask="0,0,, 주,0,,0,1,0,0,0" halign="2" imetype="1" maxlength="15" hintcaption="청산수량" ly_vert="216,148,114,39,1" />
+		<BUTTON name="btnQPlus" btnimage="btn_etc12.9" ly_vert="334,148,33,39,1" />
+		<BUTTON name="btnQMinus" btnimage="btn_etc13.9.png" ly_vert="180,148,32,39,1" />
+		<BUTTON name="btnAmt" enable="0" visible="0" caption="금액" fgcolor="004:000000000" btnimage="btn_02.9.png" ly_vert="488,142,60,39,0" />
+		<EDIT name="edtPrc" mask="0,0,, 원,0,,0,1,0,0,0" halign="2" imetype="1" maxlength="15" hintcaption="청산가격" imagefilepth="input_01_clrn.9" ly_vert="216,194,114,39,1" />
+		<BUTTON name="btnPPlus" btnimage="btn_etc12.9.png" ly_vert="334,194,33,39,1" />
+		<BUTTON name="btnPMinus" btnimage="btn_etc13.9.png" ly_vert="180,194,32,39,1" />
+		<BUTTON name="btnQty" btnimage="alpha" ly_vert="213,148,120,39,1" />
+		<BUTTON name="btnPrc" btnimage="alpha" ly_vert="213,194,120,39,1" />
+		<LABEL name="Label0" visible="0" fgcolor="006:213049051" fontsize="-4" caption="종가매매 정정/취소
+불가 시간(08:15~08:30)" transmode="0" multiline="1" border="1" bordercolor="214:255039039" ly_vert="179,188,186,40,0" />
+		<BUTTON name="btnClrn" caption="청산" btnimage="btn_13.9.png" ly_vert="180,330,186,52,1" />
+		<BUTTON name="btnOrdBal" caption="정산금" fgcolor="004:000000000" btnimage="btn_02.9.png" ly_vert="1180,330,90,52,1" />
+		<BUTTON name="btnMkClrn" enable="0" visible="0" caption="시장가
+매수" fgcolor="004:000000000" btnimage="btn_02.9.png" ly_vert="488,327,65,55,0" />
+		<BUTTON name="btnBalance" caption="잔고" fgcolor="004:000000000" btnimage="btn_02.9.png" ly_vert="180,283,115,39,1" />
+		<BUTTON name="btnMiche" caption="체결" fgcolor="004:000000000" btnimage="btn_02.9.png" ly_vert="300,283,66,39,1" />
+		<LABEL name="lblDeposit" mask="0,0,청산가능수량: ,,0,,0,1,1,0,0" bgcolor="320:246247248" transmode="0" autofontsize="1" ly_vert="180,10,186,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="50930" _ulen="46512" >
+--===========================================================================
+--===========================================================================
+'20231121 SWJ : 제도개선 (ELW - 호가 5원 단위 / ETF, ETN - 호가 2000 미만 : 1원 단위, 2000 이상 : 5원 단위)
+'****************************************************************************
+'               G  R  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+' ----- 주문설정값 공통변수 Start -------------------------------------------
+'주문 환경
+Dim g_szOdrPop
+Dim g_szBtnMkt
+
+' 가격, 수량 설정
+Dim g_szAfterInit
+Dim g_szChangeInit
+Dim g_szBuyQty, g_szBuyQtyCnt
+
+' 주문후 
+Dim g_szAfterOrg
+
+' 20200824 LES START 경고구분코드
+Dim gWarnCd
+gWarnCd =""
+
+' 20200910 SWJ START : 메모리평문제거 적용구분값
+Dim plain_rm
+plain_rm =""
+
+Dim g_nQty, g_nQtyFlag
+g_nQty = 0
+g_nQtyFlag = 0 '다른화면에서 잔고로 넘어올 때 수량이 초기화되는 현상을 막기위해 플래그 배치
+' ----- 주문설정값 공통변수 End ---------------------------------------------
+
+Dim g_szCd, g_szMk
+Dim	g_szWarnFlag				' 주문 경고 확인플래그
+g_szWarnFlag	= "N"
+
+Dim g_szTR
+
+Dim g_bBtnMkClk
+g_bBtnMkClk = false
+
+Dim g_szMax
+g_szMax = "0"
+
+Dim g_szInner
+
+Dim g_szTitle
+g_szTitle = "알림"
+
+Dim g_ShortAmt
+
+Dim g_szLabel		'20230308 HSZ
+g_szLabel = false
+'****************************************************************************
+'			P  E  R  S  O  N  A  L     F  U  N  C  T  I  O  N
+'****************************************************************************
+
+'============================================================================
+' Init_AfterOrder : 주문후 초기화
+'============================================================================
+Function	Init_InputControl()
+	if g_nQtyFlag == 1 then
+		edtQty.caption = g_nQty
+		edtQty_OnEditComplete()
+		
+		g_nQtyFlag = 0
+	else
+		edtQty.caption = ""
+		edtQty_OnEditComplete()
+	end if
+
+	edtPrc.caption = ""
+	edtPrc_OnEditComplete()
+	
+End Function
+
+'============================================================================
+' Load_OrderSet : 환경설정값 정의
+'============================================================================
+Function Load_OrderSet()
+	g_szOdrPop     = Form.LoadConfigData("SET_ORDER", "OPEN_CONFIRM")			' 주문확인창
+	g_szBtnMkt     = Form.LoadConfigData("SET_ORDER", "BTN_MARKET")				' 시장가 주문버튼
+	g_szAfterInit  = Form.LoadConfigData("SET_ORDER", "AFERTORD_INIT")			' 주문전송 후 초기화
+	g_szChangeInit = Form.LoadConfigData("SET_ORDER", "CHANGE_INIT")			' 종목/탭 변경시 초기화
+	g_szAfterOrg   = Form.LoadConfigData("SET_ORDER", "AUTO_ORGNO")				' 원주문번호 자동입력
+	
+	g_szBuyQty     = Form.LoadConfigData("SET_ORDER", "AUTO_STOCK_BUYQTY")		' 매수수량 자동입력(0:미사용, 1:현금가능수량, 2:최대가능수량(미수포함), 3:수량입력
+	g_szBuyQtyCnt  = Form.LoadConfigData("SET_ORDER", "AUTO_STOCK_BUYQTYCNT")	' 매수수량 주수(수량입력 선택시)
+
+	' 주문확인창(기본값 : 사용)
+	if Trim(g_szOdrPop) = "" then
+		g_szOdrPop = "1"
+	end if
+	
+	' 시장가 주문버튼(기본값 : 미사용)
+	if Trim(g_szBtnMkt) = "1" then
+		btnMkClrn.visible = true
+	else
+		btnMkClrn.visible = false
+	end if	
+	
+	' 주문전송 후 초기화(기본값 : 사용)
+	if Trim(g_szAfterInit) = "" then
+		g_szAfterInit = "1"
+	end if	
+	
+	'20170919 HAMWG START : 종목/탭 변경시 초기화 사용을 초기값으로 설정
+	' 종목/탭 변경시 초기화(기본값 : 사용)
+	if Trim(g_szChangeInit) = "" then
+		g_szChangeInit = "1"
+	end if	
+	'20170919 HAMWG END
+
+	' 원주문번호 자동입력(기본값 : 사용)
+	if Trim(g_szAfterOrg) = "" then
+		g_szAfterOrg = "1"
+	end if
+	
+	' 매수수량 자동입력(기본값 : 사용하지 않음)
+	if Trim(g_szBuyQty) = "" then
+		g_szBuyQty = "0"		
+	end if	
+End Function
+
+'============================================================================
+' Visible_Control : nGbn(유형)
+'============================================================================
+Function Visible_Control(nGbn)
+	' 보통, 조건부지정가, 보통(IOC), 보통(FOK), 시간외단일가
+	Select case nGbn
+		case 0
+			edtPrc.enable = true
+			btnPrc.enable = true
+			btnPPlus.enable = true
+			btnPMinus.enable = true
+		case else
+			edtPrc.caption = ""
+			edtPrc_OnEditComplete()
+			
+			edtPrc.enable = false	
+			btnPrc.enable = false
+			btnPPlus.enable = false
+			btnPMinus.enable = false
+	End Select
+	
+End Function
+
+'============================================================================
+' Set_OrdType : 종목코드에 따라 주문유형 설정
+' 20160329 : "market"이 같고 "ineermarket"이 다른 상태의 예외처리 추가(코넥스 때문)
+'============================================================================
+Function Set_OrdType()
+	Dim szMk, szInner
+	szMk, szInner = "", ""
+	
+	szMk = Form.GetItemCodeInfo(g_szCd, "market")
+	szInner = Form.GetItemCodeInfo(g_szCd, "innermarket")
+	
+	
+	'20170816 LES START
+	szType = Form.GetSharedData("B_TYPE", false)		' 주문구분
+	cmbType.currentindex = szType					' 주문구분 콤보박스 세팅
+	'20170816 LES END
+
+	if g_szMk <> szMk then
+		cmbType.currentindex = "0"					' 0으로 변경해야 die안됨
+		Form.SetCtlProp("cmbGroup", "clear", "")		' 콤보 리스트 클리어
+	
+		if szMk == "W" then
+			szList = Set_TypeList(0)
+			'Form.SetCtlProp("#rdoGbn", "visible", false)
+		else
+			if Trim(szInner) =="033" then		' 코넥스
+				szList = Set_TypeList(1)
+			else
+				szList = Set_TypeList(2)
+			end if
+			'Form.SetCtlProp("#rdoGbn", "visible", true)
+		end if
+		
+		g_szMk = szMk
+	else
+		if g_szInner <> szInner then
+			if Trim(szInner) =="033" then		' 코넥스
+				szList = Set_TypeList(1)
+			else
+				szList = Set_TypeList(2)
+			end if
+			
+			g_szInner = szInner
+		end if
+	end if
+
+	cmbType.cbinputdatatext = szList
+End Function
+
+'============================================================================
+' Set_TypeList : "market" or "ineermarket"에 따른 주문유형 변경 (20160329 추가)
+'============================================================================
+Function Set_TypeList(nGbn)
+	if nGbn == 0 then
+		return "00`보통\r\n01`보통(IOC)\r\n02`보통(FOK)"
+	elseif nGbn == 1 then
+		return "00`보통\r\n01`시장가\r\n02`장후시간외"
+	else
+		return "00`보통\r\n01`시장가"
+	end if
+End Function
+
+'============================================================================
+' Check_OrdType : 주문유형확인
+'============================================================================
+Function Check_OrdType()
+	Dim szIdx
+	szIdx = CStr(cmbType.currentindex)
+	
+	if g_bBtnMkClk == true Then					'시장가 주문
+		return "05"	
+	elseIf g_szInner == "033" then				' 코넥스 
+		Select Case szIdx
+			Case "0"	'지정
+				return "01"
+			Case "1"	'시장
+				return "05"
+			Case "2"	'장후
+				return "71"
+		End Select
+	elseIf g_szMk == "W" then					' ELW인경우 -  보통
+		return "01"
+	else '일반주문
+		Select Case szIdx
+			Case "0", "5", "8"	' 지정(일반, IOC, FOK)
+				return "01"
+			Case "1", "6", "9"	' 시장(일반, IOC, FOK)
+				return "05"
+			Case "2"				' 조건부
+				return "06"
+			Case "3", "7", "10"	' 최유리(일반, IOC, FOK)
+				return "12"
+			Case "4"				' 최우선
+				return "13"   
+			Case "11"			' 장전
+				return "61"
+			Case "12"			' 장후
+				return "71"
+			Case "13" 
+				return "81" 		' 시간외단일가
+		End Select 			
+    End If
+End Function
+
+'============================================================================
+' Check_CondCode : 주문조건 구분 확인
+'============================================================================
+Function Check_CondCode()
+	Dim szIdx
+	
+	if g_bBtnMkClk == true Then					'시장가 주문
+		return "0"
+	elseIf g_szInner == "033" then				' 코넥스 
+		return "0"
+	elseIf g_szMk == "W" then					' ELW인경우 -  보통
+		return "0"
+	else '일반주문
+		szIdx = cmbType.currentindex
+
+		Select Case szIdx
+			Case "5", "6", "7"	' IOC
+				return "3"
+			Case "8", "9", "10"	' FOK
+				return "4"
+			Case Else
+				return "0" 	
+		End Select 			
+    End If
+End Function
+
+'============================================================================
+' Change_ItemCode
+'============================================================================
+Function Change_ItemCode()
+	Dim szMk
+	
+	if g_szCd <> "" and g_szCd <> null then
+		szMk = Form.GetItemCodeInfo(g_szCd, "market")
+	
+		if Left(g_szCd, 1) = "J" or Left(g_szCd, 1) = "F" then
+			return g_szCd
+		elseif szMk = "J" or szMk = "T" then	'주식
+			return "A" & g_szCd
+		elseif szMk = "W" then	'ELW
+			return "J" & g_szCd
+		else
+			return g_szCd
+		end if 
+	else
+		return ""
+	end if
+End Function
+
+'============================================================================
+' Check_InputData
+'============================================================================
+Function Check_InputData(nGbn)
+	' 계좌번호와 계좌비밀번호 체크
+	if Check_Account(nGbn) == false then
+		return false
+	end if
+
+	if Trim(g_szCd) == "" then
+		Form.ShowAlert(g_szTitle, "종목코드를 입력하십시요.")
+		return false
+	end if
+	
+	if Trim(edtQty.caption) == "" or Trim(edtQty.caption) == "0" then
+		Form.ShowAlert(g_szTitle, "주문수량을 입력하십시요.")
+		return false
+	end if
+	
+	if nGbn == 0 then
+		szType = Check_OrdType()
+		
+		if szType == "01" or szType = "06" or szType = "81" then	' 지정, 조건부, 시간외단일가
+			if Trim(edtPrc.caption) == "" or Trim(edtPrc.caption) == "0" then
+				Form.ShowAlert(g_szTitle, "주문가격을 입력하십시요.")
+				return false
+			end if	
+		end if
+	end if	
+		
+	if nGbn <> 2 then	
+		' 주문확인창 오픈여부
+		if g_szOdrPop == "1" then
+			Open_ConfirmPopup()
+		else
+			Request_Order()
+		end if
+	end if
+	
+	return true
+End Function
+
+'============================================================================
+' Open_ConfirmPopup
+'============================================================================
+Function Open_ConfirmPopup(szWarn)
+	Dim szData
+	DIm szGbn
+	
+'	szGbn = Form.GetCtlProp("#rdoGbn", "currentindex")
+	szGbn = ""
+	szData = ""
+	
+	if cmbOrdType.cbkeydata == "112" then '청산매수
+		szData = "0"
+	elseif cmbOrdType.cbkeydata == "111" then '청산매도
+		szData = "1"
+	end if
+	
+	szData = szData & "|" & g_szMk									' 시장구분
+	szData = szData & "|" & Form.GetCtlProp("#acnt", "caption")			' 계좌번호
+	szData = szData & "|" & Form.GetCtlProp("#acnt", "accountname")		' 계좌명
+	szData = szData & "|" & g_szCd									' 종목코드
+	szData = szData & "|" & Form.GetItemCodeInfo(g_szCd, "name")		' 종목명
+	szData = szData & "|" & cmbType.caption							' 주문구분
+	szData = szData & "|" & szGbn									' 현금/신용
+	szData = szData & "|" & ""										' 신용구분
+	szData = szData & "|" & ""										' 대출일자
+	szData = szData & "|" & edtQty.caption							' 주문수량
+	szData = szData & "|" & edtPrc.caption							' 주문가격
+	szData = szData & "|" & ""										' 원주문번호
+	szData = szData & "|" & ""										' 전량전부
+	
+	if Trim(szWarn) <> "" then					' 경고팝업 오픈
+		szData = szData & "|" & szWarn			' 경고메세지
+		
+		'20200824 LES START 경고구분코드 추가
+		szData = szData & "|" & gWarnCd			' 경고구분코드추가
+		'20200824 LES END
+				
+		Form.OpenPopup("mbtrs12020_p8", szData , "")		
+	else							' 주문확인팝업 오픈
+'		if szGbn == "1" then	' 신용
+'			Form.OpenPopup("mbtrs12020_p3", szData , "")
+'		else					' 현금
+			Form.OpenPopup("mbtrs13000_p5", szData , "")
+'		end if
+	end if
+End Function
+
+'============================================================================
+' Request_Order
+'============================================================================
+Function Request_Order()
+	g_szWarnFlag = "N"
+	
+	' 현금/신용 구분
+'	szCLS = Form.GetCtlProp("#rdoGbn", "currentindex")
+	
+'	if szCLS == "0" then
+'		DATAMANAGER.RequestTranData("obtrs_oder_101a")			' 주식주문
+'	elseif szCLS == "1" then
+'		DATAMANAGER.RequestTranData("obtrs_oder_201a")			' 신용주문
+'	end if
+	
+	DATAMANAGER.RequestTranData("obtrc_oder_001a")
+End Function
+
+'============================================================================
+' Check_Account
+'============================================================================
+Function Check_Account(nGbn)
+	Dim szAcnt, szPwd
+	
+	szAcnt = Form.GetCtlProp("#acnt", "caption")
+
+	If Len(szAcnt) < 10 Then
+		Form.ShowAlert(g_szTitle, "계좌번호를 확인후 다시 입력하십시오.")
+		return False
+	End If
+	
+	if nGbn <> 2 then
+		szPwd = Form.GetCtlProp("#edtPwd", "caption")
+		If Trim(szPwd) = "" Then
+			Form.ShowAlert(g_szTitle, "비밀번호를 확인후 다시 입력하십시오.")
+			return False
+		end If
+	end if
+	
+	return True
+End Function
+
+'============================================================================
+' Calc_Price : +, - 버튼클릭시 호가단위로 가격계산
+'============================================================================
+Function Calc_Price(nGbn)
+	Dim szPrc, szUnit, szHigh, szLow, szHyun
+	
+	szPrc  = edtPrc.caption
+	szUnit = Form.GetCtlProp("#lblUnit", "caption")
+	szHigh = Form.GetCtlProp("#lblHigh", "caption")	
+	szLow  = Form.GetCtlProp("#lblLow", "caption")
+	szHyun = Form.GetCtlProp("#lblHyun", "caption")
+	
+	'=======================================================================
+	'20221116 HWG START : (거래소 차세대) 호가단위 개선
+	'=======================================================================
+	
+	'=======================================================================
+	' ETN/ELW
+	'=======================================================================
+	
+	'20231121 SWJ START : 제도개선
+	if g_szMk == "W" then
+		szUnit = 5
+	
+	elseif g_szMk == "Q" then
+		
+		if CDbl(szPrc) < 2000 then
+			szUnit = 1
+		else
+			szUnit = 5 
+		end if
+	'20231121 SWJ END
+		
+	'=======================================================================
+	' ETN/ELW 외
+	'=======================================================================
+	else
+		szInnerMk = Form.GetItemCodeInfo(g_szCd, "innermarket")
+		
+		'=======================================================================
+		' ETF
+		'=======================================================================
+		if szInnerMk = "013" then
+		
+			'20231121 SWJ START : 제도개선
+			if CDbl(szPrc) < 2000 then
+				szUnit = 1
+			else
+				szUnit = 5 
+			end if
+			'20231121 SWJ END
+		
+		'=======================================================================
+		' KOTC
+		'=======================================================================
+'		elseif szInnerMk = "025" then
+'			if CDbl(szPrc) < 1000 then
+'				szUnit = 1
+'			elseif (CDbl(szPrc) >= 1000 and CDbl(szPrc) < 5000) then
+'				szUnit = 5 
+'			elseif (CDbl(szPrc) >= 5000 and CDbl(szPrc) < 10000) then
+'				szUnit = 10
+'			elseif (CDbl(szPrc) >= 10000 and CDbl(szPrc) < 50000) then
+'				szUnit = 50
+'			elseif (CDbl(szPrc) >= 50000 and CDbl(szPrc) < 100000) then
+'				szUnit = 100
+'			elseif (CDbl(szPrc) >= 100000 and CDbl(szPrc)<  500000) then
+'				szUnit = 500
+'			elseif CDbl(szPrc) >= 500000 then
+'				szUnit = 1000
+'			end if
+'			
+'			if nGbn == 1 then
+'				if CDbl(szPrc) = 1000 then
+'					szUnit = 1
+'				elseif CDbl(szPrc) = 5000 then
+'					szUnit = 5 
+'				elseif CDbl(szPrc) = 20000 then
+'					szUnit = 10
+'				elseif CDbl(szPrc) = 10000 then
+'					szUnit = 50
+'				elseif CDbl(szPrc) = 50000 then
+'					szUnit = 100
+'				elseif CDbl(szPrc) = 100000 then
+'					szUnit = 500
+'				elseif CDbl(szPrc) = 500000 then
+'					szUnit = 1000
+'				end if
+'			end if
+		
+		'=======================================================================
+		' KOSPI/KOSDAQ/KONEX/신주인수권/수익증권 등
+		'=======================================================================
+		else
+			if CDbl(szPrc) < 2000 then
+				szUnit = 1
+			elseif (CDbl(szPrc) >= 2000 and CDbl(szPrc) < 5000) then
+				szUnit = 5 
+			elseif (CDbl(szPrc) >= 5000 and CDbl(szPrc) < 20000) then
+				szUnit = 10
+			elseif (CDbl(szPrc) >= 20000 and CDbl(szPrc) < 50000) then
+				szUnit = 50
+			elseif (CDbl(szPrc) >= 50000 and CDbl(szPrc) < 200000) then
+				szUnit = 100
+			elseif (CDbl(szPrc) >= 200000 and CDbl(szPrc) < 500000) then
+				szUnit = 500
+			elseif CDbl(szPrc) >= 500000 then
+				szUnit = 1000
+			end if
+			
+			if nGbn == 1 then
+				if CDbl(szPrc) = 2000 then
+					szUnit = 1
+				elseif CDbl(szPrc) = 5000 then
+					szUnit = 5 
+				elseif CDbl(szPrc) = 20000 then
+					szUnit = 10
+				elseif CDbl(szPrc) = 50000 then
+					szUnit = 50
+				elseif CDbl(szPrc) = 200000 then
+					szUnit = 100
+				elseif CDbl(szPrc) = 500000 then
+					szUnit = 500
+				end if
+			end if
+		end if
+	end if
+	'20221116 HWG END
+	
+	' 이전소스
+'	'=======================================================================
+'	' 20190403 LES START 호가단위 설정
+'	'=======================================================================
+'	if g_szMk == "J" or g_szMk == "T" then
+'			
+'		szInnerMk = Form.GetItemCodeInfo(g_szCd, "innermarket")
+'			
+'		'-------------------------------------------------------------------
+'		'코스닥, 코넥스
+'		'-------------------------------------------------------------------
+'		if szInnerMk == "002" or szInnerMk == "033" then
+'			if CDbl(szPrc) < 1000 then
+'				szUnit = 1
+'			elseif (CDbl(szPrc) >= 1000 and CDbl(szPrc) < 5000) then
+'				szUnit = 5 
+'			elseif (CDbl(szPrc) >= 5000 and CDbl(szPrc) < 10000) then
+'				szUnit = 10
+'			elseif (CDbl(szPrc) >= 10000 and CDbl(szPrc) < 50000) then
+'				szUnit = 50
+'			elseif CDbl(szPrc) >= 50000 then
+'				szUnit = 100
+'			end if
+'				
+'		'-------------------------------------------------------------------
+'		'ETF
+'		'-------------------------------------------------------------------
+'		elseif szInnerMk = "013" then
+'			szUnit = 5
+'						
+'		'-------------------------------------------------------------------
+'		'코스피, 신주인수권, 수익증권, K-OTC
+'		'-------------------------------------------------------------------
+'		else
+'					
+'			if CDbl(szPrc) < 1000 then
+'				szUnit = 1
+'			elseif (CDbl(szPrc) >= 1000 and CDbl(szPrc) < 5000) then
+'				szUnit = 5 
+'			elseif (CDbl(szPrc) >= 5000 and CDbl(szPrc) < 10000) then
+'				szUnit = 10
+'			elseif (CDbl(szPrc) >= 10000 and CDbl(szPrc) < 50000) then
+'				szUnit = 50
+'			elseif (CDbl(szPrc) >= 50000 and CDbl(szPrc) < 100000) then
+'				szUnit = 100
+'			elseif (CDbl(szPrc) >= 100000 and CDbl(szPrc) < 500000) then
+'				szUnit = 500
+'			elseif CDbl(szPrc) >= 500000 then
+'				szUnit = 1000
+'			end if
+'					
+'		end if
+'		
+'	'-------------------------------------------------------------------
+'	'ETN, ELW
+'	'-------------------------------------------------------------------
+'	elseif g_szMk == "Q" or g_szMk == "W" then
+'		szUnit = 5
+'					
+'	end if
+'	'20190318 LES END
+	
+	
+	
+	'=======================================================================
+	' +,- 버튼 클릭시 동작 
+	'=======================================================================		
+	
+	'----------------------------------------------------------------------
+	' ELW
+	'----------------------------------------------------------------------
+	if g_szMk = "W" then
+		if Trim(szUnit) == "" then
+			szUnit = "5"
+		end if
+
+		if Trim(szPrc) == "" then
+			szPrc = szHyun
+		else
+			' + 버튼 클릭 /////////////////////////////
+			if nGbn == 0 then							
+				szPrc = CDbl(szPrc) + CDbl(szUnit)
+			' - 버튼 클릭 ////////////////////////////	
+			elseif nGbn == 1 then					
+				if CDbl(szPrc) == 0 then		' 0상태에서 "-"선택시 현재가로 복귀
+					szPrc = szHyun
+				else
+					szPrc = CDbl(szPrc) - CDbl(szUnit)
+				end if
+			end if
+		end if
+	
+	
+	' ----------------------------------------------------------------------
+	' 그외 (코스피, 코스닥, KOTC, ETF, ETN ..)
+	' ----------------------------------------------------------------------		
+	else
+		if Trim(szUnit) == "" then
+			szUnit = "1"
+		end if
+		
+		if Trim(szPrc) == "" then
+			szPrc = szHyun
+		else
+			' + 버튼 클릭 /////////////////////////////
+			if nGbn == 0 then							
+			
+			'20210216 SWJ START : 신주인수권 가격 +/- 버튼 입력오류 수정(상한가, 하한가 항상 0이어서 생긴 오류)
+				if Left(g_szCd,1) == "J" then
+					
+					szPrc = CDbl(szPrc) + CDbl(szUnit)
+					
+					if szPrc <= 0 then
+						szPrc = szHyun
+					end if
+				else
+					if CDbl(szPrc) >= CDbl(szHigh) then		' 상한가와 같거나 높은가격에서 +버튼 클릭시 상한가로 복귀
+						szPrc = szHigh
+					elseif CDbl(szPrc) < CDbl(szLow) then	' 하한가보다 낮은가격에서 +버튼 클릭시 하한가로 복귀	
+						szPrc = szLow
+					else
+						szPrc = CDbl(szPrc) + CDbl(szUnit)
+					end if
+				end if
+				
+			' - 버튼 클릭 ////////////////////////////
+			elseif nGbn == 1 then
+			
+				if Left(g_szCd,1) == "J" then
+					
+					szPrc = CDbl(szPrc) - CDbl(szUnit)
+					
+					if szPrc <= 0 then
+						szPrc = szHyun
+					end if
+				else
+					if CDbl(szPrc) > CDbl(szHigh) then		' 상한가보다 높은가격에서 -버튼 클릭시 상한가로 복귀
+						szPrc = szHigh		
+					elseif CDbl(szPrc) <= CDbl(szLow) then	' 하한가와 같거나 낮은가격에서 -버튼 클릭시 하한가로 복귀
+						szPrc = szLow
+					else
+						szPrc = CDbl(szPrc) - CDbl(szUnit)
+					end if
+				end if
+			'20210216 SWJ END
+			end if
+		end if
+	end if
+	
+	'Form.ShowAlert(g_szMk, szInnerMk)
+	edtPrc.caption = szPrc
+	edtPrc_OnEditComplete()
+	
+	
+End Function
+
+'============================================================================
+' Calc_Qty : +, - 버튼클릭시 수량 length로 수량단위 계산
+'============================================================================
+Function Calc_Qty(nGbn)
+	Dim szQty, nUnit, szCalc, szUnit
+	
+	szQty = edtQty.caption
+
+	
+	if Trim(szQty) == "" then
+		szQty = 1
+	else
+		if Len(szQty) = 1 or Len(szQty) = 2 then
+			nUnit = 1
+		else
+			nCnt = Len(szQty)-1
+			
+			For i = 0 to nCnt-1
+				if i == 0 then
+					szUnit = "1"
+				else
+					szUnit = szUnit & "0"
+				end if
+			Next
+			
+			nUnit = CDbl(szUnit)
+		end if
+		
+		if nGbn == 0 then
+			szQty = CDbl(szQty) + nUnit
+		elseif nGbn == 1 then
+			if CDbl(szQty) == 0 then
+				Exit Function
+			else
+				szQty = CDbl(szQty) - nUnit
+			end if
+		end if
+	end if
+	
+	edtQty.caption = szQty
+	edtQty_OnEditComplete()
+End Function
+
+'============================================================================
+' Return_BalanceScreen : 잔고팝업에서 리턴된 값 적용
+'============================================================================
+Function Return_BalanceScreen(szRet)
+	'수량/매수매도구분코드
+	tData = Split(szRet, "♥")
+	
+	if UBound(tData) > 0 then
+'		cmbType.currentindex = "0"
+		g_nQtyFlag = 1
+		g_nQty = tData(0)
+		edtQty.caption = tData(0)				' 수량
+		edtQty_OnEditComplete()
+		
+		if tData(1) == "2" then '청산이기 때문에 잔고 주문타입의 반대로 설정
+			cmbOrdType.currentindex = 1 '매도
+		else
+			cmbOrdType.currentindex = 0 '매수
+		end if
+		
+	end if
+End Function		
+
+'============================================================================
+' Return_AutoQty
+'============================================================================
+Function Return_AutoQty()
+	if g_szBuyQty == "1" then			' 현금가능수량
+		Request_Able(1)
+	elseif g_szBuyQty == "2" then		' 최대가능수량
+		Request_Able(2)
+	elseif g_szBuyQty == "3" then		' 수량입력
+		edtQty.caption = g_szBuyQtyCnt
+		edtQty_OnEditComplete()
+	end if
+End Function
+
+'============================================================================
+' Request_Able
+'============================================================================
+Function Request_Able(nGbn)
+	if nGbn == 1 then			' 현금가능수량
+		g_szMax = "0"
+	elseif nGbn == 2 then		' 최대가능수량
+		g_szMax = "1"
+	end if	
+
+	g_bBtnMkClk = false
+	g_szWarnFlag = "N"
+	
+	DATAMANAGER.RequestTranData("obtrc_oder_005r")				' 주문가능금액 조회	
+End Function
+
+'============================================================================
+' 20180716 LES START - K-OTC종목 선택 시, 컨트롤 위치조정
+'============================================================================
+Sub Position_Control()
+	'20191106 HWG START : 수량필드 스핀컨트롤 추가
+'	if g_szMk == "T" then
+'		cmbType.top = 7 
+'		btnQty.top = 53
+'		edtQty.top = 53 
+'		btnQPlus.top = 53 
+'		btnQMinus.top = 53 
+'		btnMax.top = 53
+'		
+'		btnPrc.top = 99
+'		edtPrc.top = 99
+'		btnPPlus.top = 99
+'		btnPMinus.top = 99
+'		
+'		cmbType.enable = false
+'		cmbType.width = 118
+'		btnCash.top = 7
+'		btnCash.left = 304
+'		btnCash.width = 62
+'		btnMax.visible = false
+'		
+'	else
+'		cmbType.top = 54 
+'		btnQty.top = 148
+'		edtQty.top = 148
+'		btnQPlus.top = 148
+'		btnQMinus.top = 148
+'		btnCash.top = 101 
+'		btnMax.top = 101
+'		
+'		btnPrc.top = 194
+'		edtPrc.top = 194
+'		btnPPlus.top = 194
+'		btnPMinus.top = 194
+'		
+'		cmbType.enable = true
+'		cmbType.width = 186
+'		btnCash.top = 101
+'		btnCash.left = 180
+'		btnCash.width = 89
+'		btnMax.visible = true
+'
+'	end if
+	'20191106 HWG END
+	
+End Sub
+
+'============================================================================
+' Get_QtyinPer() - 가능수량 %에 따른 수량 계산 값 리턴
+'============================================================================
+Function Get_QtyinPer(nMaxQty)
+	Dim nPer
+	nPer = CInt(cmbQtyPer.cbkeydata) / 100
+
+	return CInt(nMaxQty * nPer)
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Load_OrderSet() '주문설정값 읽어오기
+	
+	'20200910 SWJ START
+	'MTS메모리평문 적용유무
+	'plain_rm = ( 0 : 미적용/ 1 : 적용)
+	plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	
+	'20200910 SWJ END
+	
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "13000_HOGA" then
+		if sParam <> "" then
+			'주문유형에 따른 주문단가
+			szType = Check_OrdType()
+			
+			if szType == "01" or szType == "06" or szType == "81" then		'지정, 조건부, 시간외 주문
+				edtPrc.caption = sParam			
+				edtPrc_OnEditComplete()
+			end if	
+		else
+			edtPrc.caption = sParam
+			edtPrc_OnEditComplete()
+		end if
+	' ----------------------------------------------------------------------
+	' 메인화면에서 종목코드 받기/ 탭 체인지
+	' ----------------------------------------------------------------------		
+	elseif sEventName == "INIT_CODE" or sEventName == "CHNAGE_TAB" then
+		if sEventName == "INIT_CODE" then
+			Form.SetCtlProp("#edtOrgNo", "caption", "")
+		end if
+		
+		' 20160407 예외처리 추가
+		if g_szCd <> sParam then
+			g_szCd = sParam
+		
+			Set_OrdType()					' 종목코드에 따라 주문유형 설정
+		end if
+		
+		if g_szChangeInit == "1" then		' 종목변경시 인풋항목 초기화
+			Init_InputControl()
+		end if
+		
+		'20170816 LES START - 주문유형콤보세팅 여기다가???
+		szType = Form.GetSharedData("B_TYPE", false)		' 주문구분
+		cmbType.currentindex = szType					' 주문구분 콤보박스 세팅
+		'20170816 LES END
+		
+		'20180716 LES START
+		Position_Control()
+		
+		'20230308 HSZ START
+		szACNO = Trim(Form.GetCtlProp("#acnt", "total"))
+		if szACNO <> "" then
+			g_szLabel = true
+			Request_Able(1)
+		end if
+		'20230308 HSZ END
+		
+	' ----------------------------------------------------------------------
+	' 자동가격입력
+	' ----------------------------------------------------------------------		
+	elseif sEventName == "AUTO_PRICE" then
+		Dim szPrc
+		
+		'20170919 HAMWG START : 탭/종목 변경시 초기화 여부
+		if g_szChangeInit <> "1" then		
+			Return_AutoQty()
+		end if
+		'20170919 HAMWG END
+		
+		szPrc = Form.GetSharedData("HYUN_RETURN", true)
+		Form.SetSharedData("HYUN_RETURN", "")
+		
+		if Trim(szPrc) <> "" and szPrc <> null then
+			edtPrc.caption = szPrc
+			edtPrc_OnEditComplete()
+		else
+			if Trim(sParam) <> "" then
+				edtPrc.caption = sParam
+				edtPrc_OnEditComplete()
+			end if
+		end if
+	
+	' ----------------------------------------------------------------------
+	' 잔고팝업에서 리턴된 값 적용하기
+	' ----------------------------------------------------------------------			
+	elseif sEventName == "13000_BALANCE_RETURN" then	
+'		g_bRtnData = true
+'		g_bRtnData1 = true
+		
+		if sParam == "" then
+			Exit Sub
+		end if
+
+		Return_BalanceScreen(sParam)
+		
+		'20180716 LES START
+		Position_Control()
+		
+	' ----------------------------------------------------------------------
+	' 현재가에서 리턴된 값 적용 : 20160321 추가
+	' ----------------------------------------------------------------------		
+	elseif sEventName == "12000_HYUN_RETURN" then
+		'edtPrc.caption = sParam
+	end if
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	' ----------------------------------------------------------------------
+	' 경고팝업에서 리턴
+	' ----------------------------------------------------------------------	
+	if sKeyName == "주문경고" then
+		if sRet == "1" then
+			
+			'20201117 LES START
+			g_szWarnFlag = "A"
+			
+			'20200824 LES START 제도개선
+			'if gWarnCd = "3" then
+			'	g_szWarnFlag = "O"
+			'elseif gWarnCd = "4"then
+			'	g_szWarnFlag = "A"
+			'elseif gWarnCd = "5" then
+			'	g_szWarnFlag = "A"
+			'else
+			'	g_szWarnFlag = "Y"
+			'end if
+			'20200824 LES END
+			
+			DATAMANAGER.RequestTranData(g_szTR)
+		else
+		    g_szWarnCd = "0"
+		end if	
+	' ----------------------------------------------------------------------
+	' 주문확인창에서 리턴
+	' ----------------------------------------------------------------------	
+	elseif sKeyName == "주문전송" then
+		if sRet == "1" then
+			Request_Order()	
+		end if
+	' ----------------------------------------------------------------------
+	' 수량/금액입력창에서 리턴
+	' ----------------------------------------------------------------------	
+	elseif sKeyName == "QTY_POPUP" then		
+		edtQty.caption = sRet
+		edtQty_OnEditComplete()
+		
+
+		'20160829_01 LKM START
+		 btnCash.btnimage = "btn_02.9.png"
+'		 btnMax.btnimage  = "btn_02.9.png"
+		 Form.SetSharedData("B_QTY_TYPE" , "2")
+		'20160829_01 LKM END		
+		
+	' ----------------------------------------------------------------------
+	' 가격입력창에서 리턴
+	' ----------------------------------------------------------------------	
+	elseif sKeyName == "PRC_POPUP" then		
+		edtPrc.caption = sRet		
+		edtPrc_OnEditComplete()
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim szCd, szType, szPrc, szCLS, szCLSCd, szCondCd
+	
+	' 종목코드
+	szCd = Change_ItemCode()
+		
+	'주문유형
+	szType = Check_OrdType()
+
+	' 주문조건 구분코드
+	szCondCd = Check_CondCode()
+	
+	'서비스 구분코드
+	szCLSCd = cmbOrdType.cbkeydata
+	
+	'주문유형에 따른 주문단가
+	Select Case szType
+		Case "05", "12", "13", "61", "71"					'시장가,최유리,최우선 주문
+			szPrc = "0"
+		Case Else
+			szPrc = edtPrc.caption
+			
+			' HTS에서 가격없고, 가능금액조회시 현재가를 넣어준다.
+			if Trim(szPrc) == "" and szTranID == "obtrc_oder_004r" then
+				szPrc = Form.GetCtlProp("#lblHyun", "caption")
+				
+			end if
+	End Select
+	
+	' ----------------------------------------------------------------------
+	' CFD 청산주문
+	' ----------------------------------------------------------------------	
+	if szTranID == "obtrc_oder_001a" then
+		g_szTR = szTranID
+		DATAMANAGER.ClearInputData(0, "obtrc_oder_001a")
+
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ACNO"				, 0, Form.GetCtlProp("#acnt", "total"))			' 계좌번호(8)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ASNO"				, 0, Form.GetCtlProp("#acnt", "sequence"))		' 계좌일련번호(2)
+		
+		'20200910 SWJ START
+		'MTS메모리평문제거 적용상태일 때
+		if plain_rm == "1" then
+			DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ACNT_PWD"			, 0, Form.GetCtlProp("#edtPwd", "caption"))		' 계좌 비밀번호
+		'MTS메모리평문제거 미적용상태일 때
+		else
+			DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ACNT_PWD"			, 0, Form.GetCtlProp("#edtPwd", "encdata"))		' 계좌 비밀번호
+		end if
+		
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ISCD"				, 0, szCd)									' 종목코드
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ODER_UNPR"			, 0, szPrc)									' 주문단가
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ODQT"				, 0, edtQty.caption)							' 주문수량
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ODER_CLS_CODE"		, 0, szType)									' 주문구분코드
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ODER_COND_CLS_CODE"	, 0, szCondCd)								' 주문조건구분코드
+'		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ORGL_ODER_NO"		, 0, "Y")									' 전체정정취소여부
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "WARN_CNFR_YN"		, 0, g_szWarnFlag)							' 경고확인여부
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "SVC_CLS_CODE"		, 0, szCLSCd )								' 서비스 구분 코드(101:신규매수, 102:신규매도, 111:청산매도, 112:청산매수, 103:정정, 104:취소)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ODER_GRP_NO"			, 0, "0")									' 주문그룹번호(0 고정)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "CHAN_TYPE_CLS_CODE"	, 0, "")										' 채널유형구분코드(메리츠공통)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "ODER_OCRN_TYPE_CODE"	, 0, "01")									' 주문발생유형코드(01:일반주문, 03:반대주문)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_001a", "InBlock1", "LQDT_CLCD"			, 0, "1")									' 반대매매구분코드
+	' ----------------------------------------------------------------------
+	' 청산 주문가능금액 조회
+	' ----------------------------------------------------------------------	
+	elseif szTranID == "obtrc_oder_005r" then
+		DATAMANAGER.ClearInputData(0, "obtrc_oder_005r")
+		
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_005r", "InBlock1", "ACNO"				, 0, Form.GetCtlProp("#acnt", "total"))			' 계좌번호(8)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_005r", "InBlock1", "ASNO"				, 0, Form.GetCtlProp("#acnt", "sequence"))		' 계좌일련번호(2)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_005r", "InBlock1", "BROK_CODE"			, 0, "MERITZ")								' 브로커코드(고정)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_005r", "InBlock1", "CFD_EXCH_CODE"		, 0, "KRX")									' CFD거래소코드(고정)
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_005r", "InBlock1", "ISCD"				, 0, szCd)									' 종목코드
+		DATAMANAGER.SetDataValue(0, "obtrc_oder_005r", "InBlock1", "SVC_CLS_CODE"		, 0, szCLSCd )								' 매매유형구분코드(111:청산매도, 112:청산매수)
+	
+	'20220217 SWJ START
+	elseif szTranID = "obrtd_drng_036r" then
+		DATAMANAGER.SetDataValue(0, "obrtd_drng_036r", "InBlock1", "ACNO" , 0 , Form.GetCtlProp("#acnt", "total"))
+		DATAMANAGER.SetDataValue(0, "obrtd_drng_036r", "InBlock1", "ASNO" , 0 , Form.GetCtlProp("#acnt", "sequence"))	
+	'20220217 SWJ END	
+	
+	End if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim szWarnCd, szWarnMsg, szOrdCd, szOrdMsg, szOrgNo
+	
+	' ----------------------------------------------------------------------
+	' CFD 매수주문
+	' ----------------------------------------------------------------------	
+	Select Case szTranID		
+		Case "obtrc_oder_001a"		
+			
+			'20200824 LES START 제도개선
+			'경고구분코드 (0.정상, 1.경고, 2.보류  추가: 3.투자유의 4.투자유의+경고  5.투자유의+보류)
+			szWarnCd  = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "WARN_CLS_CODE", 0)	
+			szWarnMsg = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "UI_MSG_CNTT"  , 0)
+			
+			gWarnCd = szWarnCd
+			'20200824 LES END
+			
+			'20201117 LES START 제도개선
+			'20200824 LES START 제도개선
+			Select Case szWarnCd
+				
+				Case "1","3","4","6","7","9","a","c","d","f","g"
+					Open_ConfirmPopup(szWarnMsg)
+				Case "2","5","8","b","e","h"
+					g_szTR = ""
+				Case Else
+					g_szTR = ""
+					
+					szOrdCd  = DATAMANAGER.GetDataMsgCode(szTranID)
+					szOrdMsg = DATAMANAGER.GetDataMsgText(szTranID)
+
+					if Trim(szOrdCd) == "0001" then			' 정상주문
+						Form.Toast(0, szOrdMsg, true)
+					
+						if g_szAfterInit == "1" then		' 주문후 초기화
+							Init_InputControl()
+						end if
+					
+						if g_szAfterOrg == "1" then			' 주문번호 연동
+							szOrgNo = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "ODER_NO", 0)
+							Form.SetCtlProp("#edtOrgNo", "caption", szOrgNo)
+						else
+							Form.SetCtlProp("#edtOrgNo", "caption", "")
+						end if
+						
+						'20230308 HSZ START : 청산가능수량 재조회
+						g_szLabel = true
+						Request_Able(1)
+						'20230308 HSZ END
+					end if
+				
+			End Select
+	' ----------------------------------------------------------------------
+	' 청산 주문가능금액 조회
+	' ----------------------------------------------------------------------	
+		Case "obtrc_oder_005r"
+		
+		if g_szMax == "0" or g_szMax == "1" then			' 현금
+			if g_szLabel == false then	'20230308 HSZ 분기처리 추가
+				Dim nMaxQty 
+				nMaxQty = CInt(DATAMANAGER.GetDataValue(0, "obtrc_oder_005r", "OutBlock1", "CLRN_ABLE_QTY", 0))
+				
+				edtQty.caption = Get_QtyinPer(nMaxQty)
+				edtQty_OnEditComplete()
+				
+				
+				'20160829_01 LKM START
+	'			 btnCash.btnimage = "btn_04.9.png"
+	'			 btnMax.btnimage  = "btn_02.9.png"
+	'			 Form.SetSharedData("B_QTY_TYPE" , "0")
+				'20160829_01 LKM END
+				
+	'		elseif g_szMax == "1" then		' 최대
+	'			edtQty.caption = DATAMANAGER.GetDataValue(0, "obtrc_oder_004r", "OutBlock1", "UNCL_OCRN_ODER_ABLE_QTY", 0)
+	'			edtQty_OnEditComplete()
+	'			
+	'			 '20160829_01 LKM START
+	'			 btnCash.btnimage = "btn_02.9.png"
+	'			 btnMax.btnimage  = "btn_04.9.png"
+	'			 Form.SetSharedData("B_QTY_TYPE" , "1")
+	'			'20160829_01 LKM END
+			end if
+			
+		end if
+		
+		'20230308 HSZ START
+		if g_szLabel == true then
+			nMaxQty = CDbl(DATAMANAGER.GetDataValue(0, "obtrc_oder_005r", "OutBlock1", "CLRN_ABLE_QTY", 0))
+			if CDbl(g_nQty) > 0 then	'20230401 HSZ
+				lblDeposit.caption = g_nQty
+				g_nQty = 0
+			else
+				lblDeposit.caption = nMaxQty
+			end if
+			g_szLabel = false
+		end if
+		'20230308 HSZ END
+		
+		'20220217 SWJ START
+		Case "obrtd_drng_036r"
+			szOutAcno = DATAMANAGER.GetDataValue(0, "obrtd_drng_036r", "OutBlock1", "CNFT_ACNO" 		, 0)		'출금계좌번호
+			szOutAsno = DATAMANAGER.GetDataValue(0, "obrtd_drng_036r", "OutBlock1", "CNFT_ASNO" 		, 0)		'출금계좌일련번호
+			szOutPrnm = DATAMANAGER.GetDataValue(0, "obrtd_drng_036r", "OutBlock1", "PRNM" 			, 0)		'출금상품명
+			szInPrnm  = DATAMANAGER.GetDataValue(0, "obrtd_drng_036r", "OutBlock1", "MNRC_ACNT_PRNM"   , 0)		'입금상품명
+			szAbleAmt = DATAMANAGER.GetDataValue(0, "obrtd_drng_036r", "OutBlock1", "DRNG_ABLE_AMT"    , 0)		'출금가능금액
+			
+			'20200910 SWJ START
+			'MTS메모리평문제거 적용상태일 때
+			if plain_rm == "1" then
+				sztmpPwd = Form.GetCtlProp("#edtPwd", "caption")		' 계좌 비밀번호
+			'MTS메모리평문제거 미적용상태일 때
+			else
+				sztmpPwd = Form.GetCtlProp("#edtPwd", "encdata")		' 계좌 비밀번호
+			end if	
+			
+			'출금가능액 >= 증거금부족액
+			if CDbl(szAbleAmt) >= CDbl(g_ShortAmt) then
+				szData = "0" & "@" & szOutAcno&szOutAsno & "@" & szOutPrnm & "@" & szAbleAmt & "@" & Form.GetCtlProp("#acnt", "total") & Form.GetCtlProp("#acnt", "sequence") & "@" & sztmpPwd & "@" & szInPrnm & "@" & g_ShortAmt & "@" & "청산"
+			'출금가능액 < 증거금부족액
+			else
+				szData = "1" & "@" & szOutAcno&szOutAsno & "@" & szOutPrnm & "@" & szAbleAmt & "@" & g_ShortAmt
+			end if		
+			
+			'대체주문확인팝업
+			Form.OpenPopup("mbtre13000_p11" , szData , "")
+		'20220217 SWJ END
+	End Select
+	
+	g_szWarnFlag = "N"	
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	'20220217 SWJ START : 증거금 부족 이후 대체출금 주문 요건 추가
+	if szTranID == "obtrc_oder_001a" then
+		Select Case szErrCode
+		
+		'주문종료
+'		Case "5988"
+
+		'연결계좌 입금 후 주문
+		Case "5989"
+			'원장 내부 영향도로 인해 오류코드로 대체후 주문처리 할 것
+			'증거금 부족금액은 주문모듈에서 계산해서 알 수 있는 값인데
+			'오류로 떨어지면 증거금부족금액을 받을 수 있는 방법이
+			'오류메시지에서 뿐이라.. (이체 쪽 서비스에서 받기엔 속도 및 유지보수 측면에서 별로)
+			
+			'증거금부족금액
+			g_ShortAmt = tonumber(Trim(szSubMsg))
+
+			DATAMANAGER.RequestTranData("obrtd_drng_036r")
+		Case Else
+				
+			if Trim(szSubMsg) <> "" then
+				Form.ShowAlert(g_szTitle, szErrMsg & "(" & szSubMsg & ")")
+				'Form.Toast(0, szErrMsg & "(" & szSubMsg & ")", true)	
+			else
+				Form.ShowAlert(g_szTitle, szErrMsg)
+				'Form.Toast(0, szErrMsg, true)
+			end if
+		End Select
+		
+		exit sub
+	end if
+	'20220217 SWJ END
+		
+	if Trim(szSubMsg) <> "" then
+		Form.ShowAlert(g_szTitle, szErrMsg & "(" & szSubMsg & ")")
+		'Form.Toast(0, szErrMsg & "(" & szSubMsg & ")", true)	
+	else
+		Form.ShowAlert(g_szTitle, szErrMsg)
+		'Form.Toast(0, szErrMsg, true)
+	end if
+	
+End Sub
+
+'============================================================================
+' btnOrdBal_OnClick : 주문관련비용 계산
+'============================================================================
+Sub btnOrdBal_OnClick()
+	Dim szType, szCode, szPrice, szInner, szInrMk, szAcnt, szAcntCd, szSvcCd
+	
+	'계좌번호
+	szAcnt   = Form.GetCtlProp("#acnt", "total")
+	szAcntCd = Form.GetCtlProp("#acnt", "sequence")
+	
+	if Check_InputData(2) == false then
+		Exit Sub
+	end if
+	
+ 	'시장구분
+	if g_szInner == "002" then		'코스닥
+	    szInrMk = "02"
+	elseif g_szInner == "033" then	'코넥스
+		szInrMk = "21"
+	elseif g_szInner == "025" then  '프리보드 '20180820 LES START
+		szInrMk = "03"
+	else
+		szInrMk = "01"
+	end if
+	
+	'주문유형에 따른 주문단가
+	szType = cmbType.cbkeydata
+    
+	Select Case szType
+		Case "11"										' 장개시전시간외(전일종가)
+			szPrice =  Form.GetCtlProp("#lblStd", "caption")
+		Case "12"										' 시간외종가(현재가)
+			szPrice =  Form.GetCtlProp("#lblHyun", "caption")
+		Case "01", "03", "04", "06", "07", "09", "10" 		' 시장/최유리/최우선지정가
+			szPrice =  Form.GetCtlProp("#lblHigh", "caption")		' 매수시(상한가), 매도시 ( 하한가 )	
+		Case else
+		    szPrice = edtPrc.caption
+	    
+			if edtPrc.caption = "0" or edtPrc.caption = "" then
+				Form.ShowAlert(g_szTitle, "주문가격을 입력하세요")
+				exit Sub
+			end if	    
+	End Select
+
+    '종목코드
+	szCode = Change_ItemCode()
+	
+	if cmbOrdType.currentindex == 0 or cmbOrdType.currentindex == "0" then
+		szSvcCd = "2" '매수
+	else
+		szSvcCd = "1" '매도
+	end if
+	
+    '계좌번호|채널유형|시장구분|매매구분(1매도, 2매수)|주문수량|주문단가|종목코드|신규청산구분
+    szData = szAcnt & "★" & szAcntCd & "★" & szInrMk & "★" & szSvcCd & "★" & edtQty.caption & "★" & szPrice & "★" & szCode & "★" & "1"
+    
+    Form.OpenPopup("mbtrs13000_pc" , szData , "")
+End Sub
+
+'============================================================================
+' btnMkBuy_OnClick : 시장가 매수버튼 클릭
+'============================================================================
+Sub btnMkClrn_OnClick()
+	g_bBtnMkClk = true
+	
+	Check_InputData(1)
+End Sub
+
+'============================================================================
+' btnBuy_OnClick : 매수버튼 클릭
+'============================================================================
+Sub btnClrn_OnClick()
+	g_bBtnMkClk = false
+	
+	Check_InputData(0)
+End Sub
+
+'============================================================================
+' btnCash_OnClick : 가능수량버튼 클릭
+'============================================================================
+Sub btnCash_OnClick()
+	if cmbType.currentindex = "0" or cmbType.currentindex = 0 then
+		if edtPrc.caption = "" or edtPrc.caption = "0" or edtPrc.caption = 0 then
+'			Form.ShowAlert(g_szTitle, "주문가격을 입력해주세요.")
+			edtPrc.caption = Form.GetCtlProp("#lblHyun", "caption")
+		end if
+		
+		Request_Able(1)
+	Else
+		Request_Able(1)
+	End if
+End Sub
+
+'============================================================================
+' btnQPlus_OnClick : 수량 + 버튼
+'============================================================================
+Sub btnQPlus_OnClick()	
+	Calc_Qty(0)
+End Sub
+
+'============================================================================
+' btnQMinus_OnClick : 수량 - 버튼
+'============================================================================
+Sub btnQMinus_OnClick()
+	Calc_Qty(1)
+End Sub
+
+'============================================================================
+' btnPPlus_OnClick : 가격 + 버튼
+'============================================================================
+Sub btnPPlus_OnClick()
+	Calc_Price(0)
+End Sub
+
+'============================================================================
+' btnPMinus_OnClick : 가격 - 버튼
+'============================================================================
+Sub btnPMinus_OnClick()
+	Calc_Price(1)
+End Sub
+
+'============================================================================
+' btnQty_OnClick
+'============================================================================
+Sub btnQty_OnClick()
+	Dim szPrc, szData
+
+	if Trim(edtPrc.caption) <> "" then
+		szPrc = edtPrc.caption
+	else
+		szPrc = Form.GetCtlProp("#lblHyun", "caption")
+	end if
+
+	' 종목코드
+	szCd = Change_ItemCode()
+	
+	if szCd <> "" then
+		'주문유형
+		szType = Check_OrdType()
+		
+		szData = "0★" & edtQty.caption & "★" & g_szMk & "★" & szPrc
+		szData = szData & "♥" & Form.GetCtlProp("#acnt", "total")			' 계좌번호(8)
+		szData = szData & "♥" & Form.GetCtlProp("#acnt", "sequence")		' 계좌일련번호(2)
+		'szData = szData & "♥" & Form.GetCtlProp("#edtPwd", "encdata")		' 계좌비밀번호
+		szData = szData & "♥" & ""										' 계좌비밀번호
+		szData = szData & "♥" & szCd									' 종목코드
+		szData = szData & "♥" & szType									' 주문구분코드
+		szData = szData & "♥" & "2"									' 매매구분코드(매수)
+		szData = szData & "♥" & "1"									' 조회구분코드
+		
+		Form.OpenPopup("mbtrs12000_p1", szData, "")
+	End if
+End Sub
+
+'============================================================================
+' btnPrc_OnClick
+'============================================================================
+Sub btnPrc_OnClick()
+	if g_szCd <> "" and g_szCd <> null then
+		Dim szUnit, szHigh, szLow
+		
+		szUnit = Form.GetCtlProp("#lblUnit", "caption")
+		szHigh = Form.GetCtlProp("#lblHigh", "caption")	
+		szLow  = Form.GetCtlProp("#lblLow", "caption")
+		
+		Form.OpenPopup("mbtrs12000_p2" , edtPrc.caption & "★" & g_szCd & "★" & g_szMk & "★" & szUnit & "★" & cmbType.currentindex & "★" & szHigh & "★" & szLow, "")
+	end if
+End Sub
+
+'============================================================================
+' btnBalance_OnClick
+'============================================================================
+Sub btnBalance_OnClick()
+	Form.triggerEvent("#", "13000_BALANCE_OPEN", "0")
+End Sub
+
+'============================================================================
+' cmbType_OnEditComplete
+'============================================================================
+Sub cmbType_OnEditComplete(iIndex)
+	Form.SetSharedData("B_TYPE", cmbType.currentindex)
+	Form.SetSharedData("STOCK_BUYTYPE", cmbType.cbkeydata)
+	Form.triggerEvent("#", "12000_BUYTYPE", "")
+	Visible_Control(iIndex)
+	
+	'20180716 LES START
+	'Position_Control()
+	
+	'20190806 LES START
+	if iIndex == 11 then
+		Label0.visible = true
+	else
+		Label0.visible = false
+	end if
+	'20190806 LES END
+	
+End Sub
+
+'============================================================================
+' edtPrc_OnEditComplete
+'============================================================================
+Sub edtPrc_OnEditComplete()
+	Form.SetSharedData("B_PRC", edtPrc.caption)
+	Form.SetCtlProp("#lblPrc", "caption", edtPrc.caption)
+End Sub
+
+'============================================================================
+' edtQty_OnEditComplete
+'============================================================================
+Sub edtQty_OnEditComplete()
+	Form.SetSharedData("B_QTY", edtQty.caption)
+End Sub
+
+'============================================================================
+' cmbQtyPer_OnEditComplete
+'============================================================================
+Sub cmbQtyPer_OnEditComplete(iIndex)
+'	if iIndex = 0 then
+'		btnCash.caption = "가능수량"
+'	else
+'		btnCash.caption = "가" & cmbQtyPer.caption
+'	end if
+	
+	btnCash_OnClick()
+End Sub
+
+'============================================================================
+Sub btnMiche_OnClick()
+	Form.triggerEvent("#", "13000_CONTRACT_OPEN", "")
+End Sub
+
+'============================================================================
+Sub cmbOrdType_OnEditComplete(iIndex)
+	'20230308 HSZ START : 상단 청산가능 수량 라벨 추가
+	g_szLabel = true
+	Request_Able(1)
+	'20230308 HSZ END
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrc_oder_001a" trcode="obtrc_oder_001a" compress="1" encryption="1" inputcheck="1" digitalsign="1" useattr="0" />
+			<TRAN tranid="obtrc_oder_005r" trcode="obtrc_oder_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obrtd_drng_036r" trcode="obrtd_drng_036r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrc_oder_001a" title="국내CFD_주문 처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="837" _ulen="619" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+ODER_UNPR^주문단가^19^0^7^0^0^0^0
+ODQT^주문수량^19^0^7^0^0^0^0
+ODER_CLS_CODE^주문구분코드^2^0^0^0^0^0^0
+ODER_COND_CLS_CODE^주문조건구분코드^1^0^0^0^0^0^0
+ORGL_ODER_NO^원주문번호^11^0^7^0^0^0^0
+WHOL_RCTF_CNCL_YN^전체정정취소여부^1^0^0^0^0^0^0
+WARN_CNFR_YN^경고확인여부^1^0^0^0^0^0^0
+SVC_CLS_CODE^서비스구분코드^3^0^0^0^0^0^0
+BSKT_NO^바스켓번호^10^0^0^0^0^0^0
+ODER_GRP_NO^주문그룹번호^11^0^7^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+ODER_OCRN_TYPE_CODE^주문발생유형코드^2^0^0^0^0^0^0
+LQDT_CLCD^반대매매구분코드^1^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="183" _ulen="141" >
+
+ODER_NO^주문번호^11^0^7^0^0^0^0
+WARN_CLS_CODE^경고구분코드^1^0^0^0^0^0^0
+UI_MSG_CNTT^UI메시지내용^100^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrc_oder_005r" title="국내CFD_청산주문가능수량 단건" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="297" _ulen="223" >
+
+SVC_CLS_CODE^서비스구분코드^3^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+BROK_CODE^브로커코드^20^0^0^0^0^0^0
+CFD_EXCH_CODE^CFD거래소코드^10^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="55" _ulen="43" >
+
+CLRN_ABLE_QTY^청산가능수량^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obrtd_drng_036r" title="(CFD계좌용)_주문증거금대체처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="235" _ulen="175" >
+
+CNFT_ACNO^상대계좌번호^8^0^0^0^0^0^0
+CNFT_ASNO^상대계좌일련번호^2^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+MNRC_ACNT_PRNM^입금계좌상품명^100^0^0^0^0^0^0
+DRNG_ABLE_AMT^출금가능금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
