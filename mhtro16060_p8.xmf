@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="0000" scrname="해외주식주문_잔고현재가조회" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,332,408,1" />
+	<CONTROL_INFO/>
+	<SCRIPT_INFO _len="4193" _ulen="4129" >
+
+'===========================================================================
+' 01. 업무구분 :
+' 02. 화면 : 
+' 03. 화면설명 : 
+' 04. 작성자 : 김철중
+' 05. 작성일 : 2020.04.29
+' 06. 수정이력 : 
+'===========================================================================
+
+Dim g_tCodeList()
+Dim g_nCnt
+Dim g_nCnt2
+Dim g_sData
+Dim g_nTotal
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "CodeList" then
+		
+		g_tCodeList = Split(sParam, "`")
+
+		if #g_tCodeList > 0 and sParam ~= "" then
+			if #g_tCodeList > 100 then
+				g_nCnt = Cint(#g_tCodeList) / 100
+				temp = Cint(#g_tCodeList) % 100
+				if temp > 0 then
+					g_nCnt = Cint(g_nCnt) + 1
+				end if
+			else
+				g_nCnt = 1
+			end if
+			
+			DATAMANAGER.ClearInputData( false, "ohhts_6000_010r" )
+			DATAMANAGER.RequestTranData( "ohhts_6000_010r" )
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "ohhts_6000_010r" then
+		for i=0 to #g_tCodeList-1
+			if i >= 99 then
+				exit for
+			end if 
+			
+			if g_nCnt2 >= #g_tCodeList then
+				exit for
+			end if
+			
+			tData = Split(g_tCodeList(g_nCnt2),"@")
+			
+			szCode = tData[1]
+			szMarket = ConvertExchCode(tData[0])
+		    
+			szDelay = ""
+			if szMarket <> "" then
+				szDelay = Form.GetSharedData("REALTIME_"..szMarket, 0 )
+			end if
+			
+			DATAMANAGER.SetDataValue(0, "ohhts_6000_010r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", i, "OV")
+			DATAMANAGER.SetDataValue(0, "ohhts_6000_010r", "InBlock1", "FID_INPUT_OVRS_ISCD", i, szCode)
+			DATAMANAGER.SetDataValue(0, "ohhts_6000_010r", "InBlock1", "FID_COND_MRKT_CLS_CODE", i, szMarket)
+			DATAMANAGER.SetDataValue(0, "ohhts_6000_010r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE", i, szDelay)
+			
+			g_nCnt2 = Cint(g_nCnt2) + 1
+		next
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "ohhts_6000_010r" then
+		Dim nCount, sData
+		nCount = DATAMANAGER.GetDataCount( 0, "ohhts_6000_010r" , "OutBlock1" )
+		'sData = ""
+		
+		for i=0 to nCount-1
+			Dim sKormark, sCode , sClose, sDiff, sDecimal
+
+			sKormark	= DATAMANAGER.GetDataValue( 0, "ohhts_6000_010r" , "OutBlock1", "FID_COND_MRKT_CLS_CODE" , i )
+			sCode	= DATAMANAGER.GetDataValue( 0, "ohhts_6000_010r" , "OutBlock1", "FIDX_ISCD" , i )
+			sClose	= DATAMANAGER.GetDataValue( 0, "ohhts_6000_010r" , "OutBlock1", "FIDX_PRPR" , i )
+			sDiff	= DATAMANAGER.GetDataValue( 0, "ohhts_6000_010r" , "OutBlock1", "FIDX_PRDY_VRSS" , i )
+			sDecimal	= DATAMANAGER.GetDataValue( 0, "ohhts_6000_010r" , "OutBlock1", "FIDX_DCPN_CNT" , i )
+			
+			sKormark = Form.GetItemCodeInfo( sKormark & "@" & sCode , "exchcode3") '다시 3자리로
+			
+			g_sData = g_sData & sKormark & "◆" & sKormark & "@" & sCode & "◆" & sClose & "◆" & sDiff & "◆" & sDecimal
+		
+			if i ~= nCount-1 then
+				g_sData = g_sData & "`"
+			end if
+		next
+		
+		g_nCnt = Cint(g_nCnt) - 1
+		if Cint(g_nCnt) > 0 then
+			DATAMANAGER.ClearInputData( false, "ohhts_6000_010r" )
+			DATAMANAGER.RequestTranData( "ohhts_6000_010r" )
+		else 
+			if g_sData ~= null and g_sData ~= "" then
+				Form.triggerEvent("#", "CodeData", g_sData)
+				
+				'20210119 LES START 
+				g_sData = ""
+				g_nCnt2 = 0
+				g_nTotal = Cint()
+				'20210119 LES END
+				
+			end if
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_sData = ""
+    g_nCnt2 = 0
+    g_nTotal = Cint()
+End Sub
+
+'============================================================================
+Function ConvertExchCode(sCode)
+	Dim exCode
+	exCode = ""
+    if sCode == "NAS" then
+	    exCode = "OQ"
+    elseif sCode == "AMX" then
+	    exCode = "AX"
+    elseif sCode == "NYS" then
+	    exCode = "NY"
+    elseif sCode == "SHS" then
+	    exCode = "SH"
+    elseif sCode == "SZS" then
+	    exCode = "SZ"
+    elseif sCode == "HKS" then
+	    exCode = "HK"
+    elseif sCode == "TSE" then
+	    exCode = "JP"
+    end if
+    
+    return exCode
+End Function
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="getGtsInterest" trcode="getGtsInterest" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_6000_010r" trcode="ohhts_6000_010r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="getGtsInterest" title="getGtsInterest" realdata="0" dessvr="H" datamode=".WSKJson" >
+				<TRBLOCK name="inblock" occurs="1" inout="in" _len="32" _ulen="32" >
+
+codelist^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="priceList" occurs="1" inout="out" _len="480" _ulen="480" >
+
+code^^-1^0^0^0^0^0^0
+symbol^^-1^0^0^0^0^0^0
+korname^^-1^0^0^0^0^0^0
+close^^-1^0^0^0^0^0^0
+sign^^-1^0^0^0^0^0^0
+diff^^-1^0^0^0^0^0^0
+rate^^-1^0^0^0^0^0^0
+tvol^^-1^0^0^0^0^0^0
+isvalid^^-1^0^0^0^0^0^0
+decimal^^-1^0^0^0^0^0^0
+market^^-1^0^0^0^0^0^0
+kormarket^^-1^0^0^0^0^0^0
+orgcode^^-1^0^0^0^0^0^0
+accessibility^^-1^0^0^0^0^0^0
+realcode^^-1^0^0^0^0^0^0
+open^^-1^0^0^0^0^0^0
+high^^-1^0^0^0^0^0^0
+low^^-1^0^0^0^0^0^0
+pbid^^-1^0^0^0^0^0^0
+pask^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_010r" title="해외주식 복수종목 현재가조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" occurs="200" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="200" inout="out" _len="489" _ulen="403" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1200^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^778^1200^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1200^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1200^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1200^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1200^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1200^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1200^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1200^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

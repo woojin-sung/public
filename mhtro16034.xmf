@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16034" scrname="종목분석_링크" version="2" writer="이현종" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="LinkForm1" ly_vert="0,0,375,562,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3251" _ulen="2927" >
+Dim g_GridListDic1
+g_GridListDic1 = {{
+   "mhtro16030_s01","주요지표순위"
+},{"mhtro16030_s02","거래량갱신"
+},{"mhtro16030_s03","거래량급증"
+},{"mhtro16030_s04","당일고저가근접"
+},{"mhtro16030_s05","신저/신고"
+},{"mhtro16030_s06","신고신저근접"
+},{"mhtro16030_s07","이격도상위"
+},{"mhtro16030_s08","A-H프리미엄"
+},{"mhtro16030_s09","평균거래량 대비 증감률 상위"
+},{"mhtro16030_s10","평균거래대금 대비 증감률 상위"
+},{"mhtro16030_s11","호가잔량상위"
+},{"mhtro16030_s12","회전률상위"
+},{"mhtro16030_s13","골든크로스"
+},{"mhtro16030_s14","시세급변"
+},{"mhtro16030_s15","상하한가"
+},{"mhtro16030_s16","거래량상위"
+},{"mhtro16030_s17","시가총액상위"
+},{"mhtro16030_s18","기간별등락"
+},{"mhtro16030_s20","조건검색결과"
+}}
+
+'============================================================================
+Sub Form_OnFormInit()
+	f_EventPopup()
+	Dim strOpenData, strOpenScreen, strSearchData
+	strOpenData = Form.GetOpenLinkData()
+	
+	if strOpenData == null or strOpenData == "" then
+		strOpenScreen = Form.GetSharedData("16034_OPEN_SCREEN", 0 )
+		strSearchData = Form.GetSharedData("16034_SEARCH_DATA", 0 )
+	else
+		Dim splitIndex
+		splitIndex = InStr( strOpenData, "★" )
+		if splitIndex > 0 then
+			Dim sTemp
+			sTemp = Split(strOpenData, "★")
+			strOpenScreen = sTemp[0]
+			strSearchData = sTemp[1]
+		else
+			strOpenScreen = strOpenData
+		end if
+	end if
+	
+	Form.SetSharedData("16034_OPEN_SCREEN", strOpenScreen)
+	Form.SetSharedData("16034_SEARCH_DATA", strSearchData)
+	
+	Dim strTitle
+	for i=0 to #g_GridListDic1 - 1 		
+		if g_GridListDic1[i][0] == strOpenScreen then
+			Form.SetTitleCaption(g_GridListDic1[i][1])
+			exit for
+		end if
+	next
+	LinkForm1.linkfile = strOpenScreen
+	if strOpenScreen == "mhtro16030_s20" then
+		Form.triggerEvent( "LinkForm1", "OPEN_DATA", strSearchData)
+	end if
+End Sub
+
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH"	then
+		Form.triggerEvent( "LinkForm1", "SCREEN_REFRESH", "")
+	end if
+end Sub
+
+'============================================================================
+' 해외주식 공지팝업
+'============================================================================
+function f_EventPopup()
+    Dim szEndDate
+    Dim szToday
+    Dim szDate
+    Dim nDiffDay
+    
+    '20200526 SWJ START : MTS 해외주식 실시간 서비스 비용 변동 안내 팝업
+    szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    szEndDate = "20200612"                            	' 팝업노출일
+	    szToday = Form.GetSharedData("&HOST_DATE", false )    ' 현재일
+	    szDate = Form.GetEnvData("EVENT_DATE_YH")            ' 일주일간 열지 않기 체크한 날짜
+    
+	    if tonumber(Form.DiffDate(szToday, szEndDate)) >= 0 then
+			if szDate == null or szDate == "" then
+			    Form.OpenPopup("popup_noti", "" , "")
+			else
+			    nDiffDay =  tonumber(Form.DiffDate(szDate, szToday))
+			    if nDiffDay > 7 then
+					Form.SetEnvData(0, "EVENT_DATE_YH", "")
+					Form.OpenPopup("popup_noti", "" , "")
+			    end if
+			end if
+	    end if
+	end if
+	'20200526 SWJ END
+
+end function
+
+	</SCRIPT_INFO>
+</ROOT>

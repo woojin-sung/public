@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16060" scrname="안내" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="notice_p14.png" ly_vert="0,0,375,520,1" />
+		<IMAGE name="Image5" imgpath="icon_main_11" ly_vert="340,4,30,28,1" />
+		<CHKBUTTON name="ChkButton0" fontsize="-2" ly_vert="9,532,20,27,1" />
+		<LABEL name="Label0" fontsize="-1" fontstyle="01" caption="GME 주식 분할(이하 '본건 분할')에" ly_vert="28,530,355,23,1" />
+		<LABEL name="Label1" fontsize="-1" fontstyle="01" caption="대한 '투자자계좌부 선반영 기재'와 관련하여" ly_vert="28,552,355,23,1" />
+		<LABEL name="Label2" fontsize="-1" fontstyle="01" caption="상기 내용에 동의합니다." ly_vert="28,574,355,23,1" />
+		<BUTTON name="btnCancel" caption="닫기" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,602,188,45,1" />
+		<BUTTON name="btnOk" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="188,602,188,45,1" />
+		<BUTTON name="Button0" btnimage="alpha" ly_vert="0,473,375,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2214" _ulen="2120" >
+'============================================================================
+'20201111 SWJ START : 엔비디아 주식 분할 안내
+'============================================================================
+Sub Image5_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Button0_OnClick()
+	'Form.OpenPopup("notice_p4","","")
+	Form.openExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=fstock&bbsCnttTurnNo=342&listCnt=10&pageNum=1&searchDiv=&searchText=")
+End Sub
+'============================================================================
+Sub btnOk_OnClick()
+	
+	if ChkButton0.checkstate == "1" then
+	
+		szCustNum = Form.GetSharedData("&CUST_NUM", false)
+		
+		DATAMANAGER.SetDataValue(0, "obtro_acnt_901a", "InBlock1", "PROS_CLS_CODE"	, 0 , "I")
+		DATAMANAGER.SetDataValue(0, "obtro_acnt_901a", "InBlock1", "BSWR_CLCD" 		, 0 , "06") '애플테슬라 주식분할 01, 엔비디아 02, TQQQ/SSO/UPRO 03, AMZN 04 GOOGL,GOOG 05
+		DATAMANAGER.SetDataValue(0, "obtro_acnt_901a", "InBlock1", "CSNO" 			, 0 , szCustNum)
+		DATAMANAGER.SetDataValue(0, "obtro_acnt_901a", "InBlock1", "AGRM_YN" 		, 0 , "Y")
+		DATAMANAGER.RequestTranData("obtro_acnt_901a")
+	
+	else
+		Form.ShowAlert("안내", "유의사항 동의여부를 확인해주시기 바랍니다.")
+	end if
+	
+	
+End Sub
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID =="obtro_acnt_901a" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	if sCheckState = "1" then
+		ServerMode = Form.GetSharedData("&SERVER_MODE", false)
+	
+		If ServerMode == "1" Then	'개발기
+			Form.openExternalBrowser("https://testhome.imeritz.com/include/resource/comm/ctcn/notice/mts_meritz_gme.pdf")
+		Else
+			Form.openExternalBrowser("https://home.imeritz.com/include/resource/comm/ctcn/notice/mts_meritz_gme.pdf")
+		End If
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtro_acnt_901a" trcode="obtro_acnt_901a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtro_acnt_901a" title="해외주식 고객 동의여부 관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="168" _ulen="128" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+BSWR_CLCD^업무구분코드^2^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

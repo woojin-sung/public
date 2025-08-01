@@ -1,0 +1,747 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16030" scrname="종목분석-조건검색" version="2" writer="이호철" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,522,1" />
+	<CONTROL_INFO>
+		<COMBO name="Combo0" fgcolor="004:000000000" cbinputdatatext="US`미국
+CN`중국
+HK`홍콩
+JP`일본" disptype="1" ly_vert="6,9,117,39,1" />
+		<CHKBUTTON name="ChkButton0" chkcaption="현재가" unchkcaption="현재가" ly_vert="6,57,90,39,1" />
+		<EDIT name="Edit0" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="98,57,122,39,1" />
+		<EDIT name="Edit1" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="247,57,122,39,1" />
+		<LABEL name="Label0" caption="~" ly_vert="220,57,18,39,1" />
+		<CHKBUTTON name="ChkButton1" chkcaption="시가총액     (백만)" unchkcaption="시가총액     (백만)" ly_vert="6,107,90,39,1" />
+		<EDIT name="Edit2" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="98,107,122,39,1" />
+		<EDIT name="Edit3" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="247,107,122,39,1" />
+		<LABEL name="Label1" caption="~" ly_vert="220,107,18,39,1" />
+		<CHKBUTTON name="ChkButton2" fontsize="-1" chkcaption="거래량(주)" unchkcaption="거래량(주)" ly_vert="6,157,90,39,1" />
+		<EDIT name="Edit4" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="98,157,122,39,1" />
+		<EDIT name="Edit5" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="247,157,122,39,1" />
+		<LABEL name="Label2" caption="~" ly_vert="220,157,18,39,1" />
+		<CHKBUTTON name="ChkButton3" chkcaption="EPS" unchkcaption="EPS" ly_vert="6,207,90,39,1" />
+		<EDIT name="Edit6" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="98,207,122,39,1" />
+		<EDIT name="Edit7" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="247,207,122,39,1" />
+		<LABEL name="Label3" caption="~" ly_vert="220,207,18,39,1" />
+		<CHKBUTTON name="ChkButton4" chkcaption="PER" unchkcaption="PER" ly_vert="6,255,90,39,1" />
+		<EDIT name="Edit8" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="98,255,122,39,1" />
+		<EDIT name="Edit9" autofontsize="1" mask="0,0,,,0,,0,1,0,0,0" imetype="1" ly_vert="247,255,122,39,1" />
+		<LABEL name="Label4" caption="~" ly_vert="220,255,18,39,1" />
+		<BUTTON name="Button0" caption="검색" fgcolor="012:000000000" fontsize="2" ly_vert="6,474,363,39,1" />
+		<LABEL name="Label5" border="1" ly_vert="0,467,375,1,1" />
+		<RADIOGROUP name="RadioGroup0" buttonshape="1" buttonsnumber="4" initselectionuse="1" initselection="0" ly_vert="130,9,240,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" position="0,0,60,39" />
+				<RADIO no="1" text="뉴욕" transfervalue="321" position="60,0,60,39" />
+				<RADIO no="2" text="아멕스" transfervalue="66" position="120,0,60,39" />
+				<RADIO no="3" text="나스닥" transfervalue="537" position="180,0,60,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<RADIOGROUP name="RadioGroup1" visible="0" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="130,9,240,39,0" >
+			<RADIO_INFO>
+				<RADIO no="0" text="상해" position="0,0,120,39" />
+				<RADIO no="1" text="심천" position="120,0,120,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="19111" _ulen="18191" >
+'===========================================================================
+' 01. 업무구분 : 해외주식
+' 02. 화면 :  ETF
+' 03. 화면설명 : 
+' 04. 작성자 : 이재원
+' 05. 작성일 : 2017.10.12
+' 06. 수정이력 :
+'===========================================================================
+
+'215`상해
+'214`심천
+'104`홍콩
+'321`뉴욕
+'66`아멕스
+'537`나스닥
+
+Dim g_tCmbData1
+Dim g_tCmbData2
+Dim g_nPage
+Dim g_xPos
+Dim g_nIndex
+Dim g_sKeyName
+Dim g_nation
+Dim g_market
+Dim g_stpr
+Dim g_enpr
+Dim g_stsi
+Dim g_ensi
+Dim g_stvo
+Dim g_envo
+Dim g_step
+Dim g_enep
+Dim g_stpe
+Dim g_enpe
+Dim KEYPAD_POPUP
+
+g_tCmbData1 = "상해^심천^홍콩^뉴욕^아멕스^나스닥" '미/홍/중			
+g_tCmbData2 = "도쿄^호치민^하노이" ' 일/베
+g_nPage = 1
+g_xPos  = ""
+g_nIndex = 0
+g_sKeyName = ""
+g_nation = ""	'국가
+g_market = ""	'거래소
+g_stpr = ""	'현재가
+g_enpr = ""
+g_stsi = ""	'시가총액
+g_ensi = ""	
+g_stvo = ""	'거래량(주)
+g_envo = ""
+g_step = ""	'EPS
+g_enep = ""
+g_stpe = ""	'PER
+g_enpe = ""
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'콤보 배경색 : 검정색
+	Combo0.bgimagetype = "1" 
+	Dim sExid
+	Dim ChkBtn0, ChkBtn1, ChkBtn2, ChkBtn3, ChkBtn4
+	Dim g_stpr, g_enpr
+	Dim g_stsi, g_ensi
+	Dim g_stvo, g_envo
+	Dim g_step, g_enep
+	Dim g_stpe, g_enpe
+	
+	sExid = Form.GetSharedData( "16030_SEARCH_EXID", 0 )
+	ChkBtn0 = Form.GetSharedData( "16030_SEARCH_CHK0", 0 )
+	ChkBtn1 = Form.GetSharedData( "16030_SEARCH_CHK1", 0 )
+	ChkBtn2 = Form.GetSharedData( "16030_SEARCH_CHK2", 0 )
+	ChkBtn3 = Form.GetSharedData( "16030_SEARCH_CHK3", 0 )
+	ChkBtn4 = Form.GetSharedData( "16030_SEARCH_CHK4", 0 )
+	g_stpr = Form.GetSharedData( "16030_SEARCH_STPR", 0 )
+	g_enpr = Form.GetSharedData( "16030_SEARCH_ENPR", 0 )
+	g_stsi = Form.GetSharedData( "16030_SEARCH_STSI", 0 )
+	g_ensi = Form.GetSharedData( "16030_SEARCH_ENSI", 0 )
+	g_stvo = Form.GetSharedData( "16030_SEARCH_STVO", 0 )
+	g_envo = Form.GetSharedData( "16030_SEARCH_ENVO", 0 )
+	g_step = Form.GetSharedData( "16030_SEARCH_STEP", 0 )
+	g_enep = Form.GetSharedData( "16030_SEARCH_ENEP", 0 )
+	g_stpe = Form.GetSharedData( "16030_SEARCH_STPE", 0 )
+	g_enpe = Form.GetSharedData( "16030_SEARCH_ENPE", 0 )
+		
+	Combo0.cbkeydata = sExid
+	ChkButton0.checkstate = ChkBtn0
+	ChkButton1.checkstate = ChkBtn1
+	ChkButton2.checkstate = ChkBtn2
+	ChkButton3.checkstate = ChkBtn3
+	ChkButton4.checkstate = ChkBtn4
+	if ChkBtn0 == "1" then
+		Edit0.caption = g_stpr
+		Edit1.caption = g_enpr
+	end if
+	if ChkBtn1 == "1" then
+		Edit2.caption = g_stsi
+		Edit3.caption = g_ensi
+	end if	
+	if ChkBtn2 == "1" then
+		Edit4.caption = g_stvo
+		Edit5.caption = g_envo
+	end if
+	if ChkBtn3 == "1" then
+		Edit6.caption = g_step
+		Edit7.caption = g_enep
+	end if
+	if ChkBtn4 == "1" then
+		Edit8.caption = g_stpe
+		Edit9.caption = g_enpe
+	end if
+	SetControlNation()
+end Sub
+
+function CtlClear()
+	 g_sKeyName = ""
+	 g_nation = ""	'국가
+	 g_market = ""	'거래소
+	 g_stpr = ""	'현재가
+	 g_enpr = ""
+	 g_stsi = ""	'시가총액
+	 g_ensi = ""	
+	 g_stvo = ""	'거래량(주)
+	 g_envo = ""
+	 g_step = ""	'EPS
+	 g_enep = ""
+	 g_stpe = ""	'PER
+	 g_enpe = ""
+
+	ChkButton0.checkstate = 0
+	ChkButton1.checkstate = 0
+	ChkButton2.checkstate = 0
+	ChkButton3.checkstate = 0
+	ChkButton4.checkstate = 0
+'	Edit0.enable = false
+'	Edit1.enable = false
+'	Edit2.enable = false
+'	Edit3.enable = false
+'	Edit4.enable = false
+'	Edit5.enable = false
+'	Edit6.enable = false
+'	Edit7.enable = false
+'	Edit8.enable = false
+'	Edit9.enable = false
+	Edit0.caption = ""
+	Edit1.caption = ""
+	Edit2.caption = ""
+	Edit3.caption = ""
+	Edit4.caption = ""
+	Edit5.caption = ""
+	Edit6.caption = ""
+	Edit7.caption = ""
+	Edit8.caption = ""
+	Edit9.caption = ""
+	
+	Form.SetSharedData("16030_SEARCH_EXID", Combo0.cbkeydata)
+	Form.SetSharedData("16030_SEARCH_CHK0", "0")
+	Form.SetSharedData("16030_SEARCH_STPR", "")
+	Form.SetSharedData("16030_SEARCH_ENPR", "")
+	Form.SetSharedData("16030_SEARCH_CHK1", "0")
+	Form.SetSharedData("16030_SEARCH_STSI", "")
+	Form.SetSharedData("16030_SEARCH_ENSI", "")
+	Form.SetSharedData("16030_SEARCH_CHK2", "0")
+	Form.SetSharedData("16030_SEARCH_STVO", "")
+	Form.SetSharedData("16030_SEARCH_ENVO", "")
+	Form.SetSharedData("16030_SEARCH_CHK3", "0")
+	Form.SetSharedData("16030_SEARCH_STEP", "")
+	Form.SetSharedData("16030_SEARCH_ENEP", "")
+	Form.SetSharedData("16030_SEARCH_CHK4", "0")
+	Form.SetSharedData("16030_SEARCH_STPE", "")
+	Form.SetSharedData("16030_SEARCH_ENPE", "")	
+	
+	Button0.enable = false
+end function
+
+'============================================================================
+Sub Combo0_OnEditComplete(iIndex)
+	SetControlNation()
+	CtlClear() 
+end Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	CtlClear()
+end Sub
+
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	if sCheckState == "1" then
+'		Edit0.enable = true
+'		Edit1.enable = true
+	else
+'		Edit0.enable = false
+'		Edit1.enable = false
+		Edit0.caption = ""
+		Edit1.caption = ""
+	end if
+	
+	Check_Button0_Enable()
+end Sub
+
+'============================================================================
+Sub ChkButton1_OnChange(sCheckState)
+	if sCheckState == "1" then
+'		Edit2.enable = true
+'		Edit3.enable = true
+	else
+'		Edit2.enable = false
+'		Edit3.enable = false
+		Edit2.caption = ""
+		Edit3.caption = ""
+	end if
+	
+	Check_Button0_Enable()
+end Sub
+
+'============================================================================
+function ChkButton2_OnChange(sCheckState)
+	if sCheckState == "1" then
+'		Edit4.enable = true
+'		Edit5.enable = true
+	else
+'		Edit4.enable = false
+'		Edit5.enable = false
+		Edit4.caption = ""
+		Edit5.caption = ""
+	end if
+	
+	Check_Button0_Enable()
+end function
+
+'============================================================================
+Sub ChkButton3_OnChange(sCheckState)
+	if sCheckState == "1" then
+'		Edit6.enable = true
+'		Edit7.enable = true
+	else
+'		Edit6.enable = false
+'		Edit7.enable = false
+		Edit6.caption = ""
+		Edit7.caption = ""
+	end if
+	
+	Check_Button0_Enable()
+end Sub
+
+'============================================================================
+Sub ChkButton4_OnChange(sCheckState)
+	if sCheckState == "1" then
+'		Edit8.enable = true
+'		Edit9.enable = true
+	else
+'		Edit8.enable = false
+'		Edit9.enable = false
+		Edit8.caption = ""
+		Edit9.caption = ""
+	end if
+	
+	Check_Button0_Enable()
+end Sub
+
+'============================================================================
+function _tonumber(data)
+	return tonumber(data) or 0
+end function
+
+'============================================================================
+' 거래소명 ID 숫자로 변환
+'============================================================================
+function TransformName_Exid(sValue)
+	if sValue == "홍콩" then	' HKS
+		return "104"
+	elseif sValue == "항셍 지수" then ' HSI
+		return "529"
+	elseif sValue == "상해" then ' SHS
+		return "215"
+	elseif sValue == "심천" then ' SZS
+		return "214"
+	elseif sValue == "뉴욕" then ' NYS
+		return "321"
+	elseif sValue == "아멕스" then ' AMX
+		return "66"
+	elseif sValue == "나스닥" then ' NAS
+		return "537"
+	elseif sValue == "미국" then ' NAO
+		return "990"
+	elseif sValue == "S&P" then ' SPI
+		return "625"
+	elseif sValue == "다우존스" then ' DJI
+		return "310"
+	elseif sValue == "도쿄" then ' TSE
+		return "106"
+	elseif sValue == "오사카" then ' OSE 
+		return "107"
+	elseif sValue == "자스닥" then ' JSD
+		return "112"
+	elseif sValue == "니케이" then ' NII
+		return "889"
+	elseif sValue == "나스닥" then ' NAI (미국)
+		return "538"
+	elseif sValue == "호치민" then ' HSX
+		return "770"
+	elseif sValue == "하노이" then ' HNX
+		return "771"
+	end if
+end function
+
+
+'============================================================================
+function Check_Button0_Enable()	
+	Dim ChkBtn0
+	Dim ChkBtn1
+	Dim ChkBtn2
+	Dim ChkBtn3
+	Dim ChkBtn4
+	
+	ChkBtn0 = ChkButton0.checkstate
+	ChkBtn1 = ChkButton1.checkstate
+	ChkBtn2 = ChkButton2.checkstate
+	ChkBtn3 = ChkButton3.checkstate
+	ChkBtn4= ChkButton4.checkstate
+	
+	Button0.enable = 0
+	
+	' 체크박스 상태 확인
+	if ChkBtn0 == "1" or ChkBtn1 == "1" or ChkBtn2 == "1" or ChkBtn3 == "1" or ChkBtn4 == "1"  then
+		if _tonumber(Edit0.caption) >= 0 and _tonumber(Edit1.caption) >= 0 then
+			Button0.enable = 1
+		elseif _tonumber(Edit2.caption) >= 0 and _tonumber(Edit3.caption) >= 0 then
+			Button0.enable = 1
+		elseif _tonumber(Edit4.caption) >= 0 and _tonumber(Edit5.caption) >= 0 then
+			Button0.enable = 1
+		elseif _tonumber(Edit6.caption) >= 0 and _tonumber(Edit7.caption) >= 0 then
+			Button0.enable = 1
+		elseif _tonumber(Edit8.caption) >= 0 and _tonumber(Edit9.caption) >= 0 then
+			Button0.enable = 1
+		end if
+	else
+		Button0.enable = 0
+	end if
+
+end function
+
+'
+'============================================================================
+Sub Button0_OnClick()
+	Dim result
+	result = isValidationCheck()
+	if result == true then
+		' 검색	
+		g_nation =  Combo0.cbkeydata '국가
+		g_stpr =  Edit0.caption 	'현재가
+		g_enpr =  Edit1.caption 
+		g_stsi =  Edit2.caption 	'시가총액 
+		g_ensi =  Edit3.caption 	
+		g_stvo =  Edit4.caption 	'거래량(주)
+		g_envo =  Edit5.caption 
+		g_step =  Edit6.caption 	'EPS
+		g_enep =  Edit7.caption 
+		g_stpe =  Edit8.caption 	'PER
+		g_enpe =  Edit9.caption 
+		
+		Dim ChkBtn0
+		Dim ChkBtn1
+		Dim ChkBtn2
+		Dim ChkBtn3
+		Dim ChkBtn4
+		
+		ChkBtn0 = ChkButton0.checkstate
+		ChkBtn1 = ChkButton1.checkstate
+		ChkBtn2 = ChkButton2.checkstate
+		ChkBtn3 = ChkButton3.checkstate
+		ChkBtn4= ChkButton4.checkstate
+		
+		Form.SetSharedData("16030_SEARCH_EXID", Combo0.cbkeydata)
+		Form.SetSharedData("16030_SEARCH_CHK0", ChkBtn0)
+		Form.SetSharedData("16030_SEARCH_STPR", g_stpr)
+		Form.SetSharedData("16030_SEARCH_ENPR", g_enpr)
+		Form.SetSharedData("16030_SEARCH_CHK1", ChkBtn1)
+		Form.SetSharedData("16030_SEARCH_STSI", g_stsi)
+		Form.SetSharedData("16030_SEARCH_ENSI", g_ensi)
+		Form.SetSharedData("16030_SEARCH_CHK2", ChkBtn2)
+		Form.SetSharedData("16030_SEARCH_STVO", g_stvo)
+		Form.SetSharedData("16030_SEARCH_ENVO", g_envo)
+		Form.SetSharedData("16030_SEARCH_CHK3", ChkBtn3)
+		Form.SetSharedData("16030_SEARCH_STEP", g_step)
+		Form.SetSharedData("16030_SEARCH_ENEP", g_enep)
+		Form.SetSharedData("16030_SEARCH_CHK4", ChkBtn4)
+		Form.SetSharedData("16030_SEARCH_STPE", g_stpe)
+		Form.SetSharedData("16030_SEARCH_ENPE", g_enpe)		
+		
+	'	g_stpr = _tonumber( Edit0.caption )	'현재가
+	'	g_enpr = _tonumber( Edit1.caption )
+	'	g_stsi = _tonumber( Edit2.caption )	'시가총액
+	'	g_ensi = _tonumber( Edit3.caption )	
+	'	g_stvo = _tonumber( Edit4.caption )	'거래량(주)
+	'	g_envo = _tonumber( Edit5.caption )
+	'	g_step = _tonumber( Edit6.caption )	'EPS
+	'	g_enep = _tonumber( Edit7.caption )
+	'	g_stpe = _tonumber( Edit8.caption )	'PER
+	'	g_enpe = _tonumber( Edit9.caption )
+		
+		if g_nation == "US" then
+			if RadioGroup0.currentindex == "0" then
+				g_market = ""
+			elseif RadioGroup0.currentindex == "1" then
+				g_market = "NY"
+			elseif RadioGroup0.currentindex == "2" then
+				g_market = "AX"
+			elseif RadioGroup0.currentindex == "3" then
+				g_market = "OQ"
+			end if
+		elseif g_nation == "CN" then
+			if RadioGroup1.currentindex == "0" then
+				g_market = "SH"
+			elseif RadioGroup1.currentindex == "1" then
+				g_market = "SZ"
+			end if
+		else
+			g_market = ""
+		end if
+		
+		sOpenData = g_nation
+		sOpenData = sOpenData.."`"..g_market
+		sOpenData = sOpenData.."`"..g_stpr
+		sOpenData = sOpenData.."`"..g_enpr
+		sOpenData = sOpenData.."`"..g_stsi
+		sOpenData = sOpenData.."`"..g_ensi
+		sOpenData = sOpenData.."`"..g_stvo
+		sOpenData = sOpenData.."`"..g_envo
+		sOpenData = sOpenData.."`"..g_step
+		sOpenData = sOpenData.."`"..g_enep
+		sOpenData = sOpenData.."`"..g_stpe
+		sOpenData = sOpenData.."`"..g_enpe
+		
+		if sOpenData <> nil and sOpenData <> "" then
+'			Form.OpenPopup("mhtro16030_s20" , sOpenData , "")
+			Form.OpenScreen("16034", "mhtro16030_s20★"..sOpenData)
+		end if
+	end if	
+end Sub
+
+Sub isValidationCheck()
+	Dim isChk1, isChk2, isChk3, isChk4, isChk5
+	isChk1 = ChkButton0.checkstate
+	isChk2 = ChkButton1.checkstate
+	isChk3 = ChkButton2.checkstate
+	isChk4 = ChkButton3.checkstate
+	isChk5 = ChkButton4.checkstate
+	
+	Dim firstString, secondString
+	Dim firstNum, secondNum
+	if isChk1 == "1" then
+		firstString = Edit0.caption
+		secondString = Edit1.caption
+		if firstString <> nil and firstString <> "" and firstString <> nil and firstString <> "" then
+			firstNum = _tonumber( firstString )
+			secondNum = _tonumber( secondString )
+			if firstNum > secondNum then
+				Form.ShowAlert("알림", "현재가 조건이 잘못되었습니다.")
+				return false
+			end if
+		else
+			Form.ShowAlert("알림", "현재가 조건이 입력되지 않았습니다.")
+			return false
+		end if		
+	end if
+	if isChk2 == "1" then
+		firstString = Edit2.caption
+		secondString = Edit3.caption
+		if firstString <> nil and firstString <> "" and firstString <> nil and firstString <> "" then
+			firstNum = _tonumber( firstString )
+			secondNum = _tonumber( secondString )
+			if firstNum > secondNum then
+				Form.ShowAlert("알림", "시가총액 조건이 잘못되었습니다.")
+				return false
+			end if
+		else
+			Form.ShowAlert("알림", "시가총액 조건이 입력되지 않았습니다.")
+			return false
+		end if		
+	end if
+	if isChk3 == "1" then
+		firstString = Edit4.caption
+		secondString = Edit5.caption
+		if firstString <> nil and firstString <> "" and firstString <> nil and firstString <> "" then
+			firstNum = _tonumber( firstString )
+			secondNum = _tonumber( secondString )
+			if firstNum > secondNum then
+				Form.ShowAlert("알림", "거래량(주) 조건이 잘못되었습니다.")
+				return false
+			end if
+		else
+			Form.ShowAlert("알림", "거래량(주) 조건이 입력되지 않았습니다.")
+			return false
+		end if		
+	end if
+	if isChk4 == "1" then
+		firstString = Edit6.caption
+		secondString = Edit7.caption
+		if firstString <> nil and firstString <> "" and firstString <> nil and firstString <> "" then
+			firstNum = _tonumber( firstString )
+			secondNum = _tonumber( secondString )
+			if firstNum > secondNum then
+				Form.ShowAlert("알림", "EPS 조건이 잘못되었습니다.")
+				return false
+			end if
+		else
+			Form.ShowAlert("알림", "EPS 조건이 입력되지 않았습니다.")
+			return false
+		end if		
+	end if
+	if isChk5 == "1" then
+		firstString = Edit8.caption
+		secondString = Edit9.caption
+		if firstString <> nil and firstString <> "" and firstString <> nil and firstString <> "" then
+			firstNum = _tonumber( firstString )
+			secondNum = _tonumber( secondString )
+			if firstNum > secondNum then
+				Form.ShowAlert("알림", "PER 조건이 잘못되었습니다.")
+				return false
+			end if
+		else
+			Form.ShowAlert("알림", "PER 조건이 입력되지 않았습니다.")
+			return false
+		end if		
+	end if
+	
+	return true
+end Sub
+
+'============================================================================
+Sub Edit0_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit0.caption))
+	if sTemp <> Trim(Edit0.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit0.caption = ""
+	else
+		Edit0.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit1_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit1.caption))
+	if sTemp <> Trim(Edit1.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit1.caption = ""
+	else
+		Edit1.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit2_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit2.caption))
+	if sTemp <> Trim(Edit2.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit2.caption = ""
+	else
+		Edit2.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit3_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit3.caption))
+	if sTemp <> Trim(Edit3.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit3.caption = ""
+	else
+		Edit3.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit4_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit4.caption))
+	if sTemp <> Trim(Edit4.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit4.caption = ""
+	else
+		Edit4.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit5_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit5.caption))
+	if sTemp <> Trim(Edit5.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit5.caption = ""
+	else
+		Edit5.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit6_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit6.caption))
+	if sTemp <> Trim(Edit6.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit6.caption = ""
+	else
+		Edit6.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit7_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit7.caption))
+	if sTemp <> Trim(Edit7.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit7.caption = ""
+	else
+		Edit7.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit8_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit8.caption))
+	if sTemp <> Trim(Edit8.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit8.caption = ""
+	else
+		Edit8.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub Edit9_OnEditComplete()
+	Dim sTemp
+	sTemp = Trim(CDbl(Edit9.caption))
+	if sTemp <> Trim(Edit9.caption)	then
+		Form.ShowAlert("알림", "숫자를 입력해주세요")
+		Edit9.caption = ""
+	else
+		Edit9.caption = sTemp
+	end if
+	
+	Check_Button0_Enable()
+End Sub
+
+'============================================================================
+Sub SetControlNation()
+	RadioGroup0.setCurIndexSilent("0")
+	RadioGroup1.setCurIndexSilent("0")
+
+	if Combo0.currentindex ==  "0" then
+		RadioGroup0.visible = 1
+		RadioGroup1.visible = 0
+	elseif Combo0.currentindex ==  "1" then
+		RadioGroup0.visible = 0
+		RadioGroup1.visible = 1
+	else
+		RadioGroup0.visible = 0
+		RadioGroup1.visible = 0
+	end if
+End Sub
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	Form_OnRefresh()
+End Sub
+
+'============================================================================
+Sub RadioGroup1_OnClick(nIndex)
+	Form_OnRefresh()
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

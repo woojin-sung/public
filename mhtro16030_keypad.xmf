@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16030" scrname="가격키패드" version="2" writer="김보라" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelBG" fgcolor="000:000000000" bgalpha="100" bgcolor="000:255255255" click="1" ly_vert="-2,308,329,292,1" />
+		<LABEL name="LabelBack" fgcolor="000:255255255" bgcolor="000:255255255" click="1" ly_vert="-1,308,375,292,1" />
+		<LABEL name="Label3" bgcolor="000:242242242" ly_vert="-1,315,376,199,1" />
+		<BUTTON name="BtnOK" caption="확인" fgcolor="000:255255255" btnimage="btn_basic_black_n.9" ly_vert="190,522,173,32,1" />
+		<EDIT name="EditInputBG" enable="0" autofontsize="1" halign="2" imetype="1" clearall="0" imagefilepth="form_input_n.9.png" ly_vert="41,277,291,30,1" />
+		<LABEL name="EditInput" halign="2" paddinginfo="12,0,12,0" ly_vert="68,277,260,30,1" />
+		<LABEL name="LabelUnit" visible="0" mask="0,0,,,0,,0,0,0" ly_vert="279,6,69,20,0" />
+		<BUTTON name="BtnE" btnimage="btn_sidemenu_del" ly_vert="47,287,15,12,1" />
+		<BUTTON name="BtnC" caption="C" btnimage="btn_keypad_n.9" ly_vert="131,473,111,32,1" />
+		<BUTTON name="BtnBack" btnimage="btn_keypad_backspace_n.9" ly_vert="10,473,111,32,1" />
+		<BUTTON name="BtnDot" caption="." btnimage="btn_keypad_n.9" ly_vert="253,473,111,32,1" />
+		<BUTTON name="Btn1" caption="1" btnimage="btn_keypad_n.9" ly_vert="10,322,111,32,1" />
+		<BUTTON name="Btn2" caption="2" btnimage="btn_keypad_n.9" ly_vert="131,322,111,32,1" />
+		<BUTTON name="Btn3" caption="3" btnimage="btn_keypad_n.9" ly_vert="253,322,111,32,1" />
+		<BUTTON name="Btn4" caption="4" btnimage="btn_keypad_n.9" ly_vert="10,359,111,32,1" />
+		<BUTTON name="Btn5" caption="5" btnimage="btn_keypad_n.9" ly_vert="131,359,111,32,1" />
+		<BUTTON name="Btn6" caption="6" btnimage="btn_keypad_n.9" ly_vert="253,359,111,32,1" />
+		<BUTTON name="Btn7" caption="7" btnimage="btn_keypad_n.9" ly_vert="10,397,111,32,1" />
+		<BUTTON name="Btn8" caption="8" btnimage="btn_keypad_n.9" ly_vert="131,397,111,32,1" />
+		<BUTTON name="Btn9" caption="9" btnimage="btn_keypad_n.9" ly_vert="253,397,111,32,1" />
+		<BUTTON name="Btn0" caption="0" btnimage="btn_keypad_n.9" ly_vert="10,435,111,32,1" />
+		<BUTTON name="Btn00" caption="00" btnimage="btn_keypad_n.9" ly_vert="131,435,111,32,1" />
+		<BUTTON name="Btn000" caption="000" btnimage="btn_keypad_n.9" ly_vert="253,435,111,32,1" />
+		<BUTTON name="BtnM" btnimage="btn_input_minus_n.9" ly_vert="15,456,45,50,1" />
+		<BUTTON name="BtnP" btnimage="btn_input_plus_n.9" ly_vert="333,277,31,30,1" />
+		<LABEL name="LabelMarket" visible="0" ly_vert="279,25,69,19,0" />
+		<LABEL name="LabelTtyp" visible="0" ly_vert="280,46,69,19,0" />
+		<LABEL name="Label1" bgcolor="000:153153153" ly_vert="1,314,373,1,1" />
+		<LABEL name="Label2" bgcolor="000:153153153" ly_vert="0,515,375,1,1" />
+		<BUTTON name="BtnCancel" caption="닫기" btnimage="btn_keypad_n.9" ly_vert="9,522,173,32,1" />
+		<LABEL name="Label4" bgcolor="000:034034034" ly_vert="0,269,375,2,1" />
+		<LABEL name="Label5" bgcolor="000:153153153" ly_vert="-6,269,1,244,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="14138" _ulen="13622" >
+'===========================================================================
+' 화  면  명 : 가격키패드
+' 화  면  ID : 
+' 개      요 : 
+' 작      성 : 2017.10.12
+' 수      정 : 이재원
+'===========================================================================
+Dim g_sDecimal 
+g_sDecimal = "0"
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sRevData
+	sRevData = Form.GetOpenLinkData( )
+	
+	if sRevData <> nil and sRevData <> "" then
+		Dim sTemp 
+		sTemp = Split( sRevData, "^" )
+		
+		Dim nNum 
+		nNum = _tonumber(sTemp[1])
+		Dim sMarket 
+		sMarket = sTemp[4]
+		Dim sTtyp 
+		sTtyp = sTemp[5]
+				
+		g_sDecimal 		= _tonumber(sTemp[3])
+		if g_sDecimal == 0 then
+			BtnDot.enable = false
+		end if
+		EditInput.caption = sTemp[1]
+		LabelUnit.caption = sTemp[2]
+		LabelMarket.caption = sTemp[4]
+		LabelTtyp.caption = sTemp[5]
+		
+	end if
+end Sub
+
+'============================================================================
+Sub ImgClose_OnClick()
+	Form.CloseForm( )
+end Sub
+
+'============================================================================
+Sub BtnOK_OnClick()
+	Form.SendReturnToParent( "가격키패드" , EditInput.caption )
+	
+	Form.CloseForm( )
+end Sub
+
+'============================================================================
+Sub BtnE_OnClick()
+	EditInput.caption = "0"
+end Sub
+
+'============================================================================
+Sub BtnC_OnClick()
+	EditInput.caption = "0"
+end Sub
+
+'============================================================================
+Sub BtnBack_OnClick()
+	Dim sNum
+	sNum = EditInput.caption 
+
+	if sNum == nil or sNum == "" or tonumber(sNum) == 0 then
+		EditInput.caption = "0" 
+	else
+		if Len(sNum) == 1 then
+			EditInput.caption = "0" 
+		else
+			EditInput.caption = Left( sNum, Len(sNum)-1) 
+		end if
+	end if
+end Sub
+
+'============================================================================
+Sub ImgBack_OnClick()
+	Dim sNum
+	sNum = EditInput.caption 
+
+	if sNum == nil or sNum == "" or tonumber(sNum) == 0 then
+		EditInput.caption = "0" 
+	else
+		if Len(sNum) == 1 then
+			EditInput.caption = "0" 
+		else
+			EditInput.caption = Left( sNum, Len(sNum)-1) 
+		end if
+	end if
+end Sub
+
+'============================================================================
+Sub BtnDot_OnClick()
+	Dim sDot
+	sDot = Instr(1, EditInput.caption, "%.")
+	
+	if sDot == nil or sDot == "" then
+		if EditInput.caption == nil or EditInput.caption == "" then
+			EditInput.caption = "0"
+		end if
+		
+		EditInput.caption = EditInput.caption.."."
+	end if
+end Sub
+
+'============================================================================
+Sub Btn1_OnClick()
+	SetModifyNum("1")
+end Sub
+
+'============================================================================
+Sub Btn2_OnClick()
+	SetModifyNum("2")
+end Sub
+
+'============================================================================
+Sub Btn3_OnClick()
+	SetModifyNum("3")
+end Sub
+
+'============================================================================
+Sub Btn4_OnClick()
+	SetModifyNum("4")
+end Sub
+
+'============================================================================
+Sub Btn5_OnClick()
+	SetModifyNum("5")
+end Sub
+
+'============================================================================
+Sub Btn6_OnClick()
+	SetModifyNum("6")	
+end Sub
+
+'============================================================================
+Sub Btn7_OnClick()
+	SetModifyNum("7")
+end Sub
+
+'============================================================================
+Sub Btn8_OnClick()
+	SetModifyNum("8")	
+end Sub
+
+'============================================================================
+Sub Btn9_OnClick()
+	SetModifyNum("9")
+end Sub
+
+'============================================================================
+Sub Btn0_OnClick()
+	SetModifyNum("0")
+end Sub
+
+'============================================================================
+Sub Btn00_OnClick()
+	SetModifyNum("00")
+end Sub
+
+'============================================================================
+Sub Btn000_OnClick()
+	SetModifyNum("000")
+end Sub
+
+'============================================================================
+Sub BtnM_OnClick()
+	SetPlusMinus("M")
+end Sub
+
+'============================================================================
+Sub BtnP_OnClick()
+	SetPlusMinus("P")
+end Sub
+
+'============================================================================
+Sub BtnCancel_OnClick()
+	Form.CloseForm()
+end Sub
+
+'============================================================================
+function SetPlusMinus(sGubun1)
+	Dim nPrc
+	Dim sMarket
+	Dim sTtyp
+	Dim nUnit
+	Dim nInput
+	
+	nPrc = _tonumber(EditInput.caption) 
+	sMarket = LabelMarket.caption
+	sTtyp = LabelTtyp.caption
+	nUnit = GetHogaUnit(sMarket, sTtyp, nPrc, sGubun1)
+	nInput = 0
+	
+	if sGubun1 == "P" then
+		nInput = nPrc + nUnit
+	else
+		if nPrc > 0 then
+			Dim nQty
+			nQty = nPrc - nUnit
+	
+			if nQty >= 0 then
+				nInput = nQty 
+			else
+				nInput = 0
+			end if
+		end if
+	end if
+
+	EditInput.caption = SetDecimalPrc(nInput)
+end function
+
+'============================================================================
+function SetModifyNum(sData)
+	if EditInput.caption == nil or EditInput.caption == "" or tonumber(EditInput.caption) == 0 then
+		Dim sDot
+		sDot = Instr(1, EditInput.caption, "%.")
+		
+		if sDot == nil or sDot == "" then
+			if sData == "0" or sData == "00" or sData == "000" then
+				EditInput.caption = "0"
+			else
+				EditInput.caption = sData
+			end if
+		else
+			EditInput.caption = EditInput.caption..sData
+		end if
+	else	
+		EditInput.caption = EditInput.caption..sData
+	end if
+end function
+
+'============================================================================
+function _tonumber(sData)
+	if sData == nil or sData == "" then
+		return 0
+	end if
+	
+	return tonumber(sData)
+end function
+
+
+'============================================================================
+function SetDecimalPrc(nPrc)
+	if CDbl(nPrc) <= 0 then
+		nPrc = "0."
+	end if
+	
+	Dim sPrcTemp
+	sPrcTemp = Split( nPrc, "." )
+	Dim m
+	m = 0
+	if sPrcTemp[2] == nil or sPrcTemp[2] == "" then
+		nPrc = sPrcTemp[1].."."
+	else
+		m = #sPrcTemp[2]
+	end if
+	for k = m to g_sDecimal-1
+		nPrc = nPrc.."0"
+	next
+	
+	return nPrc
+end function
+
+
+
+'============================================================================
+function GetHogaUnit(sMarket, sttyp, sPrc, sGubun2)
+	Dim unit 
+	unit = 1.0
+	Dim price
+	price = tonumber(sPrc)	
+	Dim ttype
+	ttype = 0
+	if sttyp == nil or sttyp == "" then
+		ttype = "0"
+	else
+		ttype = CInt(sttyp)
+	end if
+	
+	' ttype 1:TOPIX100 제외, 3:TOPIX 100
+	
+	if sMarket == "SHS" then ' 상해
+		unit = 0.01
+	elseif sMarket == "SZS" then ' 심천
+		unit = 0.01
+	elseif sMarket == "TSE" then ' 도쿄		
+		if ttype == 3 then
+			' 일본(TOPIX 100)
+			' 1,000 이하 					0.1
+			' 1,000 초과 	3,000 이하 		0.5
+			' 3,000 초과 	5,000 이하		1
+			' 5,000 초과 	10,000 이하 		1
+			' 10,000 초과 	30,000 이하		5
+			' 30,000 초과 	50,000 이하 		10
+			' 50,000 초과 	100,000 이하		10
+			' 100,000 초과 	300,000 이하 		50
+			' 300,000 초과 	500,000 이하		100
+			' 500,000 초과 	1,000,000 이하 	100
+			' 1,000,000 초과 3,000,000 이하	500
+			' 3,000,000 초과 5,000,000 이하	1,000
+			' 5,000,000 초과 10,000,000 이하	1,000
+			' 10,000,000 초과 30,000,000 이하	5,000
+			' 30,000,000 초과 50,000,000 이하	10,000
+			' 50,000,000 이상		 		10,000
+			if sGubun2 == "P" then
+				if 1000 > price then			unit = 0.1
+				elseif 3000 > price then		unit = 0.5
+				elseif 5000 > price then		unit = 1
+				elseif 10000 > price then		unit = 1
+				elseif 30000 > price then		unit = 5
+				elseif 50000 > price then		unit = 10
+				elseif 100000 > price then		unit = 10
+				elseif 300000 > price then		unit = 50
+				elseif 500000 > price then		unit = 100
+				elseif 1000000 > price then		unit = 100
+				elseif 3000000 > price then		unit = 500
+				elseif 5000000 > price then		unit = 1000
+				elseif 10000000 > price then	unit = 1000
+				elseif 30000000 > price then	unit = 5000
+				elseif 50000000 > price then	unit = 10000				
+				else							unit = 10000
+				end if
+			else
+				if 1000 >= price then			unit = 0.1
+				elseif 3000 >= price then		unit = 0.5
+				elseif 5000 >= price then		unit = 1
+				elseif 10000 >= price then		unit = 1
+				elseif 30000 >= price then		unit = 5
+				elseif 50000 >= price then		unit = 10
+				elseif 100000 >= price then		unit = 10
+				elseif 300000 >= price then		unit = 50
+				elseif 500000 >= price then		unit = 100
+				elseif 1000000 >= price then	unit = 100
+				elseif 3000000 >= price then	unit = 500
+				elseif 5000000 >= price then	unit = 1000
+				elseif 10000000 >= price then	unit = 1000
+				elseif 30000000 >= price then	unit = 5000
+				elseif 50000000 >= price then	unit = 10000				
+				else							unit = 10000
+				end if
+			end if
+		else
+			' 일본(TOPIX 100 제외)
+			' 3,000 이하 					1			
+			' 3,000 초과 	5,000 이하		5
+			' 5,000 초과 	30,000 이하		10
+			' 30,000 초과 	50,000 이하 		50
+			' 50,000 초과 	300,000 이하 		100
+			' 300,000 초과 	500,000 이하		500
+			' 500,000 초과 	3,000,000 이하	1,000
+			' 3,000,000 초과 5,000,000 이하	5,000
+			' 5,000,000 초과 30,000,000 이하	10,000			
+			' 30,000,000 초과50,000,000 이하	50,000
+			' 50,000,000 이상		 		100,000
+
+			if sGubun2 == "P" then
+				if 3000 > price then			unit = 1
+				elseif 5000 > price then		unit = 5
+				elseif 30000 > price then		unit = 10
+				elseif 50000 > price then		unit = 50
+				elseif 300000 > price then		unit = 100
+				elseif 500000 > price then		unit = 500
+				elseif 3000000 > price then		unit = 1000
+				elseif 5000000 > price then		unit = 5000				
+				elseif 30000000 > price then	unit = 1000
+				elseif 50000000 > price then	unit = 50000				
+				else							unit = 100000
+				end if
+			else
+				if 3000 >= price then			unit = 1
+				elseif 5000 >= price then		unit = 5
+				elseif 30000 >= price then		unit = 10
+				elseif 50000 >= price then		unit = 50
+				elseif 300000 >= price then		unit = 100
+				elseif 500000 >= price then		unit = 500
+				elseif 3000000 >= price then	unit = 1000
+				elseif 5000000 >= price then	unit = 5000				
+				elseif 30000000 >= price then	unit = 1000
+				elseif 50000000 >= price then	unit = 50000				
+				else							unit = 100000
+				end if
+			end if
+		end if
+	elseif sMarket == "OSE" or sMarket == "JSD" or sMarket == "NII" then ' 오사카, 자스닥, 니케이		
+		' 3,000 이하 					1			
+		' 3,000 초과 	5,000 이하		5
+		' 5,000 초과 	30,000 이하		10
+		' 30,000 초과 	50,000 이하 		50
+		' 50,000 초과 	300,000 이하 		100
+		' 300,000 초과 	500,000 이하		500
+		' 500,000 초과 	3,000,000 이하	1,000
+		' 3,000,000 초과 5,000,000 이하	5,000
+		' 5,000,000 초과 30,000,000 이하	10,000			
+		' 30,000,000 초과50,000,000 이하	50,000
+		' 50,000,000 이상		 		100,000
+
+		if sGubun2 == "P" then
+			if 3000 > price then			unit = 1
+			elseif 5000 > price then		unit = 5
+			elseif 30000 > price then		unit = 10
+			elseif 50000 > price then		unit = 50
+			elseif 300000 > price then		unit = 100
+			elseif 500000 > price then		unit = 500
+			elseif 3000000 > price then		unit = 1000
+			elseif 5000000 > price then		unit = 5000				
+			elseif 30000000 > price then	unit = 1000
+			elseif 50000000 > price then	unit = 50000				
+			else							unit = 100000
+			end if
+		else
+			if 3000 >= price then			unit = 1
+			elseif 5000 >= price then		unit = 5
+			elseif 30000 >= price then		unit = 10
+			elseif 50000 >= price then		unit = 50
+			elseif 300000 >= price then		unit = 100
+			elseif 500000 >= price then		unit = 500
+			elseif 3000000 >= price then	unit = 1000
+			elseif 5000000 >= price then	unit = 5000				
+			elseif 30000000 >= price then	unit = 1000
+			elseif 50000000 >= price then	unit = 50000				
+			else							unit = 100000
+			end if
+		end if
+		
+	elseif sMarket == "NYS" or sMarket == "NYG" or sMarket == "NAS" or sMarket == "NAI" or sMarket == "AMX" or sMarket == "NAO" or sMarket == "SPI" or sMarket == "DJI" or sMarket == "USA" then 
+		' 뉴욕, NYSE Global Index, 나스닥, 나스닥 지수, 아멕스, NQ-OTC, S&P, 다우존스, 미국전체
+		' 1 이하 	0.0001			
+		' 1 초과	0.01
+		
+		if ttype == 1 then				unit = 0.01
+		elseif ttype == 2 then				unit = 0.05
+		elseif ttype == 3 then				unit = 0.05
+		elseif ttype == 4 then				unit = 0.05
+		else								unit = 0.01
+		end if
+'		if sGubun2 == "P" then
+'			if 1 > price then			unit = 0.0001
+'			else						unit = 0.01
+'			end
+'		else
+'			if 1 >= price then			unit = 0.0001
+'			else						unit = 0.01
+'			end
+'		end
+		
+	elseif sMarket == "HKS" or sMarket == "HKW" or sMarket == "HSI" then ' 홍콩/홍콩ELW,항생
+		if ttype == 3 then
+			unit = 0.05
+		else
+			' 0.25 이하	 				0.001			
+			' 0.25 초과 		0.5 이하		0.005
+			' 0.5 초과 		10 이하		0.01
+			' 10 초과 		20 이하 		0.02
+			' 20 초과 		100 이하 	0.05
+			' 100 초과 		200 이하		0.1
+			' 200 초과 		500 이하		0.2
+			' 500 초과 		1,000 이하	0.5
+			' 1,000 초과 	2,000 이하	1			
+			' 2,000 초과		5,000 이하	2
+			' 5,000 이상		 			5
+	
+			if sGubun2 == "P" then
+				if 0.25 > price then		unit = 0.001
+				elseif 0.5 > price then	unit = 0.005
+				elseif 10.0 > price then		unit = 0.01
+				elseif 20.0 > price then		unit = 0.02
+				elseif 100.0 > price then	unit = 0.05
+				elseif 200.0 > price then	unit = 0.1
+				elseif 500.0 > price then	unit = 0.2
+				elseif 1000.0 > price then	unit = 0.5				
+				elseif 2000.0 > price then	unit = 1
+				elseif 5000.0 > price then	unit = 2				
+				else						unit = 5
+				end if
+			else
+				if 0.25 >= price then		unit = 0.001
+				elseif 0.5 >= price then	unit = 0.005
+				elseif 10 >= price then		unit = 0.01
+				elseif 20 >= price then		unit = 0.02
+				elseif 100 >= price then	unit = 0.05
+				elseif 200 >= price then	unit = 0.1
+				elseif 500 >= price then	unit = 0.2
+				elseif 1000 >= price then	unit = 0.5				
+				elseif 2000 >= price then	unit = 1
+				elseif 5000 >= price then	unit = 2				
+				else						unit = 5
+				end if
+			end if
+		end if
+	end if
+
+	return unit
+end function
+
+
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

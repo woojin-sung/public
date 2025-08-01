@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16030" scrname="종목분석-종목순위" version="2" writer="이호철" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,522,1" />
+	<CONTROL_INFO>
+		<COMBO name="Combo0" fgcolor="004:000000000" cbinputdatatext="주요지표순위
+거래량갱신
+거래량급증
+당일고저가근접
+신저/신고
+신고신저근접
+이격도상위
+A-H프리미엄
+평균거래량 대비 증감률 상위
+평균거래대금 대비 증감률 상위
+호가잔량상위
+회전률상위
+골든/데드크로스
+시세급변
+상하한가
+거래량상위
+시가총액상위
+기간별등락" disptype="1" ly_vert="6,9,364,39,1" />
+		<LINKFORM name="LinkForm0" ly_vert="0,48,375,474,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4980" _ulen="4402" >
+'===========================================================================
+' 01. 업무구분 : 
+' 02. 화면 :  
+' 03. 화면설명 : 
+' 04. 작성자 : 
+' 05. 작성일 : 2017.08.09
+' 06. 수정이력 :
+'===========================================================================
+Dim g_GridListDic1, g_GridListDic2
+
+g_GridListDic1 = {{
+   "mhtro16030_s01","주요지표순위"
+},{"mhtro16030_s02","거래량갱신"
+},{"mhtro16030_s03","거래량급증"
+},{"mhtro16030_s04","당일고저가근접"
+},{"mhtro16030_s05","신저/신고"
+},{"mhtro16030_s06","신고신저근접"
+},{"mhtro16030_s07","이격도상위"
+},{"mhtro16030_s08","A-H프리미엄"
+},{"mhtro16030_s09","평균거래량 대비 증감률 상위"
+},{"mhtro16030_s10","평균거래대금 대비 증감률 상위"
+},{"mhtro16030_s11","호가잔량상위"
+},{"mhtro16030_s12","회전률상위"
+},{"mhtro16030_s13","골든크로스"
+},{"mhtro16030_s14","시세급변"
+},{"mhtro16030_s15","상하한가"
+},{"mhtro16030_s16","거래량상위"
+},{"mhtro16030_s17","시가총액상위"
+},{"mhtro16030_s18","기간별등락"
+}}
+
+g_GridListDic2 = {{
+   "mhtro16030_s01","주요지표순위"
+},{"mhtro16030_s02","거래량갱신"
+},{"mhtro16030_s03","거래량급증"
+},{"mhtro16030_s04","당일고저가근접"
+},{"mhtro16030_s05","신저/신고"
+},{"mhtro16030_s06","신고신저근접"
+},{"mhtro16030_s07","이격도상위"
+},{"mhtro16030_s09","평균거래량 대비 증감률 상위"
+},{"mhtro16030_s10","평균거래대금 대비 증감률 상위"
+},{"mhtro16030_s11","호가잔량상위"
+},{"mhtro16030_s13","골든크로스"
+},{"mhtro16030_s14","시세급변"
+},{"mhtro16030_s15","상하한가"
+},{"mhtro16030_s16","거래량상위"
+},{"mhtro16030_s17","시가총액상위"
+},{"mhtro16030_s18","기간별등락"
+}}
+
+
+'20240528 LES START 홈화면 연동
+Dim gLinkFileName
+gLinkFileName = ""
+'20240528 LES END
+
+'============================================================================
+Sub Form_OnFormInit()
+	SetLinkFile()
+end Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	SetLinkFile()
+end Sub
+
+'============================================================================
+function _tonumber(data)
+	return tonumber(data) or 0
+end function
+
+'============================================================================
+function SetLinkFile()
+	
+	'-----------------------------------------------
+	'20240528 LES START 홈화면 연동
+	'-----------------------------------------------
+	if gLinkFileName <> "" then
+		SetComboIndex(gLinkFileName)
+	else
+		
+		Dim nIndex
+		nIndex = _tonumber(Combo0.currentindex)
+		LinkForm0.linkfile = g_GridListDic1[nIndex][0]
+	
+	end if
+	'20240528 LES END
+
+	
+end function
+
+'_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+
+'============================================================================
+' 2017.11.22 - LSS : 연합인포맥스에서 마지막 선택 리스트가 팝업되도록 수정요청
+'============================================================================
+Function saveLastPopup(fileName)
+	Form.SetEnvData( 1, "mhtro16030.lastscreen", fileName )
+End Function
+
+'============================================================================
+Sub Combo0_OnEditComplete(iIndex)
+	LinkForm0.linkfile = g_GridListDic1[iIndex][0]
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH" then
+		Form.triggerEvent("LinkForm0", "SCREEN_REFRESH", "")
+	
+	'-----------------------------------------------
+	'20240528 LES START 홈화면 연동
+	'-----------------------------------------------
+	elseif sEventName == "HOME" then
+		
+		sLinkFileName = Form.GetSharedData("HOME_RANKING_OVRS_GUBUN", true )
+		
+		if sLinkFileName <> "" then
+			gLinkFileName = sLinkFileName
+			SetComboIndex(sLinkFileName)
+		end if
+	
+	'20240528 LES END 
+	
+	end if
+End Sub
+
+'============================================================================
+' 20240528 LES START 홈화면 연동
+'============================================================================
+Function SetComboIndex(sFileName)
+
+	'-----------------------------------------------
+	' 상승/하락/거래량
+	'-----------------------------------------------
+	if sFileName == "mhtro16030_s01" then
+		Combo0.currentindex = 0
+		
+	'-----------------------------------------------
+	' 거래대금
+	'-----------------------------------------------
+	elseif sFileName == "mhtro16030_s10" then
+		Combo0.currentindex = 9
+	
+	'-----------------------------------------------
+	' 시가총액
+	'-----------------------------------------------
+	elseif sFileName == "mhtro16030_s17" then
+		Combo0.currentindex = 16
+	
+	'-----------------------------------------------
+	' 신고가
+	'-----------------------------------------------
+	elseif sFileName == "mhtro16030_s05" then
+		Combo0.currentindex = 4
+	end if
+
+End Function
+
+	</SCRIPT_INFO>
+</ROOT>

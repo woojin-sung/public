@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16034" scrname="종목비교" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="2" tabheadheight="40" autosave="1" ly_vert="0,0,375,562,1" >
+			<PAGE name="page0" caption="개요" linkfile="mhtro16035_t1" loadingtype="1" />
+			<PAGE name="page1" caption="수익률" linkfile="mhtro16035_t2" loadingtype="1" />
+		</FORMTAB>
+		<IMAGE name="imgSetItem" autosize="1" imgpath="set_item" ly_vert="271,48,98,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1598" _ulen="1584" >
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	f_CodeTrigger()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH"	then
+		Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "SCREEN_REFRESH", "")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	f_CodeTrigger()
+End Sub
+
+'============================================================================
+Sub imgSetItem_OnClick()
+'	dim szCodeInfo
+'	
+'	szCodeInfo = "OQ@AAPL★OQ@MSFT"
+'	
+'	if szCodeInfo ~= nil and szCodeInfo ~= "" then
+'		Form.SetSharedData("PEERGRP_CODEINFO", szCodeInfo)
+'		
+'		Form.triggerEvent( "FormTab0."..FormTab0.currenttabpageid, "SELECT_CODE", szCodeInfo )
+'	end if
+
+	' 종목비교 팝업
+	Form.OpenPopup("mhtro16035_p1" , "" , "")
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	f_CodeTrigger()
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mhtro16035_p1" then
+		f_CodeTrigger()
+	end if
+End Sub
+
+'============================================================================
+Sub f_CodeTrigger()
+	dim szCodeInfo
+	
+	szCodeInfo = Form.GetSharedData("PEERGRP_CODEINFO", false)
+
+	Form.triggerEvent( "FormTab0."..FormTab0.currenttabpageid, "SELECT_CODE", szCodeInfo )
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

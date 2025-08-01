@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16050" scrname="ETF순위" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="5" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,0,375,562,1" >
+			<PAGE name="page0" caption="상승률" linkfile="mhtro16050_t1" loadingtype="1" />
+			<PAGE name="page1" caption="하락률" linkfile="mhtro16050_t2" loadingtype="1" />
+			<PAGE name="page2" caption="거래량순" linkfile="mhtro16050_t3" loadingtype="1" />
+			<PAGE name="page3" caption="거래대금" linkfile="mhtro16050_t4" loadingtype="1" />
+			<PAGE name="page4" caption="거래증가율" linkfile="mhtro16050_t5" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1590" _ulen="1496" >
+'--============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH"	then
+		Form.triggerEvent("FormTab0." .. FormTab0.currenttabpageid, "SCREEN_REFRESH", "")
+	end if
+end Sub
+
+
+
+
+'============================================================================
+' 해외주식 공지팝업
+'============================================================================
+function f_EventPopup()
+    Dim szEndDate
+    Dim szToday
+    Dim szDate
+    Dim nDiffDay
+    
+    '20200526 SWJ START : MTS 해외주식 실시간 서비스 비용 변동 안내 팝업
+    szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    szEndDate = "20200612"                            	' 팝업노출일
+	    szToday = Form.GetSharedData("&HOST_DATE", false )    ' 현재일
+	    szDate = Form.GetEnvData("EVENT_DATE_YH")            ' 일주일간 열지 않기 체크한 날짜
+    
+	    if tonumber(Form.DiffDate(szToday, szEndDate)) >= 0 then
+			if szDate == null or szDate == "" then
+			    Form.OpenPopup("popup_noti", "" , "")
+			else
+			    nDiffDay =  tonumber(Form.DiffDate(szDate, szToday))
+			    if nDiffDay > 7 then
+					Form.SetEnvData(0, "EVENT_DATE_YH", "")
+					Form.OpenPopup("popup_noti", "" , "")
+			    end if
+			end if
+	    end if
+	end if
+	'20200526 SWJ END
+
+end function
+
+'============================================================================
+Sub Form_OnFormInit()
+	f_EventPopup()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

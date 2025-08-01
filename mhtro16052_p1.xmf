@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16052" scrname="ADR검색_서브팝업" version="2" writer="이재원" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<CONTAINER name="Container0" containerimage="alpha.png" ly_vert="0,197,375,174,1" scroll_ly_vert="0,197,375,174,1" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" imgpath="btn_link_bg.9" ly_vert="0,0,375,174,1" />
+				<TABLE name="Table0" outlinecolor="089:049050057" insidelinecolor="102:255255255" colcount="5" rowcount="5" outline="0000" designorder="1" ly_vert="0,10,375,125,1" >
+					<COL_INFO ly_vert_width="87,100,1,87,100" />
+					<ROW_INFO ly_vert_height="25,25,25,25,25" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="시가" impidxs="" />
+						<CELL cell_ly="1,0,1,0" import="0,1,9" realrec="0,1,7" line="0,0" mask="0,0,,,0,,-1,1,0,0,0" impidxs="" />
+						<CELL cell_ly="2,0,2,4" line="0,0" impidxs="" />
+						<CELL cell_ly="3,0,3,0" halign="0" line="0,0" caption="매도호가" impidxs="" />
+						<CELL cell_ly="4,0,4,0" import="1,1,2" line="0,0" mask="0,0,,,0,,-1,1,0,0,0" impidxs="" />
+						<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="고가" impidxs="" />
+						<CELL cell_ly="1,1,1,1" import="0,1,10" realrec="0,1,8" line="0,0" mask="0,0,,,0,,-1,1,0,0,0" impidxs="" />
+						<CELL cell_ly="3,1,3,1" halign="0" line="0,0" caption="매수호가" impidxs="" />
+						<CELL cell_ly="4,1,4,1" import="1,1,12" line="0,0" mask="0,0,,,0,,-1,1,0,0,0" impidxs="" />
+						<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="저가" impidxs="" />
+						<CELL cell_ly="1,2,1,2" import="0,1,11" realrec="0,1,9" line="0,0" mask="0,0,,,0,,-1,1,0,0,0" impidxs="" />
+						<CELL cell_ly="3,2,3,2" halign="0" line="0,0" caption="전일종가" impidxs="" />
+						<CELL cell_ly="4,2,4,2" import="0,1,4" realrec="0,1,10" line="0,0" mask="0,0,,,0,,-1,1,0,0,0" impidxs="" />
+						<CELL cell_ly="0,3,0,3" halign="0" line="0,0" caption="상한가↑" impidxs="" />
+						<CELL cell_ly="1,3,1,3" import="0,1,12" line="0,0" mask="0,1,,,0,,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="3,3,3,3" halign="0" line="0,0" caption="하한가↓" impidxs="" />
+						<CELL cell_ly="4,3,4,3" import="0,1,13" line="0,0" mask="0,1,,,0,,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,4,0,4" halign="0" line="0,0" caption="통화" impidxs="" />
+						<CELL cell_ly="1,4,1,4" import="0,1,27" line="0,0" impidxs="" />
+						<CELL cell_ly="3,4,3,4" halign="0" line="0,0" caption="매매단위" impidxs="" />
+						<CELL cell_ly="4,4,4,4" import="0,1,25" line="0,0" mask="0,0,,,0,,0,1,1,0,0" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<BUTTON name="BtnCurrent" caption="현재가" fgcolor="004:000000000" btnimage="btn_etc24.9" ly_vert="0,134,75,39,1" />
+				<BUTTON name="BtnChart" caption="차트" fgcolor="004:000000000" btnimage="btn_etc24.9" ly_vert="75,134,75,39,1" />
+				<BUTTON name="BtnMaeSu" caption="매수" btnimage="btn_etc10.9" ly_vert="225,134,75,39,1" />
+				<BUTTON name="BtnMaeDo" caption="매도" btnimage="btn_etc11.9" ly_vert="300,134,75,39,1" />
+				<BUTTON name="BtnGuanSim" caption="관심등록" fgcolor="004:000000000" btnimage="btn_etc24.9" ly_vert="150,134,75,39,1" />
+				<LABEL name="Label0" bgcolor="089:049050057" transmode="0" ly_vert="0,134,375,1,1" />
+				<LABEL name="Label1" bgcolor="089:049050057" transmode="0" ly_vert="0,173,375,1,1" />
+				<LABEL name="Label2" bgcolor="089:049050057" transmode="0" ly_vert="0,9,375,1,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6934" _ulen="6872" >
+Dim szData
+Dim g_szExid
+Dim g_szCode
+Dim g_rtChk
+Dim g_sCode
+
+szData = {}
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	if Form.GetOpenLinkData( ) <> null and Form.GetOpenLinkData( ) <> ""	then
+		szData = split(Form.GetOpenLinkData( ), "^")		
+		Dim sTemp
+		sTemp = split(szData[0], "@")
+		g_szExid = sTemp[0] '시장구분
+		g_szCode = sTemp[1] '종목코드 
+		g_rtChk = Form.GetSharedData( "REALTIME_"..g_szExid, false )
+		g_sCode = sTemp
+		
+		nContHeight = 197
+		if nContHeight + szData[5] + 45 > 647	then
+			Container0.Image0.imgpath = "btn_link_bg2.9"
+			Container0.top = szData[5] - 170
+			Container0.Table0.top = 0
+			Container0.Label0.top = 124
+			Container0.Label1.top = 163
+			Container0.BtnCurrent.top = 124
+			Container0.BtnChart.top = 124
+			Container0.BtnGuansim.top = 124
+			Container0.BtnMaeDo.top = 124
+			Container0.BtnMaeSu.top = 124
+			Container0.Label2.top = 0
+		else
+			Container0.top = szData[5] + 33
+		end if
+			
+		DATAMANAGER.RequestTranData("ohhts_6000_001r")
+		DATAMANAGER.RequestTranData("ohhts_6000_002r")
+		
+	end if
+End Sub
+
+
+'============================================================================
+Sub Container0_BtnChart_OnClick()
+	if szData[0] <> "" then
+	
+		Form.SetSharedData( "&ITEM_CODE" , szData[0] )
+		Form.SetSharedData( "&ITEM_SYMBOL" , szData[1] )
+		Form.SetSharedData( "&ITEM_KORNAME" , szData[2] )
+		Form.SetSharedData( "&ITEM_ENGNAME" , szData[3] )		
+		Form.SetSharedData( "&ITEM_EXID" , szData[4] )
+		
+		Dim sTemp, sTemp1, sTemp2
+		sTemp = split(szData[0], "@")
+		if CInt(sTemp[0]) <> null or CInt(sTemp[0]) <> ""	then
+			sTemp2 = sTemp[0]
+		else
+			'sTemp1 = Right(sTemp[0], (Len(sTemp[0]) - 1))
+			'sTemp2 = Transform_Code(Trim(sTemp1))
+			sTemp2 = Form.GetItemCodeInfo(szData[0], "exchcode3")
+		end if
+		Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", sTemp2.."@"..sTemp[1].."★"..szData[2].."★".."", "" )		
+		Form.OpenScreen("16020", "")
+		Form.CloseForm( )
+		
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_BtnCurrent_OnClick()
+	if szData[0] <> "" then
+	
+		Form.SetSharedData( "&ITEM_CODE" , szData[0] )
+		Form.SetSharedData( "&ITEM_SYMBOL" , szData[1] )
+		Form.SetSharedData( "&ITEM_KORNAME" , szData[2] )
+		Form.SetSharedData( "&ITEM_ENGNAME" , szData[3] )		
+		Form.SetSharedData( "&ITEM_EXID" , szData[4] )
+
+		Dim sTemp, sTemp1, sTemp2
+		sTemp = split(szData[0], "@")
+		if CInt(sTemp[0]) <> null or CInt(sTemp[0]) <> ""	then
+			sTemp2 = sTemp[0]
+		else
+			'sTemp1 = Right(sTemp[0], (Len(sTemp[0]) - 1))
+			'sTemp2 = Transform_Code(Trim(sTemp1))
+			sTemp2 = Form.GetItemCodeInfo(szData[0], "exchcode3")
+		end if
+		
+		szName = Form.GetItemCodeInfo(szData[0], "name")
+		Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", szData[0].."★"..szName.."★".."", "" )
+		Form.OpenScreen("16000", "")
+		Form.CloseForm( )
+		
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_BtnGuanSim_OnClick()
+	
+	'20240626 LES START 관심종목 등록팝업 변경
+	'if szData[0] <> ""	then
+	'	Dim sExid
+	'	sExid = Trim(szData[4])
+	'	Form.OpenPopup("mhtro16010_p5", szData[0] , "")
+	'end if
+	
+	if g_szExid <> "" and g_szCode <> "" then
+		Form.OpenPopupAnimation("mhprc11000_pd", g_szExid.."@"..g_szCode & "★"& "ADD","", "2")	'종목등록
+	end if
+	
+	'20240626 LES END
+	
+End Sub
+
+'============================================================================
+Sub Container0_BtnMaeDo_OnClick()
+	if szData[0] <> "" then
+	
+		Form.SetSharedData( "&ITEM_CODE" , szData[0] )
+		Form.SetSharedData( "&ITEM_SYMBOL" , szData[1] )
+		Form.SetSharedData( "&ITEM_KORNAME" , szData[2] )
+		Form.SetSharedData( "&ITEM_ENGNAME" , szData[3] )		
+		Form.SetSharedData( "&ITEM_EXID" , szData[4] )
+		
+		Dim sTemp, sTemp1, sTemp2
+		sTemp = split(szData[0], "@")
+		if CInt(sTemp[0]) <> null or CInt(sTemp[0]) <> ""	then
+			sTemp2 = sTemp[0]
+		else
+			'sTemp1 = Right(sTemp[0], (Len(sTemp[0]) - 1))
+			'sTemp2 = Transform_Code(Trim(sTemp1))
+			sTemp2 = Form.GetItemCodeInfo(szData[0], "exchcode3")
+		end if
+		Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", sTemp2.."@"..sTemp[1].."★"..szData[2].."★".."", "" )
+		Form.OpenScreen("16060", "1")
+		Form.CloseForm( )
+		
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_BtnMaeSu_OnClick()
+	if szData[0] <> "" then
+	
+		Form.SetSharedData( "&ITEM_CODE" , szData[0] )
+		Form.SetSharedData( "&ITEM_SYMBOL" , szData[1] )
+		Form.SetSharedData( "&ITEM_KORNAME" , szData[2] )
+		Form.SetSharedData( "&ITEM_ENGNAME" , szData[3] )		
+		Form.SetSharedData( "&ITEM_EXID" , szData[4] )
+		
+		Dim sTemp, sTemp1, sTemp2
+		sTemp = split(szData[0], "@")
+		if CInt(sTemp[0]) <> null or CInt(sTemp[0]) <> ""	then
+			sTemp2 = sTemp[0]
+		else
+			'sTemp1 = Right(sTemp[0], (Len(sTemp[0]) - 1))
+			'sTemp2 = Transform_Code(Trim(sTemp1))
+			sTemp2 = Form.GetItemCodeInfo(szData[0], "exchcode3")
+		end if
+		Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", sTemp2.."@"..sTemp[1].."★"..szData[2].."★".."", "" )
+		Form.OpenScreen("16060", "0")
+		Form.CloseForm( )
+		
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	DATAMANAGER.SetDataValue( 1, "ohhts_exst_ictg", "InBlock1", "FIDXR_ISCD" , 0 , g_sCode )
+	DATAMANAGER.RequestRealData( "ohhts_exst_ictg" )
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "CLOSE_FORM"	then
+		Form.CloseForm( )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	DATAMANAGER.CancelRealData("ohhts_exst_ictg")
+	
+	if szTranID == "ohhts_6000_001r" then
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" , 0 , "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_001r", "InBlock1", "FID_INPUT_OVRS_ISCD" , 0 , g_szCode)
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_001r", "InBlock1", "FID_COND_MRKT_CLS_CODE" , 0 , g_szExid)
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_001r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk)
+	elseif szTranID == "ohhts_6000_002r" then
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_002r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" , 0 , "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_002r", "InBlock1", "FID_INPUT_OVRS_ISCD" , 0 , g_szCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_002r", "InBlock1", "FID_COND_MRKT_CLS_CODE" , 0 , g_szExid )
+		DATAMANAGER.SetDataValue( 0, "ohhts_6000_002r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_exst_ictg" trcode="ohhts_exst_ictg" />
+			<TRAN tranid="ohhts_6000_001r" trcode="ohhts_6000_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_6000_002r" trcode="ohhts_6000_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_exst_ictg" title="해외주식체결 자동갱신" realdata="1" dessvr="4" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="51" _ulen="43" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1517" _ulen="1247" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+FIDXR_DELY_YN^FIDXR지연여부^1^0^0^0^0^0^0
+FIDXR_ACPL_BSOP_DATE^FIDXR현지영업일자^8^0^0^0^0^0^0
+FIDXR_ACPL_DATE^FIDXR현지일자^8^0^0^0^0^0^0
+FIDXR_ACPL_HOUR^FIDXR현지시간^6^0^0^0^0^0^0
+FIDXR_KOREA_DATE^FIDXR한국일자^8^0^0^0^0^0^0
+FIDXR_KOREA_HOUR^FIDXR한국시간^6^0^0^0^0^0^0
+FIDXR_OPRC^FIDXR시가^18^4^7^0^0^1^0
+FIDXR_HPRC^FIDXR고가^18^4^7^0^0^1^0
+FIDXR_LPRC^FIDXR저가^18^4^7^0^0^1^0
+FIDXR_PRPR^FIDXR현재가^18^4^7^0^0^1^0
+FIDXR_VRSS_SIGN^FIDXR대비부호^1^0^0^0^0^0^0
+FIDXR_PRDY_VRSS^FIDXR전일대비^18^4^7^0^0^1^0
+FIDXR_RSFL_RT^FIDXR등락율^10^2^7^0^0^1^0
+FIDXR_BIDP^FIDXR매수호가^18^4^7^0^0^1^0
+FIDXR_SHNU_ASPR_RSQN^FIDXR매수호가잔량^13^0^7^0^0^0^0
+FIDXR_ASKP^FIDXR매도호가^18^4^7^0^0^1^0
+FIDXR_SELN_ASPR_RSQN^FIDXR매도호가잔량^13^0^7^0^0^0^0
+FIDXR_CNQN^FIDXR체결량^13^0^7^0^0^1^0
+FIDXR_ACML_VOL^FIDXR누적거래량^19^0^7^0^0^0^0
+FIDXR_ACML_TR_PBMN^FIDXR누적거래대금^19^0^7^0^0^0^0
+FIDXR_MKT_CLS^FIDXR장구분^1^0^0^0^0^0^0
+FIDXR_SHNU_ACML_CNQN^FIDXR매수누적체결량^19^0^7^0^0^0^0
+FIDXR_SELN_ACML_CNQN^FIDXR매도누적체결량^19^0^7^0^0^0^0
+FIDXR_RLTV^FIDXR체결강도^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_OPRC_RATE^FIDXR전일대비시가비율^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_HPRC_RATE^FIDXR전일대비고가비율^10^2^7^0^0^1^0
+FIDXR_PRDY_VRSS_LPRC_RATE^FIDXR전일대비저가비율^10^2^7^0^0^1^0
+FIDXR_WGHN_AVRG_PRC^FIDXR가중평균가격^18^4^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_001r" title="해외주식 현재가 조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2326" _ulen="1976" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_52_WEEK_HGPR^FIDX52주최고가^14^4^7^32^1000^0^0
+FIDX_52_WEEK_LWPR^FIDX52주최저가^14^4^7^35^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_EPS^FIDXEPS^11^4^7^210^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_BSTP_CLS_CODE^FIDX업종구분코드^4^0^0^335^1000^0^0
+FIDX_BSTP_LRDV_NAME^FIDX업종대분류명^80^0^0^5133^1000^0^0
+FIDX_BSTP_MDDV_NAME^FIDX업종중분류명^80^0^0^5134^1000^0^0
+FIDX_BSTP_SMDV_NAME^FIDX업종소분류명^80^0^0^5135^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_SHNU_ASPR_UNIT^FIDX매수호가단위^14^4^7^5125^1000^0^0
+FIDX_SELN_ASPR_UNIT^FIDX매도호가단위^14^4^7^5126^1000^0^0
+FIDX_SHNU_ODER_QTY_UNIT^FIDX매수주문수량단위^9^0^7^5127^1000^0^0
+FIDX_SELN_ODER_QTY_UNIT^FIDX매도주문수량단위^9^0^7^5128^1000^0^0
+FIDX_CRNC_CODE^FIDX통화코드^4^0^0^5114^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_TICK_CLS^FIDX틱구분^4^0^0^5136^1000^0^0
+FID_PBR^FIDPBR^9^2^7^43^1000^0^0
+FIDX_PER^FIDXPER^9^2^7^42^1000^0^0
+BSTP_KOR_ISNM^업종한글종목명^100^0^0^822^1000^0^0
+FIDX_CAS_TRGT_ISSU_YN^FIDXCAS대상종목여부^1^0^0^5181^1000^0^0
+FIDX_VCM_STAT_CLS_CODE^FIDXVCM상태구분코드^1^0^0^5166^1000^0^0
+FIDX_ENG_ISNM^FIDX영문종목명^65^0^0^5112^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_VCM_STA_HOUR^FIDXVCM시작시간^6^0^0^5167^1000^0^0
+FIDX_VCM_FIN_HOUR^FIDXVCM종료시간^6^0^0^5168^1000^0^0
+FIDX_SELL_ONLY^FIDXSELLONLY^2^0^7^5173^1000^0^0
+FIDX_ISSU_STAT_CLS_CODE^FIDX종목상태구분코드^1^0^0^6016^1000^0^0
+FIDX_CAS_IEP^FIDXCASIEP^11^4^7^5215^1000^0^0
+FIDX_CAS_IEV^FIDXCASIEV^11^4^7^5216^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_002r" title="해외주식 호가조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2641" _ulen="2179" >
+
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ASKP1^FIDX매도호가1^14^4^7^500^1000^0^0
+FIDX_ASKP2^FIDX매도호가2^14^4^7^501^1000^0^0
+FIDX_ASKP3^FIDX매도호가3^14^4^7^502^1000^0^0
+FIDX_ASKP4^FIDX매도호가4^14^4^7^503^1000^0^0
+FIDX_ASKP5^FIDX매도호가5^14^4^7^504^1000^0^0
+FIDX_ASKP6^FIDX매도호가6^14^4^7^505^1000^0^0
+FIDX_ASKP7^FIDX매도호가7^14^4^7^506^1000^0^0
+FIDX_ASKP8^FIDX매도호가8^14^4^7^507^1000^0^0
+FIDX_ASKP9^FIDX매도호가9^14^4^7^508^1000^0^0
+FIDX_ASKP10^FIDX매도호가10^14^4^7^509^1000^0^0
+FIDX_BIDP1^FIDX매수호가1^14^4^7^510^1000^0^0
+FIDX_BIDP2^FIDX매수호가2^14^4^7^511^1000^0^0
+FIDX_BIDP3^FIDX매수호가3^14^4^7^512^1000^0^0
+FIDX_BIDP4^FIDX매수호가4^14^4^7^513^1000^0^0
+FIDX_BIDP5^FIDX매수호가5^14^4^7^514^1000^0^0
+FIDX_BIDP6^FIDX매수호가6^14^4^7^515^1000^0^0
+FIDX_BIDP7^FIDX매수호가7^14^4^7^516^1000^0^0
+FIDX_BIDP8^FIDX매수호가8^14^4^7^517^1000^0^0
+FIDX_BIDP9^FIDX매수호가9^14^4^7^518^1000^0^0
+FIDX_BIDP10^FIDX매수호가10^14^4^7^519^1000^0^0
+FIDX_ASKP_RSQN1^FIDX매도호가잔량1^13^0^7^520^1000^0^0
+FIDX_ASKP_RSQN2^FIDX매도호가잔량2^13^0^7^521^1000^0^0
+FIDX_ASKP_RSQN3^FIDX매도호가잔량3^13^0^7^522^1000^0^0
+FIDX_ASKP_RSQN4^FIDX매도호가잔량4^13^0^7^523^1000^0^0
+FIDX_ASKP_RSQN5^FIDX매도호가잔량5^13^0^7^524^1000^0^0
+FIDX_ASKP_RSQN6^FIDX매도호가잔량6^13^0^7^525^1000^0^0
+FIDX_ASKP_RSQN7^FIDX매도호가잔량7^13^0^7^526^1000^0^0
+FIDX_ASKP_RSQN8^FIDX매도호가잔량8^13^0^7^527^1000^0^0
+FIDX_ASKP_RSQN9^FIDX매도호가잔량9^13^0^7^528^1000^0^0
+FIDX_ASKP_RSQN10^FIDX매도호가잔량10^13^0^7^529^1000^0^0
+FIDX_BIDP_RSQN1^FIDX매수호가잔량1^13^0^7^530^1000^0^0
+FIDX_BIDP_RSQN2^FIDX매수호가잔량2^13^0^7^531^1000^0^0
+FIDX_BIDP_RSQN3^FIDX매수호가잔량3^13^0^7^532^1000^0^0
+FIDX_BIDP_RSQN4^FIDX매수호가잔량4^13^0^7^533^1000^0^0
+FIDX_BIDP_RSQN5^FIDX매수호가잔량5^13^0^7^534^1000^0^0
+FIDX_BIDP_RSQN6^FIDX매수호가잔량6^13^0^7^535^1000^0^0
+FIDX_BIDP_RSQN7^FIDX매수호가잔량7^13^0^7^536^1000^0^0
+FIDX_BIDP_RSQN8^FIDX매수호가잔량8^13^0^7^537^1000^0^0
+FIDX_BIDP_RSQN9^FIDX매수호가잔량9^13^0^7^538^1000^0^0
+FIDX_BIDP_RSQN10^FIDX매수호가잔량10^13^0^7^539^1000^0^0
+FIDX_TOTAL_ASKP_RSQN^FIDX총매도호가잔량^19^0^7^560^1000^0^0
+FIDX_TOTAL_BIDP_RSQN^FIDX총매수호가잔량^19^0^7^561^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_ACPL_HOUR^FIDX현지시간^6^0^0^5161^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

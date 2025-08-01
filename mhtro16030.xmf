@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="17030" scrname="종목분석" version="2" writer="이호철" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab" tabcount="3" tabwidthtype="1" tabheadheight="40" ly_vert="0,0,375,562,1" >
+			<PAGE name="page0" caption="시세/순위분석" linkfile="mhtro16030_t01" loadingtype="1" />
+			<PAGE name="page1" caption="조건검색" linkfile="mhtro16030_t02" loadingtype="1" />
+			<PAGE name="page2" caption="거래중지/재개" linkfile="mhtro16030_t03" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2978" _ulen="2754" >
+'============================================================================
+' 2017.11.22 - LSS : 연합인포맥스에서 마지막 선택 리스트가 팝업되도록 수정요청
+'============================================================================
+Sub Form_OnFormInit()
+	
+	szOpenLinkData = Form.GetOpenLinkData()
+	
+	'20240528 LES START 홈화면 연동
+	'홈화면에서 연동된 경우 첫번째 탭으로 유지 & 링크정보 넘김
+	if szOpenLinkData == "HOME" then
+	
+		Form.triggerEvent( "FormTab." .. FormTab.currenttabpageid, "HOME", "")
+
+	else
+		f_EventPopup()
+		Dim nTabIndex
+		nTabIndex = CInt( Form.GetEnvData( "mhtro16030.currentTabIndex" ) )
+
+		FormTab.currenttabpageid = "page" & nTabIndex
+	end if
+	'20240528 LES END 
+
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH"	then
+		if FormTab.currenttabpageid == "page0" or FormTab.currenttabpageid == "page2"	then
+			Form.triggerEvent( "FormTab." .. FormTab.currenttabpageid, "SCREEN_REFRESH", "")
+		end if
+	end if
+end Sub
+
+
+'============================================================================
+Sub FormTab_OnTabChanged(nCurrentTab)
+	Form.SetEnvData( 1, "mhtro16030.currentTabIndex", nCurrentTab )
+End Sub
+
+'============================================================================
+' 2017.11.22 - LSS : 마지막 선택된 팝업 열기
+'============================================================================
+Sub runOnLastPopupOpen()
+	Dim szLastPopup
+	szLastPopup = Form.GetEnvData( "mhtro16030.lastscreen" )
+	
+	if Null <> szLastPopup and Len(szLastPopup) > 0 then
+		Form.OpenPopup( szLastPopup, "" , "")
+		Form.SetEnvData( 1, "mhtro16030.lastscreen", "" )
+	end if
+End Sub
+
+
+'============================================================================
+' 해외주식 공지팝업
+'============================================================================
+function f_EventPopup()
+    Dim szEndDate
+    Dim szToday
+    Dim szDate
+    Dim nDiffDay
+    
+    '20200526 SWJ START : MTS 해외주식 실시간 서비스 비용 변동 안내 팝업
+    szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    szEndDate = "20200612"                            	' 팝업노출일
+	    szToday = Form.GetSharedData("&HOST_DATE", false )    ' 현재일
+	    szDate = Form.GetEnvData("EVENT_DATE_YH")            ' 일주일간 열지 않기 체크한 날짜
+    
+	    if tonumber(Form.DiffDate(szToday, szEndDate)) >= 0 then
+			if szDate == null or szDate == "" then
+			    Form.OpenPopup("popup_noti", "" , "")
+			else
+			    nDiffDay =  tonumber(Form.DiffDate(szDate, szToday))
+			    if nDiffDay > 7 then
+					Form.SetEnvData(0, "EVENT_DATE_YH", "")
+					Form.OpenPopup("popup_noti", "" , "")
+			    end if
+			end if
+	    end if
+	end if
+	'20200526 SWJ END
+
+end function
+
+	</SCRIPT_INFO>
+</ROOT>
