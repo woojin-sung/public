@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90302" scrname="클라우드 고객정보입력" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0,375,647,1" >
+			<CONTROL_INFO>
+				<BUTTON name="Buttonok" caption="다음" fontsize="4" btnimage="btn_20.9" ly_vert="0,588,375,61,1" />
+				<LABEL name="labTitle" fontsize="4" fontstyle="01" caption="클라우드 연결" halign="1" ly_vert="0,0,375,60,1" />
+				<IMAGE name="ImgClose" autosize="1" imgpath="icon_close" ly_vert="340,20,20,20,1" />
+				<EDIT name="EditName" fontsize="2" imetype="4" hintcaption="이름을 입력해주세요." imagefilepth="input_03.9" ly_vert="20,190,335,74,1" />
+				<EDIT name="EditPhone" fontsize="2" imetype="1" maxlength="11" minlength="10" hintcaption="휴대폰 번호를 입력해주세요." imagefilepth="input_03.9" ly_vert="20,362,335,74,1" />
+				<EDIT name="EditDate" fontsize="2" imetype="1" maxlength="8" minlength="8" hintcaption="생년월일 8자리를 입력해주세요." imagefilepth="input_03.9" ly_vert="20,277,335,74,1" />
+				<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="고객정보 입력" ly_vert="20,92,342,20,1" />
+				<LABEL name="lblSubTitle" fgcolor="321:115118124" caption="클라우드 공동인증서비스 이용을 위해 
+사용자 정보를 입력해주세요." multiline="1" ly_vert="21,120,357,38,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9113" _ulen="8073" >
+'20240314_01 KBC 클라우드공동인증서 도입 (신규)
+'클라우드인증서 가입 시, 고객정보 입력창
+
+'로그인 or 인증센터 (CLOUD_EVENT_ACQUIREUSERINFO 이벤트 발생시) -> mhetc90302.xmf -> mhetc90303.xmf
+
+Dim g_Back_Flag   '뒤로가기플래그
+
+g_Back_Flag = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Container0.ImgClose.setMaintainingRatio("1")
+	
+	Form.transmode = false 'true 불투명, false 투명
+	Container0.visible = false
+	
+	szDev = Form.GetSharedData("&SERVER_MODE", False)
+	
+	if szDev == "1" then
+		Container0.Button0.visible = true
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.transmode = true 'true 불투명, false 투명
+	Container0.visible = true
+	
+
+	Container0.EditName.SetApplyLabel("이름" 		, 0, 267, "left", false)  'True.필수입력 / False.선택입력
+	Container0.EditPhone.SetApplyLabel("휴대폰번호"	, 0, 267, "left", false)  'True.필수입력 / False.선택입력
+	Container0.EditDate.SetApplyLabel("생년월일"		, 0, 267, "left", false)  'True.필수입력 / False.선택입력
+	
+	Container0.EditName.SetUseResultLabel(True, 1)	'True.사용가능 / False.사용불가, 라인수
+	Container0.EditPhone.SetUseResultLabel(True, 1)	'True.사용가능 / False.사용불가, 라인수
+	Container0.EditDate.SetUseResultLabel(True, 1)	'True.사용가능 / False.사용불가, 라인수
+	
+	Form.SetTimerEvent2(1, 1, 0.3)
+End Sub
+
+'
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'클라우드연결(고객정보) 입력 -> 기기인증 후 리턴 (From mhetc90303)
+		'InProgress 진행중
+		'Complete 완료
+		'Canceled 취소
+		'AuthCodeDoesNotMatch 인증번호 불일치
+		'Timeout 타임아웃
+		'AuthCodeInvalidated 인증코드 전송횟수 초과
+
+	if sKeyName == "CLOUDCERT_DEVICE_AUTH" then
+		' sRet
+		' 	- InProgress 진행중
+		' 	- Complete 완료
+		' 	- Canceled 취소
+		' 	- AuthCodeDoesNotMatch 인증번호 불일치
+		' 	- Timeout 타임아웃
+		' 	- AuthCodeInvalidated 인증코드 전송횟수 초과		
+		
+		if sRet == "Complete" then
+			'Form.CloseForm()
+			sScrPoint = Form.GetSharedData( "CLOUD_CONNECT_IS_FROM" , true )
+			
+			'클라우드 발급 시, 타기관 등록 시
+			if sScrPoint == "new" or sScrPoint == "regi" then
+				Form.OpenNextPopup("mhetc90150_s1", sScrPoint, "")
+			end if
+			
+			Form.SendReturnToParent("CLOUD_CHECK_CONNECT", "OK")	
+			
+		elseif sRet == "Canceled" then
+			Form.MsgBox("안내", "클라우드연결을 위한 단말인증이 취소되었습니다.", "", 0)
+			
+		elseif sRet == "AuthCodeDoesNotMatch" then
+			Form.MsgBox("안내", "클라우드연결을 위해 입력한 인증번호가 맞지않습니다.", "", 0)
+			
+		elseif sRet == "Timeout" then
+			Form.MsgBox("안내", "클라우드연결을 위한 인증유효시간이 지났습니다.", "", 0)				
+
+		elseif sRet == "AuthCodeInvalidated" then
+			Form.MsgBox("안내", "클라우드연결을 위한 인증코드 전송횟수가 초과되었습니다. .", "", 0)
+		end if		
+		
+		Form.CloseForm()
+		Form.SendReturnToParent("CLOUD_CHECK_CONNECT", "NO")
+	end if
+End Sub
+
+'============================================================================
+'클라우드 계정연결 [다음]버튼 
+Sub Container0_Buttonok_OnClick()
+	NextStep()
+End Sub
+
+'============================================================================
+'계정연결 않하고 닫기
+Sub Container0_ImgClose_OnClick()
+	g_Back_Flag = "Y"
+	Form.CloseForm()
+	Form.SendReturnToParent("CLOUD_CHECK_CONNECT" , "CANCEL")
+End Sub
+
+'============================================================================
+Function CloudConnectInputCheck(sType, sInput, bShowKeypad)
+
+	sInput = Trim(sInput)	
+	
+	if sType == "EditName" then
+		if sInput == "" Then
+			Container0.EditName.SetResultLabel("1","error","이름을 입력해주시기 바랍니다.","Container0")
+	
+			if bShowKeypad == True and g_Back_Flag <> "Y" then
+				Form.SetTimerEvent2(1, 1, 0.1) '0.1초뒤 보안키패드 활성화
+			end if	
+
+			return False
+	
+		else
+			Container0.EditName.SetResultLabel("0","complete","","Container0")
+			
+			if bShowKeypad == True And Container0.EditDate.caption == "" Or Container0.EditDate.caption == null then
+				If g_Back_Flag <> "Y" Then
+					Form.SetTimerEvent2(2, 1, 0.1) '0.1초뒤 보안키패드 활성화
+				End If		
+			end if
+	    end if	
+	
+	
+	elseif sType == "EditDate" then
+		if sInput == "" Then
+			Container0.EditDate.SetResultLabel("1","error","생년월일을 입력해주시기 바랍니다.","Container0")
+			
+			if bShowKeypad == True and g_Back_Flag <> "Y" then
+				Form.SetTimerEvent2(2, 1, 0.1) '0.1초뒤 보안키패드 활성화
+			end if	
+			
+			return False
+	
+		elseif Len(sInput) ~= 8 then
+			Container0.EditDate.SetResultLabel("1","error","생년월일 8자리를 입력해주세요.","Container0")
+			
+			if bShowKeypad == True and g_Back_Flag <> "Y" then
+				Form.SetTimerEvent2(2, 1, 0.1) '0.1초뒤 보안키패드 활성화
+			end if	
+			
+			return False
+	
+		else
+			Container0.EditDate.SetResultLabel("0","complete","","Container0")
+			
+			if Container0.EditPhone.caption == "" Or Container0.EditPhone.caption == null then
+				If g_Back_Flag <> "Y" Then
+					Form.SetTimerEvent2(3, 1, 0.1) '0.1초뒤 보안키패드 활성화
+				End If		
+			end if
+		end if	
+		
+	else
+		if sInput == ""  Then
+			Container0.EditPhone.SetResultLabel("1","error","휴대폰번호를 입력해주세요.","Container0")
+			
+			if bShowKeypad == True and g_Back_Flag <> "Y" then
+				Form.SetTimerEvent2(3, 1, 0.1) '0.1초뒤 보안키패드 활성화
+			end if	
+			
+			return False
+			
+		elseif Len(sInput) ~= 11 and Len(sInput) ~= 10 then
+			Container0.EditPhone.SetResultLabel("1","error","정확한 휴대폰번호를 입력해주세요.","Container0")
+
+			if bShowKeypad == True and g_Back_Flag <> "Y" then
+				Form.SetTimerEvent2(3, 1, 0.1) '0.1초뒤 보안키패드 활성화
+			end if	
+			
+			return False
+		
+		else
+			Container0.EditPhone.SetResultLabel("0","complete","","Container0")
+		end if		
+	end if
+
+	return True
+End Function
+
+'============================================================================
+'이름
+Sub Container0_EditName_OnEditComplete()
+	bRslt = CloudConnectInputCheck("EditName", Container0.EditName.caption, True)
+End Sub
+
+'============================================================================
+'생년월일
+Sub Container0_EditDate_OnEditComplete()
+	bRslt = CloudConnectInputCheck("EditDate", Container0.EditDate.caption, True)
+End Sub
+
+'============================================================================
+'휴대폰번호
+Sub Container0_EditPhone_OnEditComplete()
+	bRslt = CloudConnectInputCheck("EditPhone", Container0.EditPhone.caption, True)
+
+	if bRslt == True then
+		if Len(Container0.EditPhone.caption) == 11 then
+			Container0.EditPhone.mask = "1,0,,,1,###-####-####,0,1,1"
+		elseif Len(Container0.EditPhone) == 10 then
+			Container0.EditPhone.mask = "1,0,,,1,###-###-####,0,1,1"
+		end if
+	end if
+	
+	NextStep()
+End Sub
+
+'============================================================================
+Sub Container0_EditDate_OnClick()
+	CloudConnectInputCheck("EditName", Container0.EditName.caption, True)
+End Sub
+
+'============================================================================
+Sub Container0_EditPhone_OnClick()
+	
+	bRslt = CloudConnectInputCheck("EditName", Container0.EditName.caption, True)
+	
+	if bRslt == true then
+		bRsltm = CloudConnectInputCheck("EditDate", Container0.EditDate.caption, True)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(CInt(sTimerID), 0, 0)
+
+	if sTimerID == "1" or sTimerID == 1 then
+		Container0.EditName.SetShowKeypad(True)
+	elseif sTimerID == "2" or sTimerID == 2 then
+		Container0.EditDate.SetShowKeypad(True)
+	elseif sTimerID == "3" or sTimerID == 3 then
+		Container0.EditPhone.SetShowKeypad(True)
+	end if
+End Sub
+
+
+'============================================================================
+Sub NextStep()
+	bRslt1 = CloudConnectInputCheck("EditName", Container0.EditName.caption, True)
+	
+	if bRslt1 == true then
+		bRslt2 = CloudConnectInputCheck("EditDate", Container0.EditDate.caption, True)
+		
+		if bRslt2 == true then
+			bRslt3 = CloudConnectInputCheck("EditPhone", Container0.EditPhone.caption, True)
+		end if
+	end if
+
+	if bRslt1 == true and bRslt2 == true and bRslt3 == true then
+		'---------------------------------------------------------------------
+		'클라우드인증(사용자정보전송)
+		'이름★휴대폰번호★생년월일(YYYYMDD)
+		'---------------------------------------------------------------------
+		sName	= Container0.EditName.caption
+		sPhone	= Container0.EditPhone.caption
+		sBirth	= Container0.EditDate.caption
+		
+		sInput = sName.."★"..sPhone.."★"..sBirth
+		
+		Form.openPopupAnimation("mhetc90303", sInput ,"","2") '클라우드 기기인증
+	end if
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

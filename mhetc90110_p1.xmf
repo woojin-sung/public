@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90110" scrname="바이오인증 센터" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="LinkForm0" ly_vert="0,0,375,562,1" />
+		<LABEL name="LabelCSNO" ly_vert="488,91,100,32,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+		<BUTTON name="ButtonOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="16018" _ulen="14206" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 바이오인증
+' 02. 화면설명 : 바이오인증 - 신규등록
+' 03. 작    성 : 2016.11.11 함원규
+'-------------------------------------------------------------------------------------------
+'20201126 SWJ START : 공인인증서 '공인'글자 삭제
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim G_BIO_CONFIRM_FILE 		'바이오인증본인확인화면
+Dim G_BIO_AGREE_FILE 			'바이오인증약관동의화면
+
+Dim G_BIO_ADD_FILE 			'추가인증풀팝업
+Dim G_BIO_SECURITY_FILE 		'보안카드풀팝업
+Dim G_BIO_QUESTION_FILE 		'부가정보풀팝업
+Dim G_BIO_OTP_FILE 			'일반/스마트OTP풀팝업
+Dim 	G_BIO_OCSP_FILE			'인증서 검증 팝업
+Dim G_BIO_MOTP_FILE 			'모바일OTP풀팝업
+
+Dim g_nStepIndex 
+Dim g_sRevData 				'플로우 진행 구분값
+Dim g_sGubunCode 				'보안매체구분코드
+
+Dim g_dnData 
+
+'--------------------------------------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' 단계별 화면변경
+'============================================================================
+Function SetControlChange()
+	if g_sRevData == "bio_new" then
+	
+		if g_nStepIndex == 0 then
+			LinkForm0.linkfile = G_BIO_AGREE_FILE 		'바이오인증 약관동의화면
+		elseif g_nStepIndex == 1 then
+			LinkForm0.linkfile = G_BIO_CONFIRM_FILE		'바이오인증 본인확인화면		
+		else
+			LinkForm0.linkfile = ""
+		end if
+		
+	elseif g_sRevData == "bio_cancel" then
+	    if g_nStepIndex == 0 then
+		    LinkForm0.linkfile = G_BIO_CONFIRM_FILE	'바이오인증해지본인확인화면
+	    end if
+	end if
+	
+	Form.triggerEvent( "LinkForm0", "TabChange", g_sRevData ) 	'sub flow 화면에 flow 구분코드 전달
+End Function
+
+'============================================================================
+' 보안매체별 화면오픈
+'============================================================================
+Function SetSecurityOpen()
+	 
+	'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+	
+	if g_sGubunCode == "0" then '보안카드
+		Form.OpenFramePopup( G_BIO_SECURITY_FILE , "" , "" )	'보안카드풀팝업
+		
+	elseif g_sGubunCode == "1" then '부가정보
+		Form.OpenFramePopup( G_BIO_QUESTION_FILE , "" , "" )	'부가정보풀팝업
+		
+	elseif g_sGubunCode == "3" then 'OTP
+		Form.OpenFramePopup( G_BIO_OTP_FILE , "" , "" )		'일반/스마트OTP풀팝업
+	
+'20210226 SWJ START : 모바일OTP 인증매체 추가 
+	elseif g_sGubunCode == "4" then '모바일OTP
+		
+		'20240321 SWJ START
+		'모바일OTP 및 OTP 인증 시
+		'로그아웃 상태에서 USERID와 다른 계정으로
+		'발급 시도할 때 문제가 될 수 있어서 추가 함
+		'보수적으로 motp 인증 시에만 이렇게 처리(다음 화면에서 쉐어드변수 바로 클리어 가능)
+		szAcno = Form.GetSharedData("CERT_ACNO" , false)
+			
+		Form.SetSharedData("BioCommonAuth_RegYN", "Y") 
+		Form.SetSharedData("BioCommonAuth_Acno", szAcno)
+		'20240321 SWJ END
+		
+		Form.OpenPopup( G_BIO_MOTP_FILE , "motp_success" , "" )		'일반/스마트OTP풀팝업
+'20210226 SWJ END
+
+elseif g_sGubunCode == "2" then '없을경우
+		'Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 사고등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+		RegisterOTP() '2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+		
+	else '에러
+		Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+		
+	end if
+	
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	G_BIO_CONFIRM_FILE 		= "mhetc90110_s1"		'바이오인증 본인확인화면
+	G_BIO_AGREE_FILE			= "mhetc90110_s2"		'바이오인증 약관동의화면
+	
+	G_BIO_ADD_FILE 			= "mhetc90060_p8"		'추가인증풀팝업			'20240502 SWJ START : mhetc90060_p11에서 통합
+	G_BIO_SECURITY_FILE 		= "mhetc90060_p9"		'보안카드풀팝업
+	G_BIO_QUESTION_FILE		= "mhetc90060_pa"		'부가정보풀팝업
+	G_BIO_OTP_FILE 			= "mhetc90060_pb"		'일반/스마트OTP풀팝업
+	
+	'20210226 SWJ START
+	G_BIO_MOTP_FILE			= "mhetc90060_motp"    '모바일OTP풀팝업
+	'20210226 SWJ END
+	
+	'20161222 NOHES START
+	G_BIO_OCSP_FILE			= "mhetc90060_p5"		'인증서 검증 팝업
+	'20161222 NOHES END
+	g_sGubunCode = ""
+	g_nStepIndex = 0
+	
+	g_sRevData = Form.GetOpenLinkData( ) '바이오인증 메인화면서 flow 구분값 전달받음
+	
+	if g_sRevData == null or g_sRevData == "" then
+		g_sRevData = "bio_new"
+
+	'20180911_01 KBC START : 바이오인증 인증방식 추가 및 스크립트 정리
+	elseif g_sRevData == "bio_new_mhetc90110_s2" then
+		G_BIO_AGREE_FILE = "mhetc90110_s2"
+		g_sRevData = "bio_new" '필수
+
+	elseif g_sRevData == "bio_new_mhetc90110_s3" then
+		G_BIO_AGREE_FILE = "mhetc90110_s3"
+		g_sRevData = "bio_new" '필수
+		
+	elseif g_sRevData == "bio_new_mhetc90110_s4" then
+		G_BIO_AGREE_FILE = "mhetc90110_s4"
+		g_sRevData = "bio_new" '필수
+
+	elseif g_sRevData == "bio_new_mhetc90110_s5" then
+		G_BIO_AGREE_FILE = "mhetc90110_s5"
+		g_sRevData = "bio_new" '필수
+	'20180911_01 KBC END
+	
+	end if
+	
+	SetControlChange()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "NextStep" then
+	
+		if g_sRevData == "bio_new"  then
+		
+			if g_nStepIndex == 0 then
+				'20170110 WHG - 바이오인증 유의사항 화면 추가
+				g_nStepIndex = 1
+				SetControlChange()
+			elseif g_nStepIndex == 1 then
+			
+				'20161222 NOHES START : 온라인신원확인 안함
+				'온라인 신원확인 동의 조회
+				'DATAMANAGER.RequestTranData("obpds_srvc_173r")
+				DATAMANAGER.RequestTranData("obcsb_padc_004r")
+				'20161222
+			    
+			end if
+		elseif g_sRevData == "bio_cancel" then
+			if g_nStepIndex == 0 then
+				DATAMANAGER.RequestTranData( "obcsb_oimf_638r" ) '추가인증대상,단말기지정약정조회
+			end if
+		end if
+		
+	elseif sEventName == "BeforeStep" then
+		if g_nStepIndex > 0 then
+			g_nStepIndex = g_nStepIndex-1
+			SetControlChange()
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == G_BIO_ADD_FILE then
+		if g_sRevData == "bio_new" then
+			if sRet == "ok" then
+				DATAMANAGER.RequestTranData( "obcsb_oimf_625r" )
+			else
+				g_sGubunCode = ""
+			end if
+		elseif g_sRevData == "bio_cancel" then 
+			if sRet == "ok" then
+				sSendData = "ok"&"★"&Form.GetSharedData("CERT_ID" , false) &"★"&Form.GetSharedData("CERT_ACNO" , false) 
+				Form.SendReturnToParent( "b_idft" , sSendData)
+				Form.CloseForm( )
+			else
+				g_sGubunCode = ""
+			end if
+		end if
+	
+	elseif sKeyName == G_BIO_SECURITY_FILE or sKeyName == G_BIO_QUESTION_FILE or 
+			sKeyName == G_BIO_OTP_FILE or sKeyName == G_BIO_MOTP_FILE then '20210226 SWJ START : 모바일OTP 인증매체 추가
+		if sRet == "ok" then
+			if g_sRevData == "bio_new" Then
+				
+				'20180306 LES START - 바이오인증등록 인증서확인 단계 삭제
+				'ORGN
+				'sSendData =g_sRevData&"★"& Form.GetSharedData("CERT_ID" , false) &"★"&g_dnData
+				'Form.OpenFramePopup( G_BIO_OCSP_FILE,  sSendData, "")
+				
+				sSendData = sRet&"★"&Form.GetSharedData("CERT_ID" , false)&"★"&Form.GetSharedData("CERT_ACNO" , false)
+				Form.SendReturnToParent( "b_vft" , sSendData)
+				Form.CloseForm( )
+				
+			end if
+		end if
+		
+	'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)									
+	elseif sKeyName == "mhetc90190_p1" then										
+		'if sRet == "ok" then									
+		'end if
+		
+	'20180306 LES START - 바이오인증등록 인증서확인 단계 삭제
+	'ORGN
+	'20161222 NOHES START	
+	'elseif sKeyName == G_BIO_OCSP_FILE then
+	'	if g_sRevData == "bio_new" Then
+	'		sSendData = sRet&"★"&Form.GetSharedData("CERT_ID" , false)&"★"&Form.GetSharedData("CERT_ACNO" , false)
+	'		Form.SendReturnToParent( "b_vft" , sSendData)
+	'		Form.CloseForm( )
+	'	end if
+	'20161222 NOHES END
+	
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "REG_MSG" then
+		if sRet == "ok" then
+			Form.OpenScreen( "86010" , "" ) '단말등록화면이동
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim sDeviceID, sACNO, sACNO_PWD, sUserID, sRCNO, sUserName
+	
+	sDeviceID = Form.GetDeviceID()
+	sACNO = Form.GetSharedData("CERT_ACNO" , false)
+	sACNO_PWD = Form.GetSharedData("CERT_ACNT_PWD" , false)
+	sUserID = Form.GetSharedData("CERT_ID" , false)
+	sUserName = Form.GetSharedData("CERT_USER_NAME" , false)
+	sRCNO = Form.GetSharedData("CERT_RCNO" , false)
+	
+	if szTranID == "obcsb_oimf_625r" then	
+		DATAMANAGER.SetUserID( sUserID ) '20160620 KBC 추가 : 발급(170a)와 동일하게 등록도 헤더에 값 지정해준다.
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PROS_CLS_CODE" , 0 , "5" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "REG_CLCD" , 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "DRNG_ACNO" , 0 , sACNO )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "PWD" , 0 , sACNO_PWD )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_BANK_CODE" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "MNRC_ACNO" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "TACT_AMT" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_625r", "InBlock1", "UI_TERM_IDNT_KEY" , 0 , sDeviceID )
+			
+	elseif szTranID == "obcsb_oimf_638r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_638r", "InBlock1", "ELFN_ID" , 0 , sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_638r", "InBlock1", "UI_TERM_IDNT_KEY" , 0 , Form.GetDeviceID() )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_638r", "InBlock1", "SVCD" , 0 , "000" ) '인증서신규
+
+'20161222 NOHES START
+	elseif szTranID == "obcsb_padc_004r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_padc_004r", "InBlock1", "ELFN_ID" , 0 , sUserID )		'ID
+'20161222 NOHES END
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_oimf_625r" then
+		Dim sSPLM_ATHN_NCSR_YN 
+		
+		g_sGubunCode = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_625r", "OutBlock2", "SCRC_OTP_CLS_CODE" , 0 )
+         SetSecurityOpen()
+		
+	elseif szTranID == "obcsb_oimf_638r" then	'단말기 지정여부 팝업 오픈
+		
+		sTemp = DATAMANAGER.GetDataValue( 0 , "obcsb_oimf_638r", "OutBlock1", "SPLM_ATHN_STPL_YN" , 0)
+		        
+		if sTemp == "Y" then	
+			Form.OpenFramePopup( G_BIO_ADD_FILE , g_sRevData , "" )	 
+		else
+			DATAMANAGER.RequestTranData( "obcsb_oimf_625r" ) '추가인증대상조회
+		end if
+		
+
+'20161222 NOHES START
+	elseif szTranID == "obcsb_padc_004r" Then
+		
+		g_dnData =  DATAMANAGER.GetDataValue(0, "obcsb_padc_004r" , "OutBlock1" , "DN_DATA" , 0)
+		
+		'20170103 HWG START - 바이오인증 가입시, OCSP 검증에 필요한 고객번호 Shared
+		Form.SetSharedData("BIO_CSNO" , DATAMANAGER.GetDataValue(0, "obcsb_padc_004r", "OutBlock1", "CSNO" , 0))
+		'20170103 HWG END
+		
+		'20180802 LES START - 바이오인증 등록절차 변경
+		'등록절차 변경으로 인해 인증서 인증이 추가인증수단으로 추가됨에따라
+		'추가인증화면에서 OCSP검증화면을 FramePopup으로 호출하기 위해 dn값 Shared
+		Form.SetSharedData("BIO_DNDATA" , g_dnData)
+		'20180802 LES END
+		
+		
+		'20210215 SWJ START : DN정보 없는 고객 스크립트 오류 수정
+		'if g_dnData == null or g_dnData == "" then
+		 '   sText = "인증서 정보가 존재하지 않습니다.\n".."인증서 정보를 확인해주세요"
+		'	Form.MsgBox( "알림", sText, "REG_MSG", 1 )
+		'	sSendData = "cancel"
+			
+			'Form.SendReturnToParent( "b_vft" , sSendData)
+			'Form.CloseForm( )
+        ' else
+			DATAMANAGER.RequestTranData( "obcsb_oimf_638r" ) '추가인증대상,단말기지정약정조회
+		'end if
+		'20210215 SWJ END
+	
+'20161222 NOEHS END
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+		szErrMsg = szErrMsg.." "..sSubMsg
+	end if
+	
+'20161222 NOHES START
+	if szTranID == "obcsb_padc_004r" then
+
+		Form.MsgBox("알림", szErrMsg, "", 6 )
+'20161222 NOHES END
+	end if
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	if g_nStepIndex == 0 then
+		Form.CloseForm( )
+	else
+		Form.triggerEvent( "LinkForm0", "BeforeCheck", "" )	
+	end if
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	if g_sRevData == "bio_new" then
+		if g_nStepIndex < 2 then
+			Form.triggerEvent( "LinkForm0", "NextCheck", "" )	
+		end if
+	
+	elseif g_sRevData == "bio_cancel" then
+		Form.triggerEvent("LinkForm0", "NextCheck", "")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("CERT_ID" , "")
+	Form.SetSharedData("CERT_RCNO" , "")
+	Form.SetSharedData("CERT_ACNO" , "")
+	Form.SetSharedData("CERT_ACNT_PWD" , "")
+	Form.SetSharedData("CERT_USER_NAME" , "")
+	Form.SetSharedData("CERT_NEW", "")	
+	Form.SetSharedData("CERT_DN" , "")
+	Form.SetSharedData("CERT_INDEX" , "")
+	'20170103 HWG START- BIO 인증시, OCSP 검증에 필요한 쉐어드 데이터 초기화
+	Form.SetSharedData("BIO_CSNO" , "")
+	Form.SetSharedData("BIO_CSNM" , "")
+	'20170103 HWG END
+End Sub
+
+'============================================================================
+'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+'============================================================================
+Sub RegisterOTP()
+	'20240219 SWJ START
+	szAcno = Form.GetSharedData("CERT_ACNO" , false)
+	
+	'계좌번호★주민번호(필수아님)★Y/N( 모바일OTP/타기관OTP 발급 완료 후 인증 처리 진행여부를 판단함)★Y/N(처리 완료시 화면닫기)	
+	Form.OpenNextPopup("mhetc90190_p1", szAcno &"★"& "" &"★"& "N" &"★"& "", "")
+	'20240219 SWJ END
+End Sub
+'============================================================================
+'20240219 SWJ START
+'보안매체없음 팝업일 때 다음 스텝으로 이동
+'============================================================================
+'Sub Form_OnLinkData(sKey, sValue)
+'	if sKey == "&CommonNoSecurity" then
+'		if Cint(sValue) == 6 then
+'			if g_sRevData == "bio_new" Then
+'				
+'				'20180306 LES START - 바이오인증등록 인증서확인 단계 삭제
+'				'ORGN
+'				'sSendData =g_sRevData&"★"& Form.GetSharedData("CERT_ID" , false) &"★"&g_dnData
+'				'Form.OpenFramePopup( G_BIO_OCSP_FILE,  sSendData, "")
+'				
+'				sSendData = "ok" &"★"&Form.GetSharedData("CERT_ID" , false)&"★"&Form.GetSharedData("CERT_ACNO" , false)
+'				Form.SendReturnToParent( "b_vft" , sSendData)
+'				Form.CloseForm( )
+'				
+'			end if
+'		end if
+'	end if
+'End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_625r" trcode="obcsb_oimf_625r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_173r" trcode="obpds_srvc_173r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_638r" trcode="obcsb_oimf_638r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_padc_004r" trcode="obcsb_padc_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_625r" title="추가인증대상조회(스마트폰)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="358" _ulen="272" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+REG_CLCD^등록구분코드^1^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="213" _ulen="165" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="67" _ulen="51" >
+
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_173r" title="공인인증서온라인신원확인 사전?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="195" _ulen="147" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="89" _ulen="67" >
+
+AGRM_YN^동의여부^1^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="40" _ulen="32" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_638r" title="전자금융사기예방 고객조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="376" _ulen="290" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="30" inout="in" _len="330" _ulen="242" >
+
+TACT_CLS_CODE^이체구분코드^2^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+DRNG_ASNO^출금계좌일련번호^2^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+MNRC_ASNO^입금계좌일련번호^2^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1142" _ulen="840" >
+
+TERM_DSGT_STPL_YN^단말지정약정여부^1^0^0^0^0^0^0
+SPLM_ATHN_STPL_YN^추가인증약정여부^1^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+OWHS_ARCD^자택지역번호^4^0^0^0^0^0^0
+OWHS_TONO^자택국번호^4^0^0^0^0^0^0
+OWHS_TLPH_SRNO^자택전화일련번호^4^0^0^0^0^0^0
+WRPL_TLPH_ARCD^직장전화지역번호^4^0^0^0^0^0^0
+WRPL_TLPH_TONO^직장전화국번호^4^0^0^0^0^0^0
+WRPL_TLPH_SRNO^직장전화일련번호^4^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+ACML_TR_PBMN^누적거래대금^19^0^7^0^0^0^0
+UI_SPLM_YN^UI추가여부^1^0^0^0^0^0^0
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+REG_YN^등록여부^1^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+UI_CUST_ATHN_NO^UI고객인증번호^6^0^0^0^0^0^0
+UI_CUST_ATHN_NO2^UI고객인증번호2^6^0^0^0^0^0^0
+SVC_ECPT_CLS_CODE^서비스예외구분코드^1^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="10" inout="out" _len="309" _ulen="243" >
+
+TERM_NAME^단말명^30^0^0^0^0^0^0
+MAC_ADDR^MAC주소^12^0^0^0^0^0^0
+DISK_SERL_NO^디스크일련번호^20^0^0^0^0^0^0
+REG_EMPNO^등록직원번호^9^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="111" _ulen="85" >
+
+TOTAL_TACT_AMT^총이체금액^19^0^7^0^0^0^0
+SECU_MDIA_EXLS_YN^보안매체제외여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_padc_004r" title="전자금융ID 공인인증서정보 발급" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="45" _ulen="37" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="630" _ulen="470" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+DN_DATA^DN데이터^256^0^0^0^0^0^0
+DN_REG_DATE^DN등록일자^8^0^0^0^0^0^0
+DN_REG_IPAD^DN등록IP주소^39^0^0^0^0^0^0
+NTAT_SRNO^인증서일련번호^32^0^0^0^0^0^0
+NTAT_SRNO_REG_DATE^인증서일련번호등록일자^8^0^0^0^0^0^0
+NTAT_SRNO_REG_IPAD^인증서일련번호등록IP주소^39^0^0^0^0^0^0
+ISNC_TYPE_CODE^발급유형코드^1^0^0^0^0^0^0
+CUST_EMPL_CLS_CODE^고객직원구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90154" scrname="클라우드 연결/관리" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="ImgBackPress" imgpath="icon_arrow_left_on" ly_vert="17,17,24,30,1" />
+		<LABEL name="labTitle" fontsize="4" fontstyle="01" caption="클라우드 연결/관리" halign="1" ly_vert="1,0,375,60,1" />
+		<LABEL name="LblNotice1" fgcolor="334:034034034" caption="클라우드에 자동 연결된 내역입니다." ly_vert="10,56,365,27,1" />
+		<LABEL name="LblNotice2" fgcolor="334:034034034" caption="내역을 확인하고 안전하게 관리하세요." ly_vert="10,76,365,27,1" />
+		<LABEL name="lblSubTitle" fgcolor="321:115118124" caption="해제하면 클라우드 접속 시 인증 절차가 필요합니다." multiline="1" ly_vert="10,109,357,38,1" />
+		<LABEL name="lbNoticeMsg" visible="0" fgcolor="146:124124124" caption="조회내역이 없습니다." halign="1" ly_vert="80,330,210,32,0" />
+		<IMAGE name="imgNotice" visible="0" autosize="1" imgpath="icon_notice_3" ly_vert="158,270,50,50,0" />
+		<LABEL name="LblServiceCancel" visible="0" fgcolor="334:034034034" fontsize="1" caption="<![CDATA[클라우드 서비스 탈퇴  >]]>" halign="1" ly_vert="10,565,350,40,0" />
+		<BUTTON name="BtnServiceCancel" visible="0" btnimage="alpha" ly_vert="60,565,252,43,0" />
+		<PANNEL name="Pannel0" ly_vert="10,147,354,413,1" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" ly_vert="4,6,347,129,1" />
+				<LABEL name="LblQuestion" fontsize="2" bgcolor="029:255212175" multiline="1" paddinginfo="1,0,0,0" ly_vert="23,14,241,40,1" />
+				<BUTTON name="Button0" caption="연결 해제" fgcolor="334:034034034" fontsize="-1" ly_vert="257,22,78,30,1" />
+				<LABEL name="LblQuestion0" fgcolor="321:115118124" fontsize="-2" bgcolor="029:255212175" multiline="1" paddinginfo="1,0,0,0" ly_vert="24,49,144,25,1" />
+				<LABEL name="LblQuestion4" fgcolor="321:115118124" fontsize="-2" mask="1,0,,,1,####.##.## ##:##:##,0,1,1,0,0" bgcolor="029:255212175" halign="2" multiline="1" paddinginfo="1,0,0,0" ly_vert="129,72,197,26,1" />
+				<LABEL name="LblQuestion1" fgcolor="321:115118124" fontsize="-2" bgcolor="029:255212175" multiline="1" paddinginfo="1,0,0,0" ly_vert="193,48,122,26,1" />
+				<LABEL name="LblQuestion2" fgcolor="321:115118124" fontsize="-2" caption="연결등록일자" bgcolor="029:255212175" multiline="1" paddinginfo="1,0,0,0" ly_vert="25,72,122,26,1" />
+				<LABEL name="LblQuestion3" fgcolor="321:115118124" fontsize="-2" caption="최근사용일자" bgcolor="029:255212175" multiline="1" paddinginfo="1,0,0,0" ly_vert="25,92,122,26,1" />
+				<LABEL name="LblQuestion5" fgcolor="321:115118124" fontsize="-2" mask="1,0,,,1,####.##.## ##:##:##,0,1,1,0,0" bgcolor="029:255212175" halign="2" multiline="1" paddinginfo="1,0,0,0" ly_vert="129,91,197,26,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="129" gap="4" >
+				<CELL name="LblQuestion" />
+				<CELL name="Image0" />
+				<CELL name="Button0" />
+				<CELL name="LblQuestion0" />
+				<CELL name="LblQuestion1" />
+				<CELL name="LblQuestion2" />
+				<CELL name="LblQuestion3" />
+				<CELL name="LblQuestion4" />
+				<CELL name="LblQuestion5" />
+			</CARD_INFO>
+		</PANNEL>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7022" _ulen="6320" >
+'============================================================================
+'20240502 SWJ START : 클라우드 연결/관리
+'============================================================================
+Dim g_sUseDate
+g_sUseDate = ""
+
+Dim g_sCompany
+g_sCompany = ""
+
+Dim g_sServiceName
+g_sServiceName = ""
+
+Dim g_sOsGubun
+g_sOsGubun = ""
+
+Dim g_sRegisterDate
+g_sRegisterDate = ""
+
+Dim g_sDeviceModel
+g_sDeviceModel = ""
+
+Dim g_sRetUseCnt
+g_sRetUseCnt = 0
+
+Dim g_sRetDeviceCnt
+g_sRetDeviceCnt = 0
+
+Dim g_sEachUseList
+g_sEachUseList = Array()
+
+Dim g_sEachDeviceList
+g_sEachDeviceList = Array()
+
+Dim tbl_Device
+tbl_Device = Array()
+
+Dim gPannelIndex
+gPannelIndex = 0
+
+Dim g_bUseListFlag
+g_bUseListFlag = False
+
+Dim g_bDeviceListFlag
+g_bDeviceListFlag = False
+
+Dim g_bByeCloud
+g_bByeCloud = False
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBackPress.setMaintainingRatio("1")
+	imgNotice.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	Form.SetTimerEvent2(1, 1, 0.1)
+	
+	Pannel0.rowcount = 0
+	
+End Sub
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if Cint(sTimerID) == 1 then
+		'클라우드 인증서 목록이 있는지 확인하는 함수
+		'(함수의 목적과 달리 연결 여부를 판단하려고 호출)
+		'(일단 무언가를 호출해야 CLOUD_EVENT_ACQUIREUSERINFO 이벤트가 발생)
+		
+		Form.SetTimerEvent2(1, 0, 0.1)
+		Form.requestCertCommand("CLOUD_REQ_DEVICE_LIST", "", "90154") 
+		Form.requestCertCommand("CLOUD_REQ_USE_LIST", "", "90154")
+		
+		Form.SendReturnToParent("mhetc90154" , "")
+	end if
+End Sub
+'============================================================================
+Sub Form_onTriggerEventCloudCert(sCommand, sResult)
+	
+	Dim sErrorCd, sErrorMsg
+
+	szItem = Split(sResult,"★")
+
+	'처리코드,처리메시지 처리
+	sErrorCd		= szItem(0)
+	sErrorMsg	= szItem(1)	
+	
+	'Form.ShowAlert(sCommand, sResult)
+	
+	'오류이면
+	if sErrorCd <> "0" then
+		Form.MsgBox("안내" & sCommand, sErrorMsg, "", 0)
+		exit sub
+	end if		
+	
+	if sCommand == "CLOUD_EVENT_ACQUIREUSERINFO" then
+		CertListUI("No")
+		
+		'클라우드 정상 탈퇴 시
+		'기기 인증 "CLOUDCERT_DEVICE_AUTH" 리턴 쪽에서
+		'한번 더 조회시켜서 이 곳에서 리턴 받게 됨
+		if g_bByeCloud = True then
+			Form.OpenPopup("mhetc90150_p2" , "WithDrawal" , "")
+		end if
+	
+	end if
+	
+	'응답 순서
+	'처리코드, 처리메시지, rowCount, (디바이스ID, OS구분, 서비스명, 등록일시, 최종사용일시, OS버전, H/W모델명)
+	'위 괄호 부분은 하트로 Array처럼 엮임
+	if sCommand == "CLOUD_REQ_DEVICE_LIST_90154" then
+		if #szItem > 2 then
+			g_sRetDeviceCnt = Cint(szItem(2))
+			
+			for i = 0 to g_sRetDeviceCnt - 1
+				g_sEachDeviceList(i) = szItem(i+3) 
+			next
+		end if
+		
+		g_bDeviceListFlag = True
+		
+	end if
+	
+	'응답 순서
+	'처리코드, 처리메시지, rowCount, (행위명, 일자, 금융사명, 서비스명, OS구분)
+	'위 괄호 부분은 하트로 Array처럼 엮임
+	if sCommand == "CLOUD_REQ_USE_LIST_90154" then	
+		if #szItem > 2 then
+			
+			g_sRetUseCnt = Cint(szItem(2))
+			
+			for i = 0 to g_sRetUseCnt - 1
+				g_sEachUseList(i) = szItem(i+3) 
+			next	
+		end if
+		
+		g_bUseListFlag = True
+	
+	end if
+	
+	if sCommand = "CLOUD_EVENT_PHONE_PROOF" then
+		
+		Form.openPopupAnimation("mhetc90303", sInput ,"","2") '클라우드 기기인증
+		
+		g_bByeCloud = True
+
+	end if
+	
+	'연결 해제
+	if sCommand = "CLOUD_REQ_DEVICE_DELETE_90154" then
+		'단말 목록 재조회
+		Form.SetTimerEvent2(1, 1, 0.1)
+		
+		Form.MsgBox("안내", "자동 연결이 해제 되었습니다.", "", 0)
+	end if
+	
+	'한번만 UI 호출하기 위함
+	if g_bDeviceListFlag and g_bUseListFlag then
+		CertListUI("Yes")
+		g_bUseListFlag = false
+		g_bDeviceListFlag = false
+	end if
+	
+End Sub
+'============================================================================
+Function CertListUI(sParam)
+	
+	if sParam == "Yes" then
+		Pannel0.visible = True
+		lbNoticeMsg.visible = False
+		imgNotice.visible = False
+		LblServiceCancel.visible = True
+		BtnServiceCancel.visible = True
+		
+		Pannel0.rowcount = g_sRetDeviceCnt
+		
+		for i = 0 to g_sRetDeviceCnt - 1	
+				
+			sEachDeviceList = Split(g_sEachDeviceList(i) , "♥")
+			
+			if Ubound(sEachDeviceList) > 0 then
+				
+				'Pannel0.setPropCardCell("imgpath","Image0",gPannelIndex, "img_bgbox_line1.9")
+				Pannel0.setPropCardCell("imgpath","Image0",i, "bg_infobox_n.9")
+				'Pannel0.setPropCardCell("singleimage","Button0",gPannelIndex, "btn_line2_o.9")
+				
+				Pannel0.setPropCardCell("btnimage","Button0",i, "btn_line2.9")
+				
+				Pannel0.setPropCardCell("maxlinecnt","LblQuestion0", i , "1^-2")
+				
+				Pannel0.SetCellValue("LblQuestion", i, sEachDeviceList(2))	
+				
+				'모델ID
+				Pannel0.SetCellValue("LblQuestion0", i, sEachDeviceList(6))	
+				
+				Pannel0.SetCellValue("LblQuestion1", i, sEachDeviceList(1))	
+				
+				Pannel0.setPropCardCell("maxlinecnt","LblQuestion4", i , "1^-2")
+				
+				'등록일시
+				Pannel0.SetCellValue("LblQuestion4", i, sEachDeviceList(3))	
+				
+				'최종사용일시
+				Pannel0.SetCellValue("LblQuestion5", i, sEachDeviceList(4))	
+				
+				'단말ID 저장
+				tbl_Device(i) = sEachDeviceList(0)
+			end if	
+			
+		next
+		
+	else
+		Pannel0.visible = False
+		lbNoticeMsg.visible = True
+		imgNotice.visible = True
+		LblServiceCancel.visible = False
+		BtnServiceCancel.visible = False
+	end if
+	
+End Function
+'============================================================================
+Sub BtnServiceCancel_OnClick()
+
+	Form.MsgBox("안내", "클라우드에 저장된 인증서가\n모두 삭제됩니다.\n\n클라우드 서비스를 탈퇴하시겠어요?", "ByeCloud", 7, "탈퇴하기", "취소")
+
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	
+	'서비스 탈퇴 시
+	'기기인증 후 리턴
+	if sKeyName == "CLOUDCERT_DEVICE_AUTH" then
+		Form.SetTimerEvent2(1, 1, 0.1)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "ByeCloud" then
+		if sRet == "ok" then
+			Form.requestCertCommand("CLOUD_REQ_DELETE_ACCOUNT", "", "90154")
+		end if
+	end if
+	
+	if sKeyName == "DisconnectCloud" then
+		if sRet == "ok" then
+			Form.requestCertCommand("CLOUD_REQ_DEVICE_DELETE", tbl_Device(Cint(nIndex)), "90154") 	
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+	'연결해제
+	if sCellID == "Button0" then
+		Form.MsgBox("안내", "선택한 기기의 연결을\n해제하시겠습니까?", "DisconnectCloud", 7, "연결 해제", "취소")
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

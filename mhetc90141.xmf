@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90140" scrname="개별본인인증 완료" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" autosize="1" ly_vert="0,0,375,587,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="check.png" ly_vert="153,55,70,60,1" />
+		<LABEL name="Label0" fontsize="9" fontstyle="01" caption="완료" halign="1" ly_vert="20,135,335,26,1" />
+		<LABEL name="Label2" mask="0,0,,건,1,,0,0,0,0,0" ly_vert="106,285,100,18,1" />
+		<BUTTON name="Button0" caption="확인" bgcolor="085:205216147" bgcolor2="102:216216216" fontsize="4" fontstyle="01" btnimage="btn_10.9" ly_vert="0,527,375,60,1" />
+		<LABEL name="Label4" fontstyle="01" bgcolor="143:049050052" transmode="0" ly_vert="21,231,335,2,1" />
+		<GRID name="Grid0" colcount="2" ly_vert="21,232,335,240,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-1" mask="1,0,,,1,####-####-##,0,1,1,0,0" halign="1" autofontsize="1" />
+				<LABEL name="th_cell0" fontstyle="01" caption="계좌번호" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-1" autofontsize="1" />
+				<LABEL name="th_cell1" fontstyle="01" caption="계좌상품명" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="200,135" ly_vert_visible="0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="200" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="135" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="LblAlert" visible="0" fontsize="2" fontstyle="01" caption="선택된 계좌가 없습니다." halign="1" ly_vert="21,233,335,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4701" _ulen="4367" >
+'Dim g_Ostype
+Dim g_redirect_Resp
+Dim g_urlschme
+'============================================================================
+Sub Button0_OnClick()
+	call Redirect_Resp()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+'	AcntSetting()
+'	Button0.enable = false
+	Image0.visible = false
+	Label0.visible = false
+	nDev = Form.GetSharedData("&SERVER_MODE", false )
+	if nDev == "1" then '테스트
+		Form.requestMyData("MYDATA_002", "https://mytest.imeritz.com:9443/oauth/2.0/authorization-code", "")
+	else
+		Form.requestMyData("MYDATA_002", "https://mydata.imeritz.com:9443/oauth/2.0/authorization-code", "")
+	end if
+End Sub
+'============================================================================
+'iOS는 호출화면에서 TriggerEventMyData 받고, 안드로이드는 껍데기화면에서 받은 후 원래 화면으로 Trigger 보내기
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	Image0.visible = true
+	Label0.visible = true
+	g_urlschme = Form.GetSharedData("&MYDATA_APP_SCHEME", false )
+	if sParam = "ERROR" then
+		Image0.imgpath = "fail.png"
+		Label0.caption = "실패"
+		Form.MsgBox("확인 필요", "계좌연결이 정상적으로 완료되지 않았습니다. \n사업자 앱으로 연결되오니, 재확인하시기 바랍니다.", "error", 6)
+'		urlSchme = Form.GetSharedData("&MYDATA_APP_SCHEME", false )
+'		Form.triggerEvent( "#", "CloseForm", "1" )
+'		Form.runMyDataApp(urlSchme, "02")
+	else
+		if sEventName = "MYDATA_RETURN_002" then
+			call AcntSetting()
+			
+			redirect_url = Form.GetSharedData("&MYDATA_REDIRECT_URI", false )
+			Form.requestMyData("MYDATA_REDIRECT", redirect_url, "")
+			
+		Elseif sEventName = "MYDATA_RETURN_REDIRECT" then
+			g_redirect_Resp = sParam
+'			call Redirect_Resp()
+		end if
+	end if
+End Sub
+'============================================================================
+Sub Form_OnTriggerEventMyData(sEventName, sParam)
+	Image0.visible = true
+	Label0.visible = true
+	g_urlschme = Form.GetSharedData("&MYDATA_APP_SCHEME", false )
+	if sParam = "ERROR" then
+		Image0.imgpath = "fail.png"
+		Label0.caption = "실패"
+		Form.MsgBox("확인 필요", "계좌연결이 정상적으로 완료되지 않았습니다. \n사업자 앱으로 연결되오니, 재확인하시기 바랍니다.", "error", 6)
+'		urlSchme = Form.GetSharedData("&MYDATA_APP_SCHEME", false )
+'		Form.triggerEvent( "#", "CloseForm", "1" )
+'		Form.runMyDataApp(urlSchme, "02")
+	else
+		if sEventName = "MYDATA_RETURN_002" then
+			call AcntSetting()
+			
+			redirect_url = Form.GetSharedData("&MYDATA_REDIRECT_URI", false )
+			Form.requestMyData("MYDATA_REDIRECT", redirect_url, "")
+			
+		Elseif sEventName = "MYDATA_RETURN_REDIRECT" then
+			g_redirect_Resp = sParam
+'			call Redirect_Resp()
+		end if
+	end if
+End Sub 
+'============================================================================
+'Step3에서 선택한 계좌번호 표시
+Sub AcntSetting()
+	acntNum = Form.GetSharedData("&MYDATA_MAP_ACNTNUM" , FALSE)				'선택계좌 개수
+	get_list = Form.GetSharedData("&MYDATA_MAP_ACNTLIST" , FALSE)			'선택계좌 리스트
+'	Form.ShowAlert("acntNum", acntNum)
+'	Form.ShowAlert("get_list", get_list)
+	if int(acntNum) = 0 or acntNum = "" or acntNum = null then
+		Grid0.visible = False
+		Label4.visible = False
+		LblAlert.visible = True
+		exit sub
+	end if 
+	acnt_list = Split(get_list, "★")
+	acntlst_len = (int(acntNum)) * 2 - 1
+	if UBOUND(acnt_list) < 1 then
+		Grid0.visible = False
+		Label4.visible = False
+		LblAlert.visible = True
+		exit sub
+	end if
+	
+	j = 0
+	for i = 0 to acntNum-1 
+		Grid0.AddRow()
+		Grid0.SetCellData("bd_cell0", i, acnt_list(j))
+		j = j+1
+		Grid0.SetCellData("bd_cell1", i, acnt_list(j))
+		j = j+1
+	next
+	
+	Grid0.rowcount = acntNum-1 
+End Sub 
+'============================================================================
+Sub Redirect_Resp()
+	if g_redirect_Resp = "COMPLETE" then
+		Form.triggerEvent( "#", "CloseForm", "1" )
+		Form.runMyDataApp(g_urlschme, "01")
+		Button0.enable = false
+		Form.CloseForm()
+	else
+		Form.triggerEvent( "#", "CloseForm", "1" )
+		Form.runMyDataApp(g_urlschme, "02")
+		Form.CloseForm()
+	end if 
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("&MYDATA_MAP_ACNTNUM" , "")			'선택계좌 개수
+	Form.SetSharedData("&MYDATA_MAP_ACNTLIST" , "")			'선택계좌 리스트
+'	Form.TerminateApp()
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName = "error" and sRet = "close" then
+		Form.triggerEvent( "#", "CloseForm", "1" )
+		Form.runMyDataApp(g_urlschme, "02")
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

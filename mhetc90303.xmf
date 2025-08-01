@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90303" scrname="클라우드 기기인증" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container1" bgcolor="347:217217217" containerimage="popup_bg.9" ly_vert="0,174,375,473,1" scroll_ly_vert="0,174,375,473,1" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fgcolor="321:115118124" fontsize="1" caption="기기인증을 위해 아래의 '확인' 버튼을 눌러주세요." multiline="1" ly_vert="5,20,355,50,1" />
+				<LABEL name="Label1" fgcolor="334:034034034" fontstyle="10" caption="<![CDATA[인증방식 변경 >]]>" halign="1" click="1" ly_vert="0,339,375,32,1" />
+				<LABEL name="labTitle" fontsize="2" fontstyle="01" caption="기기인증" ly_vert="5,-11,200,60,1" />
+				<LABEL name="Label2" fgcolor="334:034034034" fontstyle="01" caption="메시지 창에 입력된 인증 문자를 전송해주세요." halign="1" multiline="1" ly_vert="0,259,375,50,1" />
+				<LABEL name="Label3" fgcolor="321:115118124" caption="문자발송이 안되는 기기인가요?" halign="1" multiline="1" ly_vert="0,303,375,50,1" />
+				<IMAGE name="Image0" autosize="1" imgpath="img_cloud_mms.png" ly_vert="40,89,290,160,1" />
+				<BUTTON name="BtnCancel" caption="취소" fgcolor="334:034034034" fontsize="1" fontstyle="01" btnimage="btn_21.9" ly_vert="0,397,188,61,1" />
+				<BUTTON name="BtnOK" caption="확인" fgcolor="320:246247248" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="188,397,188,61,1" />
+				<LABEL name="remainTime" visible="0" fgcolor="321:115118124" fontsize="-2" caption="유효시간 05:00" halign="2" ly_vert="200,246,140,32,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="Container2" bgcolor="347:217217217" containerimage="popup_bg.9" ly_vert="390,174,375,473,1" scroll_ly_vert="390,174,375,473,1" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fgcolor="321:115118124" fontsize="1" caption="휴대폰으로 문자를 보냈습니다." multiline="1" ly_vert="5,20,325,50,1" />
+				<LABEL name="labTitle" fontsize="2" fontstyle="01" caption="기기인증" ly_vert="5,-11,200,60,1" />
+				<LABEL name="Label2" fgcolor="334:034034034" caption="휴대폰의 문자메시지로 이동하여" halign="1" multiline="1" ly_vert="0,212,375,50,1" />
+				<LABEL name="Label3" fgcolor="334:034034034" caption="상단 인증 코드를 문자로 전송해주세요." halign="1" multiline="1" ly_vert="0,233,375,50,1" />
+				<BUTTON name="BtnCancel" caption="취소" fgcolor="334:034034034" fontsize="1" fontstyle="01" btnimage="btn_21.9" ly_vert="0,397,375,61,1" />
+				<LABEL name="labTitle0" fontsize="1" fontstyle="01" caption="인증코드" halign="1" ly_vert="130,105,110,40,1" />
+				<LABEL name="labTitle1" fontsize="10" fontstyle="01" caption="18" halign="1" ly_vert="130,145,110,40,1" />
+				<LABEL name="Label5" fgcolor="321:115118124" fontsize="-3" caption="문자메세지를 수신 받지 못한 경우는 수신 차단 번호를 확인해주세요." halign="1" multiline="1" autofontsize="1" ly_vert="1,327,375,50,1" />
+				<LABEL name="Label4" fgcolor="334:034034034" caption="보낸 메시지가 확인되면 다음단계로 진행됩니다." halign="1" multiline="1" ly_vert="0,263,375,50,1" />
+				<LABEL name="remainTime" fgcolor="321:115118124" fontsize="-2" caption="유효시간 05:00" halign="2" ly_vert="200,186,140,32,1" />
+				<BUTTON name="BtnOK" visible="0" caption="확인" fgcolor="320:246247248" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="188,397,188,61,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8384" _ulen="7338" >
+'20240314_01 KBC 클라우드공동인증서 도입 (신규)
+
+'클라우드 공동인증서 로그인 화면 (로그인 or 인증센터)
+'    
+'        ============================================================================================================
+'        [Form_onTriggerEventCloudCert]
+'        ------------------------------------------------------------------------------------------------------------
+'        CLOUD_EVENT_ACQUIREUSERINFO 수신 -> mhetc90302.xmf 팝업 (고객정보입력) -> mhetc90303.xmf (단말인증수행)
+'        ============================================================================================================
+'        [Form_OnPopupReturn]
+'        ------------------------------------------------------------------------------------------------------------
+'        CLOUD_CHECK_CONNECT 수신 (단말인증 결과 "NO" or "OK")
+'        ============================================================================================================
+'
+'
+'클라우드 공동인증서 단말인증 화면
+'
+'	(1) 기기인증 - SMS가능(인증메시지)
+'        ============================================================================================================
+'        [Form_OnFormInit]               [Form_onTriggerEventCloudCert]     [기기인증 1, 확인버튼 클릭] 
+'        ------------------------------------------------------------------------------------------------------------
+'         1. CLOUD_SEND_USERINFO 전송 -> 2. CLOUD_EVENT_PHONE_PROOF 수신 -> 3. CLOUD_DEVICE_AUTH 전송 (SMS)
+'        ============================================================================================================
+'                                              [Form_OnTimerEvent]
+'        ------------------------------------------------------------------------------------------------------------
+'        -> 4. 현재 단말에서 인증메시지 보내기 -> 5. CLOUD_DEVICE_AUTH_STATUS 조회 시작 (InProgress이면 반복조회)
+'        ============================================================================================================
+'
+'	(2) 기기인증 - SMS불가(인증코드)
+'        ============================================================================================================
+'        [Form_OnFormInit]              [Form_onTriggerEventCloudCert]           [기기인증 1, 인증방식변경 ]
+'        ------------------------------------------------------------------------------------------------------------
+'        1. CLOUD_SEND_USERINFO 전송 -> 2. CLOUD_EVENT_PHONE_PROOF 수신 (1차) -> 3. CLOUD_DEVICE_AUTH 전송 (NOSMS)
+'        ============================================================================================================
+'        [Form_onTriggerEventCloudCert]              [Form_OnTimerEvent]
+'        ------------------------------------------------------------------------------------------------------------
+'        -> 4. CLOUD_EVENT_PHONE_PROOF 수신 (2차) -> 5. CLOUD_DEVICE_AUTH_STATUS 조회 시작 (InProgress이면 반복조회)
+'        ============================================================================================================
+
+Dim g_sOpenData
+g_sOpenData = ""
+
+Dim g_type
+g_type = ""
+
+Dim g_status
+g_status = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Container1.Image0.setmaintainingratio("1")
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	g_sOpenData = Form.GetOpenLinkData()
+	
+	Container2.visible = False '휴대폰 인증코드화면 숨김
+	
+	if Len(g_sOpenData) > 0 then
+		Form.requestCertCommand("CLOUD_SEND_USERINFO", g_sOpenData, "90303") 'CLOUD_SEND_USERINFO 전송 -> CLOUD_EVENT_PHONE_PROOF수신
+	end if	
+	
+	Container2.labTitle1.fontsize = "48"
+End Sub
+
+'============================================================================
+Sub Form_onTriggerEventCloudCert(sCommand, sResult)
+	Dim sErrorCd, sErrorMsg
+
+	szItem = Split(sResult,"★")
+
+	'처리코드,처리메시지 처리
+	sErrorCd		= szItem(0)
+	sErrorMsg	= szItem(1)	
+
+	'오류이면
+'	if sErrorCd <> "0" then
+'		Form.MsgBox("기기인증", sErrorMsg & "(" & sCommand & ")", "", 0)
+'		exit sub
+'	end if		
+
+	'-------------------------------------------------------------
+	'EVENT_응답처리
+	'-------------------------------------------------------------
+	if sCommand = "CLOUD_SEND_USERINFO_90303" then		
+		'No Action
+		'CLOUD_EVENT_PHONE_PROOF 수신 시, 계속 절차 수행하게 됨
+	elseif sCommand = "CLOUD_EVENT_PHONE_PROOF" then		
+		if #szItem > 2 then
+			'SMS불가단말 선택하면 한번 더 내려옴 : 인증코드 화면으로 전환
+			Container2.left = Container1.left
+			Container2.top = Container1.top
+			
+			Container1.visible = False 
+			Container2.visible = True	
+			
+			Container2.labTitle1.caption = szItem[2] '인증코드
+			
+		else
+			'no action
+		end if
+		
+	elseif sCommand == "CLOUD_EVENT_ACK_CONDITIONOFUSE" then
+		'약관동의
+		if sErrorCd == "0" then 
+			'정상
+		else 
+			'취소/오류
+			Form.CloseForm()
+			Form.SendReturnToParent("CLOUDCERT_DEVICE_AUTH" , "Canceled")	
+		end if
+	
+	elseif sCommand = "CLOUD_DEVICE_AUTH_90303" then
+		if #szItem > 2 then
+			sArg = szItem[2]
+			
+			if sArg == "CANCEL" then
+				Form.CloseForm()
+				Form.SendReturnToParent("CLOUDCERT_DEVICE_AUTH" , "Canceled")	
+			else
+				'SMS 가능단말 + 불가단말 모두 진입
+				Form.SetTimerEvent2(1,1,1) '주기적으로 클라우드 단말인증상태조회 (CLOUD_DEVICE_AUTH -> CLOUD_DEVICE_AUTH_STATUS)
+			end if
+		end if
+		
+	elseif sCommand = "CLOUD_DEVICE_AUTH_STATUS_90303" then		
+		if #szItem >= 4 then
+			status 			= szItem[2]
+			mismatchCount 	= szItem[3]
+			timeOut 			= szItem[4]
+			
+			Container2.remainTime.caption = "유효시간 " + timeout
+			Container1.remainTime.caption = "유효시간 " + timeout
+			
+			' status
+			' 	- InProgress 진행중
+			' 	- Complete 완료
+			' 	- Canceled 취소
+			' 	- AuthCodeDoesNotMatch 인증번호 불일치
+			' 	- Timeout 타임아웃
+			' 	- AuthCodeInvalidated 인증코드 전송횟수 초과			
+		
+			if status == "InProgress" then
+				'진행중
+				Form.SetTimerEvent2(1,1,1) '단말인증상태조회 계속 (CLOUD_DEVICE_AUTH_STATUS)
+			else
+				g_status = status
+				
+				Form.SetTimerEvent2(2,1,1) '화면종료	(바로  CloseForm하면 앱이 비정상 종료되어 타이머 처리함)
+			end if			
+		end if			
+	end if
+End Sub	
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if trim(sTimerID) = "1" then
+		Form.SetTimerEvent2(1,0,0)
+		
+		'단말인증 진행상황조회
+		Form.requestCertCommand("CLOUD_DEVICE_AUTH_STATUS", "", "90303")
+	
+	elseif trim(sTimerID) = "2" then
+		Form.SetTimerEvent2(2,0,0)
+	
+		Form.CloseForm()
+		Form.SendReturnToParent("CLOUDCERT_DEVICE_AUTH" , g_status)	
+	
+	end if
+End Sub
+
+
+
+'============================================================================
+'(기기인증1 확인버튼 클릭) 현재 단말에서 SMS로 인증문자보내기
+Sub Container1_BtnOK_OnClick()
+	'단말인증(SMS 가능단말)
+	Form.requestCertCommand("CLOUD_DEVICE_AUTH", "SMS", "90303") '현재 단말의 SMS앱으로 인증문자를 넘겨주고 SMS앱을 실행함
+End Sub
+
+
+'============================================================================
+'(기기인증1 인증방식변경 클릭) 다른 단말에서 SMS로 인증코드 2자리 회신하기
+Sub Container1_Label1_OnClick()	
+	'단말인증(SMS 불가단말)
+	Form.requestCertCommand("CLOUD_DEVICE_AUTH", "NOSMS", "90303") '다른단말에서 인증코드를 회신하는 방식으로 변경함 (유효시간 자동으로 다시 초기화됨)
+End Sub
+
+
+'============================================================================
+'(기기인증1 취소버튼 클릭) 기기인증취소
+Sub Container1_BtnCancel_OnClick()
+	Form.requestCertCommand("CLOUD_DEVICE_AUTH", "CANCEL", "90303") 
+End Sub
+
+'============================================================================
+'(기기인증2 취소버튼 클릭) 기기인증취소
+Sub Container2_BtnCancel_OnClick()
+	Form.requestCertCommand("CLOUD_DEVICE_AUTH", "CANCEL", "90303")
+End Sub
+
+'============================================================================
+
+	</SCRIPT_INFO>
+</ROOT>

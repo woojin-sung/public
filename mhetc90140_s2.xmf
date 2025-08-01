@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90140" scrname="개별본인인증_1" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" autosize="1" ly_vert="0,0,375,587,1" />
+	<CONTROL_INFO>
+		<BUTTON name="Button0" caption="다음" bgcolor="085:205216147" bgcolor2="102:216216216" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="0,527,375,60,1" />
+		<LABEL name="LblCert" fontsize="6" fontstyle="01" caption="본인인증" ly_vert="5,45,365,26,1" />
+		<TABLE name="TblCert" insidelinecolor="102:255255255" colcount="1" rowcount="3" outline="0000" designorder="1" ly_vert="15,282,365,54,1" >
+			<COL_INFO ly_vert_width="365" />
+			<ROW_INFO ly_vert_height="18,18,18" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="메리츠증권 온라인서비스에 미가입하여 사용자 ID 및" fontsize="-1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="ID 비밀번호가 없는 경우, 통합인증을 이용하여 주시기 " fontsize="-1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="바랍니다." fontsize="-1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image0" imgpath="icon_dot" ly_vert="8,282,18,18,1" />
+		<EDIT name="EdtID" fontsize="3" imetype="3" maxlength="12" minlength="6" hintcaption="아이디를 입력해주세요" imagefilepth="input_03.9" ly_vert="20,90,335,74,1" />
+		<EDIT name="EdtIDPwd" fontsize="3" password="2" imetype="0" hintcaption="비밀번호를 입력해주세요" imagefilepth="input_03.9" ly_vert="20,180,335,74,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_1stepline.png" ly_vert="0,1,375,30,1" />
+		<TABLE name="TblCert0" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="15,347,365,43,1" >
+			<COL_INFO ly_vert_width="365" />
+			<ROW_INFO ly_vert_height="18,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="ID 비밀번호를 5회 오류 시 온라인채널 접속이" fontsize="-1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="제한됩니다." fontsize="-1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image2" imgpath="icon_dot" ly_vert="8,347,18,18,1" />
+		<TABLE name="TblCert1" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="17,398,365,43,1" >
+			<COL_INFO ly_vert_width="365" />
+			<ROW_INFO ly_vert_height="18,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="ID 및 ID비밀번호를 모르실 경우 메리츠 SMART를 " fontsize="-1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="이용하여 확인 후 이용하시기 바랍니다." fontsize="-1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image3" imgpath="icon_dot" ly_vert="10,398,18,18,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3812" _ulen="3504" >
+'Dim g_Ostype
+Dim g_trCSNO
+Dim g_trCSNM
+Dim g_apiCSNO
+'============================================================================
+Sub Button0_OnClick()
+	Form.triggerEvent( "#", "NextStep", "1" )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'항목가이드 Default 설정 (267.검정색)
+	EdtID.SetApplyLabel   ("사용자 ID"         , 0, 267, "left", True)  'True.필수입력 / False.선택입력
+	EdtIDPwd.SetApplyLabel("ID 비밀번호" , 0, 267, "left", True)
+	Button0.enable = False
+	g_apiCSNO = Form.GetSharedData("&INNER_MYDATA_CSNO" , false)
+End Sub
+
+'============================================================================
+Sub EdtIDPwd_OnEditComplete()
+	DATAMANAGER.RequestTranData("obcsb_efif_162r")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "obcsb_efif_162r" then
+		sucs_yn = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "SUCS_YN", 0)
+		if sucs_yn = "Y" THEN
+			DATAMANAGER.SetDataValue( 0 , "obcsb_info_004r", "InBlock1", "ELFN_ID" , 0 , EdtID.Caption)
+			DATAMANAGER.RequestTranData("obcsb_info_004r")
+		else
+			Button0.enable = False
+			szCode = DATAMANAGER.GetDataMsgCode( "obcsb_efif_162r" ) 
+			szErr = DATAMANAGER.GetDataMsgText( "obcsb_efif_162r" )
+			szSubErr = DATAMANAGER.GetDataMsgSubText( "obcsb_efif_162r" )
+			if szCode == "2413" then '5회이상 오류시
+				Form.ShowAlert("알림", "ID비밀번호 5회 오류입니다.\n\nID비밀번호를 5회 연속 잘못 입력하여 접속이 불가능하오니\n내방하시거나 앱(메리츠스마트) 또는 홈페이지(ID 비밀번호 재설정)에서 \n재설정하시기 바랍니다.")
+			else	
+				Form.MsgBox("알림", "[TR]"& szErr& " " & szSubErr, "", 6)
+			end if
+		end if
+	elseif szTranID = "obcsb_info_004r" then
+		g_trCSNO = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "CSNO", 0)
+		g_trCSNM = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "CSNM", 0) ''20211028 HSZ 쉐어드 변수 저장
+		CHECK_CSNO()
+	end if
+End Sub
+'============================================================================
+Function CHECK_CSNO()
+	if g_trCSNO  = g_apiCSNO then
+		Form.SetSharedData("&MYDATA_MAP_CSNO", g_trCSNO)
+		Button0.enable = True 
+	else
+		Form.ShowAlert("알림", "고객정보가 일치하지 않습니다.")
+	end if
+End Function 
+'============================================================================
+'Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+'	szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+'	Form.MsgBox("알림", "[TR]"&szErrMsg&" "&szSubErr, "", 6)
+'End Sub
+
+'============================================================================
+Sub EdtID_OnEditComplete()
+	If EdtIDPwd.caption == "" Or EdtIDPwd.caption == null Then
+		EdtIDPwd.SetShowKeypad(True)
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+	sUser_Id = Form.getsharedData("&USER_ID", FALSE)
+	If CInt(sLOGIN_TYPE) > 1 and sUser_Id <> "" then '로그인상태
+	else 
+		'처리중인 휴대폰정보로 USerID설정
+		DATAMANAGER.SetUserID("meritz")
+	end if
+	DATAMANAGER.SetDataValue( 0 , "obcsb_efif_162r", "InBlock1", "ELFN_ID" , 0 , EdtID.Caption)
+	DATAMANAGER.SetDataValue( 0 , "obcsb_efif_162r", "InBlock1", "CONN_PWD" , 0 , EdtIDPwd.Caption)
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+	Button0.enable = False 
+	'20211028 HSZ 쉐어드 변수 저장
+	Form.SetSharedData("MAP_MYDATA_CUSNO" , g_trCSNO)
+	Form.SetSharedData("MAP_MYDATA_CUSNM" , g_trCSNM)
+End Sub 
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_efif_162r" trcode="obcsb_efif_162r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_info_004r" trcode="obcsb_info_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_efif_162r" title="전자금융ID와비밀번호일치체크" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="89" _ulen="69" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CONN_PWD^접속비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_info_004r" title="입력유형별 고객번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="165" _ulen="125" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="71" _ulen="57" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

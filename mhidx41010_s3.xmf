@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41010" scrname="시장종합_지수" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,250,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" bgcolor="272:246246246" transmode="0" ly_vert="0,0,375,250,1" />
+		<BUTTON name="Button0" visible="0" caption=" " bgcolor="039:242242242" btnimage="btn_12.9" ly_vert="10,28,355,220,0" />
+		<IMAGE name="Image2" autosize="1" imgpath="input_03_n.9" ly_vert="10,25,355,220,1" />
+		<LABEL name="Label1" fgcolor="269:066066066" fontsize="-1" fontstyle="01" caption="메뉴 바로가기" bgcolor="052:255255255" ly_vert="25,-6,125,32,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="new_menu01" ly_vert="25,32,90,80,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="new_menu02" ly_vert="143,32,90,80,1" />
+		<IMAGE name="Image3" autosize="1" imgpath="new_menu03" ly_vert="263,32,90,80,1" />
+		<IMAGE name="Image4" autosize="1" imgpath="new_menu04" ly_vert="25,140,90,80,1" />
+		<IMAGE name="Image5" autosize="1" imgpath="new_menu05" ly_vert="143,141,90,80,1" />
+		<IMAGE name="Image6" autosize="1" imgpath="new_menu09" ly_vert="263,141,90,80,1" />
+		<LABEL name="Label2" fgcolor="269:066066066" fontsize="-2" fontstyle="01" caption="관심종목" bgcolor="052:255255255" ly_vert="35,112,64,23,1" />
+		<LABEL name="Label3" fgcolor="269:066066066" fontsize="-2" fontstyle="01" caption="현재가" bgcolor="052:255255255" ly_vert="161,112,64,23,1" />
+		<LABEL name="Label4" fgcolor="269:066066066" fontsize="-2" fontstyle="01" caption="잔고" bgcolor="052:255255255" ly_vert="288,112,125,23,1" />
+		<LABEL name="Label5" fgcolor="269:066066066" fontsize="-2" fontstyle="01" caption="주식주문" bgcolor="052:255255255" ly_vert="35,220,67,23,1" />
+		<LABEL name="Label6" fgcolor="269:066066066" fontsize="-2" fontstyle="01" caption="이체" bgcolor="052:255255255" ly_vert="165,220,40,23,1" />
+		<LABEL name="Label7" fgcolor="269:066066066" fontsize="-2" fontstyle="01" caption="계좌개설" bgcolor="052:255255255" halign="1" ly_vert="263,220,90,23,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2001" _ulen="1805" >
+'============================================================================
+' 01. 화 면 명 : 메뉴바로가기
+' 02. 화면설명 : 메뉴바로가기
+' 03. 작    성 : 2021.09.23 성우진
+'============================================================================
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.OpenScreen("11010","")
+End Sub
+'============================================================================
+Sub Image1_OnClick()
+	Form.OpenScreen("11000","")
+End Sub
+'============================================================================
+Sub Image3_OnClick()
+	Form.OpenScreen("15000","")
+End Sub
+'============================================================================
+Sub Image4_OnClick()
+	Form.OpenScreen("12000","")
+End Sub
+'============================================================================
+Sub Image5_OnClick()
+	Form.OpenScreen("63010","")
+End Sub
+'============================================================================
+Sub Image6_OnClick()
+'	Form.OpenScreen("61000","")
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+		Dim sText
+		sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+		Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+	else
+		Form.SetSharedData("&SCREEN_AUTH" , "99")
+		Form.OpenPopup("mbbdm85100" , "" , "")
+	end if	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOGOUT_MSG" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenPopup("mbbdm85100" , "" , "")
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_nmix_cntg" trcode="ohhts_nmix_cntg" />
+			<TRAN tranid="ohhts_1500_001r" trcode="ohhts_1500_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_0510_001r" trcode="ohhts_0510_001r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FID_INPUT_COND_SCR_DIV_CODE" idx="0" defconst="510" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="ohhts_1682_002r" trcode="ohhts_1682_002r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_5020_002r" trcode="ohhts_5020_002r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_5020_003r" trcode="ohhts_5020_003r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_5020_001r" trcode="ohhts_5020_001r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_5020_002r_1" trcode="ohhts_5020_002r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_1683_002r" trcode="ohhts_1683_002r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_1683_002r_1" trcode="ohhts_1683_002r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_1683_002r_2" trcode="ohhts_1683_002r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_1683_002r_3" trcode="ohhts_1683_002r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_1683_002r_4" trcode="ohhts_1683_002r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_nmix_cntg" title="업종지수 체결 자동갱신" realdata="1" dessvr="1" >
+				<TRBLOCK name="InBlock1" inout="in" _len="63" _ulen="51" >
+
+FIDR_BSTP_CLS_CODE^FIDR업종구분코드^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1183" _ulen="965" >
+
+FIDR_BSTP_CLS_CODE^FIDR업종구분코드^6^0^0^0^0^0^0
+FIDR_ANTC_NMIX_CLS_CODE^FIDR예상지수구분코드^1^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^12^4^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^12^4^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_ACML_TR_PBMN^FIDR누적거래대금^13^0^7^0^0^0^0
+FIDR_PCAS_VOL^FIDR건별거래량^11^0^7^0^0^0^0
+FIDR_PCAS_TR_PBMN^FIDR건별거래대금^11^0^7^0^0^0^0
+FIDR_OPRC2^FIDR시가2^12^4^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^12^4^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^12^4^7^0^0^1^0
+FIDR_OPRC_VRSS2^FIDR시가대비2^12^4^7^0^0^1^0
+FIDR_OPRC_VRSS_SIGN^FIDR시가대비부호^1^0^0^0^0^0^0
+FIDR_HPRC_VRSS2^FIDR고가대비2^12^4^7^0^0^1^0
+FIDR_HPRC_VRSS_SIGN^FIDR고가대비부호^1^0^0^0^0^0^0
+FIDR_LPRC_VRSS2^FIDR저가대비2^12^4^7^0^0^1^0
+FIDR_LPRC_VRSS_SIGN^FIDR저가대비부호^1^0^0^0^0^0^0
+FIDR_OPRC_CTRT^FIDR시가대비율^9^2^7^0^0^1^0
+FIDR_HPRC_CTRT^FIDR고가대비율^9^2^7^0^0^1^0
+FIDR_LPRC_CTRT^FIDR저가대비율^9^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1500_001r" title="시장종합_1" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" occurs="4" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="4" inout="out" _len="973" _ulen="765" >
+
+FID_CNCN_ISCD^FID관심종목코드^12^0^0^1^1200^0^0
+FID_CNCN_ISNM^FID관심종목명^50^0^0^2^1200^0^0
+FID_CNCN_PRPR^FID관심현재가^12^0^0^4^1200^0^0
+FID_CNCN_PRDY_VRSS_SIGN^FID관심전일대비부호^1^0^0^6^1200^0^0
+FID_CNCN_PRDY_VRSS^FID관심전일대비^12^0^0^5^1200^0^0
+FID_CNCN_PRDY_CTRT^FID관심전일대비율^9^0^0^7^1200^0^0
+FID_CNCN_ACML_VOL^FID관심누적거래량^18^0^0^14^1200^0^0
+FID_CNCN_ACML_TR_PBMN^FID관심누적거래대금^18^0^0^16^1200^0^0
+FID_CNCN_UPLM_ISSU_CNT^FID관심상한종목수^7^0^0^137^1200^0^0
+FID_CNCN_ASCN_ISSU_CNT^FID관심상승종목수^7^0^0^134^1200^0^0
+FID_CNCN_STNR_ISSU_CNT^FID관심보합종목수^7^0^0^136^1200^0^0
+FID_CNCN_DOWN_ISSU_CNT^FID관심하락종목수^7^0^0^135^1200^0^0
+FID_CNCN_LSLM_ISSU_CNT^FID관심하한종목수^7^0^0^138^1200^0^0
+FID_CNCN_OTST_STPL_QTY^FID관심미결제약정수량^18^0^0^116^1200^0^0
+FID_CNCN_MRKT_BASIS^FID관심시장베이시스^7^0^0^114^1200^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_0510_001r" title="옵션가치분석(선물월물코드리스?" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="89" toutblk="OutBlock1" _ulen="69" >
+
+FID_INPUT_COND_SCR_DIV_CODE^FID입력조건화면분류코드^6^0^0^9101^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="172" _ulen="140" >
+
+FID_MTRT_YYMM^FID만기년월^6^0^0^113^2000^0^0
+FID_MTRT_YYMM_CODE^FID만기년월코드^4^0^0^6387^2000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^2000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1682_002r" title="해외주요지수(일별)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="285" toutblk="OutBlock1" _ulen="229" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_DAY_WEEK_MONTH_YR^FID입력일주월년^2^0^0^9104^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="421" _ulen="359" >
+
+FID_DATE^FID일자^8^0^0^67^1003^0^0
+FID_PRPR^FID현재가^14^4^7^4^1003^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^6^1003^0^0
+FID_PRDY_VRSS2^FID전일대비2^14^4^7^5^1003^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1003^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1003^0^0
+FID_OPRC2^FID시가2^14^4^7^17^1003^0^0
+FID_HPRC2^FID고가2^14^4^7^18^1003^0^0
+FID_LPRC2^FID저가2^14^4^7^19^1003^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5020_002r" title="업종조회(차트[분])" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="276" toutblk="OutBlock2" _ulen="220" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_HOUR_CLS_CODE^FID입력시간구분코드^7^0^7^9114^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="798" _ulen="664" >
+
+FID_PRDY_VRSS^FID전일대비^13^0^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_PRDY_CLPR^FID전일종가^11^0^7^13^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_ACML_TR_PBMN^FID누적거래대금^19^0^7^16^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^4^7^4^1000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+FID_OPRC^FID시가^13^0^7^17^1000^0^0
+FID_HPRC^FID고가^13^0^7^18^1000^0^0
+FID_LPRC^FID저가^13^0^7^19^1000^0^0
+FID_PRDY_OPRC^FID전일시가^13^0^7^6607^1000^0^0
+FID_PRDY_LPRC^FID전일저가^13^0^7^6609^1000^0^0
+FID_PRDY_HPRC^FID전일고가^13^0^7^6608^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="300" inout="out" _len="303" _ulen="263" >
+
+FID_DATE^FID일자^8^0^0^67^1005^0^0
+FID_CNTG_HOUR^FID체결시간^6^0^0^12^1005^0^0
+FID_PRPR^FID현재가^14^4^7^4^1005^0^0
+FID_OPRC^FID시가^13^0^7^17^1005^0^0
+FID_HPRC^FID고가^13^0^7^18^1005^0^0
+FID_LPRC^FID저가^13^0^7^19^1005^0^0
+FID_CNTG_VOL^FID체결거래량^13^0^7^68^1005^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5020_003r" title="업종조회(차트[틱])" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="359" toutblk="OutBlock2" _ulen="283" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_HOUR_CLS_CODE^FID입력시간구분코드^7^0^7^9002^9999^0^0
+FID_INPUT_CNT1^FID입력수1^13^0^7^9031^9999^0^0
+FID_INPUT_PAST_DATA_INCU_YN^FID입력과거데이터포함여부^2^0^0^9133^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="798" _ulen="664" >
+
+FID_PRDY_VRSS^FID전일대비^13^0^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_PRDY_CLPR^FID전일종가^11^0^7^13^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_ACML_TR_PBMN^FID누적거래대금^19^0^7^16^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^4^7^4^1000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+FID_OPRC^FID시가^13^0^7^17^1000^0^0
+FID_HPRC^FID고가^13^0^7^18^1000^0^0
+FID_LPRC^FID저가^13^0^7^19^1000^0^0
+FID_PRDY_OPRC^FID전일시가^13^0^7^6607^1000^0^0
+FID_PRDY_LPRC^FID전일저가^13^0^7^6609^1000^0^0
+FID_PRDY_HPRC^FID전일고가^13^0^7^6608^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="300" inout="out" _len="362" _ulen="312" >
+
+FID_DATE^FID일자^8^0^0^67^1002^0^0
+FID_PRPR_HOUR^FID현재가시간^6^0^0^12^1002^0^0
+FID_PRPR^FID현재가^14^4^7^4^1002^0^0
+FID_OPRC^FID시가^13^0^7^17^1002^0^0
+FID_HPRC^FID고가^13^0^7^18^1002^0^0
+FID_LPRC^FID저가^13^0^7^19^1002^0^0
+FID_CNTG_VOL^FID체결거래량^13^0^7^68^1002^0^0
+FID_SCTN_TICK_CNT^FID구간틱수^11^0^7^6644^1002^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5020_001r" title="업종조회(차트)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="274" toutblk="OutBlock2" _ulen="222" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_DAY_WEEK_MONTH_YR^FID입력일주월년^2^0^0^9104^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="798" _ulen="664" >
+
+FID_PRDY_VRSS^FID전일대비^13^0^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_PRDY_CLPR^FID전일종가^11^0^7^13^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_ACML_TR_PBMN^FID누적거래대금^19^0^7^16^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^4^7^4^1000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+FID_OPRC^FID시가^13^0^7^17^1000^0^0
+FID_HPRC^FID고가^13^0^7^18^1000^0^0
+FID_LPRC^FID저가^13^0^7^19^1000^0^0
+FID_PRDY_OPRC^FID전일시가^13^0^7^6607^1000^0^0
+FID_PRDY_LPRC^FID전일저가^13^0^7^6609^1000^0^0
+FID_PRDY_HPRC^FID전일고가^13^0^7^6608^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="300" inout="out" _len="302" _ulen="262" >
+
+FID_DATE^FID일자^8^0^0^67^1003^0^0
+FID_PRPR^FID현재가^14^4^7^4^1003^0^0
+FID_OPRC^FID시가^13^0^7^17^1003^0^0
+FID_HPRC^FID고가^13^0^7^18^1003^0^0
+FID_LPRC^FID저가^13^0^7^19^1003^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1003^0^0
+FID_MOD_YN^FID수정여부^2^0^0^1911^1003^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1683_002r" title="해외장중지수(시간)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="203" toutblk="OutBlock1" _ulen="163" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_HOUR1^FID입력시간1^7^0^7^9114^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="435" _ulen="367" >
+
+FID_PRPR_HOUR^FID현재가시간^6^0^0^12^1002^0^0
+FID_PRPR^FID현재가^14^4^7^4^1002^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^6^1002^0^0
+FID_PRDY_VRSS2^FID전일대비2^14^4^7^5^1002^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1002^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1002^0^0
+FID_OPRC2^FID시가2^14^4^7^17^1002^0^0
+FID_HPRC2^FID고가2^14^4^7^18^1002^0^0
+FID_LPRC2^FID저가2^14^4^7^19^1002^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

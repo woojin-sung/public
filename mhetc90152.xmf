@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90152" scrname="공동인증서 클라우드에 등록" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0,375,647,1" >
+			<CONTROL_INFO>
+				<LABEL name="labTitle" fontsize="4" fontstyle="01" caption="공동인증서 클라우드에 등록" halign="1" ly_vert="-4,0,375,60,1" />
+				<IMAGE name="ImgBackPress" imgpath="icon_arrow_left_on" ly_vert="17,17,24,30,1" />
+				<CONTAINER name="contNoCert" visible="0" ly_vert="13,57,347,150,0" scroll_ly_vert="13,57,347,150,0" >
+					<CONTROL_INFO/>
+				</CONTAINER>
+				<LABEL name="Label0" fgcolor="321:115118124" fontsize="-1" caption="인증서를 선택해주세요." ly_vert="13,60,347,23,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<PANNEL name="Pannel0" visible="0" ly_vert="10,85,350,390,0" >
+			<CONTROL_INFO>
+				<IMAGE name="ImgBack" ly_vert="6,5,340,125,1" />
+				<IMAGE name="ImgCertList" imgpath="icon_cloud.png" ly_vert="42,45,38,44,1" />
+				<LABEL name="lblSubTitle0" fgcolor="321:115118124" fontsize="-1" multiline="1" ly_vert="93,48,240,26,1" />
+				<LABEL name="lblSubTitle" fgcolor="334:034034034" fontstyle="01" multiline="1" ly_vert="93,22,240,38,1" />
+				<LABEL name="lblSubTitle1" fgcolor="321:115118124" fontsize="-1" multiline="1" ly_vert="93,74,270,26,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="125" gap="4" >
+				<CELL name="ImgCertList" />
+				<CELL name="ImgBack" />
+				<CELL name="lblSubTitle0" />
+				<CELL name="lblSubTitle" />
+				<CELL name="lblSubTitle1" />
+			</CARD_INFO>
+		</PANNEL>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9557" _ulen="8593" >
+'============================================================================
+'20240418 SWJ START
+'클라우드 인증 발급_본인인증
+'============================================================================
+'로그인 or 인증센터 (CLOUD_EVENT_ACQUIREUSERINFO 이벤트 발생시) -> mhetc90302.xmf -> mhetc90303.xmf
+
+Dim g_Back_Flag   '뒤로가기플래그
+
+g_Back_Flag = ""
+
+Dim g_bExistCert
+g_bExistCert = False
+
+Dim g_sArrCloudID
+g_sArrCloudID = Array()
+
+Dim g_sArrCloudDN
+g_sArrCloudDN = Array()
+
+Dim g_sArrCloudName
+g_sArrCloudName = Array()				
+
+Dim g_sArrCloudPolicy
+g_sArrCloudPolicy = Array()
+
+Dim g_sArrCloudInsti
+g_sArrCloudInsti = Array()
+
+Dim g_sArrCloudMake
+g_sArrCloudMake = Array()		
+
+Dim g_sArrCloudDue
+g_sArrCloudDue = Array()	
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Container0.ImgBackPress.setMaintainingRatio("1")
+	Container0.ImgInfo.setMaintainingRatio("1")
+	
+	Form.transmode = false 'true 불투명, false 투명
+	
+	szDev = Form.GetSharedData("&SERVER_MODE", False)
+	
+	if szDev == "1" then
+		Container0.Button0.visible = true
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.transmode = true 'true 불투명, false 투명
+	Container0.visible = true
+	
+	Pannel0.rowcount = 0
+	Form.SetTimerEvent2(1,1,0.1)
+End Sub
+
+'
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'클라우드연결(고객정보) 입력 -> 기기인증 후 리턴 (From mhetc90303)
+		'InProgress 진행중
+		'Complete 완료
+		'Canceled 취소
+		'AuthCodeDoesNotMatch 인증번호 불일치
+		'Timeout 타임아웃
+		'AuthCodeInvalidated 인증코드 전송횟수 초과
+
+	if sKeyName == "CLOUDCERT_DEVICE_AUTH" then
+		' sRet
+		' 	- InProgress 진행중
+		' 	- Complete 완료
+		' 	- Canceled 취소
+		' 	- AuthCodeDoesNotMatch 인증번호 불일치
+		' 	- Timeout 타임아웃
+		' 	- AuthCodeInvalidated 인증코드 전송횟수 초과		
+		
+		if sRet == "Complete" then
+			Form.CloseForm()
+			Form.SendReturnToParent("CLOUD_CHECK_CONNECT", "OK")	
+		
+		elseif sRet == "Canceled" then
+			Form.MsgBox("알림", "클라우드연결을 위한 단말인증이 취소되었습니다.", "", 0)
+			
+		elseif sRet == "AuthCodeDoesNotMatch" then
+			Form.MsgBox("알림", "클라우드연결을 위해 입력한 인증번호가 맞지않습니다.", "", 0)
+			
+		elseif sRet == "Timeout" then
+			Form.MsgBox("알림", "클라우드연결을 위한 인증유효시간이 지났습니다.", "", 0)				
+
+		elseif sRet == "AuthCodeInvalidated" then
+			Form.MsgBox("알림", "클라우드연결을 위한 인증코드 전송횟수가 초과되었습니다. .", "", 0)				
+		end if		
+		
+		Form.CloseForm()
+		Form.SendReturnToParent("CLOUD_CHECK_CONNECT", "NO")
+	end if
+	
+	'if sKeyName == "mhetc90152_s1" then
+'		if sRet <> "" then
+			'szData = Split(sRet, "★")
+			
+		'	if Ubound(szData) > 0 then
+		'		g_sCloudCertDN = szData(1)
+		'	end if
+'		end if
+'	end if
+
+	if sKeyName == "mhetc90152_s1" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+'클라우드 계정연결 [다음]버튼 
+
+
+'============================================================================
+'계정연결 않하고 닫기
+
+
+'============================================================================
+Function CloudConnectInputCheck(sType, sInput, bShowKeypad)
+
+	sInput = Trim(sInput)	
+	
+	if sType == "EditAcnt" then
+		if sInput == "" Then
+			Container0.EditAcnt.SetResultLabel("1","error","계좌번호를 입력해주세요.","Container0")
+	
+			if bShowKeypad == True and g_Back_Flag <> "Y" then
+				Form.SetTimerEvent2(1, 1, 0.1) '0.1초뒤 보안키패드 활성화
+			end if	
+
+			return False
+		
+		else
+			'공백 체크
+		    sStr = Len(contMain.edtAcno.Caption)
+		    
+		    If sStr <> 8 Then
+			    Container0.edtAcno.SetResultLabel("1","error","계좌번호 앞 8자리를 입력해주세요.","Container0")
+		    else
+				Container0.EditAcnt.SetResultLabel("0","complete","","Container0")
+				
+				if bShowKeypad == True And Container0.EditPwd.caption == "" Or Container0.EditPwd.caption == null then
+					If g_Back_Flag <> "Y" Then
+						Form.SetTimerEvent2(2, 1, 0.1) '0.1초뒤 보안키패드 활성화
+					End If		
+				end if
+			end if
+	    end if	
+	
+	
+	elseif sType == "EditPwd" then
+		if sInput == "" Then
+			Container0.EditPwd.SetResultLabel("1","error","계좌비밀번호를 입력해주세요.","Container0")
+			
+			if bShowKeypad == True and g_Back_Flag <> "Y" then
+				Form.SetTimerEvent2(2, 1, 0.1) '0.1초뒤 보안키패드 활성화
+			end if	
+			
+			return False
+	
+'		elseif Len(sInput) ~= 8 then
+'			Container0.EditPwd.SetResultLabel("1","error","생년월일 8자리를 입력해주세요.","Container0")
+'			
+'			if bShowKeypad == True and g_Back_Flag <> "Y" then
+'				Form.SetTimerEvent2(2, 1, 0.1) '0.1초뒤 보안키패드 활성화
+'			end if	
+'			
+'			return False
+	
+		else
+			nLen = Container0.edtPwd.pwdlen
+			
+			if Cint(nLen) < 4 then
+			   Container0.edtPwd.SetResultLabel("1","error","4자 이상 입력해주세요.","Container0")
+			else
+				Container0.EditPwd.SetResultLabel("0","complete","","Container0")
+			
+				if Container0.EditRcno.caption == "" Or Container0.EditRcno.caption == null then
+					If g_Back_Flag <> "Y" Then
+						Form.SetTimerEvent2(3, 1, 0.1) '0.1초뒤 보안키패드 활성화
+					End If		
+				end if
+			end if
+		end if	
+		
+	else
+		if sInput == ""  Then
+			Container0.EditRcno.SetResultLabel("1","error","1글자 이상 입력해주세요.","Container0")
+			
+			if bShowKeypad == True and g_Back_Flag <> "Y" then
+				Form.SetTimerEvent2(3, 1, 0.1) '0.1초뒤 보안키패드 활성화
+			end if	
+			
+			return False
+			
+'		elseif Len(sInput) ~= 11 and Len(sInput) ~= 10 then
+'			Container0.EditRcno.SetResultLabel("1","error","정확한 휴대폰번호를 입력해주세요.","Container0")
+'
+'			if bShowKeypad == True and g_Back_Flag <> "Y" then
+'				Form.SetTimerEvent2(3, 1, 0.1) '0.1초뒤 보안키패드 활성화
+'			end if	
+'			
+'			return False
+		
+		else
+			Container0.EditRcno.SetResultLabel("0","complete","","Container0")
+		end if		
+	end if
+
+	return True
+End Function
+
+'============================================================================
+
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(CInt(sTimerID), 0, 0.1)
+
+	if sTimerID == "1" or sTimerID == 1 then
+		Container0.contNoCert.visible = true
+		Container0.Label0.visible = false
+		Form.requestCertCommand("CLOUD_REQ_CERT_LIST", "LOCAL", "90152")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_onTriggerEventCloudCert(sCommand, sResult)
+	Dim sErrorCd, sErrorMsg
+
+	szItem = Split(sResult,"★")
+	
+	'처리코드,처리메시지 처리
+	sErrorCd		= szItem(0)
+	sErrorMsg	= szItem(1)	
+
+	'오류이면
+	if sErrorCd <> "0" then
+		Form.MsgBox("안내" & sCommand, sErrorMsg, "", 0)
+		exit sub
+	end if		
+	
+	if sCommand = "CLOUD_REQ_CERT_LIST_90152" then
+		'응답문 처리
+		if #szItem >= 3 then
+			
+			nCnt	= szItem(2) 	'인증서 개수
+			
+			if Cint(nCnt) > 0 then
+				
+				Pannel0.visible = True
+				Container0.contNoCert.visible = False
+				Container0.Label0.visible = true
+				
+				Pannel0.rowcount = nCnt
+				
+				for i = 0 to nCnt -1  
+					szCertList = Split(szItem(i+3), "♥")
+					
+					Pannel0.setPropCardCell("maintainratio","ImgCertList",i, "1")
+					Pannel0.setPropCardCell("imgpath","ImgBack",i, "bg_infobox_n.9")
+					Pannel0.setPropCardCell("imgpath","ImgCertList",i, "icon_cloud")
+					
+					Pannel0.setPropCardCell("maxlinecnt","lblSubTitle", i , "1^-1")
+					Pannel0.setPropCardCell("maxlinecnt","lblSubTitle0", i , "1^-1")
+					Pannel0.setPropCardCell("maxlinecnt","lblSubTitle1", i , "1^-1")
+					
+					Pannel0.setPropCardCell("caption","lblSubTitle",i, szCertList(4))
+					Pannel0.setPropCardCell("caption","lblSubTitle0",i, szCertList(6))
+					
+					sCertExpiredDate = Left(szCertList(7), 4) & "/" & Mid(szCertList(7), 5, 2) & "/" & Right(szCertList(7), 2) & " 만료"
+					Pannel0.setPropCardCell("caption","lblSubTitle1",i, szCertList(11) & " | " & sCertExpiredDate)
+					
+					'클라우드인증서ID
+					g_sArrCloudID(i) = szCertList(9)
+					
+					'클라우드인증서DN
+					g_sArrCloudDN(i) = szCertList(5)
+					
+					'이름
+					g_sArrCloudName(i) = szCertList(4)
+					
+					'정책
+					g_sArrCloudPolicy(i) = szCertList(6)
+					
+					'발급기관명
+					g_sArrCloudInsti(i) = szCertList(11)
+					
+					'발급일
+					g_sArrCloudMake(i) = szCertList(8)
+					
+					'만료일
+					g_sArrCloudDue(i) = szCertList(7)
+
+				next 	
+			end if
+		end if
+	end if
+End Sub
+'============================================================================
+Sub Container0_ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+
+	if sCellID <> "" then
+		'인증서ID, DN, 이름(CN), 정책, 발급기관명, 발급일, 만료일, 
+		Form.OpenPopup("mhetc90152_s1" , g_sArrCloudID(nIndex) & "★" & g_sArrCloudDN(nIndex) & "★" &  g_sArrCloudName(nIndex) & "★" &  g_sArrCloudPolicy(nIndex) & "★" &  g_sArrCloudInsti(nIndex)& "★" &  g_sArrCloudMake(nIndex)& "★" &  g_sArrCloudDue(nIndex) & "★" &  nIndex & "★" & "", "")
+	end if
+	
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

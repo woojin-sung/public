@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90301" scrname="클라우드 PIN입력" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0,375,647,1" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fontsize="3" fontstyle="01" caption="클라우드 인증서
+비밀번호를 입력해주세요." halign="1" multiline="1" fonttype="1" ly_vert="0,161,375,59,1" />
+				<BUTTON name="Buttonok" visible="0" caption="확인" fontsize="4" btnimage="btn_20.9" ly_vert="0,588,375,61,0" />
+				<EDIT name="EditReal" visible="0" password="1" imetype="1" maxlength="6" minlength="6" ly_vert="394,84,262,34,0" />
+				<IMAGE name="Pwdbasic0" imgpath="txt_circle_02" ly_vert="82,259,22,22,1" />
+				<IMAGE name="Pwdbasic1" autosize="1" imgpath="txt_circle_02" ly_vert="120,259,22,22,1" />
+				<IMAGE name="Pwdbasic2" autosize="1" imgpath="txt_circle_02" ly_vert="158,259,22,22,1" />
+				<IMAGE name="Pwdbasic3" autosize="1" imgpath="txt_circle_02" ly_vert="196,259,22,22,1" />
+				<IMAGE name="Pwdbasic4" autosize="1" imgpath="txt_circle_02" ly_vert="234,259,22,22,1" />
+				<IMAGE name="Pwdbasic5" autosize="1" imgpath="txt_circle_02" ly_vert="272,259,22,22,1" />
+				<IMAGE name="PwdInsert0" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="83,260,20,20,0" />
+				<IMAGE name="PwdInsert1" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="121,260,20,20,0" />
+				<IMAGE name="PwdInsert2" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="159,260,20,20,0" />
+				<IMAGE name="PwdInsert3" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="197,260,20,20,0" />
+				<IMAGE name="PwdInsert4" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="235,260,20,20,0" />
+				<IMAGE name="PwdInsert5" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="273,260,20,20,0" />
+				<IMAGE name="PwdFail0" visible="0" autosize="1" imgpath="pwd_red" ly_vert="83,260,20,20,0" />
+				<IMAGE name="PwdFail1" visible="0" autosize="1" imgpath="pwd_red" ly_vert="121,260,20,20,0" />
+				<IMAGE name="PwdFail2" visible="0" autosize="1" imgpath="pwd_red" ly_vert="159,260,20,20,0" />
+				<IMAGE name="PwdFail3" visible="0" autosize="1" imgpath="pwd_red" ly_vert="197,260,20,20,0" />
+				<IMAGE name="PwdFail4" visible="0" autosize="1" imgpath="pwd_red" ly_vert="235,260,20,20,0" />
+				<IMAGE name="PwdFail5" visible="0" autosize="1" imgpath="pwd_red" ly_vert="273,260,20,20,0" />
+				<BUTTON name="Button0" btnimage="alpha" ly_vert="31,235,332,73,1" />
+				<LABEL name="labTitle" fontsize="4" fontstyle="01" caption="클라우드인증 로그인" halign="1" ly_vert="0,0,375,60,1" />
+				<IMAGE name="ImgClose" autosize="1" imgpath="icon_close" ly_vert="340,20,20,20,1" />
+				<IMAGE name="Image0" autosize="1" imgpath="icon_meritz_certi_02" ly_vert="159,110,56,36,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12917" _ulen="11855" >
+'20240314_01 KBC 클라우드공동인증서 도입 (신규)
+'클라우드인증서 PIN번호 입력창
+
+Dim g_CountSave
+Dim nCnt
+Dim g_sCloudCertID
+
+g_CountSave = 0
+nCnt = 0
+g_sCloudCertID = ""
+
+'============================================================================
+Sub Form_OnFormInit()	
+	Container0.EditReal.SetApplyLabel("숫자 6자리 입력", 0 , 76 , "left" , true) '호출해야 정상작동
+	
+	szTmpLink = Form.GetOpenLinkData()
+
+	szLinkData = Split(szTmpLink, "★")
+	
+	if Ubound(szLinkData) < 1 then
+		exit sub
+	end if
+	
+	'szLinkData(0) : "login"
+	g_sCloudCertID = szLinkData(1)
+	
+	'비밀번호 입력키패드 Show
+	Form.SetTimerEvent2(1, 1, 0.6)
+	'20230524 SWJ END
+End Sub
+
+
+'============================================================================
+'20240314_01 KBC 클라우드공동인증서 도입
+Sub Form_onTriggerEventCloudCert(sCommand, sResult)
+	Dim sErrorCd, sErrorMsg
+
+	szItem = Split(sResult,"★")
+
+	'처리코드,처리메시지 처리
+	sErrorCd		= szItem(0)
+	sErrorMsg	= szItem(1)	
+
+	'오류이면
+	if sErrorCd <> "0" then
+		'에러
+		sErrorMsg	= szItem(2)	
+		Form.MsgBox("안내", sErrorMsg, "PinError", 6)			
+		exit sub
+	end if		
+
+	'-------------------------------------------------------------
+	'요청_응답처리
+	'-------------------------------------------------------------
+	if sCommand = "CLOUD_REQ_CHECK_PASSWD_90301" then		
+		'PIN정상
+		sPin = Container0.EditReal.caption
+		
+		Form.CloseForm()	
+		Form.SendReturnToParent("CLOUDCERT_LOGIN" , sPin)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if sTimerID == "1" or sTimerID == 1 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.6)
+		Container0.EditReal.SetShowKeypad(True)
+	end if
+	
+End Sub
+
+'============================================================================
+'사용자에게 보여지는 패스워드 함수
+'============================================================================
+Function PasswordInsert()
+	
+	'입력완료일 시에 따로 개수 세이브해서 UI보이기
+	if g_CharFlag = "N" then
+		nCnt = g_CountSave
+		g_CharFlag = ""
+	end if
+	
+	Select Case nCnt
+	
+	Case 0
+		Container0.Pwdbasic0.visible = true	
+		Container0.Pwdbasic1.visible = true	
+		Container0.Pwdbasic2.visible = true	
+		Container0.Pwdbasic3.visible = true	
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true		
+		Container0.PwdInsert0.visible = false	
+		Container0.PwdInsert1.visible = false	
+		Container0.PwdInsert2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false	
+	Case 1
+		Container0.Pwdbasic1.visible = true	
+		Container0.Pwdbasic2.visible = true	
+		Container0.Pwdbasic3.visible = true	
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true		
+		Container0.PwdInsert0.visible = true
+		Container0.Pwdbasic0.visible = false	
+		Container0.PwdInsert1.visible = false	
+		Container0.PwdInsert2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false	
+	Case 2	
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true
+		Container0.Pwdbasic2.visible = true	
+		Container0.Pwdbasic3.visible = true	
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true
+		Container0.Pwdbasic0.visible = false	
+		Container0.Pwdbasic1.visible = false
+		Container0.PwdInsert2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false	
+	Case 3
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true	
+		Container0.PwdInsert2.visible = true
+		Container0.Pwdbasic3.visible = true	
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true		
+		Container0.Pwdbasic0.visible = false	
+		Container0.Pwdbasic1.visible = false	
+		Container0.Pwdbasic2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false
+	Case 4
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true		
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true	
+		Container0.PwdInsert2.visible = true	
+		Container0.PwdInsert3.visible = true
+		Container0.Pwdbasic0.visible = false	
+		Container0.Pwdbasic1.visible = false	
+		Container0.Pwdbasic2.visible = false	
+		Container0.Pwdbasic3.visible = false		
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false	
+	Case 5
+		Container0.Pwdbasic5.visible = true		
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true	
+		Container0.PwdInsert2.visible = true	
+		Container0.PwdInsert3.visible = true	
+		Container0.PwdInsert4.visible = true
+		Container0.Pwdbasic0.visible = false	
+		Container0.Pwdbasic1.visible = false	
+		Container0.Pwdbasic2.visible = false	
+		Container0.Pwdbasic3.visible = false	
+		Container0.Pwdbasic4.visible = false		
+		Container0.PwdInsert5.visible = false	
+	Case 6
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true	
+		Container0.PwdInsert2.visible = true	
+		Container0.PwdInsert3.visible = true	
+		Container0.PwdInsert4.visible = true	
+		Container0.PwdInsert5.visible = true	
+		Container0.Pwdbasic0.visible = false		
+		Container0.Pwdbasic1.visible = false		
+		Container0.Pwdbasic2.visible = false		
+		Container0.Pwdbasic3.visible = false		
+		Container0.Pwdbasic4.visible = false		
+		Container0.Pwdbasic5.visible = false
+	Case else
+		Form.ShowAlert("알림", "6자리를 입력해주세요.")
+	End Select
+	
+	Container0.PwdFail0.visible = false
+	Container0.PwdFail1.visible = false
+	Container0.PwdFail2.visible = false
+	Container0.PwdFail3.visible = false
+	Container0.PwdFail4.visible = false
+	Container0.PwdFail5.visible = false
+End Function
+'============================================================================
+'인증 실패 UI
+'============================================================================
+Function PasswordFail()
+		Container0.PwdFail0.visible = True
+		Container0.PwdFail1.visible = True
+		Container0.PwdFail2.visible = True
+		Container0.PwdFail3.visible = True
+		Container0.PwdFail4.visible = True
+		Container0.PwdFail5.visible = True
+		Container0.Pwdbasic0.visible = false		
+		Container0.Pwdbasic1.visible = false		
+		Container0.Pwdbasic2.visible = false		
+		Container0.Pwdbasic3.visible = false		
+		Container0.Pwdbasic4.visible = false		
+		Container0.Pwdbasic5.visible = false
+		Container0.PwdInsert0.visible = false	
+		Container0.PwdInsert1.visible = false	
+		Container0.PwdInsert2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false
+End Function
+'============================================================================
+'패스워드 글자 개수 카운트
+'============================================================================
+Sub Container0_EditReal_OnEditChar(CharCode)
+	
+	Select Case CharCode
+	
+	Case "0"
+		
+		'입력값 6초과할 때 초과 카운팅 방지
+		if nCnt = 6 then
+			nCnt = 6
+		else
+			nCnt = nCnt + 1
+		end if
+		
+		g_CountSave = nCnt
+	Case "1"	
+		'입력값 없을 때 마이너스 카운팅 방지
+		if nCnt = 0 then
+			nCnt = 0
+		else
+			nCnt = nCnt - 1
+		end if
+		
+		g_CountSave = nCnt
+	'취소, 입력완료일 때
+	Case "2"
+		nCnt = 0
+	End Select
+
+	PasswordInsert()
+	
+	if nCnt = 6 then		
+		'입력완료 호출 API
+		Container0.EditReal.runSecKeypadFinish()
+	end if
+	
+End Sub
+
+'============================================================================
+'고객에게 보여지는 에디트 위치 클릭시 키패드 활성화(에디트 위치에 버튼 올려서)
+'============================================================================
+Sub Container0_Button0_OnClick()
+	Container0.EditReal.SetShowKeypad(True)
+	
+	'인증 에디트 초기화
+	nCnt = 0
+	PasswordInsert()
+	
+End Sub
+
+'============================================================================
+Sub Container0_EditReal_OnEditComplete()
+	'입력완료 시에만 타게끔(취소는 안타고)
+	if g_DeviceOS == "2"  then
+		g_CharFlag = "N"
+		PasswordInsert()
+	end if
+	
+	if nCnt <> 6 then
+		'OS별로 비밀번호 최소글자 입력안했을 시에 시스템팝업메시지 내용이 달라서 
+		'시스템팝업과 내용 맞춰주기 위한 분기처리
+		if g_DeviceOS == "2"  then
+			Form.MsgBox("알림", "최소 6자리 이상 입력해야 합니다.", "", 6 )
+		elseif g_DeviceOS == "1" then
+			Form.MsgBox("알림", "6글자 이상 입력해 주세요.", "", 6 )
+		end if
+		
+	elseif nCnt = 6 then
+		sPin = Container0.EditReal.caption
+		Form.requestCertCommand("CLOUD_REQ_CHECK_PASSWD", g_sCloudCertID & "★" & sPin, "90301") '20240314_01 KBC 클라우드공동인증서 도입
+		nCnt = 0
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	'메세지박스 팝업시 메세지 박스 확인 후 Form Close
+'	if sKeyName == "close" then
+'		Form.CloseForm()		'첫페이지(ID등록)로 이동
+'	elseif sKeyName == "LOG_FORCE" then
+'		' IOS "openPrevScreen api없으므로 시장종합으로 일단 돌림.
+'		if g_DeviceOS == "2" Then	'iOS("2")Android("1")
+'			if sRet == "ok" then			
+'				Form.SetSharedData("&90060_motp", "LOG_FORCE")
+'				Form.OpenNextPopup("mhetc90021" , "" , "")		
+'			else
+'				if g_ScrNum == "10003" then
+'					'안드로이드는 여기서 폼닫기 해도 닫히는데
+'					'ios는 메뉴화면을 직접닫아줘야 닫아짐
+'					Form.triggerEvent("#","ios_formclose","")
+'				else
+'					Form.CloseForm()
+'				end if
+'			end if		
+'		else
+'			if sRet == "ok" then
+'				Form.SetSharedData("&90060_motp", "LOG_FORCE")
+'				Form.OpenNextPopup("mhetc90021" , "" , "")
+'			else
+'				Form.CloseForm()			
+'			end if	
+'		end if
+'		
+'	elseif sKeyName == "MOTP_NEW" then
+'		
+'		if sRet == "cancel" then
+'			Form.CloseForm()
+'			exit sub
+'		end if
+'		
+'		'로그인을 한번이라도 했었는지 판단
+'		if g_sUserID == "" or g_sUserID == null then
+'			Form.SetSharedData("BDM_NMETBSWRGB", "009")
+'			Form.OpenNextPopup("mbbdm85200","", "")
+'		else
+'			if Cint(g_LoginType) > 1 then '로그인상태
+'				Form.OpenNextPopup("mbotp86100","", "")
+'			else
+'				'Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+'				'업무신청 화면으로 발급하도록 연결
+'				 Form.SetSharedData( "mOTP_IntoClcd" , "NMET_BSWR" )
+'				 Form.SetSharedData("BDM_FRST_MAPID", "screen41000")
+'				 Form.SetSharedData("BDM_NMETBSWRGB", "009")
+'				 'V001
+'				 'Form.OpenNextPopup("mbbdm85110", "" , "" )
+'				 Form.OpenNextPopup("mbbdm86130", "" , "" )
+'				
+'			end if
+'		end if
+	
+	if sKeyName == "PinError" then
+		'인증 에디트 초기화
+		nCnt = 0
+		PasswordInsert()
+				
+		'비밀번호 입력키패드 Show
+		Form.SetTimerEvent2(1, 1, 0.6)
+	
+'	elseif sKeyName == "030104" then
+'		if sRet == "ok" then
+'			
+'			'mpopup_auth에서 리턴받을 때랑 다른 케이스지만
+'			'결국 재등록하는 절차는 동일해서
+'			'같은 변수 사용
+'			g_Register = "Y"
+'			Form.OpenStartScreen()
+'		else
+'			Form.CloseForm()
+'		end if
+		
+	end if
+End Sub
+
+'============================================================================
+'20220701 SWJ START : 이미지 찌그러짐 방지
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Container0.Pwdbasic0.setMaintainingRatio("1")
+	Container0.Pwdbasic1.setMaintainingRatio("1")
+	Container0.Pwdbasic2.setMaintainingRatio("1")
+	Container0.Pwdbasic3.setMaintainingRatio("1")
+	Container0.Pwdbasic4.setMaintainingRatio("1")
+	Container0.Pwdbasic5.setMaintainingRatio("1")
+	Container0.Pwdinsert0.setMaintainingRatio("1")
+	Container0.Pwdinsert1.setMaintainingRatio("1")
+	Container0.Pwdinsert2.setMaintainingRatio("1")
+	Container0.Pwdinsert3.setMaintainingRatio("1")
+	Container0.Pwdinsert4.setMaintainingRatio("1")
+	Container0.Pwdinsert5.setMaintainingRatio("1")
+	Container0.PwdFail0.setMaintainingRatio("1")
+	Container0.PwdFail1.setMaintainingRatio("1")
+	Container0.PwdFail2.setMaintainingRatio("1")
+	Container0.PwdFail3.setMaintainingRatio("1")
+	Container0.PwdFail4.setMaintainingRatio("1")
+	Container0.PwdFail5.setMaintainingRatio("1")
+	
+	Container0.ImgClose.setMaintainingRatio("1")
+End Sub
+'============================================================================
+Sub ImgClose_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+End Sub
+
+'============================================================================
+Sub Container0_ImgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

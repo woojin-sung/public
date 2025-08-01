@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90140" scrname="개별본인인증_4" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" autosize="1" ly_vert="0,0,375,587,1" />
+	<CONTROL_INFO>
+		<BUTTON name="Button0" caption="다음" bgcolor="085:205216147" bgcolor2="102:216216216" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="0,527,375,60,1" />
+		<LABEL name="LblTitle" fontsize="6" fontstyle="01" caption="전송요구 내역 세부 설정" ly_vert="5,40,365,26,1" />
+		<TABLE name="TblTitle" insidelinecolor="102:255255255" colcount="1" rowcount="1" outline="0000" designorder="1" ly_vert="15,72,365,18,1" >
+			<COL_INFO ly_vert_width="365" />
+			<ROW_INFO ly_vert_height="18" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="전송을 요구할 계좌 및 정보를 선택해주시기 바랍니다." fontsize="-1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image0" imgpath="icon_dot" ly_vert="8,72,18,18,1" />
+		<LABEL name="red" fontstyle="01" bgcolor="138:255000000" transmode="0" ly_vert="-3,16,123,2,1" />
+		<LABEL name="grey" fontstyle="01" bgcolor="025:216216216" transmode="0" ly_vert="256,16,121,2,1" />
+		<IMAGE name="Image1" imgpath="title_5step_4.png" ly_vert="0,-1,374,36,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="5,119,366,40,1" >
+			<COL_INFO ly_vert_width="366" />
+			<ROW_INFO ly_vert_height="20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="전송을 요구하는 개인신용정보를 정기적으로 전송" fontsize="1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="하시겠습니까?" fontsize="1" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<RADIOGROUP name="RdoYn" initselectionuse="1" initselection="0" ly_vert="10,167,315,32,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="예 (주1회)" position="2,2,100,32" />
+				<RADIO no="1" text="아니오" position="200,2,68,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<TABLE name="Table1" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="5,232,366,40,1" >
+			<COL_INFO ly_vert_width="366" />
+			<ROW_INFO ly_vert_height="20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="정기적 전송을 요구하는 경우 보내시는 정보를" fontsize="1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="얼마 동안 전송하시겠습니까?" fontsize="1" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<RADIOGROUP name="RdoMonth" buttonsnumber="4" initselectionuse="1" initselection="0" ly_vert="10,280,350,32,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="3개월" transfervalue="3/m" position="2,2,70,32" />
+				<RADIO no="1" text="6개월" transfervalue="6/m" position="92,2,70,32" />
+				<RADIO no="2" text="9개월" transfervalue="9/m" position="182,2,70,32" />
+				<RADIO no="3" text="12개월" transfervalue="12/m" position="272,2,80,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1796" _ulen="1756" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'============================================================================
+Sub Button0_OnClick()
+	Save_Select()
+	Form.triggerEvent( "#", "NextStep", "1" )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	rdo_yn = Form.GetSharedData("&MYDATA_IS_SCHEDULED", false )	'조회 후 사용자 설정 변경 시, 화면에서 재설정 필요
+	if rdo_yn = "false" then
+		RdoYn.currentindex = 1
+		RdoMonth.currentindex = -1
+	end if
+'	Button0.enable = False
+End Sub
+
+'============================================================================
+Function Save_Select()
+	If RdoYn.currentindex = "0" then
+		Form.SetSharedData("&MYDATA_IS_SCHEDULED"	, "true")
+		Form.SetSharedData("&MYDATA_FND_CYCLE"		, "1/w")
+	Elseif RdoYn.currentindex = "1" then
+		Form.SetSharedData("&MYDATA_IS_SCHEDULED"	, "false")
+		Form.SetSharedData("&MYDATA_FND_CYCLE"		, "")
+	End if
+	
+	if Int(RdoMonth.currentindex) > -1 then
+		Form.SetSharedData("&MYDATA_ADD_CYCLE"		, "1/w")
+	else
+		Form.SetSharedData("&MYDATA_ADD_CYCLE"		, "")
+	end if
+End Function 
+'============================================================================
+
+'Sub DATAMANAGER_OnSendTranBefore(szTranID)
+'	DATAMANAGER.SetDataValue( 0 , "obaci_myif_001r", "InBlock1", "IF_CI" , 0 , g_userci )
+'End Sub
+'============================================================================
+Sub RdoYn_OnClick(nIndex)
+	if nIndex = 1 then
+		RdoMonth.enable = false
+		RdoMonth.currentindex = -1
+	else 
+		RdoMonth.currentindex = 0
+		RdoMonth.enable = true
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90150" scrname="클라우드 인증센터" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="labTitle" fgcolor="334:034034034" fontsize="4" fontstyle="01" caption="클라우드인증서" halign="1" ly_vert="0,0,375,60,1" />
+		<TABLE name="Table1" outlinecolor="144:034034034" insidelinecolor="102:255255255" colcount="2" rowcount="15" outline="0000" designorder="1" ly_vert="-3,60,360,260,1" >
+			<COL_INFO ly_vert_width="20,340" />
+			<ROW_INFO ly_vert_height="10,32,10,10,32,10,10,32,10,10,32,10,10,32,10" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" fgcolor="334:034034034" halign="0" line="0,0" caption="클라우드인증서 발급/재발급" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="0" line="0,1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,0" impidxs="" />
+				<CELL cell_ly="1,4,1,4" fgcolor="334:034034034" halign="0" line="0,0" caption="타기관 클라우드인증서 등록" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,5,0,5" line="0,0" impidxs="" />
+				<CELL cell_ly="1,5,1,5" line="0,1" impidxs="" />
+				<CELL cell_ly="0,6,0,6" line="0,0" impidxs="" />
+				<CELL cell_ly="1,6,1,6" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,7,0,7" line="0,0" impidxs="" />
+				<CELL cell_ly="1,7,1,7" fgcolor="334:034034034" halign="0" line="0,0" caption="공동인증서 클라우드에 등록" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,8,0,8" line="0,0" impidxs="" />
+				<CELL cell_ly="1,8,1,8" line="0,1" impidxs="" />
+				<CELL cell_ly="0,9,0,9" line="0,0" impidxs="" />
+				<CELL cell_ly="1,9,1,9" halign="0" line="0,0" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,10,0,10" line="0,0" impidxs="" />
+				<CELL cell_ly="1,10,1,10" halign="0" line="0,0" caption="클라우드인증서 관리" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,11,0,11" line="0,0" impidxs="" />
+				<CELL cell_ly="1,11,1,11" halign="0" line="0,1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,12,0,12" line="0,0" impidxs="" />
+				<CELL cell_ly="1,12,1,12" halign="0" line="0,0" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,13,0,13" line="0,0" impidxs="" />
+				<CELL cell_ly="1,13,1,13" halign="0" line="0,0" caption="클라우드 연결/관리" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,14,0,14" line="0,0" impidxs="" />
+				<CELL cell_ly="1,14,1,14" halign="0" line="0,0" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image0" imgpath="icon_arrow_right_on" ly_vert="339,74,21,29,1" />
+		<IMAGE name="Image1" imgpath="icon_arrow_right_on" ly_vert="339,125,21,29,1" />
+		<IMAGE name="Image2" imgpath="icon_arrow_right_on" ly_vert="339,173,21,29,1" />
+		<IMAGE name="ImgBackPress" imgpath="icon_arrow_left_on" ly_vert="17,15,24,33,1" />
+		<IMAGE name="imgCaution" autosize="1" imgpath="icon_notice.png" ly_vert="338,19,20,20,1" />
+		<BUTTON name="BtnCaution" btnimage="alpha" ly_vert="323,9,45,43,1" />
+		<IMAGE name="Image3" imgpath="icon_arrow_right_on" ly_vert="339,226,21,29,1" />
+		<IMAGE name="Image4" imgpath="icon_arrow_right_on" ly_vert="340,276,21,29,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8742" _ulen="7468" >
+'-------------------------------------------------------------------------------------------
+'20240418 SWJ START : 클라우드 인증 개발
+'-------------------------------------------------------------------------------------------
+'[공동인증서 발급]
+'- 개인: 클라우드
+'- 법인: 로컬
+
+'[공동인증서 갱신]
+'- 개인/법인: 로컬 및 클라우드 동시 갱신
+
+'[클라우드 인증서 발급]
+'- 개인/법인: 클라우드
+
+'[클라우드 인증서 갱신]
+'- 개인/법인: 클라우드
+'-------------------------------------------------------------------------------------------
+'클라우드 연결 여부
+Dim g_bNeedConnect
+g_bNeedConnect = false
+
+Dim g_sSaveRow
+g_sSaveRow = -1
+
+Dim g_sLOGIN_TYPE
+g_sLOGIN_TYPE = ""
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	Image0.setMaintainingRatio("1")
+	Image1.setMaintainingRatio("1")
+	Image2.setMaintainingRatio("1")
+	Image3.setMaintainingRatio("1")
+	Image4.setMaintainingRatio("1")
+	ImgBackPress.setMaintainingRatio("1")
+	imgCaution.setMaintainingRatio("1")
+End Sub
+
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	sLoginID = Form.GetSharedData( "&USER_ID", 0 )
+	sFlag	= Form.GetOpenLinkData()				'로그인>인증센터>메리츠간편인증을 통해서 화면 오픈시 sFlag = Y
+												'공지사항을 통해서 화면 오픈시 sFlag = P
+'	if Trim(sLoginID) == "" then
+'		if sFlag <> "Y" then						' 최초 1회 로그인 필요 O + 바이오정보 등록(로그인화면)으로 열렸을 시
+'			if sFlag == "P" then					' 최초 1회 로그인 필요 O + 공지사항에서 이동하였을 시
+'			else
+'				Form.OpenPopup("mhetc90021" , "")		'20180911_01 KBC : 바이오인증 인증방식 추가
+'			end if
+'		end if
+'	
+'	else
+'		if sFlag <> "Y" and g_complete = "Y" then	' 최초 1회 로그인 필요 X + 바이오정보 등록(로그인화면)으로 열렸을 시 
+'			if sFlag == "P" then					' 최초 1회 로그인 필요 X + 공지사항에서 이동하였을 시
+'			else
+'				Form.OpenPopup("mhetc90021" , "")		'20180911_01 KBC : 바이오인증 인증방식 추가
+'			end if
+'		end if
+'	end if
+	
+	if sFlag == "Y" then
+		Form.SendReturnToParent("FORM_CLOSE" , "") '20220805_01 KBC : 로그인개선
+	end if
+	
+	
+	Form.SendReturnToParent("BTN_IMAGE_ENABLE" , "")
+End Sub
+
+'============================================================================
+Sub Table1_OnClick(lRow , lColumn)
+	
+	g_sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+	
+	if CInt(g_sLOGIN_TYPE) > 1 then '로그인상태
+		
+		Dim sText
+		sText = "인증서 업무를 위하여 로그아웃을 진행하시겠습니까?"	
+		Form.MsgBox( "안내", sText, "LOGOUT_MSG", 1 )
+		
+		g_sSaveRow = lRow
+		exit sub
+	end if	
+	
+	Select Case lRow
+	
+	'클라우드 인증서 발급/재발급
+	Case	 0,1,2
+		'클라우드 연결 필요
+		if g_bNeedConnect then
+			'클라우드 연결화면 진입시점 판단 용도
+			Form.SetSharedData("CLOUD_CONNECT_IS_FROM" , "new")
+			
+			Form.OpenNextPopup("mhetc90302" , "" , "")	
+		else
+			Form.OpenNextPopup("mhetc90150_s1", "new", "")
+		end if
+		
+	'타기관 클라우드 인증서 등록
+	Case 3,4,5
+		'클라우드 연결 필요
+		if g_bNeedConnect then
+			'클라우드 연결화면 진입시점 판단 용도
+			Form.SetSharedData("CLOUD_CONNECT_IS_FROM" , "regi")
+			
+			Form.OpenNextPopup("mhetc90302" , "" , "")	
+		else
+			Form.OpenNextPopup("mhetc90150_s1", "regi", "")
+		end if
+		
+	'공동인증서 클라우드에 보관
+	Case 6,7,8
+		
+		'클라우드 연결 필요
+		if g_bNeedConnect then
+			Form.OpenNextPopup("mhetc90302" , "" , "")	
+		else
+			Form.OpenPopup("mhetc90152" , "" , "")
+		end if
+		
+	'클라우드인증서 관리
+	Case 9,10,11
+		
+		'클라우드 연결 필요
+		if g_bNeedConnect then
+			Form.OpenNextPopup("mhetc90302" , "" , "")	
+		else
+			Form.OpenPopup("mhetc90153" , "" , "")
+		end if
+		
+	'클라우드 연결 관리
+	Case 12,13,14
+		
+		'클라우드 연결 필요
+		if g_bNeedConnect then
+			Form.OpenNextPopup("mhetc90302" , "" , "")	
+		else
+			Form.OpenPopup("mhetc90154" , "" , "")
+		end if
+		
+	End Select
+	
+End Sub
+'============================================================================
+Sub Image0_OnClick()
+	Table1_OnClick(0 , lColumn)
+End Sub
+'============================================================================
+Sub Image1_OnClick()
+	Table1_OnClick(3 , lColumn)
+End Sub
+'============================================================================
+Sub Image2_OnClick()
+	Table1_OnClick(6 , lColumn)
+End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOG_FORCE" then
+		if sRet == "ok" then
+			Form.OpenPopup("mhetc90021" , "" , "")	
+		else
+			Form.CloseForm()			
+		end if
+	elseif sKeyName == "BioRegister" then
+		Form.OpenFramePopup("mhetc90060_py" , "mhetc90190" , "")
+		
+	elseif sKeyName == "E4106" then
+		if sRet == "ok" then
+		else
+			Form.CloseForm()
+		end if
+	elseif sKeyName == "E3201" then
+		if sRet == "ok" then
+			Form.OpenNextPopup("mhetc90190_s1" , "" , "")
+		end if
+	end if
+	
+	if sKeyName == "LOGOUT_MSG" then
+	
+		if sRet == "ok" then
+			
+			'(1param(0:문구없음,1문구있음), 
+		     '2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+		      Form.LogOut(0, 1) 
+		      
+			Form.MsgBox( "알림", "로그아웃이 완료되었습니다.", "LOGOUT_MSG_NEW", 6 )
+		end if
+		
+	elseif sKeyName == "LOGOUT_MSG_NEW" then
+		Table1_OnClick(g_sSaveRow , lColumn)
+	end if
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+	
+	Form.SetTimerEvent2(1, 1, 0.2)
+End Sub
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if Cint(sTimerID) == 1 then
+		'클라우드 인증서 목록이 있는지 확인하는 함수
+		'(함수의 목적과 달리 연결 여부를 판단하려고 호출)
+		'(일단 무언가를 호출해야 CLOUD_EVENT_ACQUIREUSERINFO 이벤트가 발생)
+		
+		Form.SetTimerEvent2(1, 0, 0.2)
+		Form.requestCertCommand("CLOUD_REQ_DEVICE_LIST", "", "90150") 
+		Form.requestCertCommand("CLOUD_REQ_USE_LIST", "", "90150")
+		
+	elseif Cint(sTimerID) == 2 then
+		Form.SetTimerEvent2(2, 0, 0.2)
+		Form.OpenPopup("mhetc90154" , "" , "")
+	end if
+End Sub
+'============================================================================
+Sub Form_onTriggerEventCloudCert(sCommand, sResult)
+	Dim sErrorCd, sErrorMsg
+	Dim sCertArray
+	sCertArray = Array()
+	
+	szItem = Split(sResult,"★")
+
+	'처리코드,처리메시지 처리
+	sErrorCd		= szItem(0)
+	sErrorMsg	= szItem(1)	
+	
+	'오류이면
+	if sErrorCd <> "0" then
+		Form.MsgBox("안내" & sCommand, sErrorMsg, "", 0)
+		exit sub
+	end if		
+	
+	'클라우드 연결 여부 확인
+	'연결이 필요하면 이벤트 발생, 뭔가 연결되어 있으면 미발생
+	if sCommand == "CLOUD_EVENT_ACQUIREUSERINFO" then
+		g_bNeedConnect = True
+	end if
+	
+'	'응답 순서
+'	'처리코드, 처리메시지, rowCount, (디바이스ID, OS구분, 서비스명, 등록일)
+'	'위 괄호 부분은 하트로 Array처럼 엮임
+'	if sCommand == "CLOUD_REQ_DEVICE_LIST_90150" then
+'		
+'		Form.SaveConfigData("CLOUD_CERT", "REQ_DEVICE_LIST_COUNT", szItem(2))
+'		
+'		if #szItem > 2 then
+'			for i = 0 to #szItem - 1
+'				Form.SaveConfigData("CLOUD_CERT", "REQ_DEVICE_LIST" & i, szItem(i + 3))	
+'			next
+'		end if
+'		
+'	end if
+'	
+'	'응답 순서
+'	'처리코드, 처리메시지, rowCount, (행위명, 일자, 금융사명, 서비스명, OS구분)
+'	'위 괄호 부분은 하트로 Array처럼 엮임
+'	if sCommand == "CLOUD_REQ_USE_LIST_90150" then	
+'		if #szItem > 2 then
+'		
+'			Form.SaveConfigData("CLOUD_CERT", "REQ_USE_LIST_COUNT", szItem(2))
+'			
+'			for i = 0 to #szItem - 1
+'				Form.SaveConfigData("CLOUD_CERT", "REQ_USE_LIST" & i, szItem(i + 3))	
+'			next
+'		end if
+'
+'	end if
+	
+End Sub
+
+
+
+'============================================================================
+Sub imgCaution_OnClick()
+	Form.OpenPopup("mhetc90150_p1", "" , "")
+End Sub
+
+'============================================================================
+Sub BtnCaution_OnClick()
+	Form.OpenPopup("mhetc90150_p1", "" , "")
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mhetc90154" then
+		Form.CloseForm()
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_pauth_004" trcode="ohhts_pauth_004" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_657r" trcode="obcsb_oimf_657r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_pauth_111" trcode="ohhts_pauth_111" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_658a" trcode="obcsb_oimf_658a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_pauth_004" title="사설인증 - 인증서조회" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="228" _ulen="180" >
+
+PAU_RQST_CHNL_DCD^PAU매체구분코드^20^0^0^0^0^0^0
+PAU_CERT_SEQ_NO^PAU인증서일련번호^12^0^0^0^0^0^0
+PAU_CUST_NO^PAU고객번호^20^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_ID^PAU이용자접속기기ID^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1679" _ulen="1323" >
+
+PAU_ERR_CD^PAU에러코드^6^0^0^0^0^0^0
+PAU_CERT_SEQ_NO^PAU인증서일련번호^12^0^0^0^0^0^0
+PAU_MSB_CERT_SEQ_NO^PAUMSB인증서일련번호^15^0^0^0^0^0^0
+PAU_CUST_NO^PAU고객번호^20^0^0^0^0^0^0
+PAU_RQST_CHNL_DCD^PAU매체구분코드^20^0^0^0^0^0^0
+PAU_CERT_STTS_DCD^PAU인증서상태구분코드^2^0^0^0^0^0^0
+PAU_CERT_ISNC_TS^PAU인증서발급일시^17^0^0^0^0^0^0
+PAU_CERT_DCRD_TS^PAU인증서폐기일시^17^0^0^0^0^0^0
+PAU_VLTE_STTG_YMD^PAU유효기간시작년월일^8^0^0^0^0^0^0
+PAU_VLTE_EXPY_YMD^PAU유효기간만료년월일^8^0^0^0^0^0^0
+PAU_CERT_EXPY_GDNC_YN^PAU인증서만료공지여부^1^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_ID^PAU이용자접속기기ID^200^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_OPSS_DCD^PAU아용자접속기기OS구분코드^2^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_OPSS_VRSN_VL^PAU이용자접속기기OS버전값^50^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_MDL_NM^PAU이용자접속기기모델명^100^0^0^0^0^0^0
+PAU_PIN_LOCK_TS^PAUPIN잠김일시^17^0^0^0^0^0^0
+PAU_PIN_LOCK_YN^PAUPIN잠김여부^1^0^0^0^0^0^0
+PAU_PIN_EROR_CNT^PAUPIN오류횟수^3^0^0^0^0^0^0
+PAU_BIO_LOCK_TS^PAUBIO잠김일시^17^0^0^0^0^0^0
+PAU_BIO_LOCK_YN^PAUBIO잠김여부^1^0^0^0^0^0^0
+PAU_BIO_USE_YN^PAUBIO사용여부^1^0^0^0^0^0^0
+PAU_BIO_EROR_CNT^PAUBIO오류횟수^3^0^0^0^0^0^0
+PAU_BIO_DISUSE_TS^PAUBIO사용중지일시^17^0^0^0^0^0^0
+PAU_BIO_CRTC_DCD^PAUBIO인증구분코드^2^0^0^0^0^0^0
+PAU_PTN_LOCK_TS^PAUPTN잠김일시^17^0^0^0^0^0^0
+PAU_PTN_LOCK_YN^PAUPTN잠김여부^1^0^0^0^0^0^0
+PAU_PTN_USE_YN^PAUPTN사용여부^1^0^0^0^0^0^0
+PAU_PTN_EROR_CNT^PAUPTN오류횟수^3^0^0^0^0^0^0
+PAU_PTN_DISUSE_TS^PAUPTN사용중지일시^17^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_657r" title="간편 인증 등록 불가 조건 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="120" _ulen="92" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+GRP_NO^그룹번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_pauth_111" title="(사설인증) BIO등록" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="389" _ulen="315" >
+
+PAU_RQST_CHNL_DCD^PAU매체구분코드^20^0^0^0^0^0^0
+PAU_CUST_NO^PAU고객번호^20^0^0^0^0^0^0
+PAU_MSB_VRSN_VL^PAUmSB버전값^32^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_ID^PAU이용자접속기기ID^200^0^0^0^0^0^0
+PAU_BIO_ELSG_CON^PAUBIO전자서명내용^64^0^0^0^0^0^0
+PAU_BIO_CRTC_DCD^PAUBIO인증구분코드^2^0^0^0^0^0^0
+PAU_PIN_DATA_CON^PAUPIN데이터내용^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="445" _ulen="361" >
+
+PAU_ERR_CD^PAU에러코드^6^0^0^0^0^0^0
+PAU_PIN_MAX_EROR_ALWN_CNT^PAUPIN최대오류허용횟수^3^0^0^0^0^0^0
+PAU_PIN_EROR_CNT^PAUPIN오류횟수^3^0^0^0^0^0^0
+PAU_BIO_MAX_ALWN_CNT^PAUBIO최대오류허용횟수^3^0^0^0^0^0^0
+PAU_BIO_EROR_CNT^PAUBIO오류횟수^3^0^0^0^0^0^0
+PAU_BIO_USE_YN^PAUBIO사용여부^1^0^0^0^0^0^0
+PAU_BIO_LOCK_YN^PAUBIO잠김여부^1^0^0^0^0^0^0
+PAU_BIO_CRTC_DCD^PAUBIO인증구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_658a" title="간편 인증 완료 알리미 전송 처?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="253" _ulen="195" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+UI_EASY_ATHN_KEY_VAL^UI간편인증키값^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+REG_YN_IQRY_KEY^등록여부조회키^64^0^0^0^0^0^0
+UI_CUST_CONT_CLS_CODE^UI고객접촉구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

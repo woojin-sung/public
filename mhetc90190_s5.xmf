@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90190" scrname="생체인증등록 팝업" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Img0" imgpath="icon_face_id_on" ly_vert="121,193,130,130,1" />
+		<LABEL name="Label0" fontsize="3" fontstyle="01" caption="Face ID 등록" halign="1" ly_vert="0,363,375,33,1" />
+		<LABEL name="Label1" fgcolor="321:115118124" fontsize="1" fontstyle="01" caption="Face ID를 이용하시면 더 편하게" halign="1" ly_vert="0,398,375,33,1" />
+		<LABEL name="Label2" fgcolor="321:115118124" fontsize="1" fontstyle="01" caption="로그인 및 인증이 가능해요." halign="1" ly_vert="0,421,375,33,1" />
+		<BUTTON name="BtnAfter" caption="다음에 등록" fgcolor="334:034034034" fontsize="1" fontstyle="01" btnimage="btn_21.9" ly_vert="0,586,188,61,1" />
+		<BUTTON name="BtnRegi" fgcolor="320:246247248" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="188,586,188,61,1" />
+		<LABEL name="Label3" fontsize="3" fontstyle="01" caption="인증수단을 추가로 등록해요." halign="1" ly_vert="0,120,375,33,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11035" _ulen="9403" >
+'--==========================================================================
+' 01. 화 면 명 : 생체인증 등록 팝업
+' 02. 화면설명 : 생체인증 등록 팝업
+' 03. 작    성 : 2023.05.15 성우진
+' 04. 수    정 :
+'============================================================================
+'바이오등록
+'	ATON_GETALLINFO -> ATON_CHECKBIOSIGNATURE -> ATON_SETBIOSIGNATURE -> PIN입력 -> ohhts_pauth_111 -> 완료
+'============================================================================
+Dim g_Ostype, g_sBioEnbl, g_termID, g_deviceModel, g_FaceFinger
+Dim g_SBVersion, g_SBAlias
+Dim g_CustNo, g_PinPWD, g_DeviceId, g_LoginType
+Dim g_BioLogin, g_MeritzPin, g_BioRegister
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'ImgClose.setMaintainingRatio("1")
+	Img0.setMaintainingRatio("1")
+End Sub
+''============================================================================
+'
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_Ostype = Form.GetSharedData("&OS_TYPE", false )	'iOS("2") Android("1") 기타("9")
+	g_PinPWD = Form.GetSharedData("Meritz_OTP_PINPWD" , false )
+	g_MeritzPin = Form.GetSharedData("90191_MeritzPin" , True)	'20230621 SWJ START : 로그인(90191) 화면에서 받아옴
+	g_BioRegister = Form.GetSharedData("90021_BioRegister" , True)
+	
+	Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	
+	g_DeviceId = Form.GetDeviceID2()
+	g_LoginType = Form.GetSharedData("&LOGIN_TYPE", 0 )
+	g_sBioType = Form.getBiometryType()				'생체/지문 기기 및 사용가능여부 판단 : 0.사용불가 1.TOUCH ID 2.FACE ID
+	
+	'로그인 상태에서 간편인증 등록 시에는 SharedData 가져와서 쓰자
+	'비로그인 상태에서는 계좌인증 화면에서 고객번호 Set해주는 값으로 쓰자
+	'(사유: 로그인 상태는 계좌인증 화면을 skip)
+	if CInt(g_LoginType) > 1 then '로그인상태
+		g_CustNo = Form.GetSharedData("&CUST_NUM"  , false )	 '고객번호
+	else
+		g_CustNo = Form.GetSharedData("Meritz_OTP_CSNO" , false )
+	end if
+	
+	'Face/지문 여부
+	szBioType = Form.GetOpenLinkData()
+	
+	'Face ID
+	if szBioType == "2" then
+		Img0.imgpath = "icon_face_id.png"
+		Label0.caption = "Face ID 등록"
+		Label1.caption = "Face ID를 이용하시면 더 편하게"
+		Label2.caption = "로그인 및 인증이 가능해요."
+		BtnRegi.caption = "Face ID 등록"
+	'지문
+	else
+		Img0.imgpath = "icon_finger_print.png"
+		Label0.caption = "지문 등록"
+		Label1.caption = "지문을 이용하시면 더 편하게"
+		Label2.caption = "로그인 및 인증이 가능해요."
+		BtnRegi.caption = "지문 등록"
+	end if
+	
+End Sub
+
+'============================================================================
+Sub BtnRegi_OnClick()
+	if fnGetSBInfo("") == False then 
+		exit sub
+	end if
+	
+	'-----------------------------------------------------------------------
+	'ATON_CHECKBIOSIGNATURE
+	'-----------------------------------------------------------------------
+	sRet = Form.requestAtonAuth("ATON_CHECKBIOSIGNATURE" , "" , "")
+	
+	sRetItem = Split(sRet, "★")
+	
+	sErrorCode	= sRetItem[0]
+	sErrorMsg	= sRetItem[1]
+
+	'바이오 등록시에는 아래 에러는 무시 (더 있는지 테스트필요)
+	'	E4101 : 생체 등록 정보가 변경되었습니다.
+	'	E4103 : 생체 인증 등록 키가 존재하지 않습니다.
+	
+	'생체인증 접근 권한 허용하지 않았을 때
+	if sErrorCode == "E4108" then
+		Form.MsgBox("안내", "생체정보 접근 권한을 확인해주세요.", "", 0)
+		exit sub
+	end if
+	
+	if sErrorCode <> "00000" and sErrorCode <> "E4101" and sErrorCode <> "E4103" and sErrorCode <> "E4105" then 
+		Form.MsgBox("알림", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+		exit sub
+	end if	
+	
+	'-----------------------------------------------------------------------
+	'ATON_SETBIOSIGNATURE
+	'-----------------------------------------------------------------------
+	Form.requestAtonAuth("ATON_SETBIOSIGNATURE" , "" , "90190s5")
+
+	'Form_onTriggerEventAton()로 리턴옴
+End Sub
+
+'============================================================================
+Sub BtnAfter_OnClick()
+	Form.openStartScreen()
+	'Form.CloseForm()
+End Sub
+'============================================================================
+'SafeBox 정보획득
+function fnGetSBInfo(sParam)
+	'-----------------------------------------------------------------------
+	'ATON_GETALLINFO
+	'-----------------------------------------------------------------------
+	sRet = Form.requestAtonAuth("ATON_GETALLINFO" , "" , "")
+	sRetItem = Split(sRet, "★")
+	
+	sErrorCode	= sRetItem[0]
+	sErrorMsg	= sRetItem[1]
+	g_SBVersion  	= sRetItem[2] 'SafeBox 버전 (에러여도 값있음)
+	g_SBAlias 	= sRetItem[3] '인증서일련번호(식별자)
+
+	if sErrorCode == "00000" and sErrorCode <> "E4101" and sErrorCode <> "E4103" then
+		
+'		if sParam <> "ISSUE" then
+'			'발급시 인증서 일련번호에 해당하는 고객번호를 획득
+'			g_CustNo = Form.LoadConfigData("MERITZATONAUTH", g_SBAlias) '발급 시, 고객번호를 앱에 저장 후 이값을 인증 시 사용 (인증서조회 1 transaction을 줄이고자 함)
+'		end if
+		
+		return True
+	else
+		if sParam <> "ISSUE" then
+			'생체인증 접근 권한 허용하지 않았을 때
+			if sErrorCode == "E4108" then
+				Form.MsgBox("안내", "생체정보 접근 권한을 확인해주세요.", "", 0)
+			else
+				Form.MsgBox("알림", sErrorMsg & "(" & sErrorCode & ")", "", 0)
+			end if
+		end if
+	
+		return False
+	end if
+	
+	return True
+end function
+'============================================================================
+'BIO인증구분코드 획득
+function fnGetCrtc()
+	'01 : 지문, 02 : 안면 - FACEID가 안면인증 임
+	sBioType = Form.getBiometryType()				'생체/지문 기기 판단 : 0.사용불가 1.TOUCH ID 2.FACE ID
+	
+	if sBioType == "2" then
+		return "02"
+	else 
+		return "01"
+	end if
+
+end function
+'============================================================================
+Sub Form_onTriggerEventAton(sEventName, sParam)
+	'ATON_SETBIOSIGNATURE, ATON_VERIFYBIOSIGNATURE 만 여기로만 진입
+	
+	if sEventName == "ATON_SETBIOSIGNATURE_RETURN_90190s5" or sEventName == "ATON_VERIFYBIOSIGNATURE_RETURN_90190s5" then
+	
+		sRet = Split(sParam, "★")
+	
+		sErrorCode	= sRet[0]
+		sErrorMsg	= sRet[1]			
+		sBioSignature	= sRet[2]
+		
+		'E4100	생체 데이터에 오류가 발생하였습니다.
+		'E4101	생체 등록 정보가 변경되었습니다.
+		'E4102	단말에 등록된 생체 정보가 없습니다.
+		'E4103	생체 인증 등록 키가 존재하지 않습니다.
+		'E4104	생체 인증에 실패하였습니다.
+		'E4105	생체 인증을 취소하였습니다.
+		'E4106	TouchID/FaceID가 잠겨있습니다.
+		'E4107	단말에 등록된 패스워드가 없습니다.
+		'E4108	생체 정보를 사용할 수 없습니다.
+	end if
+	
+	if sEventName == "ATON_SETBIOSIGNATURE_RETURN_90190s5" then
+			
+		'-----------------------------------------------------------------------
+		'PIN데이터입력받아야함 (1회) - 바이오등록 시, PIN번호 검증 필수
+		'-----------------------------------------------------------------------
+		
+		if g_PinPWD == "" then
+			
+			'20230621 SWJ START : 로그인 화면에서 생체인증 추가등록 안내팝업에서 진입할 때
+			if g_MeritzPin == "" then
+				Form.MsgBox("안내", "간편번호 필수", "", 0)
+			else
+				g_PinPWD = g_MeritzPin
+			end if
+			'20230621 SWJ END
+		end if
+		
+		'생체인증 취소하는 경우 skip
+		if sErrorCode == "E4105" then
+			exit sub
+			
+		'지문/face id 5회 실패 시
+		elseif sErrorCode == "E4106" then
+			Form.MsgBox("안내", "시도 횟수가 너무 많습니다.\n다음에 등록해주세요.", "E4106", 6)
+			exit sub
+		end if
+		
+		'생체인증 접근 권한 허용하지 않았을 때
+		if sErrorCode == "E4108" then
+			Form.MsgBox("안내", "생체정보 접근 권한을 확인해주세요.", "", 0)
+			exit sub
+		end if
+		
+		'-----------------------------------------------------------------------
+		'전문전송
+		'-----------------------------------------------------------------------
+		procRequestAtonTR_REQBIO(sBioSignature, g_PinPWD)
+	end if
+End Sub
+
+'============================================================================
+Sub procRequestAtonTR_REQBIO(paramElsgCon, paramPinData)
+	sTranID = "ohhts_pauth_111"
+	
+	szGbnAuth = fnGetCrtc()
+	
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_RQST_CHNL_DCD" 			, 0 , "MERITZSMART")	'매체구분코드
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_CUST_NO" 					, 0 , g_CustNo)		'고객번호
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_MSB_VRSN_VL" 				, 0 , g_SBVersion)	'mSB버전값 (라이브러리 버전 정보)
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_USR_CCTN_MCTL_ID" 			, 0 , g_DeviceId)		'이용자접속기기ID
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_BIO_ELSG_CON"	 			, 0 , paramElsgCon)	'BIO전자서명내용
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_BIO_CRTC_DCD" 				, 0 , fnGetCrtc())	'BIO인증구분코드 (01 : 지문, 02 : 안면) 'FACEID가 안면인증 임
+	DATAMANAGER.SetDataValue(0, sTranID, "InBlock1", "PAU_PIN_DATA_CON" 				, 0 , paramPinData)	'PIN데이터내용
+
+	DATAMANAGER.RequestTranData(sTranID)		
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	if szTranID == "ohhts_pauth_111" then
+		sErrorCode	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PAU_ERR_CD" ,0)
+
+		if sErrorCode <> "000000" then
+			'전문에러 : metaimsi 등 활용해서 에러메시지 처리필요
+			sErrorMsg = Form.requestAtonAuth("ATON_GETERRORMSG_SVR", sErrorCode, "")
+
+			Form.MsgBox("안내", "(" & sErrorCode & ")" & sErrorMsg, "", 0)
+			exit sub
+		end if
+		
+		g_BioLogin = true
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	
+	 Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+	
+	if g_BioLogin then
+		Form.OpenPopup("mhetc90190_p2" , g_sBioType , "")
+	else
+		'로그인에서 진입해서 생체인증 추가등록하는 경우는
+		'다음에 등록 누르면 닫기 처리
+		if g_BioRegister == "LoginBioRegister" then
+			exit sub
+		end if
+		
+		Form.OpenPopup("mhetc90190_p2" , "" , "")
+	end if
+End Sub
+
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if sTimerID == 1 or sTimerID == "1" then
+		Form.SetTimerEvent2(1, 0, 0.1)
+			'-----------------------------------------------------------------------
+			'전문전송
+			'-----------------------------------------------------------------------
+			procRequestAtonTR_REQBIO(sBioSignature, g_PinPWD)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "E4106" then
+		Form.CloseForm()
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_pauth_111" trcode="ohhts_pauth_111" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_pauth_111" title="(사설인증) BIO등록" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="389" _ulen="315" >
+
+PAU_RQST_CHNL_DCD^PAU매체구분코드^20^0^0^0^0^0^0
+PAU_CUST_NO^PAU고객번호^20^0^0^0^0^0^0
+PAU_MSB_VRSN_VL^PAUmSB버전값^32^0^0^0^0^0^0
+PAU_USR_CCTN_MCTL_ID^PAU이용자접속기기ID^200^0^0^0^0^0^0
+PAU_BIO_ELSG_CON^PAUBIO전자서명내용^64^0^0^0^0^0^0
+PAU_BIO_CRTC_DCD^PAUBIO인증구분코드^2^0^0^0^0^0^0
+PAU_PIN_DATA_CON^PAUPIN데이터내용^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="445" _ulen="361" >
+
+PAU_ERR_CD^PAU에러코드^6^0^0^0^0^0^0
+PAU_PIN_MAX_EROR_ALWN_CNT^PAUPIN최대오류허용횟수^3^0^0^0^0^0^0
+PAU_PIN_EROR_CNT^PAUPIN오류횟수^3^0^0^0^0^0^0
+PAU_BIO_MAX_ALWN_CNT^PAUBIO최대오류허용횟수^3^0^0^0^0^0^0
+PAU_BIO_EROR_CNT^PAUBIO오류횟수^3^0^0^0^0^0^0
+PAU_BIO_USE_YN^PAUBIO사용여부^1^0^0^0^0^0^0
+PAU_BIO_LOCK_YN^PAUBIO잠김여부^1^0^0^0^0^0^0
+PAU_BIO_CRTC_DCD^PAUBIO인증구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

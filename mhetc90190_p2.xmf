@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90190" scrname="메리츠사설인증_등록완료팝업" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Img0" autosize="1" imgpath="icon_confirm" ly_vert="150,82,74,74,1" />
+		<LABEL name="Label0" fgcolor="334:255255255" fontsize="5" fontstyle="01" caption="메리츠 간편인증 등록이" halign="1" ly_vert="0,177,375,33,1" />
+		<LABEL name="Label1" fgcolor="334:255255255" fontsize="5" fontstyle="01" caption="완료되었습니다." halign="1" ly_vert="0,206,375,33,1" />
+		<BUTTON name="BtnLogin" caption="로그인" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="-3,588,379,61,1" />
+		<LABEL name="Label2" fgcolor="334:255255255" fontsize="2" fontstyle="01" caption="나의 신청현황" ly_vert="15,279,375,33,1" />
+		<LABEL name="Label3" bgcolor="320:255255255" transmode="0" ly_vert="15,326,340,99,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="3" outline="0000" transmode="1" designorder="1" ly_vert="15,334,328,70,1" >
+			<COL_INFO ly_vert_width="5,135,188" />
+			<ROW_INFO ly_vert_height="10,30,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" line="0,0" impidxs="" />
+				<CELL cell_ly="2,0,2,0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="0" line="0,0" caption="간편인증 등록유형" impidxs="" />
+				<CELL cell_ly="2,1,2,1" halign="2" line="0,0" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="0,0" impidxs="" />
+				<CELL cell_ly="2,2,2,2" halign="2" line="0,0" fontstyle="01" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="BtnOther" visible="0" fgcolor="334:034034034" fontsize="1" fontstyle="01" btnimage="btn_21.9" ly_vert="187,588,188,61,0" />
+		<TABLE name="TblOnlyPin" visible="0" insidelinecolor="102:255255255" colcount="3" rowcount="3" outline="0000" designorder="1" ly_vert="10,410,332,60,0" >
+			<COL_INFO ly_vert_width="110,110,112" />
+			<ROW_INFO ly_vert_height="20,20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,2,0" fgcolor="321:255255255" halign="0" line="0,0" caption="· 메리츠 간편인증 유효기간은 3년입니다." fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,2,1" fgcolor="321:255255255" halign="0" line="0,0" caption="· 스마트폰을 교체하거나, 다른 기기에서 등록할 경우" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,2,2" fgcolor="321:255255255" halign="0" line="0,0" caption="   기존에 등록된 기기는 해지됩니다." fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="TblPinBio" visible="0" insidelinecolor="102:255255255" colcount="3" rowcount="4" outline="0000" designorder="1" ly_vert="10,434,332,80,0" >
+			<COL_INFO ly_vert_width="110,94,128" />
+			<ROW_INFO ly_vert_height="20,20,20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,2,0" fgcolor="321:255255255" halign="0" line="0,0" caption="· 메리츠 간편인증 유효기간은 3년입니다." fontsize="-3" impidxs="" />
+				<CELL cell_ly="0,1,2,1" fgcolor="321:255255255" halign="0" line="0,0" caption="· 스마트폰을 교체하거나, 다른 기기에서 등록할 경우" fontsize="-3" impidxs="" />
+				<CELL cell_ly="0,2,2,2" fgcolor="321:255255255" halign="0" line="0,0" caption="    기존에 등록된 기기는 해지됩니다." fontsize="-3" impidxs="" />
+				<CELL cell_ly="0,3,2,3" fgcolor="321:255255255" halign="0" line="0,0" caption="· 생체인증을 등록한 경우 생체인증으로 우선 로그인합니다." fontsize="-3" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6354" _ulen="5764" >
+'--==========================================================================
+' 01. 화 면 명 : otp등록 팝업
+' 02. 화면설명 : otp등록 팝업
+' 03. 작    성 : 2023.05.15 성우진
+' 04. 수    정 :
+' 2024.01.19 : 전상일 : v0001 : obcsb_oimf_658a ui_cust_cont_cls_code 추가 (별도 맵핑 x)
+'============================================================================
+Dim g_szOTPYN
+Dim g_loginAthn
+Dim g_RegiData, g_AlarmRegi, g_CustNum, g_szAlias
+Dim g_LoginType, g_szOStype
+Dim g_NextPage, g_Home
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'ImgClose.setMaintainingRatio("1")
+	Img0.setMaintainingRatio("1")
+End Sub
+'============================================================================
+'
+
+'============================================================================
+Sub Form_OnFormInit()
+	'grd0.setUseCardView(true, 10, "img_bgbox_gray.9")
+	'grd0.scrollenable = "0"
+	
+	Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	
+	'비대면계좌개설 단계에서 들어올 때
+	szBdmScr = Form.GetSharedData("NMET_SIMPLE_ATHN", true )
+	'OTP 여부 판단
+	g_szOTPYN = Form.GetSharedData("NMET_OTP_ISNC_YN", true )
+	g_szOStype = Form.GetSharedData("&OS_TYPE", false)
+	g_LoginType = Form.GetSharedData("&LOGIN_TYPE", False)
+	szLoginID  = Form.GetSharedData("&USER_ID", false)
+	
+	if Cint(g_LoginType) > 1 then
+		'BtnLogin.caption = "확인"
+		g_CustNum = Form.GetSharedData("&CUST_NUM"  , false )
+	else
+		g_CustNum = Form.GetSharedData("Meritz_OTP_CSNO" , false )
+	end if
+	
+	'이전 화면에서 받아옴
+	g_szAlias = Form.GetSharedData( "MERITZAUTH_ALIAS" , false )
+
+	if szBdmScr == "Y" then
+		if g_szOTPYN == "Y" then		
+			BtnLogin.Top = 588
+			BtnLogin.left = 0
+			BtnLogin.width = 188
+			BtnOther.visible = True
+			
+			BtnLogin.btnimage = "btn_21.9.png"	
+			BtnLogin.fgcolor = "334"
+			BtnOther.btnimage = "btn_20.9.png"
+			BtnOther.fgcolor = "338"
+			BtnOther.caption = "OTP등록/발급"
+		else
+			'로그인 했던 ID가 없는 경우는 
+			'다음에하기 버튼 눌렀을 때 home으로 보내면 안되서
+			'일단 로그인 버튼만 남기자
+			if Trim(szLoginID) == "" then
+				exit sub
+			end if
+			
+			BtnLogin.Top = 588
+			BtnLogin.left = 0
+			BtnLogin.width = 188
+			BtnOther.visible = True
+			
+			BtnOther.btnimage = "btn_21.9.png"	
+			BtnOther.fgcolor = "334"
+			BtnLogin.btnimage = "btn_20.9.png"
+			BtnLogin.fgcolor = "338"
+			BtnLogin.left = 188
+			BtnOther.left = 0
+			BtnOther.caption = "다음에 하기"
+		end if
+	end if
+	
+	'알리미 발송
+	DATAMANAGER.RequestTranData("obcsb_oimf_658a")
+	
+	g_RegiData = Form.GetOpenLinkData()
+	
+	if g_RegiData = "1" then
+		Table0.SetCellString( 1, 2, "간편비밀번호")
+		Table0.SetCellString( 2, 2, "지문")
+		TblPinBio.visible = True
+		g_loginAthn = "100"
+		g_AlarmRegi = "01$03"
+
+	elseif g_RegiData = "2" then
+		Table0.SetCellString( 1, 2, "간편비밀번호")
+		Table0.SetCellString( 2, 2, "Face ID")
+		TblPinBio.visible = True
+		g_loginAthn = "200"
+		g_AlarmRegi = "01$02"
+
+	else
+		'Table0.top = 345
+		Table0.top = 335
+		Label3.height = 70
+		
+		Table0.SetCellString( 1, 2, "간편비밀번호")
+		TblOnlyPin.visible = True
+		g_loginAthn = "10"
+		g_AlarmRegi = "01"
+	end if
+	
+End Sub
+
+'============================================================================
+Sub BtnLogin_OnClick()
+'	if Cint(g_LoginType) > 1 then
+'		Form.CloseForm()
+'	else
+	
+	'무조건 로그아웃 시켜야함
+	'로그인 상태에서 발급 시
+	'로그인 상태 그대로 주문화면 등 진입하면 축약서명 에러남
+	Form.logout2(0, 0, 0)
+	
+	if g_loginAthn <> "" or g_loginAthn <> null then
+		Form.SetEnvData(1, "login.input.atonathntchncode", g_loginAthn) 
+	end if
+	
+	'mhetc90022에서 앱설치 후 간편인증 등록 시 남아있는 현상을 해결하기 위한 쉐어드 변수
+	'mhetc90022에서 받음
+	'Form.SetSharedData("ATON_Regi", "Y")
+	
+	'Form.OpenPopup("mhetc90021" , "mhetc90120_p2" , "")
+	
+	'mhetc90021에서 앱설치 후 간편인증 등록 시 남아있는 현상을 해결하기 위한 쉐어드 변수
+	'mhetc90021에서 받음
+	'Form.SetSharedData("ATON_Regi2", "Y")
+	'Form.PostLinkData("&ATON_Regi", 6)
+	
+	g_NextPage = True
+	Form.openStartScreen()
+	'Form.SetTimerEvent2(1, 1, 0.1)
+	'Form.OpenPopup("mhetc90021", "mhetc90120_p2","")
+	'g_NextPage = True
+	'Form.CloseForm()
+	
+'	end if
+End Sub
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "Login_Type" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub BtnOther_OnClick()
+	if g_szOTPYN == "Y" then
+		Form.OpenNextPopup("mbotp86200", "","")
+	else
+		g_Home = true
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	
+	if g_loginAthn <> "" or g_loginAthn <> null then
+		Form.SetEnvData(1, "login.input.atonathntchncode", g_loginAthn) 
+	end if
+	
+	if g_NextPage then
+		Form.OpenPopup("mhetc90021" , "mhetc90120_p2" , "")
+	end if
+	
+	if g_Home then
+		Form.OpenScreen("41000","")
+	end if
+	
+'	'안드 : OpenScreen으로 열면 깔려있는 90021이나 90022 다 지움
+'	'iOS  : POPUP_ALL_CLOSE 파라미터 넘기면 다 지움
+'	if szOStype == "2" then
+'		Form.OpenScreen("90020" , "POPUP_ALL_CLOSE")
+'	else
+'		Form.OpenScreen("90020" , "")
+'	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'알리미 발송 서비스
+	if szTranID == "obcsb_oimf_658a" then
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_658a", "InBlock1", "PROS_CLS"			, 0 , "1"       ) '등록/재등록
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_658a", "InBlock1", "UI_EASY_ATHN_KEY_VAL" , 0 , g_AlarmRegi) '간편인증/지문/Face ID
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_658a", "InBlock1", "CSNO" 				, 0 , g_CustNum  ) 
+		DATAMANAGER.SetDataValue(0, "obcsb_oimf_658a", "InBlock1", "REG_YN_IQRY_KEY"		, 0 , g_szAlias  ) 
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if sTimerID == "1" or sTimerID == 1 then
+		Form.SetTimerEvent2(1, 0, 0.1)
+		Form.OpenPopup("mhetc90021" , "mhetc90120_p2" , "")
+	end if
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_658a" trcode="obcsb_oimf_658a" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_658a" title="간편 인증 완료 알리미 전송 처?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="253" _ulen="195" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+UI_EASY_ATHN_KEY_VAL^UI간편인증키값^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+REG_YN_IQRY_KEY^등록여부조회키^64^0^0^0^0^0^0
+UI_CUST_CONT_CLS_CODE^UI고객접촉구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

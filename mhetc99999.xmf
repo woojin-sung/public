@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="비대면 테스트" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" ly_vert="20,15,335,165,1" />
+		<BUTTON name="Button0" caption="신분증 촬영" fgcolor="013:051051051" ly_vert="20,186,335,55,1" />
+		<BUTTON name="Button1" caption="OCR데이터 확인" fgcolor="013:051051051" ly_vert="20,246,335,55,1" />
+		<BUTTON name="Button2" caption="MOTP_GETINFO" fgcolor="005:000000000" ly_vert="20,314,335,45,1" />
+		<BUTTON name="Button3" caption="MOTP_ISSUE" fgcolor="005:000000000" ly_vert="20,416,335,45,1" />
+		<BUTTON name="Button4" caption="MOTP_DISCARD" fgcolor="005:000000000" ly_vert="20,468,335,45,1" />
+		<BUTTON name="Button5" caption="MOTP_REQ_OTP" fgcolor="005:000000000" ly_vert="20,520,335,45,1" />
+		<BUTTON name="Button6" caption="MOTP_GET_VERSION" fgcolor="005:000000000" ly_vert="20,364,335,45,1" />
+		<BUTTON name="Button7" caption="MOTP_REQ_ENC_OTP" fgcolor="005:000000000" ly_vert="20,572,335,45,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="9" designorder="1" ly_vert="20,310,335,315,1" >
+			<COL_INFO ly_vert_width="150,185" />
+			<ROW_INFO ly_vert_height="35,35,35,35,35,35,35,35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" caption="데이터" impidxs="" />
+				<CELL cell_ly="1,0,1,0" caption="값" impidxs="" />
+				<CELL cell_ly="0,1,0,1" caption="신분증종류" impidxs="" />
+				<CELL cell_ly="1,1,1,1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" caption="이름" impidxs="" />
+				<CELL cell_ly="1,2,1,2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" caption="실명확인번호" impidxs="" />
+				<CELL cell_ly="1,3,1,3" impidxs="" />
+				<CELL cell_ly="0,4,0,4" caption="발급일자" impidxs="" />
+				<CELL cell_ly="1,4,1,4" impidxs="" />
+				<CELL cell_ly="0,5,0,5" caption="특징점데이터길이" impidxs="" />
+				<CELL cell_ly="1,5,1,5" impidxs="" />
+				<CELL cell_ly="0,6,0,6" caption="라이센스번호" impidxs="" />
+				<CELL cell_ly="1,6,1,6" impidxs="" />
+				<CELL cell_ly="0,7,0,7" caption="실명확인번호(뒷자리)" impidxs="" />
+				<CELL cell_ly="1,7,1,7" impidxs="" />
+				<CELL cell_ly="0,8,0,8" caption="이미지데이터길이" impidxs="" />
+				<CELL cell_ly="1,8,1,8" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4819" _ulen="4623" >
+Dim g_mSBVer, g_OTPKEY1, g_OTPKEY2, g_TFserialNum
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_OTPKEY1 = "00000000000000000000000000000000746A13FAAD0809671166D3D07FC130F6"
+	g_OTPKEY2 = "000000000000000000000000000000004CA9BFD838FA2C8393006255441A2EEE"
+	g_TFserialNum = "512001000000001"
+	
+	Table0.visible = false
+	
+End Sub
+'============================================================================
+Sub Button2_OnClick()
+	Form.requestMOTP("MOTP_GETINFO", "" , "99999")
+End Sub
+'============================================================================
+Sub Button3_OnClick()
+	szData = g_TFserialNum & "★" & g_OTPKEY1 & "★" & g_OTPKEY2
+	Form.requestMOTP("MOTP_ISSUE",szData,"99999")
+End Sub
+
+'============================================================================
+Sub Button4_OnClick()
+	Form.requestMOTP("MOTP_DISCARD", g_TFserialNum , "99999")
+End Sub
+'============================================================================
+Sub Button5_OnClick()
+	'Form.requestMOTP("MOTP_REQ_OTP", "" , "99999")
+	szData = "512001000000001" & "★" & "02010" & "★" & "20D34A4DD02CC1F1249C0453D8BB4967" & "★" & "2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824"
+	Form.requestMOTP("MOTP_REQ_OTP", szData , "99999")
+	
+End Sub
+
+'============================================================================
+Sub Button6_OnClick()
+	Form.requestMOTP("MOTP_GET_VERSION", "" , "99999")
+End Sub
+
+'============================================================================
+Sub Button7_OnClick()
+	'Form.requestMOTP("MOTP_REQ_OTP_ENC", "" , "99999")
+	szData = "512001000000001" & "★" & "02010" & "★" & "20D34A4DD02CC1F1249C0453D8BB4967" & "★" & "2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824"
+	Form.requestMOTP("MOTP_REQ_OTP_ENC", szData , "99999")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEventMOTP(sEventName, sParam)
+	
+	Select Case sEventName
+	
+		Case "MOTP_GETINFO_RETURN_99999"
+			Form.ShowAlert(sEventName, sParam)
+		Case "MOTP_ISSUE_RETURN_99999"
+			Form.ShowAlert(sEventName, sParam)
+		Case "MOTP_DISCARD_RETURN_99999"
+			Form.ShowAlert(sEventName, sParam)
+		Case "MOTP_REQ_OTP_RETURN_99999"
+			Form.ShowAlert(sEventName, sParam)
+		Case "MOTP_GET_VERSION_RETURN_99999"
+			Form.ShowAlert(sEventName, sParam)
+		Case "MOTP_REQ_OTP_ENC_RETURN_99999"
+			Form.ShowAlert(sEventName, sParam)
+			
+	End Select
+		
+End Sub
+
+
+
+
+'============================================================================
+Sub Button0_OnClick()
+	Form.runInziCamera()
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+
+	if Button1.caption = "OCR데이터 삭제" then
+	
+		Button1.caption = "OCR데이터 확인"
+		Table0.visible = false
+		
+	else
+		g_IdCardType 		= Form.GetSharedData("&RET_CARD_TYPE", 0)
+		g_NAME		    	= Form.GetSharedData("&RET_NAME", 0)				'이름
+		g_RCNO 		    	= Form.GetSharedData("&RET_JUMIN_NUM", 0 )		'암호화된 실명확인번호
+		g_ISSU_DATE	    	= Form.GetSharedData("&RET_ISSU_DATE", 0)			'발급일자
+	
+		ImgMskData 	    	= Form.GetSharedData("&RET_MASK_IMAGE_ENC" , 0)	'주민번호 마스킹이미지 
+		g_ImgData  	    	= Form.GetSharedData("&RET_IMAGE_ENC", 0)			'주민번호 마스킹없는이미지
+
+		g_FEATURE 	  	= Form.GetSharedData("&RET_FEATURE"		, 0 ) 	'특징점데이터
+		g_FEATURE_SCORE 	= Form.GetSharedData("&RET_FEATURE_SCORE"	, 0 ) 	'특징점 점수
+		g_FEATURE_LEN   	= Form.GetSharedData("&RET_FEATURE_LEN"	, 0 ) 	'특징점데이터 길이
+		g_SERIAL    	  	= Form.GetSharedData("&RET_SERIAL"			, 0 ) 	'발급번호
+		g_LISENCE_NUM   	= Form.GetSharedData("&RET_LICENSE_NUM"	, 0 ) 	'신분증번호
+		g_RCNO_7		  	= Form.GetSharedData("&RET_JUMIN_NUM_BACK"	, 0 ) 	'실명확인번호 뒷 7자리
+		g_ImgDataLen 	  	= LEN(g_ImgData)
+	
+		Table0.SetCellString(1, 1, g_IdCardType)
+		Table0.SetCellString(2, 1, g_NAME)
+		Table0.SetCellString(3, 1, g_RCNO)
+	
+		Table0.SetCellString(4, 1, g_ISSU_DATE)
+		Table0.SetCellString(5, 1, g_FEATURE_LEN)
+		Table0.SetCellString(6, 1, g_LISENCE_NUM)
+		Table0.SetCellString(7, 1, g_RCNO_7)
+		Table0.SetCellString(8, 1, g_ImgDataLen)
+	
+		Button1.caption = "OCR데이터 삭제"
+		Table0.visible = true
+		
+	end if
+	
+	
+	
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	if sEventName == "OCRCOMPLETE" then
+		if sParam == "1" then
+			ImgMskData 	    = Form.GetSharedData("&RET_MASK_IMAGE_ENC" , 0)
+			Image0.SetImageDataEnc(ImgMskData)
+		end if
+	
+	end if
+	
+End Sub
+
+
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

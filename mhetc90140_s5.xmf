@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90140" scrname="개별본인인증_5" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" autosize="1" ly_vert="0,0,375,587,1" />
+	<CONTROL_INFO>
+		<BUTTON name="Button0" caption="다음" bgcolor="085:205216147" bgcolor2="102:216216216" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="0,527,375,60,1" />
+		<LABEL name="LblTitle" fontsize="6" fontstyle="01" caption="전송요구 내역 세부 설정" ly_vert="5,45,365,26,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_4stepline.png" ly_vert="0,1,375,30,1" />
+		<CHKBUTTON name="Chk1Y" fontsize="-2" chkcaption="예 (주1회)" unchkcaption="예 (주1회)" ly_vert="35,343,100,27,1" />
+		<CHKBUTTON name="Chk1N" fontsize="-2" chkcaption="아니오" unchkcaption="아니오" ly_vert="175,343,100,27,1" />
+		<CHKBUTTON name="Chk2Y" enable="0" fontsize="-2" chkcaption="1년" unchkcaption="1년" ly_vert="35,405,100,27,1" />
+		<CHKBUTTON name="Chk2N" enable="0" fontsize="-2" chkcaption="1년 범위 내 직접 선택" unchkcaption="1년 범위 내 직접 선택" ly_vert="175,405,166,27,1" />
+		<CHKBUTTON name="ChkAgree" chkcaption="상기와 같이 전송요구에 동의합니다." unchkcaption="상기와 같이 전송요구에 동의합니다." ly_vert="9,485,357,32,1" />
+		<LABEL name="LblScope" fontsize="-2" caption="보유 계좌정보, 잔액정보, 거래내역, 개별상품기본정보" ly_vert="20,108,336,32,1" />
+		<LABEL name="Label1" fontsize="-1" fontstyle="01" caption="■ 전송을 요구하는 개인신용 정보" ly_vert="9,92,342,18,1" />
+		<LABEL name="Label2" fontsize="-1" fontstyle="01" caption="■ 개인신용정보를 제공 받는 자" ly_vert="9,156,342,18,1" />
+		<LABEL name="Label0" fontsize="-1" fontstyle="01" caption="■ 전송을 요구하는 목적" ly_vert="9,207,342,18,1" />
+		<LABEL name="Label3" fontsize="-1" fontstyle="01" caption="■ 전송을 요구하는 개인신용정보의 보유기간" ly_vert="9,270,342,18,1" />
+		<LABEL name="Label4" fontsize="-1" fontstyle="01" caption="■ 보내시는 정보를 정기적으로 전송하시겠습니까?" ly_vert="9,323,342,18,1" />
+		<LABEL name="Label5" fontsize="-1" fontstyle="01" caption="■ 보내시는 정보를 얼마동안 전송하시겠습니까?" ly_vert="9,386,342,18,1" />
+		<LABEL name="LblName" fontsize="-2" ly_vert="20,169,326,32,1" />
+		<LABEL name="LblScope1" visible="0" fontsize="-2" caption="본인신용정보 통합조회서비스의 이용" ly_vert="20,221,227,32,0" />
+		<LABEL name="LblScope2" fontsize="-2" caption="서비스 이용 종료 시 또는 삭제 요구시까지" ly_vert="20,285,259,32,1" />
+		<CALENDAR name="DueDate" visible="0" fontsize="-1" halign="0" dispmode="121" ly_vert="198,433,130,32,0" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="20,227,304,40,1" >
+			<COL_INFO ly_vert_width="304" />
+			<ROW_INFO ly_vert_height="20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="전송요구를 통한 본인신용정보 통합조회," fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="데이터분석 서비스의 이용" fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="LblScope0" fontsize="-2" caption=", 연금계좌정보" ly_vert="20,126,336,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4953" _ulen="4635" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_today
+Dim g_yearDate
+'============================================================================
+Sub Button0_OnClick()
+	call Save_Select()
+	Form.triggerEvent( "#", "NextStep", "1" )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'접근범위 세팅
+'	scope = Form.GetSharedData("&MYDATA_SCOPE", false )
+	scope = Form.GetSharedData("&MYDATA_MAP_ANNACNT", false )
+'	if scope ="invest.account" then
+	if scope = "available" then
+		LblScope0.visible = true
+	else
+		LblScope0.visible = false
+	end if
+	
+	'본인신용정보관리회사의 상호
+	szName = Form.GetSharedData("&MYDATA_CLIENT_ORG_NM", false )
+'	szName = Form.GetSharedData("&MYDATA_CLIENT_SVC_NM", false )
+	LblName.caption = szName
+	
+	'정기전송 여부 세팅
+	scheduled = Form.GetSharedData("&MYDATA_IS_SCHEDULED", false )
+	if scheduled = "true" then
+		Chk1Y.checkstate = 1
+		call Chk1Y_OnChange("1")
+	else
+		Chk1N.checkstate = 1
+		call Chk1N_OnChange("1")
+	end if
+	
+	g_today = Form.GetSharedData("&HOST_DATE"  , false) '당일
+	g_yearDate = Int(g_today)+10000 				  '1년후
+	
+	Button0.enable = False
+End Sub
+
+'============================================================================
+Sub Save_Select()
+	Form.SetSharedData("&MYDATA_PURPOSE"		, "본인신용정보 통합조회" )	'전송목적
+	if Chk2Y.checkstate = "1" then
+		end_date = g_yearDate
+	elseif Chk2N.checkstate = "1" then
+		end_date = Int(DueDate.caption)
+	end if
+	
+	if Chk1Y.checkstate = "1" then
+		Form.SetSharedData("&MYDATA_IS_SCHEDULED", "true" )
+		Form.SetSharedData("&MYDATA_FND_CYCLE", "1/w" )
+		Form.SetSharedData("&MYDATA_ADD_CYCLE", "1/w" )
+	elseif Chk1N.checkstate = "1" then
+		Form.SetSharedData("&MYDATA_IS_SCHEDULED", "false" )
+		Form.SetSharedData("&MYDATA_FND_CYCLE", "" )
+		Form.SetSharedData("&MYDATA_ADD_CYCLE", "" )
+	end if
+	
+	Form.SetSharedData("&MYDATA_END_DATE"	 , end_date )				'전송종료일자
+	Form.SetSharedData("&MYDATA_HOLDING_PERIOD", "99991231" )			'전송요구기간
+	Form.SetSharedData("&MYDATA_IS_CONSENT_TRANS_MEMO", " " )			'적요전송요구여부
+	Form.SetSharedData("&MYDATA_IS_CONSENT_MERCHANT_NAME", " " )		'가맹점명전송요구여부
+	Form.SetSharedData("&MYDATA_IS_CONSENT_TRANS_CATEGORY", " " )		'상품분류전송요구여부
+'	Form.SetSharedData("&MYDATA_REQ_DATETIME", " " )					'인가코드 발급요청 일자
+End Sub
+
+'============================================================================
+Sub ChkAgree_OnChange(sCheckState)
+	if sCheckState = "1" then
+		if Chk1Y.checkstate = "1" or Chk1N.checkstate = "1" then
+			if Chk2Y.checkstate = "1" or Chk2N.checkstate = "1" then
+				Button0.enable = True
+			else
+				Form.MsgBox("알림", "모든 항목에 체크 후 다음단계로 이동가능합니다.", "", 6)
+				ChkAgree.chksilence = "0"
+			end if
+'		elseif Chk1N.checkstate = "1" then
+'			Button0.enable = True
+		else
+			Form.MsgBox("알림", "모든 항목에 체크 후 다음단계로 이동가능합니다.", "", 6)
+			ChkAgree.chksilence = "0"
+		end if
+	else
+		Button0.enable = False
+	end if
+End Sub
+
+'============================================================================
+Sub DueDate_OnEditComplete()									'당일 1년후
+	if Int(DueDate.caption) > g_yearDate then
+		Form.ShowAlert("알림", "1년 범위 내 날짜만 선택가능합니다.")
+		DueDate.caption = g_today
+	end if
+End Sub
+
+'============================================================================
+Sub Chk1Y_OnChange(sCheckState)
+	Chk2Y.chksilence = "0"
+	Chk2N.chksilence = "0"
+	DueDate.visible = false
+	if sCheckState = "1" then
+		Chk2Y.enable = true
+		Chk2N.enable = true
+		if Chk1N.checkstate = "1" then
+			Chk1N.chksilence = "0"
+		end if
+	else 
+		Chk2Y.enable = false
+		Chk2N.enable = false
+	end if
+End Sub
+
+'============================================================================
+Sub Chk1N_OnChange(sCheckState)
+	Chk2Y.chksilence = "0"
+	Chk2N.chksilence = "0"
+	DueDate.visible = false
+	if sCheckState = "1" then
+		Chk2Y.enable = true
+		Chk2N.enable = true
+		if Chk1Y.checkstate = "1" then
+			Chk1Y.chksilence = "0"
+		end if
+	else 
+		Chk2Y.enable = false
+		Chk2N.enable = false
+	end if	
+End Sub
+
+'============================================================================
+Sub Chk2Y_OnChange(sCheckState)
+	if sCheckState = "1" then
+		if Chk2N.checkstate = "1" then
+			Chk2N.chksilence = "0"
+			DueDate.visible = false
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Chk2N_OnChange(sCheckState)
+	if sCheckState = "1" then
+		if Chk2Y.checkstate = "1" then
+			Chk2Y.chksilence = "0"
+		end if
+		DueDate.visible = true
+	else
+		DueDate.visible = false
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

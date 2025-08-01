@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90140" scrname="마이데이터 개별본인인증" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="LinkForm0" ly_vert="0,60,375,587,1" />
+		<LABEL name="Label1" fontsize="4" fontstyle="01" caption="메리츠증권" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_top_back_light" ly_vert="20,20,20,20,1" />
+		<IMAGE name="ImgClose" imgpath="icon_close" ly_vert="335,20,20,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3576" _ulen="3318" >
+''============================================================================
+'' 01. 화 면 명 : 마이데이터 개별본인인증
+'' 02. 화면설명 : 개별본인인증 메인
+'' 03. 작    성 : 2021.08.23  HSZ
+''============================================================================
+'----------------------------------------------------------------------------
+'마이데이터 개별본인인증 flow
+'----------------------------------------------------------------------------
+'obaci_myif_002r	->obcsb_efif_162r(아이디인증)->obcsb_info_004r(고객번호비교)->
+'핸드폰본인인증->obcsb_info_004r(고객번호비교)
+'obaci_myif_001r->MYDATA_003	->MYDATA_002
+''****************************************************************************
+''               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+''****************************************************************************
+
+Dim g_complete
+Dim g_nStepIndex
+Dim g_sRevData 		'플로우 진행 구분값
+Dim g_dnData
+'
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N") 
+	g_nStepIndex = 1
+	SetControlChange()
+End Sub
+
+'============================================================================
+' 단계별 화면변경
+'============================================================================
+Sub SetControlChange()
+	if g_nStepIndex < 1 then
+		Form.MsgBox("알림", "개별본인인증을 중단하시겠습니까?", "close_form", 1 ) 
+	elseif g_nStepIndex > 5 then
+		screen_file = "mhetc90141"
+		LinkForm0.linkfile = screen_file
+	else
+		screen_file = "mhetc90140_s" & Cstr(g_nStepIndex)
+		LinkForm0.linkfile = screen_file
+	end if
+End Sub
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "NextStep" then
+		g_nStepIndex = g_nStepIndex+1
+		SetControlChange()
+	elseif sEventName = "CloseForm" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	g_nStepIndex = g_nStepIndex-1
+	SetControlChange()
+End Sub
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	call ImgBackPress_OnClick()
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+    '화면닫기전 안드로이드-백버튼 작동Y 원복
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")    
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName = "close_form" then
+		if sRet = "ok" then
+			urlSchme = Form.GetSharedData("&MYDATA_APP_SCHEME", false )
+			Form.CloseForm()
+			Form.runMyDataApp(urlSchme, "03")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub ImgClose_OnClick()
+	Form.MsgBox("알림", "개별본인인증을 중단하시겠습니까?", "close_form", 1 ) 
+End Sub
+'============================================================================
+Sub Form_OnTriggerEventMyData(sEventName, sParam)
+	if sEventName = "MYDATA_RETURN_003" then
+		Form.triggerEvent("LinkForm0", "MYDATA_RETURN_003", sParam) 
+		
+	Elseif sEventName = "MYDATA_RETURN_002" then
+		Form.triggerEvent("LinkForm0", "MYDATA_RETURN_002", sParam)
+			
+	Elseif sEventName = "MYDATA_RETURN_REDIRECT" then
+		Form.triggerEvent("LinkForm0", "MYDATA_RETURN_REDIRECT", sParam)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

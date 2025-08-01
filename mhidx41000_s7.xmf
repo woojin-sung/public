@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="시장종합_순위정보6줄" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,339,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="순위정보" ly_vert="0,0,100,39,1" />
+		<GRID name="grd01" colcount="3" ly_vert="0,39,375,300,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" />
+				<LABEL name="bd_cell1" mask="0,0,,,0,,0,1,1" halign="2" />
+				<LABEL name="bd_cell3" plusminuscolor="1" mask="0,0,,%,0,,2,1,0" halign="2" />
+				<LABEL name="bd_cell4" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell5" />
+				<LABEL name="bd_cell6" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell7" mask="0,0,,,0,,0,1,1" halign="2" />
+				<LABEL name="bd_cell8" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell9" halign="2" ly_vert="0,0,100,20,1" />
+				<CHANGE name="bd_cell2" mask="0,0,,,0,,0,1,0" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" nexteventtr="ohhts_1703_002r" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="100,105,170" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="100" ly_vert_visible="0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,0" import="0,2,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell5" cell_ly="0,1,0,1" line="0,1" import="0,2,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="105" ly_vert_visible="0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,1" line="0,1" import="0,2,2" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="2" >
+					<SUBCOLINFO ly_vert_width="90,80" ly_vert_visible="0,0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" line="0,0" import="0,2,4" impsign="0,2,3" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell3" cell_ly="1,0,1,0" line="0,0" import="0,2,5" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell7" cell_ly="0,1,1,1" line="0,1" import="0,2,7" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2026" _ulen="1970" >
+'============================================================================
+' 01.화면명 	: 시장종합
+' 02.화면설명	: 시장종합_순위정보
+' 03.작성		: 2016.01.28
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************				
+dim g_szSect 	'순위정보정렬값
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+
+'============================================================================
+'Form_OnFormInitBefore
+'============================================================================
+Sub Form_OnFormInitBefore()
+	dim szData
+	
+	g_szFileName	= "mhidx41000p2_Set.ini"
+	g_szSect		= Form.LoadConfigData(g_szFileName, "41000P2_RANKSORT")
+	
+End Sub
+
+'============================================================================'
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+	grd01.scr
+	if	g_szSect <> "" 	then
+		DATAMANAGER.RequestTranData("ohhts_1703_002r")
+	end if 
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	if	szTranID	=	"ohhts_1703_002r"	then
+		DATAMANAGER.SetDataValue(0, "ohhts_1703_002r", "InBlock1", "FID_INPUT_SRNO", 0, g_szSect)
+	end if 
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_1703_002r" trcode="ohhts_1703_002r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FID_INPUT_COND_MRKT_DIV_CODE" idx="0" defconst="0" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_1703_002r" title="빠른종목검색_MTS" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="105" _ulen="93" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^종목 업종^2^0^0^0^0^0^0
+FID_INPUT_SRNO^조건 NO^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="50" _ulen="40" >
+
+FID_ISSU_CNT^검색종목수^6^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="803" _ulen="691" >
+
+FID_SHRN_ISCD^종목코드^9^0^0^0^0^0^0
+FID_KOR_ISNM^종목명^40^0^0^0^0^0^0
+FID_STCK_PRPR^현재가^13^0^7^0^0^0^0
+FID_PRDY_VRSS_SIGN^등락구분^2^0^0^0^0^0^0
+FID_PRDY_VRSS^대비^13^0^7^0^0^0^0
+FID_PRDY_CTRT^등락률^9^2^7^0^0^0^0
+FID_CNNT_DYNU^연속봉수^9^0^7^0^0^0^0
+FID_ACML_VOL^거래량^19^0^7^0^0^0^0
+FID_COND_SRCH_RSLT1^값보기1^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT2^값보기2^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT3^값보기3^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT4^값보기4^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT5^값보기5^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT6^값보기6^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT7^값보기7^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT8^값보기8^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT9^값보기9^16^0^0^0^0^0^0
+FID_COND_SRCH_RSLT10^값보기10^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

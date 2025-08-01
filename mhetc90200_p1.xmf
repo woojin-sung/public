@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90200" scrname="해외공지사항 팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelCSNO" ly_vert="488,91,100,32,1" />
+		<GRID name="Grid0" visible="0" colcount="3" ly_vert="281,3,317,67,0" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" />
+				<LABEL name="th_cell0" fontsize="-2" caption="제   목" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-2" mask="1,0,,,1,####/##/##,0,1,1,0,0" halign="1" />
+				<LABEL name="bd_cell2" halign="2" />
+				<LABEL name="th_cell1" fontsize="-2" caption="게시일" halign="1" />
+				<LABEL name="th_cell2" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="283,90,70" ly_vert_visible="0,0,1" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="283" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="31" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="-1,-1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="31" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" import="-1,-1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="31" />
+						<CELLINFO>
+							<CELL name="th_cell2" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" import="-1,-1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="LabelTitle" fontsize="5" fontstyle="01" caption="해외주식 공지사항" bgcolor="028:255255255" transmode="0" halign="1" ly_vert="0,0,375,40,1" />
+		<LABEL name="Label0" fontstyle="01" multiline="1" ly_vert="1,41,372,47,1" />
+		<LABEL name="Label1" fontsize="-2" mask="1,0,,,1,####/##/##,0,1,1,0,0" ly_vert="1,94,119,29,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="-2,78,379,571,1" />
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="40" ly_vert="0,40,375,41,1" >
+			<PAGE name="page1" caption="공지사항" linkfile="empty" loadingtype="1" />
+			<PAGE name="page2" caption="권리사항" linkfile="empty" loadingtype="1" />
+		</FORMTAB>
+		<IMAGE name="Image0" imgpath="icon_close" ly_vert="328,0,40,38,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2524" _ulen="2322" >
+Dim g_nFontSize,g_szTitle,g_szDate,g_szURL	
+Dim g_sDeviceOS, g_serverMode
+Dim g_nIndex
+Dim g_serverURL
+'============================================================================
+Sub Form_OnFormInit()
+	'웹 캐시삭제
+	WebView0.RemoveCache()
+	
+	g_serverMode = Form.GetSharedData("&SERVER_MODE", false)
+	If g_serverMode == "1" Then	'개발기
+		g_serverURL = "https://testhome.imeritz.com"
+	else
+		g_serverURL = "https://home.imeritz.com"
+	end if
+	
+	'기본url: szBbsId, szCntNo 바꿔주기
+	szDetailUrl = "/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=szBbsId_vm_mts&bbsCnttTurnNo=szCntNo&listCnt=10&pageNum=1&searchDiv=&searchText="
+	
+	Dim szData, arrData
+
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData,"|")
+	
+	if UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+
+	g_szTitle		= arrData(0)
+	g_szDate			= arrData(1)
+	g_szCnt			= CDbl(arrData(2))
+	g_szCls			= CStr(arrData(3))	'fstock:공지사항, fstock2:권리사항
+	
+	Label0.caption = g_szTitle
+	Label1.caption = g_szDate
+	
+	if g_szCls = "fstock" then
+		FormTab0.currenttab = 0
+		LabelTitle.caption = "해외주식 공지사항"
+	elseif g_szCls = "fstock2" then
+		LabelTitle.caption = "해외주식 권리사항"
+		FormTab0.currenttab = 1
+	else
+		FormTab0.currenttab = 0
+		call FormTab0_OnTabChanged(0)
+		exit sub
+	end if
+	
+	szDetailUrl = Replace(szDetailUrl, "szBbsId", g_szCls)
+	szDetailUrl = Replace(szDetailUrl, "szCntNo", g_szCnt)
+	g_szURL = g_serverURL..szDetailUrl
+	
+'	Form.ShowAlert("test", g_szURL)
+	WebView0.urlpath = g_szURL
+	
+	g_sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+
+	'모바일 웹에서 어떤 OS인지 판단할 수 있음(javascript 먼저 set해야함)
+	if g_sDeviceOS == "1" then
+		WebView0.SetUserAgent("meritz_android")
+	elseif g_sDeviceOS == "2" then
+		WebView0.SetUseJavaScript("1")
+		WebView0.SetUserAgent("meritz_ios")
+	else
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+
+	'웹 캐시삭제
+	WebView0.RemoveCache()
+	
+	if CInt(nCurrentTab) = 0 then	'해외주식 공지사항
+		LabelTitle.caption = "해외주식 공지사항"
+		WebView0.urlpath = g_serverURL & "/mobile/sub/mts_fstock.html"
+
+	else							'해외주식 권리사항
+		LabelTitle.caption = "해외주식 권리사항"
+		WebView0.urlpath = g_serverURL & "/mobile/sub/mts_fstock2.html"
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

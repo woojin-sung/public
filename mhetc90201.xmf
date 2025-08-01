@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90100" scrname="해외 위험고지" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="-5,40,379,522,1" />
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="40" ly_vert="0,0,375,41,1" >
+			<PAGE name="page1" caption="직접투자 유의사항" linkfile="empty" loadingtype="1" />
+			<PAGE name="page2" caption="해외ETP 투자위험" linkfile="empty" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2093" _ulen="1907" >
+Dim g_serverMode, g_serverURL
+Dim g_szScreen
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_serverMode = Form.GetSharedData("&SERVER_MODE", false)
+	g_szScreen = Form.GetSharedData("&SCREEN_NO", false)
+	
+	If g_serverMode == "1" Then	'개발기
+		g_serverURL = "https://testhome.imeritz.com"
+	else
+		g_serverURL = "https://home.imeritz.com"
+	end if
+	
+	MenuOpen(g_szScreen)
+End Sub
+'============================================================================
+Function MenuOpen(scrNum)
+	Select Case scrNum
+	'해외주식 위험고지
+	Case "90207"
+		FormTab0.SetTabPageCaption("page1", "직접투자 유의사항")
+		FormTab0.SetTabPageCaption("page2", "해외ETP 투자위험")
+		WebView0.urlpath = g_serverURL & "/include/resource/comm/ctcn/pdf/Risk_disclosure_of_global_equities1.pdf"
+	'해외파생 위험고지
+	Case "90208"
+		FormTab0.SetTabPageCaption("page1", "해외파생 위험고지")
+		FormTab0.SetTabPageCaption("page2", "불공정매매 안내")
+		WebView0.urlpath = g_serverURL &"/include/resource/comm/ctcn/pdf/Risk_disclosure_of_global_derivative_products1.pdf"
+	End Select
+End Function
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Select Case g_szScreen
+	'해외주식 위험고지
+	Case "90207"
+		if CInt(nCurrentTab) = 0 then	'직접투자 유의사항
+			WebView0.urlpath = g_serverURL & "/include/resource/comm/ctcn/pdf/Risk_disclosure_of_global_equities1.pdf"
+		else							'해외ETP 투자위험
+			WebView0.urlpath = g_serverURL & "/include/resource/comm/ctcn/pdf/Risk_disclosure_of_global_equities2.pdf"
+		end if
+	'해외파생 위험고지
+	Case "90208"
+		if CInt(nCurrentTab) = 0 then	'해외파생 위험고지
+			WebView0.urlpath = g_serverURL & "/include/resource/comm/ctcn/pdf/Risk_disclosure_of_global_derivative_products1.pdf"
+		else							'불공정매매 안내
+			WebView0.urlpath = g_serverURL & "/include/resource/comm/ctcn/pdf/Risk_disclosure_of_global_derivative_products2.pdf"
+		end if
+	End Select
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90070" scrname="추가ID 등록 확인_spinpad" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,453,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="LabelTitle" fontsize="2" fontstyle="01" caption="간편인증 추가 신청 확인" bgcolor="092:185046046" halign="1" autofontsize="1" ly_vert="0,0,309,55,1" />
+		<BUTTON name="ButtonOK" caption="확 인" btnimage="btn_01.9" ly_vert="25,391,259,39,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="269,10,24,24,1" />
+		<GRID name="GrdID" colcount="2" ly_vert="14,165,280,157,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" halign="1" />
+				<LABEL name="th_cell0" fontsize="-1" caption="보유 ID" halign="1" />
+				<LABEL name="bd_cell1" fontsize="-1" halign="1" />
+				<LABEL name="th_cell1" fontsize="-1" caption="가입 상태" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO nexteventtr="obpds_srvc_312r" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="190,90" ly_vert_visible="0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="190" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="Label0" fontsize="-1" caption="선택하신 ID는 이미 간편인증 서비스에 가입되어 있습니다.
+보유 ID를 터치하여 ID별로 간편인증 서비스를 추가신청 또는 재등록하실 수 있습니다." multiline="1" ly_vert="6,55,291,103,1" />
+		<LABEL name="Label1" fgcolor="006:213049051" fontsize="-2" caption="※ 추가 ID신청 시 간편인증 비밀번호는 기존
+    서비스 비밀번호와 동일합니다." multiline="1" ly_vert="18,340,281,37,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3570" _ulen="3476" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 간편인증 서비스
+' 02. 화면설명 : 간편인증 서비스 메인
+' 03. 작    성 : 2016.08.05  NOHES
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_spad_sCusNo
+Dim g_sID
+
+Dim	g_lRow
+	g_lRow = -1
+
+Dim	g_ChoiceID
+Dim	g_nCount
+'============================================================================
+Sub Form_OnFormInit()
+	Dim stemp, sRet
+	stemp = Form.GetOpenLinkData()
+	sRet= Split(stemp, "★")
+	
+	g_spad_sCusNo = sRet[0]
+	g_sID = sRet[1]
+	
+	DATAMANAGER.SetDataValue(0, "obpds_srvc_312r" , "InBlock1" , "CSNO" , 0 , g_spad_sCusNo)
+	DATAMANAGER.RequestTranData( "obpds_srvc_312r" )
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If szTranID == "obpds_srvc_312r" Then
+		g_nCount = 0
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_421r" , "InBlock1" , "CSNO" , 0 , g_spad_sCusNo)
+		DATAMANAGER.RequestTranData( "obpds_srvc_421r" )
+		
+	ElseIf szTranID == "obpds_srvc_421r" Then
+		If DATAMANAGER.IsMoreNextData(szTranID) == "1" Then
+			g_nCount = g_nCount+DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1")
+			DATAMANAGER.RequestNextData(szTranID)
+			Exit Sub
+		Else
+			g_nCount = g_nCount+DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1")
+		End If
+		
+		For i = 0 To Form.GetCtlProp("GrdID", "rowcount") -1
+			sParam = Trim(GrdID.GetCellData("bd_cell0", i) ) 
+			GrdID.SetCellData("bd_cell1", i, "미가입")
+			
+			For u = 0 To DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1")-1
+				sID = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ELFN_ID" , u)
+				If sParam == Trim(sID) Then
+					GrdID.SetCellData("bd_cell1", i, "가입")
+					Call GrdID_OnClickUp(i, szCellID)
+				End If
+			Next
+		Next
+	End If	
+End Sub
+
+'============================================================================
+Sub GrdID_OnClickUp(lRow, szCellID)
+	If g_lRow >= 0 Then
+		nIndex = g_lRow%2
+		If nIndex = 0 Then
+			GrdID.SetCellFgColor("bd_cell0",g_lRow,"4")
+			GrdID.SetCellFgColor("bd_cell1",g_lRow,"4")
+			
+		Else
+			GrdID.SetCellFgColor("bd_cell0",g_lRow,"4")
+			GrdID.SetCellFgColor("bd_cell1",g_lRow,"4")
+		
+		End If
+	End If
+	
+	GrdID.SetCellFgColor("bd_cell0", lRow, "10")
+	GrdID.SetCellFgColor("bd_cell1",lRow,"10")
+	
+	if Trim(GrdID.GetCellData("bd_cell1", lRow)) == "가입" Then
+		ButtonOK.caption = "재등록"
+	elseif Trim(GrdID.GetCellData("bd_cell1", lRow)) == "미가입" Then
+		ButtonOK.caption = "추가신청"
+	else
+		ButtonOK.caption = "확인"
+	end if
+	
+	g_ChoiceID = Trim(GrdID.GetCellData("bd_cell0", lRow)) 
+	g_lRow = lRow
+	
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	Form.SendReturnToParent("mhetc90070_p2" ,  g_ChoiceID & "★" & ButtonOK.caption  )
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	Dim sRet, sErrorCode, sErrorMsg
+	sRet = Split(sParam, "★")
+	if #sRet > 1 then
+		sErrorCode = sRet[0]
+		sErrorMsg = sRet[1]	
+	end if
+
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_312r" trcode="obpds_srvc_312r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obpds_srvc_421r" trcode="obpds_srvc_421r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_312r" title="전자금융ID 조회(해지건 제외)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="79" _ulen="63" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="92" _ulen="72" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ATMT_ISNC_YN^자동발급여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="45" _ulen="37" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_421r" title="SPIN 서비스 약정 ID 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="40" _ulen="32" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="173" _ulen="129" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+APP_TYPE_NO^어플리케이션유형번호^11^0^7^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+USE_YN^사용여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="79" _ulen="63" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

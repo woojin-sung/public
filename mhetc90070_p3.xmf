@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90070p" scrname="ID 비밀번호 검증" version="2" writer="노은솔" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<TABLE name="tbl0" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" designorder="1" ly_vert="0,0,375,132,1" >
+			<COL_INFO ly_vert_width="160,215" />
+			<ROW_INFO ly_vert_height="29,50,53" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,1,0" bgcolor="039:242242242" halign="0" line="0,1" caption="ID 비밀번호 입력" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" halign="0" line="0,0" caption="ID" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" halign="0" line="0,0" caption="ID 비밀번호" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="edtPW" password="1" imetype="0" maxlength="12" ly_vert="170,86,195,39,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+		<BUTTON name="btnOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="188,562,189,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2998" _ulen="2862" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : ID 비밀번호 검증
+' 02. 화면설명 : 간편인증 서비스 팝업
+' 03. 작    성 : 2016.09.26  NOHES
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_spad_sID			'사용자 ID
+Dim g_sLinkData			
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_sLinkData = Form.GetOpenLinkData()
+
+	Form.SetScreenName("ID 비밀번호 검증")
+	g_spad_sID = Form.GetSharedData( "&USER_ID", 0 )	'고객ID
+	tbl0.SetCellString(1,1, g_spad_sID)
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	If  Len(edtPW.caption) == 0 Then
+		ShowAlert "확인", "ID 비밀번호를 입력하십시오."
+		Exit Sub
+	End If
+	
+	DATAMANAGER.SetDataValue( 0, "obcsb_efif_162r", "InBlock1", "ELFN_ID" , 0 , g_spad_sID)
+	DATAMANAGER.SetDataValue( 0, "obcsb_efif_162r", "InBlock1", "CONN_PWD" , 0 , Form.GetEncData(edtPW.caption))
+	DATAMANAGER.RequestTranData( "obcsb_efif_162r" )
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'HTSID와 비밀번호가 체크하게 되면 변경 실시
+	if DATAMANAGER.GetDataValue( 0 , "obcsb_efif_162r", "OutBlock1", "SUCS_YN" , 0) == "Y" then
+		Form.SendReturnToParent( "90070_p3", g_sLinkData)
+		Form.CloseForm()
+	elseif DATAMANAGER.GetDataValue( 0 , "obcsb_efif_162r", "OutBlock1", "SUCS_YN" , 0) == "N" then
+		Dim szErr, szSubErr
+		
+		szErr = DATAMANAGER.GetDataMsgText( szTranID )
+		szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+		Form.ShowAlert( "알림", szErr.."("..szSubErr..")" )
+	end if
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+
+	if szTranID == "obcsb_efif_162r" then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( "obcsb_efif_162r" )
+		edtPW.caption = ""
+		Form.MsgBox("알림", szErrMsg.."("..szSubErr..")" , 0, 6)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_efif_162r" trcode="obcsb_efif_162r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_efif_162r" title="전자금융ID와비밀번호일치체크" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="89" _ulen="69" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CONN_PWD^접속비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

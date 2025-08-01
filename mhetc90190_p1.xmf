@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90190" scrname="OTP등록 팝업" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="ImgClose" autosize="1" imgpath="icon_close" ly_vert="340,20,22,22,1" />
+		<IMAGE name="Img0" autosize="1" imgpath="icon_notice_3" ly_vert="148,82,74,74,1" />
+		<LABEL name="Label0" fgcolor="334:034034034" fontsize="4" fontstyle="01" caption="보안매체가 없으면" halign="1" ly_vert="0,177,375,33,1" />
+		<LABEL name="Label1" fontsize="4" fontstyle="01" caption="간편인증 등록이 안돼요." halign="1" ly_vert="0,203,375,33,1" />
+		<LABEL name="Label2" fgcolor="321:115118124" fontsize="1" fontstyle="01" caption="모바일OTP 발급 후 등록해주세요." halign="1" ly_vert="0,259,375,33,1" />
+		<BUTTON name="BtnRegOther" visible="0" caption="타기관OTP 등록" fgcolor="334:034034034" fontsize="1" fontstyle="01" btnimage="btn_21.9" ly_vert="0,587,188,60,0" />
+		<BUTTON name="BtnRegiMotp" visible="0" caption="모바일OTP 발급" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="188,587,188,60,0" />
+		<BUTTON name="BtnContactCenter" visible="0" caption="고객지원센터" fgcolor="334:034034034" fontsize="1" fontstyle="01" btnimage="btn_21.9" ly_vert="0,587,188,60,0" />
+		<BUTTON name="BtnRegiClose" visible="0" caption="확인" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="188,587,188,60,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9905" _ulen="8433" >
+'--==========================================================================
+' 01. 화 면 명 : OTP등록 팝업
+' 02. 화면설명 : OTP등록 팝업
+' 03. 작    성 : 2023.05.15 성우진
+' 04. 수    정 :
+'--==========================================================================
+'20230803 SWJ START : 간편인증 전용으로 만든 팝업이었으나
+' 타 업무화면에서도 사용하도록 수정함
+' (간편인증은 공통으로 사용되도록 고려되지 않아, 타 업무화면 용도로 따로 분기 처리함) 
+'============================================================================
+Dim g_closeflag
+g_closeflag = false
+Dim g_closeflag2
+g_closeflag2 = false
+
+'20230803 SWJ START
+Dim g_szData1, g_szData2, g_szData3, g_szData4
+Dim g_sSecurity
+Dim g_sCONO
+Dim g_closeflag3
+g_closeflag3 = false
+
+'20240312 개인/법인여부에 따라 하단버튼설정
+Function SetBottomButton()
+	'법인일 때 2
+	if g_sCONO == "2" then
+		'타기관OTP등록 활성화 및 위치변경
+		'BtnRegOther.visible = False
+		BtnRegOther.visible = True 
+		BtnRegOther.left = 188
+		BtnRegOther.btnimage = "btn_20.9"
+		BtnRegOther.fgcolor = "62"
+		BtnRegiMotp.visible = False '모바일OTP등록
+		BtnContactCenter.visible = True '고객지원센터
+		
+		'확인버튼 비활성화
+		'BtnRegiClose.visible = True
+		BtnRegiClose.visible = False '변경됨
+	'개인일 때 1
+	else
+		BtnRegOther.visible = True
+		BtnRegiMotp.visible = True
+		BtnContactCenter.visible = False
+		BtnRegiClose.visible = False
+	end if	
+	'20230803 SWJ END
+End Function
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgClose.setMaintainingRatio("1")
+	Img0.setMaintainingRatio("1")
+End Sub
+'============================================================================
+Sub ImgClose_OnClick()
+	Form.SendReturnToParent("mhetc90190_p1" , "cancel")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'20230803 SWJ START : 모바일OTP 발급할 때 계좌번호, 주민번호 필요
+	szTemp = Form.GetOpenLinkData()
+	
+	'로그인할 때 obcsb_efif_021r 에서 Set해줌
+	g_sCONO = Form.GetSharedData("LOGIN_CUST_CLS_CODE", false)
+	
+	'계좌번호★주민번호★Y/N( 모바일OTP/타기관OTP 발급 완료 후 인증 처리 진행여부를 판단함)
+	'계좌번호★주민번호★Y/N( 모바일OTP/타기관OTP 발급 완료 후 인증 처리 진행여부를 판단함)★Y/N(간편인증)
+	'szTemp = "1234567890★★Y★Y"
+	szData = Split(szTemp, "★")	
+	if Ubound(szData) > 0 then
+		'g_szData1 = szData(0)  '계좌번호
+		g_szData1 = Mid(szData(0), 1, 8)  '계좌번호
+		g_szData2 = szData(1)	'주민번호
+		g_szData3 = szData(2)  
+			
+		'메리츠 간편인증 외 타 업무화면에서 사용 시 
+		'간편인증과 구분하는 변수
+		'로그인 되어있는 화면이면 로그인된 정보로 진행
+		'(모바일OTP 및 타기관OTP 발급화면에서 사용)
+		Form.SetSharedData("CommonNoSecurity" , "Y")
+		
+		'모바일OTP/타기관OTP 발급 완료 후
+		'인증 처리 진행여부를 판단함
+		Form.SetSharedData("Common_OTP_PopupYn" , g_szData3 )
+		
+		g_sSecurity = Form.GetSharedData("CommonNoSecurity", true)
+		
+		Label1.caption = "신청이 불가해요."
+		Label2.caption = "보안매체 등록 후 진행해주세요."
+
+		'SetBottomButton() '하단 버튼 설정
+		
+		'20240202  Y/N(처리 완료시 화면닫기)
+		'if szData(3) <> "" and szData(3) <> null then
+		'	g_szData4 = szData(3) 'Y/N
+		'	if g_szData4 == "N" then
+		'		Form.SetSharedData("CommonNoSecurity" , "N" )
+		'	end if 			
+			if g_szData2 == "" then
+				g_szData2 = Form.GetSharedData("&JUMIN_NUM" , false)  '주민번호 암호화 값
+			end if 
+		'end if 
+		
+		'20240312 개인/법인여부 TR로 확인
+		if g_szData1 <> "" and g_szData1 <> null then '계좌번호
+			DATAMANAGER.SetDataValue( 0 , "obcsb_acif_005r", "InBlock1", "PROS_CLS_CODE", 0 , "1")		
+			DATAMANAGER.SetDataValue( 0 , "obcsb_acif_005r", "InBlock1", "ACNO", 0 , g_szData1)		
+			DATAMANAGER.RequestTranData("obcsb_acif_005r")
+		elseif g_szData2 <> "" and g_szData2 <> null then '주민번호
+			DATAMANAGER.SetDataValue( 0 , "obcsb_acif_005r", "InBlock1", "PROS_CLS_CODE", 0 , "4")		
+			DATAMANAGER.SetDataValue( 0 , "obcsb_acif_005r", "InBlock1", "RCNO_PIP", 0 , g_szData2)		
+			DATAMANAGER.RequestTranData("obcsb_acif_005r")		
+		else
+			'20240312 개인/법인여부에 따라 하단버튼설정
+			SetBottomButton() '하단 버튼 설정 
+		end if 
+
+	else	
+		'Form.ShowAlert("알림CommonNoSecurity" , "들어오나??")
+'		BtnRegiMotp.visible = True
+'		BtnRegOther.visible = True
+
+		'20240312 개인/법인여부에 따라 하단버튼설정
+		SetBottomButton() '하단 버튼 설정 
+		Form.SetSharedData("CommonNoSecurity" , "N")
+		'g_sSecurity = Form.GetSharedData("CommonNoSecurity", true)
+	end if
+End Sub
+
+'모바일OTP발급
+'============================================================================
+Sub BtnRegiMotp_OnClick() 
+	'모바일otp 발급이 완료된 이후, 
+	'Form.SetSharedData("MeritzAuth_Security", "MOTP")	'20230803 SWJ START : 위치 변경
+	
+	Form.SetSharedData( "mOTP_IntoClcd"	, "MTS" )
+	Form.SendReturnToParent("mhetc90190_p1" , "ok")
+	
+	g_closeflag2 = True
+	Form.CloseForm()
+End Sub
+'============================================================================
+'20230803 SWJ START: 고객지원센터, 닫기 버튼 
+'============================================================================
+Sub BtnContactCenter_OnClick()
+	Form.SendReturnToParent("mhetc90190_p1" , "ok")
+	g_closeflag3 = True
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub BtnRegiClose_OnClick()
+	Form.SendReturnToParent("mhetc90190_p1" , "cancel")
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub BtnRegOther_OnClick()
+	Form.SetSharedData("Common_OTP_PopupCloseYn" , "Y" )
+	
+	'타기관otp 등록이 완료된 이후, 
+	'Form.SetSharedData("MeritzAuth_Security", "OTP")		'20230803 SWJ START : 위치 변경
+	Form.SendReturnToParent("mhetc90190_p1" , "ok")
+	
+	
+	'20230817 JSI START : 로그인상태 체크 주석처리(로그인상태에서도 가능하도록 변경)
+	g_closeflag = True
+	Form.CloseForm()
+	'Dim sLOGIN_TYPE  
+	'sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+
+	'if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+	'	Dim sText
+	'	sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+	'	Form.MsgBox( "알림", sText, "LOGOUT_MSG", 2 )
+	'else
+	'	g_closeflag = True
+	'	Form.CloseForm()
+	'end if	
+	'20230817 JSI END
+End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOGOUT_MSG" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을2 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			g_closeflag = True
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+	if g_closeflag then	'타기관otp 등록
+		Form.SetSharedData("MeritzAuth_Security", "OTP")		'20230803 SWJ START : 위치 변경
+		
+		'20230803 SWJ START
+		if g_sSecurity == "Y" then
+			Form.SetSharedData("CommonNoSecurity" , "Y")
+		end if
+		'20230803 SWJ END
+		
+		''20230818 JSI START : 비로그인상태에서만 권한 해지
+		Dim sLOGIN_TYPE  
+		sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+		if CInt(sLOGIN_TYPE) <= 1 then '비로그인상태
+			'&USER_ID가 빈값일 때 OpenScreen 함수로 화면 못열어서 OpenPopup 처리 함 (로그인 창 뜸)
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+		'20240111 START
+			Form.OpenPopup("mbotp86300" , "mhetc90190_p1" , "")
+		else
+			Form.OpenPopup( "mbotp86000", "mhetc90190_p1", "" )
+		end if
+		'20240111 END 
+		''20230818 JSI END : 비로그인상태에서만 권한 해지
+		'Form.OpenPopup("mbbdm85200" , "mhetc90190_p1" , "")
+		
+		g_closeflag = ""
+	elseif g_closeflag2 then '모바일otp 발급
+		
+		'20230803 SWJ START
+		if g_sSecurity == "Y" then
+			Form.SetSharedData("CommonNoSecurity" , "Y")
+		end if
+		
+		Form.SetSharedData("MeritzAuth_Security", "MOTP")		'20230803 SWJ START : 위치 변경
+		Form.SetSharedData("Motp_Acno"	 ,	 g_szData1)		
+		Form.SetSharedData("Motp_RcnoPip",	 g_szData2)
+		'20230803 SWJ END
+		
+		'Form.OpenPopup( "mbotp86100", "", "" )
+		Form.OpenPopup( "mbotp86100", "mhetc90190_p1", "" ) '20240111
+		g_closeflag2 = ""
+	
+	'20230803 SWJ START
+	elseif g_closeflag3 then '고객지원센터
+		'20240329 안드로이드-백버튼 작동Y 원복
+		Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+		
+		Form.OpenScreen("89020" , "POPUP_ALL_CLOSE")
+		g_closeflag3 = ""
+	'20230803 SWJ END
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'20240312 개인/법인여부에 따라 하단버튼설정
+	if szTranID = "obcsb_acif_005r" then
+		'고객구분코드 
+		g_sCONO = DATAMANAGER.GetDataValue( 0 , "obcsb_acif_005r", "OutBlock1", "CUST_CLS_CODE", 0 )
+		Form.SetSharedData("LOGIN_CUST_CLS_CODE", g_sCONO) ' 1 : 개인, 2: 법인
+		SetBottomButton() '하단 버튼 설정
+	end if 
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	SetBottomButton() '하단 버튼 설정	
+End Sub
+
+'20240326 안드로이드 백버튼 사용시 
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.SendReturnToParent("mhetc90190_p1" , "cancel")
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_005r" trcode="obcsb_acif_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_005r" title="고객정보 실명확인정보관련 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="207" _ulen="159" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="310" _ulen="224" >
+
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCNO_20_FGRS^실명확인번호20자리^20^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인구분코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

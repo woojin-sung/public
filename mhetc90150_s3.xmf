@@ -1,0 +1,949 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90150" scrname="클라우드 인증 비밀번호 입력화면" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0,375,647,1" >
+			<CONTROL_INFO>
+				<LABEL name="Label0" fontsize="3" fontstyle="01" caption="클라우드인증서" halign="1" fonttype="1" ly_vert="0,161,375,26,1" />
+				<BUTTON name="Buttonok" caption="확인" fontsize="4" btnimage="btn_20.9" ly_vert="0,588,375,61,1" />
+				<EDIT name="EditReal" visible="0" password="2" imetype="1" maxlength="6" minlength="6" ly_vert="394,84,262,34,0" />
+				<LABEL name="Label1" fontsize="3" fontstyle="01" caption="비밀번호를 입력해주세요." halign="1" fonttype="1" ly_vert="0,184,375,26,1" />
+				<IMAGE name="Pwdbasic0" autosize="1" imgpath="txt_circle_02.png" ly_vert="82,267,22,22,1" />
+				<IMAGE name="Pwdbasic1" autosize="1" imgpath="txt_circle_02.png" ly_vert="120,267,22,22,1" />
+				<IMAGE name="Pwdbasic2" autosize="1" imgpath="txt_circle_02.png" ly_vert="158,267,22,22,1" />
+				<IMAGE name="Pwdbasic3" autosize="1" imgpath="txt_circle_02.png" ly_vert="196,267,22,22,1" />
+				<IMAGE name="Pwdbasic4" autosize="1" imgpath="txt_circle_02.png" ly_vert="234,267,22,22,1" />
+				<IMAGE name="Pwdbasic5" autosize="1" imgpath="txt_circle_02.png" ly_vert="272,267,22,22,1" />
+				<IMAGE name="PwdInsert0" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="83,268,20,20,0" />
+				<IMAGE name="PwdInsert1" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="121,268,20,20,0" />
+				<IMAGE name="PwdInsert2" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="159,268,20,20,0" />
+				<IMAGE name="PwdInsert3" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="197,268,20,20,0" />
+				<IMAGE name="PwdInsert4" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="235,268,20,20,0" />
+				<IMAGE name="PwdInsert5" visible="0" autosize="1" imgpath="pwd_blue" ly_vert="273,268,20,20,0" />
+				<IMAGE name="PwdFail0" visible="0" autosize="1" imgpath="pwd_red" ly_vert="83,268,20,20,0" />
+				<IMAGE name="PwdFail1" visible="0" autosize="1" imgpath="pwd_red" ly_vert="121,268,20,20,0" />
+				<IMAGE name="PwdFail2" visible="0" autosize="1" imgpath="pwd_red" ly_vert="159,268,20,20,0" />
+				<IMAGE name="PwdFail3" visible="0" autosize="1" imgpath="pwd_red" ly_vert="197,268,20,20,0" />
+				<IMAGE name="PwdFail4" visible="0" autosize="1" imgpath="pwd_red" ly_vert="235,268,20,20,0" />
+				<IMAGE name="PwdFail5" visible="0" autosize="1" imgpath="pwd_red" ly_vert="273,268,20,20,0" />
+				<BUTTON name="Button0" btnimage="alpha" ly_vert="31,244,332,73,1" />
+				<LABEL name="Label2" visible="0" caption="간편비밀번호를 잊어버리셨나요?" halign="1" fonttype="1" ly_vert="-5,398,375,26,0" />
+				<IMAGE name="ImgRegi" visible="0" imgpath="icon_arrow_right_on" ly_vert="301,399,14,24,0" />
+				<BUTTON name="BtnRegi" visible="0" btnimage="alpha" ly_vert="21,383,337,51,0" />
+				<IMAGE name="Image0" autosize="1" imgpath="icon_cloud_pw" ly_vert="160,110,56,40,1" />
+				<IMAGE name="ImgBackPress" imgpath="icon_arrow_left_on" ly_vert="17,17,24,30,1" />
+				<LABEL name="labTitle" fontsize="4" fontstyle="01" caption="클라우드인증서 발급/재발급" halign="1" ly_vert="0,0,375,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="25896" _ulen="23640" >
+'============================================================================
+' 2024.05.02 SWJ START
+' 클라우드 인증 비밀번호 입력
+' 진입점
+' - 발급/재발급 최초 발급 시
+' - 재등록 시 PIN 인증
+' - 비밀번호 변경 시 PIN 인증
+' - 내려받기 시 PIN 인증
+' - 삭제 시 PIN 인증
+' - 갱신 시 PIN 인증
+' - 로컬 -> 클라우드 등록 시 PIN 인증
+'============================================================================
+Dim nCnt, g_DeviceOS
+nCnt = 0
+
+Dim g_CharFlag
+g_CharFlag = ""
+
+Dim g_CountSave
+Dim g_nextpage
+Dim g_HomeNo '20230622 jsi 연락처 조회 자택번호
+Dim g_ClphNo '20230622 jsi 연락처 조회 휴대폰번호
+Dim g_WorkNo '20230622 jsi 연락처 조회 직장번호
+
+Dim g_sCloudID
+g_sCloudID = ""
+
+Dim g_sCloudAcno
+g_sCloudAcno = ""
+
+Dim g_sCloudRcnoPip
+g_sCloudRcnoPip = ""
+
+'진입점
+Dim g_sScrPoint
+g_sScrPoint = ""
+
+'클라우드인증서ID
+Dim g_sCloudCertID
+g_sCloudCertID = ""
+
+'클라우드인증서시리얼번호
+Dim g_sCloudCertSerial
+g_sCloudCertSerial = ""
+
+'클라우드인증서DN
+Dim g_sCloudCertDN
+g_sCloudCertDN = ""
+
+'클라우드 인증서 인덱스
+Dim g_sCloudCertIndex
+g_sCloudCertIndex = -1
+
+Dim g_sPinPwd
+g_sPinPwd = ""
+
+Dim g_sCloudCertLocalPwd
+ g_sCloudCertLocalPwd = ""
+
+Dim g_sAsctRcno
+g_sAsctRcno = ""
+
+Dim g_sCloudCustName
+g_sCloudCustName = ""
+
+Dim g_sRcnoPip
+g_sRcnoPip = ""
+
+Dim g_sCSNO
+g_sCSNO = ""
+'============================================================================
+Sub Form_OnFormInit()
+	
+	Container0.EditReal.SetApplyLabel("숫자 6자리 입력", 0 , 76 , "left" , true) '호출해야 정상작동
+	
+	g_DeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	
+	g_ScrNum = Form.GetSharedData("&POPUP_SCREEN_NO",true) '메뉴클릭시 팝업메뉴 화면번호 전달
+	
+	g_sCloudID 	  = Form.GetSharedData("CLOUD_CERT_ID" , false )
+	g_sCloudAcno    = Form.GetSharedData("CLOUD_CERT_ACNO" , false)
+	g_sCloudRcnoPip = Form.GetSharedData("CLOUD_CERT_RCNO_PIP" , false)
+	g_sCloudCustName = Form.GetSharedData("CLOUD_CERT_CUST_NAME", false)
+	
+	sTempData = Form.GetOpenLinkData()
+	
+	szData = Split(sTempData, "★")
+	
+	if Cint(#szData) > 1 then
+		'진입점
+		g_sScrPoint = szData(0)
+		g_sCloudCertID = szData(1)
+	else
+		g_sScrPoint = sTempData
+	end if 
+	
+	if g_sScrPoint == "ChangePwd" then
+		Container0.labTitle.caption = "클라우드인증서 비밀번호 변경"
+		Container0.Label0.caption = "현재 사용중인"
+		Container0.Label1.caption = "비밀번호를 입력해주세요."
+		
+		g_sCloudCertDN = szData(2)
+		
+	elseif g_sScrPoint == "register" then
+		Container0.labTitle.caption = "타기관 클라우드인증서 등록"
+		
+	elseif g_sScrPoint == "DownloadToLocal" then
+		Container0.labTitle.caption = "클라우드인증서 내려받기"
+		g_sCloudCertIndex = szData(2)
+	
+	elseif g_sScrPoint == "RemoveCloudCert" then
+		Container0.labTitle.caption = "클라우드인증서 삭제"
+	
+	elseif g_sScrPoint == "RenewCloudCert" then
+		g_sCloudCertSerial = szData(2)
+		Container0.labTitle.caption = "클라우드인증서 갱신"
+	
+	elseif g_sScrPoint == "UploadToCloud" then
+		Container0.labTitle.caption = "공동인증서 클라우드에 등록"
+		g_sCloudCertIndex = szData(2)
+		g_sCloudCertLocalPwd = szData(3)
+	end if
+	
+	'비밀번호 입력키패드 Show
+	Form.SetTimerEvent2(1, 1, 0.6)
+End Sub
+'============================================================================
+'인증성공 시 에디트 파란색으로 변환
+'============================================================================
+Sub Container0_Buttonok_OnClick()
+	
+	'입력완료 시에만 타게끔(취소는 안타고)
+	if g_DeviceOS == "2"  then
+		g_CharFlag = "N"
+		PasswordInsert()
+	end if
+	
+	if nCnt <> 6 then
+		'OS별로 비밀번호 최소글자 입력안했을 시에 시스템팝업메시지 내용이 달라서 
+		'시스템팝업과 내용 맞춰주기 위한 분기처리
+		if g_DeviceOS == "2"  then
+			Form.MsgBox("알림", "최소 6자리 이상 입력해야 합니다.", "", 6 )
+		elseif g_DeviceOS == "1" then
+			Form.MsgBox("알림", "6글자 이상 입력해 주세요.", "", 6 )
+		end if
+		
+	elseif nCnt = 6 then
+		
+		'''''''''''''''''''''비밀번호 설정 불가 Case 서비스 호출''''''''''''''''''''''''''
+		DATAMANAGER.RequestTranData("obacp_comm_004r")   '20230622 jsi 비밀번호 검증 전 연락처 조회 호출
+		'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+		nCnt = 0
+		Container0.Buttonok.enable = False
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	
+	if sTimerID == "1" or sTimerID == 1 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.6)
+		Container0.EditReal.SetShowKeypad(True)
+				
+	elseif sTimerID == "2" or sTimerID == 2 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.6)
+		
+'		'다음 화면에서 비번 재검증 위해 set
+'		Form.SetSharedData("Meritz_OTP_PWDAuth",  Container0.EditReal.caption2)
+'		
+'		'비번 재입력 팝업
+
+	elseif sTimerID == "3" or sTimerID == 3 then	
+		Form.SetTimerEvent2(sTimerID, 0, 0.3)
+		
+		g_sPinPwd = Container0.EditReal.caption2 
+		
+		'PIN인증
+		Form.requestCertCommand("CLOUD_REQ_CHECK_PASSWD", g_sCloudCertID & "★" & g_sPinPwd, "90150") 
+		
+	end if
+	
+End Sub
+'============================================================================
+'사용자에게 보여지는 패스워드 함수
+'============================================================================
+Function PasswordInsert()
+	
+	'입력완료일 시에 따로 개수 세이브해서 UI보이기
+	if g_CharFlag = "N" then
+		nCnt = g_CountSave
+		g_CharFlag = ""
+	end if
+	
+	Select Case nCnt
+	
+	Case 0
+		Container0.Pwdbasic0.visible = true	
+		Container0.Pwdbasic1.visible = true	
+		Container0.Pwdbasic2.visible = true	
+		Container0.Pwdbasic3.visible = true	
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true		
+		Container0.PwdInsert0.visible = false	
+		Container0.PwdInsert1.visible = false	
+		Container0.PwdInsert2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false	
+	Case 1
+		Container0.Pwdbasic1.visible = true	
+		Container0.Pwdbasic2.visible = true	
+		Container0.Pwdbasic3.visible = true	
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true		
+		Container0.PwdInsert0.visible = true
+		Container0.Pwdbasic0.visible = false	
+		Container0.PwdInsert1.visible = false	
+		Container0.PwdInsert2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false	
+	Case 2	
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true
+		Container0.Pwdbasic2.visible = true	
+		Container0.Pwdbasic3.visible = true	
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true
+		Container0.Pwdbasic0.visible = false	
+		Container0.Pwdbasic1.visible = false
+		Container0.PwdInsert2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false	
+	Case 3
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true	
+		Container0.PwdInsert2.visible = true
+		Container0.Pwdbasic3.visible = true	
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true		
+		Container0.Pwdbasic0.visible = false	
+		Container0.Pwdbasic1.visible = false	
+		Container0.Pwdbasic2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false
+	Case 4
+		Container0.Pwdbasic4.visible = true	
+		Container0.Pwdbasic5.visible = true		
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true	
+		Container0.PwdInsert2.visible = true	
+		Container0.PwdInsert3.visible = true
+		Container0.Pwdbasic0.visible = false	
+		Container0.Pwdbasic1.visible = false	
+		Container0.Pwdbasic2.visible = false	
+		Container0.Pwdbasic3.visible = false		
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false	
+	Case 5
+		Container0.Pwdbasic5.visible = true		
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true	
+		Container0.PwdInsert2.visible = true	
+		Container0.PwdInsert3.visible = true	
+		Container0.PwdInsert4.visible = true
+		Container0.Pwdbasic0.visible = false	
+		Container0.Pwdbasic1.visible = false	
+		Container0.Pwdbasic2.visible = false	
+		Container0.Pwdbasic3.visible = false	
+		Container0.Pwdbasic4.visible = false		
+		Container0.PwdInsert5.visible = false	
+	Case 6
+		Container0.PwdInsert0.visible = true	
+		Container0.PwdInsert1.visible = true	
+		Container0.PwdInsert2.visible = true	
+		Container0.PwdInsert3.visible = true	
+		Container0.PwdInsert4.visible = true	
+		Container0.PwdInsert5.visible = true	
+		Container0.Pwdbasic0.visible = false		
+		Container0.Pwdbasic1.visible = false		
+		Container0.Pwdbasic2.visible = false		
+		Container0.Pwdbasic3.visible = false		
+		Container0.Pwdbasic4.visible = false		
+		Container0.Pwdbasic5.visible = false
+	Case else
+		Form.ShowAlert("알림", "6자리를 입력해주세요.")
+	End Select
+	
+	Container0.PwdFail0.visible = false
+	Container0.PwdFail1.visible = false
+	Container0.PwdFail2.visible = false
+	Container0.PwdFail3.visible = false
+	Container0.PwdFail4.visible = false
+	Container0.PwdFail5.visible = false
+End Function
+'============================================================================
+'인증 실패 UI
+'============================================================================
+Function PasswordFail()
+		Container0.PwdFail0.visible = True
+		Container0.PwdFail1.visible = True
+		Container0.PwdFail2.visible = True
+		Container0.PwdFail3.visible = True
+		Container0.PwdFail4.visible = True
+		Container0.PwdFail5.visible = True
+		Container0.Pwdbasic0.visible = false		
+		Container0.Pwdbasic1.visible = false		
+		Container0.Pwdbasic2.visible = false		
+		Container0.Pwdbasic3.visible = false		
+		Container0.Pwdbasic4.visible = false		
+		Container0.Pwdbasic5.visible = false
+		Container0.PwdInsert0.visible = false	
+		Container0.PwdInsert1.visible = false	
+		Container0.PwdInsert2.visible = false	
+		Container0.PwdInsert3.visible = false	
+		Container0.PwdInsert4.visible = false	
+		Container0.PwdInsert5.visible = false
+End Function
+'============================================================================
+'패스워드 글자 개수 카운트
+'============================================================================
+Sub Container0_EditReal_OnEditChar(CharCode)
+	
+	Select Case CharCode
+	
+	Case "0"
+		
+		'입력값 6초과할 때 초과 카운팅 방지
+		if nCnt = 6 then
+			nCnt = 6
+		else
+			nCnt = nCnt + 1
+		end if
+		
+		g_CountSave = nCnt
+	Case "1"	
+		'입력값 없을 때 마이너스 카운팅 방지
+		if nCnt = 0 then
+			nCnt = 0
+		else
+			nCnt = nCnt - 1
+		end if
+		
+		g_CountSave = nCnt
+	'취소, 입력완료일 때
+	Case "2"
+		nCnt = 0
+	End Select
+
+	PasswordInsert()
+	
+	if nCnt = 6 then		
+		'입력완료 호출 API
+		Container0.EditReal.runSecKeypadFinish()
+	end if
+	
+End Sub
+
+'============================================================================
+'고객에게 보여지는 에디트 위치 클릭시 키패드 활성화(에디트 위치에 버튼 올려서)
+'============================================================================
+Sub Container0_Button0_OnClick()
+	Container0.EditReal.SetShowKeypad(True)
+	
+	'인증 에디트 초기화
+	nCnt = 0
+	PasswordInsert()
+	Container0.Buttonok.enable = True
+	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	'메세지박스 팝업시 메세지 박스 확인 후 Form Close
+	if sKeyName == "close" then
+		Form.CloseForm()		'첫페이지(ID등록)로 이동
+	elseif sKeyName == "LOG_FORCE" then
+		' IOS "openPrevScreen api없으므로 시장종합으로 일단 돌림.
+		if g_DeviceOS == "2" Then	'iOS("2")Android("1")
+			if sRet == "ok" then			
+				Form.SetSharedData("&90060_motp", "LOG_FORCE")
+				Form.OpenNextPopup("mhetc90021" , "" , "")		
+			else
+				if g_ScrNum == "10003" then
+					'안드로이드는 여기서 폼닫기 해도 닫히는데
+					'ios는 메뉴화면을 직접닫아줘야 닫아짐
+					Form.triggerEvent("#","ios_formclose","")
+				else
+					Form.CloseForm()
+				end if
+			end if		
+		else
+			if sRet == "ok" then
+				Form.SetSharedData("&90060_motp", "LOG_FORCE")
+				Form.OpenNextPopup("mhetc90021" , "" , "")
+			else
+				Form.CloseForm()			
+			end if	
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_EditReal_OnEditComplete()
+	'입력완료 시에만 타게끔(취소는 안타고)
+	if g_DeviceOS == "2"  then
+		g_CharFlag = "N"
+		PasswordInsert()
+	end if
+	
+	if nCnt <> 6 then
+		'OS별로 비밀번호 최소글자 입력안했을 시에 시스템팝업메시지 내용이 달라서 
+		'시스템팝업과 내용 맞춰주기 위한 분기처리
+		if g_DeviceOS == "2"  then
+			Form.MsgBox("알림", "최소 6자리 이상 입력해야 합니다.", "", 6 )
+		elseif g_DeviceOS == "1" then
+			Form.MsgBox("알림", "6글자 이상 입력해 주세요.", "", 6 )
+		end if
+		
+	elseif nCnt = 6 then
+		
+		if g_sScrPoint == "new" or g_sScrPoint == "UploadToCloud" then
+		'''''''''''''''''''''비밀번호 설정 불가 Case 서비스 호출''''''''''''''''''''''''''
+			DATAMANAGER.RequestTranData("obacp_comm_004r")   '20230622 jsi 비밀번호 검증 전 연락처 조회 호출	
+		'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+		else
+			Form.SetTimerEvent2("3", 1, 0.1)
+		end if
+		
+		nCnt = 0
+	end if
+End Sub
+
+'============================================================================
+'20220701 SWJ START : 이미지 찌그러짐 방지
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Container0.Pwdbasic0.setMaintainingRatio("1")
+	Container0.Pwdbasic1.setMaintainingRatio("1")
+	Container0.Pwdbasic2.setMaintainingRatio("1")
+	Container0.Pwdbasic3.setMaintainingRatio("1")
+	Container0.Pwdbasic4.setMaintainingRatio("1")
+	Container0.Pwdbasic5.setMaintainingRatio("1")
+	Container0.Pwdinsert0.setMaintainingRatio("1")
+	Container0.Pwdinsert1.setMaintainingRatio("1")
+	Container0.Pwdinsert2.setMaintainingRatio("1")
+	Container0.Pwdinsert3.setMaintainingRatio("1")
+	Container0.Pwdinsert4.setMaintainingRatio("1")
+	Container0.Pwdinsert5.setMaintainingRatio("1")
+	Container0.PwdFail0.setMaintainingRatio("1")
+	Container0.PwdFail1.setMaintainingRatio("1")
+	Container0.PwdFail2.setMaintainingRatio("1")
+	Container0.PwdFail3.setMaintainingRatio("1")
+	Container0.PwdFail4.setMaintainingRatio("1")
+	Container0.PwdFail5.setMaintainingRatio("1")
+	
+	Container0.ImgClose.setMaintainingRatio("1")
+	Container0.ImgRegi.setMaintainingRatio("1")
+	Container0.Image0.setMaintainingRatio("1")
+End Sub
+'============================================================================
+Sub ImgClose_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+
+	if szTranID == "obaci_nmet_011r" then
+		szProsClsCode = ""
+		szRsltCode    = ""
+		
+		szProsClsCode	= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "PROS_CLS_CODE" , 0)
+		szRsltCode	= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "IF_RSLT_CODE"  , 0)
+		
+		If szProsClsCode == "5" and TRIM(szRsltCode) <> "00" Then
+			
+			sReturnMsg = ReturnPwdErrorMsg(szRsltCode)
+			
+			Form.MsgBox("안내", "유효하지 않은 비밀번호 입니다.\n".. sReturnMsg, "", 0)
+			
+			Form.SetSharedData("CLOUD_CERT_ORIGINAL_PWD" , Container0.EditReal.caption2)
+			
+			Container0.EdtPwReal.caption = ""
+			nCnt = 0
+			PasswordFail()
+			
+		Else '비밀번호 입력 성공시
+			
+			Call PasswordInsert()
+			
+			'다음 화면에서 비번 재검증 위해 set
+			Form.SetSharedData("CLOUD_CERT_PWDAuth",  Container0.EditReal.caption2 )
+			
+			if g_sScrPoint == "new" then
+				'비번 재입력 팝업
+				Form.OpenPopup( "mhetc90150_s4" , "" , "")
+				
+			elseif g_sScrPoint == "UploadToCloud" then
+
+				Form.SetSharedData("CLOUD_CERT_LOCAL_PWD", g_sCloudCertLocalPwd)
+				Form.SetSharedData("CLOUD_CERT_INDEX" , g_sCloudCertIndex)
+				
+				'비번 재입력 팝업
+				Form.OpenPopup( "mhetc90150_s4" , "UploadToCloud" , "")
+			end if
+		End If
+	
+	elseif szTranID == "obaci_acct_239r" then
+	
+		'Array이지만 하나만 받아서 쓰자
+		'비밀번호 정합성 체크 시 맨 위에 계좌번호로 체크해도
+		' 업무적으로 문제 없다고 확인함
+		g_sCloudAcno = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ACNO" , 0)
+		
+		Form.SetSharedData( "CLOUD_CERT_ACNO" ,g_sCloudAcno)
+		
+		DATAMANAGER.RequestTranData("obaci_nmet_011r") 
+	
+	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obaci_nmet_011r" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "PROS_CLS_CODE"  , 0 , "5")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO"           , 0 , g_sCloudAcno )   '20230622 jsi 계좌번호 추가
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "PWD_PIP"        , 0 , Container0.EditReal.caption2)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "CLPH_TELNO"     , 0 , g_ClphNo    ) '20230623 jsi 휴대폰 추가
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "WRPL_TELNO"     , 0 , g_WorkNo    ) '20230622 jsi 직장전화 추가
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "OWHS_TELNO"     , 0 , g_HomeNo    ) '20230622 jsi 자택전화 추가
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RCNO_PIP"       , 0 , g_sCloudRcnoPip   )
+		
+	elseif szTranID == "obacp_comm_004r" then  '20230622 jsi obacp_comm_004r 연락처 정보 조회 전 세팅 /'비로그인 시에는 meritz로 세팅 되기 때문에 헤더값세팅
+
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO"   , 0 , g_sCloudAcno )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ELFN_ID", 0 , "meritz"   )  
+		
+	elseif szTranID == "obcpp_pcrt_173a" then
+		DATAMANAGER.SetUserID( g_sCloudID )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "USER_ID" , 0 , g_sCloudID )
+		
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "CRPT_YN"  , 0 , "Y"   )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "RCNO_PIP" , 0 , g_sAsctRcno )
+		
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "USER_NAME" , 0 , g_sCloudCustName )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "CSNO" , 0 , g_sCSNO)
+	
+	elseif szTranID == "obcsb_efif_011r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_efif_011r", "InBlock1", "RCNO_PIP" , 0 , g_sCloudRcnoPip )
+	
+	elseif szTranID == "obcsb_acif_005r" then
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_005r", "InBlock1", "PROS_CLS_CODE",  0, "4")
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_005r", "InBlock1", "RCNO_PIP"	 ,  0, g_sCloudRcnoPip)
+		
+	elseif szTranID == "obcpp_logn_003a" then
+		DATAMANAGER.SetDataValue( 0, "obcpp_logn_003a", "InBlock1", "USER_ID" , 0 , g_sCloudID )
+		DATAMANAGER.SetDataValue( 0, "obcpp_logn_003a", "InBlock1", "PBCR_PWD_MSTK_TMNU" , 0 , "0007" ) '20160527_02 KBC : 인증서 비밀번호오류횟수초기화 "0" -> "0007"로 수정
+		DATAMANAGER.SetDataValue( 0, "obcpp_logn_003a", "InBlock1", "SUCS_YN" , 0 , "Y" )
+	
+	elseif szTranID == "obaci_acct_239r" then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ELFN_ID"   		 , 0 , g_sCloudID )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNT_STAT_CODE"   , 0 , "1"   )
+	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+		
+	if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+		szErrMsg = szErrMsg.." "..sSubMsg
+	end if
+		
+	Form.MsgBox( "안내", szErrMsg, "", 6 )
+
+End Sub
+'============================================================================
+Sub Container0_BtnRegi_OnClick()
+	Form.OpenPopup("mpopup_auth","CommonAuthPopup","")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	
+	if g_nextpage then
+			
+		if g_sScrPoint == "ChangePwd" then
+			Form.SetSharedData("CLOUD_CERT_ORIGINAL_PWD", Container0.EditReal.caption2)
+			Form.OpenPopup("mhetc90153_p1" , "ChangePwd" & "★" & g_sCloudCertID & "★" & g_sCloudCertDN , "")
+			
+		elseif g_sScrPoint == "DownloadToLocal" then
+		
+			Form.SetSharedData("CLOUD_CERT_ORIGINAL_PWD", Container0.EditReal.caption2)
+			Form.SetSharedData("CLOUD_CERT_INDEX" , g_sCloudCertIndex)
+			Form.OpenPopup("mhetc90153_s1" , "" , "")	
+		
+		end if
+		
+		Form.SendReturnToParent("mhetc90150_s3" , g_sScrPoint)
+		
+		exit sub
+	end if
+	
+	Form.SendReturnToParent("mhetc90150_s3" , "cancel")
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+    if szTranID == "obacp_comm_004r" then 
+	    g_HomeNo = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "OWHS_TELNO"      , 0)  '자택전화
+	    g_ClphNo = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "CLPH_TELNO"      , 0)  '휴대전화
+	    g_WorkNo = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "WRPL_WHOL_TELNO" , 0)  '직장전화
+	    g_sCloudRcnoPip = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "RCNO_PIP" 		, 0)  '실명확인번호
+	    
+	    Form.SetSharedData("CLOUD_CERT_PHONENUM", g_ClphNo)
+	    
+	    if g_sCloudAcno <> "" then
+		    DATAMANAGER.RequestTranData("obaci_nmet_011r") 
+	    else
+		    DATAMANAGER.RequestTranData("obaci_acct_239r")
+	    end if
+	    
+	end if
+	
+	if szTranID == "obcsb_efif_011r" then
+		g_sAsctRcno = DATAMANAGER.GetDataValue( 0, "obcsb_efif_011r", "OutBlock1", "ASCT_PSPR_NO_PIP", 0 )
+
+		g_sRcnoPip = DATAMANAGER.GetDataValue(0, "obcsb_efif_011r", "OutBlock1", "RCNO_PIP" , 0)
+		
+		DATAMANAGER.RequestTranData( "obcsb_acif_005r" ) 
+	end if
+	
+	if szTranID == "obcsb_acif_005r" then
+		g_sCSNO = DATAMANAGER.GetDataValue( 0, "obcsb_acif_005r", "OutBlock1", "CSNO", 0 )
+		
+		DATAMANAGER.RequestTranData("obcpp_pcrt_173a") 
+	end if
+	
+	if szTranID == "obcpp_pcrt_173a" then
+		DATAMANAGER.RequestTranData( "obcpp_logn_003a" ) '인증접속로그
+	end if 
+	
+	if szTranID == "obcpp_logn_003a" then	
+		Form.OpenPopup("mhetc90150_p2", "register", "")
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_onTriggerEventCloudCert(sCommand, sResult)
+
+	Dim sErrorCd, sErrorMsg
+
+	szItem = Split(sResult,"★")
+	
+	'처리코드,처리메시지 처리
+	sErrorCd		= szItem(0)
+	sErrorMsg	= szItem(1)	
+
+	'오류이면
+	if sErrorCd <> "0" then
+		
+		if #szItem > 2 then
+			Form.MsgBox("안내", szItem(3), "", 0)
+		else
+			Form.MsgBox("안내", sErrorMsg, "", 0)
+		end if
+		
+		'개발중 에러코드 찾기 편하게 편의상 남긴다.
+		'(나중에 지운다. 못지워도 큰 문제없고)
+		Form.SaveConfigData("CLOUD_CERT_ERRORCODE", "mhetc90150_s3" & "★" & szItem(2), szItem(3))
+		
+		exit sub
+	end if		
+	
+	'PIN 인증 완료
+	if sCommand = "CLOUD_REQ_CHECK_PASSWD_90150" then
+	
+		if g_sScrPoint == "RemoveCloudCert" then
+			Form.requestCertCommand("CLOUD_REQ_CERT_DELETE", g_sCloudCertID , "90150") 
+			
+		elseif g_sScrPoint == "RenewCloudCert" then
+			sPinPwd = Container0.EditReal.caption2
+			
+			sInput = g_sCloudCertID &  "★"  & g_sCloudCertSerial &  "★"  & sPinPwd
+			Form.requestCertCommand("CLOUD_REQ_CERT_UPDATE", sInput , "90150") 
+		
+		elseif g_sScrPoint == "register" then
+			
+			sInput = g_sCloudCertID &  "★"  & Container0.EditReal.caption2 &  "★"  & g_sCloudID
+			Form.requestCertCommand("CLOUD_REQ_SIGNDATA_LOGIN", sInput , "90150") 
+			
+		else
+			g_nextpage = true
+			Form.CloseForm()
+		end if
+
+	end if
+	
+	'타기관 인증서 등록
+	if sCommand = "CLOUD_REQ_SIGNDATA_LOGIN_90150" then
+	
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "UI_R_VAL" , 0 , szItem(3) )
+		DATAMANAGER.SetDataValue( 0, "obcpp_pcrt_173a", "InBlock1", "UI_ELCT_SGNT_DATA_CNTT" , 0 , szItem(4) )
+			
+		DATAMANAGER.RequestTranData("obcsb_efif_011r") 
+	end if
+	
+	'인증서 삭제
+	if sCommand = "CLOUD_REQ_CERT_DELETE_90150" then
+		Form.OpenPopup("mhetc90150_p2" , "RemoveCloudCert" , "")
+	end if
+	
+	'인증서 갱신
+	if sCommand = "CLOUD_REQ_CERT_UPDATE_90150" then
+		Form.OpenPopup("mhetc90150_p2" , "RenewCloudCert" , "")
+	end if
+End Sub
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mhetc90150_p2" then
+		Form.CloseForm()
+	end if
+	
+	if sKeyName == "mhetc90150_s4" then
+		if sRet == "retry" then
+			'비밀번호 입력키패드 Show
+			Form.SetTimerEvent2(1, 1, 0.6)
+		else
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+'============================================================================
+Function ReturnPwdErrorMsg(sErrCode)
+
+	Select Case sErrCode
+	
+	Case "06" '4-8 자리체크
+		sErrMsg = "( 4 ~ 8자리 가능 )"
+	Case "01"
+		sErrMsg = "(연속된 4자리 숫자)"
+	Case "02"
+		sErrMsg = "(동일한 숫자)"
+	Case "03"
+		sErrMsg = "(휴대폰번호와 4자리 이상 일치)"
+	Case "04"
+		sErrMsg = "(자택번호와 4자리 이상 일치)"
+	Case "05"
+		sErrMsg = "(직장번호와 4자리 이상 일치)"
+	Case "07"
+		sErrMsg = "(실명확인번호와 4자리 이상 일치)"
+	Case "08"
+		sErrMsg = "(계좌번호와 4자리 이상 일치)"
+	Case Else
+		sErrMsg = ""
+	End Select
+	
+	return sErrMsg
+	
+End Function
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_nmet_011r" trcode="obaci_nmet_011r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_comm_004r" trcode="obacp_comm_004r" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_efif_011r" trcode="obcsb_efif_011r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_005r" trcode="obcsb_acif_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_003a" trcode="obcpp_logn_003a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_pcrt_173a" trcode="obcpp_pcrt_173a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_239r" trcode="obaci_acct_239r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_nmet_011r" title="비대면업무_비밀번호 체크" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="442" _ulen="334" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PWD_PIP^비밀번호PIP^68^0^0^0^0^0^0
+CNFR_PWD_PIP^확인비밀번호PIP^68^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+WRPL_TELNO^직장전화번호^15^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+LOGN_ID^로그인ID^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="97" _ulen="77" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+IF_RSLT_CODE^IF결과코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_comm_004r" title="연락처 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="62" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="281" _ulen="207" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+WRPL_WHOL_TELNO^직장전체전화번호^16^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+NRML_YN^정상여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_efif_011r" title="조합여권번호 정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="53" _ulen="41" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="341" _ulen="253" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+ASCT_PSPR_NO_PIP^조합여권번호PIP^68^0^0^0^0^0^0
+CUST_CNFR_YN^고객확인여부^1^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+GNDR_CLS_CODE^성별구분코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적국가코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_005r" title="고객정보 실명확인정보관련 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="207" _ulen="159" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="310" _ulen="224" >
+
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCNO_20_FGRS^실명확인번호20자리^20^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인구분코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_003a" title="공인인증 접속로그" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="152" _ulen="112" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_pcrt_173a" title="타기관 공인인증서 등록" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="344" _ulen="268" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_R_VAL^UIR값^96^0^0^0^0^0^0
+UI_ELCT_SGNT_DATA_CNTT^UI전자서명데이터내용^4000^0^0^0^0^0^0
+CRPT_YN^암호화여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="173" _ulen="133" >
+
+NEW_YN^최신 인증서 여부^1^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_LNGT^UI공인인증키길이^4^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_VAL^UI공인인증키값^1024^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_239r" title="HTS ID로 종합계좌번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="94" _ulen="74" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌상태코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

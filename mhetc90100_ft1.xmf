@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90100" scrname="공지사항_공지사항" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" ly_vert="0,0,375,522,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2718" _ulen="2504" >
+'============================================================================
+'20200707 SWJ START : 공지사항에 증거금변경, 개선사항 탭 추가
+'============================================================================
+Sub Form_OnFormInit()
+'	WebView0.urlpath = "http://home.imeritz.com/bbs/BbsList.go?bbsGrpId=bascGrp&bbsId=moneynotice_vm_mts&listCnt=10&pageNum=1&searchDiv=00&searchText=#none"
+	'16-04-11 변경
+	'20171113_01 LKM: 홈페이지 SSL적용으로  http에서 https로 변경
+	'20171120_01 LKM :iOS http Android https 적용
+	
+'	szOSType = Form.GetSharedData( "&OS_TYPE", false )
+'	
+'	if szOSType == "1" then	'안드로이드
+'		szURL = 	"https://home.imeritz.com/bbs/BbsList.go?bbsGrpId=bascGrp&bbsId=help13_vm_mts&listCnt=10&pageNum=1&searchDiv=00&searchText=#none"		
+'	else						'iOS				
+'		szURL = 	"http://home.imeritz.com/bbs/BbsList.go?bbsGrpId=bascGrp&bbsId=help13_vm_mts&listCnt=10&pageNum=1&searchDiv=00&searchText=#none"		
+'	end if
+	
+'	WebView0.urlpath = "https://home.imeritz.com/bbs/BbsList.go?bbsGrpId=bascGrp&bbsId=help13_vm_mts&listCnt=10&pageNum=1&searchDiv=00&searchText=#none"
+	
+	'웹 캐시삭제
+	WebView0.RemoveCache()
+	
+	'20221026 SWJ START : 테스트계 운영계 나눔
+	serverMode = Form.GetSharedData("&SERVER_MODE", false)
+	
+	If serverMode == "1" Then	'개발기
+		WebView0.urlpath = "https://testhome.imeritz.com/mobile/sub/mts_notice.html"
+	else
+		WebView0.urlpath = "https://home.imeritz.com/mobile/sub/mts_notice.html"
+	end if
+	'20221026 SWJ END
+	
+	sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+
+	'모바일 웹에서 어떤 OS인지 판단할 수 있음(javascript 먼저 set해야함)
+	if sDeviceOS == "1" then
+		WebView0.SetUserAgent("meritz_android")
+	elseif sDeviceOS == "2" then
+		WebView0.SetUseJavaScript("1")
+		WebView0.SetUserAgent("meritz_ios")
+	else
+	end if
+End Sub
+
+'============================================================================
+'20200707 SWJ END
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "WebViewReturn" then
+		sData = Split(sParam,"@")
+		
+		'1: 맵파일 바로 호출, 2: 웹, 3: 맵파일 호출 전 파라미터 받는 경우
+		if Ubound(sData) > 0 then
+			if sData(0) == "1" then
+				if sData(1) == "88031" then
+					'Form.OpenScreen(sData(1) , "")
+					Form.OpenNextPopup("mbonl88031","","")
+				end if
+			end if
+		elseif sData(0) == "2" then
+				
+			If g_serverMode == "1" Then	'개발기
+				szWebUrl = Replace(sData(1),"home.imeritz.com","testhome.imeritz.com")
+			else
+				szWebUrl = sData(1)
+			end if
+				
+			Form.OpenExternalBrowser(szWebUrl)
+		end if
+	end if
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

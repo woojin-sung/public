@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41000" scrname="시장종합_투자자챠트선물" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,335,100,1" />
+	<CONTROL_INFO>
+		<CHARTEX name="chart01" ly_vert="-1,-3,338,105,1" >
+			<DATASETTING>
+				<DATAITEM name="chart01" time="0,1,0" open="0,1,1" high="0,1,2" low="0,1,3" >
+					<ADJDATAITEM/>
+				</DATAITEM>
+			</DATASETTING>
+		</CHARTEX>
+		<GRID name="grd01" colcount="4" ly_vert="400,0,376,100,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" halign="2" />
+				<LABEL name="th_cell0" halign="1" />
+				<LABEL name="bd_cell1" mask="0,0,,,0,,2,1,1,0,0" halign="2" />
+				<LABEL name="bd_cell2" mask="0,0,,,0,,2,1,1,0,0" halign="2" />
+				<LABEL name="bd_cell3" mask="0,0,,,0,,2,1,1,0,0" halign="2" />
+				<LABEL name="th_cell1" halign="1" />
+				<LABEL name="th_cell2" halign="1" />
+				<LABEL name="th_cell3" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="90,90,90,90" ly_vert_visible="0,0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell2" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" import="0,1,2" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="th_cell3" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="25" />
+						<CELLINFO>
+							<CELL name="bd_cell3" cell_ly="0,0,0,0" import="0,1,3" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2890" _ulen="2746" >
+'============================================================================
+' 01.화면명 	: 시장종합
+' 02.화면설명	: 시장종합_투자자별매매동향챠트
+' 03.작성		: 2016.02.24
+' 			: 일단 금액으로 만듬.. 추후 수량 처리필요
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim	g_szISCD
+dim	g_szISCD2
+
+g_szISCD		= ""
+g_szISCD2	= ""
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	chart01.SetAccrueName("개인,외국인,기관=1,1,1")
+	chart01.SetPeriodType(0)			'0:틱, 1:분, 2:일자
+	chart01.setViewDataCount(-1)
+	g_szISCD	=	"K2I"
+	g_szISCD2	=	"F001"
+	DATAMANAGER.RequestTranData("ohhts_1058_003r")
+	chart01.setTouchEventType("0")	'0:터치이벤트 없음 1:모든 터치 이벤트 2:가로차트
+End Sub
+
+
+'============================================================================
+'Form_OnRefresh
+'============================================================================
+Sub Form_OnRefresh()
+	Form_OnFormInit()
+End Sub
+
+
+'============================================================================
+'Form_OnTriggerEvent
+'============================================================================
+'Sub Form_OnTriggerEvent(sEventName, sParam)
+'
+'	if	sEventName	=	"CHGMARKET_41000"	then
+'		if	sParam	=	"0"	then
+'			g_szISCD	=	"KSP"
+'			g_szISCD2	=	"0001"
+'		elseif	sParam	=	"1"	then
+'			g_szISCD	=	"KSQ"
+'			g_szISCD2	=	"1001"
+'		elseif	sParam	=	"2"	then
+'			g_szISCD	=	"K2I"
+'			g_szISCD2	=	"F001"
+'		end if
+'	end if
+'	DATAMANAGER.RequestTranData("ohhts_1058_003r")
+'End Sub
+'
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if	szTranID	=	"ohhts_1058_003r"	then
+		DATAMANAGER.SetDataValue(0, "ohhts_1058_003r", "InBlock1", "FID_INPUT_ISCD", 0, g_szISCD)
+		DATAMANAGER.SetDataValue(0, "ohhts_1058_003r", "InBlock1", "FID_INPUT_ISCD2", 0, g_szISCD2)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_1058_003r" trcode="ohhts_1058_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_1058_003r" title="미니투자자매매동향2(차트)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="198" toutblk="OutBlock1" _ulen="158" >
+
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_ISCD2^FID입력종목코드2^12^0^0^9035^9999^0^0
+FID_INPUT_ETC_CLS_CODE^FID입력기타구분코드^3^0^7^9021^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="999" inout="out" _len="1845" _ulen="1393" >
+
+FID_CNTG_HOUR^FID체결시간^6^0^0^12^1009^0^0
+FID_PRSN_NTBY_VOL^FID개인순매수거래량^19^0^7^1636^1009^0^0
+FID_FRGN_NTBY_VOL^FID외국인순매수거래량^19^0^7^201^1009^0^0
+FID_ORGN_NTBY_VOL^FID기구순매수거래량^19^0^7^202^1009^0^0
+FID_SCRT_NTBY_VOL^FID증권순매수거래량^19^0^7^1656^1009^0^0
+FID_INSU_NTBY_VOL^FID보험순매수거래량^19^0^7^1638^1009^0^0
+FID_IVTR_NTBY_VOL^FID투자신탁순매수거래량^19^0^7^1640^1009^0^0
+FID_MRBN_NTBY_VOL^FID종금순매수거래량^19^0^7^1641^1009^0^0
+FID_BANK_NTBY_VOL^FID은행순매수거래량^19^0^7^1639^1009^0^0
+FID_FUND_NTBY_VOL^FID기금순매수거래량^19^0^7^1637^1009^0^0
+FID_PE_FUND_NTBY_VOL^FID사모펀드순매수거래량^19^0^7^1799^1009^0^0
+FID_ETC_CORP_NTBY_VOL^FID기타법인순매수거래량^19^0^7^1793^1009^0^0
+FID_ETC_ORGT_NTBY_VOL^FID기타단체순매수거래량^19^0^7^1828^1009^0^0
+FID_PRSN_NTBY_TR_PBMN^FID개인순매수거래대금^19^0^7^1643^1009^0^0
+FID_FRGN_NTBY_TR_PBMN^FID외국인순매수거래대금^19^0^7^1644^1009^0^0
+FID_ORGN_NTBY_TR_PBMN^FID기구순매수거래대금^19^0^7^1645^1009^0^0
+FID_SCRT_NTBY_TR_PBMN^FID증권순매수거래대금^19^0^7^1657^1009^0^0
+FID_INSU_NTBY_TR_PBMN^FID보험순매수거래대금^19^0^7^1647^1009^0^0
+FID_IVTR_NTBY_TR_PBMN^FID투자신탁순매수거래대금^19^0^7^1649^1009^0^0
+FID_MRBN_NTBY_TR_PBMN^FID종금순매수거래대금^19^0^7^1650^1009^0^0
+FID_BANK_NTBY_TR_PBMN^FID은행순매수거래대금^19^0^7^1648^1009^0^0
+FID_FUND_NTBY_TR_PBMN^FID기금순매수거래대금^19^0^7^1646^1009^0^0
+FID_PE_FUND_NTBY_TR_PBMN^FID사모펀드순매수거래대금^19^0^7^1798^1009^0^0
+FID_ETC_CORP_NTBY_TR_PBMN^FID기타법인순매수거래대금^19^0^7^1792^1009^0^0
+FID_ETC_ORGT_NTBY_TR_PBMN^FID기타단체순매수거래대금^19^0^7^1829^1009^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

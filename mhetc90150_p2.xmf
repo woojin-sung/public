@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90150" scrname="클라우드 프로세스 종료 화면" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Img0" autosize="1" imgpath="icon_confirm" ly_vert="150,82,74,74,1" />
+		<LABEL name="Label0" fgcolor="334:034034034" fontsize="5" fontstyle="01" halign="1" ly_vert="0,177,375,33,1" />
+		<LABEL name="Label1" fgcolor="334:034034034" fontsize="5" fontstyle="01" halign="1" ly_vert="0,206,375,33,1" />
+		<BUTTON name="BtnOk" caption="확인" fontsize="1" fontstyle="01" btnimage="btn_20.9" ly_vert="-3,587,379,61,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3530" _ulen="2914" >
+Dim g_sScrPoint
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_sScrPoint = Form.GetOpenLinkData()
+	
+	SetConfirmNotice(g_sScrPoint)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Img0.setmaintainingratio("1")
+End Sub
+
+'============================================================================
+Function SetConfirmNotice(sParam)
+	
+	Select Case g_sScrPoint 
+		
+	'클라우드 서비스 탈퇴
+	Case "WithDrawal"
+			
+		Label0.caption = "클라우드 인증 서비스가" 
+		Label1.caption = "탈퇴되었습니다."
+	
+	'클라우드 발급(재발급) 완료
+	Case "New"
+		
+		Label0.caption = "클라우드인증서"
+		Label1.caption = "발급(재발급)이 완료되었습니다."
+		BtnOk.caption = "로그인"
+	
+	'클라우드인증서 내려받기
+	Case "DownloadToLocal"
+		
+		Label0.caption = "클라우드인증서 내려받기가"
+		Label1.caption = "완료되었습니다."
+		BtnOk.caption = "로그인"
+		
+	'타기관 인증서 등록
+	Case "register"
+		Label0.caption = "타기관 클라우드인증서가"
+		Label1.caption = "등록되었습니다."
+	
+	'인증서 삭제
+	Case "RemoveCloudCert"
+		Label0.caption = "클라우드인증서가"
+		Label1.caption = "삭제되었습니다."
+	
+	'인증서 갱신
+	Case "RenewCloudCert"
+		Label0.caption = "클라우드인증서가"
+		Label1.caption = "갱신되었습니다."
+	
+	'인증서 비밀번호 변경
+	Case "ChangePwd"
+		
+		Label0.caption = "클라우드인증서  비밀번호가"
+		Label1.caption = "변경되었습니다."
+		
+	'PIN 5회 잠김 해제
+	Case "PinUnlock" 
+		Label0.caption = "클라우드인증서  잠금해제가"
+		Label1.caption = "완료되었습니다."
+	
+	'클라우드에 등록
+	Case "UploadToCloud"
+		Label0.caption = "클라우드에 공동인증서가"
+		Label1.caption = "등록되었습니다."
+	
+	End Select
+
+	
+End Function
+'============================================================================
+Function SetConfirmReturn(sParam)
+	
+	Select Case g_sScrPoint 
+		
+	'클라우드 서비스 탈퇴
+	Case "WithDrawal"
+			
+		Form.SendReturnToParent("Cloud_WithDrawal" , "ok")
+	'클라우드 서비스 
+	Case "New"
+		
+		Form.OpenPopup("mhetc90021" , "" , "")
+		
+		Form.SendReturnToParent("mhetc90150_p2" , "new")
+	
+	'클라우드인증서 내려받기
+	Case "DownloadToLocal"
+		
+		Form.OpenPopup("mhetc90021" , "" , "")
+		
+		Form.SendReturnToParent("mhetc90150_p2" , "DownloadToLocal")
+		
+	'타기관 인증서 등록
+	Case "register"
+		Form.SendReturnToParent("mhetc90150_p2" , "register")
+	
+	'인증서 삭제
+	Case "RemoveCloudCert"
+		Form.SendReturnToParent("mhetc90150_p2" , "RemoveCloudCert")
+	
+	'인증서 갱신
+	Case "RenewCloudCert"
+		Form.SendReturnToParent("mhetc90150_p2" , "RenewCloudCert")
+		
+	'인증서 비밀번호 변경
+	Case "ChangePwd"
+		Form.SendReturnToParent("mhetc90150_p2" , "ChangePwd")
+		
+	'PIN 5회 잠김 해제
+	Case "PinUnlock" 
+		Form.SendReturnToParent("mhetc90150_p2" , "PinUnlock")
+	
+	'
+	Case "UploadToCloud"
+		Form.SendReturnToParent("mhetc90150_p2" , "UploadToCloud")
+	End Select
+
+	
+End Function
+'============================================================================
+Sub BtnOk_OnClick()
+	'주의 이 화면에서만 쓰도록 한다
+	Form.PostLinkData("CloudCertListReload", g_sScrPoint )
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	SetConfirmReturn()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
