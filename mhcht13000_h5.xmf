@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="13000" scrname="주식차트 주월년선택팝업_가로" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" lyinfo="1" ly_horz="0,0,285,161,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" ly_horz="17,40,251,121,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" />
+				<LABEL name="bd_cell1" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell2" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell3" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell4" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell5" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell6" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell7" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell8" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell9" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell10" ly_horz="0,0,100,20,1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="3" cursorstyle="1" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_horz_width="285" ly_horz_visible="0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_horz_width="285" ly_horz_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_horz_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_horz="0,0,285,41,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="선택하세요" bgcolor="064:255255255" halign="1" ly_horz="0,0,285,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_horz="248,8,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1967" _ulen="1899" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 추가증거금 청산주문
+' 02. 화면설명 : 추가증거금 청산주문 팝업화면
+' 03. 작    성 : 2016.04.30 LJS
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+g_szType = {"주", "월", "년"}	'PENTA13 START => 2019.03.04
+
+Dim g_szData
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	g_szData = Form.GetOpenLinkData()
+	
+	for i = 0 to Grid0.rowcount-1
+		if g_szType[i] = null or g_szType[i] = "" then
+			g_szType[i] = "120"
+		end if
+		Grid0.SetCellData( "bd_cell0", i, g_szType[i])
+		if g_szData == g_szType[i] then
+			Grid0.selectrow = i
+		end if	
+	next
+	
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	sData = Grid0.GetCellData( szCellID, lRow)
+	Form.SendReturnToParent( "Chart_WEEK" , sData )
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.SendReturnToParent( "Chart_WEEK" , g_szData )
+	Form.CloseForm( )	
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

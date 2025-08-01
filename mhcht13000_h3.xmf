@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="13000" scrname="주식차트 틱선택팝업_가로" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" lyinfo="1" ly_horz="0,0,285,280,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" ly_horz="17,40,251,241,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" />
+				<LABEL name="bd_cell1" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell2" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell3" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell4" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell5" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell6" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell7" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell8" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell9" ly_horz="0,0,100,20,1" />
+				<LABEL name="bd_cell10" ly_horz="0,0,100,20,1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="8" cursorstyle="1" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_horz_width="250" ly_horz_visible="0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_horz_width="250" ly_horz_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_horz_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_horz="0,0,285,41,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="선택하세요" bgcolor="064:255255255" halign="1" ly_horz="0,0,285,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_horz="248,8,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3045" _ulen="2881" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 추가증거금 청산주문
+' 02. 화면설명 : 추가증거금 청산주문 팝업화면
+' 03. 작    성 : 2016.04.30 LJS
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+g_szType = {"1", "3", "5", "10",  "20", "30", "60" , "120"}
+Dim g_szData
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_szData = Form.GetOpenLinkData()
+	
+	
+	Load_Ini()
+	
+	for i = 0 to Grid0.rowcount-1
+		if g_szType[i] = null or g_szType[i] = "" then
+			g_szType[i] = "120"
+		end if
+		Grid0.SetCellData( "bd_cell0", i, g_szType[i].."틱")
+		if g_szData == g_szType[i] then
+			Grid0.selectrow = i
+		end if	
+	next
+	
+	
+	
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	sData = Grid0.GetCellData( szCellID, lRow)
+	Form.SendReturnToParent( "Chart_Tic" , sData )
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.SendReturnToParent( "Chart_Tic" , g_szData.."틱" )
+	Form.CloseForm( )	
+End Sub
+
+
+
+'============================================================================
+'분,틱 설정파일 읽기
+'처음엔 설정파일에 저장된게 없으므로 초기값으로 셋팅
+'============================================================================
+function Load_Ini()
+	dim sMin, sTic, sflag
+	
+'	for i = 1 to 7
+'		sflag = Form.GetEnvData( "chart_mflag"..i )	'사용여부
+''		if sflag ~= "" then
+''			g_chartMinFlagArr[i] = sflag
+''		end if
+''		
+'		sMin	= Form.GetEnvData( "chart_min"..i )	'분차트
+'		if sMin ~= "" then
+'			g_szType[i-1] = sMin
+'		end if
+'		
+''		Grid0.SetCellData( "bd_cell0", i - 1, g_chartMinFlagArr[i] )	
+'	next
+
+	for i = 0 to 7
+'		sflag = Form.GetEnvData( "chart_tflag"..i )	'사용여부
+'		if sflag ~= "" then
+'			g_chartTicFlagArr[i] = sflag
+'		end
+'		
+		sTic	= Form.GetEnvData( "chart_tic"..i )	'틱차트
+		if sTic ~= "" then
+			g_szType[i] = sTic
+		end if
+	Next
+'
+'	g_sChartCnt = Form.GetEnvData( "chart_Count" )	'차트 개수
+'	if g_sChartCnt == "" then
+'		g_sChartCnt = "0200"
+'	end if
+	
+
+end function
+
+	</SCRIPT_INFO>
+</ROOT>

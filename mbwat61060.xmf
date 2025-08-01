@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57060" scrname="계약정보 변경" version="2" writer="고승연" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt" bgcolor="052:255255255" itemcodetype="119" etcfunctions="" accpwdctl="edtPwd" ly_vert="400,5,280,40,1" />
+		<COMBO name="cmbWrap" ly_vert="400,5,70,40,1" />
+		<FORMTAB name="fmtabInfo" tabcount="2" tabwidthtype="1" tabheadheight="30" ly_vert="0,85,375,477,1" >
+			<PAGE name="page0" caption="계약정보" linkfile="mbwat61060_t1" />
+			<PAGE name="page1" caption="운용지침" linkfile="mbwat61060_t2" />
+		</FORMTAB>
+		<EDIT name="edtPwd" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="400,5,76,40,1" />
+		<LABEL name="lblNoData" visible="0" fgcolor="146:124124124" caption="랩계약이 존재하지 않습니다." halign="1" ly_vert="30,152,315,20,0" />
+		<COMBO name="cmbAcnt" ly_vert="6,5,361,39,1" />
+		<LABEL name="lblAcntNodata" visible="0" caption="선택할 수 있는 계좌가 없습니다." ly_vert="6,5,250,39,0" />
+		<LABEL name="lblPrnm" fgcolor="067:049081150" fontstyle="01" multiline="1" ly_vert="5,40,360,50,1" />
+		<COMBO name="cmbPrnm" ly_vert="400,5,361,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5342" _ulen="5158" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : Wrap 계약정보 변경
+' 02. 화면설명 : 
+' 03. 이    력 : 2022.10.21 : 고승연 : v0001 : 
+'                2022.10.24 : 고승연 : v0002 : 계좌일련번호 추가
+'                2023.01.05 : 고승연 : v0003 : [T2301130023] 비밀번호 체크 수정
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_sCsno		'고객번호
+Dim g_sAcno		'계좌번호
+Dim g_sAsno		'계좌일련번호
+Dim g_sCnrcNo		'계약번호
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	edtPwd.caption = ""
+	g_sCsno = Form.GetSharedData("&CUST_NUM", false)
+	
+	DATAMANAGER.SetDataValue( 0, "obwat_onln_004r", "InBlock1", "IQRY_CLS_CODE" , 0 , "2" )
+	DATAMANAGER.SetDataValue( 0, "obwat_onln_004r", "InBlock1", "CSNO" , 0 , g_sCsno )
+	DATAMANAGER.RequestTranData( "obwat_onln_004r" )
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obwat_onln_004r" then
+		Dim nCount
+		nCount = DATAMANAGER.GetDataCount( 0, "obwat_onln_004r", "OutBlock1" )
+		
+		if nCount > 0 then
+			for i = 0 to nCount-1
+				Dim sAcnt, sAsno, sPrcd, sCnrcNo, sPrcdName
+				sAcnt	= DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "ACNO" , i )
+				sAsno	= DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "ASNO" , i )
+				sPrcd	= DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "PRCD" , i )
+				sCnrcNo	= DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "CNRC_NO" , i )
+				sCsnm	= DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "CSNM" , i )
+				sPrnm	= DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "WA_PRNM" , i )
+				
+				if sPrcd = "100" Then
+					sPrcdName = "[종합매매] "
+				elseif sPrcd = "118" Then
+					sPrcdName = "[CMA] "
+				elseif sPrcd = "119" Then
+					sPrcdName = "[랩종합] "
+				else
+					sPrcdName = ""
+				end if
+				
+				cmbAcnt.cbadddatatext = sAcnt..sAsno..sCnrcNo.."`"..sPrcdName..mid(sAcnt, 1, 4).."-"..mid(sAcnt, 5, 4).."-"..sAsno.."-"..sCnrcNo.." "..sCsnm
+				cmbPrnm.cbadddatatext = sAcnt..sCnrcNo.."`"..sPrnm
+			next
+			
+			cmbAcnt.currentindex = 0
+			g_sAcno = Left(cmbAcnt.cbkeydata, 8)
+			g_sAsno = Mid(cmbAcnt.cbkeydata, 9, 2)			'v0003 
+			g_sCnrcNo = Right(cmbAcnt.cbkeydata, 3)
+				
+			Dim sData
+			sData = g_sAcno.."|"..g_sAsno.."|"..g_sCnrcNo
+			Form.triggerEvent("fmtabInfo."..fmtabInfo.currenttabpageid, "Request", sData)
+		else
+			lblAcntNodata.visible = true
+			lblNoData.visible = true
+		end if
+		
+
+	end if
+End Sub
+
+'============================================================================
+Sub cmbAcnt_OnEditComplete(iIndex)
+	g_sAcno = Left(cmbAcnt.cbkeydata, 8)
+	g_sAsno = Mid(cmbAcnt.cbkeydata, 9, 2)			'v0003 
+	g_sCnrcNo = Right(cmbAcnt.cbkeydata, 3)
+	
+	cmbPrnm.currentindex = iIndex
+	
+	Dim sWaPrnm
+	sWaPrnm = cmbPrnm.caption
+	lblPrnm.caption = sWaPrnm
+	
+	Dim sData
+	sData = g_sAcno.."|"..g_sAsno.."|"..g_sCnrcNo
+	Form.triggerEvent("fmtabInfo."..fmtabInfo.currenttabpageid, "Request", sData)
+End Sub
+
+'============================================================================
+Sub fmtabInfo_OnTabChanged(nCurrentTab)
+	cmbAcnt.currentindex = cmbAcnt.currentindex
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "PwCheck" then
+		'v0003
+		Form.openPopupAnimation("pwdcheckpopup", g_sAcno & g_sAsno & "☆0" ,"","2")
+		
+	elseif sEventName == "Request" then
+		cmbAcnt.currentindex = cmbAcnt.currentindex
+		
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "CORRECT_PWD" then
+		if sRet <> "" then
+			Dim tData
+			tData = Split(sRet, "★")
+			
+			if UBOUND(tData) > 0 then
+				edtPwd.pwdlen = tData(1)
+				edtPwd.caption = tData(0)
+				
+				Dim sPlain_rm, sPwd
+				sPlain_rm = Form.GetSharedData("&PLAIN_RM", false)
+				
+				if sPlain_rm == "1" then 'MTS메모리평문 적용상태일때
+					sPwd = edtPwd.caption
+				else 'MTS메모리평문 미적용상태일때
+					sPwd = Form.GetEncData(edtPwd.caption)
+				end if
+				
+				Form.triggerEvent("fmtabInfo."..fmtabInfo.currenttabpageid, "PwCheck", sPwd)
+			end if
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubmsg
+	sSubmsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	Form.MsgBox( "알림", szErrMsg & " " & sSubmsg, "", 0 )
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_ctad_011r" trcode="obwat_ctad_011r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_onln_004r" trcode="obwat_onln_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_ctad_011r" title="랩계약번호조회(콤보)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="105" _ulen="75" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="61" _ulen="43" >
+
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_onln_004r" title="랩계좌 계약번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="173" _ulen="127" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="281" _ulen="205" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+CNRC_NO^계약번호^10^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

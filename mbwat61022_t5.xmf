@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57020" scrname="Wrap가입_Step5" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgStep" autosize="1" imgpath="wrap_step_4.png" ly_vert="30,113,315,30,1" />
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_15.9" ly_vert="190,557,175,40,1" />
+		<BUTTON name="btnSearch" caption="진행현황 조회" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="10,557,175,40,1" />
+		<LABEL name="lblText0" fontsize="5" fontstyle="01" caption="Wrap 가입을 위한
+화상상담 예약이 완료 되었습니다." halign="1" multiline="1" ly_vert="36,29,293,71,1" />
+		<LABEL name="lblText1" fgcolor="146:124124124" fontsize="2" halign="1" multiline="1" ly_vert="40,226,295,80,1" />
+		<TABLE name="tblStep" insidelinecolor="102:255255255" colcount="5" rowcount="1" outline="0000" designorder="1" ly_vert="15,155,345,20,1" >
+			<COL_INFO ly_vert_width="69,69,69,69,69" />
+			<ROW_INFO ly_vert_height="20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="067:049081150" line="0,0" caption="계약정보" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" fgcolor="067:049081150" line="0,0" caption="운용정보" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="2,0,2,0" fgcolor="067:049081150" line="0,0" caption="약관및동의" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="3,0,3,0" fgcolor="146:124124124" line="0,0" caption="화상통화" fontsize="-2" impidxs="" />
+				<CELL cell_ly="4,0,4,0" fgcolor="146:124124124" line="0,0" caption="계약완료" fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<GRID name="grdData" ly_vert="15,450,345,60,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bdText1" fontsize="-2" halign="1" />
+				<LABEL name="bdText2" fontsize="-2" halign="1" />
+				<LABEL name="bdText3" fontsize="-2" halign="1" />
+				<LABEL name="bdText4" fontsize="-2" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO usetopheader="0" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="345" ly_vert_visible="0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="345" ly_vert_visible="0" />
+					<BODY rowcount="4" >
+						<ROWINFO ly_vert_height="15,15,15,15" />
+						<CELLINFO>
+							<CELL name="bdText1" cell_ly="0,0,0,0" line="0,0" fgcolor="067:049081150" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bdText2" cell_ly="0,1,0,1" line="0,0" fgcolor="067:049081150" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bdText3" cell_ly="0,2,0,2" line="0,0" fgcolor="067:049081150" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bdText4" cell_ly="0,3,0,3" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bdText1" rangecellid="bdText1" hlcolorcellid="bdText1" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4249" _ulen="4043" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 
+' 02. 화면설명 : 
+' 03. 이    력 : 2023.11.10 : 고승연 : v0003 : 상품위험등급 구분 변경, obwat_pdad_065r IO 수정
+'                2024.03.26 : 고승연 : v0004 : [T2402290007] obwat_pdad_065r IO 수정
+'-------------------------------------------------------------------------------------------
+
+Dim g_sAcno, g_sAsno
+
+'============================================================================
+Sub btnOk_OnClick()
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+	Form.OpenScreen("57020", "")
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Form.SetSharedData("mbwat61022_ACNO", g_sAcno)
+	Form.SetSharedData("mbwat61022_ASNO", g_sAsno)
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+	Form.OpenScreen("57030" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "Text" then
+		if sParam <> "" then
+			Dim tData, sCsno
+			sCsno = Form.GetSharedData("&CUST_NUM", false)
+			tData = Split(sParam, "|")
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_001r", "InBlock1", "IQRY_CLS_CODE" , 0 , "1" )
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_001r", "InBlock1", "NMET_APLT_DATE" , 0 , tData(0) )
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_001r", "InBlock1", "NMET_APLT_SRNO" , 0 , tData(1) )
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_001r", "InBlock1", "CSNO" , 0 , sCsno )
+			DATAMANAGER.RequestTranData( "obwat_onln_001r" )
+			
+			lblText1.caption = tData(2).."에\n연락드릴께요."
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgStep.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+	Form.OpenScreen("57020", "")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obwat_onln_001r" then
+		Dim sDate, sSrno, sCode, sData1, sData2, sData3
+		
+		sDate = DATAMANAGER.GetDataValue( 0, "obwat_onln_001r", "OutBlock1", "NMET_APLT_DATE" , 0 )
+		sSrno = DATAMANAGER.GetDataValue( 0, "obwat_onln_001r", "OutBlock1", "NMET_APLT_SRNO" , 0 )
+		g_sAcno = DATAMANAGER.GetDataValue( 0, "obwat_onln_001r", "OutBlock1", "ACNO" , 0 )
+		g_sAsno = DATAMANAGER.GetDataValue( 0, "obwat_onln_001r", "OutBlock1", "ASNO" , 0 )
+		sCode = DATAMANAGER.GetDataValue( 0, "obwat_onln_001r", "OutBlock1", "ISCD" , 0 )
+		sData1 = DATAMANAGER.GetDataValue( 0, "obwat_onln_001r", "OutBlock1", "SVC_DTL_CNTT1" , 0 )
+		sData2 = DATAMANAGER.GetDataValue( 0, "obwat_onln_001r", "OutBlock1", "SVC_DTL_CNTT2" , 0 )
+		sData3 = DATAMANAGER.GetDataValue( 0, "obwat_onln_001r", "OutBlock1", "SVC_DTL_CNTT3" , 0 )
+		
+		Dim tsData2, sText1, sText2, sText3, sText4
+		tsData2 = Split(sData2, "|")
+		
+		If Trim(tsData2(3)) = "Y" Or Trim(tsData2(4)) = "Y" Or Trim(tsData2(11)) = "Y" Then
+			sText1 = "예약하신 화상상담 종료 후 최종계약이 완료되며,"
+			sText2 = "계약 완료 시점에 선택하신 운용대상 자산에 따른"
+			sText3 = "서비스 약정이 자동 신청됩니다."
+			
+			sText4 = "( "
+			
+			If Trim(tsData2(4)) = "Y" Then
+				sText4 = sText4 & "K-OTC거래신청"
+			End If
+			
+			If Trim(tsData2(11)) = "Y" Then
+				If Len(Trim(sText4)) > 1 Then
+					sText4 = sText4 & " / "
+				End If
+				sText4 = sText4 & "파생ETF거래신청"
+			End If
+			
+			If Trim(tsData2(3)) = "Y" Then
+				If Len(Trim(sText4)) > 1 Then
+					sText4 = sText4 & " / "
+				End If
+				sText4 = sText4 & "ETN거래신청"
+			End If
+			
+			sText4 = sText4 & " )"
+			
+		Else
+			sText1 = ""
+			sText2 = ""
+			sText3 = ""
+			sText4 = ""
+		End If
+		
+		grdData.SetCellData("bdText1", 0, sText1)
+		grdData.SetCellData("bdText2", 0, sText2)
+		grdData.SetCellData("bdText3", 0, sText3)
+		grdData.SetCellData("bdText4", 0, sText4)
+		
+		'Form.ShowAlert("ETN=" & tsData2(3) & "K-OTC" & tsData2(4) & "ETF" & tsData2(11))
+	End If
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_csad_023r" trcode="obwat_csad_023r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_csad_003r" trcode="obwat_csad_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_pdad_065r" trcode="obwat_pdad_065r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_csad_005r" trcode="obwat_csad_005r" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_ctad_081r" trcode="obwat_ctad_081r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_ctad_082r" trcode="obwat_ctad_082r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_ctad_083a" trcode="obwat_ctad_083a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_onln_001r" trcode="obwat_onln_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_onln_002a" trcode="obwat_onln_002a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_csad_023r" title="랩상품 목록 조회 (채널)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="125" _ulen="93" >
+
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+NRML_YN^정상여부^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="463" _ulen="341" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+MGRI_MNBD_CLS_CODE^운용주체구분코드^1^0^0^0^0^0^0
+PROD_RISK_CLCD^상품위험구분코드^2^0^0^0^0^0^0
+HGDT_PROD_YN^고난도상품여부^1^0^0^0^0^0^0
+MIN_JOIN_AMT^최소가입금액^19^0^7^0^0^0^0
+INVT_TRGT_TYPE_NAME^투자대상유형명^40^0^0^0^0^0^0
+UI_FEE_NAME^UI수수료명^100^0^0^0^0^0^0
+ADCP_NAME^자문사명^1024^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="58" _ulen="40" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_csad_003r" title="랩상품상세조회(기본정보)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="94" _ulen="72" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+PROS_CLS_CODE^구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="3" inout="out" _len="155" _ulen="113" >
+
+FLNM^성명^40^0^0^0^0^0^0
+RPRS_ACNT_MGRI_YN^대표계좌운용여부^1^0^0^0^0^0^0
+WA_MGRI_EMPNO^랩어카운트운용직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2598" _ulen="1826" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+WA_PROD_ENG_RPRS_NAME^랩어카운트상품영문대표명^100^0^0^0^0^0^0
+WA_PROD_SVC_CLCD^랩어카운트상품서비스구분코드^2^0^0^0^0^0^0
+WA_RCRT_CLCD^랩어카운트모집구분코드^2^0^0^0^0^0^0
+WA_PROD_ENTT_YN^랩어카운트상품일임여부^1^0^0^0^0^0^0
+WA_MGRI_FORM_CODE^랩어카운트운용방식코드^2^0^0^0^0^0^0
+MGRI_MNBD_CLS_CODE^운용주체구분코드^1^0^0^0^0^0^0
+PROD_CMAT_CLCD^상품맞춤형구분코드^1^0^0^0^0^0^0
+WA_GOAL_CNVR_ABLE_YN^랩어카운트목표전환가능여부^1^0^0^0^0^0^0
+WA_INVT_TYPE_CLCD^랩어카운트투자유형구분코드^2^0^0^0^0^0^0
+WA_PROD_CLCD^랩어카운트상품구분코드^1^0^0^0^0^0^0
+WA_PROD_RISK_CLCD^랩어카운트상품위험구분코드^2^0^0^0^0^0^0
+WA_PROD_SALE_STA_DATE^랩어카운트상품판매시작일자^8^0^0^0^0^0^0
+WA_PROD_SALE_FIN_DATE^랩어카운트상품판매종료일자^8^0^0^0^0^0^0
+WA_MGRI_STA_DATE^랩어카운트운용시작일자^8^0^0^0^0^0^0
+WA_PROD_MTRT_DATE^랩어카운트상품만기일자^8^0^0^0^0^0^0
+PROD_EXPL^상품설명^4000^0^0^0^0^0^0
+MGRI_MTHD_DTL_EXPL^운용방법상세설명^1000^0^0^0^0^0^0
+ASET_CNFG_DTL_EXPL^자산구성상세설명^1000^0^0^0^0^0^0
+RCMT_CUST_DTL_EXPL^추천고객상세설명^1000^0^0^0^0^0^0
+CNTM_MNCN^계약기간월수^6^0^7^0^0^0^0
+JOIN_TRGT_CLS_CODE^가입대상구분코드^1^0^0^0^0^0^0
+INTP_YN^적립식여부^1^0^0^0^0^0^0
+SPLM_MNRC_ABLE_YN^추가입금가능여부^1^0^0^0^0^0^0
+HLFW_DRNG_ABLE_YN^중도출금가능여부^1^0^0^0^0^0^0
+BNMR_NMIX_RPRS_NAME^벤치마크지수대표명^100^0^0^0^0^0^0
+LWST_MNTN_AMT^최저유지금액^19^0^7^0^0^0^0
+MIN_JOIN_AMT^최소가입금액^19^0^7^0^0^0^0
+WA_DRNG_SCDL_DYNU^랩어카운트출금예정일수^9^0^7^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+BNMR_NMIX_CODE^벤치마크지수코드^12^0^0^0^0^0^0
+LOAN_ABLE_ISSU_YN^대출가능종목여부^1^0^0^0^0^0^0
+WA_OTCM_PAY_TPCD^랩어카운트성과보수유형코드^4^0^0^0^0^0^0
+MMW_INVT_YN^MMW투자여부^1^0^0^0^0^0^0
+CUST_DSGT_YN^고객지정여부^1^0^0^0^0^0^0
+MIN_INVT_AMT^최소투자금액^19^0^7^0^0^0^0
+ETF_ATMT_DEAL_YN^ETF자동매매여부^1^0^0^0^0^0^0
+OVRS_ETP_INVT_YN^해외ETP투자여부^1^0^0^0^0^0^0
+OVRS_PROD_INVT_YN^해외상품투자여부^1^0^0^0^0^0^0
+HGDT_PROD_YN^고난도상품여부^1^0^0^0^0^0^0
+FNCM_PROD_CLCD^금융소비자상품구분코드^1^0^0^0^0^0^0
+CAFU_EXLS_YN^숙려제외여부^1^0^0^0^0^0^0
+APRT_SRNM_PROD_YN^적정성상품여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="174" _ulen="134" >
+
+USE_CNT^종합매매계좌^13^0^7^0^0^0^0
+WA_INVT_AMT^CMA자산관리계좌^19^0^7^0^0^0^0
+WA_VLTN_AMT^파생계좌^19^0^7^0^0^0^0
+ISCD^상품코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_pdad_065r" title="랩상품운용지침상세정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="58" _ulen="40" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2120" _ulen="1518" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+WA_PROD_SALE_STA_DATE^랩어카운트상품판매시작일자^8^0^0^0^0^0^0
+WA_PROD_SALE_FIN_DATE^랩어카운트상품판매종료일자^8^0^0^0^0^0^0
+WA_MGRI_STA_DATE^랩어카운트운용시작일자^8^0^0^0^0^0^0
+WA_PROD_MTRT_DATE^랩어카운트상품만기일자^8^0^0^0^0^0^0
+MGRI_MNBD_CLS_CODE^운용주체구분코드^1^0^0^0^0^0^0
+WA_PROD_RISK_CLCD^랩어카운트상품위험구분코드^2^0^0^0^0^0^0
+HGDT_PROD_YN^고난도상품여부^1^0^0^0^0^0^0
+WA_OTCM_PAY_TPCD^랩어카운트성과보수유형코드^4^0^0^0^0^0^0
+DVPD_YN^파생상품여부^1^0^0^0^0^0^0
+WA_MGRI_EMPNO^랩어카운트운용직원번호^9^0^0^0^0^0^0
+FLNM^성명^40^0^0^0^0^0^0
+MGRI_CLS_CODE^운용구분코드^2^0^0^0^0^0^0
+INVT_REGN_CLCD^투자지역구분코드^2^0^0^0^0^0^0
+INVT_ASET_TYPE_CLCD^투자자산유형구분코드^2^0^0^0^0^0^0
+ONLN_SALE_YN^온라인판매여부^1^0^0^0^0^0^0
+EXCH_INVT_YN^거래소투자여부^1^0^0^0^0^0^0
+KONEX_INVT_YN^코넥스투자여부^1^0^0^0^0^0^0
+KOSDAQ_INVT_YN^코스닥투자여부^1^0^0^0^0^0^0
+FND_INVT_YN^펀드투자여부^1^0^0^0^0^0^0
+BOND_INVT_YN^채권투자여부^1^0^0^0^0^0^0
+DRVT_ETF_INVT_YN^파생ETF투자여부^1^0^0^0^0^0^0
+ETN_INVT_YN^ETN투자여부^1^0^0^0^0^0^0
+OTC_INVT_YN^OTC투자여부^1^0^0^0^0^0^0
+OVRS_STCK_INVT_YN^해외주식투자여부^1^0^0^0^0^0^0
+OVRS_ETP_INVT_YN^해외ETP투자여부^1^0^0^0^0^0^0
+OPTN_TR_ABLE_YN^옵션거래가능여부^1^0^0^0^0^0^0
+CLRN_INDC_YN^청산지시여부^1^0^0^0^0^0^0
+LOAN_ABLE_YN^대출가능여부^1^0^0^0^0^0^0
+MMW_ATMT_INVT_YN^MMW자동투자여부^1^0^0^0^0^0^0
+DIV_GRP_CODE^분류그룹코드^10^0^0^0^0^0^0
+WA_OTCM_PAY_YN^랩어카운트성과보수여부^1^0^0^0^0^0^0
+BASC_RMRT^기본보수율^12^5^7^0^0^0^0
+OTCM_PAY_SDRT^성과보수기준율^9^4^7^0^0^0^0
+OTCM_RMRT^성과보수율^14^5^7^0^0^0^0
+OLD_WA_PROD_RISK_CLCD^구랩어카운트상품위험구분코드^2^0^0^0^0^0^0
+ETP_INVT_YN^ETP투자여부^1^0^0^0^0^0^0
+CRDT_INVT_YN^신용투자여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_csad_005r" title="랩상품상세조회(운용지침)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="94" _ulen="72" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+PROS_CLS_CODE^구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1390" _ulen="1050" >
+
+D1_ERT^컴플주식최소^23^6^7^0^0^0^0
+WA_W1_ERT^컴플주식최대^23^6^7^0^0^0^0
+WA_M1_ERT^컴플집합최소^23^6^7^0^0^0^0
+WA_M2_ERT^컴플집합최대^23^6^7^0^0^0^0
+WA_M3_ERT^컴플채권최소^23^6^7^0^0^0^0
+WA_M6_ERT^컴플채권최대^23^6^7^0^0^0^0
+WA_M9_ERT^컴플RP최소^23^6^7^0^0^0^0
+WA_M12_ERT^컴플RP최대^23^6^7^0^0^0^0
+WA_ACML_ERT^컴플예수금최소^23^6^7^0^0^0^0
+WA_TIMS_ACML_ERT^컴플예수금최대^23^6^7^0^0^0^0
+FUTS_MIN_RLIM^선물최소비중^14^5^7^0^0^0^0
+FUTS_MAX_RLIM^선물최대비중^14^5^7^0^0^0^0
+ISNT_MIN_RLIM^발행어음최소비중^14^5^7^0^0^0^0
+ISNT_MAX_RLIM^발행어음최대비중^14^5^7^0^0^0^0
+MMW_MIN_RLIM^MMW최소비중^14^5^7^0^0^0^0
+MMW_MAX_RLIM^MMW최대비중^14^5^7^0^0^0^0
+OM_DRVT_MIN_RLIM^장외파생최소비중^14^5^7^0^0^0^0
+OM_DRVT_MAX_RLIM^장외파생최대비중^14^5^7^0^0^0^0
+WA_GOAL_CNVR_ERT^편입주식코스피^23^6^7^0^0^0^0
+DSCS_MGRI_RMRT^편입주식코스닥^14^5^7^0^0^0^0
+WA_GOAL_ERT^편입집합^23^6^7^0^0^0^0
+WA_STCK_ERT^편입채권^23^6^7^0^0^0^0
+FUTS_ENRL_RLIM^선물편입비중^14^5^7^0^0^0^0
+OM_DRVT_ENRL_RLIM^장외파생편입비중^14^5^7^0^0^0^0
+WA_STCK_RLIM^손절코스피^14^5^7^0^0^0^0
+WA_RLIM^손절코스닥^14^5^7^0^0^0^0
+WA_PRCD^상품코드^12^0^0^0^0^0^0
+BOND_CRDT_GRAD^채권신용등급^100^0^0^0^0^0^0
+CP_CRDT_GRAD^CP신용등급^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_ctad_081r" title="비대면 랩 가입 예약일자 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="151" _ulen="113" >
+
+RSEV_STA_DATE^예약시작일자^8^0^0^0^0^0^0
+RSEV_FIN_DATE^예약종료일자^8^0^0^0^0^0^0
+CNPL_TELNO^연락처전화번호^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="1000" inout="out" _len="91" _ulen="71" >
+
+RSEV_DATE^예약일자^8^0^0^0^0^0^0
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_ctad_082r" title="비대면 랩 가입 예약시간 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="116" _ulen="88" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RSEV_DATE^예약일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="1000" inout="out" _len="167" _ulen="131" >
+
+STA_HOUR^시작시간^6^0^0^0^0^0^0
+FIN_HOUR^종료시간^6^0^0^0^0^0^0
+RSEV_ABLE_QTY^예약가능수량^12^0^7^0^0^0^0
+APLT_QTY^신청수량^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_ctad_083a" title="비대면 랩 가입 예약 신청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="345" _ulen="253" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RSEV_DATE^예약일자^8^0^0^0^0^0^0
+RSEV_APLT_STA_HOUR^예약신청시작시간^6^0^0^0^0^0^0
+RSEV_APLT_FIN_HOUR^예약신청종료시간^6^0^0^0^0^0^0
+NMET_APLT_DATE^비대면신청일자^8^0^0^0^0^0^0
+NMET_APLT_SRNO^비대면신청일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="229" _ulen="169" >
+
+RSEV_APLT_DATE^예약신청일자^8^0^0^0^0^0^0
+RSEV_APLT_SRNO^예약신청일련번호^11^0^7^0^0^0^0
+RSEV_APLT_STA_HOUR^예약신청시작시간^6^0^0^0^0^0^0
+RSEV_APLT_FIN_HOUR^예약신청종료시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_onln_001r" title="온라인 계약 신청내역 조회 (채?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="276" _ulen="204" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+NMET_APLT_DATE^비대면신청일자^8^0^0^0^0^0^0
+NMET_APLT_SRNO^비대면신청일련번호^11^0^7^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+BSWR_CLCD^업무구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="666" _ulen="496" >
+
+NMET_APLT_DATE^비대면신청일자^8^0^0^0^0^0^0
+NMET_APLT_SRNO^비대면신청일련번호^11^0^7^0^0^0^0
+PRGS_STAT_CODE^진행상태코드^2^0^0^0^0^0^0
+BSWR_CLCD^업무구분코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+CNRC_DATE^계약일자^8^0^0^0^0^0^0
+CNRC_NO^계약번호^10^0^0^0^0^0^0
+SVC_DTL_CNTT1^서비스상세내용1^1000^0^0^0^0^0^0
+SVC_DTL_CNTT2^서비스상세내용2^1000^0^0^0^0^0^0
+SVC_DTL_CNTT3^서비스상세내용3^1000^0^0^0^0^0^0
+SVC_DTL_CNTT4^서비스상세내용4^1000^0^0^0^0^0^0
+SVC_DTL_CNTT5^서비스상세내용5^1000^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_onln_002a" title="온라인 계약 신청내역 처리 (채?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="628" _ulen="466" >
+
+NMET_APLT_DATE^비대면신청일자^8^0^0^0^0^0^0
+NMET_APLT_SRNO^비대면신청일련번호^11^0^7^0^0^0^0
+PRGS_STAT_CODE^진행상태코드^2^0^0^0^0^0^0
+BSWR_CLCD^업무구분코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+CNRC_NO^계약번호^10^0^0^0^0^0^0
+SVC_DTL_CNTT1^서비스상세내용1^1000^0^0^0^0^0^0
+SVC_DTL_CNTT2^서비스상세내용2^1000^0^0^0^0^0^0
+SVC_DTL_CNTT3^서비스상세내용3^1000^0^0^0^0^0^0
+SVC_DTL_CNTT4^서비스상세내용4^1000^0^0^0^0^0^0
+SVC_DTL_CNTT5^서비스상세내용5^1000^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

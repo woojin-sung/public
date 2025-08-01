@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57060" scrname="계약정보 변경_계약정보탭" version="2" writer="고승연" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,437,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="cont" scroll_pos="0,0" ly_vert="0,0,375,437,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" designorder="1" ly_vert="10,10,355,150,1" >
+					<COL_INFO ly_vert_width="200,155" />
+					<ROW_INFO ly_vert_height="50,50,50" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="만기연장" impidxs="" />
+						<CELL cell_ly="1,0,1,0" line="0,0" impidxs="" />
+						<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="투자일임보고서 발송" impidxs="" />
+						<CELL cell_ly="1,1,1,1" line="0,0" impidxs="" />
+						<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="약정계좌" impidxs="" />
+						<CELL cell_ly="1,2,1,2" line="0,0" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<BUTTON name="btnTrans" caption="변경" btnimage="btn_15.9" ly_vert="10,397,355,40,1" />
+				<BUTTON name="btnSwitch" ly_vert="305,25,55,20,1" />
+				<COMBO name="cmbReport" fgcolor="067:049081150" cbinputdatatext="21`이메일
+02`직장
+01`자택" popuptitle="투자일임보고서 제공" imagefilepth="combo_04.9.png" ly_vert="250,68,109,30,1" />
+				<BUTTON name="btnReport" btnimage="alpha" ly_vert="250,68,109,30,1" />
+				<COMBO name="cmbAcntDeposit" fgcolor="067:049081150" imagefilepth="combo_04.9.png" ly_vert="100,119,260,30,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10195" _ulen="9883" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : Wrap 계약정보 변경 (계약정보)
+' 02. 화면설명 : 
+' 03. 이    력 : 2022.10.21 : 고승연 : v0001 : 
+'                2022.10.24 : 고승연 : v0002 : 계좌일련번호 추가
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_bRequest
+Dim g_sAcnoDeposit	'선택_약정계좌번호
+Dim g_sAsnoDeposit	'선택_약정계좌일련번호
+Dim g_sLNKD_ACNO		'약정계좌번호
+Dim g_sLNKD_ASNO		'약정계좌일련번호
+Dim g_lnkdIndx
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	cont.btnSwitch.setApplySwitch("OFF", "ON", 269, 261, 286, 289)
+	cont.acntDepositAcnt.SetBgImg("combo_04.9")
+	
+	f_SetClear()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "Clear" then
+		f_SetClear()
+		
+	elseif sEventName == "Request" then
+		if sParam <> null and sParam <> "" then
+			g_bRequest = true
+			
+			Dim tData
+			tData = Split(sParam, "|")
+			
+			cont.btnSwitch.switchindex = 0
+			cont.cmbReport.currentindex = 0
+			cont.acntDepositAcnt.currentindex = 0
+			
+			cont.tblInfo.visible = true
+			cont.btnSwitch.visible = true
+			cont.cmbReport.visible = true
+			cont.acntDepositAcnt.visible = true
+			
+			if tData(0) == null or tData(0) == "" or tData(1) == null or tData(1) == "" or tData(2) == null or tData(2) == "" then
+				Exit Sub
+			end if
+			
+			DATAMANAGER.SetDataValue( 0, "obwat_ctad_023r", "InBlock1", "WA_ACNO" , 0 , tData(0) )
+			DATAMANAGER.SetDataValue( 0, "obwat_ctad_023r", "InBlock1", "WA_CNRC_NO" , 0 , tData(2) )
+			
+			DATAMANAGER.RequestTranData( "obwat_ctad_023r" )
+
+			Dim g_sCsno
+			g_sCsno = Form.GetSharedData("&CUST_NUM", false)
+			
+			' 입금받을 계좌 조회
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_004r", "InBlock1", "IQRY_CLS_CODE" , 0 , "3" )
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_004r", "InBlock1", "CSNO" , 0 , g_sCsno )
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_004r", "InBlock1", "ACNO" , 0 , tData(0) )
+			DATAMANAGER.RequestTranData( "obwat_onln_004r" )
+			
+			DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "WA_ACNO" , 0 , tData(0) )
+			DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "WA_CNRC_NO" , 0 , tData(2) )
+			
+		end if
+		
+	elseif sEventName == "PwCheck" then
+		Dim sWA_CNRC_EXTS_YN
+		sWA_CNRC_EXTS_YN = cont.btnSwitch.switchindex = "1" and "Y" or "N"
+		
+		DATAMANAGER.SetEventFlag( "obwat_ctad_013a", "U" )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "PWD" , 0 , sParam )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "WA_CNRC_EXTS_YN" , 0 , sWA_CNRC_EXTS_YN )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "SNML_INAG_TYPE_CODE" , 0 , cont.cmbReport.cbkeydata )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "LNKD_ACNO" , 0 , g_sLNKD_ACNO )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "LNKD_ASNO" , 0 , g_sLNKD_ASNO )
+'		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "RSEV_YN" , 0 , "Y" )
+		
+		DATAMANAGER.RequestTranData( "obwat_ctad_013a" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obwat_ctad_023r" then
+		sWA_CNRC_EXTS_YN		= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "WA_CNRC_EXTS_YN" , 0 )
+		sSNML_INAG_TYPE_CODE	= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "SNML_INAG_TYPE_CODE" , 0 )
+		g_sLNKD_ACNO			= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "LNKD_ACNO" , 0 )
+		g_sLNKD_ASNO			= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "LNKD_ASNO" , 0 )
+		sWA_PRCD				= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "WA_PRCD" , 0 )
+		
+		if sWA_CNRC_EXTS_YN == "Y" then
+			cont.btnSwitch.switchindex = 1
+		end if
+		
+		cont.cmbReport.cbkeydata = sSNML_INAG_TYPE_CODE
+		'cont.acntDepositAcnt.caption = g_sLNKD_ACNO..g_sLNKD_ASNO
+		
+		sWA_MGRI_EMPNO				= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "WA_MGRI_EMPNO" , 0 )
+		sRCMD_EMPNO					= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "RCMD_EMPNO" , 0 )
+		sMNGR_EMPNO					= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "MNGR_EMPNO" , 0 )
+		sASET_RE_DSTR_PRIR_NTFY_CLCD	= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "ASET_RE_DSTR_PRIR_NTFY_CLCD" , 0 )
+		sLOAN_ABLE_YN					= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "LOAN_ABLE_YN" , 0 )
+		sCRDT_GVNG_AMT_RATE			= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "CRDT_GVNG_AMT_RATE" , 0 )
+		sWA_CRDT_CLCD					= DATAMANAGER.GetDataValue( 0, "obwat_ctad_023r", "OutBlock1", "WA_CRDT_CLCD" , 0 )
+		
+		if sCRDT_GVNG_AMT_RATE <> null and sCRDT_GVNG_AMT_RATE <> "" then
+			sCRDT_GVNG_AMT_RATE = tostring(tonumber(sCRDT_GVNG_AMT_RATE) * 10000)
+		end if
+		
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "WA_PRCD" , 0 , sWA_PRCD )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "WA_MGRI_EMPNO" , 0 , sWA_MGRI_EMPNO )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "RCMD_EMPNO" , 0 , sRCMD_EMPNO )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "MNGR_EMPNO" , 0 , sMNGR_EMPNO )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "ASET_RE_DSTR_PRIR_NTFY_CLCD" , 0 , sASET_RE_DSTR_PRIR_NTFY_CLCD )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "LOAN_ABLE_YN" , 0 , sLOAN_ABLE_YN )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "CRDT_GVNG_AMT_RATE" , 0 , sCRDT_GVNG_AMT_RATE / 10000 )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_013a", "InBlock1", "WA_CRDT_CLCD" , 0 , sWA_CRDT_CLCD )
+	
+	elseif szTranID == "obwat_ctad_013a" then
+		Form.MsgBox("알림", "계좌정보가 변경되었습니다.", "", 8, "확인", "")
+		Form.triggerEvent("#", "Request", "")
+	elseif szTranID == "obwat_onln_004r" then
+		Dim nCount, bImpossible
+		nCount = DATAMANAGER.GetDataCount( 0, "obwat_onln_004r", "OutBlock1" )
+		bImpossible = true
+		
+		cont.cmbAcntDeposit.clear = 0
+		
+		if nCount > 0 then
+			for i = 0 to nCount-1
+				Dim sAcnt, sAsno, sPrcd, sPrcdName
+				sAcnt = DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "ACNO" , i )
+				sAsno = DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "ASNO" , i )
+				sPrcd = DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "PRCD" , i )
+				sCsnm = DATAMANAGER.GetDataValue( 0, "obwat_onln_004r", "OutBlock1", "CSNM" , i )
+				
+				if sPrcd = "100" Then
+					sPrcdName = "[종합매매] "
+				elseif sPrcd = "118" Then
+					sPrcdName = "[CMA] "
+				elseif sPrcd = "119" Then
+					sPrcdName = "[랩종합] "
+				else
+					sPrcdName = ""
+				end if
+				
+				if Trim(sAcnt) == Trim(g_sLNKD_ACNO) and Trim(sAsno) == Trim(g_sLNKD_ASNO) then
+					g_lnkdIndx = i
+				end if
+				
+				cont.cmbAcntDeposit.cbadddatatext = sAcnt..sAsno.."`"..sPrcdName..mid(sAcnt, 1, 4).."-"..mid(sAcnt, 5, 4).."-"..sAsno.." "..sCsnm
+			next
+		end if
+		
+		cont.cmbAcntDeposit.currentindex = g_lnkdIndx
+		
+	end if
+End Sub
+
+
+'============================================================================
+Sub cont_cmbAcntDeposit_OnEditComplete(iIndex)
+	g_sLNKD_ACNO = Left(cont.cmbAcntDeposit.cbkeydata, 8)
+	g_sLNKD_ASNO = Right(cont.cmbAcntDeposit.cbkeydata, 2)
+End Sub
+
+'============================================================================
+Sub cont_btnTrans_OnClick()
+	if (g_bRequest) then
+		sWA_ACNO = DATAMANAGER.GetDataValue( 0, "obwat_ctad_013a", "InBlock1", "WA_ACNO" , 0 )
+		sWA_CNRC_NO = DATAMANAGER.GetDataValue( 0, "obwat_ctad_013a", "InBlock1", "WA_CNRC_NO" , 0 )
+		
+		if sWA_ACNO == null or sWA_ACNO == "" or sWA_CNRC_NO == null or sWA_CNRC_NO == "" then
+			Exit Sub
+		end if
+		
+		Form.triggerEvent("#", "PwCheck", "")
+	else
+		Form.MsgBox("알림", "계약번호를 선택해주세요.", "", 8, "확인", "")
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubmsg
+
+	if szTranID == "obwat_ctad_013a" then
+		sSubmsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+		Form.MsgBox( "알림", "서비스신청이 불가합니다.\n" & sSubmsg, "", 0 )
+	end if
+End Sub
+
+Sub f_SetClear()
+	g_bRequest = false
+	
+	cont.tblInfo.visible = false
+	cont.btnSwitch.visible = false
+	cont.cmbReport.visible = false
+	cont.acntDepositAcnt.visible = false
+End Sub
+
+'============================================================================
+Sub cont_btnReport_OnClick()
+	'Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+	
+'	Dim sPlain_rm, sData
+'	sPlain_rm = Form.GetSharedData("&PLAIN_RM", false)
+'	sData = g_sLNKD_ACNO.."|"
+'	
+'	if sPlain_rm == "1" then 'MTS메모리평문 적용상태일때
+'		sData = sData..contStep1.edtPwd.caption
+'	else 'MTS메모리평문 미적용상태일때
+'		sData = sData..Form.GetEncData(contStep1.edtPwd.caption)
+'	end if
+		
+		
+	sData = g_sLNKD_ACNO.."|"..""
+	Form.OpenPopupAnimation("mbwat61022_p9" , sData ,"POPUP_REPORT","2")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("POPUP_REPORT" , g_szData)
+End Sub
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "POPUP_REPORT" then '투자일임보고서 제공
+		if sRet <> "null" and sRet <> "" then
+			tData = Split(sRet, "|")
+			cont.cmbReport.cbkeydata = tData(1)
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_ctad_023r" trcode="obwat_ctad_023r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_ctad_013a" trcode="obwat_ctad_013a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_onln_004r" trcode="obwat_onln_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_ctad_023r" title="랩계약조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="358" _ulen="246" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+WA_INDV_MGRI_ASNO^랩어카운트개별운용계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="3290" _ulen="2340" >
+
+WA_KYC_GRAD_CODE^랩어카운트KYC등급코드^2^0^0^0^0^0^0
+WA_CUST_INVT_INCL_OPNN^랩어카운트고객투자성향의견^100^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+WA_PROD_RISK_CLCD^랩어카운트상품위험구분코드^2^0^0^0^0^0^0
+MIN_JOIN_AMT^최소가입금액^19^0^7^0^0^0^0
+INTP_YN^적립식여부^1^0^0^0^0^0^0
+WA_GOAL_CNVR_ABLE_YN^랩어카운트목표전환가능여부^1^0^0^0^0^0^0
+PROD_CMAT_CLCD^상품맞춤형구분코드^1^0^0^0^0^0^0
+WA_INVT_AMT^랩어카운트투자금액^19^0^7^0^0^0^0
+WA_CNRC_EXTS_YN^랩어카운트계약연장여부^1^0^0^0^0^0^0
+WA_MGRI_EMPNO^랩어카운트운용직원번호^9^0^0^0^0^0^0
+MGCO_NAME^운용사명^40^0^0^0^0^0^0
+RCMD_EMPNO^권유직원번호^9^0^0^0^0^0^0
+EMPL_NAME^직원명^40^0^0^0^0^0^0
+WA_GOAL_CNVR_ERT^랩어카운트목표전환수익률^23^6^7^0^0^0^0
+DSCS_MGRI_RMRT^협의운용보수율^14^5^7^0^0^0^0
+LNKD_ACNO^연계계좌번호^8^0^0^0^0^0^0
+LNKD_ASNO^연계계좌일련번호^2^0^0^0^0^0^0
+WA_CNRC_STAT_CLCD^랩어카운트계약상태구분코드^2^0^0^0^0^0^0
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+MP_CODE^모델포트폴리오코드^10^0^0^0^0^0^0
+INVT_PRD_CLCD^투자기간구분코드^2^0^0^0^0^0^0
+FRST_CNRC_DATE^최초계약일자^8^0^0^0^0^0^0
+SEQ1^순서1^6^0^7^0^0^0^0
+SEQ2^순서2^6^0^7^0^0^0^0
+SEQ3^순서3^6^0^7^0^0^0^0
+CNTM_MNCN^계약기간월수^6^0^7^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+WA_INDV_MGRI_ACNO^랩어카운트개별운용계좌번호^8^0^0^0^0^0^0
+WA_INDV_MGRI_ASNO^랩어카운트개별운용계좌일련번호^2^0^0^0^0^0^0
+CNTG_VOL^체결거래량^19^0^7^0^0^0^0
+CNPL_TELNO^연락처전화번호^16^0^0^0^0^0^0
+OWHS_ADDR^자택주소^200^0^0^0^0^0^0
+CO_ADDR^회사주소^200^0^0^0^0^0^0
+RPRS_ACNO^대표계좌번호^8^0^0^0^0^0^0
+RPRS_ASNO^대표계좌일련번호^2^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+MNGR_EMPNO^관리자직원번호^9^0^0^0^0^0^0
+MNGR_NAME^관리자명^40^0^0^0^0^0^0
+LOAN_ABLE_YN^대출가능여부^1^0^0^0^0^0^0
+CRDT_GVNG_AMT_RATE^신용공여금액비율^10^5^7^0^0^0^0
+WA_CRDT_CLCD^랩어카운트신용구분코드^1^0^0^0^0^0^0
+MMW_INVT_YN^MMW투자여부^1^0^0^0^0^0^0
+JOIN_TYPE_CODE^가입유형코드^2^0^0^0^0^0^0
+ATMT_CANC_YN^자동해지여부^1^0^0^0^0^0^0
+ASET_RE_DSTR_PRIR_NTFY_CLCD^자산재배분사전통지구분코드^2^0^0^0^0^0^0
+STCK_CNTG_BRKD_SNDN_APLT_YN^주식체결내역발송신청여부^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+WA_OTCM_PAY_YN^랩어카운트성과보수여부^1^0^0^0^0^0^0
+OTCM_PAY_SDRT^성과보수기준율^9^4^7^0^0^0^0
+OTCM_PAY_CAP_RATE^성과보수CAP비율^10^5^7^0^0^0^0
+OTCM_PAY_STND_CLCD^성과보수기준구분코드^2^0^0^0^0^0^0
+OTCM_PAY_CLCD^성과보수구분코드^2^0^0^0^0^0^0
+OTCM_PAY_LEVY_TMNG_CLCD^성과보수징수시기구분코드^2^0^0^0^0^0^0
+OTCM_RMRT^성과보수율^14^5^7^0^0^0^0
+OPTN_TR_ABLE_YN^옵션거래가능여부^1^0^0^0^0^0^0
+MNTL_ERT_INFR_YN^월간수익률통보여부^1^0^0^0^0^0^0
+CNRC_EXTS_DATE^계약연장일자^8^0^0^0^0^0^0
+MTRT_EXTS_AFT_M1_DATE^만기연장후1개월일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="100" inout="out" _len="745" _ulen="509" >
+
+ADCP_CO_RPRS_NAME^자문사회사대표명^100^0^0^0^0^0^0
+OUTS_INVT_ADCP_CODE^외부투자자문사코드^5^0^0^0^0^0^0
+MP_CODE^모델포트폴리오코드^10^0^0^0^0^0^0
+MP_RPRS_NAME^모델포트폴리오대표명^100^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+PROD_CMAT_CLCD^상품맞춤형구분코드^1^0^0^0^0^0^0
+WA_INVT_PROD_CLCD^랩어카운트투자상품구분코드^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+WA_INDV_MGRI_ACNO^랩어카운트개별운용계좌번호^8^0^0^0^0^0^0
+WA_INDV_MGRI_ASNO^랩어카운트개별운용계좌일련번호^2^0^0^0^0^0^0
+RPRS_ACNT_YN^대표계좌여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="233" _ulen="169" >
+
+CMPG_SNRG_CODE^캠페인시너지코드^5^0^0^0^0^0^0
+CMPG_SNRG_CODE_NAME^캠페인시너지코드명^200^0^0^0^0^0^0
+SNRG_BLNG_CO_CODE^시너지소속회사코드^10^0^0^0^0^0^0
+RCMT_EMPNO^추천직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="549" _ulen="413" >
+
+JOIN_DATE^가입일자^8^0^0^0^0^0^0
+MTRT_DATE^만기일자^8^0^0^0^0^0^0
+TXTN_TRGT_PRD_STA_DATE^과세대상기간시작일자^8^0^0^0^0^0^0
+TXTN_TRGT_PRD_FIN_DATE^과세대상기간종료일자^8^0^0^0^0^0^0
+CNRC_AMT^계약금액^19^0^7^0^0^0^0
+WA_KYC_GRAD_CODE^랩어카운트KYC등급코드^2^0^0^0^0^0^0
+TXEX_INCM_AMT^비과세소득금액^19^0^7^0^0^0^0
+AGE^연령^4^0^7^0^0^0^0
+ENLS_DATE^입대일자^8^0^0^0^0^0^0
+DFMS_DATE^제대일자^8^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_ctad_013a" title="계약관리_계약등록/변경/취소" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="2983" _ulen="2123" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+FRST_CNRC_AMT^최초계약금액^19^0^7^0^0^0^0
+WA_GOAL_CNVR_ERT^랩어카운트목표전환수익률^23^6^7^0^0^0^0
+WA_CNRC_EXTS_YN^랩어카운트계약연장여부^1^0^0^0^0^0^0
+DSCS_MGRI_RMRT^협의운용보수율^14^5^7^0^0^0^0
+WA_GOAL_ERT^랩어카운트목표수익률^23^6^7^0^0^0^0
+WA_MGRI_EMPNO^랩어카운트운용직원번호^9^0^0^0^0^0^0
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+WA_CUST_INVT_INCL_OPNN^랩어카운트고객투자성향의견^100^0^0^0^0^0^0
+MNST_EMPNO^관리사원직원번호^9^0^0^0^0^0^0
+RCMD_EMPNO^권유직원번호^9^0^0^0^0^0^0
+LNKD_ACNO^연계계좌번호^8^0^0^0^0^0^0
+LNKD_ASNO^연계계좌일련번호^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+WA_INDV_MGRI_ASNO^랩어카운트개별운용계좌일련번호^2^0^0^0^0^0^0
+SEQ1^순서1^6^0^7^0^0^0^0
+SEQ2^순서2^6^0^7^0^0^0^0
+SEQ3^순서3^6^0^7^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+CNTM_MNCN^계약기간월수^6^0^7^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MP_CODE^모델포트폴리오코드^10^0^0^0^0^0^0
+MNGR_EMPNO^관리자직원번호^9^0^0^0^0^0^0
+LOAN_ABLE_YN^대출가능여부^1^0^0^0^0^0^0
+CRDT_GVNG_AMT_RATE^신용공여금액비율^10^5^7^0^0^0^0
+WA_CRDT_CLCD^랩어카운트신용구분코드^1^0^0^0^0^0^0
+MMW_INVT_YN^MMW투자여부^1^0^0^0^0^0^0
+ATMT_CANC_YN^자동해지여부^1^0^0^0^0^0^0
+ASET_RE_DSTR_PRIR_NTFY_CLCD^자산재배분사전통지구분코드^2^0^0^0^0^0^0
+ENLS_DATE^입대일자^8^0^0^0^0^0^0
+DFMS_DATE^제대일자^8^0^0^0^0^0^0
+STCK_CNTG_BRKD_SNDN_APLT_YN^주식체결내역발송신청여부^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+RSEV_YN^예약여부^1^0^0^0^0^0^0
+JOIN_TYPE_CODE^가입유형코드^2^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+TRNM_RSLT_YN^전송결과여부^1^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+WA_OTCM_PAY_YN^랩어카운트성과보수여부^1^0^0^0^0^0^0
+OTCM_PAY_SDRT^성과보수기준율^9^4^7^0^0^0^0
+OTCM_PAY_CAP_RATE^성과보수CAP비율^10^5^7^0^0^0^0
+OTCM_PAY_STND_CLCD^성과보수기준구분코드^2^0^0^0^0^0^0
+OTCM_PAY_CLCD^성과보수구분코드^2^0^0^0^0^0^0
+OTCM_PAY_LEVY_TMNG_CLCD^성과보수징수시기구분코드^2^0^0^0^0^0^0
+OTCM_RMRT^성과보수율^14^5^7^0^0^0^0
+OPTN_TR_ABLE_YN^옵션거래가능여부^1^0^0^0^0^0^0
+MNTL_ERT_INFR_YN^월간수익률통보여부^1^0^0^0^0^0^0
+FNPR_JOIN_SRNO^금융상품가입일련번호^13^0^0^0^0^0^0
+FNPR_JOIN_DETL_SRNO^금융상품가입세부일련번호^5^0^0^0^0^0^0
+NMET_APLT_DATE^비대면신청일자^8^0^0^0^0^0^0
+NMET_APLT_SRNO^비대면신청일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="5" inout="in" _len="611" _ulen="417" >
+
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+WA_INDV_MGRI_ACNO^랩어카운트개별운용계좌번호^8^0^0^0^0^0^0
+WA_INDV_MGRI_ASNO^랩어카운트개별운용계좌일련번호^2^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+PROD_CMAT_CLCD^상품맞춤형구분코드^1^0^0^0^0^0^0
+WA_INVT_PROD_CLCD^랩어카운트투자상품구분코드^2^0^0^0^0^0^0
+MP_CODE^모델포트폴리오코드^10^0^0^0^0^0^0
+INVT_PROD_RLIM^투자상품비중^14^5^7^0^0^0^0
+RPRS_ACNT_YN^대표계좌여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="168" _ulen="122" >
+
+SNRG_BLNG_CO_CODE^시너지소속회사코드^10^0^0^0^0^0^0
+CMPG_SNRG_CODE^캠페인시너지코드^5^0^0^0^0^0^0
+RCMT_EMPNO^추천직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="176" _ulen="126" >
+
+TACT_PROS_CLS_CODE^이체처리구분코드^1^0^0^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+WA_CNRC_NO^랩어카운트계약번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_onln_004r" title="랩계좌 계약번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="173" _ulen="127" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="281" _ulen="205" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+CNRC_NO^계약번호^10^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

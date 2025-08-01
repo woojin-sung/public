@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57020" scrname="Wrap가입_운용대상자산BS" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" autosize="1" imgpath="alpha128" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,210,375,491,1" />
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="운용대상자산" halign="1" ly_vert="32,222,304,38,1" />
+		<IMAGE name="imgDot0" imgpath="icon_dot.png" ly_vert="11,272,26,30,1" />
+		<LABEL name="lblTitle0" fontsize="1" fontstyle="01" caption="국내주식" ly_vert="29,272,165,33,1" />
+		<CHKBUTTON name="chk00" chkcaption="거래소" unchkcaption="거래소" ly_vert="36,304,100,17,1" />
+		<CHKBUTTON name="chk01" chkcaption="코스닥" unchkcaption="코스닥" ly_vert="151,304,100,17,1" />
+		<CHKBUTTON name="chk02" chkcaption="코넥스" unchkcaption="코넥스" ly_vert="266,304,100,17,1" />
+		<CHKBUTTON name="chk03" chkcaption="ETN" unchkcaption="ETN" ly_vert="36,328,100,17,1" />
+		<CHKBUTTON name="chk04" chkcaption="K-OTC" unchkcaption="K-OTC" ly_vert="151,328,100,17,1" />
+		<IMAGE name="imgDot1" imgpath="icon_dot.png" ly_vert="11,358,26,30,1" />
+		<LABEL name="lblTitle1" fontsize="1" fontstyle="01" caption="해외주식" ly_vert="29,358,165,33,1" />
+		<CHKBUTTON name="chk10" chkcaption="해외주식" unchkcaption="해외주식" ly_vert="36,390,100,17,1" />
+		<CHKBUTTON name="chk11" chkcaption="해외ETP" unchkcaption="해외ETP" ly_vert="151,390,100,17,1" />
+		<IMAGE name="imgDot2" imgpath="icon_dot.png" ly_vert="11,420,26,30,1" />
+		<LABEL name="lblTitle2" fontsize="1" fontstyle="01" caption="선물옵션" ly_vert="29,420,165,33,1" />
+		<CHKBUTTON name="chk20" chkcaption="선물옵션매수/청산만 허용" unchkcaption="선물옵션매수/청산만 허용" ly_vert="36,452,240,17,1" />
+		<CHKBUTTON name="chk21" chkcaption="모든 선물옵션" unchkcaption="모든 선물옵션" ly_vert="36,476,131,17,1" />
+		<IMAGE name="imgDot3" imgpath="icon_dot.png" ly_vert="11,504,26,30,1" />
+		<LABEL name="lblTitle3" fontsize="1" fontstyle="01" caption="기타" ly_vert="29,504,165,33,1" />
+		<CHKBUTTON name="chk30" chkcaption="채권" unchkcaption="채권" ly_vert="36,536,100,17,1" />
+		<CHKBUTTON name="chk31" chkcaption="펀드" unchkcaption="펀드" ly_vert="151,536,100,17,1" />
+		<CHKBUTTON name="chk32" chkcaption="파생ETF" unchkcaption="파생ETF" ly_vert="266,328,100,17,1" />
+		<CHKBUTTON name="chk33" chkcaption="MMW자동투자" unchkcaption="MMW자동투자" ly_vert="36,560,134,17,1" />
+		<BUTTON name="btnNext" caption="운용 자산을 확인 했어요." btnimage="btn_15.9" ly_vert="10,597,355,40,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6908" _ulen="6618" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 운용대상자산 조회
+' 02. 화면설명 : 
+' 03. 이    력 : 2022.10.19 : 고승연 : v0001 : 
+'                2022.10.25 : 고승연 : v0002 : 파생인경우 선물옵션매수/청산만허용 필수
+'                2023.11.10 : 고승연 : v0003 : 상품위험등급 구분 변경, obwat_pdad_065r IO 수정
+'                2024.03.26 : 고승연 : v0004 : [T2402290007] obwat_pdad_065r IO 수정
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szWA_PRCD	'랩상품코드
+Dim g_sMgriYN		'운용주체
+Dim g_sDrvtYN		'파생여부
+Dim g_tData
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgDot0.setMaintainingRatio("1")
+	imgDot1.setMaintainingRatio("1")
+	imgDot2.setMaintainingRatio("1")
+	imgDot3.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sData
+	sData = Form.GetOpenLinkData()
+	
+	if sData <> "" then
+		g_tData = Split(sData, "|")
+		
+		g_szWA_PRCD = g_tData(0)	' 상품코드
+		g_sMgriYN = g_tData(1)		' 운용주체
+		g_sDrvtYN = g_tData(2)		' 파생여부
+		
+		DATAMANAGER.RequestTranData("obwat_pdad_065r")
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "obwat_pdad_065r" then '운용대상자산
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "WA_PRCD" , 0 , g_szWA_PRCD)	'랩어카운트상품코드	
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "obwat_pdad_065r" then '운용대상자산
+		sEXCH_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "EXCH_INVT_YN" , 0)	'거래소
+		sKOSDAQ_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "KOSDAQ_INVT_YN" , 0)	'코스닥
+		sKONEX_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "KONEX_INVT_YN" , 0)	'코넥스		
+		sETN_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ETN_INVT_YN" , 0)	'ETN
+		sOTC_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "OTC_INVT_YN" , 0)	'K-OTC
+		
+		sOVRS_STCK_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "OVRS_STCK_INVT_YN" , 0)	'해외주식
+		sOVRS_ETP_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "ETP_INVT_YN" , 0)	'해외ETP
+		
+		sCLRN_INDC_YN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CLRN_INDC_YN" , 0)	'선물옵션매수/청산만 허용
+		sOPTN_TR_ABLE_YN = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "OPTN_TR_ABLE_YN" , 0) '모든선물옵션
+		
+		sBOND_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "BOND_INVT_YN" , 0)	'채권
+		sFND_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "FND_INVT_YN" , 0)	'펀드
+		sDRVT_ETF_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "DRVT_ETF_INVT_YN" , 0)	'파생ETF
+		sMMW_ATMT_INVT_YN = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "MMW_ATMT_INVT_YN" , 0)
+		
+		f_Check("chk00", sEXCH_INVT_YN)
+		f_Check("chk01", sKOSDAQ_INVT_YN)
+		f_Check("chk02", sKONEX_INVT_YN)
+		f_Check("chk03", sETN_INVT_YN)
+		f_Check("chk04", sOTC_INVT_YN)
+		
+		f_Check("chk10", sOVRS_STCK_INVT_YN)
+		f_Check("chk11", sOVRS_ETP_INVT_YN)
+		
+		f_Check("chk20", sCLRN_INDC_YN)
+		f_Check("chk21", sOPTN_TR_ABLE_YN)
+		
+		f_Check("chk30", sBOND_INVT_YN)
+		f_Check("chk31", sFND_INVT_YN)
+		f_Check("chk32", sDRVT_ETF_INVT_YN)
+		f_Check("chk33", sMMW_ATMT_INVT_YN)
+		
+		chk20.enable = false
+		
+		if g_sMgriYN == "N" then
+			chk00.enable = false
+			chk01.enable = false
+			chk02.enable = false
+			chk03.enable = false
+			chk04.enable = false
+			
+			chk10.enable = false
+			chk11.enable = false
+			
+			chk20.enable = false
+			chk21.enable = false
+			
+			chk30.enable = false
+			chk31.enable = false
+			chk32.enable = false
+			chk33.enable = false
+		end if
+	end if
+End Sub
+
+Sub f_Check(sCtlName, sYN)
+	Dim sState
+	
+	if sYN == "Y" then
+		sState = "1"
+	else
+		sState = "0"
+	end if
+	
+	if g_sMgriYN == "Y" then
+		Form.SetCtlProp(sCtlName, "enable", sState)
+	end if
+	
+	if #g_tData == 16 then
+		if sCtlName == "chk00" then
+			if g_tData(3) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk01" then
+			if g_tData(4) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk02" then
+			if g_tData(5) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk03" then
+			if g_tData(6) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk04" then
+			if g_tData(7) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk10" then
+			if g_tData(8) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk11" then
+			if g_tData(9) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk20" then
+			if g_tData(10) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk21" then
+			if g_tData(11) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk30" then
+			if g_tData(12) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk31" then
+			if g_tData(13) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk32" then
+			if g_tData(14) == "N" then
+				sState = "0"
+			end if
+		elseif sCtlName == "chk33" then
+			if g_tData(15) == "N" then
+				sState = "0"
+			end if
+		end if
+	end if
+	
+	Form.SetCtlProp(sCtlName, "checkstate", sState)
+End Sub
+
+Function CheckYN(sCtlName)
+	Dim sState
+	sState = Form.GetCtlProp(sCtlName, "checkstate")
+	CheckYN = sState = "1" and "Y" or "N"
+End Function
+
+'============================================================================
+Sub btnNext_OnClick()
+	Dim sData
+	
+	sData = CheckYN("chk00").."|"..CheckYN("chk01").."|"..CheckYN("chk02").."|"
+	sData = sData..CheckYN("chk03").."|"..CheckYN("chk04").."|"
+	
+	sData = sData..CheckYN("chk10").."|"..CheckYN("chk11").."|"
+	
+	sData = sData..CheckYN("chk20").."|"..CheckYN("chk21").."|"
+	
+	sData = sData..CheckYN("chk30").."|"..CheckYN("chk31").."|"
+	sData = sData..CheckYN("chk32").."|"..CheckYN("chk33")
+	
+	Form.SendReturnToParent("CONFIRM" , sData)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_pdad_065r" trcode="obwat_pdad_065r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_pdad_065r" title="랩상품운용지침상세정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="58" _ulen="40" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2120" _ulen="1518" >
+
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+WA_PROD_SALE_STA_DATE^랩어카운트상품판매시작일자^8^0^0^0^0^0^0
+WA_PROD_SALE_FIN_DATE^랩어카운트상품판매종료일자^8^0^0^0^0^0^0
+WA_MGRI_STA_DATE^랩어카운트운용시작일자^8^0^0^0^0^0^0
+WA_PROD_MTRT_DATE^랩어카운트상품만기일자^8^0^0^0^0^0^0
+MGRI_MNBD_CLS_CODE^운용주체구분코드^1^0^0^0^0^0^0
+WA_PROD_RISK_CLCD^랩어카운트상품위험구분코드^2^0^0^0^0^0^0
+HGDT_PROD_YN^고난도상품여부^1^0^0^0^0^0^0
+WA_OTCM_PAY_TPCD^랩어카운트성과보수유형코드^4^0^0^0^0^0^0
+DVPD_YN^파생상품여부^1^0^0^0^0^0^0
+WA_MGRI_EMPNO^랩어카운트운용직원번호^9^0^0^0^0^0^0
+FLNM^성명^40^0^0^0^0^0^0
+MGRI_CLS_CODE^운용구분코드^2^0^0^0^0^0^0
+INVT_REGN_CLCD^투자지역구분코드^2^0^0^0^0^0^0
+INVT_ASET_TYPE_CLCD^투자자산유형구분코드^2^0^0^0^0^0^0
+ONLN_SALE_YN^온라인판매여부^1^0^0^0^0^0^0
+EXCH_INVT_YN^거래소투자여부^1^0^0^0^0^0^0
+KONEX_INVT_YN^코넥스투자여부^1^0^0^0^0^0^0
+KOSDAQ_INVT_YN^코스닥투자여부^1^0^0^0^0^0^0
+FND_INVT_YN^펀드투자여부^1^0^0^0^0^0^0
+BOND_INVT_YN^채권투자여부^1^0^0^0^0^0^0
+DRVT_ETF_INVT_YN^파생ETF투자여부^1^0^0^0^0^0^0
+ETN_INVT_YN^ETN투자여부^1^0^0^0^0^0^0
+OTC_INVT_YN^OTC투자여부^1^0^0^0^0^0^0
+OVRS_STCK_INVT_YN^해외주식투자여부^1^0^0^0^0^0^0
+OVRS_ETP_INVT_YN^해외ETP투자여부^1^0^0^0^0^0^0
+OPTN_TR_ABLE_YN^옵션거래가능여부^1^0^0^0^0^0^0
+CLRN_INDC_YN^청산지시여부^1^0^0^0^0^0^0
+LOAN_ABLE_YN^대출가능여부^1^0^0^0^0^0^0
+MMW_ATMT_INVT_YN^MMW자동투자여부^1^0^0^0^0^0^0
+DIV_GRP_CODE^분류그룹코드^10^0^0^0^0^0^0
+WA_OTCM_PAY_YN^랩어카운트성과보수여부^1^0^0^0^0^0^0
+BASC_RMRT^기본보수율^12^5^7^0^0^0^0
+OTCM_PAY_SDRT^성과보수기준율^9^4^7^0^0^0^0
+OTCM_RMRT^성과보수율^14^5^7^0^0^0^0
+OLD_WA_PROD_RISK_CLCD^구랩어카운트상품위험구분코드^2^0^0^0^0^0^0
+ETP_INVT_YN^ETP투자여부^1^0^0^0^0^0^0
+CRDT_INVT_YN^신용투자여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

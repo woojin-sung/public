@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57020" scrname="Wrap가입_기간연장BS" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image1" imgpath="popup_bg.9" ly_vert="0,457,375,285,1" />
+		<GRID name="Grid0" colcount="6" ly_vert="20,522,335,81,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_Text" fontsize="2" click="1" />
+				<LABEL name="bd_Select" halign="2" />
+				<LABEL name="bd_Data" halign="2" autofontsize="1" />
+				<LABEL name="bd_Value" halign="2" />
+				<LABEL name="bd_InagType" halign="2" />
+				<LABEL name="bd_InagSrno" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="135,200,70,70,70,70" ly_vert_visible="0,0,2,2,2,2" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="135" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_Text" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="200" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_Data" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_Select" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_Value" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_InagType" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_InagSrno" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_Text" rangecellid="bd_Text" hlcolorcellid="bd_Text" />
+		</GRID>
+		<LABEL name="Label0" fontsize="3" fontstyle="01" caption="계약서류 제공" halign="1" ly_vert="30,468,315,38,1" />
+		<BUTTON name="btnBGUP" btnimage="alpha" ly_vert="0,0,376,456,1" />
+		<LABEL name="lblChangeInfo" fgcolor="067:049081150" transmode="0" halign="2" click="1" ly_vert="184,617,172,23,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5234" _ulen="5090" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : WRAP 가입 투자일임보고서 선택
+' 02. 화면설명 : 
+' 03. 이    력 : 2024.01.23 : 고승연 : v0002 : 이메일/주소항목 전달 추가
+'-------------------------------------------------------------------------------------------
+dim g_szContent
+dim g_szData
+Dim g_sInagTypeCode, g_sInagSrno
+
+Sub Form_OnFormInit()
+	szOpenData = Form.GetOpenLinkData()
+	
+	if szOpenData <> null and szOpenData <> "" then
+		Dim tData, sAcnt, sPwd
+		tData = Split(szOpenData, "|")
+		
+		sAcnt = tData(0)
+		sPwd = Mid(szOpenData, Len(sAcnt) + 2, Len(szOpenData) - (Len(sAcnt) + 1))
+		
+		DATAMANAGER.SetDataValue( 0, "obcsb_acad_002r", "InBlock1", "ACNO" , 0 , sAcnt )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acad_002r", "InBlock1", "PWD" , 0 , sPwd )
+		
+		DATAMANAGER.RequestTranData( "obcsb_acad_002r" )
+	end if
+	
+	g_szContent = {"알림톡/문자", "이메일"}
+	g_szContValue = {"05", "04"}
+	
+	lblChangeInfo.caption = "변경하기  >"
+	Grid0.rowcount = CInt(UBound(g_szContent)) + 1
+	for i=0 to UBound(g_szContent)
+	
+		Grid0.SetCellData("bd_Text", i, g_szContent(i))
+		Grid0.SetCellData("bd_Value", i, g_szContValue(i))
+		'Grid0.SetCellImage("bd_Check", i, "icon_chk_on.png")
+		'Grid0.SetCellImage("bd_Check", i, "check_circle_on.png")
+		
+	next
+	
+	
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	'구분명 | 구분값 | 통보처코드 | 통보처일련번호 | 주소데이터
+	g_szData = Grid0.GetCellData("bd_Text", lRow).."|"..Grid0.GetCellData("bd_Value", lRow).."|"..Grid0.GetCellData("bd_InagType", lRow).."|"..Grid0.GetCellData("bd_InagSrno", lRow).."|"..Grid0.GetCellData("bd_Data", lRow)
+	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub btnBGUP_OnClick()
+	g_szData = ""
+	Form.CloseForm("")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("POPUP_PAPER" , g_szData)
+End Sub
+
+'============================================================================
+Sub lblChangeInfo_OnClick()
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+	Form.OpenFramePopup( "mbonl81000" , "" , "")
+	lblChangeInfo.visible = false
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName == "mbonl81000" then
+		Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+		
+		lblChangeInfo.visible = true
+		Grid0.SetCellData("bd_Data", 0, "")
+		Grid0.SetCellData("bd_Data", 1, "")
+		
+		DATAMANAGER.RequestTranData( "obcsb_acad_002r" )
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_acad_002r" then
+		Dim nCount
+		nCount = DATAMANAGER.GetDataCount( 0, "obcsb_acad_002r", "OutBlock1" )
+		
+		if nCount > 0 then
+			for i = 0 to nCount-1
+				Dim sINAG_TYPE_CODE
+				sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "INAG_TYPE_CODE" , i )
+				
+				if sINAG_TYPE_CODE == "21" then 'E-mail
+					Dim sEmail
+					sEmail = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "EMAIL_ADDR" , i )
+					Grid0.SetCellData("bd_Data", 1, sEmail)
+					
+					g_sInagTypeCode = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "INAG_TYPE_CODE" , i )
+					g_sInagSrno = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock1", "INAG_SRNO" , i )
+					
+					Grid0.SetCellData("bd_InagType", 1, g_sInagTypeCode)
+					Grid0.SetCellData("bd_InagSrno", 1, g_sInagSrno)
+				end if
+			next
+		end if
+		
+		nCount = DATAMANAGER.GetDataCount( 0, "obcsb_acad_002r", "OutBlock3" )
+		
+		if nCount > 0 then
+			for i = 0 to nCount-1
+				Dim sINAG_TYPE_CODE
+				sINAG_TYPE_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "INAG_TYPE_CODE" , i )
+				
+				if sINAG_TYPE_CODE == "13" then '휴대폰
+					Dim sPhoneNum, sNum0, sNum1, sNum2
+					sNum0 = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "ARCD" , i )
+					sNum1 = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TONO" , i )
+					sNum2 = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "TELNO" , i )
+					
+					sPhoneNum = sNum0.."-"..sNum1.."-"..sNum2
+					Grid0.SetCellData("bd_Data", 0, sPhoneNum)
+					
+					g_sInagTypeCode = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "INAG_TYPE_CODE" , i )
+					g_sInagSrno = DATAMANAGER.GetDataValue( 0, "obcsb_acad_002r", "OutBlock3", "INAG_SRNO" , i )
+					
+					Grid0.SetCellData("bd_InagType", 0, g_sInagTypeCode)
+					Grid0.SetCellData("bd_InagSrno", 0, g_sInagSrno)
+				end if
+			next
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_acad_002r" then
+		DATAMANAGER.ClearOutputData( 0, "obcsb_acad_002r" )
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acad_002r" trcode="obcsb_acad_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_140r" trcode="obcsb_acif_140r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acad_002r" title="고객연락처정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="206" _ulen="158" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="973" _ulen="731" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+ADDR_REG_DATE^주소 등록 일자^8^0^0^0^0^0^0
+SNBC_YN^반송 여부^1^0^0^0^0^0^0
+SNBC_CANC_REAS_CODE^반송해지사유코드^2^0^0^0^0^0^0
+SNBC_CANC_REAS_NAME^반송해지사유명^40^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총 반송 횟수^4^0^7^0^0^0^0
+CNNT_SNBC_TMNU^연속 반송 횟수^4^0^7^0^0^0^0
+REGN_ZIP^지역 우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세 우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일 주소^200^0^0^0^0^0^0
+INAG_RCTF_REAS_CODE^통보처 정정 사유 코드^1^0^0^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="30" inout="out" _len="427" _ulen="323" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_TYPE_CODE^고객 유형 코드^2^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+UI_CUST_TELNO^UI고객전화번호^40^0^0^0^0^0^0
+CNPL_REG_DATE^연락처 등록 일자^8^0^0^0^0^0^0
+ARCD^지역번호^4^0^0^0^0^0^0
+TONO^국번호^4^0^0^0^0^0^0
+TELNO^전화번호^4^0^0^0^0^0^0
+TENO^교환번호^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="950" _ulen="700" >
+
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물 통보처 일련번호^4^0^7^0^0^0^0
+MAIL_INAG_TYPE_CODE^우편물 통보처 유형 코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물 통보처 일련번호^4^0^7^0^0^0^0
+MGRI_RPRT_INAG_TYPE_CODE^운용 보고서 통보처 유형 코드^2^0^0^0^0^0^0
+MGRI_RPRT_INAG_SRNO^운용 보고서 통보처 일련번호^4^0^7^0^0^0^0
+STPL_YN^약정 여부^1^0^0^0^0^0^0
+SNDN_YN^발송 여부^1^0^0^0^0^0^0
+PRFN_CNPL_CLCD^선호연락처구분코드^2^0^0^0^0^0^0
+TRUST_CLS_CODE^신탁 구분 코드^1^0^0^0^0^0^0
+FUND_RMND_RCMS_CLS_CODE^펀드잔고수신구분코드^1^0^0^0^0^0^0
+UI_ITEM_NAME1^UI항목명1^40^0^0^0^0^0^0
+UI_ITEM_NAME2^UI항목명2^40^0^0^0^0^0^0
+UI_ITEM_NAME3^UI항목명3^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MBL_PRTY_INFR_YN^모바일우선통보여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="476" _ulen="350" >
+
+SNML_INAG_TYPE_CODE^발송물통보처유형코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+EMAIL_ADDR^이메일주소^200^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock9" inout="out" _len="432" _ulen="316" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+REGN_ZIP^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP^상세우편번호^3^0^0^0^0^0^0
+POST^우편주소^100^0^0^0^0^0^0
+DTAD^상세주소^100^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+TOTAL_SNBC_TMNU^총반송횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="232" _ulen="164" >
+
+MAIL_INAG_TYPE_CODE^우편물통보처유형코드^2^0^0^0^0^0^0
+MAIL_INAG_SRNO^우편물통보처일련번호^4^0^7^0^0^0^0
+INAG_TYPE_CODE^통보처유형코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처일련번호^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_140r" title="유선본인확인정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="327" _ulen="243" >
+
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+SNML_INAG_TYPE_CODE^발송물 통보처 유형 코드^2^0^0^0^0^0^0
+SNML_INAG_SRNO^발송물 통보처 일련번호^4^0^7^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+AGE^연령^4^0^7^0^0^0^0
+UI_MNR_YN^UI미성년자여부^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="137" _ulen="105" >
+
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="30" inout="out" _len="159" _ulen="119" >
+
+INAG_TYPE_CODE^통보처 유형 코드^2^0^0^0^0^0^0
+INAG_SRNO^통보처 일련번호^4^0^7^0^0^0^0
+UI_CUST_TELNO^UI고객전화번호^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" occurs="30" inout="out" _len="380" _ulen="282" >
+
+SVCD^서비스코드^3^0^0^0^0^0^0
+PXPR_NAME^대리인 명^40^0^0^0^0^0^0
+PXPR_RCNO^대리인 실명확인번호^13^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+CUST_RLTS_CODE^고객 관계 코드^2^0^0^0^0^0^0
+CLPH_TELNO^휴대폰 전화번호^20^0^0^0^0^0^0
+UI_CUST_TELNO^UI고객전화번호^40^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="202" _ulen="148" >
+
+CNPL_SRNO^연락처 일련번호^4^0^7^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+CUST_RLTS_CODE^고객 관계 코드^2^0^0^0^0^0^0
+PXPR_RCNO_PIP^대리인실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

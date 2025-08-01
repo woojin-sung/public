@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90102" scrname="이벤트" version="2" writer="성우진" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="0,37,375,525,1" />
+		<TAB name="Tab0" tabheadheight="36" tabwidthtype="1" tabcount="2" ly_vert="0,0,375,40,1" >
+			<PAGE name="page0" caption="진행중" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="page1" caption="종료" >
+				<CONTROL_INFO/>
+			</PAGE>
+		</TAB>
+		<LABEL name="Label0" visible="0" fontsize="-4" caption="※ 본 이벤트는 Apple의 후원을 받지 않으며, 일체의 관련이 없습니다." ly_vert="0,527,375,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12135" _ulen="10527" >
+'============================================================================
+'20220627 SWJ START
+'============================================================================
+Dim g_serverMode
+Dim g_LoginType, g_sDate
+Dim g_CredAgree, g_InfoAgree 	'20230309 SWJ START
+Dim g_szEVNT_TRGT_YN
+Dim g_sCsNo
+Dim g_sDeviceOS
+'============================================================================
+Sub Form_OnFormInit()
+	g_serverMode = Form.GetSharedData("&SERVER_MODE", false)
+	g_LoginType = Form.GetSharedData("&LOGIN_TYPE", 0 )
+	g_sDate 	   = Form.GetSharedData("&HOST_DATE"  , false )
+	g_sCsNo 	   = Form.GetSharedData("&CUST_NUM"  , false )	 '고객번호
+	
+	szScreen = Form.GetSharedData("&SCREEN_NO", false)
+	g_sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	
+	'20220615 SWJ START
+	'모바일 웹에서 어떤 OS인지 판단할 수 있음
+	if g_sDeviceOS == "1" then
+		WebView0.SetUserAgent("meritz_android")
+	elseif g_sDeviceOS == "2" then
+		WebView0.SetUseJavaScript("1")
+		WebView0.SetUserAgent("meritz_ios")
+	else
+	end if
+	
+	'20230904 SWJ START
+'	If g_serverMode == "1" Then	'개발기
+'		WebView0.urlpath = "https://testhome.imeritz.com/mobile/sub/mts_event.html"
+'	else
+'		WebView0.urlpath = "https://home.imeritz.com/mobile/sub/mts_event.html"
+'	end if
+	TabWebPath("0")
+	'20230904 SWJ END
+	
+	'90102는 이벤트 메뉴, 90103/90104는 좌측 하단 배너
+	if szScreen == "90102" or szScreen == "90103" or szScreen == "90104" then
+		Form.SetTitleCaption("이벤트")
+	end if
+	
+	
+	'20220927 LES START iOS심사대응
+	if g_sDeviceOS == "2" then
+		WebView0.height = 492
+		Label0.visible = true
+	end if
+	'20220927 LES END 
+	
+	'20230309 SWJ START
+	DATAMANAGER.RequestTranData("obaci_acct_269r")
+	'20230309 SWJ END
+End Sub
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "WebViewReturn" then
+		
+		g_LoginType = Form.GetSharedData("&LOGIN_TYPE", 0 )	'20231106 SWJ START : 화면이 밑에 남아있을 수 있으니 다시 받음
+		
+		sData = Split(sParam,"@")
+		
+		'1: 맵파일 바로 호출, 2: 웹, 3: 맵파일 호출 전 파라미터 받는 경우
+		if Ubound(sData) > 0 then
+			if sData(0) == "3" then
+				'비대면 계좌개설
+				if sData(1) == "85100" then
+					if CInt(g_LoginType) > 1 then '로그인상태
+						Dim sText
+						sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+						Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+					else 
+						Form.SetSharedData("&SCREEN_AUTH" , "99")
+						Form.OpenPopup("mbbdm85100" , "" , "")
+					end if
+				
+				'20240610 SWJ START
+				elseif sData(1) == "99999" then
+					Form.OpenScreen("99999" , "Meritz365")
+					Form.CloseForm()
+				'20240610 SWJ END
+				
+				'20231106 SWJ START : Super365 계좌개설하기 
+				elseif sData(1) == "90081" then
+					if CInt(g_LoginType) > 1 then '로그인상태
+						Dim sText
+						sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+						Form.MsgBox( "알림", sText, "LOGOUT_MSG2", 1 )
+					else 
+						Form.SetSharedData("&SCREEN_AUTH" , "99")
+						Form.OpenPopup("mbbdm85100", ",★Super365Acnt", "")
+					end if
+				'20231106 SWJ END
+				
+				'개인전문투자자 이벤트 신청하기 (화면번호 90180)
+				elseif sData(1) == "90180" then
+					
+					if Cint(g_sDate) < 20230417 then
+						Form.MsgBox( "알림", "이벤트 신청은 4월 17일부터 가능합니다.", "", 6 )
+						exit sub
+					elseif Cint(g_sDate) > 20230623 then
+						Form.MsgBox("알림", "종료된 이벤트 입니다.", "", 6)
+						exit sub
+					end if
+				
+					'ETF이벤트
+					Form.SetSharedData("DIGITAL_EVENT","AceEtf")
+					
+					if Cint(g_LoginType) > 1 then '로그인상태
+						Form.OpenNextPopup("banner_p0","", "")
+					else
+						Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+					end if
+					
+				'ETF 증정 이벤트 신청하기 (화면번호 90170)
+'				elseif sData(1) == "90170" then
+'					'ETF 증정 이벤트 구분값
+'					Form.SetSharedData("DIGITAL_EVENT","STOCKETF")
+'						
+'					if Cint(g_LoginType) > 1 then '로그인상태
+'						Form.OpenNextPopup("banner_p0","", "")
+'					else
+'						Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+'					end if
+				'20220901 SWJ START
+				'국내주식 이벤트 신청하기 (화면번호 90160)
+				elseif sData(1) == "90160" then
+					'ETF 증정 이벤트 구분값
+					Form.SetSharedData("DIGITAL_EVENT","BDMSTOCK")
+						
+					if Cint(g_LoginType) > 1 then '로그인상태
+						Form.OpenNextPopup("banner_p0","", "")
+					else
+						Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+					end if
+				'20220901 SWJ END
+				
+				'20230206 SWJ START (CFD 베트남 ETF)
+				'20220902 SWJ START
+				'ETF 이벤트2 신청하기 (화면번호 90150)
+				elseif sData(1) == "90150" then
+				
+					if Cint(g_sDate) > 20240531 then
+						Form.MsgBox( "알림", "이벤트 기간이 아닙니다.", "", 6 )
+						exit sub
+					end if
+					
+					'CFD 베트남 ETF 구분값
+					Form.SetSharedData("DIGITAL_EVENT","EtnEvent")
+						
+					if Cint(g_LoginType) > 1 then '로그인상태
+						Form.OpenNextPopup("banner_p0","", "")
+					else
+						Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+					end if
+				'20220902 SWJ END
+				'20230206 SWJ END
+				
+				elseif sData(1) == "90190" then		'20221102 SWJ START
+					if Cint(g_sDate) >= 20221101 then
+						Form.MsgBox( "알림", "이벤트 기간이 아닙니다.", "", 6 )
+						exit sub
+					end if
+				
+				'20230309 SWJ START
+				elseif sData(1) == "90170" then
+					'개인신용정보제공동의 마케팅 이벤트 구분값
+					Form.SetSharedData("DIGITAL_EVENT","CreditInfo")
+					
+					if Cint(g_sDate) < 20230315 then
+						Form.MsgBox( "알림", "이벤트 신청은 3월 15일부터 가능합니다.", "", 6 )
+						exit sub
+					elseif Cint(g_sDate) > 20230515 then
+						Form.MsgBox("알림", "종료된 이벤트 입니다.", "", 6)
+						exit sub
+					end if			
+					
+					'대상자
+					if g_szEVNT_TRGT_YN == "Y" then
+						DATAMANAGER.RequestTranData("ooopc_evca_123r")
+					else
+						Form.MsgBox( "알림", "이벤트 대상자가 아닙니다.", "CLOSE", 6 )
+					end if
+					
+				end if
+			elseif sData(0) == "1" then
+				if sData(1) == "89000" then
+					Form.OpenScreen(sData(1) , "")
+				
+				'20230109 SWJ START : 슈퍼365 안내화면 바로가기
+				elseif sData(1) == "88031" then
+					'Form.OpenScreen(sData(1) , "")
+					Form.OpenNextPopup("mbonl88031","","")
+				end if
+				'20230109 SWJ END
+				
+				'20240423 SWJ START : ETN 이벤트
+				'ETF 이벤트2 신청하기 (화면번호 90150)
+				if sData(1) == "90150" then
+				
+					if Cint(g_sDate) > 20240531 then
+						Form.MsgBox( "알림", "이벤트 기간이 아닙니다.", "", 6 )
+						exit sub
+					end if
+					
+					'CFD 베트남 ETF 구분값
+					Form.SetSharedData("DIGITAL_EVENT","EtnEvent")
+						
+					if Cint(g_LoginType) > 1 then '로그인상태
+						Form.OpenNextPopup("banner_p0","", "")
+					else
+						Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+					end if
+				end if
+				'20240423 SWJ END
+				
+			elseif sData(0) == "2" then
+				
+				If g_serverMode == "1" Then	'개발기
+					szWebUrl = Replace(sData(1),"home.imeritz.com","testhome.imeritz.com")
+				else
+					szWebUrl = sData(1)
+				end if
+				
+				Form.OpenExternalBrowser(szWebUrl)
+			end if
+		end if			
+	end if
+End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOG_FORCE" then
+		if sRet == "ok" then
+			Form.SetSharedData("BDM_CORPORATE", "Y")
+			Form.OpenNextPopup("mhetc90021" , "" , "")
+		else
+			Form.CloseForm()			
+		end if	
+	end if
+	
+	if sKeyName == "LOGOUT_MSG" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenPopup("mbbdm85100" , "" , "")
+		end if
+	end if
+	
+	if sKeyName == "LOGOUT_MSG2" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenPopup("mbbdm85100", ",★Super365Acnt", "")
+		end if
+	end if
+	
+	'20230309 SWJ START
+	if sKeyName == "mbonl81020" then
+		if sRet == "ok" then
+			Form.CloseForm()
+			Form.OpenScreen("81020" , "탭이동;1")
+		else
+			Form.CloseForm()
+		end if
+	elseif sKeyName == "CLOSE" then
+		Form.CloseForm()
+	end if
+	'20230309 SWJ END
+End Sub
+'============================================================================
+'20230309 SWJ START
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "ooopc_evca_123r" then
+		sCsNo 	   = Form.GetSharedData("&CUST_NUM"  , false )	 '고객번호
+		
+		DATAMANAGER.SetDataValue( 0, "ooopc_evca_123r", "InBlock1", "CSNO" 			   	   , 0 	,  sCsNo     )
+		DATAMANAGER.SetDataValue( 0, "ooopc_evca_123r", "InBlock1", "EVNT_ID" 			   , 0 	, "EVENT00017")
+		
+	elseif szTranID == "obaci_acct_269r" then
+		DATAMANAGER.SetDataValue( 0, "obaci_acct_269r", "InBlock1", "CSNO" 			   , 0 	, g_sCsNo)
+	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "ooopc_evca_123r" then
+		g_CredAgree  = DATAMANAGER.GetDataValue( 0 , "ooopc_evca_123r", "OutBlock1", "CRIN_GTHR_UTLZ_AGRM_YN" , 0)
+		g_InfoAgree = DATAMANAGER.GetDataValue( 0 , "ooopc_evca_123r", "OutBlock1", "INFO_OFER_AGRM_YN"      , 0)
+		
+		if g_CredAgree = "Y" and g_InfoAgree = "Y" then
+			Form.MsgBox( "알림", "신청내역이 존재합니다. (단, 대상자인 경우 개인(신용)정보동의 처리를 하셔야 이벤트 참여가 가능합니다.)\n\n메뉴로 이동하시겠습니까?", "mbonl81020", 1  )
+		else
+			if Cint(g_LoginType) > 1 then '로그인상태
+				Form.OpenNextPopup("banner_p0","", "")
+			else
+				Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+			end if
+		end if		
+		
+	elseif szTranID == "obaci_acct_269r" then
+		g_szEVNT_TRGT_YN = DATAMANAGER.GetDataValue( 0 , "obaci_acct_269r", "OutBlock1", "EVNT_TRGT_YN"      , 0)	
+	end if
+End Sub
+
+'============================================================================
+'20230904 SWJ START : 탭 추가
+'============================================================================
+Sub Tab0_OnTabChanged(nCurrentTab)
+	TabWebPath(nCurrentTab)
+End Sub
+'============================================================================
+Sub TabWebPath(nIndex)
+
+	'웹 캐시삭제
+	WebView0.RemoveCache()
+	
+	If g_serverMode == "1" Then	'개발기
+		sUrlpath = "https://testhome.imeritz.com/mobile/sub/mts_event.html?state=1"
+		sUrlpath1 = "https://testhome.imeritz.com/mobile/sub/mts_event.html?state=2"
+	else
+		sUrlpath = "https://home.imeritz.com/mobile/sub/mts_event.html?state=1"
+		sUrlpath1 = "https://home.imeritz.com/mobile/sub/mts_event.html?state=2"
+	end if
+	
+	'AOS에서 A웹페이지 -> B웹페이지 -> A웹페이지 로 갈 때 A로 다시 못돌아가는 현상이 있어서
+	'중간에 한번 다른 링크 호출시킴
+	if g_sDeviceOS == "1" then
+		WebView0.urlpath = "https://testhome.imeritz.com/mobile/sub/mts_event.html"
+	end if
+	
+	if Cint(nIndex) == 0 then
+		WebView0.urlpath = sUrlpath
+	else
+		WebView0.urlpath = sUrlpath1
+	end if 
+
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ooopc_evca_123r" trcode="ooopc_evca_123r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_269r" trcode="obaci_acct_269r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ooopc_evca_123r" title="운영CRM_이벤트정보제공동의내역" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="76" _ulen="62" >
+
+EVNT_ID^이벤트ID^36^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="247" _ulen="187" >
+
+CRIN_GTHR_UTLZ_AGRM_YN^신용정보수집이용동의여부^1^0^0^0^0^0^0
+INFO_OFER_AGRM_YN^정보제공동의여부^1^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+REG_YMDH^등록일시^19^0^0^0^0^0^0
+TERM_ID^단말ID^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_269r" title="상품서비스 마케팅 동의 대상 여" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="40" _ulen="32" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="56" _ulen="42" >
+
+EVNT_TRGT_YN^이벤트대상여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

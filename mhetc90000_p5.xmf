@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90000" scrname="환경설정_개인_메모수정" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image1" autosize="1" imgpath="bg_dim40.9" ly_vert="0,361,375,286,1" />
+		<LABEL name="Label0" transmode="0" ly_vert="0,0,374,350,1" />
+		<BUTTON name="ButtonDel" caption="삭제" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="20,305,154,39,1" />
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,375,55,1" />
+		<BUTTON name="ButtonModify" caption="수정" btnimage="btn_01.9" ly_vert="197,305,154,39,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="2" outline="0100" designorder="1" ly_vert="13,60,344,182,1" >
+			<COL_INFO ly_vert_width="120,224" />
+			<ROW_INFO ly_vert_height="45,137" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="066:238239240" halign="0" fontsize="-2" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="0" line="0,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,1,1" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="EditText" multiline="1" imetype="0" maxlength="4000" ly_vert="15,113,343,170,1" />
+		<LABEL name="lblTitle" fontsize="2" bgcolor="064:188030030" halign="1" ly_vert="0,0,375,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="338,14,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6998" _ulen="6604" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 환경설정
+' 02. 화면설명 : 환경설정_개인_메모수정
+' 03. 작    성 : 2016.02.16 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sType '처리구분값
+Dim g_sGubun '종목/일반메모구분값
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sRevData 
+	sRevData = Form.GetOpenLinkData( )
+	
+	if sRevData == null or Trim(sRevData) == "" then
+		Exit Sub
+	end if
+	
+	g_sGubun = sRevData
+	g_sType = ""
+	
+	if g_sGubun == "1" then
+		lblTitle.caption = "일반메모 수정"
+		'Form.SetScreenName("일반메모 수정")
+		
+		Dim title, text
+		title = Form.GetSharedData("mhetc90000_t7_title" , false)
+		text = Form.GetSharedData("mhetc90000_t7_text" , false)	
+		
+		Table0.SetCellString( 0, 0, "제목" )
+		Table0.SetCellString( 0, 1, title )
+		EditText.caption = text
+	elseif g_sGubun == "2" then
+		lblTitle.caption = "종목메모 수정"
+		'Form.SetScreenName("종목메모 수정")
+		
+		Dim codename, text
+		codename = Form.GetSharedData("mhetc90000_t6_codename" , false)
+		text = Form.GetSharedData("mhetc90000_t6_text" , false)
+
+		Table0.SetCellString( 0, 0, "종목명" )
+		Table0.SetCellString( 0, 1, codename )
+		EditText.caption = text
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "clear" then
+		if sRet == "ok" then
+			g_sType = "5"
+
+			DATAMANAGER.RequestTranData( "ohhts_memo_013r" ) '삭제	' 20210622 HWG : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	' 20210622 HWG START : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+	if szTranID == "ohhts_memo_013r" then
+		DATAMANAGER.ClearInputData( 0, szTranID )
+		
+		Dim sUserID 
+		sUserID = Form.GetSharedData("&USER_ID", false )
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_USER_ID" , 0 , sUserID )
+		'일반1,종목2
+		DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_MEMO_MANG_CLS_CODE" , 0 , g_sGubun ) 
+		'입력검색1,전체검색2,추가3,수정4,선택삭제5,전체삭제9
+		DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_SLCT_YN" , 0 , g_sType )
+		'종목코드1,내용2/제목1,내용2,내용+제목3
+		DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_CLS_CODE" , 0 , "1" )
+		
+		if g_sType == "4" then '수정인경우
+			if g_sGubun == "1" then
+				Dim sDate, sTime, title, clscode
+				sDate = Form.GetSharedData("&HOST_DATE", false )
+				sTime = Form.GetSharedData("&HOST_TIME", false )
+				title = Form.GetSharedData("mhetc90000_t7_title" , false)
+				clscode = Form.GetSharedData("mhetc90000_t7_clscode" , false)
+				
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_MOD_YMDH" , 0 , sDate..sTime )
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_TITL" , 0 , title )
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_GNRL_CNTT" , 0 , EditText.caption )
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_MEMO_CLS_CODE" , 0 , clscode )	
+			elseif g_sGubun == "2" then
+				Dim codename, sCode, market
+				codename = Form.GetSharedData("mhetc90000_t6_codename" , false)
+				sCode = Form.GetSharedData("mhetc90000_t6_code" , false)
+				market = Form.GetSharedData("mhetc90000_t6_market" , false)
+				
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_NEW_ISSU_CODE" , 0 , sCode )
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_KOR_ISNM" , 0 , codename )
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_ISSU_MEMO_CNTT" , 0 , EditText.caption )
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_INPUT_MRKT_CLS_CODE" , 0 , market )
+			end if
+		elseif g_sType == "5" then '삭제인경우
+			if g_sGubun == "1" then
+				Dim sClsCode
+				sClsCode = Form.GetSharedData("mhetc90000_t7_clscode" , false)
+				
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_MEMO_CLS_CODE" , 0 , sClsCode )
+			elseif g_sGubun == "2" then
+				Dim sCode
+				sCode = Form.GetSharedData("mhetc90000_t6_code" , false)
+			
+				DATAMANAGER.SetDataValue( 0, "ohhts_memo_013r", "InBlock1", "FID_NEW_ISSU_CODE" , 0 , sCode )
+			end if	
+		end if
+	end if
+	' 20210622 HWG END
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Form.SendReturnToParent( "mhetc90000_p5" , "" )
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 수정
+'============================================================================
+Sub ButtonModify_OnClick()
+	if EditText.caption = "" then
+		Form.MsgBox( "알림", "내용을 입력해주세요.", "", 6 )
+		Exit Sub
+	end if
+
+	g_sType = "4"
+	
+	DATAMANAGER.RequestTranData( "ohhts_memo_013r" ) '수정	' 20210622 HWG : 종목메모 서비스변경 (ohhts_memo_003r -> ohhts_memo_013r)
+End Sub
+
+'============================================================================
+' 삭제
+'============================================================================
+Sub ButtonDel_OnClick()
+	if g_sGubun == "1" then
+		Form.MsgBox( "알림", "일반메모를 삭제 하시겠습니까?", "clear", 1 )
+	elseif g_sGubun == "2" then
+		Form.MsgBox( "알림", "종목메모를 삭제 하시겠습니까?", "clear", 1 )
+	end if
+End Sub
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+
+
+'============================================================================
+Sub Image1_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_memo_013r" trcode="ohhts_memo_013r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_memo_013r" title="메모관리자(신규)" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="640" _ulen="512" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+FID_MEMO_MANG_CLS_CODE^FID메모관리구분코드^1^0^0^0^0^0^0
+FID_INPUT_SLCT_YN^FID입력선택여부^2^0^0^0^0^0^0
+FID_INPUT_CLS_CODE^FID입력구분코드^2^0^0^0^0^0^0
+FID_MEMO_CLS_CODE^FID메모구분코드^8^0^0^0^0^0^0
+FID_MOD_YMDH^FID변경일시^14^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_GNRL_CNTT^FID일반내용^2048^0^0^0^0^0^0
+FID_NEW_ISSU_CODE^FID신규종목코드^20^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_ISSU_MEMO_CNTT^FID종목메모내용^4000^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="420" _ulen="338" >
+
+FID_MOD_YMDH^FID변경일시^14^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_GNRL_CNTT^FID일반내용^2048^0^0^0^0^0^0
+FID_MEMO_CLS_CODE^FID메모구분코드^8^0^0^0^0^0^0
+FID_NEW_ISSU_CODE^FID신규종목코드^20^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_ISSU_MEMO_CNTT^FID종목메모내용^4000^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

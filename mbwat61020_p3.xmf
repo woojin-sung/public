@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57020" scrname="Wrap상품 및 가입_운용직원검색" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" caption="운용 직원 검색" halign="1" ly_vert="10,0,355,40,1" />
+		<IMAGE name="ImgBack" autosize="1" imgpath="icon_top_back_light" ly_vert="15,10,15,20,1" />
+		<BUTTON name="btnBack" btnimage="alpha" ly_vert="0,0,40,40,1" />
+		<IMAGE name="imgClose" imgpath="ic_close.png" ly_vert="342,9,21,21,1" />
+		<LABEL name="lblText" fgcolor="067:049081150" fontsize="2" fontstyle="01" caption="Wrap 상품을 운용할
+담당 직원을 지정해 주세요." multiline="1" ly_vert="0,45,375,45,1" />
+		<IMAGE name="imgSearchBg" imgpath="img_bgbox.9.png" ly_vert="10,95,355,34,1" />
+		<IMAGE name="imgSearchIcon" imgpath="icon_main_06.png" ly_vert="16,98,28,28,1" />
+		<EDIT name="edtSearch" fonttype="1" imetype="0" hintcaption="직원명을 입력해주세요." imagefilepth="alpha" ly_vert="42,95,322,34,1" />
+		<GRID name="grdData" colcount="3" ly_vert="10,139,355,498,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" />
+				<LABEL name="bd_cell1" halign="2" />
+				<LABEL name="empno" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="300,55,70" ly_vert_visible="0,0,2" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="300" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,1" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="55" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" line="0,1" import="0,1,3" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="40" />
+						<CELLINFO>
+							<CELL name="empno" cell_ly="0,0,0,0" line="0,1" import="0,1,2" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="lblNoData" visible="0" fgcolor="146:124124124" fontsize="2" caption="검색하신 운용역이
+존재하지 않습니다." halign="1" multiline="1" ly_vert="54,254,268,59,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8005" _ulen="7731" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : Wrap상품 목록 조회
+' 02. 화면설명 : 
+' 03. 이    력 : 2022.10.21 : 고승연 : v0001 : 
+'                2023.05.08 : 고승연 : v0002 : [T2305030027] obwat_csad_021r IO 수정, 고객번호,조회구분 입력 추가
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_sAcnt
+Dim g_sCode
+Dim g_sWaPrcd
+
+Dim g_szCode
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBack.setMaintainingRatio("1")
+'	imgSearchBg.setMaintainingRatio("1")
+	imgSearchIcon.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	edtSearch.SetOnOffImage("alpha", "alpha")
+	
+	Dim sData
+	sData = Form.GetOpenLinkData()
+	
+	'Form.MsgBox(sData)
+	
+	if sData <> null and sData <> "" then
+		Dim tData
+		tData = Split(sData, "|")
+		
+		g_sAcnt = tData(0)
+		g_sCode = tData(1)
+		g_sWaPrcd = tData(2)
+	end if
+End Sub
+
+' 뒤로가기
+'============================================================================
+Sub btnBack_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.OpenScreen("57020", "")
+End Sub
+
+'============================================================================
+Sub imgSearch_OnClick()
+	edtSearch.SetShowKeypad(true)
+End Sub
+
+'============================================================================
+Sub edtSearch_OnEditChar(CharCode)
+	lblNoData.visible = false
+	grdData.SetClear()
+	DATAMANAGER.RequestTranData("obwat_oiad_021r")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "obwat_oiad_021r" then
+		DATAMANAGER.SetDataValue(0, "obwat_oiad_021r", "InBlock1", "NRML_YN", 0 , "Y") '정상여부
+		DATAMANAGER.SetDataValue(0, "obwat_oiad_021r", "InBlock1", "DPCD", 0 , "") '부서코드
+		DATAMANAGER.SetDataValue(0, "obwat_oiad_021r", "InBlock1", "FLNM", 0, edtSearch.caption) '성명
+		
+	elseif szTranID == "obwat_csad_021r" then
+		'v0002
+		DATAMANAGER.SetDataValue(0, "obwat_csad_021r", "InBlock1", "IQRY_CLS_CODE", 0 , "2")
+		
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "obwat_oiad_021r" then
+		Dim nCount
+		nCount = tonumber(grdData.rowcount)
+		
+		lblNoData.visible = false
+		
+		if nCount == 0 then
+			lblNoData.visible = true
+		end if
+	
+	elseif szTranID == "obwat_csad_021r" then
+		Dim nCount, bFlag
+		nCount = DATAMANAGER.GetDataCount( 0, "obwat_csad_021r", "OutBlock1" )
+		bFlag = false
+		
+		if tonumber(nCount) > 0 then
+			if len(g_sCode) == 1 then
+				for i = 0 to nCount-1
+					Dim sGrpCode
+					sGrpCode = DATAMANAGER.GetDataValue( 0, "obwat_csad_021r", "OutBlock1", "DIV_GRP_CODE" , i )
+					
+					if sGrpCode == g_sCode then
+						bFlag = true
+						exit for
+					end if
+				next
+			end if
+		end if
+		
+		if bFlag then
+			Dim sEmpno
+			sEmpno = DATAMANAGER.GetDataValue( 0, "obwat_csad_021r", "InBlock1", "MANG_EMPNO" , 0 )
+			Form.OpenPopup("mbwat61020_p4", "1|"..sEmpno.."|"..g_sWaPrcd , "")
+		else
+			Form.MsgBox("알림", "해당 운용역은 선택하신 상품을 운용하지 않습니다. 운용역을 다시 확인해주세요.", "", 8, "확인", "")
+		end if
+		
+	elseif szTranID == "obwat_oiad_023r" then
+		Dim sAplyYN
+		sAplyYN = DATAMANAGER.GetDataValue( 0, "obwat_oiad_023r", "OutBlock1", "APLY_YN" , 0 )
+		
+		if sAplyYN == "Y" then '협의완료
+			Dim sCode, sCsno
+			sCode = DATAMANAGER.GetDataValue( 0, "obwat_oiad_023r", "OutBlock1", "WA_PRCD" , 0 )
+			sCsno = Form.GetSharedData("&CUST_NUM", false)
+			
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_003r", "InBlock1", "ACNO" , 0 , g_sAcnt )
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_003r", "InBlock1", "WA_PRCD" , 0 , sCode )
+			DATAMANAGER.SetDataValue( 0, "obwat_onln_003r", "InBlock1", "CSNO" , 0 , sCsno )
+			DATAMANAGER.RequestTranData( "obwat_onln_003r" )
+		else
+			Form.OpenPopup("mbwat61020_p5", "", "")
+		end if
+		
+	elseif szTranID == "obwat_onln_003r" then
+		Dim sJoinYN
+		sJoinYN = DATAMANAGER.GetDataValue( 0, "obwat_onln_003r", "OutBlock1", "JOIN_ABLE_YN" , 0 )
+		
+		if sJoinYN == "Y" then
+			g_szCode = DATAMANAGER.GetDataValue( 0, "obwat_onln_003r", "InBlock1", "WA_PRCD" , 0 )
+			
+'			Form.OpenPopup("mbwat61022" , sCode , "") '계약(가입)
+			
+			Form.OpenPopup("mbonl81010_p20" , "" , "")	'2023.05.22 금융소비자 팝업 추가
+		else
+			Dim sResultCode, sMsg
+			sResultCode = DATAMANAGER.GetDataValue( 0, "obwat_onln_003r", "OutBlock1", "PROS_RSLT_CODE" , 0 )
+			sMsg = DATAMANAGER.GetDataValue( 0, "obwat_onln_003r", "OutBlock1", "PROS_PRHB_DTL_CNTT" , 0 )
+			
+			Form.OpenPopup("mbwat61020_p9", sResultCode.."|"..sMsg, "")
+		end if
+		
+	end if
+End Sub
+
+' 운용역 선택
+'============================================================================
+Sub grdData_OnClickUp(lRow, szCellID)
+	Dim sEmpno
+	sEmpno = grdData.GetCellData("empno", lRow)
+	
+	DATAMANAGER.SetDataValue(0, "obwat_csad_021r", "InBlock1", "MANG_EMPNO", 0 , sEmpno)
+	DATAMANAGER.RequestTranData( "obwat_csad_021r" )
+End Sub
+
+'============================================================================
+Sub grdData_OnScrollEnd()
+	if DATAMANAGER.IsMoreNextData( "obwat_oiad_021r" ) then
+		DATAMANAGER.RequestNextData( "obwat_oiad_021r" )
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "SEARCH_EMP_PRD" then
+		if Len(g_sWaPrcd) > 1 then
+			DATAMANAGER.SetDataValue( 0, "obwat_oiad_023r", "InBlock1", "WA_PRCD" , 0 , g_sWaPrcd )
+		else
+			DATAMANAGER.SetDataValue( 0, "obwat_oiad_023r", "InBlock1", "WA_PRCD" , 0 , g_sCode )
+		end if
+		DATAMANAGER.SetDataValue( 0, "obwat_oiad_023r", "InBlock1", "EMPNO" , 0 , sRet )
+		
+		Dim sLOGIN_TYPE
+		sLOGIN_TYPE = Form.GetSharedData( "&LOGIN_TYPE", 0 )
+	
+		If sLOGIN_TYPE = "1" Then
+			Form.MsgBox("알림", "로그인이 필요한 메뉴입니다.\n로그인하시겠습니까?", "GOTOLOGIN", 1)
+			Exit Sub
+		else
+			DATAMANAGER.SetDataValue( 0, "obwat_oiad_023r", "InBlock1", "ACNO" , 0 , g_sAcnt )
+			DATAMANAGER.RequestTranData( "obwat_oiad_023r" )
+		end if
+		
+	elseif sKeyName == "Login_Type" then
+		if sRet == "3" then
+			Form.PostLinkData("ReloadAccount", "mbwat61020_p3")
+		end if
+	elseif sKeyName == "mbonl81010_p20_CLOSE" then
+		if sRet == "NEXT_mbonl81010_p20" then
+			Form.OpenPopup("mbwat61022" , g_szCode , "") '계약(가입)
+		elseif sRet == "CANCEL_mbonl81010_p20" then
+		
+		end if
+	end if
+End Sub
+
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "GOTOLOGIN" Then
+		if sRet == "ok" then
+			Form.OpenPopup("mhetc90021", "", "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if sKey == "mbwat61020_p3" then
+		g_sAcnt = sValue
+		DATAMANAGER.SetDataValue( 0, "obwat_oiad_023r", "InBlock1", "ACNO" , 0 , g_sAcnt )
+		DATAMANAGER.RequestTranData( "obwat_oiad_023r" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubmsg
+	sSubmsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	Form.MsgBox( "알림", szErrMsg & " " & sSubmsg, "", 0 )
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_oiad_021r" trcode="obwat_oiad_021r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_oiad_023r" trcode="obwat_oiad_023r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_onln_003r" trcode="obwat_onln_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_csad_021r" trcode="obwat_csad_021r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_oiad_021r" title="랩운용역 목록 조회 (채널)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="70" _ulen="58" >
+
+NRML_YN^정상여부^1^0^0^0^0^0^0
+FLNM^성명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="182" _ulen="146" >
+
+DPCD^부서코드^4^0^0^0^0^0^0
+DPNM^부서명^40^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+EMPL_NAME^직원명^40^0^0^0^0^0^0
+IQRY_KEY_VAL^조회키값^32^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="48" _ulen="40" >
+
+IQRY_KEY_VAL^조회키값^32^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_oiad_023r" title="랩운용역 협의 정보 조회 (채널)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="159" _ulen="117" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="423" _ulen="311" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+APLY_YN^적용여부^1^0^0^0^0^0^0
+APLY_STA_DATE^적용시작일자^8^0^0^0^0^0^0
+APLY_FIN_DATE^적용종료일자^8^0^0^0^0^0^0
+WA_ACNO^랩어카운트계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+UI_1_CSNU^UI1건수^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_onln_003r" title="온라인 계약 신청 가능 여부 조?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="164" _ulen="118" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="164" _ulen="124" >
+
+JOIN_ABLE_YN^가입가능여부^1^0^0^0^0^0^0
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+PROS_PRHB_DTL_CNTT^처리불가상세내용^1000^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_csad_021r" title="랩상품 유형 목록 조회 (채널)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="700" _ulen="566" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+MANG_EMPNO^관리직원번호^9^0^0^0^0^0^0
+EMPL_NAME^직원명^40^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_1_COND_VAL^UI1조건값^100^0^0^0^0^0^0
+UI_2_COND_VAL^UI2조건값^100^0^0^0^0^0^0
+UI_3_COND_VAL^UI3조건값^100^0^0^0^0^0^0
+UI_4_COND_VAL^UI4조건값^100^0^0^0^0^0^0
+UI_5_COND_VAL^UI5조건값^100^0^0^0^0^0^0
+UI_6_COND_VAL^UI6조건값^100^0^0^0^0^0^0
+UI_7_COND_VAL^UI7조건값^100^0^0^0^0^0^0
+UI_8_COND_VAL^UI8조건값^100^0^0^0^0^0^0
+UI_9_COND_VAL^UI9조건값^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="1063" _ulen="797" >
+
+DIV_GRP_CODE^분류그룹코드^10^0^0^0^0^0^0
+WA_PRCD^랩어카운트상품코드^12^0^0^0^0^0^0
+WA_PRNM^랩어카운트상품명^100^0^0^0^0^0^0
+MGRI_CLS_CODE^운용구분코드^2^0^0^0^0^0^0
+PROD_RISK_CLCD^상품위험구분코드^2^0^0^0^0^0^0
+INVT_REGN_CLCD^투자지역구분코드^2^0^0^0^0^0^0
+INVT_ASET_TYPE_CLCD^투자자산유형구분코드^2^0^0^0^0^0^0
+HGDT_PROD_YN^고난도상품여부^1^0^0^0^0^0^0
+MIN_JOIN_AMT^최소가입금액^19^0^7^0^0^0^0
+INVT_TYPE_CLS_NAME^투자유형구분명^40^0^0^0^0^0^0
+MANG_EMPNO^관리직원번호^9^0^0^0^0^0^0
+EMPL_NAME^직원명^40^0^0^0^0^0^0
+UI_MGRI_CLS_NAME^UI운용구분명^60^0^0^0^0^0^0
+UI_PROD_RISK_CLS_NAME^UI상품위험구분명^60^0^0^0^0^0^0
+UI_INVT_REGN_CLS_NAME^UI투자지역구분명^60^0^0^0^0^0^0
+UI_INVT_ASET_TYPE_CLS_NAME^UI투자자산유형구분명^60^0^0^0^0^0^0
+UI_ADCP_CLS_NAME^UI자문사구분명^60^0^0^0^0^0^0
+UI_INVT_ASET_EXPL^UI투자자산설명^200^0^0^0^0^0^0
+UI_FEE_EXPL^UI수수료설명^200^0^0^0^0^0^0
+IQRY_KEY_VAL^조회키값^32^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="348" _ulen="264" >
+
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+PROS_RSLT_DTL_CNTT^처리결과상세내용^1000^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC전문투자자여부^1^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+KYC_MTRT_DATE^KYC만기일자^8^0^0^0^0^0^0
+WA_KYC_GRAD_CODE^랩어카운트KYC등급코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="48" _ulen="40" >
+
+IQRY_KEY_VAL^조회키값^32^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

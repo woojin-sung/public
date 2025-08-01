@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="13010" scrname="비교차트_차트설정" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,285,319,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" colcount="3" ly_vert="17,41,251,235,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell1" valign="2" autofontsize="1" paddinginfo="10,0,0,0" />
+				<LABEL name="bd_cell3" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell4" fontsize="-3" paddinginfo="10,0,0,0" />
+				<LABEL name="bd_cell5" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell6" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell7" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell8" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell9" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell10" ly_vert="0,0,100,20,1" />
+				<IMAGE name="bd_cell2" imgpath="icon_sub_03.9" margin="0,0,5,0" />
+				<CHKBUTTON name="bd_cell0" checkstate="1" margin="10,0,0,0" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" cursorstyle="1" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="39,178,34" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="39" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="22,25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="178" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="22,25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell4" cell_ly="0,1,0,1" line="0,1" fgcolor="088:114114114" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="34" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="22,25" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<BUTTON name="BtnAdd" caption="추가" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="10,270,127,39,1" />
+		<BUTTON name="BtnSave" caption="저장" btnimage="btn_01.9" ly_vert="147,270,128,39,1" />
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,285,42,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="비교종목편집" bgcolor="064:255255255" halign="1" ly_vert="0,0,285,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_vert="248,8,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3840" _ulen="3748" >
+'===========================================================================
+'===========================================================================
+Dim g_szData
+Dim g_arrItem
+Dim g_intItemCnt
+
+Dim g_arrCheck 
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_intItemCnt = Form.GetEnvData( "comp_itemCnt")
+	tmpItem =  Form.GetEnvData( "comp_itemList" )
+	tmpCheckSt = Form.GetEnvData("comp_itmeCheck")
+	
+	if g_intItemCnt = "" then
+		Exit Sub		
+	end if
+	g_arrItem = split(tmpItem , "^")
+	g_arrCheck = split(tmpCheckSt , "^")
+	for i = 0 to g_intItemCnt - 1
+		Grid0.insertrow = i
+		Grid0.SetCellData( "bd_cell4", i , g_arrItem[i] )
+		szItemName = Form.GetItemCodeInfo(g_arrItem[i] ,"name")
+		Grid0.SetCellData( "bd_cell1", i , szItemName )
+		if g_arrCheck[i] = "" then
+			g_arrCheck[i] = "1"
+		end if
+		Grid0.SetCellData( "bd_cell0", i , g_arrCheck[i] )
+	next
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	nGridCnt = CInt(Grid0.rowcount)
+	if nGridCnt =  0 then
+		Exit Sub
+	end if
+	tmpItemData = ""
+	tmpCheck = ""
+	for i = 0 to nGridCnt -1
+		tmpItemData = tmpItemData..Grid0.GetCellData( "bd_cell4", i ).."^"
+		tmpCheck = tmpCheck..Grid0.GetCellData( "bd_cell0", i ).."^"
+	next
+	Form.SetEnvData( 1, "comp_itemCnt", nGridCnt )
+	Form.SetEnvData( 1, "comp_itemList", tmpItemData )
+	Form.SetEnvData( 1, "comp_itmeCheck", tmpCheck )
+	Form.SendReturnToParent( "CompOption" , "true" )
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	nGridCnt = CInt(Grid0.rowcount)
+	if szCellID = "bd_cell2" then
+		if nGridCnt = 1 then
+			Form.ShowAlert("알림", "최소 1개 종목은 있어야 합니다. ")
+			Exit Sub
+		else
+			Grid0.SetDeleteRow( lRow )
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub BtnAdd_OnClick()
+	nGridCnt = CInt(Grid0.rowcount)
+	if nGridCnt = 5 then
+		Form.ShowAlert("알림" , "비교종목은 5개까지 가능합니다.")
+		Exit Sub
+	end if
+	Form.OpenCommonDialog("SEARCH", "2:3:5:6:15", "")	'20180712 HAMWG : K-OTC MTS 도입
+End Sub
+
+'============================================================================
+Sub BtnSave_OnClick()
+	Form.CloseForm( ) 
+End Sub
+
+
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	nGridCnt = CInt(Grid0.rowcount)
+
+	if sDlgName = "SEARCH" then
+		if sReturn1 = "" or sReturn1 = null then
+			Exit Sub
+		else
+			if nGridCnt = 0 then
+				Grid0.insertrow = 0
+				Grid0.SetCellData( "bd_cell4", 0 , sReturn1 )
+				szItemName = Form.GetItemCodeInfo(sReturn1,"name")
+				Grid0.SetCellData( "bd_cell1", 0 , szItemName )
+				Grid0.SetCellData( "bd_cell0", 0 , "1" )
+			else
+				for i = 0 to nGridCnt-1
+					tmpItemcode = Grid0.GetCellData( "bd_cell4", i )
+					if sReturn1 = tmpItemcode then
+						
+						Form.ShowAlert("알림", "동일한 종목을 선택하셨습니다.")
+						Exit Sub
+					else
+						if i = nGridCnt - 1 then
+							Grid0.insertrow = i+1
+							Grid0.SetCellData( "bd_cell4", i+1 , sReturn1 )
+							szItemName = Form.GetItemCodeInfo(sReturn1,"name")
+							Grid0.SetCellData( "bd_cell1", i+1 , szItemName )
+							Grid0.SetCellData( "bd_cell0", i+1 , "1" )
+						elseif i = 4 then
+							Grid0.SetCellData( "bd_cell4", 0 , sReturn1 )
+							szItemName = Form.GetItemCodeInfo(sReturn1,"name")
+							Grid0.SetCellData( "bd_cell1", 0 , szItemName )
+							Grid0.SetCellData( "bd_cell0", 0 , "1" )
+							
+						end if
+					end if
+				next
+			end if
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

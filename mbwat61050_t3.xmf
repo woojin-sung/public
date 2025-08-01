@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57050" scrname="계약정보 조회_포트폴리오" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,477,1" />
+	<CONTROL_INFO>
+		<COMBO name="cmbType" cbinputdatatext="0`주식
+1`선물옵션
+2`채권
+3`해외주식" popuptitle="포트폴리오 선택" imagefilepth="combo_04.9" ly_vert="10,10,150,30,1" />
+		<LINKFORM name="lkForm" ly_vert="0,50,375,427,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1127" _ulen="1127" >
+--===========================================================================
+--===========================================================================
+
+Dim g_sAcnt, g_sAcntCnrc
+
+'============================================================================
+Sub Form_OnFormInit()
+	f_SetClear()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "Clear" then
+		f_SetClear()
+		
+	elseif sEventName == "Request" then
+		if sParam <> null and sParam <> "" then
+			cmbType.visible = true
+			lkForm.visible = true
+			
+			Dim tData
+			tData = Split(sParam, "|")
+			
+			g_sAcnt = tData(0)
+			g_sAcntCnrc = tData(1)
+			
+			cmbType.currentindex = cmbType.currentindex
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub cmbType_OnEditComplete(iIndex)
+	lkForm.linkfile = ""
+	lkForm.linkfile = "mbwat61050_t3"..iIndex
+	
+	Form.triggerEvent("lkForm", "Request", g_sAcnt.."|"..g_sAcntCnrc)
+End Sub
+
+Sub f_SetClear()
+	cmbType.visible = false
+	lkForm.visible = false
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

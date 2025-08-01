@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57020" scrname="Wrap가입" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" caption="Wrap 가입" halign="1" ly_vert="10,0,355,40,1" />
+		<IMAGE name="ImgBack" autosize="1" imgpath="icon_top_back_light" ly_vert="15,10,15,20,1" />
+		<BUTTON name="btnBack" btnimage="alpha" ly_vert="0,0,40,40,1" />
+		<LINKFORM name="lnkFormStep1" ly_vert="0,40,375,607,1" />
+		<LINKFORM name="lnkFormStep2" visible="0" ly_vert="0,40,375,607,0" />
+		<LINKFORM name="lnkFormStep3" visible="0" ly_vert="0,40,375,607,0" />
+		<LINKFORM name="lnkFormStep4" visible="0" ly_vert="0,40,375,607,0" />
+		<LINKFORM name="lnkFormStep5" visible="0" ly_vert="0,40,375,607,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2996" _ulen="2918" >
+--===========================================================================
+--===========================================================================
+
+Dim g_nStep
+Dim g_sDate, g_sSrno
+Dim g_sPwd
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBack.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+	
+	g_nStep = 1
+	lnkFormStep1.linkfile = "mbwat61022_t1"
+	
+	Dim sCode
+	sCode = Form.GetOpenLinkData()
+	
+	if sCode <> null and sCode <> "" then
+		Form.triggerEvent("lnkFormStep1", "Code", sCode)
+	end if
+End Sub
+
+' 이전스탭
+'============================================================================
+Sub f_SetPrev()
+	lnkFormStep1.visible = false
+	lnkFormStep2.visible = false
+	lnkFormStep3.visible = false
+	lnkFormStep4.visible = false
+	lnkFormStep5.visible = false
+	
+	g_nStep = g_nStep - 1
+	
+	if g_nStep == 0 then
+		Form.CloseForm()
+	else
+		Form.SetCtlProp("lnkFormStep"..g_nStep, "visible", true)
+	end if
+End Sub
+
+' 다음스탭
+'============================================================================
+Sub f_SetNext(sParam)
+	Form.SetCtlProp("lnkFormStep"..g_nStep, "visible", false)
+	
+	g_nStep = g_nStep + 1
+	
+	Form.SetCtlProp("lnkFormStep"..g_nStep, "visible", true)
+	
+	Form.SetCtlProp("lnkFormStep"..g_nStep, "linkfile", "")
+	Form.SetCtlProp("lnkFormStep"..g_nStep, "linkfile", "mbwat61022_t"..g_nStep)
+	
+	if g_nStep > 1 and g_nStep < 5 then
+		Form.triggerEvent("lnkFormStep"..g_nStep, "001rData", g_sDate.."|"..g_sSrno)
+	elseif g_nStep == 5 then
+		Form.triggerEvent("lnkFormStep"..g_nStep, "Text", g_sDate.."|"..g_sSrno.."|"..sParam)
+		ImgBack.visible = false
+		btnBack.visible = false
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "CLOSEFORM" then '1Step - 투자자금원금보전확인동의 취소시 진행불가.
+		Form.CloseForm()
+		
+	elseif sEventName == "PWD" then
+		g_sPwd = sParam
+		
+	elseif sEventName == "GETPWD" then
+		Form.triggerEvent("lnkFormStep"..g_nStep, "PWD", g_sPwd)
+		
+	elseif sEventName == "NEXT" then
+		if g_nStep == 1 then
+			Dim tData
+			
+			if sParam <> "" then
+				tData = Split(sParam, "|")
+				g_sDate = tData(0)
+				g_sSrno = tData(1)
+			end if
+		end if
+		
+		f_SetNext(sParam) ' 다음스탭
+		
+	end if
+End Sub
+
+'============================================================================
+Sub btnBack_OnClick()
+	f_SetPrev() ' 이전스탭
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	if g_nStep == 1 then
+		Form.CloseForm()
+	else
+		f_SetPrev() ' 이전스탭
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

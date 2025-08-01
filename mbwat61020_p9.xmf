@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57020" scrname="Wrap상품 및 가입_진입체크알림" version="2" writer="김철중" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" autosize="1" imgpath="alpha128" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,432,375,190,1" />
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="알림" halign="1" ly_vert="32,442,304,30,1" />
+		<LABEL name="lblText" halign="1" multiline="1" ly_vert="20,467,335,120,1" />
+		<BUTTON name="btnCancel" fgcolor="013:051051051" btnimage="btn_25.9.png" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnOk" btnimage="btn_26.9.png" ly_vert="187,597,188,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6126" _ulen="5124" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 화상상담 조회/변경
+' 02. 화면설명 : 
+' 03. 이    력 : 2023.04.12 : 고승연 : v0002 : [T2304120007] 계좌체크 수정
+'-------------------------------------------------------------------------------------------
+
+Dim g_sResultCode '처리결과코드
+Dim g_bImpossibleFlag '불가능 리턴플래그
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_bImpossibleFlag = false
+	
+	Dim sData
+	sData = Form.GetOpenLinkData()
+	
+'	sData = "25|랩계좌보유계좌미보유"
+	
+	if sData <> null and sData <> "" then
+		DIm tData
+		tData = Split(sData, "|")
+		
+		g_sResultCode = tData(0)
+		
+		lblText.caption = tData(1)
+		
+		if g_sResultCode == "21" then '21 : 랩 가입 불가대상
+			btnOk.left = 0
+			btnOk.width = 375
+			btnOk.caption = "확인"
+		elseif g_sResultCode == "22" then '22 : 랩계좌 없는 고객
+			btnCancel.caption = "취소"
+			btnOk.caption = "개설하러 가기"
+		elseif g_sResultCode == "23" then '23 : 랩계좌 미보유, 계좌 1개
+			btnCancel.caption = "취소"
+			btnOk.caption = "개설하러 가기"
+		'v0002
+		elseif g_sResultCode == "24" then '24 : 랩계좌 미보유, 계좌 2개 이상
+			btnCancel.caption = "Wrap계좌로 전환"
+			btnOk.caption = "개설하러 가기"
+		elseif g_sResultCode == "25" then '25 : 종합매매 or CMA 계좌 없는 고객
+			btnCancel.caption = "취소"
+			btnOk.caption = "개설하러 가기"
+		elseif g_sResultCode == "11" then '11 : 랩 가입 가능 시간 체크
+			btnOk.left = 0
+			btnOk.width = 375
+			btnOk.caption = "확인"
+		elseif g_sResultCode == "31" then '31 : 투자성향 미작성 고객
+			btnCancel.caption = "확인"
+			btnOk.caption = "투자성향 등록하기"
+		elseif g_sResultCode == "32" then '32 : 투자불원
+			btnCancel.caption = "확인"
+			btnOk.caption = "투자성향 등록하기"
+		elseif g_sResultCode == "33" then '33 : 투자성향 정보 미제공
+			btnCancel.caption = "확인"
+			btnOk.caption = "투자성향 등록하기"
+		elseif g_sResultCode == "34" then '34 : 투자성향 기간 만료시
+			btnCancel.caption = "확인"
+			btnOk.caption = "투자성향 등록하기"
+		elseif g_sResultCode == "35" then '35 : 투자성향 낮은 경우
+			btnCancel.caption = "투자성향 변경"
+			btnOk.caption = "확인"
+		elseif g_sResultCode == "12" then '12 : 동일상품추가 개설불가
+			btnCancel.caption = "진행현황 보러가기"
+			btnOk.caption = "확인"
+		elseif g_sResultCode == "13" then '13 : 임직원
+			btnOk.left = 0
+			btnOk.width = 375
+			btnOk.caption = "확인"
+		elseif g_sResultCode == "14" then '14 : 지점운용형
+			btnCancel.caption = "고객지원센터"
+			btnOk.caption = "확인"
+		elseif g_sResultCode == "41" then '41 : 해외주식 미신청고객
+			btnCancel.caption = "확인"
+			btnOk.caption = "신청하러 가기"
+		elseif g_sResultCode == "42" then '42 : 해외ETP 미신청고객
+			btnCancel.caption = "확인"
+			btnOk.caption = "신청하러 가기"
+		elseif g_sResultCode == "43" then '41 : 해외주식 미신청계좌
+			btnCancel.caption = "확인"
+			btnOk.caption = "신청하러 가기"
+		elseif g_sResultCode == "44" then '42 : 해외ETP 미신청계좌
+			btnCancel.caption = "확인"
+			btnOk.caption = "신청하러 가기"
+		elseif g_sResultCode == "100" then '100 : Deposit계좌에 종합매매orCMA계좌 없는 경우 (화면에서 정한 키값임.)
+			btnCancel.caption = "취소"
+			btnOk.caption = "개설하러 가기"
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	if btnCancel.caption = "투자성향 변경" then
+		Form.OpenScreen("81010", "")
+	elseif btnCancel.caption = "취소" then
+		
+		if g_sResultCode <> "100" then
+			g_bImpossibleFlag = true
+		end if
+		
+		Form.CloseForm()
+		
+	elseif btnCancel.caption = "Wrap계좌로 전환" then
+		Form.OpenScreen("57090", "")
+	elseif btnCancel.caption = "확인" then
+		g_bImpossibleFlag = true
+		Form.CloseForm()
+	elseif btnCancel.caption = "진행현황 보러가기" then
+		Form.OpenScreen("57030", "")
+	elseif btnCancel.caption = "고객지원센터" then
+		Form.OpenScreen("89020", "")
+	end if
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+
+	if btnOk.caption = "확인" then
+		g_bImpossibleFlag = true
+		Form.CloseForm()
+		
+	elseif btnOk.caption = "개설하러 가기" then
+	
+		if g_sResultCode == "100" then '100 : Deposit계좌에 종합매매orCMA계좌 없는 경우 (화면에서 정한 키값임.)
+			Form.SendReturnToParent("WRAP_MBWAT61020_P9", "")
+			Form.CloseForm()
+		else
+			Dim sloginType
+			sloginType = Form.GetSharedData( "&LOGIN_TYPE", false )
+			
+			if Cint(sloginType) > 1 then
+				sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"
+				Form.MsgBox("알림",sText, "LOGOUT_MSG" , 1 )
+			else
+				Form.SetSharedData("&SCREEN_AUTH" , "99")
+				Form.OpenPopup("mbbdm85100", "", "")
+			end if
+		end if
+		
+	elseif btnOk.caption = "투자성향 등록하기" then
+		Form.OpenScreen("81010", "")
+		
+	elseif btnOk.caption = "신청하러 가기" then
+	
+		if g_sResultCode == "42" Or g_sResultCode == "44" then '41 : 해외ETP 미신청계좌
+			Form.OpenScreen("87050", "")
+		else
+			Form.OpenScreen("87051", "")
+		end if
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOGOUT_MSG" then
+		if sRet == "ok" then
+			'1parm (0.문구없음 1.문구있음)
+			'2parm (0.권한상관없이 로그아웃만 함 1.화면권한에 따라 닫을 화면 로그아웃)
+			Form.LogOut(0,1)
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenPopup("mbbdm85100", "", "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	if g_bImpossibleFlag then
+		Form.SendReturnToParent("impossible", "")
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

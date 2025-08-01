@@ -1,0 +1,1137 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="31020" scrname="(야)선옵차트_가로" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" lyinfo="1" ly_horz="0,0,667,355,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" bgcolor="097:255255255" transmode="0" ly_horz="0,0,667,355,1" />
+		<BUTTON name="BtnSave" btnimage="btn_chart02.9.png" ly_horz="499,3,39,39,1" />
+		<BUTTON name="BtnIndi" btnimage="btn_chart03.9.png" ly_horz="541,3,39,39,1" />
+		<BUTTON name="BtnTool" btnimage="btn_chart04.9.png" ly_horz="583,3,39,39,1" />
+		<RADIOGROUP name="RadioGroup0" buttonshape="1" buttonsnumber="4" initselectionuse="1" initselection="0" ly_horz="3,3,180,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="일" position="0,0,45,39" />
+				<RADIO no="1" text="주" position="45,0,45,39" />
+				<RADIO no="2" text="1분" position="90,0,45,39" />
+				<RADIO no="3" text="1틱" position="135,0,45,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<IMAGE name="Image0" autosize="1" imgpath="icon_util_03" ly_horz="128,31,10,11,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_util_03" ly_horz="173,31,10,11,1" />
+		<IMAGE name="Image2" autosize="1" imgpath="icon_util_03" ly_horz="83,31,10,11,1" />
+		<CHARTEX name="ChartEx0" markettype="1" ly_horz="0,45,667,310,1" >
+			<DATASETTING>
+				<DATAITEM name="chart" date="0,3,0;2,3,0;1,3,0" time="2,3,1;1,3,1" open="0,3,2;1,3,3;2,3,3" high="0,3,3;1,3,4;2,3,4" low="0,3,4;1,3,5;2,3,5" close="0,3,1;1,3,2;2,3,2" volume="0,3,5;2,3,6;1,3,6" current="0,2,8;1,2,8;2,2,8" chgbit="0,2,1;1,2,1;2,2,1" chg="0,2,0;1,2,0;2,2,0" perchg="0,2,2;1,2,2;2,2,2" curvol="0,2,5;1,2,5;2,2,5" base="0,2,4;1,2,4;2,2,4" uplimit="0,2,11;1,2,11;2,2,11" dnlimit="0,2,12;1,2,12;2,2,12" dayopen="0,2,13;1,2,13;2,2,13" dayhigh="0,2,14;1,2,14;2,2,14" daylow="0,2,15;1,2,15;2,2,15" cursellvol="2,2,9;1,2,9;0,2,9" curbuyvol="2,2,7;1,2,7;0,2,7" realtime="0,1,1;1,1,1;2,1,1;3,1,1" reallast="0,1,2;1,1,2;2,1,2;3,1,2" realopen="0,1,9;1,1,9;2,1,9;3,1,9" realhigh="0,1,10;1,1,10;2,1,10;3,1,10" reallow="0,1,11;1,1,11;2,1,11;3,1,11" realdayvol="0,1,7;1,1,7;2,1,7;3,1,7" realdayamt="0,1,8;1,1,8;2,1,8;3,1,8" realtickbuy="0,1,3;1,1,3;2,1,3;3,1,3" realticksell="0,1,4;1,1,4;2,1,4;3,1,4" realbid="0,1,0;1,1,0;2,1,0;3,1,0" >
+					<ADJDATAITEM/>
+				</DATAITEM>
+			</DATASETTING>
+		</CHARTEX>
+		<BUTTON name="btnClose" caption="X" fgcolor="004:000000000" bgcolor="028:255255255" fontsize="4" btnimage="alpha" ly_horz="625,3,40,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_sub_07.png" ly_horz="637,11,24,24,1" />
+		<TABLE name="tblHoga" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0001" designorder="1" ly_horz="190,5,212,40,1" >
+			<COL_INFO ly_horz_width="212" />
+			<ROW_INFO ly_horz_height="20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,1" import="3,1,1" halign="0" line="0,0" fontsize="6" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="BtnLine" imgpath="btn_chart01_n.9.png" ly_horz="457,3,39,39,1" />
+		<IMAGE name="imgSearch" autosize="1" imgpath="icon_main_10.png" ly_horz="419,7,29,30,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="18363" _ulen="17853" >
+''''''''''''''''''''''''''''''''''''''''''''''-
+' 01. 화 면 명 : 야간선옵현재가
+' 02. 화면설명 : 야간선옵현재가 차트탭
+' 03. 작    성 : 2017.04.10 PENTA13
+''''''''''''''''''''''''''''''''''''''''''''''-
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+Dim g_szItemCode, g_szItemMarket
+Dim g_szChrtType
+Dim g_szToday
+Dim g_szMinType
+Dim g_szTicType
+Dim g_flagMin
+Dim g_flagTic
+Dim g_flagWeek
+Dim g_flagLine
+
+Dim g_szItemKey, g_szHostKey, g_szOsKey
+g_szItemKey = "&ITEM_CMEEUREX"
+g_szHostKey = "&HOST_DATE"
+g_szOsKey   = "&OS_TYPE"
+
+'============================================================================
+Sub Form_OnFormInit()
+	sBIOTermOS = Form.GetSharedData(g_szOsKey, false) 'iOS("2")Android("1")
+	
+	if sBIOTermOS == "2" then
+		imgSearch.visible = false
+	end if
+	
+	Dim szOpen, g_szCd, arrData
+
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData,"★")
+	
+	if arrData(0) <> "" then
+		g_szItemCode = arrData(0)
+		
+		' 타화면에서 호출되는 탭으로 이동
+		If #arrData > 1 Then
+			If arrData(1) <> "" then
+				fmtab0.currenttab = arrData(1)
+			End If
+		End If
+	else
+		g_szItemCode = Form.GetSharedData(g_szItemKey, 0)		' 최근조회종목
+	end if
+	
+	g_szItemMarket = Form.GetItemCodeInfo( g_szItemCode, "market_night" )
+	
+	g_flagMin = false
+	g_flagTic = false
+	g_flagWeek = true
+	g_szChrtType = "D" 	'일
+	g_szToday = Form.GetSharedData(g_szHostKey, 0)
+'	g_szMinType = "1분"
+'	g_szTicType = "1틱"
+	
+	g_flagLine = false
+	PeriodSet(g_szChrtType)
+	
+	RequestData()
+End Sub
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if sKey = "ITEMCODE" then
+		if g_szItemCode = sValue and g_flagInit = false then
+			exit Sub
+		end if
+		
+		If g_szItemMarket = "EO" Then
+			DATAMANAGER.CancelRealData( "ohhts_eopt_cntg" )
+		ElseIf g_szItemMarket = "EM" Then
+			DATAMANAGER.CancelRealData( "ohhts_efut_cntg" )
+		ElseIf g_szItemMarket = "CM" Then	
+			DATAMANAGER.CancelRealData( "ohhts_cmef_cntg" )
+		ElseIf g_szItemMarket = "CD" Then
+			DATAMANAGER.CancelRealData( "ohhts_cusf_cntg" )
+		End If
+		
+		g_szItemCode = sValue
+		g_szItemMarket = Form.GetItemCodeInfo( g_szItemCode, "market_night" )
+		g_szItemName   = Form.GetItemCodeInfo( g_szItemCode, "name" )
+		
+		RequestData()
+	end	if
+End Sub
+'============================================================================
+Function RequestData()
+	DATAMANAGER.CancelRealData("ohhts_eopt_cntg")
+	DATAMANAGER.CancelRealData("ohhts_efut_cntg")
+	DATAMANAGER.CancelRealData("ohhts_cmef_cntg")
+	DATAMANAGER.CancelRealData("ohhts_cusf_cntg")	
+	
+	if g_szChrtType = "0" then 		' 틱
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szItemMarket)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock1", "FID_INPUT_ISCD", 0, g_szItemCode)
+	
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szItemMarket)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock2", "FID_INPUT_ISCD", 0, g_szItemCode)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock2", "FID_INPUT_MOD_STPR_CLS_CODE", 0, "Y")
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock2", "FID_INPUT_DATE1", 0, g_szToday)
+			
+		sTic = Split(g_szTicType, "틱", -1, 1)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock2", "FID_INPUT_CNT1", 0, sTic[0])  'n틱
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock2", "FID_INPUT_HOUR_CLS_CODE", 0, "2") 
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_004r", "InBlock2", "FID_INPUT_PAST_DATA_INCU_YN", 0, "Y") 
+	
+		DATAMANAGER.RequestTranData("ohhts_5030_004r")
+
+	elseif g_szChrtType = "1" then 	' 분
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szItemMarket)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock1", "FID_INPUT_ISCD", 0, g_szItemCode)
+	
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szItemMarket)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock2", "FID_INPUT_ISCD", 0, g_szItemCode)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock2", "FID_INPUT_MOD_STPR_CLS_CODE", 0,"Y")
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock2", "FID_INPUT_DATE1", 0, g_szToday)
+		
+		sMin = Split(g_szMinType, "분", -1, 1)
+		sTemp = sMin[0] * 60
+
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock2", "FID_INPUT_HOUR_CLS_CODE", 0, sTemp)  'n분
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock2", "FID_INPUT_PAST_DATA_INCU_YN", 0,"Y")  '
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_003r", "InBlock2", "FID_INPUT_VRTL_TICK_INCU_YN", 0,"N")
+		
+		DATAMANAGER.RequestTranData("ohhts_5030_003r")
+
+	else
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szItemMarket)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_001r", "InBlock1", "FID_INPUT_ISCD", 0, g_szItemCode)
+	
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_001r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szItemMarket)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_001r", "InBlock2", "FID_INPUT_ISCD", 0, g_szItemCode)
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_001r", "InBlock2", "FID_INPUT_MOD_STPR_CLS_CODE", 0, "Y")
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_001r", "InBlock2", "FID_INPUT_DAY_WEEK_MONTH_YR", 0, g_szChrtType)  'D/W/M/Y 일/주/월/년 
+		DATAMANAGER.SetDataValue( 0, "ohhts_5030_001r", "InBlock2", "FID_INPUT_DATE1", 0, g_szToday)
+	
+		DATAMANAGER.RequestTranData("ohhts_5030_001r")
+
+	end if
+	
+	DATAMANAGER.SetDataValue( 0, "ohhts_3050_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szItemMarket)
+	DATAMANAGER.SetDataValue( 0, "ohhts_3050_001r", "InBlock1", "FID_INPUT_ISCD", 0, g_szItemCode)
+	
+	DATAMANAGER.RequestTranData("ohhts_3050_001r")
+
+End Function
+'============================================================================
+Sub BtnSave_OnClick()
+	ChartEx0.SetOpenDlg("save;BtnSave")
+End Sub
+'============================================================================
+Sub BtnIndi_OnClick()
+	ChartEx0.SetOpenDlg("indicatormini;BtnIndi")
+End Sub
+'============================================================================
+Sub BtnTool_OnClick()
+	ChartEx0.SetOpenDlg("tools;BtnTool")
+End Sub
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	if nIndex == 0 then  		'일
+		g_flagMin = false
+		g_flagTic = false
+		g_flagWeek = false
+		
+		g_szChrtType = "D"
+		
+		PeriodSet(g_szChrtType)
+		
+	elseif nIndex == 1 then  	'주/월
+		g_flagMin = false
+		g_flagTic = false
+		
+		if g_flagWeek == false then
+			sTemp = RadioGroup0.GetRadioCaption(1)
+			
+			if sTemp == "월" then
+				g_szChrtType = "M"
+			else
+				g_szChrtType = "W"
+			end if
+			
+			g_flagWeek = true
+			
+			PeriodSet(g_szChrtType)
+		else
+			sTemp = RadioGroup0.GetRadioCaption(1)
+			Form.OpenPopup( "mhcht13000_h4.xmf", sTemp, "" )
+		end if
+		
+'		if g_flagWeek == true   then
+'			if g_szChrtType == "W" then
+'				g_szChrtType = "M"
+'				g_flagWeek = false
+'				RadioGroup0.SetRadioCaption( 1, "월" )
+'			else
+'				g_szChrtType = "W"
+'			end if
+'		else
+'			if g_szChrtType == "M" then
+'				g_szChrtType = "W"
+'				g_flagWeek = true
+'				RadioGroup0.SetRadioCaption( 1, "주" )
+'			else
+'				g_szChrtType = "M"
+'			end if
+'		end if	
+'		PeriodSet(g_szChrtType)
+'	elseif nIndex == 2 then  '월
+'		g_szChrtType = "M"
+'		PeriodSet(g_szChrtType)
+	elseif nIndex == 2 then   		'분
+		g_flagTic = false
+		g_flagWeek = false
+	
+		g_szChrtType = "1"
+		
+		if g_flagMin == false then
+			g_flagMin = true
+			tmpMin = split(RadioGroup0.GetRadioCaption(2), "분")
+			g_szMinType = tmpMin[0]
+			
+			PeriodSet(g_szChrtType)
+		else
+			'g_flagMin = false
+			Form.OpenPopup( "mhcht13000_h2.xmf", g_szMinType, "" )
+		end if
+		
+	elseif nIndex == 3 then   		'틱
+		g_flagMin = false
+		g_flagWeek = false
+		
+		g_szChrtType = "0"
+		
+		if g_flagTic == false then
+			g_flagTic = true
+			tmpTic = split(RadioGroup0.GetRadioCaption(3), "틱")
+			g_szTicType = tmpTic[0]
+			
+			PeriodSet(g_szChrtType)
+		else
+			Form.OpenPopup( "mhcht13000_h3.xmf", g_szTicType, "" )
+			'g_flagTic = false
+		end if
+		
+	end if
+End Sub
+'============================================================================
+'Chart 불러오기(기간)
+' 설정창 닫을때 분,틱 주기 넘겨줌.
+'============================================================================
+
+'============================================================================
+' 차트 설정 개수 변경시
+'============================================================================
+Function ChartEx0_OnByNumber(Count)
+	if #Count == 1 then
+		Count = "000"..Count
+	elseif #Count == 2 then
+		Count = "00"..Count
+	elseif #Count == 3 then
+		Count = "0"..Count
+	end if
+
+	g_sChartCnt = Count
+	
+	RequestData()
+End function
+'============================================================================
+' 분,틱 설정파일 저장
+'============================================================================
+Function Save_ini()
+	dim sMin, sTic, sflag
+	
+	for i = 0 to 6 
+		Form.SetEnvData( 1, "chart_mflag"..i, g_chartMinFlagArr[i] )
+		Form.SetEnvData( 1, "chart_min"..i, g_chartMinArr[i] )
+		
+		Form.SetEnvData( 1, "chart_tflag"..i, g_chartTicFlagArr[i] )
+		Form.SetEnvData( 1, "chart_tic"..i, g_chartTicArr[i] )
+	next
+'	Form.SetEnvData( 1, "chart_Count", g_sChartCnt )			' 데이터갯수...필요 없음 삭제 해도 됩니다.
+End function
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "Chart_Min" then
+		g_szMinType = sRet
+		RadioGroup0.SetRadioCaption( 2, g_szMinType )
+		tmpMin = split(RadioGroup0.GetRadioCaption(2), "분")
+		g_szMinType = tmpMin[0]
+		
+		PeriodSet(g_szChrtType)
+		
+	elseif sKeyName == "Chart_Tic" then
+		g_szTicType = sRet
+		RadioGroup0.SetRadioCaption( 3, g_szTicType )
+		tmpTic = split(RadioGroup0.GetRadioCaption(3), "틱")
+		g_szTicType = tmpTic[0]
+		
+		PeriodSet(g_szChrtType)
+		
+	elseif sKeyName == "Chart_WEEK" then	
+		if sRet == "월" then
+			g_szChrtType = "M"
+		else
+			g_szChrtType = "W"
+		end if
+		
+		RadioGroup0.SetRadioCaption( 1, sRet )
+		
+		PeriodSet(g_szChrtType)
+	end if
+End Sub
+'============================================================================
+' 일,분,틱 주기별 차트 설정
+' 0(틱),1(분) ,2(일), 3(주), 4(월), 5(년)
+'============================================================================
+Function PeriodSet(sPeriodType)
+	if sPeriodType= "0" then
+	   g_sPeriod = g_szTicType
+	   g_sPeriodType = "0"
+	   
+	elseif sPeriodType= "1" then
+	   g_sPeriod = g_szMinType
+	   g_sPeriodType = "1"
+	   
+	elseif sPeriodType= "D" then 
+	   g_sPeriodType = "2"
+	   g_sPeriod ="1"
+	   
+	elseif sPeriodType= "W" then 
+	   g_sPeriodType = "3"
+	   g_sPeriod ="1"
+	    
+	elseif sPeriodType= "M" then 
+	   g_sPeriodType = "4"
+	   g_sPeriod ="1"
+	   
+	end if
+	
+	sPeriod = CInt( g_sPeriod )
+	if Len( sPeriod ) = 1 then
+	   g_sPeriod = "00"..g_sPeriod
+	elseif Len( sPeriod ) = 2 then
+	   g_sPeriod = "0"..g_sPeriod
+	end if
+
+	ChartEx0.SetPeriodType(g_sPeriodType)
+	ChartEx0.SetPeriodTime(g_sPeriod)
+
+	RequestData()
+End Function
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If g_szItemMarket = "EO" Then
+		DATAMANAGER.SetDataValue( 1, "ohhts_eopt_cntg", "InBlock1", "FIDR_SHRN_ISCD", 0, g_szItemCode )
+		DATAMANAGER.RequestRealData( "ohhts_eopt_cntg" )
+		
+	elseif g_szItemMarket = "EM" then
+		DATAMANAGER.SetDataValue( 1, "ohhts_efut_cntg", "InBlock1", "FIDR_SHRN_ISCD", 0, g_szItemCode )
+		DATAMANAGER.RequestRealData( "ohhts_efut_cntg" )
+		
+	elseif g_szItemMarket = "CM" then
+		DATAMANAGER.SetDataValue( 1, "ohhts_cmef_cntg", "InBlock1", "FIDR_SHRN_ISCD", 0, g_szItemCode )
+		DATAMANAGER.RequestRealData( "ohhts_cmef_cntg" )
+		
+	elseif g_szItemMarket = "CD" then
+		DATAMANAGER.SetDataValue( 1, "ohhts_cusf_cntg", "InBlock1", "FIDR_SHRN_ISCD", 0, g_szItemCode )
+		DATAMANAGER.RequestRealData( "ohhts_cusf_cntg" )
+	End If
+End Sub
+'============================================================================
+Function ChartEx0_OnRequestData(nIndex, sData)
+	If sData = "" or sData = null then
+		Exit Function
+	End If
+	
+	Data = split(sData, ";")
+	
+   '현재가내의 차트에서는 종목코드를 변경하지 않는다.
+	g_szItemCode   = Cstr(Trim(Data[0]))             '코드
+	g_sPeriodType  = Cstr(Trim(Data[1]))             '일주월년분틱
+	g_sPeriod      = Cstr(Trim(Data[2]))             '주기(1,5,...)
+	sRefresh 	 = Cstr(Trim(Data[3]))
+	
+	radioIndex = ""
+	
+	if sRefresh = 1 or sRefresh = "1" or sRefresh = true then  
+		g_sPeriodType = "2"
+		g_sPeriod = "1"
+		radioIndex = 0
+		g_szChrtType =  "D"
+		
+		sTic = Form.GetEnvData( "chart_tic0" )
+		sMin = Form.GetEnvData( "chart_min0" )
+		
+		if sTic = "" then
+			sTic = "1"
+		end if
+		
+		if sMin = "" then
+			sMin = "1"
+		end if
+		
+		RadioGroup0.SetRadioCaption( 3, sTic.."틱" )
+		RadioGroup0.SetRadioCaption( 2, sMin.."분" )
+	
+	else
+		Select case g_sPeriodType
+			case "0"
+				radioIndex = 3
+				RadioGroup0.SetRadioCaption(radioIndex, g_sPeriod.."틱")
+				
+			case "1"				
+				radioIndex = 2
+				RadioGroup0.SetRadioCaption(radioIndex, g_sPeriod.."분")
+			
+			case "2"
+				radioIndex = 0
+			
+			case "3"
+				radioIndex = 1
+				RadioGroup0.SetRadioCaption(radioIndex, "주")
+			
+			case "4"
+				radioIndex = 1
+				RadioGroup0.SetRadioCaption(radioIndex, "월")
+		
+		end Select
+	end if
+	
+	RadioGroup0.currentindex = radioIndex
+	
+	ChartEx0.SetPeriodType(g_sPeriodType)
+	ChartEx0.SetPeriodTime(g_sPeriod)
+	
+	' 종목코드 주기
+	g_szItemMarket = Form.GetItemCodeInfo(g_szItemCode, "market_night")
+	Form.SetItemCode(g_szItemCode)
+	
+	RequestData()
+End Function
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ChartEx0.SetLoadChart("future")
+End Sub
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub ChartEx0_OnScrollEnd()
+	if g_szChrtType = "0" then 		' 틱
+		DATAMANAGER.RequestNextData("ohhts_5030_004r")
+	elseif g_szChrtType = "1" then 	' 분
+		DATAMANAGER.RequestNextData("ohhts_5030_003r")
+	else
+		DATAMANAGER.RequestNextData("ohhts_5030_001r")
+	end if
+End Sub
+'============================================================================
+'Chart 불러오기(기간)
+' 설정창 닫을때 분,틱 주기 넘겨줌.
+'============================================================================
+Function ChartEx0_OnGetPeriodInfo()
+	Dim sPeriodType
+	sPeriodType = ""
+	
+	Dim sMin, sTic
+	
+   ' 차트 설정창에서 주기 값 넘어온 경우
+   ' 분주기#틱주기 => 1;3;5;.../1;3;5;...
+	for i = 0 to 8
+		sMin = Form.GetEnvData( "chart_min"..i )	'분차트
+		if sMin <> "" then
+			if i == 7 then
+				sPeriodType = sPeriodType & sMin & "/"
+			else
+				sPeriodType = sPeriodType & sMin & ";"
+			end if
+		end if
+	next
+	
+	for i = 0 to 8
+		sTic = Form.GetEnvData( "chart_tic"..i )	'분차트
+		if sTic <> "" then
+			if i == 7 then
+				sPeriodType = sPeriodType & sTic & "/"
+			else
+				sPeriodType = sPeriodType & sTic & ";"
+			end if
+		end if
+	next
+	
+	if sPeriodType <> "" then
+		ChartEx0.setSyncPeriodValueToChart(sPeriodType)
+	end if
+End Function
+'============================================================================
+Function ChartEx0_OnChangePeriod(sPeriodType)
+	sMinArr = {}
+	sTicArr = {}
+	sDataArr = {}
+	
+	g_sIsRequestChartEvent = "1"
+
+   ' 차트 설정창에서 주기 값 넘어온 경우
+   ' 분주기#틱주기 => 1;3;5;.../1;3;5;...
+	if InStr(sPeriodType, "/") > 0 then
+		sTemp = split(sPeriodType, "/")
+		sMinArr = split(sTemp[0], ";")
+		sTicArr = split(sTemp[1], ";")
+		
+		Form.Log("sPeriodType", sPeriodType)
+	   
+		for i = 0 to 7 step 1
+			Form.SetEnvData( 1, "chart_min"..i, sMinArr[i] )
+			Form.SetEnvData( 1, "chart_tic"..i, sTicArr[i] )
+		next
+	end if
+End Function
+'============================================================================
+Sub Form_OnFormClose()
+	ChartEx0.SetSaveChart("1")
+	Form.SendReturnToParent("OrientaitonClose", g_szItemCode)
+End Sub
+'============================================================================
+Sub BtnLine_OnClick()
+	if g_flagLine = false then
+		g_flagLine = true
+		ChartEx0.SetShowCrossLine("true")
+		BtnLine.imgpath = "btn_chart01_o.9.png"
+	else
+		g_flagLine = false
+		ChartEx0.SetShowCrossLine("false")
+		BtnLine.imgpath = "btn_chart01_n.9.png"
+	end if
+End Sub
+'============================================================================
+Sub Form_OnRefresh()
+	RequestData()
+End Sub
+'============================================================================
+Sub imgSearch_OnClick()
+	Form.OpenCommonDialog("SEARCH", "11:12:13", "")
+End Sub
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	if sDlgName = "SEARCH" then
+		if sReturn1 <> "" or sRturn1 <> null then
+'			g_szItemCode = sReturn1
+'			g_szItemMarket = Form.GetItemCodeInfo( g_szItemCode, "market_night" )
+'		
+'			DATAMANAGER.SetDataValue( 0, "ohhts_1001_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0, g_szItemMarket)
+'			DATAMANAGER.SetDataValue( 0, "ohhts_1001_001r", "InBlock1", "FID_INPUT_ISCD", 0, g_szItemCode)
+'			
+'			DATAMANAGER.RequestTranData("ohhts_1001_001r")
+		
+			RequestData()
+		end if
+	end	if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_cmef_cntg" trcode="ohhts_cmef_cntg" />
+			<TRAN tranid="ohhts_cusf_cntg" trcode="ohhts_cusf_cntg" />
+			<TRAN tranid="ohhts_eopt_cntg" trcode="ohhts_eopt_cntg" />
+			<TRAN tranid="ohhts_efut_cntg" trcode="ohhts_efut_cntg" />
+			<TRAN tranid="ohhts_5030_001r" trcode="ohhts_5030_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_5030_003r" trcode="ohhts_5030_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_5030_004r" trcode="ohhts_5030_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_3050_001r" trcode="ohhts_3050_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_cmef_cntg" title="CME선물 체결 자동갱신" realdata="1" dessvr="" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="59" _ulen="47" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2764" _ulen="2192" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^10^2^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^10^2^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_CNTG_VOL^FIDR체결거래량^11^0^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_ACML_TR_PBMN^FIDR누적거래대금^13^0^7^0^0^0^0
+FIDR_OPRC2^FIDR시가2^10^2^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^10^2^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^10^2^7^0^0^1^0
+FIDR_OPRC_HOUR^FIDR시가시간^6^0^0^0^0^0^0
+FIDR_OPRC_VRSS_SIGN^FIDR시가대비부호^1^0^0^0^0^0^0
+FIDR_OPRC_VRSS2^FIDR시가대비2^10^2^7^0^0^1^0
+FIDR_HPRC_HOUR^FIDR고가시간^6^0^0^0^0^0^0
+FIDR_HPRC_VRSS_SIGN^FIDR고가대비부호^1^0^0^0^0^0^0
+FIDR_HPRC_VRSS2^FIDR고가대비2^10^2^7^0^0^1^0
+FIDR_LPRC_HOUR^FIDR저가시간^6^0^0^0^0^0^0
+FIDR_LPRC_VRSS_SIGN^FIDR저가대비부호^1^0^0^0^0^0^0
+FIDR_LPRC_VRSS2^FIDR저가대비2^10^2^7^0^0^1^0
+FIDR_NMSC_FCTN_STPL_PRC^FIDR근월물의제약정가격^10^2^7^0^0^0^0
+FIDR_FMSC_FCTN_STPL_PRC^FIDR원월물의제약정가격^10^2^7^0^0^0^0
+FIDR_SPEAD^FIDR스프레드^9^2^7^0^0^0^0
+FIDR_OTST_STPL_QTY^FIDR미결제약정수량^13^0^7^0^0^0^0
+FIDR_OTST_STPL_QTY_ICDC^FIDR미결제약정수량증감^13^0^7^0^0^1^0
+FIDR_OTST_STPL_RGBF_QTY_ICDC^FIDR미결제약정직전수량증감^13^0^7^0^0^1^0
+FIDR_THPR^FIDR이론가^9^2^7^0^0^1^0
+FIDR_MRKT_BASIS^FIDR시장베이시스^9^2^7^0^0^1^0
+FIDR_THER_BASIS^FIDR이론베이시스^9^2^7^0^0^1^0
+FIDR_ESDG^FIDR괴리도^9^2^7^0^0^1^0
+FIDR_DPRT^FIDR괴리율^9^2^7^0^0^1^0
+FIDR_SHNU_RATE^FIDR매수비율^9^2^7^0^0^1^0
+FIDR_RLTV^FIDR체결강도^9^2^7^0^0^1^0
+FIDR_FUTS_OPTN_ASKP1^FIDR선물옵션매도호가1^10^2^7^0^0^1^0
+FIDR_FUTS_OPTN_BIDP1^FIDR선물옵션매수호가1^10^2^7^0^0^1^0
+FIDR_ASKP_RSQN1^FIDR매도호가잔량1^13^0^7^0^0^0^0
+FIDR_BIDP_RSQN1^FIDR매수호가잔량1^13^0^7^0^0^0^0
+FIDR_SELN_CNTG_CSNU^FIDR매도체결건수^5^0^7^0^0^0^0
+FIDR_SHNU_CNTG_CSNU^FIDR매수체결건수^5^0^7^0^0^0^0
+FIDR_NTBY_CNTG_CSNU^FIDR순매수체결건수^5^0^7^0^0^1^0
+FIDR_SELN_CNTG_SMTN^FIDR매도체결합계^13^0^7^0^0^0^0
+FIDR_SHNU_CNTG_SMTN^FIDR매수체결합계^13^0^7^0^0^0^0
+FIDR_TOTAL_ASKP_RSQN^FIDR총매도호가잔량^13^0^7^0^0^0^0
+FIDR_TOTAL_BIDP_RSQN^FIDR총매수호가잔량^13^0^7^0^0^0^0
+FIDR_PRDY_VRSS_VOL_RATE^FIDR전일대비거래량비율^9^2^7^0^0^1^0
+FIDR_UNAS_PRPR^FIDR기초자산현재가^12^2^7^0^0^1^0
+FIDR_UNAS_PRDY_VRSS_SIGN^FIDR기초자산전일대비부호^1^0^0^0^0^0^0
+FIDR_UNAS_PRDY_VRSS^FIDR기초자산전일대비^12^2^7^0^0^1^0
+FIDR_UNAS_PRDY_CTRT^FIDR기초자산전일대비율^9^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_cusf_cntg" title="CME USD선물 체결 자동갱신" realdata="1" dessvr="" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="59" _ulen="47" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="3136" _ulen="2474" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^10^2^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^10^2^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_CNTG_VOL^FIDR체결거래량^11^0^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_ACML_TR_PBMN^FIDR누적거래대금^13^0^7^0^0^0^0
+FIDR_OPRC2^FIDR시가2^10^2^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^10^2^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^10^2^7^0^0^1^0
+FIDR_OPRC_HOUR^FIDR시가시간^6^0^0^0^0^0^0
+FIDR_OPRC_VRSS_SIGN^FIDR시가대비부호^1^0^0^0^0^0^0
+FIDR_OPRC_VRSS2^FIDR시가대비2^10^2^7^0^0^1^0
+FIDR_HPRC_HOUR^FIDR고가시간^6^0^0^0^0^0^0
+FIDR_HPRC_VRSS_SIGN^FIDR고가대비부호^1^0^0^0^0^0^0
+FIDR_HPRC_VRSS2^FIDR고가대비2^10^2^7^0^0^1^0
+FIDR_LPRC_HOUR^FIDR저가시간^6^0^0^0^0^0^0
+FIDR_LPRC_VRSS_SIGN^FIDR저가대비부호^1^0^0^0^0^0^0
+FIDR_LPRC_VRSS2^FIDR저가대비2^10^2^7^0^0^1^0
+FIDR_NMSC_FCTN_STPL_PRC^FIDR근월물의제약정가격^10^2^7^0^0^0^0
+FIDR_FMSC_FCTN_STPL_PRC^FIDR원월물의제약정가격^10^2^7^0^0^0^0
+FIDR_SPEAD^FIDR스프레드^9^2^7^0^0^0^0
+FIDR_OTST_STPL_QTY^FIDR미결제약정수량^13^0^7^0^0^0^0
+FIDR_OTST_STPL_QTY_ICDC^FIDR미결제약정수량증감^13^0^7^0^0^1^0
+FIDR_OTST_STPL_RGBF_QTY_ICDC^FIDR미결제약정직전수량증감^13^0^7^0^0^1^0
+FIDR_THPR^FIDR이론가^9^2^7^0^0^1^0
+FIDR_MRKT_BASIS^FIDR시장베이시스^9^2^7^0^0^1^0
+FIDR_THER_BASIS^FIDR이론베이시스^9^2^7^0^0^1^0
+FIDR_ESDG^FIDR괴리도^9^2^7^0^0^1^0
+FIDR_DPRT^FIDR괴리율^9^2^7^0^0^1^0
+FIDR_SHNU_RATE^FIDR매수비율^9^2^7^0^0^1^0
+FIDR_RLTV^FIDR체결강도^9^2^7^0^0^1^0
+FIDR_FUTS_OPTN_ASKP1^FIDR선물옵션매도호가1^10^2^7^0^0^1^0
+FIDR_FUTS_OPTN_BIDP1^FIDR선물옵션매수호가1^10^2^7^0^0^1^0
+FIDR_ASKP_RSQN1^FIDR매도호가잔량1^13^0^7^0^0^0^0
+FIDR_BIDP_RSQN1^FIDR매수호가잔량1^13^0^7^0^0^0^0
+FIDR_SELN_CNTG_CSNU^FIDR매도체결건수^5^0^7^0^0^0^0
+FIDR_SHNU_CNTG_CSNU^FIDR매수체결건수^5^0^7^0^0^0^0
+FIDR_NTBY_CNTG_CSNU^FIDR순매수체결건수^5^0^7^0^0^1^0
+FIDR_SELN_CNTG_SMTN^FIDR매도체결합계^13^0^7^0^0^0^0
+FIDR_SHNU_CNTG_SMTN^FIDR매수체결합계^13^0^7^0^0^0^0
+FIDR_TOTAL_ASKP_RSQN^FIDR총매도호가잔량^13^0^7^0^0^0^0
+FIDR_TOTAL_BIDP_RSQN^FIDR총매수호가잔량^13^0^7^0^0^0^0
+FIDR_PRDY_VRSS_VOL_RATE^FIDR전일대비거래량비율^9^2^7^0^0^1^0
+FIDR_UNAS_PRPR^FIDR기초자산현재가^12^2^7^0^0^1^0
+FIDR_UNAS_PRDY_VRSS_SIGN^FIDR기초자산전일대비부호^1^0^0^0^0^0^0
+FIDR_UNAS_PRDY_VRSS^FIDR기초자산전일대비^12^2^7^0^0^1^0
+FIDR_UNAS_PRDY_CTRT^FIDR기초자산전일대비율^9^2^7^0^0^1^0
+FIDR_UNAS_ACML_VOL^FIDR기초자산누적거래량^13^0^7^0^0^0^0
+FIDR_LRQN_ACML_CNTG_QTY^FIDR대량누적체결수량^13^0^7^0^0^0^0
+FIDR_RLTM_MXPR_SIGN^FIDR실시간상한가부호^1^0^0^0^0^0^0
+FIDR_RLTM_MXPR^FIDR실시간상한가^12^2^7^0^0^1^0
+FIDR_RLTM_LLAM_SIGN^FIDR실시간하한가부호^1^0^0^0^0^0^0
+FIDR_RLTM_LLAM^FIDR실시간하한가^12^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_eopt_cntg" title="EUREX지수옵션 체결 자동갱신" realdata="1" dessvr="" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="59" _ulen="47" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="3268" _ulen="2614" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^10^2^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^10^2^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_CNTG_VOL^FIDR체결거래량^11^0^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_ACML_TR_PBMN^FIDR누적거래대금^13^0^7^0^0^0^0
+FIDR_OPRC2^FIDR시가2^10^2^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^10^2^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^10^2^7^0^0^1^0
+FIDR_OPRC_HOUR^FIDR시가시간^6^0^0^0^0^0^0
+FIDR_OPRC_VRSS_SIGN^FIDR시가대비부호^1^0^0^0^0^0^0
+FIDR_OPRC_VRSS2^FIDR시가대비2^10^2^7^0^0^1^0
+FIDR_HPRC_HOUR^FIDR고가시간^6^0^0^0^0^0^0
+FIDR_HPRC_VRSS_SIGN^FIDR고가대비부호^1^0^0^0^0^0^0
+FIDR_HPRC_VRSS2^FIDR고가대비2^10^2^7^0^0^1^0
+FIDR_LPRC_HOUR^FIDR저가시간^6^0^0^0^0^0^0
+FIDR_LPRC_VRSS_SIGN^FIDR저가대비부호^1^0^0^0^0^0^0
+FIDR_LPRC_VRSS2^FIDR저가대비2^10^2^7^0^0^1^0
+FIDR_NMSC_FCTN_STPL_PRC^FIDR근월물의제약정가격^10^2^7^0^0^0^0
+FIDR_FMSC_FCTN_STPL_PRC^FIDR원월물의제약정가격^10^2^7^0^0^0^0
+FIDR_SPEAD^FIDR스프레드^9^2^7^0^0^0^0
+FIDR_OTST_STPL_QTY^FIDR미결제약정수량^13^0^7^0^0^0^0
+FIDR_OTST_STPL_QTY_ICDC^FIDR미결제약정수량증감^13^0^7^0^0^1^0
+FIDR_OTST_STPL_RGBF_QTY_ICDC^FIDR미결제약정직전수량증감^13^0^7^0^0^1^0
+FIDR_THPR^FIDR이론가^9^2^7^0^0^1^0
+FIDR_MRKT_BASIS^FIDR시장베이시스^9^2^7^0^0^1^0
+FIDR_THER_BASIS^FIDR이론베이시스^9^2^7^0^0^1^0
+FIDR_DELTA^FIDR델타^10^4^7^0^0^0^0
+FIDR_GAMA^FIDR감마^10^4^7^0^0^0^0
+FIDR_VEGA^FIDR베가^10^4^7^0^0^0^0
+FIDR_THETA^FIDR세타^10^4^7^0^0^0^0
+FIDR_RHO^FIDR로우^10^4^7^0^0^0^0
+FIDR_INTS_VLTL^FIDR내재변동성^9^2^7^0^0^0^0
+FIDR_HIST_VLTL^FIDR역사적변동성^9^2^7^0^0^0^0
+FIDR_PRMM^FIDR프리미엄^10^4^7^0^0^0^0
+FIDR_IVA^FIDR내재가치^9^2^7^0^0^0^0
+FIDR_TMVL^FIDR시간가치^9^2^7^0^0^0^0
+FIDR_ESDG^FIDR괴리도^9^2^7^0^0^1^0
+FIDR_DPRT^FIDR괴리율^9^2^7^0^0^1^0
+FIDR_SHNU_RATE^FIDR매수비율^9^2^7^0^0^1^0
+FIDR_RLTV^FIDR체결강도^9^2^7^0^0^1^0
+FIDR_FUTS_OPTN_ASKP1^FIDR선물옵션매도호가1^10^2^7^0^0^1^0
+FIDR_FUTS_OPTN_BIDP1^FIDR선물옵션매수호가1^10^2^7^0^0^1^0
+FIDR_ASKP_RSQN1^FIDR매도호가잔량1^13^0^7^0^0^0^0
+FIDR_BIDP_RSQN1^FIDR매수호가잔량1^13^0^7^0^0^0^0
+FIDR_SELN_CNTG_CSNU^FIDR매도체결건수^5^0^7^0^0^0^0
+FIDR_SHNU_CNTG_CSNU^FIDR매수체결건수^5^0^7^0^0^0^0
+FIDR_NTBY_CNTG_CSNU^FIDR순매수체결건수^5^0^7^0^0^1^0
+FIDR_SELN_CNTG_SMTN^FIDR매도체결합계^13^0^7^0^0^0^0
+FIDR_SHNU_CNTG_SMTN^FIDR매수체결합계^13^0^7^0^0^0^0
+FIDR_TOTAL_ASKP_RSQN^FIDR총매도호가잔량^13^0^7^0^0^0^0
+FIDR_TOTAL_BIDP_RSQN^FIDR총매수호가잔량^13^0^7^0^0^0^0
+FIDR_PRDY_VRSS_VOL_RATE^FIDR전일대비거래량비율^9^2^7^0^0^1^0
+FIDR_UNAS_PRPR^FIDR기초자산현재가^12^2^7^0^0^1^0
+FIDR_UNAS_PRDY_VRSS_SIGN^FIDR기초자산전일대비부호^1^0^0^0^0^0^0
+FIDR_UNAS_PRDY_VRSS^FIDR기초자산전일대비^12^2^7^0^0^1^0
+FIDR_UNAS_PRDY_CTRT^FIDR기초자산전일대비율^9^2^7^0^0^1^0
+FIDR_PRIT^FIDR패리티^9^2^7^0^0^0^0
+FIDR_AVRG_VLTL^FIDR평균변동성^9^2^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_efut_cntg" title="EUREX 미니선물 체결 자동갱신" realdata="1" dessvr="" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="59" _ulen="47" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2831" _ulen="2241" >
+
+FIDR_SHRN_ISCD^FIDR단축종목코드^9^0^0^0^0^0^0
+FIDR_BSOP_HOUR^FIDR영업시간^6^0^0^0^0^0^0
+FIDR_PRPR2^FIDR현재가2^10^2^7^0^0^1^0
+FIDR_PRDY_VRSS_SIGN^FIDR전일대비부호^1^0^0^0^0^0^0
+FIDR_PRDY_VRSS2^FIDR전일대비2^10^2^7^0^0^1^0
+FIDR_PRDY_CTRT^FIDR전일대비율^9^2^7^0^0^1^0
+FIDR_CNTG_VOL^FIDR체결거래량^11^0^7^0^0^1^0
+FIDR_ACML_VOL^FIDR누적거래량^13^0^7^0^0^0^0
+FIDR_ACML_TR_PBMN^FIDR누적거래대금^13^0^7^0^0^0^0
+FIDR_OPRC2^FIDR시가2^10^2^7^0^0^1^0
+FIDR_HPRC2^FIDR고가2^10^2^7^0^0^1^0
+FIDR_LPRC2^FIDR저가2^10^2^7^0^0^1^0
+FIDR_OPRC_HOUR^FIDR시가시간^6^0^0^0^0^0^0
+FIDR_OPRC_VRSS_SIGN^FIDR시가대비부호^1^0^0^0^0^0^0
+FIDR_OPRC_VRSS2^FIDR시가대비2^10^2^7^0^0^1^0
+FIDR_HPRC_HOUR^FIDR고가시간^6^0^0^0^0^0^0
+FIDR_HPRC_VRSS_SIGN^FIDR고가대비부호^1^0^0^0^0^0^0
+FIDR_HPRC_VRSS2^FIDR고가대비2^10^2^7^0^0^1^0
+FIDR_LPRC_HOUR^FIDR저가시간^6^0^0^0^0^0^0
+FIDR_LPRC_VRSS_SIGN^FIDR저가대비부호^1^0^0^0^0^0^0
+FIDR_LPRC_VRSS2^FIDR저가대비2^10^2^7^0^0^1^0
+FIDR_NMSC_FCTN_STPL_PRC^FIDR근월물의제약정가격^10^2^7^0^0^0^0
+FIDR_FMSC_FCTN_STPL_PRC^FIDR원월물의제약정가격^10^2^7^0^0^0^0
+FIDR_SPEAD^FIDR스프레드^9^2^7^0^0^0^0
+FIDR_OTST_STPL_QTY^FIDR미결제약정수량^13^0^7^0^0^0^0
+FIDR_OTST_STPL_QTY_ICDC^FIDR미결제약정수량증감^13^0^7^0^0^1^0
+FIDR_OTST_STPL_RGBF_QTY_ICDC^FIDR미결제약정직전수량증감^13^0^7^0^0^1^0
+FIDR_THPR^FIDR이론가^9^2^7^0^0^1^0
+FIDR_MRKT_BASIS^FIDR시장베이시스^9^2^7^0^0^1^0
+FIDR_THER_BASIS^FIDR이론베이시스^9^2^7^0^0^1^0
+FIDR_ESDG^FIDR괴리도^9^2^7^0^0^1^0
+FIDR_DPRT^FIDR괴리율^9^2^7^0^0^1^0
+FIDR_SHNU_RATE^FIDR매수비율^9^2^7^0^0^1^0
+FIDR_RLTV^FIDR체결강도^9^2^7^0^0^1^0
+FIDR_FUTS_OPTN_ASKP1^FIDR선물옵션매도호가1^10^2^7^0^0^1^0
+FIDR_FUTS_OPTN_BIDP1^FIDR선물옵션매수호가1^10^2^7^0^0^1^0
+FIDR_ASKP_RSQN1^FIDR매도호가잔량1^13^0^7^0^0^0^0
+FIDR_BIDP_RSQN1^FIDR매수호가잔량1^13^0^7^0^0^0^0
+FIDR_SELN_CNTG_CSNU^FIDR매도체결건수^5^0^7^0^0^0^0
+FIDR_SHNU_CNTG_CSNU^FIDR매수체결건수^5^0^7^0^0^0^0
+FIDR_NTBY_CNTG_CSNU^FIDR순매수체결건수^5^0^7^0^0^1^0
+FIDR_SELN_CNTG_SMTN^FIDR매도체결합계^13^0^7^0^0^0^0
+FIDR_SHNU_CNTG_SMTN^FIDR매수체결합계^13^0^7^0^0^0^0
+FIDR_TOTAL_ASKP_RSQN^FIDR총매도호가잔량^13^0^7^0^0^0^0
+FIDR_TOTAL_BIDP_RSQN^FIDR총매수호가잔량^13^0^7^0^0^0^0
+FIDR_PRDY_VRSS_VOL_RATE^FIDR전일대비거래량비율^9^2^7^0^0^1^0
+FIDR_UNAS_PRPR^FIDR기초자산현재가^12^2^7^0^0^1^0
+FIDR_UNAS_PRDY_VRSS_SIGN^FIDR기초자산전일대비부호^1^0^0^0^0^0^0
+FIDR_UNAS_PRDY_VRSS^FIDR기초자산전일대비^12^2^7^0^0^1^0
+FIDR_UNAS_PRDY_CTRT^FIDR기초자산전일대비율^9^2^7^0^0^1^0
+FIDR_UNAS_ACML_VOL^FIDR기초자산누적거래량^13^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5030_001r" title="선/옵조회(차트)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="274" toutblk="OutBlock2" _ulen="222" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_DAY_WEEK_MONTH_YR^FID입력일주월년^2^0^0^9104^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1078" _ulen="894" >
+
+FID_PRDY_VRSS2^FID전일대비2^14^2^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN2^FID전일대비부호2^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_PRDY_CLPR2^FID전일종가2^12^2^7^13^1000^0^0
+FID_SDPR2^FID기준가2^14^2^7^24^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_ACML_TR_PBMN^FID누적거래대금^19^0^7^16^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^2^7^4^1000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+FID_MXPR2^FID상한가2^14^2^7^26^1000^0^0
+FID_LLAM2^FID하한가2^14^2^7^27^1000^0^0
+FID_OPRC2^FID시가2^14^2^7^17^1000^0^0
+FID_HPRC2^FID고가2^14^2^7^18^1000^0^0
+FID_LPRC2^FID저가2^14^2^7^19^1000^0^0
+FID_PRDY_CPRC2^FID전일시가2^14^2^7^6607^1000^0^0
+FID_PRDY_HPRC^FID전일고가^13^0^7^6608^1000^0^0
+FID_PRDY_LPRC^FID전일저가^13^0^7^6609^1000^0^0
+FID_FUTS_OPTN_BIDP^FID선물옵션매수호가^14^2^7^65^1000^0^0
+FID_FUTS_OPTN_ASKP^FID선물옵션매도호가^14^2^7^66^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="300" inout="out" _len="308" _ulen="268" >
+
+FID_DATE^FID일자^8^0^0^67^1003^0^0
+FID_PRPR^FID현재가^14^2^7^4^1003^0^0
+FID_OPRC2^FID시가2^14^2^7^17^1003^0^0
+FID_HPRC2^FID고가2^14^2^7^18^1003^0^0
+FID_LPRC2^FID저가2^14^2^7^19^1003^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1003^0^0
+FID_MOD_YN^FID수정여부^2^0^0^1911^1003^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5030_003r" title="선/옵조회(차트_분)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="442" toutblk="OutBlock2" _ulen="346" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_HOUR_CLS_CODE^FID입력시간구분코드^7^0^7^9002^9999^0^0
+FID_INPUT_PAST_DATA_INCU_YN^FID입력과거데이터포함여부^2^0^0^9133^9999^0^0
+FID_INPUT_VRTL_TICK_INCU_YN^FID입력가상틱포함여부^2^0^0^9134^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1078" _ulen="894" >
+
+FID_PRDY_VRSS2^FID전일대비2^14^2^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN2^FID전일대비부호2^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_PRDY_CLPR2^FID전일종가2^12^2^7^13^1000^0^0
+FID_SDPR2^FID기준가2^14^2^7^24^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_ACML_TR_PBMN^FID누적거래대금^19^0^7^16^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^2^7^4^1000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+FID_MXPR2^FID상한가2^14^2^7^26^1000^0^0
+FID_LLAM2^FID하한가2^14^2^7^27^1000^0^0
+FID_OPRC2^FID시가2^14^2^7^17^1000^0^0
+FID_HPRC2^FID고가2^14^2^7^18^1000^0^0
+FID_LPRC2^FID저가2^14^2^7^19^1000^0^0
+FID_PRDY_CPRC2^FID전일시가2^14^2^7^6607^1000^0^0
+FID_PRDY_HPRC^FID전일고가^13^0^7^6608^1000^0^0
+FID_PRDY_LPRC^FID전일저가^13^0^7^6609^1000^0^0
+FID_FUTS_OPTN_BIDP^FID선물옵션매수호가^14^2^7^65^1000^0^0
+FID_FUTS_OPTN_ASKP^FID선물옵션매도호가^14^2^7^66^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="300" inout="out" _len="309" _ulen="269" >
+
+FID_DATE^FID일자^8^0^0^67^1005^0^0
+FID_CNTG_HOUR^FID체결시간^6^0^0^12^1005^0^0
+FID_PRPR^FID현재가^14^2^7^4^1005^0^0
+FID_OPRC2^FID시가2^14^2^7^17^1005^0^0
+FID_HPRC2^FID고가2^14^2^7^18^1005^0^0
+FID_LPRC2^FID저가2^14^2^7^19^1005^0^0
+FID_CNTG_VOL^FID체결거래량^13^0^7^68^1005^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5030_004r" title="선/옵조회(차트_틱)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="493" toutblk="OutBlock2" _ulen="391" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_CNT1^FID입력수1^13^0^7^9031^9999^0^0
+FID_INPUT_HOUR_CLS_CODE^FID입력시간구분코드^7^0^7^9002^9999^0^0
+FID_INPUT_VRTL_TICK_INCU_YN^FID입력가상틱포함여부^2^0^0^9134^9999^0^0
+FID_INPUT_PAST_DATA_INCU_YN^FID입력과거데이터포함여부^2^0^0^9133^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1078" _ulen="894" >
+
+FID_PRDY_VRSS2^FID전일대비2^14^2^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN2^FID전일대비부호2^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_PRDY_CLPR2^FID전일종가2^12^2^7^13^1000^0^0
+FID_SDPR2^FID기준가2^14^2^7^24^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_ACML_TR_PBMN^FID누적거래대금^19^0^7^16^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^2^7^4^1000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+FID_MXPR2^FID상한가2^14^2^7^26^1000^0^0
+FID_LLAM2^FID하한가2^14^2^7^27^1000^0^0
+FID_OPRC2^FID시가2^14^2^7^17^1000^0^0
+FID_HPRC2^FID고가2^14^2^7^18^1000^0^0
+FID_LPRC2^FID저가2^14^2^7^19^1000^0^0
+FID_PRDY_CPRC2^FID전일시가2^14^2^7^6607^1000^0^0
+FID_PRDY_HPRC^FID전일고가^13^0^7^6608^1000^0^0
+FID_PRDY_LPRC^FID전일저가^13^0^7^6609^1000^0^0
+FID_FUTS_OPTN_BIDP^FID선물옵션매수호가^14^2^7^65^1000^0^0
+FID_FUTS_OPTN_ASKP^FID선물옵션매도호가^14^2^7^66^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="300" inout="out" _len="312" _ulen="270" >
+
+FID_DATE^FID일자^8^0^0^67^1002^0^0
+FID_PRPR_HOUR^FID현재가시간^6^0^0^12^1002^0^0
+FID_PRPR^FID현재가^14^2^7^4^1002^0^0
+FID_OPRC2^FID시가2^14^2^7^17^1002^0^0
+FID_HPRC2^FID고가2^14^2^7^18^1002^0^0
+FID_LPRC2^FID저가2^14^2^7^19^1002^0^0
+FID_CNTG_VOL^FID체결거래량^13^0^7^68^1002^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_3050_001r" title="미니선물옵션현재가1(시세&상세)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="3703" _ulen="2933" >
+
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_PRPR^FID현재가^14^2^7^4^1000^0^0
+FID_PRDY_VRSS_SIGN2^FID전일대비부호2^2^0^0^6^1000^0^0
+FID_PRDY_VRSS2^FID전일대비2^14^2^7^5^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_PRDY_VRSS_VOL_RATE^FID전일대비거래량비율^9^2^7^15^1000^0^0
+FID_OPRC2^FID시가2^14^2^7^17^1000^0^0
+FID_HPRC2^FID고가2^14^2^7^18^1000^0^0
+FID_LPRC2^FID저가2^14^2^7^19^1000^0^0
+FID_MRKT_BASIS^FID시장베이시스^9^2^7^114^1000^0^0
+FID_DPRT^FID괴리율^9^2^7^115^1000^0^0
+FID_SDPR2^FID기준가2^14^2^7^24^1000^0^0
+FID_ESDG^FID괴리도^9^2^7^6215^1000^0^0
+FID_UNAS_SHRN_ISCD^FID기초자산단축종목코드^9^0^0^71^1000^0^0
+FID_UNAS_PRPR^FID기초자산현재가^14^2^7^1105^1000^0^0
+FID_UNAS_PRDY_VRSS^FID기초자산전일대비^13^0^7^1106^1000^0^0
+FID_UNAS_PRDY_VRSS_SIGN^FID기초자산전일대비부호^2^0^0^1107^1000^0^0
+FID_UNAS_ACML_VOL^FID기초자산누적거래량^19^0^7^1109^1000^0^0
+FID_OTST_STPL_QTY^FID미결제약정수량^19^0^7^116^1000^0^0
+FID_OTST_STPL_QTY_ICDC^FID미결제약정수량증감^11^0^7^117^1000^0^0
+FID_THPR^FID이론가^9^2^7^72^1000^0^0
+FID_THER_BASIS^FID이론베이시스^9^2^7^83^1000^0^0
+FID_DELTA^FID델타^21^6^7^86^1000^0^0
+FID_GAMA^FID감마^9^4^7^87^1000^0^0
+FID_VEGA^FID베가^9^4^7^88^1000^0^0
+FID_THETA^FID세타^20^9^7^89^1000^0^0
+FID_RHO^FID로우^9^4^7^90^1000^0^0
+FID_INTS_VLTL^FID내재변동성^9^2^7^91^1000^0^0
+FID_PRDY_CLPR2^FID전일종가2^12^2^7^13^1000^0^0
+FID_UNAS_PRDY_CTRT^FID기초자산전일대비율^9^2^7^1108^1000^0^0
+FID_MXPR2^FID상한가2^14^2^7^26^1000^0^0
+FID_LLAM2^FID하한가2^14^2^7^27^1000^0^0
+FID_ACML_TR_PBMN^FID누적거래대금^19^0^7^16^1000^0^0
+FID_CRBR_APLY_MXPR^FID서킷브레이커적용상한가^9^2^7^126^1000^0^0
+FID_CRBR_APLY_LLAM^FID서킷브레이커적용하한가^9^2^7^127^1000^0^0
+FID_CRBR_APLY_MXPR_RATE^FID서킷브레이커적용상한가비율^9^2^7^6739^1000^0^0
+FID_CRBR_APLY_LLAM_RATE^FID서킷브레이커적용하한가비율^9^2^7^6740^1000^0^0
+FID_CD_MNRT^FIDCD금리^10^5^7^251^1000^0^0
+FID_RMNN_DYNU^FID잔존일수^5^0^7^101^1000^0^0
+FID_STCK_LAST_TR_DATE^FID주식최종거래일자^8^0^0^96^1000^0^0
+FID_MTRT_DATE^FID만기일자^8^0^0^128^1000^0^0
+FID_LSTN_MEDM_HGPR^FID상장중최고가^12^2^7^124^1000^0^0
+FID_LSTN_MEDM_LWPR^FID상장중최저가^12^2^7^125^1000^0^0
+FID_LSTN_HGPR_VRSS_PRPR_RATE^FID상장최고가대비현재가비율^9^2^7^6610^1000^0^0
+FID_LSTN_LWPR_VRSS_PRPR_RATE^FID상장최저가대비현재가비율^9^2^7^6611^1000^0^0
+FID_LSTN_HGPR_DATE^FID상장최고가일자^8^0^0^340^1000^0^0
+FID_LSTN_LWPR_DATE^FID상장최저가일자^8^0^0^341^1000^0^0
+FID_IVA^FID내재가치^9^2^7^248^1000^0^0
+FID_TMVL^FID시간가치^9^2^7^249^1000^0^0
+FID_BSOP_RMNN_DYNU^FID영업잔존일수^8^0^0^6646^1000^0^0
+FID_HIST_VLTL^FID역사적변동성^9^2^7^93^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+FID_PRDY_TR_PBMN^FID전일거래대금^19^0^7^188^1000^0^0
+FID_LRQN_ACML_CNTG_QTY^FID대량누적체결수량^13^0^7^1915^1000^0^0
+FID_RLTM_PRC_RSTC_YN^FID실시간가격제한여부^1^0^0^1916^1000^0^0
+FID_RLTM_MXPR_SIGN^FID실시간상한가부호^1^0^0^1917^1000^0^0
+FID_RLTM_MXPR^FID실시간상한가^11^0^7^1918^1000^0^0
+FID_RLTM_LLAM_SIGN^FID실시간하한가부호^1^0^0^1919^1000^0^0
+FID_RLTM_LLAM^FID실시간하한가^11^0^7^1920^1000^0^0
+FID_PRCLMT_EXT_UPLM_STAG^FID가격제한확대상한단계^3^0^7^1923^1000^0^0
+FID_PRCLMT_EXT_LSLM_STAG^FID가격제한확대하한단계^3^0^7^1924^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

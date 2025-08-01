@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57020" scrname="Wrap가입_투자자금원금보전확인팝업" version="2" writer="김철중" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" autosize="1" imgpath="alpha128" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,457,375,190,1" />
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="투자자금 원금보존 확인" halign="1" ly_vert="32,467,304,30,1" />
+		<LABEL name="lblText" caption="이번에 투자되는 자금이 단기간내 사용처가 정해져있는 등 (예: 6개월 이내에 전세자금으로 활용될 자금)의 이유로 원금보존을 추구하는 자금입니까?" halign="1" multiline="1" ly_vert="20,497,335,90,1" />
+		<BUTTON name="btnOk" caption="예" btnimage="btn_20.9.png" ly_vert="187,597,188,50,1" />
+		<BUTTON name="btnCancel" caption="아니오" btnimage="btn_20.9.png" ly_vert="0,597,187,50,1" />
+		<TABLE name="tblLine" outlinecolor="038:255255255" insidelinecolor="102:255255255" colcount="1" rowcount="1" outline="1000" transmode="1" designorder="1" ly_vert="186,597,1,50,1" >
+			<COL_INFO ly_vert_width="1" />
+			<ROW_INFO ly_vert_height="50" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2218" _ulen="2218" >
+--===========================================================================
+--===========================================================================
+
+Dim g_sAgree, g_sSrno, g_sAcnt, g_sAcntSub
+
+'============================================================================
+Sub btnOk_OnClick()
+	g_sAgree = "Y"
+	DATAMANAGER.RequestTranData( "obcsb_acif_792a" )
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	g_sAgree = "N"
+	DATAMANAGER.RequestTranData( "obcsb_acif_792a" )
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("AGREE", g_sAgree)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sData
+	sData = Form.GetOpenLinkData()
+	
+	if sData <> "" then
+		Dim tData
+		tData = Split(sData, "|")
+		
+		g_sSrno = tData(0)
+		g_sAcnt = tData(1)
+		g_sAcntSub = tData(2)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_acif_792a" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_792a", "InBlock1", "ACNO" , 0 , g_sAcnt )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_792a", "InBlock1", "ASNO" , 0 , g_sAcntSub )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_792a", "InBlock1", "PRNC_PRSV_YN" , 0 , g_sAgree )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_SRNO" , 0 , g_sSrno )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_792a", "InBlock1", "FNPR_JOIN_DETL_SRNO" , 0 , "00001" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_acif_792a" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	g_sAgree = "Y"
+	
+	if g_sSrno <> null and g_sSrno <> "" and g_sAcnt <> null and g_sAcnt <> "" and g_sAcntSub <> null and g_sAcntSub <> "" then
+		DATAMANAGER.RequestTranData( "obcsb_acif_792a" )
+	else
+		Form.CloseForm()
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_792a" trcode="obcsb_acif_792a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_792a" title="고객_투자자금 원금 보존여부 등" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="309" _ulen="221" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRNC_PRSV_YN^원금보존여부^1^0^0^0^0^0^0
+MOD_REAS_RMRK^변경사유비고^500^0^0^0^0^0^0
+FNPR_JOIN_SRNO^금융상품가입일련번호^13^0^0^0^0^0^0
+FNPR_JOIN_DETL_SRNO^금융상품가입세부일련번호^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="50" _ulen="38" >
+
+REG_SRNO^등록일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

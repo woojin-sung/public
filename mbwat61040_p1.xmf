@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57040" scrname="화상상담 조회/변경_변경" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" caption="화상상담 변경" halign="1" ly_vert="10,0,355,40,1" />
+		<IMAGE name="ImgBack" autosize="1" imgpath="icon_top_back_light" ly_vert="15,10,15,20,1" />
+		<BUTTON name="btnBack" btnimage="alpha" ly_vert="0,0,40,40,1" />
+		<LABEL name="lblText0" caption="상담 가능한 시간을 선택하면
+직원이 직접 연락을 드립니다.
+(영업일 08:30 ~ 16:00)" multiline="1" ly_vert="10,50,355,80,1" />
+		<IMAGE name="imgBg0" autosize="1" imgpath="img_bgbox.9.png" ly_vert="10,135,355,72,1" />
+		<TABLE name="tblData" insidelinecolor="102:255255255" colcount="2" rowcount="2" outline="0000" transmode="1" designorder="1" ly_vert="20,146,335,50,1" >
+			<COL_INFO ly_vert_width="130,205" />
+			<ROW_INFO ly_vert_height="25,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="예약가능일" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="연락받을번호" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="lblPhone" fgcolor="002:030080200" fontsize="-2" fontstyle="10" caption="연락처가 변경되셨나요?" halign="2" click="1" ly_vert="203,215,159,20,1" />
+		<LABEL name="lblTitle0" fontstyle="01" caption="예약일자" ly_vert="5,255,130,20,1" />
+		<CALENDAR name="calDate" dispmode="741351464" ly_vert="431,271,117,30,1" />
+		<COMBO name="cmbDate" imagefilepth="combo_04.9.png" ly_vert="15,280,345,40,1" />
+		<LABEL name="lblNoDate" fgcolor="146:124124124" caption="상담 가능 일자를 선택해 주세요." ly_vert="15,280,345,40,1" />
+		<LABEL name="lblDate" visible="0" ly_vert="15,280,345,40,0" />
+		<BUTTON name="btnDate" btnimage="alpha" ly_vert="15,280,345,40,1" />
+		<LABEL name="lblTitle1" fontstyle="01" caption="예약시간" ly_vert="5,335,130,20,1" />
+		<COMBO name="cmbTime" imagefilepth="combo_04.9.png" ly_vert="15,360,345,40,1" />
+		<LABEL name="lblNoTime" fgcolor="146:124124124" caption="예약시간을 선택해 주세요." ly_vert="15,360,345,40,1" />
+		<LABEL name="lblTime" visible="0" ly_vert="15,360,345,40,0" />
+		<BUTTON name="btnTime" btnimage="alpha" ly_vert="15,360,345,40,1" />
+		<LABEL name="lblText1" fgcolor="146:124124124" caption="화상통화가 가능한 핸드폰만 상담이 가능하며
+영상통화 내용은 저장, 녹취됩니다." halign="1" multiline="1" ly_vert="30,415,315,80,1" />
+		<BUTTON name="btnTrans" caption="예약 변경" btnimage="btn_15.9" ly_vert="10,597,355,40,1" />
+		<ACCOUNT name="acnt" bgcolor="052:255255255" itemcodetype="119" etcfunctions="" accpwdctl="edtPwd" ly_vert="400,5,355,40,1" />
+		<CONTAINER name="contComplete" visible="0" scroll_pos="0,0" ly_vert="0,0,375,647,0" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="lblBg" transmode="0" ly_vert="0,0,375,647,1" />
+				<LABEL name="lblCompleteText0" fontsize="5" fontstyle="01" caption="상담 예약일정이
+변경되었습니다." halign="1" multiline="1" ly_vert="36,170,293,71,1" />
+				<LABEL name="lblCompleteText1" fgcolor="146:124124124" fontsize="2" halign="1" multiline="1" ly_vert="40,270,295,80,1" />
+				<BUTTON name="btnComplete" caption="확인" btnimage="btn_15.9" ly_vert="10,597,355,40,1" />
+				<IMAGE name="imgComplete" imgpath="check_red.png" margin="0,0,5,0" ly_vert="136,55,100,100,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CALENDAR name="calTempDate" dispmode="741351464" ly_vert="441,261,117,30,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12048" _ulen="11602" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 화상상담 조회/변경
+' 02. 화면설명 : 
+' 03. 이    력 : 2022.10.21 : 고승연 : v0001 : 신규
+'                2023.01.05 : 고승연 : v0002 : 계좌일련번호 추가
+'                2023.03.07 : 고승연 : v0003 : [T2302170013] 상담가능시간 수정
+'-------------------------------------------------------------------------------------------
+
+Dim g_sAbleStartDate, g_sAbleEndDate
+Dim g_sAbleTimeData, g_sAbleStartTime, g_sAbleEndTime
+Dim g_sAsisDate, g_sAsisTime
+Dim g_sAcno, g_sAsno
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBack.setMaintainingRatio("1")
+	contComplete.imgComplete.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub btnBack_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	btnTrans.enable = false
+	
+	Dim sData
+	sData = Form.GetOpenLinkData()
+	
+	if sData <> null and sData <> "" then
+		DIm tData
+		tData = Split(sData, "|")
+		
+		'v0002
+		g_sAcno = tData(0)
+		g_sAsno = tData(1)
+		
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "PROS_CLS_CODE" , 0 , "U" ) '예약변경
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "ACNO" , 0 , g_sAcno )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "ASNO" , 0 , g_sAsno )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "RSEV_APLT_STA_HOUR" , 0 , tData(3) )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "RSEV_APLT_FIN_HOUR" , 0 , tData(4) )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "RSEV_APLT_DATE" , 0 , tData(2) )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "RSEV_APLT_SRNO" , 0 , tData(5) )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "NMET_APLT_DATE" , 0 , tData(6) )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "NMET_APLT_SRNO" , 0 , tData(7) )
+		
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_081r", "InBlock1", "ACNO" , 0 , g_sAcno )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_081r", "InBlock1", "ASNO" , 0 , g_sAsno )
+		
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_082r", "InBlock1", "ACNO" , 0 , g_sAcno )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_082r", "InBlock1", "ASNO" , 0 , g_sAsno )
+		
+		calDate.caption = tData(2)
+		g_sAsisDate = tData(2)
+		
+		lblDate.caption = Mid(calDate.caption, 1, 4).."년 "..Mid(calDate.caption, 5, 2).."월 "..Mid(calDate.caption, 7, 2).."일"
+		lblNoDate.visible = false
+		lblDate.visible = true
+		
+		Dim sTime, sStartTime, sEndTime
+			
+		sStartTime = TransTime(tData(3))
+		sEndTime = TransTime(tData(4))
+		
+		sTime = Mid(sStartTime, 1, Len(sStartTime) - 2).." : "..Mid(sStartTime, Len(sStartTime) - 1, 2).." ~ "
+		sTime = sTime..Mid(sEndTime, 1, Len(sEndTime) - 2).." : "..Mid(sEndTime, Len(sEndTime) - 1, 2)
+		g_sAsisTime = sTime
+		
+		if tonumber(Mid(tData(3), 1, 2)) < 13 then
+			sTime = "오전 "..sTime
+		else
+			sTime = "오후 "..sTime
+		end if
+		
+		lblTime.caption = sTime
+		lblNoTime.visible = false
+		lblTime.visible = true
+	end if
+	
+	DATAMANAGER.RequestTranData( "obwat_ctad_081r" )
+End Sub
+
+Function TransTime(sTime)
+	Dim sTranTime
+	sTranTime = ""
+	
+	if tonumber(sTime) >= 1300 then
+		sTranTime = tostring(tonumber(sTime) - 1200)
+	else
+		sTranTime = tostring(tonumber(sTime))
+	end if
+	
+	Dim nLength
+	nLength = len(sTranTime)
+	
+	if nLength < 4 then
+		for i = nLength to 3
+			sTranTime = "0"..sTranTime
+		next
+	end if
+	
+	TransTime = sTranTime
+End Function
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obwat_ctad_081r" then
+		Dim sNumber, sStartDate, sEndDate
+		
+		g_sAbleStartDate = DATAMANAGER.GetDataValue( 0, "obwat_ctad_081r", "OutBlock1", "RSEV_STA_DATE" , 0 )
+		g_sAbleEndDate = DATAMANAGER.GetDataValue( 0, "obwat_ctad_081r", "OutBlock1", "RSEV_FIN_DATE" , 0 )
+		sNumber = DATAMANAGER.GetDataValue( 0, "obwat_ctad_081r", "OutBlock1", "CNPL_TELNO" , 0 )
+		
+		sStartDate = Mid(g_sAbleStartDate, 3, 2).."."..Mid(g_sAbleStartDate, 5, 2).."."..Mid(g_sAbleStartDate, 7, 2)
+		sEndDate = Mid(g_sAbleEndDate, 3, 2).."."..Mid(g_sAbleEndDate, 5, 2).."."..Mid(g_sAbleEndDate, 7, 2)
+		
+		tblData.SetCellString(0, 1, sStartDate.."~"..sEndDate)
+		tblData.SetCellString(1, 1, sNumber)
+		
+		if tonumber(g_sAbleStartDate) <= tonumber(calDate.caption) and tonumber(g_sAbleEndDate) >= tonumber(calDate.caption) then
+			DATAMANAGER.RequestTranData( "obwat_ctad_082r" )
+		end if
+	elseif szTranID == "obwat_ctad_082r" then
+		Dim nCount
+		nCount = DATAMANAGER.GetDataCount( 0, "obwat_ctad_082r", "OutBlock1" )
+		nCount = tonumber(nCount)
+		g_sAbleTimeData = ""
+		
+		for i = 0 to nCount-1
+			Dim sStartDate, sEndDate, sAbleQty, sApltQty
+			
+			sStartDate = DATAMANAGER.GetDataValue( 0, "obwat_ctad_082r", "OutBlock1", "STA_HOUR" , i )
+			sEndDate = DATAMANAGER.GetDataValue( 0, "obwat_ctad_082r", "OutBlock1", "FIN_HOUR" , i )
+			sAbleQty = DATAMANAGER.GetDataValue( 0, "obwat_ctad_082r", "OutBlock1", "RSEV_ABLE_QTY" , i )
+			sApltQty = DATAMANAGER.GetDataValue( 0, "obwat_ctad_082r", "OutBlock1", "APLT_QTY" , i )
+			
+			if i <> 0 then
+				g_sAbleTimeData = g_sAbleTimeData.."|"
+			end if
+			
+			g_sAbleTimeData = g_sAbleTimeData..sStartDate.."|"..sEndDate.."|"..sAbleQty.."|"..sApltQty
+		next
+		
+	elseif szTranID == "obcpp_bsdy_006r" then
+		Dim sMangDate
+		sMangDate = DATAMANAGER.GetDataValue( 0, "obcpp_bsdy_006r", "OutBlock1", "MANG_DATE" , 0 )
+		
+		if calDate.caption == sMangDate then '선택일이 영업일 맞음
+			lblNoDate.visible = false
+			lblDate.visible = true
+			lblDate.caption = Mid(calDate.caption, 1, 4).."년 "..Mid(calDate.caption, 5, 2).."월 "..Mid(calDate.caption, 7, 2).."일"
+			DATAMANAGER.RequestTranData( "obwat_ctad_082r" )
+		else
+			lblNoDate.visible = true
+			lblDate.visible = false
+			Form.MsgBox("알림", "휴일은 상담이 불가합니다. 다른 요일을 선택해 주세요.", "", 8, "확인", "")
+		end if
+		
+	elseif szTranID == "obwat_ctad_087a" then
+		Dim sData
+		sData = Mid(calDate.caption, 3, 2).."."..Mid(calDate.caption, 5, 2).."."..Mid(calDate.caption, 7, 2)
+		sData = sData.." "..lblTime.caption.."에\n연락드릴께요."
+		contComplete.lblCompleteText1.caption = sData
+		contComplete.visible = true
+		
+	end if
+End Sub
+
+'============================================================================
+Sub btnDate_OnClick()
+	calDate.showcalendar = true
+End Sub
+
+'============================================================================
+' 일자를 선택했을 경우
+'============================================================================
+Sub calDate_OnEditComplete()
+	g_sAbleTimeData = ""
+	g_sAbleStartTime = ""
+	g_sAbleEndTime = ""
+	
+	if tonumber(g_sAbleStartDate) <= tonumber(calDate.caption) and tonumber(g_sAbleEndDate) >= tonumber(calDate.caption) then
+		calTempDate.caption = calDate.caption
+		calTempDate.addday = -1
+		DATAMANAGER.RequestTranData( "obcpp_bsdy_006r" ) '영업일 조회
+	else
+		lblNoDate.visible = true
+		lblDate.visible = false
+		Form.MsgBox("알림", "예약 가능 일자를 확인해 주세요.", "", 8, "확인", "")
+	end if
+	
+	lblNoTime.visible = true
+	lblTime.visible = false
+	btnTrans.enable = false
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obwat_ctad_082r" then
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_082r", "InBlock1", "RSEV_DATE" , 0 , calDate.caption )
+	
+	elseif szTranID == "obcpp_bsdy_006r" then
+		DATAMANAGER.SetDataValue( 0, "obcpp_bsdy_006r", "InBlock1", "CLND_CLS_CODE" , 0 , "C001" )
+		DATAMANAGER.SetDataValue( 0, "obcpp_bsdy_006r", "InBlock1", "MANG_DATE" , 0 , calTempDate.caption )
+		DATAMANAGER.SetDataValue( 0, "obcpp_bsdy_006r", "InBlock1", "CALC_DYNU" , 0 , "1" )
+		
+	elseif szTranID == "obwat_ctad_087a" then
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "RSEV_DATE" , 0 , calDate.caption )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "RSEV_APLT_STA_HOUR" , 0 , g_sAbleStartTime )
+		DATAMANAGER.SetDataValue( 0, "obwat_ctad_087a", "InBlock1", "RSEV_APLT_FIN_HOUR" , 0 , g_sAbleEndTime )
+		
+	end if
+End Sub
+
+'============================================================================
+Sub btnTime_OnClick()
+	if g_sAbleTimeData == null or g_sAbleTimeData == "" then
+		Form.MsgBox("알림", "예약일자를 선택해주세요.", "", 8, "확인", "")
+	elseif lblDate.visible == true or lblDate.visible == "1" then
+		if g_sAsisDate == calDate.caption then
+			Form.SetSharedData("AsisTime" , g_sAsisTime)
+		end if
+		Form.OpenPopup("mbwat61022_p5" , g_sAbleTimeData, "")
+	else
+		Form.MsgBox("알림", "예약일자를 선택해주세요.", "", 8, "확인", "")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "ABLETIME" then
+		if sRet <> null and sRet <> "" then
+			Dim tData
+			tData = Split(sRet, "|")
+			
+			lblTime.caption = tData(0)
+			g_sAbleStartTime = tData(1)
+			g_sAbleEndTime = tData(2)
+			
+			lblNoTime.visible = false
+			lblTime.visible = true
+			btnTrans.enable = true
+		end if
+		
+	elseif sKeyName == "mbonl81000" then
+		btnTrans.visible = true
+		tblData.SetCellString(1, 1, "")
+		
+		DATAMANAGER.RequestTranData( "obwat_ctad_081r" )
+		
+	elseif sKeyName = "CORRECT_PWD" then
+		if sRet <> "" then
+			Dim tData
+			tData = Split(sRet, "★")
+			
+			if UBOUND(tData) > 0 then
+				DATAMANAGER.RequestTranData( "obwat_ctad_087a" )
+			end if
+		end if
+		
+	end if
+End Sub
+
+'============================================================================
+Sub lblPhone_OnClick()
+	Form.OpenFramePopup( "mbonl81000" , "" , "")
+	btnTrans.visible = false
+End Sub
+
+'============================================================================
+Sub btnTrans_OnClick()
+	if g_sAbleTimeData == null or g_sAbleTimeData == "" then
+		Form.MsgBox("알림", "예약 가능 일자를 확인해 주세요.", "", 8, "확인", "")
+		
+	elseif g_sAbleStartTime == null or g_sAbleStartTime == "" or g_sAbleEndTime == null or g_sAbleEndTime == "" then
+		Form.MsgBox("알림", "예약 가능 시간을 확인해 주세요.", "", 8, "확인", "")
+		
+	else
+		Dim sMsg
+		sMsg = lblDate.caption.."("..WeekDayText(calDate.caption)..")\n "..lblTime.caption.."로\n 예약을 변경하시겠어요?"
+		Form.MsgBox("알림", sMsg, "Trans", 7, "확인", "취소")
+		
+	end if
+End Sub
+
+Function WeekDayText(sDate)
+	Dim sText
+	sText = ""
+	
+	if sDate <> null and sDate <> "" then
+		if Len(sDate) == 8 then
+			Dim nNum
+			nNum = Weekday(CDate(Mid(sDate, 1, 4).."-"..Mid(sDate, 5, 2).."-"..Mid(sDate, 7, 2)),1)
+			
+			if nNum == 1 then
+				sText = "일"
+			elseif nNum == 2 then
+				sText = "월"
+			elseif nNum == 3 then
+				sText = "화"
+			elseif nNum == 4 then
+				sText = "수"
+			elseif nNum == 5 then
+				sText = "목"
+			elseif nNum == 6 then
+				sText = "금"
+			elseif nNum == 7 then
+				sText = "토"
+			end if
+		end if
+	end if
+	
+	WeekDayText = sText
+End Function
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "Trans" then
+		if sRet == "ok" then
+			'v0002
+			Form.openPopupAnimation("pwdcheckpopup", g_sAcno & g_sAsno & "☆0" ,"","2")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub contComplete_btnComplete_OnClick()
+	Form.SendReturnToParent("REFRESH", "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubmsg
+
+	If szTranID == "obwat_ctad_087a" Then
+		sSubmsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+		Form.MsgBox( "알림", szErrMsg & " " & sSubmsg, "", 0 )
+	End If
+	
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obwat_ctad_081r" trcode="obwat_ctad_081r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_ctad_082r" trcode="obwat_ctad_082r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obwat_ctad_087a" trcode="obwat_ctad_087a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_bsdy_006r" trcode="obcpp_bsdy_006r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obwat_ctad_081r" title="비대면 랩 가입 예약일자 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="151" _ulen="113" >
+
+RSEV_STA_DATE^예약시작일자^8^0^0^0^0^0^0
+RSEV_FIN_DATE^예약종료일자^8^0^0^0^0^0^0
+CNPL_TELNO^연락처전화번호^16^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="1000" inout="out" _len="91" _ulen="71" >
+
+RSEV_DATE^예약일자^8^0^0^0^0^0^0
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_ctad_082r" title="비대면 랩 가입 예약시간 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="116" _ulen="88" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RSEV_DATE^예약일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="1000" inout="out" _len="167" _ulen="131" >
+
+STA_HOUR^시작시간^6^0^0^0^0^0^0
+FIN_HOUR^종료시간^6^0^0^0^0^0^0
+RSEV_ABLE_QTY^예약가능수량^12^0^7^0^0^0^0
+APLT_QTY^신청수량^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obwat_ctad_087a" title="비대면 랩 가입 화상 상담 변경" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="498" _ulen="366" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RSEV_DATE^예약일자^8^0^0^0^0^0^0
+RSEV_APLT_STA_HOUR^예약신청시작시간^6^0^0^0^0^0^0
+RSEV_APLT_FIN_HOUR^예약신청종료시간^6^0^0^0^0^0^0
+RSEV_APLT_DATE^예약신청일자^8^0^0^0^0^0^0
+RSEV_APLT_SRNO^예약신청일련번호^11^0^7^0^0^0^0
+NMET_APLT_DATE^비대면신청일자^8^0^0^0^0^0^0
+NMET_APLT_SRNO^비대면신청일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="229" _ulen="169" >
+
+RSEV_APLT_DATE^예약신청일자^8^0^0^0^0^0^0
+RSEV_APLT_SRNO^예약신청일련번호^11^0^7^0^0^0^0
+RSEV_APLT_STA_HOUR^예약신청시작시간^6^0^0^0^0^0^0
+RSEV_APLT_FIN_HOUR^예약신청종료시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_bsdy_006r" title="T+N 영업일조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="130" _ulen="102" >
+
+CLND_CLS_CODE^달력구분코드^4^0^0^0^0^0^0
+MANG_DATE^관리일자^8^0^0^0^0^0^0
+CALC_DYNU^계산일수^8^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="44" _ulen="36" >
+
+MANG_DATE^관리일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

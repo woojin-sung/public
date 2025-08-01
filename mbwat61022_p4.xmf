@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="57020" scrname="Wrap가입_약관동의PDF" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" halign="1" autofontsize="1" ly_vert="40,0,295,40,1" />
+		<IMAGE name="imgClose" imgpath="ic_close.png" ly_vert="345,10,21,21,1" />
+		<BUTTON name="btnPrev" caption="취소" fgcolor="013:051051051" btnimage="btn_25.9.png" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnNext" caption="다음" btnimage="btn_26.9.png" ly_vert="187,597,188,50,1" />
+		<LABEL name="lblCount" halign="1" ly_vert="110,572,155,20,1" />
+		<FORMTAB name="fmtab" tabcount="8" tabheadheight="0" usepg="1" ly_vert="20,45,335,522,1" >
+			<PAGE name="page0" caption="0" linkfile="mbwat61022_p7" />
+			<PAGE name="page1" caption="1" linkfile="mbwat61022_p7" />
+			<PAGE name="page2" caption="2" linkfile="mbwat61022_p7" />
+			<PAGE name="page3" caption="3" linkfile="mbwat61022_p7" />
+			<PAGE name="page4" caption="4" linkfile="mbwat61022_p7" />
+			<PAGE name="page5" caption="5" linkfile="mbwat61022_p7" />
+			<PAGE name="page6" caption="6" linkfile="mbwat61022_p7" />
+			<PAGE name="page7" caption="7" linkfile="mbwat61022_p7" />
+		</FORMTAB>
+		<IMAGE name="imgPrev" autosize="1" imgpath="icon_arrow3_l.png" ly_vert="20,311,24,24,1" />
+		<IMAGE name="imgNext" autosize="1" imgpath="icon_arrow3_r.png" ly_vert="329,311,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7860" _ulen="6670" >
+--===========================================================================
+--===========================================================================
+
+Dim g_tData, g_nStep
+Dim g_tTitle
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgClose.setMaintainingRatio("1")
+	imgPrev.setMaintainingRatio("1")
+	imgNext.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sData
+	sData = Form.GetOpenLinkData()
+	
+	if sData <> null and sData <> "" then
+		Dim tData, sTempData, tTempTitle, sTempTitle
+		tData = Split(sData, "|")
+		sTempData = ""
+		
+		tTempTitle = Array("Wrap 약관", "Wrap 계약권유문서", "핵심설명서", "개인전문투자자에 대한 보호제도 미적용 확인서", "장내파생상품 거래 설명서", "K-OTC 유의사항", "파생 ETF투자위험 고지문", "상장지수증권(ETN)거래에 관한 위험고지")
+		sTempTitle = ""
+		
+		if tData(0) == "single" then
+			sTempTitle = tTempTitle(tonumber(tData(1)))
+			
+			if tonumber(tData(1)) < 3 then
+				sTempData = tData(2)
+			elseif tonumber(tData(1)) == 3 then
+				sTempData = "professional"
+			elseif tonumber(tData(1)) == 4 then
+				sTempData = "future"
+			elseif tonumber(tData(1)) == 5 then
+				sTempData = "kotc"
+			elseif tonumber(tData(1)) == 6 then
+				sTempData = "etf"
+			elseif tonumber(tData(1)) == 7 then
+				sTempData = "etn"
+			end if
+		else
+			for i = 0 to #tData-1
+				if i < 3 then
+					if i > 0 then
+						sTempData = sTempData.."|"
+						sTempTitle = sTempTitle.."|"
+					end if
+					
+					sTempData = sTempData..tData(i)
+					sTempTitle = sTempTitle..tTempTitle(i)
+					
+				else
+					if tData(i) == "Y" then
+						sTempData = sTempData.."|"
+						sTempTitle = sTempTitle.."|"
+						sTempTitle = sTempTitle..tTempTitle(i)
+						
+						if i == 3 then
+							sTempData = sTempData.."professional"
+						elseif i == 4 then
+							sTempData = sTempData.."future"
+						elseif i == 5 then
+							sTempData = sTempData.."kotc"
+						elseif i == 6 then
+							sTempData = sTempData.."etf"
+						elseif i == 7 then
+							sTempData = sTempData.."etn"
+						end if
+					end if				
+				end if
+			next
+		end if
+		
+		if sTempData <> null then
+			g_tData = Split(sTempData, "|")
+		end if
+		
+		if sTempTitle <> null then
+			g_tTitle = Split(sTempTitle, "|")
+		end if
+		
+		lblCount.caption = "1/"..#g_tData
+	end if
+	
+	if g_tData <> null and g_tData <> "" then
+		for i = 7 to 0 step -1
+			if #g_tData < i+1 then
+				fmtab.deletepage = "page"..i
+			end if
+		next
+	end if
+	
+	g_nStep = 0
+	
+	if g_tData <> null and g_tData <> "" then
+		if #g_tData == 1 then
+			btnNext.caption = "확인"
+		end if
+		
+		f_SetNext()
+	end if
+End Sub
+
+'============================================================================
+Sub btnPrev_OnClick()
+	Form.CloseForm()
+End Sub
+
+Sub f_SetPrev()
+	if g_nStep == 1 then
+		Form.CloseForm()
+	else
+		g_nStep = g_nStep - 1
+		lblCount.caption = g_nStep.."/"..#g_tData
+		
+		if g_nStep < #g_tData then
+			btnNext.caption = "다음"
+		else
+			btnNext.caption = "확인"
+		end if
+		
+		f_SetUrl()
+	end if
+End Sub
+
+'============================================================================
+Sub btnNext_OnClick()
+	f_SetNext()
+End Sub
+
+Sub f_SetNext()
+	if g_nStep == #g_tData then
+		if #g_tData > 1 then
+			Form.SendReturnToParent("AGREE", "")
+		end if
+		Form.CloseForm()
+	else
+		g_nStep = g_nStep + 1
+		lblCount.caption = g_nStep.."/"..#g_tData
+		
+		if g_nStep < #g_tData then
+			btnNext.caption = "다음"
+		else
+			btnNext.caption = "확인"
+		end if
+		
+		f_SetUrl()
+	end if
+End Sub
+
+Sub f_SetUrl()
+	Dim sType, sData, sMode, sTest
+	sType = ""
+	sData = ""
+	sTest = ""
+	sMode = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+	
+	if sMode == "1" then
+		sTest = "test"
+	end if
+	
+	if g_tData(g_nStep-1) == "professional" then
+		sType = "urlpath"
+		
+		if sMode == "1" then	'테스트경로
+			sData = "https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/meritz_dna_protect_retail-pro-investor_confirmation.html"
+		else
+			sData = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_dna_protect_retail-pro-investor_confirmation.html"
+		end if
+	elseif g_tData(g_nStep-1) == "future" then
+		sType = "urlpath"
+		 
+		if sMode == "1" then	'테스트경로
+			sData = "http://testhome.imeritz.com/include/resource/htsdown/PDF/htsdown_12.pdf"
+		else
+			sData = "http://home.imeritz.com/include/resource/htsdown/PDF/htsdown_12.pdf"
+		end if
+	elseif g_tData(g_nStep-1) == "kotc" then
+		sType = "urlpath"
+		sData = "http://"..sTest.."home.imeritz.com/include/resource/comm/ctcn/files/kotc_noti.html"
+	
+	elseif g_tData(g_nStep-1) == "etf" then
+		sType = "loaddata"
+		sData = "<html><body>파생상품 ETF 투자위험 고지문<br><br>"&
+		"● 파생상품ETF의 투자위험등급과 적합한 투자자유형을 확인하시고, 귀하의 투자경력이나 투자성향에 적합한 상품인지 신중하게 검토한 뒤 투자결정을 하시기 바랍니다.<br><br>"&
+		"● 파생상품ETF의 경우 파생상품의 가치를 결정하는 기초변수 등이 예상과 다른 변화를 보일 때에는 당초 예상과 달리 큰 손실을 입거나 원금전체의 손실을 입을 수 있습니다.<br><br>"&
+		"● 레버리지ETF는 기초지수의 일간변동률의 양의 배수로 연동되도록 설계되어 있기 때문에 2일 이상의 기간에는 일별수익률의 복리화 효과의 결과로 기초지수의 양의 배수 수익률과 레버리지 ETF의 누적수익률간 불일치가 발생합니다. 또한, 시간이 경과함에 따라 투자신탁에 영향을 주는 다양한 요인에 의해 누적수익률이 기초지수 누적수익률의 양의 배수를 추적하지 못할 수 있습니다.<br>"&
+		" 심지어는 일시적으로 또는 지속적으로 누적수익률간의 음의 상관관계가 나타날 수도 있습니다.<br><br>"&
+		"● 인버스ETF는 기초지수 일간변동률의 음의 배수로 연동되도록 설계되어 있기 때문에 2일 이상의 기간에는 일별수익률의 복리화 효과로 기초지수의 음의 배수 수익률과 인버스 ETF의 누적수익률간 불일치가 발생합니다. 또한, 시간이 경과함에 따라 투자신탁에 영향을 주는 다양한 요인에 의해 누적수익률이 기초지수 누적수익률의 음의 배수를 추적하지 못할 수 있습니다."
+		&"</body></html>"
+		
+	elseif g_tData(g_nStep-1) == "etn" then
+		sType = "urlpath"
+		
+		if sMode == "1" then	'테스트경로
+			sData = "http://testhome.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_08.html"
+		else
+			sData = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_08.html"
+		end if
+	else
+		sType = "urlpath"
+		
+		if g_tData(g_nStep-1) <> "" then
+			if sMode == "1" then	'테스트경로
+				sData = "https://testhome.imeritz.com/include/resource/comm/ctcn/nfiles/"..g_tData(g_nStep-1)
+			else
+				sData = "https://home.imeritz.com/include/resource/comm/ctcn/nfiles/"..g_tData(g_nStep-1)
+			end if
+		end if
+		
+	end if
+	
+	lblTitle.caption = g_tTitle(g_nStep-1)
+	Form.triggerEvent("fmtab."..fmtab.currenttabpageid, sType, sData)
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgPrev_OnClick()
+	if g_nStep > 1 then
+		f_SetPrev()
+	end if
+End Sub
+
+'============================================================================
+Sub imgNext_OnClick()
+	if g_nStep < #g_tData then
+		f_SetNext()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
