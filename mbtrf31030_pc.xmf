@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="31030" scrname="선물옵션주문_예수금팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,365,210,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9.png" ly_vert="0,0,365,55,1" />
+		<TABLE name="tblData" insidelinecolor="102:255255255" colcount="3" rowcount="4" outline="0101" designorder="1" ly_vert="10,70,345,124,1" >
+			<COL_INFO ly_vert_width="115,115,115" />
+			<ROW_INFO ly_vert_height="28,34,28,34" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:000000000" bgcolor="066:240240240" caption="예탁금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" fgcolor="065:000000000" bgcolor="066:240240240" caption="위탁증거금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,0,2,0" fgcolor="065:000000000" bgcolor="066:240240240" line="0,1" caption="유지증거금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,0,1" import="0,1,0" halign="2" mask="0,0,,,0,,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" import="0,1,4" halign="2" mask="0,0,,,0,,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" import="0,1,21" halign="2" line="0,1" mask="0,0,,,0,,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:000000000" bgcolor="066:240240240" caption="추가증거금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" fgcolor="065:000000000" bgcolor="066:240240240" caption="주문가능금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,2,2,2" fgcolor="065:000000000" bgcolor="066:240240240" line="0,1" caption="인출가능금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" import="0,1,6" halign="2" mask="0,0,,,0,,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,3,1,3" import="0,1,14" halign="2" mask="0,0,,,0,,0,1,1" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,3,2,3" import="0,1,11" halign="2" line="0,1" mask="0,0,,,0,,0,1,1" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="예수금" bgcolor="064:197070070" halign="1" ly_vert="0,0,365,45,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="322,0,45,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="333,10,24,24,1" />
+		<BUTTON name="btnInquiry" caption="조회" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="0,330,365,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3932" _ulen="3822" >
+
+'============================================================================
+' 화 면 명 : 선물옵션주문_예수금팝업
+' 화면설명 : 선물옵션주문에서 상단연결팝업에서 예수금 선택시 오픈
+' 작    성 : 2016.02.12 ~ 2016.  .       ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szAcnt, g_szAcntCd
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+' Init_Table
+'============================================================================
+Sub Init_Table()
+	tblData.SetCellString(1, 0, "")
+	tblData.SetCellString(1, 1, "")
+	tblData.SetCellString(1, 2, "")
+	tblData.SetCellString(3, 0, "")
+	tblData.SetCellString(3, 1, "")
+	tblData.SetCellString(3, 2, "")
+End Sub
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpen
+	Dim tData
+
+	szOpen = Form.GetOpenLinkData()
+	
+	if Trim(szOpen) == "" then
+		Exit Sub
+	end if
+
+	tData = Split(szOpen, "★")
+	
+	if UBound(tData) > 0 then
+		g_szAcnt   = tData(0)
+		g_szAcntCd = tData(1)
+
+		Init_Table()
+		DATAMANAGER.RequestTranData("obtrf_oder_608r")
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	' ----------------------------------------------------------------------
+	' 현금 잔고 조회
+	' ----------------------------------------------------------------------	
+	if szTranID = "obtrf_oder_608r" then	 
+		DATAMANAGER.ClearInputData(0, "obtrf_oder_608r")
+
+		DATAMANAGER.SetDataValue(0, "obtrf_oder_608r", "InBlock1", "ACNO", 0, g_szAcnt)
+		DATAMANAGER.SetDataValue(0, "obtrf_oder_608r", "InBlock1", "ASNO", 0, g_szAcntCd)
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	
+	if szTranID == "obtrf_oder_608r" then
+		szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+		
+'		if Trim(szSubMsg) <> "" then
+'			Form.Toast(1, szErrMsg & "(" & szSubMsg & ")", true)	
+'		else
+'			Form.Toast(1, szErrMsg, true)
+'		end if
+	end if
+End Sub
+
+'============================================================================
+' btnInquiry_OnClick
+'============================================================================
+Sub btnInquiry_OnClick()
+	Init_Table()
+	DATAMANAGER.RequestTranData("obtrf_oder_608r")
+End Sub
+
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrf_oder_608r" trcode="obtrf_oder_608r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrf_oder_608r" title="현재 현금 잔고 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1367" _ulen="1017" >
+
+VLTN_DEPS_TTAM^평가 예탁 총액^19^0^7^0^0^0^0
+VLTN_DEPS_CASH_AMT^평가 예탁 현금 금액^19^0^7^0^0^0^0
+VLTN_DEPS_SBSN_AMT^평가예탁대용금액^19^0^7^0^0^0^0
+TOTAL_CASH_MARG^총 현금 증거금^19^0^7^0^0^0^0
+TOTAL_ENTM_MARG^총 위탁 증거금^19^0^7^0^0^0^0
+UI_SBSN_ENTM_MARG^UI대용위탁증거금^19^0^7^0^0^0^0
+SPMR_TTAM^추가증거금총액^19^0^7^0^0^0^0
+SPMR_CASH_AMT^추가증거금현금금액^19^0^7^0^0^0^0
+UI_SBSN_SPMR^UI대용추가증거금^19^0^7^0^0^0^0
+WTMN_ABLE_CASH_AMT^인출가능현금금액^19^0^7^0^0^0^0
+UI_SBSN_WTMN_ABLE_AMT^UI대용인출가능금액^19^0^7^0^0^0^0
+TOTAL_WTMN_ABLE_AMT^총인출가능금액^19^0^7^0^0^0^0
+ODER_BEF_ODER_ABLE_CASH_AMT^주문 전 주문 가능 현금 금액^19^0^7^0^0^0^0
+ODER_ABLE_SBSN_AMT^주문가능대용금액^19^0^7^0^0^0^0
+ODER_BEF_ODER_ABLE_TTAM^주문 전 주문 가능 총액^19^0^7^0^0^0^0
+NXDY_DEPS_TTAM^익일예탁총액^19^0^7^0^0^0^0
+NXDY_DEPS_CASH_AMT^익일예탁현금금액^19^0^7^0^0^0^0
+FUTS_EXCT_AMT^선물정산차금금액^19^0^7^0^0^0^0
+OPTN_STLM_DFAM_AMT^옵션결제차금금액^19^0^7^0^0^0^0
+UNAM^미수금^19^0^7^0^0^0^0
+FTOP_FEE^장내파생수수료^19^0^7^0^0^0^0
+TOTAL_MNTN_MARG^총유지증거금^19^0^7^0^0^0^0
+CASH_MNTN_MARG^현금유지증거금^19^0^7^0^0^0^0
+UI_SBSN_MNTN_MARG^UI대용유지증거금^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41030" scrname="야간선물옵션주문_주문가능팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,365,227,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9.png" ly_vert="0,0,365,55,1" />
+		<TABLE name="tblData" insidelinecolor="102:255255255" colcount="4" rowcount="3" outline="0101" designorder="1" ly_vert="10,120,345,96,1" >
+			<COL_INFO ly_vert_width="81,88,88,88" />
+			<ROW_INFO ly_vert_height="28,34,34" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="066:238239240" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" fgcolor="065:102102102" bgcolor="066:238239240" caption="총수량" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,0,2,0" fgcolor="065:102102102" bgcolor="066:238239240" caption="청산" fontsize="-2" impidxs="" />
+				<CELL cell_ly="3,0,3,0" fgcolor="065:102102102" bgcolor="066:238239240" line="0,1" caption="신규" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" bgcolor="066:238239240" caption="매수가능수량" fontsize="-2" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" import="1,2,0" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" import="1,2,1" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="3,1,3,1" import="1,2,3" halign="2" line="0,1" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" bgcolor="066:238239240" caption="매도가능수량" fontsize="-2" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,2,1,2" import="1,1,0" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,2,2,2" import="1,1,1" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="3,2,3,2" import="1,1,3" halign="2" line="0,1" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="주문가능" bgcolor="064:197070070" halign="1" ly_vert="0,0,365,45,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="322,0,45,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="333,10,24,24,1" />
+		<BUTTON name="btnInquiry" btnimage="btn_refresh.9.png" ly_vert="316,70,39,39,1" />
+		<COMBO name="cmbType" cbinputdatatext="2`보통
+1`시장가
+I`조건부지정가
+X`최유리지정가" ly_vert="10,70,130,39,1" />
+		<EDIT name="edtPrc" mask="0,0,, P,0,,2,0,0,0,0" halign="2" imetype="1" hintcaption="주문단가" ly_vert="201,70,110,39,1" />
+		<LABEL name="lblPrc" ly_vert="442,13,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5109" _ulen="4955" >
+
+'============================================================================
+' 화 면 명 : 선물옵션주문_주문가능팝업
+' 화면설명 : 선물옵션주문에서 상단연결팝업에서 주문가능 선택시 오픈
+' 작    성 : 2016.02.12 ~ 2016.  .       ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szAcnt, g_szAcntCd, g_szCd, g_szMk
+Dim g_szTitle
+g_szTitle = "알림"
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+' Init_Table
+'============================================================================
+Sub Init_Table()
+	tblData.SetCellString(1, 1, "")
+	tblData.SetCellString(1, 2, "")
+	tblData.SetCellString(1, 3, "")
+	tblData.SetCellString(2, 1, "")
+	tblData.SetCellString(2, 2, "")
+	tblData.SetCellString(2, 3, "")
+End Sub
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpen
+	Dim tData
+
+	szOpen = Form.GetOpenLinkData()
+	
+	if Trim(szOpen) == "" then
+		Exit Sub
+	end if
+
+	tData = Split(szOpen, "★")
+
+	if UBound(tData) > 0 then
+		g_szAcnt   = tData(0)
+		g_szAcntCd = tData(1)
+		g_szCd     = "K" & tData(2)
+		g_szMk 	  = Form.GetItemCodeInfo(tData(2), "market_night")
+	     
+		if g_szMk = "EM" or g_szMk = "EO" or g_szMk = "EW" Then '20220311 HSZ 위클리옵션 추가
+			cmbType.clear = true
+			cmbType.cbinputdatatext = "2`보통\r\n1`시장가"
+		Else
+			cmbType.clear = true
+			cmbType.cbinputdatatext = "2`보통"
+		End If
+	     
+		lblPrc.caption = tData(3)
+		
+		if CStr(cmbType.currentindex) == "0" or CStr(cmbType.currentindex) == "2" then
+			edtPrc.caption = tData(3)
+		end if
+		
+		Init_Table()
+		DATAMANAGER.RequestTranData("obtrf_cntg_810r")
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	' ----------------------------------------------------------------------
+	' 선물옵션주문가능수량
+	' ----------------------------------------------------------------------	
+	if szTranID = "obtrf_cntg_810r" then	 
+		DATAMANAGER.ClearInputData(0, "obtrf_cntg_810r")
+
+		DATAMANAGER.SetDataValue(0, "obtrf_cntg_810r", "InBlock1", "ACNO",           0, g_szAcnt)
+		DATAMANAGER.SetDataValue(0, "obtrf_cntg_810r", "InBlock1", "ASNO",           0, g_szAcntCd)
+		DATAMANAGER.SetDataValue(0, "obtrf_cntg_810r", "InBlock1", "ISCD",           0, g_szCd)
+		DATAMANAGER.SetDataValue(0, "obtrf_cntg_810r", "InBlock1", "ASPR_TYPE_CODE", 0, cmbType.cbkeydata)
+		DATAMANAGER.SetDataValue(0, "obtrf_cntg_810r", "InBlock1", "FTOP_ODER_UNPR", 0, edtPrc.caption)
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+		
+	if Trim(szSubMsg) <> "" then
+		Form.ShowAlert(g_szTitle, szErrMsg & "(" & szSubMsg & ")")
+		'Form.Toast(0, szErrMsg & "(" & szSubMsg & ")", true)	
+	else
+		Form.ShowAlert(g_szTitle, szErrMsg)
+		'Form.Toast(0, szErrMsg, true)
+	end if
+End Sub
+
+'============================================================================
+' btnInquiry_OnClick
+'============================================================================
+Sub btnInquiry_OnClick()
+	Init_Table()
+	DATAMANAGER.RequestTranData("obtrf_cntg_810r")
+End Sub
+
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+
+'============================================================================
+Sub cmbType_OnEditComplete(iIndex)
+	if iIndex == 1 or iIndex == 3 then
+		edtPrc.enable = false
+		edtPrc.caption = ""
+	else
+		edtPrc.enable = true
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrf_cntg_110r" trcode="obtrf_cntg_110r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtrf_cntg_810r" trcode="obtrf_cntg_810r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrf_cntg_110r" title="선물옵션주문가능수량(매수매도)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="296" _ulen="220" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+ASPR_TYPE_CODE^호가유형코드^1^0^0^0^0^0^0
+FTOP_ODER_UNPR^장내파생주문단가^20^2^7^0^0^0^0
+ODQT^주문수량^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="634" _ulen="470" >
+
+ODER_ABLE_QTY^주문가능수량^19^0^7^0^0^0^0
+RSRP_ODER_ABLE_QTY^전환매주문가능수량^19^0^7^0^0^0^0
+UNCL_PRHB_ODER_ABLE_QTY^미수불가주문가능수량^19^0^7^0^0^0^0
+UI_NEW_ODER_ABLE_QTY^UI신규주문가능수량^19^0^7^0^0^0^0
+TOTAL_ODER_MARG^총주문증거금^19^0^7^0^0^0^0
+CASH_ODER_MARG^현금주문증거금^19^0^7^0^0^0^0
+UI_SBSN_ODER_MARG^UI대용주문증거금^19^0^7^0^0^0^0
+ODER_AFT_ODER_ABLE_TTAM^주문후주문가능총액^19^0^7^0^0^0^0
+ODER_AFT_ODER_ABLE_CASH_AMT^주문후주문가능현금금액^19^0^7^0^0^0^0
+UI_ODER_AFT_ODER_ABLE_SBSN^UI주문후주문가능대용^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="634" _ulen="470" >
+
+ODER_ABLE_QTY^주문가능수량^19^0^7^0^0^0^0
+RSRP_ODER_ABLE_QTY^전환매주문가능수량^19^0^7^0^0^0^0
+UNCL_PRHB_ODER_ABLE_QTY^미수불가주문가능수량^19^0^7^0^0^0^0
+UI_NEW_ODER_ABLE_QTY^UI신규주문가능수량^19^0^7^0^0^0^0
+TOTAL_ODER_MARG^총주문증거금^19^0^7^0^0^0^0
+CASH_ODER_MARG^현금주문증거금^19^0^7^0^0^0^0
+UI_SBSN_ODER_MARG^UI대용주문증거금^19^0^7^0^0^0^0
+ODER_AFT_ODER_ABLE_TTAM^주문후주문가능총액^19^0^7^0^0^0^0
+ODER_AFT_ODER_ABLE_CASH_AMT^주문후주문가능현금금액^19^0^7^0^0^0^0
+UI_ODER_AFT_ODER_ABLE_SBSN^UI주문후주문가능대용^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="248" _ulen="188" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+ISCD_NAME^종목코드명^40^0^0^0^0^0^0
+ODER_ABLE_AMT^주문가능금액^19^0^7^0^0^0^0
+ODER_ABLE_CASH_AMT^주문가능현금금액^19^0^7^0^0^0^0
+ODER_ABLE_SBSN_AMT^주문가능대용금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrf_cntg_810r" title="야간 선물옵션주문가능수량(매수" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="296" _ulen="220" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+ASPR_TYPE_CODE^호가유형코드^1^0^0^0^0^0^0
+FTOP_ODER_UNPR^장내파생주문단가^20^2^7^0^0^0^0
+ODQT^주문수량^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="634" _ulen="470" >
+
+ODER_ABLE_QTY^주문가능수량^19^0^7^0^0^0^0
+RSRP_ODER_ABLE_QTY^전환매주문가능수량^19^0^7^0^0^0^0
+UNCL_PRHB_ODER_ABLE_QTY^미수불가주문가능수량^19^0^7^0^0^0^0
+UI_NEW_ODER_ABLE_QTY^UI신규주문가능수량^19^0^7^0^0^0^0
+TOTAL_ODER_MARG^총주문증거금^19^0^7^0^0^0^0
+CASH_ODER_MARG^현금주문증거금^19^0^7^0^0^0^0
+UI_SBSN_ODER_MARG^UI대용주문증거금^19^0^7^0^0^0^0
+ODER_AFT_ODER_ABLE_TTAM^주문후주문가능총액^19^0^7^0^0^0^0
+ODER_AFT_ODER_ABLE_CASH_AMT^주문후주문가능현금금액^19^0^7^0^0^0^0
+UI_ODER_AFT_ODER_ABLE_SBSN^UI주문후주문가능대용^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="634" _ulen="470" >
+
+ODER_ABLE_QTY^주문가능수량^19^0^7^0^0^0^0
+RSRP_ODER_ABLE_QTY^전환매주문가능수량^19^0^7^0^0^0^0
+UNCL_PRHB_ODER_ABLE_QTY^미수불가주문가능수량^19^0^7^0^0^0^0
+UI_NEW_ODER_ABLE_QTY^UI신규주문가능수량^19^0^7^0^0^0^0
+TOTAL_ODER_MARG^총주문증거금^19^0^7^0^0^0^0
+CASH_ODER_MARG^현금주문증거금^19^0^7^0^0^0^0
+UI_SBSN_ODER_MARG^UI대용주문증거금^19^0^7^0^0^0^0
+ODER_AFT_ODER_ABLE_TTAM^주문후주문가능총액^19^0^7^0^0^0^0
+ODER_AFT_ODER_ABLE_CASH_AMT^주문후주문가능현금금액^19^0^7^0^0^0^0
+UI_ODER_AFT_ODER_ABLE_SBSN^UI주문후주문가능대용^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="248" _ulen="188" >
+
+ACNM^계좌명^40^0^0^0^0^0^0
+ISCD_NAME^종목코드명^40^0^0^0^0^0^0
+ODER_ABLE_AMT^주문가능금액^19^0^7^0^0^0^0
+ODER_ABLE_CASH_AMT^주문가능현금금액^19^0^7^0^0^0^0
+ODER_ABLE_SBSN_AMT^주문가능대용금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

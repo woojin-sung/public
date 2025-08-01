@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="72010" scrname="선옵가상체결증거금조회_가상잔고팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,303,225,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,303,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="267,15,24,24,1" />
+		<RADIOGROUP name="rdoSort" visible="0" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="15,73,273,47,0" >
+			<RADIO_INFO>
+				<RADIO no="0" text="매도" position="0,0,135,47" />
+				<RADIO no="1" text="매수" position="135,0,135,47" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<EDIT name="edtAmount" visible="0" mask="0,0,,,0,,0,1,1" halign="2" imetype="1" maxlength="10" ly_vert="15,73,273,47,0" />
+		<EDIT name="edtPrice" visible="0" mask="0,0,,,0,,2,1,1" halign="2" imetype="1" maxlength="10" ly_vert="15,73,273,47,0" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="18,150,130,39,1" />
+		<BUTTON name="btnOk" caption="변경" btnimage="btn_01.9" ly_vert="157,150,130,39,1" />
+		<LABEL name="Label0" fontsize="5" bgcolor="064:188030030" halign="1" ly_vert="0,0,303,55,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3500" _ulen="3290" >
+'============================================================================
+' 01. 화 면 명 : 선옵 가상체결증거금 조회 가상잔고 팝업
+' 02. 화면설명 : 선옵 가상체결증거금 조회 가상잔고 팝업 라디오/에디트
+' 03. 작    성 : 2016.02.03 ~ 최지희
+'============================================================================
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData
+	szData = Form.GetOpenLinkData()
+	
+	Dim szList
+	
+	szList = Split(szData, "★")
+	Dim szCellName, szCellData
+	szCellName = szList(0)
+	szCellData = szList(1)
+	
+	if szCellName == "bd_cell1"	 then	'구분
+		rdoSort.visible = true
+		edtAmount.visible = false
+		edtPrice.visible = false
+		Label0.caption = "구분 변경"
+		if szCellData == "매도" then
+			rdoSort.currentindex = 0
+		elseif szCellData == "매수" then
+			rdoSort.currentindex = 1
+		else
+		
+		end if
+	elseif szCellName == "bd_cell2" then		'수량
+		rdoSort.visible = false
+		edtAmount.visible = true
+		edtPrice.visible = false
+		edtAmount.caption = szCellData
+		Label0.caption = "수량 변경"
+	elseif szCellName == "bd_cell7" then		'수량이미지
+		rdoSort.visible = false
+		edtAmount.visible = true
+		edtPrice.visible = false
+		edtAmount.caption = szCellData
+		Label0.caption = "수량 변경"
+		
+	elseif szCellName == "bd_cell3"	then		'가격
+		rdoSort.visible = false
+		edtAmount.visible = false
+		edtPrice.visible = true
+		edtPrice.caption = szCellData
+		Label0.caption = "가격 변경"
+	elseif szCellName == "bd_cell8"	then		'가격이미지
+		rdoSort.visible = false
+		edtAmount.visible = false
+		edtPrice.visible = true
+		edtPrice.caption = szCellData
+		Label0.caption = "가격 변경"
+	end if
+End Sub
+'============================================================================
+' imgClose_OnClick
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+' btnCancel_OnClick
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnOk_OnClick
+'============================================================================
+Sub btnOk_OnClick()
+	if Label0.caption == "구분 변경" then
+		Form.SendReturnToParent("SORT" , rdoSort.currentindex)
+	elseif Label0.caption == "수량 변경" then
+		Form.SendReturnToParent("AMOUNT" , edtAmount.caption)
+	elseif Label0.caption == "가격 변경" then
+		Form.SendReturnToParent("PRICE" , edtPrice.caption)
+	end if
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

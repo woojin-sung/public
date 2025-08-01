@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="41030" scrname="야간선물옵션주문_정산금팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,187,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9.png" ly_vert="0,0,309,55,1" />
+		<TABLE name="tblData" insidelinecolor="017:209209209" colcount="2" rowcount="3" outline="0000" transmode="1" designorder="1" ly_vert="10,70,289,102,1" >
+			<COL_INFO ly_vert_width="99,190" />
+			<ROW_INFO ly_vert_height="34,34,34" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" line="0,0" caption="주문금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" import="0,1,0" halign="2" line="0,0" mask="0,1,,원,0,,0,1,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" line="0,0" caption="제비용" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" import="0,1,3" halign="2" line="0,0" mask="0,1,,원,0,,0,1,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" line="0,0" caption="정산금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" import="0,1,4" halign="2" line="0,0" mask="0,1,,원,0,,0,1,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="주문 관련 비용" bgcolor="064:197070070" halign="1" ly_vert="0,0,309,55,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="254,5,45,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+		<BUTTON name="btnClose2" caption="닫기" fgcolor="004:000000000" bgcolor="232:232078084" bgcolor2="233:102101101" btnimage="btn_pop1.9.png" ly_vert="0,250,155,45,1" />
+		<BUTTON name="btnReceive" caption="조회" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="155,250,154,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3761" _ulen="3587" >
+
+'============================================================================
+' 화 면 명 : 주식주문_정산금팝업
+' 화면설명 : 주식주문 정상금팝업
+' 작    성 : 2016.01.28 ~ 2016.  .       ssang
+'============================================================================
+
+'****************************************************************************
+'               G  R  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_tData
+
+'****************************************************************************
+'			P  E  R  S  O  N  A  L     F  U  N  C  T  I  O  N
+'****************************************************************************
+
+'============================================================================
+' RequestData
+'============================================================================
+Function RequestData()
+	tblData.SetCellString(0, 1, "")
+	tblData.SetCellString(1, 1, "")
+	tblData.SetCellString(2, 1, "")
+	
+	DATAMANAGER.ClearInputData(0, "obtrf_cntg_835r")
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "ACNO"             , 0, g_tData(0))	' 계좌번호
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "ASNO"             , 0, g_tData(1))	' 계좌일련번호
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "IQRY_CLS_CODE"    , 0, "1")			' 조회구분코드
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "FEE_MDIA_GRP_CODE", 0, "020")		' 수수료매체그룹코드
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "MKPL_CLS_CODE"    , 0, g_tData(2))	' 매매시장구분코드
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "DEAL_CLS_CODE"    , 0, g_tData(3))	' 매매구분코드
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "ODQT"             , 0, g_tData(4))	' 주문수량
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "FTOP_ODER_UNPR"   , 0, g_tData(5))	' 주문단가
+	DATAMANAGER.SetDataValue(0,	"obtrf_cntg_835r", "InBlock1", "ISCD"             , 0, g_tData(6))	' 종목코드
+			
+	DATAMANAGER.RequestTranData("obtrf_cntg_835r")
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim tData
+	Dim szData
+	
+	szData = Form.GetOpenLinkData()
+
+	tData = Split(szData, "★")
+	
+	if UBound(tData) > 0 then
+		g_tData = tData
+		
+		RequestData()
+	end if
+End Sub
+
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+' btnClose2_OnClick : 닫기
+'============================================================================
+Sub btnClose2_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+' btnReceive_OnClick : 조회
+'============================================================================
+Sub btnReceive_OnClick()
+	RequestData()	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrf_cntg_835r" trcode="obtrf_cntg_835r" compress="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrf_cntg_835r" title="야간수수료 계산기" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="592" _ulen="430" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+FEE_MDIA_GRP_CODE^수수료매체그룹코드^3^0^0^0^0^0^0
+MKPL_CLS_CODE^매매시장구분코드^2^0^0^0^0^0^0
+DEAL_CLS_CODE^매매구분코드^1^0^0^0^0^0^0
+ODQT^주문수량^19^0^7^0^0^0^0
+FTOP_ODER_UNPR^장내파생주문단가^20^2^7^0^0^0^0
+NRML_ODQT^정상주문수량^19^0^7^0^0^0^0
+FTOP_BYOV_ODER_UNPR^장내파생매수주문단가^20^2^7^0^0^0^0
+FTOP_SELN_ODER_UNPR^장내파생매도주문단가^20^2^7^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="212" _ulen="164" >
+
+DEAL_AMT^매매금액^19^0^7^0^0^0^0
+DEAL_FEE_AMT^매매수수료금액^19^0^7^0^0^0^0
+WTAX_AMT^제세금금액^19^0^7^0^0^0^0
+EXPN_AMT^비용금액^19^0^7^0^0^0^0
+EXCL_AMT^정산금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="371" _ulen="287" >
+
+BYNG_AMT^매입금액^19^0^7^0^0^0^0
+FEE_AMT^수수료금액^19^0^7^0^0^0^0
+BYOV_EXCL_AMT^매수정산금액^19^0^7^0^0^0^0
+SELN_AMT^매도금액^19^0^7^0^0^0^0
+FEE_AMT1^수수료금액1^19^0^7^0^0^0^0
+WTAX_AMT^제세금금액^19^0^7^0^0^0^0
+SELN_EXCL_AMT^매도정산금액^19^0^7^0^0^0^0
+PRLS_AMT^손익금액^19^0^7^0^0^0^0
+ERT^수익률^14^5^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

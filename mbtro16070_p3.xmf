@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16070" scrname="해외주식종합잔고_실시간시세" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" autosize="1" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,370,375,362,1" />
+		<LABEL name="Label1" bgcolor="320:246247248" transmode="0" ly_vert="1000,462,335,50,1" />
+		<BUTTON name="btnOK" caption="확인" fontsize="2" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+		<LABEL name="lblAllText" fontsize="2" fontstyle="01" caption="실시간 변동 시세 설정" paddinginfo="1,0,0,0" ly_vert="20,387,326,35,1" />
+		<IMAGE name="Image0" imgpath="bg_infobox.9" ly_vert="20,425,335,50,1" />
+		<LABEL name="Label0" caption="실시간 변동 시세 적용하기" paddinginfo="1,0,0,0" ly_vert="40,434,230,32,1" />
+		<BUTTON name="btnSwitch" fontsize="-2" ly_vert="279,440,55,20,1" />
+		<LABEL name="lblGuide0" fontsize="-2" fontstyle="01" caption="ㆍ" halign="1" valign="0" multiline="1" ly_vert="20,490,10,32,1" />
+		<LABEL name="lblInfo0" fontsize="-2" valign="0" multiline="1" ly_vert="30,490,325,60,1" />
+		<LABEL name="lblGuide1" fontsize="-2" fontstyle="01" caption="ㆍ" halign="1" valign="0" multiline="1" ly_vert="20,528,10,32,1" />
+		<LABEL name="lblInfo1" fontsize="-2" valign="0" multiline="1" ly_vert="30,528,325,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2141" _ulen="1897" >
+
+'-----------------------------------------------
+' 컬러코드
+'-----------------------------------------------
+' 기본 텍스트 컬러 (검정색)
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal 	= "334"
+
+' 기본 텍스트 컬러 (회색)
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey 	= "333"
+
+' 기본 텍스트 컬러 (흰색)
+Dim g_szTxtColor_White 
+g_szTxtColor_White 	= "338"
+
+' 기본 텍스트 컬러 (빨강)
+Dim g_szTxtColor_Red 
+g_szTxtColor_Red = "326"
+
+
+'============================================================================
+Sub Form_OnFormInit()
+'	btnSwitch.setApplySwitch("OFF", "ON", 269, 261, 286, 289)
+	btnSwitch.setApplySwitch("OFF", "ON", "294", "200", "270", "289")
+	szRealJango = Form.GetEnvData("OVRS_REAL_JANGO")
+
+	if szRealJango == "" or szRealJango == null then
+		Form.SetEnvData("1", "OVRS_REAL_JANGO", "1")
+		szRealJango = "1"
+	end if
+	
+	if szRealJango == "1" then
+		btnSwitch.switchindex = 1
+	else
+		btnSwitch.switchindex = 0
+	end if
+	
+	lblGuide0.paddinginfo = "0,0,0,0"
+	lblGuide0.fgcolor = g_szTxtColor_Grey
+	
+	lblGuide1.paddinginfo = "0,0,0,0"
+	lblGuide1.fgcolor = g_szTxtColor_Grey
+	
+	lblInfo0.paddinginfo = "0,0,0,0"
+	lblInfo0.fgcolor = g_szTxtColor_Grey
+	
+	lblInfo1.paddinginfo = "0,0,0,0"
+	lblInfo1.fgcolor = g_szTxtColor_Grey
+	
+	lblInfo0.maxlinecnt = "2"
+	lblInfo1.maxlinecnt = "2"
+	
+	lblInfo0.caption = "ON으로 설정 시, 실시간 변동 시세가 적용되어 조회돼요.\n(단, 보유종목이 100개 이하인 경우만 적용돼요.)"
+	lblInfo1.caption = "실시간 변동 시세 적용 시 '비용포함 / 매도수수료(추정) / 제세금(추정)' 항목은 제공이 불가하오니 참고해주세요."
+End Sub
+
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	if CInt(btnSwitch.switchindex) == 0 then
+		Form.SetEnvData("1", "OVRS_REAL_JANGO", "0")
+	else
+		Form.SetEnvData("1", "OVRS_REAL_JANGO", "1")
+	end if
+	
+	Form.SendReturnToParent("OVRS_REAL_JANGO" , "")
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

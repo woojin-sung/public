@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="31060" scrname="추가증거금 청산주문_팝업_유형가격수량" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,285,196,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<RADIOGROUP name="rdoSort" visible="0" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="10,65,265,47,0" >
+			<RADIO_INFO>
+				<RADIO no="0" text="매도" position="0,0,135,47" />
+				<RADIO no="1" text="매수" position="136,0,135,47" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" ly_vert="25,132,113,39,1" />
+		<BUTTON name="btnOk" caption="변경" fgcolor="004:000000000" ly_vert="148,132,113,39,1" />
+		<COMBO name="cmbOrderType" cbinputdatatext="1`시장가
+2`지정가
+I`조건부지정가
+X`최유리 지정가" ly_vert="10,65,265,47,1" />
+		<EDIT name="edtAmount" visible="0" mask="0,0,,,0,,0,0,0" halign="2" imetype="1" maxlength="10" ly_vert="10,65,265,47,0" />
+		<EDIT name="edtPrice" visible="0" mask="0,0,,,0,,2,0,0" halign="2" imetype="1" maxlength="10" ly_vert="10,65,265,47,0" />
+		<LABEL name="lblTitle" fontsize="2" bgcolor="064:197070070" halign="1" ly_vert="0,0,285,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="242,15,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2862" _ulen="2738" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 추가증거금 청산주문
+' 02. 화면설명 : 추가증거금 청산주문 팝업화면
+' 03. 작    성 : 2016.04.30 LJS
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_szType
+
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData, arrData
+	szData = Form.GetOpenLinkData()
+	
+	arrData = Split(szData, "★")
+	
+	If UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+	
+	g_szType = arrData(0)
+
+	If g_szType = "주문유형" Then
+		cmbOrderType.visible = True
+		edtAmount.visible	  = false
+		edtPrice.visible	  = false
+		lblTitle.caption 	  = "주문유형 변경"
+	
+	ElseIf g_szType = "수량" Then
+		cmbOrderType.visible = false
+		edtAmount.visible	  = true
+		edtPrice.visible	  = false
+		lblTitle.caption 	  = "수량 변경"
+	
+	ElseIf g_szType = "가격" Then
+		cmbOrderType.visible = false
+		edtAmount.visible	  = false
+		edtPrice.visible	  = true
+		lblTitle.caption 	  = "가격 변경"
+	
+	End If
+
+End Sub
+'============================================================================
+' imgClose_OnClick
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+' btnCancel_OnClick
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnOk_OnClick
+'============================================================================
+Sub btnOk_OnClick()
+
+	If g_szType = "주문유형" Then
+		Form.SendReturnToParent( g_szType , cmbOrderType.caption )
+	
+	ElseIf g_szType = "수량" Then
+		Form.SendReturnToParent( g_szType , edtAmount.caption )
+	
+	ElseIf g_szType = "가격" Then
+		Form.SendReturnToParent( g_szType , edtPrice.caption )
+	
+	End If	
+
+	Form.CloseForm()
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

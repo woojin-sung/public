@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="31040" scrname="선옵호가주문_팝업_기타매수" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="ImageBG" autosize="1" imgpath="bg_dim40.9.png" ly_vert="0,0,375,647,1" />
+		<GRID name="Grid0" colcount="3" ly_vert="0,176,160,350,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_prc" mask="0,0,,,0,,2,1,1,0,0" halign="2" />
+				<LABEL name="bd_text" halign="1" />
+				<LABEL name="bd_sign" usesign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" cursorstyle="1" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="20,70,70" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="20" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="34" />
+						<CELLINFO>
+							<CELL name="bd_sign" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="34" />
+						<CELLINFO>
+							<CELL name="bd_prc" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="34" />
+						<CELLINFO>
+							<CELL name="bd_text" cell_ly="0,0,0,0" line="0,0" fgcolor="006:199056017" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_sign" rangecellid="bd_sign" hlcolorcellid="bd_sign" />
+		</GRID>
+		<TABLE name="TableH" insidelinecolor="102:255255255" colcount="3" rowcount="1" outline="1110" designorder="1" ly_vert="0,141,160,35,1" >
+			<COL_INFO ly_vert_width="20,70,70" />
+			<ROW_INFO ly_vert_height="35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" usesign="1" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" mask="0,0,,,0,,2,1,1,0,0" impidxs="" />
+				<CELL cell_ly="2,0,2,0" fgcolor="006:213049051" line="1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="TableL" insidelinecolor="102:255255255" colcount="3" rowcount="1" outline="1011" designorder="1" ly_vert="0,526,160,35,1" >
+			<COL_INFO ly_vert_width="20,70,70" />
+			<ROW_INFO ly_vert_height="35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" usesign="1" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" mask="0,0,,,0,,2,1,1,0,0" impidxs="" />
+				<CELL cell_ly="2,0,2,0" fgcolor="006:213049051" line="1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6612" _ulen="6248" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 선옵호가주문
+' 02. 화면설명 : 선옵호가주문_팝업_기타매수
+' 03. 작    성 : 2016.02.23 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sMarket '시장구분(F:선물 O:옵션)
+Dim g_sCode '종목코드
+Dim g_nCurPrc '현재가
+Dim g_nHPrc '상한가
+Dim g_nLPrc '하한가
+Dim g_nBasePrc '전일종가
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+' 20240412 HSZ 코스닥글로벌지수 추가 (KF)
+
+'===========================================================================
+' 색상 리턴함수
+'===========================================================================
+Function GetFgColor(nNum)
+	if Math.floor(Cstr(nNum*100)) > Math.floor(Cstr(g_nBasePrc*100)) then
+		return "6"
+	elseif Math.floor(Cstr(nNum*100)) < Math.floor(Cstr(g_nBasePrc*100)) then
+		return "7"
+	else
+		return "12"
+	end if
+End Function
+
+'===========================================================================
+' 증감포인트 리턴함수
+'===========================================================================
+Function GetPoint(sMarket, nNum)
+	if sMarket == "F" then
+		return 0.05
+	elseif sMarket == "MF" then
+		return 0.02
+		
+	'20180323 LES START - 코스닥150옵션/KRX300선물 추가
+	elseif sMarket == "XF" then
+		return 0.2
+	elseif sMarket == "QO" then
+		if nNum >= 50 then
+			return 0.5
+		else
+			return 0.1
+		end if
+	'20180323 LES END
+	
+	' 20240412 HSZ START : 코스닥글로벌지수 추가
+	elseif sMarket == "KF" then
+		return 0.1
+	' 20240412 HSZ END
+	
+	elseif sMarket == "O" or sMarket == "WO" then	' 20190809_01 HWG : 위클리옵션추가
+		if nNum > 10 then
+			return 0.05
+		else
+			return 0.01
+		end if
+	elseif sMarket == "MO" then
+		if nNum > 10 then
+			return 0.05
+		elseif nNum <= 10 or nNum > 3 then
+			return 0.02
+		else
+			return 0.01
+		end if
+	end if
+	
+	return 0.01
+End Function
+
+'===========================================================================
+' 숫자 리턴함수
+'===========================================================================
+Function GetTonumber(sNum)
+	Dim nDbl
+	nDbl = 0
+	
+	if sNum == null or Trim(sNum) == "" then
+		return nDbl
+	end if
+	
+	nDbl = CDbl(sNum)
+	
+	return nDbl
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	Dim sRevData, sTemp, nCnt, nPoint
+	nCnt = 0
+	nPoint= 0
+	sRevData = Form.GetOpenLinkData()
+
+	if sRevData == null or Trim(sRevData) == "" then
+		Exit Sub
+	end if
+
+	'시장구분★종목코드★현재가★상한가★하한가★전일종가
+	sTemp = Split(sRevData, "★")
+	
+	g_sMarket = sTemp[0]
+	g_sCode = sTemp[1]
+	g_nCurPrc = GetTonumber(sTemp[2])
+	g_nHPrc = GetTonumber(sTemp[3])
+	g_nLPrc = GetTonumber(sTemp[4])	
+	g_nBasePrc = GetTonumber(sTemp[5])	
+	
+	'20180323 LES START - 코스닥150옵션/KRX300선물 추가
+	' 20240412 HSZ 코스닥글로벌지수 추가 
+	if g_sMarket == "F" or g_sMarket == "XF" or g_sMarket == "MF" or g_sMarket == "KF" then
+		nPoint = GetPoint(g_sMarket, 0)
+		nCnt = (g_nHPrc-g_nLPrc)/nPoint-1
+	else
+		if g_nHPrc < 10 then
+			nPoint = GetPoint(g_sMarket, g_nHPrc)
+			nCnt = (g_nHPrc-g_nLPrc)/nPoint-1
+		elseif g_nLPrc > 10 then
+			nPoint = GetPoint(g_sMarket, g_nLPrc)
+			nCnt = (g_nHPrc-g_nLPrc)/nPoint-1
+		else
+			nPoint = (g_nHPrc-10)/0.05
+			nCnt = (10-g_nLPrc)/0.01-1
+		end if
+	end if
+	
+	if nCnt > 0 then
+		Dim nRow, nPrc
+		nRow = 0
+		nPrc = g_nHPrc
+		Grid0.rowcount = nCnt
+		
+		for i = 0 to Grid0.rowcount-1 
+			if g_sMarket == "O" and (g_nHPrc > 10 and g_nLPrc < 10) then
+				nPrc = nPrc-GetPoint(g_sMarket, nPrc)	
+			
+			' 20190809_01 HWG START : 위클리옵션추가
+			elseif g_sMarket == "WO" and (g_nHPrc > 10 and g_nLPrc < 10) then
+				nPrc = nPrc-GetPoint(g_sMarket, nPrc)	
+			' 20190809_01 HWG END	
+			
+			else
+				nPrc = Round(nPrc,2)-nPoint
+			end if
+			
+			Grid0.SetCellData( "bd_prc", i, nPrc )
+			Grid0.SetCellFgColor( "bd_prc", i, GetFgColor(nPrc) )
+			Grid0.SetCellData( "bd_text", i, "매수" )
+
+			if Math.floor(Cstr(nPrc*100)) == Math.floor(Cstr(g_nCurPrc*100)) then
+				nRow = i
+			end if
+		next
+		
+		TableH.SetCellString( 0, 0, "1" )
+		TableH.SetCellString( 0, 1, g_nHPrc )
+		TableH.SetCellFgColor( 0, 1, GetFgColor(g_nHPrc) )
+		TableH.SetCellString( 0, 2, "매수" )
+		
+		TableL.SetCellString( 0, 0, "4")
+		TableL.SetCellString( 0, 1, g_nLPrc )
+		TableL.SetCellFgColor( 0, 1, GetFgColor(g_nLPrc) )
+		TableL.SetCellString( 0, 2, "매수" )
+
+		if nRow > 0 then
+			if g_sMarket == "O" and (g_nHPrc > 10 and g_nLPrc < 10) then
+				nRow = nRow+1
+			
+			' 20190809_01 HWG START : 위클리옵션추가
+			elseif g_sMarket == "WO" and (g_nHPrc > 10 and g_nLPrc < 10) then
+				nRow = nRow+1
+			' 20190809_01 HWG END
+			
+			end if
+			
+			if nRow >= 4 then
+				Grid0.selectrow = nRow
+				nRow = nRow-4
+			end if
+		end if
+		
+		Grid0.toprow = nRow
+	end if
+End Sub
+
+'============================================================================
+Sub TableH_OnClick(lRow , lColumn)
+	if lColumn == 2 then '매수
+		Dim sPrc
+		sPrc = TableH.GetCellString( 0, 1 )
+		
+		Form.SendReturnToParent( "BUY_OTHER_PRC" , sPrc )
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub TableL_OnClick(lRow , lColumn)
+	if lColumn == 2 then '매수
+		Dim sPrc
+		sPrc = TableL.GetCellString( 0, 1 )
+		
+		Form.SendReturnToParent( "BUY_OTHER_PRC" , sPrc )
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	if szCellID == "bd_text" then
+		Dim sPrc
+		sPrc = Grid0.GetCellData( "bd_prc", lRow )
+		
+		Form.SendReturnToParent( "BUY_OTHER_PRC" , sPrc )
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub ImageBG_OnClick()
+	
+	Form.CloseForm()
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

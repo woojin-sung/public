@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="31040" scrname="선옵호가주문_설정팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Cont0" scroll_pos="0,0" ly_vert="0,0,375,607,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="5" designorder="1" ly_vert="0,0,375,607,1" >
+					<COL_INFO ly_vert_width="252,100,23" />
+					<ROW_INFO ly_vert_height="29,51,26,25,476" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,2,0" bgcolor="066:240240240" line="0,1" caption="선물옵션호가주문 설정" fontsize="-2" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,1,0,1" halign="0" line="0,1" caption="주문입력 확인창 사용" autofontsize="1" impidxs="" />
+						<CELL cell_ly="1,1,1,1" fgcolor="128:188030030" halign="2" line="0,1" autofontsize="1" impidxs="" />
+						<CELL cell_ly="2,1,2,1" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="원터치주문" autofontsize="1" impidxs="" />
+						<CELL cell_ly="1,2,1,3" fgcolor="128:188030030" halign="2" line="0,1" autofontsize="1" impidxs="" />
+						<CELL cell_ly="2,2,2,3" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,3,0,3" fgcolor="100:114114114" halign="0" line="0,1" caption="원터치시 매수/매도 버튼표시 없이 바로 주문" fontsize="-3" impidxs="" />
+						<CELL cell_ly="0,4,0,4" line="0,1" impidxs="" />
+						<CELL cell_ly="1,4,1,4" line="0,1" impidxs="" />
+						<CELL cell_ly="2,4,2,4" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<IMAGE name="Image0" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="357,44,13,22,1" />
+				<IMAGE name="Image1" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="357,94,13,22,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4845" _ulen="4497" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 선옵호가주문
+' 02. 화면설명 : 선옵호가주문_설정팝업
+' 03. 작    성 : 2016.02.23 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sFileName '파일명
+Dim g_sConfirmKey '주문입력확인창사용키
+Dim g_sOneTouchKey '원터치주문사용키
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' 환경설정초기화함수
+'============================================================================
+Function SetInitData()
+	'주문입력확인창사용 - 사용
+	'원터치주문사용 - 미사용
+	
+	Cont0.Table0.SetCellString( 1, 1, "사용" )
+	Cont0.Table0.SetCellString( 2, 1, "미사용" )
+	
+	SetFgColor(1, 1)
+	SetFgColor(2, 1)
+	
+	SetConfigData(g_sFileName, g_sConfirmKey, 1, 1)
+	SetConfigData(g_sFileName, g_sOneTouchKey, 2, 1)
+End Function 
+
+'============================================================================
+' 환경설정값리턴함수
+'============================================================================
+Function GetConfigData(sFileName, sKey, nRow, nCol)
+	Dim sValue
+	sValue = Form.LoadConfigData(sFileName, sKey)
+
+	if sValue == null or Trim(sValue) == "" then
+		if sKey == g_sConfirmKey then
+			sValue = "Y" '기본값 사용
+		elseif sKey == g_sOneTouchKey then
+			sValue = "N" '기본값 미사용
+		end if
+	end if
+	
+	if sValue == "Y" then 'On
+		sValue = "사용"
+	else 'Off
+		sValue = "미사용"
+	end if
+
+	Cont0.Table0.SetCellString( nRow, nCol, sValue )
+	
+	if sValue == "미사용" then
+		Cont0.Table0.SetCellFgColor( nRow, nCol, "4:000000000" )
+	else
+		Cont0.Table0.SetCellFgColor( nRow, nCol, "128:188030030" )
+	end if
+End Function 
+
+'============================================================================
+' 환경설정값세팅함수
+'============================================================================
+Function SetConfigData(sFileName, sKey, nRow, nCol)
+	Dim sValue
+	sValue = Cont0.Table0.GetCellString( nRow, nCol )
+	
+	if sValue == "사용" then
+		sValue = "N"
+	else
+		sValue = "Y"
+	end if
+	
+	Form.SaveConfigData( sFileName, sKey, sValue )
+End Function 
+
+'============================================================================
+' 글자색상함수
+'============================================================================
+Function SetFgColor(nRow, nCol)
+	Dim sValue
+	sValue = Cont0.Table0.GetCellString( nRow, nCol )
+	
+	if sValue == "미사용" then
+		Cont0.Table0.SetCellFgColor( nRow, nCol, "4:000000000" )
+	else
+		Cont0.Table0.SetCellFgColor( nRow, nCol, "128:188030030" )
+	end if
+End Function 
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetScreenName("선물옵션호가주문 설정")
+	
+	g_sFileName = "SET_ORDER" 
+	g_sConfirmKey = "HOGA_ORD_CONFM_YN" 
+	g_sOneTouchKey = "HOGA_ORD_ONETH_YN" 
+	
+	GetConfigData(g_sFileName, g_sConfirmKey, 1, 1)
+	GetConfigData(g_sFileName, g_sOneTouchKey, 2, 1)
+End Sub
+
+'============================================================================
+Sub Cont0_Table0_OnClick(lRow , lColumn)
+	if lRow == 1 then '주문입력확인창사용
+		SetConfigData(g_sFileName, g_sConfirmKey, 1, 1)
+		GetConfigData(g_sFileName, g_sConfirmKey, 1, 1)
+	elseif lRow == 2 then '원터치주문사용
+		SetConfigData(g_sFileName, g_sOneTouchKey, 2, 1)
+		GetConfigData(g_sFileName, g_sOneTouchKey, 2, 1)
+	end if
+End Sub
+
+'============================================================================
+' 주문입력확인창사용
+'============================================================================
+Sub Cont0_Image0_OnClick()
+	SetConfigData(g_sFileName, g_sConfirmKey, 1, 1)
+	GetConfigData(g_sFileName, g_sConfirmKey, 1, 1)
+End Sub
+
+'============================================================================
+' 원터치주문사용
+'============================================================================
+Sub Cont0_Image1_OnClick()
+	SetConfigData(g_sFileName, g_sOneTouchKey, 2, 1)
+	GetConfigData(g_sFileName, g_sOneTouchKey, 2, 1)
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>
