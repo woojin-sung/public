@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86127" scrname="모바일 OTP 폐기" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<EDIT name="EdtPinNo" enable="0" password="2" imetype="1" maxlength="6" minlength="6" hintcaption="숫자 6자리 입력" imagefilepth="input_03.9" ly_vert="20,80,335,74,1" />
+		<LABEL name="Label3" fontsize="5" fontstyle="01" caption="모바일 OTP 폐기" halign="1" ly_vert="0,0,375,60,1" />
+		<BUTTON name="BtnNext" enable="0" caption="다음" fontsize="4" fontstyle="01" ly_vert="0,587,375,60,1" />
+		<ACCOUNT name="CmbAcnt" enable="0" visible="0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135" etcfunctions="" totalacc="1" ly_vert="46,234,262,49,0" />
+		<IMAGE name="Image0" imgpath="icon_top_back_light.png" ly_vert="10,0,30,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7088" _ulen="6856" >
+'--===========================================================================
+'--===========================================================================
+
+Dim g_MsboVrsn
+Dim g_MOTPSrno
+Dim g_MSBMotpSrno
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	EdtPinNo.SetApplyLabel("모바일OTP 비밀번호", 0, 76, "left", true)
+	BtnNext.btnimage			= "btn_05.9"
+	g_MsboVrsn = ""
+	g_MOTPSrno = ""
+	
+	Form.OpenFramePopup("mhetc90060_p8" , "motp" , "")
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	If szTranID = "obaci_acct_185r" Then
+   
+		For i = 0 To DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1") - 1
+
+			ACNO = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "ACNO"  , i)
+			Form.SetCtlProp("CmbAcnt", "cbadddatatext", ACNO )
+	    
+		Next
+	    
+		Form.requestMOTP("MOTP_GET_VERSION" , "" , "86127")
+
+	End If
+
+	If szTranID = "obcsb_oimf_170a" Then
+		If Len(g_MSBMotpSrno) > 0 Then
+			Form.requestMOTP("MOTP_DISCARD", g_MSBMotpSrno, "86127") ' 단말에 있는 mOTP 폐기처리
+		Else
+			Form.requestMOTP("MOTP_DISCARD", g_MOTPSrno, "86127") ' 단말에 있는 mOTP 폐기처리
+		End If
+	End If
+	
+	If szTranID = "obcsb_oimf_172r" Then
+	
+		If DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "MOTP_SRNO" , 0) == "" Then
+			Form.MsgBox("OTP 정보 조회 오류" , "발급된 OTP정보가 존재하지 않습니다." , "", 6)
+			BtnNext.caption = "닫  기"
+		Else
+			g_MOTPSrno = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "MOTP_SRNO" , 0)
+			Form.requestMOTP("MOTP_GETINFO" , "" , "86127")
+			BtnNext.enable = True
+			EdtPinNo.enable = True
+		End If
+	
+	End If
+    
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+	If szTranID = "obcsb_oimf_170a" Then
+        strMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+        If strMsg = "" Then
+            Form.MsgBox("OTP 폐기 오류" , szErrMsg , "", 6)	
+        Else
+            Form.MsgBox("OTP 폐기 오류" , szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")" , "", 6)
+        End If	    	    
+	End If	
+	
+	If szTranID = "obcsb_oimf_172r" Then
+        strMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+        If strMsg = "" Then
+            Form.MsgBox("OTP 정보 조회 오류" , szErrMsg , "", 6)	
+        Else
+            Form.MsgBox("OTP 정보 조회 오류" , szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")" , "", 6)
+        End If	    	    
+	End If	
+	
+End Sub
+
+
+'============================================================================
+Sub Form_OnTriggerEventMOTP(sEventName, sParam)
+'Form.ShowAlert(sEventName, sParam)
+
+	tmpList = Split(sParam, "★")
+	If sEventName == "MOTP_GET_VERSION_RETURN_86127" Then
+		If tmpList[0] == "00000" Then
+			g_MsboVrsn = tmpList[2]
+			
+              DATAMANAGER.SetDataValue(0 , "obcsb_oimf_172r" , "InBlock1" , "ACNO"     , 0 , CmbAcnt.caption)
+              DATAMANAGER.SetDataValue(0 , "obcsb_oimf_172r" , "InBlock1" , "RCNO_PIP" , 0 , Form.GetSharedData("&JUMIN_NUM", false ))
+              DATAMANAGER.RequestTranData("obcsb_oimf_172r")			
+		Else
+			Form.ShowAlert("알림", "MSB 버전 추출 오류\n"..tmpList[1])
+		End If        
+    
+    End If
+    
+	If sEventName == "MOTP_DISCARD_RETURN_86127" OR sEventName == "MOTP_DISCARD_RETURN86127" Then
+		If tmpList[0] == "00000" Then
+			Form.OpenNextPopup("mbotp86128" , "" , "")
+		Else
+			Form.ShowAlert("알림", "폐기 중 오류발생(" & tmpList[1] & ")")
+		End If
+	End If
+
+	If sEventName == "MOTP_GETINFO_RETURN_86127" Then
+		If tmpList[0] == "00000" Then
+			g_MSBMotpSrno = tmpList[2]
+		End If
+	End If
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+    If sKeyName == "CLOSE_YN" Then
+        If sRet == "Y" Then
+            Form.CloseForm()
+        End If
+    End If
+    
+	If sKeyName == "mhetc90060_p8" Then
+		If sRet == "ok" Then
+			DATAMANAGER.SetDataValue(0 , "obaci_acct_185r", "InBlock1" , "RCNO"     , 0 , "NMET")
+			DATAMANAGER.SetDataValue(0 , "obaci_acct_185r", "InBlock1" , "RCNO_PIP" , 0 , Form.GetSharedData("&JUMIN_NUM", false ))
+			DATAMANAGER.RequestTranData("obaci_acct_185r")
+		Else
+			Form.ShowAlert("알림", "추가 인증이 완료되지 않았습니다.")
+			Form.CloseForm()
+		End If
+	End If
+
+End Sub
+
+
+'============================================================================
+Sub BtnNext_OnClick()
+    
+	If BtnNext.caption == "닫  기" Then
+		Form.CloseForm()
+	Else
+		DATAMANAGER.RequestTranData("obcsb_oimf_170a")
+	End If
+    
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+'	Form.OpenScreen("41000", "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	If szTranID == "obcsb_oimf_170a" Then
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "PROS_CLS_CODE"       , 0 , "D")
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "CSNO"                , 0 , ""                                      ) '서비스에서 구함
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "ACNO"                , 0 , Left(CmbAcnt.caption,8)                 )
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "ACNT_PWD"            , 0 , ""                                      )
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "MSBO_VRSN"           , 0 , g_MsboVrsn                              )
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "CUST_TERM_ID"        , 0 , Form.GetDeviceID()                      )    
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "RCNO_PIP"            , 0 , Form.GetSharedData("&JUMIN_NUM", false ))
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "MOTP_ATHN_DATA_CNTT" , 0 , EdtPinNo.caption                        )
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "OS_CLCD"             , 0 , Form.GetSharedData("&OS_TYPE", False)   )
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "OS_VRSN"             , 0 , Form.GetSharedData("&OS_VERSION", False))    
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "CUST_TERM_NAME"      , 0 , Form.GetDeviceModel()                   )
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "MOTP_DNDL_YN"        , 0 , "N"                                     )        
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "MOTP_SRNO"           , 0 , g_MOTPSrno                              )
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "APLT_DATE"           , 0 , ""                                      ) '미사용
+            DATAMANAGER.SetDataValue(0 , szTranID, "InBlock1" , "APLT_SRNO"           , 0 , 0                                       ) '미사용
+	End If
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_170a" trcode="obcsb_oimf_170a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_172r" trcode="obcsb_oimf_172r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_185r" trcode="obaci_acct_185r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_170a" title="모바일OTP 등록/폐기" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="707" _ulen="533" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+MOTP_ATHN_DATA_CNTT^모바일OTP인증데이터내용^256^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_DNLD_YN^모바일OTP다운로드여부^1^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="309" _ulen="239" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_NO_1_KEY^모바일OTP번호1키^64^0^0^0^0^0^0
+MOTP_NO_2_KEY^모바일OTP번호2키^64^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+RSNC_YN^재발급여부^1^0^0^0^0^0^0
+MSBO_MOTP_SRNO^MOBILESAFEBOX모바일OTP일련번호^15^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_172r" title="OTP조회(실물&모바일)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="161" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1257" _ulen="937" >
+
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_STAT_CODE^모바일OTP상태코드^2^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_ISNC_YMDH^모바일OTP발급일시^14^0^0^0^0^0^0
+MOTP_LOCK_YMDH^모바일OTPLOCK일시^14^0^0^0^0^0^0
+MOTP_MISS_YMDH^모바일OTP분실일시^14^0^0^0^0^0^0
+MOTP_DSCD_YMDH^모바일OTP폐기일시^14^0^0^0^0^0^0
+VALD_PRD_STA_DATE^유효기간시작일자^8^0^0^0^0^0^0
+VALD_PRD_EXPI_DATE^유효기간만료일자^8^0^0^0^0^0^0
+MOTP_MTRT_GUDE_YN^모바일OTP만기안내여부^1^0^0^0^0^0^0
+LAST_VRFC_YMDH^최종검증일시^14^0^0^0^0^0^0
+MOTP_MSTK_CSNU^모바일OTP오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_MSTK_CSNU^모바일OTP인증오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_LOCK_YN^모바일OTP인증LOCK여부^1^0^0^0^0^0^0
+MOTP_ATHN_LOCK_YMDH^모바일OTP인증LOCK일시^14^0^0^0^0^0^0
+MOTP_ATHN_LAST_MOD_YMDH^모바일OTP인증최종수정일시^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="315" _ulen="247" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_USE_RANG_CODE^OTP사용범위코드^1^0^0^0^0^0^0
+OTP_STAT_CODE^OTP상태코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="131" _ulen="103" >
+
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+UI_PRHB_REAS^UI불가사유^30^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_185r" title="비대면계좌개설시 추가개설가능" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="93" _ulen="69" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="183" _ulen="137" >
+
+OVRL_ACNT_EXST_YN^종합계좌존재여부^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_BRNM^관리지점명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

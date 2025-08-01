@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94004" scrname="장외파생거래요건등록" version="2" writer="정민영" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,527,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" vscroll="1" scroll_pos="0,0" ly_vert="0,-10,375,537,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<EDIT name="edtPswd" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="275,48,80,39,1" />
+				<LABEL name="lblTitle" visible="0" fontsize="3" fontstyle="01" caption="자격요건 확인" valign="0" paddinginfo="1,0,0,0" ly_vert="10,20,335,40,0" />
+				<IMAGE name="imgProcess" autosize="1" imgpath="bcs_step01" ly_vert="276,15,79,21,1" />
+				<ACCOUNT name="acnt0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,108,109,110,112,113,114,115,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,140" etcfunctions="" totalacc="1" ly_vert="20,48,250,39,1" />
+				<LABEL name="lblTitle2" fontsize="1" fontstyle="01" caption="개인 전문투자자 지정 정보" valign="0" paddinginfo="1,0,0,0" ly_vert="20,110,335,25,1" />
+				<IMAGE name="imgBox" imgpath="btn_line_n.9" ly_vert="20,135,335,90,1" />
+				<LABEL name="Label0" visible="0" fontsize="-1" caption="전문투자자 지정번호" ly_vert="30,145,150,20,0" />
+				<LABEL name="Label1" visible="0" fontsize="-1" caption="지정일자" ly_vert="30,170,150,20,0" />
+				<LABEL name="Label2" visible="0" fontsize="-1" caption="유효기간" ly_vert="30,195,150,20,0" />
+				<LABEL name="lblRegNo" visible="0" fontsize="-1" mask="1,0,,,1,###-########-####,0,1,1,0,0" halign="2" ly_vert="158,145,185,20,0" />
+				<LABEL name="lblRegData" visible="0" fontsize="-1" mask="1,0,,,1,####.##.##,0,1,1,0,0" halign="2" ly_vert="158,170,185,20,0" />
+				<LABEL name="lblNoData" fgcolor="146:124124124" fontsize="1" caption="등록된 투자요건이 없어요." halign="1" ly_vert="30,145,315,70,1" />
+				<LABEL name="lblLine" bgcolor="066:238239240" transmode="0" ly_vert="3,240,375,10,1" />
+				<LABEL name="lblTitle3" fontsize="1" fontstyle="01" caption="당사 장외파생용 투자경험 충족 확인" paddinginfo="1,0,0,0" ly_vert="20,255,330,30,1" />
+				<IMAGE name="imgToolTip" autosize="1" imgpath="icon_question" ly_vert="272,263,16,15,1" />
+				<IMAGE name="imgBox2" imgpath="bg_infobox.9" ly_vert="20,288,335,75,1" />
+				<LABEL name="Label3" fontstyle="01" caption="3억이상 잔고 보유" halign="1" ly_vert="20,298,335,20,1" />
+				<LABEL name="lblOnCoSfcnYN" fontstyle="01" halign="2" ly_vert="54,323,120,25,1" />
+				<LABEL name="lblLine2" fgcolor="198:222222222" bgcolor="036:222222222" transmode="0" ly_vert="180,329,2,13,1" />
+				<LABEL name="lblOnCoAmt" fgcolor="146:124124124" fontstyle="01" mask="0,0,,원,0,,0,1,1,0,0" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="195,323,150,25,1" />
+				<LABEL name="lblTitle4" fontsize="1" fontstyle="01" caption="타사 장외파생용 투자경험 잔고 합산" paddinginfo="1,0,0,0" ly_vert="20,375,330,30,1" />
+				<IMAGE name="imgToolTip2" autosize="1" imgpath="icon_question" ly_vert="272,383,16,15,1" />
+				<LABEL name="lblOtCoCnt" mask="0,0,제출 서류 , 건,0,,0,1,1,0,0" halign="1" ly_vert="20,410,200,30,1" />
+				<LABEL name="lblLine1" bgcolor="090:238239240" transmode="0" ly_vert="20,441,200,1,1" />
+				<BUTTON name="btnInvReg" caption="등록하기" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="232,410,125,30,1" />
+				<LABEL name="lblbrNm" fgcolor="146:124124124" fontsize="-1" fontstyle="10" halign="1" ly_vert="20,490,335,20,1" />
+				<LABEL name="lblValdDate" visible="0" fontsize="-1" halign="2" ly_vert="138,195,205,20,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="18223" _ulen="16939" >
+'--===========================================================================
+' 01. 화 면 명 : 지정심사신청
+' 02. 화면설명 : 자격요건확인
+' 03. 작    성 : 
+' 04. 수    정 : 
+' 2022.04.14 : v0001 : KSJ : 신분증 등록 및 진위확인 개선
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szAplyDate, g_szAplyNum, g_szPrgsCode
+Dim g_szSRNO '신분증 진위 확인 후, 받은 일련번호
+
+Dim g_OSType
+
+' 21.07.02 JHY : 컴플리트랑 같이 스크롤포스 조절되서 안먹도록 하기 위해 현재 포커싱 에디트와 이전 포커싱 에디트 비교하여 왓다갓다 하지 않도록 수정
+Dim g_szCurKeyPad 
+Dim g_szPreKeyPad
+
+'v0001 STA
+Dim g_szCnshIsncYN		'1년이상거래계좌 관련서류등록여부	
+Dim g_szRmndCertIsncYN		'투자경럼 서류등록여부
+
+Dim g_szAVRG_RMND_AMT
+Dim g_szOTCO_INPUT_CSNU
+
+Dim unPressedImgPath 
+Dim PressedImgPath
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+' f_ChangeBtnState() : 입력 조건 확인 후, 버튼 활성/비활성
+'============================================================================
+Function f_ChangeBtnState()
+	Dim isAble
+	
+	isAble = true
+
+	'v0001 STA
+	if (Container0.edtPswd.caption == "" or Container0.edtPswd.caption == null or Container0.edtPswd.pwdlen <> 4) then
+		isAble = false
+	end if
+	
+	if g_szPrgsCode <> "" and g_szPrgsCode <> null then
+		if g_szPrgsCode == "0" then
+			if isAble == true then
+				Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", true)
+			
+			else
+				Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", false)
+			end if
+	
+		else
+			Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", false)
+			
+		end if
+	end if
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Container0.imgToolTip.setMaintainingRatio("1")
+	Container0.imgToolTip2.setMaintainingRatio("1")	
+	
+	Container0.imgProcess.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()			
+	Dim szTheme
+	szTheme = Form.GetEnvData("common.theme")
+
+'	if szTheme == "white" then
+'		Container0.imgProcess.imgpath = "icon_1stepthird_w"
+'	else
+'		Container0.imgProcess.imgpath = "icon_1stepthird_b"
+'	end if
+
+	Form.SetSharedData("124a_Aplt_Srno", "")	'신청일련번호 초기화
+				
+				
+	g_OSType	= Form.GetSharedData("&OS_TYPE", false)
+	
+	'g_PlainRm
+	g_plain_rm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v005
+	
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+	
+	
+	'계좌번호 입력전 화면 초기화
+	Container0_acnt0_ChangeAccount()
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "change_step2" then
+		Form.SetSharedData("94004_S1_AcntPwd", Container0.edtPswd.caption)
+	elseif sEventName == "PREV_STEP" then
+		if sParam = "mbonl94004_s1" then
+			g_plain_rm = Form.GetSharedData("&PLAIN_RM", FALSE )
+			
+			Container0.edtPswd.pwdlen = 4
+			Container0.edtPswd.caption = Form.GetSharedData("94004_S1_AcntPwd")
+	
+			if Container0.edtPswd.caption ~= null then
+				DATAMANAGER.RequestTranData( "obacp_opop_066r" ) '비밀번호검증
+			end if
+		end if
+	end if
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn(sKeyName, sRet)
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	if sKeyName == "close_mbonl94004_p2" then
+		Form.triggerEvent("#", "COMPLETE_SUBMIT", "")
+	
+	elseif sKeyName == "close_mbonl94004_p11" Then
+		DATAMANAGER.SetDataValue( false, "obcsb_acif_123r" , "InBlock1" , "APLT_SRNO" , 0 , g_szAplyNum  )
+		DATAMANAGER.RequestTranData( "obcsb_acif_123r" )
+	
+	elseif sKeyName = "CORRECT_PWD" then	'계좌비번 수신
+		if sRet <> "" then
+			tData = Split(sRet, "★")
+			
+			if UBOUND(tData) > 0 then
+				Container0.edtPswd.pwdlen = tData(1)
+				Container0.edtPswd.caption = tData(0)
+				
+				DATAMANAGER.RequestTranData( "obacp_opop_066r" ) '비밀번호검증
+			end if
+			
+		end if
+	End If
+	
+End Sub
+
+''****************************************************************************
+''               		D A T A				M A N A G E R               
+''****************************************************************************
+
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 인풋데이터 세팅
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim szCustNum, szHostDate, szAccount
+	
+	szCustNum = Form.GetSharedData("&CUST_NUM", false )
+	szHostDate = Form.GetSharedData("&HOST_DATE",0)
+	szAccount = left(Container0.acnt0.caption,8)
+	
+	Dim sACNT_PWD
+	'v0004
+	if g_plain_rm == "1" then	'MTS메모리평문 적용상태일때
+	    sACNT_PWD = Container0.edtPswd.caption
+	else  'MTS메모리평문 미적용상태일때
+	    sACNT_PWD = Form.GetEncData(Container0.edtPswd.caption)
+	end if
+	
+		
+	if szTranID == "obacp_opop_066r" then
+		DATAMANAGER.SetDataValue( false, szTranID, "InBlock1", "ACNO" , 0 , szAccount )
+		DATAMANAGER.SetDataValue( false, szTranID, "InBlock1", "ACNT_PWD" , 0 , sACNT_PWD )
+		
+	elseif szTranID == "obcsb_acif_123r" then
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "IQRY_CLS_CODE" , 0 , "1"  )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "ACNO" , 0 , szAccount )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CSNO" , 0 , szCustNum  )
+	
+	elseif szTranID == "obcsb_acif_124a" then	'장외파생투자요건 등록
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "ACNO" , 0 , szAccount )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CSNO" , 0 , szCustNum  )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "INVE_APLT_STCD" , 0 , "T"  )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "VCALL_TRGT_YN" , 0 , Form.GetSharedData( "mbonl94004_VCALL_TRGT_YN") )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "APLT_DATE" , 0 , szHostDate  )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CONT_CLS_CODE" , 0 , "4"  )
+		
+	'v0001 STA
+	elseif szTranID == "obcsb_acif_127r" then
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CSNO" 	 , 0 , szCustNum    )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "INVT_EXPC_CLCD"	 , 0 , "1" )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "APLT_SRNO"	 , 0 , g_szAplyNum  )	
+	'v0001 FIN
+	
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 들어왔을때
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	if szTranID == "obacp_opop_066r" then
+		if Container0.edtPswd.caption ~= null then
+			'20220523 LJH 센터 표기를 계좌비밀번호 입력 시점으로 변경
+			Dim szBrcd
+			szBrcd = Form.GetAccountInfo( Container0.acnt0.caption, "branchcode")
+			Container0.lblbrNm.caption = "접수센터 : " .. Form.GetMetaData( "부서코드", szBrcd )
+		
+			DATAMANAGER.RequestTranData( "obcsb_acif_124a" ) '5s
+'			DATAMANAGER.RequestTranData( "obcsb_acif_123r" ) '5s
+		end if
+	
+	elseif szTranID == "obcsb_acif_123r" then
+		g_szAplyDate = ""
+		g_szAplyNum = ""
+		g_szPrgsCode = ""
+		g_szAVRG_RMND_AMT = 0
+		g_szOTCO_INPUT_CSNU = 0
+		szPRSN_PFIN_YN = ""
+		
+		szPFIN_RGNO = ""
+		szDSGT_DATE = ""
+		szVALD_STA_DATE = ""
+		szVALD_FIN_DATE = ""
+		
+		g_szAplyDate  		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "APLT_DATE" , 0  ) '신청일자
+		g_szAplyNum  			= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "APLT_SRNO" , 0  ) '신청일련번호
+		Form.SetSharedData("124a_Aplt_Srno" , g_szAplyNum)
+		
+		g_szPrgsCode  		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "INVE_APLT_STCD" , 0  ) '투자셩험신청상태코드
+		g_szAVRG_RMND_AMT  	= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "AVRG_RMND_AMT" , 0  ) '평균잔고금액
+		g_szOTCO_INPUT_CSNU  	= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "OTCO_INPUT_CSNU" , 0  ) '타사입력건수		
+		szPRSN_PFIN_YN 		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PRSN_PFIN_YN" , 0  ) 	'개인전문투자자여부
+		
+		szPFIN_RGNO 		= DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock2" , "PFIN_RGNO" , 0  ) 	'전문투자자등록번호
+		szDSGT_DATE 		= DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock2" , "DSGT_DATE" , 0  ) 	'지정일자
+		szVALD_STA_DATE_2 	= DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock2" , "VALD_STA_DATE" , 0  ) 
+		szVALD_FIN_DATE_2 	= DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock2" , "VALD_FIN_DATE" , 0  ) 
+		
+		szREG_DATE 		= DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock3" , "REG_DATE" , 0  ) 
+		szVALD_STA_DATE 	= DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock3" , "VALD_STA_DATE" , 0  ) 
+		szVALD_FIN_DATE 	= DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock3" , "VALD_FIN_DATE" , 0  ) 
+
+		
+		'등록현황
+		if szPRSN_PFIN_YN = "Y" then	'전문투자자등록번호
+			
+			Container0.lblNoData.visible = false
+			
+			Container0.Label0.visible = true
+			Container0.Label1.visible = true
+			Container0.Label2.visible = true
+			
+			Container0.lblRegNo.visible = true
+			Container0.lblRegData.visible = true
+			Container0.lblValdDate.visible = true
+			
+			Container0.lblRegNo.caption = szPFIN_RGNO	'전문투자자 지정번호
+			if szREG_DATE <> "" and szREG_DATE <> "NULL" then
+				Container0.lblRegData.caption = szREG_DATE	'지정일자 = 등록일자는 동일한거.. 
+			elseif szDSGT_DATE <> "" and szDSGT_DATE <> "NULL" then
+				Container0.lblRegData.caption = szDSGT_DATE
+			else
+				Container0.lblRegData.caption = "-"
+			end if
+	
+			if (szVALD_FIN_DATE <> "" and szVALD_FIN_DATE <> "NULL") then
+				szVALD_STA_DATE = Left(szVALD_STA_DATE,4) .. "." .. Mid(szVALD_STA_DATE,5,2) .. "." .. Right(szVALD_STA_DATE,2)
+				szVALD_FIN_DATE = Left(szVALD_FIN_DATE,4) .. "." .. Mid(szVALD_FIN_DATE,5,2) .. "." .. Right(szVALD_FIN_DATE,2)
+				Container0.lblValdDate.caption = szVALD_STA_DATE .. " ~ " .. szVALD_FIN_DATE 	'유효기간
+			elseif (szVALD_FIN_DATE_2 <> "" and szVALD_FIN_DATE_2 <> "NULL") then
+				szVALD_STA_DATE_2 = Left(szVALD_STA_DATE_2,4) .. "." .. Mid(szVALD_STA_DATE_2,5,2) .. "." .. Right(szVALD_STA_DATE_2,2)
+				szVALD_FIN_DATE_2 = Left(szVALD_FIN_DATE_2,4) .. "." .. Mid(szVALD_FIN_DATE_2,5,2) .. "." .. Right(szVALD_FIN_DATE_2,2)
+				Container0.lblValdDate.caption = szVALD_STA_DATE_2 .. " ~ " .. szVALD_FIN_DATE_2 	'유효기간			
+			else
+				Container0.lblValdDate.caption = "-"
+			end if
+			
+		else
+			
+			Container0.lblNoData.visible = true
+			
+			Container0.Label0.visible = false
+			Container0.Label1.visible = false
+			Container0.Label2.visible = false
+			
+			Container0.lblRegNo.visible = false
+			Container0.lblRegData.visible = false
+			Container0.lblValdDate.visible = false
+		
+		end if
+		
+		'당사 투자경험 요건 확인
+		if tonumber(g_szAVRG_RMND_AMT) <> NULL then
+			if tonumber(g_szAVRG_RMND_AMT) >= 300000000 then
+				Container0.lblOnCoSfcnYN.caption = "충족"
+				Container0.lblOnCoSfcnYN.fgcolor = "2"
+				Container0.lblOnCoAmt.caption = g_szAVRG_RMND_AMT
+				
+'				Container0.btnInvReg.btnimage = "btn_02.9"
+				Container0.btnInvReg.enable = false
+				
+				Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", true)
+			else
+				Container0.lblOnCoSfcnYN.caption = "미충족"
+				Container0.lblOnCoSfcnYN.fgcolor = "6"
+				Container0.lblOnCoAmt.caption = g_szAVRG_RMND_AMT
+				
+'				Container0.btnInvReg.btnimage = "btn_05.9"
+				Container0.btnInvReg.enable = true
+			end if
+			
+		else
+			Container0.lblOnCoSfcnYN.caption = "미충족"
+			Container0.lblOnCoAmt.caption = g_szAVRG_RMND_AMT
+						
+'			Container0.btnInvReg.btnimage = "btn_05.9"
+			Container0.btnInvReg.enable = true
+
+		end if
+		
+		'타사 투자경험 요건 확인
+		Container0.lblOtCoCnt.caption = g_szOTCO_INPUT_CSNU
+		if g_szOTCO_INPUT_CSNU = 0 then
+			Container0.lblOtCoCnt.fgcolor = "146"
+		else
+			Container0.lblOtCoCnt.fgcolor = "4"
+		end if		
+		
+		'전문투자자 서류등록내역
+		DATAMANAGER.RequestTranData( "obcsb_acif_127r" )		
+		
+	elseif szTranID == "obcsb_acif_127r" then
+		g_szRmndCertIsncYN = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "RMND_CERT_ISNC_YN" , 0  )	'투자경험 서류등록여부
+		
+		Dim nCnt
+		nCnt = CInt(DATAMANAGER.GetDataCount( 0, szTranID, "OutBlock2" ))
+
+		if g_szRmndCertIsncYN = "Y" and (nCnt > 0) then
+
+			Container0.lblOtCoCnt.caption = nCnt
+			if Cint(nCnt) = 0 then
+				Container0.lblOtCoCnt.fgcolor = "146"
+			else
+				Container0.lblOtCoCnt.fgcolor = "4"
+			end if
+			Container0.btnInvReg.caption = "등록 완료"	'등록완료여도 파일 업로드 가능하도록 수정. (박효정과장 요청)
+			
+			Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", true)
+		end if
+		
+	
+	elseif szTranID == "obcsb_acif_124a" then
+		g_szAplyNum = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "APLT_SRNO" , 0  )		'신청일련번호
+		Form.SetSharedData("124a_Aplt_Srno" , g_szAplyNum)
+		
+		DATAMANAGER.RequestTranData( "obcsb_acif_123r" ) '5s
+'		If g_szAplyNum <> "" and g_szAplyNum <> null Then '5s
+'			Form.OpenPopup("mbonl94004_p11", g_szAplyNum.."★" , "") '5s
+'		End If '5s
+		
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg) : 데이터 통신 오류
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+
+	if szTranID == "obcsb_acif_123r" then
+		Dim szErrorMsg
+		szErrorMsg = szErrMsg & "(" & szSubMsg & ")\n업무신청을 중단하시겠습니까?"
+		
+		Form.OpenPopup("mbonl94004_p3" , szErrorMsg , "")
+	
+	elseif szTranID == "obacp_opop_066r" then
+		Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+		
+	else
+		Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+	end if
+End Sub
+
+
+
+'============================================================================
+' Container0_acnt0_ChangeAccount() : 계좌변경 'v0001
+'============================================================================
+Sub Container0_acnt0_ChangeAccount()
+	
+	Container0.edtPswd.caption = ""
+	
+	Container0.lblNoData.visible = false
+	
+	Container0.Label0.visible = true
+	Container0.Label1.visible = true
+	Container0.Label2.visible = true
+	
+	Container0.lblRegNo.visible = true
+	Container0.lblRegData.visible = true
+	Container0.lblValdDate.visible = true
+
+	Container0.lblRegNo.caption = "-"
+	Container0.lblRegData.caption = "-"
+	Container0.lblValdDate.caption = "-"
+
+
+	Container0.lblOnCoSfcnYN.caption = ""
+	Container0.lblOnCoAmt.caption = ""
+	Container0.lblOtCoCnt.caption = 0
+	Container0.lblOtCoCnt.fgcolor = "146"
+	Container0.btnInvReg.enable = false
+End Sub
+
+'============================================================================
+Sub Container0_edtPswd_OnClick()
+	Dim sSendData
+	sSendData = Container0.acnt0.total&Container0.acnt0.sequence&"☆"&"0"
+	'비밀번호 팝업 띄움..	
+	Form.openPopupAnimation("pwdcheckpopup",sSendData,"","2")
+End Sub
+
+'============================================================================
+' Container0_edtPswd_OnEditComplete() : 비밀번호 입력 v0001 20220519 추가
+'============================================================================
+Sub Container0_edtPswd_OnEditComplete()
+	if Container0.edtPswd.caption ~= null then
+	'if Container0.edtPswd.caption ~= null and (Container0.edtPswd.pwdlen = 4 or Container0.edtPswd.pwdlen = "4")  then
+		DATAMANAGER.RequestTranData( "obacp_opop_066r" ) '비밀번호검증
+	else
+'		Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", false)
+	end if
+End Sub
+
+
+'============================================================================
+Sub Container0_imgTooltip_OnClick()
+	szToolTipText = "금융투자상품 잔고 충족 기준\n\n전월 기준으로 최근 5년 중 1년 이상의 기간 동안 월말 평균 잔고 기준 3억원 이상 보유\n(금융위원회가 정하여 고시하는 *금융투자상품에 한함)\n\n*지분증권(주식, 해외주식, 코넥스주식), 고난도 파생 결합증권, 장내ㆍ외 파생상품"
+	
+	Container0.imgTooltip.openToolTip(szToolTipText, 360, 180, 5)
+End Sub
+
+'============================================================================
+Sub Container0_imgTooltip2_OnClick()
+	szToolTipText = "당사 투자경험 미충족 시,\n타사 투자경험을 합산하여 요건을 충족할 수 있어요."
+	
+	Container0.imgTooltip2.openToolTip(szToolTipText, 340, 70, 2)
+End Sub
+
+'============================================================================
+Sub Container0_btnInvReg_OnClick()
+	'123r에 신청일련번호 없는경우 강제로 채번하기 위함.
+	if g_szAplyNum = "00000000000" then
+		DATAMANAGER.RequestTranData( "obcsb_acif_124a" )			
+		Exit Sub
+		
+	else
+		If g_szAplyNum <> "" and g_szAplyNum <> null Then
+			Form.OpenPopup("mbonl94004_p11", g_szAplyNum.."★" , "")
+		End If
+		
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_123r" trcode="obcsb_acif_123r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_124a" trcode="obcsb_acif_124a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_127r" trcode="obcsb_acif_127r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_opop_066r" trcode="obacp_opop_066r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_123r" title="장외파생 투자요건 상태 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="248" _ulen="188" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2112" _ulen="1560" >
+
+SFCN_YN^충족여부^1^0^0^0^0^0^0
+VALD_FIN_DATE^유효종료일자^8^0^0^0^0^0^0
+VALD_STA_DATE^유효시작일자^8^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+INVE_APLT_STCD^투자경험신청상태코드^1^0^0^0^0^0^0
+STA_YYMM^시작년월^6^0^0^0^0^0^0
+FIN_YYMM^종료년월^6^0^0^0^0^0^0
+AVRG_RMND_AMT^평균잔고금액^19^0^7^0^0^0^0
+VCALL_TRGT_YN^영상통화대상여부^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+PXPR_YN^대리인여부^1^0^0^0^0^0^0
+PXPR_NAME^대리인명^40^0^0^0^0^0^0
+PXPR_BRDT^대리인생년월일^8^0^0^0^0^0^0
+PXPR_CRAL_TELNO^대리인휴대전화번호^16^0^0^0^0^0^0
+CUST_RLTS_CODE^고객관계코드^2^0^0^0^0^0^0
+PXPR_CUST_RLTS_ETC_CNTT^대리인고객관계기타내용^100^0^0^0^0^0^0
+CRIN_AGRM_YN^신용정보동의여부^1^0^0^0^0^0^0
+PROF_DOCU_CNFR_YN^증빙서류확인여부^1^0^0^0^0^0^0
+OTCO_ADUP_CSNU^타사합산건수^11^0^7^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+CUST_TELNO^고객전화번호^16^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+FRST_APLT_DATE^최초신청일자^8^0^0^0^0^0^0
+FRST_CONT_CLS_CODE^최초접촉구분코드^1^0^0^0^0^0^0
+FRST_VCALL_YN^최초영상통화여부^1^0^0^0^0^0^0
+PRSN_PFIN_YN^개인전문투자자여부^1^0^0^0^0^0^0
+COUN_EMPNO^상담직원번호^9^0^0^0^0^0^0
+COUN_EMPL_NAME^상담직원명^40^0^0^0^0^0^0
+COUN_RSLT_CLCD^상담결과구분코드^2^0^0^0^0^0^0
+COUN_DTL_CNTT^상담상세내용^1000^0^0^0^0^0^0
+COUN_DATE^상담일자^8^0^0^0^0^0^0
+COUN_HOUR^상담시간^6^0^0^0^0^0^0
+SELF_DOCU_ATCH_YN^본인서류첨부여부^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+CNCL_CNTT^취소내용^100^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+REG_HOUR^등록시간^6^0^0^0^0^0^0
+OTCO_INPUT_CSNU^타사입력건수^11^0^7^0^0^0^0
+INVE_CNCL_CLCD^투자경험취소구분코드^1^0^0^0^0^0^0
+UI_PFIN_SLCT_TPCD^UI전문투자자선택유형코드^1^0^0^0^0^0^0
+ADDR^주소^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="242" _ulen="180" >
+
+DSGT_DATE^지정일자^8^0^0^0^0^0^0
+VALD_STA_DATE^유효시작일자^8^0^0^0^0^0^0
+VALD_FIN_DATE^유효종료일자^8^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="298" _ulen="224" >
+
+ONCO_OTCO_CLS_CODE^자사타사구분코드^1^0^0^0^0^0^0
+VALD_STA_DATE^유효시작일자^8^0^0^0^0^0^0
+VALD_FIN_DATE^유효종료일자^8^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+MBCR_KIND_CODE^회원사종류코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="356" _ulen="262" >
+
+VCALL_TRGT_YN^영상통화대상여부^1^0^0^0^0^0^0
+HOUR_CHCK_YN^시간체크여부^1^0^0^0^0^0^0
+APLT_ABLE_STA_DATE^신청가능시작일자^8^0^0^0^0^0^0
+PRSN_PFIN_YN^개인전문투자자여부^1^0^0^0^0^0^0
+APLT_YN^신청여부^1^0^0^0^0^0^0
+APLT_ABLE_YN^신청가능여부^1^0^0^0^0^0^0
+APLT_PRHB_REAS^신청불가사유^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" occurs="2" inout="out" _len="351" _ulen="247" >
+
+PFIN_DSGT_DATE^전문투자자지정일자^8^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+OTCO_ISTU_CODE^타사기관코드^5^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+PFIN_VLDT_STA_DATE^전문투자자효력시작일자^8^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_124a" title="장외파생투자요건 관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="1327" _ulen="971" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+INVE_APLT_STCD^투자경험신청상태코드^1^0^0^0^0^0^0
+VCALL_TRGT_YN^영상통화대상여부^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+PXPR_YN^대리인여부^1^0^0^0^0^0^0
+PXPR_NAME^대리인명^40^0^0^0^0^0^0
+PXPR_CPNO^대리인휴대폰번호^11^0^0^0^0^0^0
+PXPR_BRDT^대리인생년월일^8^0^0^0^0^0^0
+PXPR_CUST_RLTS_CODE^대리인고객관계코드^2^0^0^0^0^0^0
+PXPR_CUST_RLTS_ETC_CNTT^대리인고객관계기타내용^100^0^0^0^0^0^0
+CRIN_AGRM_YN^신용정보동의여부^1^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+CNCL_CNTT^취소내용^100^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+PROF_DOCU_CNFR_YN^증빙서류확인여부^1^0^0^0^0^0^0
+RECDNG_TELNO^녹취전화번호^16^0^0^0^0^0^0
+RECDNG_DATE^녹취일자^8^0^0^0^0^0^0
+RECDNG_HOUR^녹취시간^6^0^0^0^0^0^0
+RECDNG_RSLT_CLCD^녹취결과구분코드^1^0^0^0^0^0^0
+RECDNG_OPNN^녹취의견^100^0^0^0^0^0^0
+RECDNG_EMPNO^녹취직원번호^9^0^0^0^0^0^0
+DSMG_TELNO^발신전화번호^20^0^0^0^0^0^0
+INVE_CNCL_CLCD^투자경험취소구분코드^1^0^0^0^0^0^0
+UI_PFIN_SLCT_TPCD^UI전문투자자선택유형코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="196" _ulen="148" >
+
+REG_PROS_YMDH^등록처리일시^14^0^0^0^0^0^0
+VLDT_STA_DATE^효력시작일자^8^0^0^0^0^0^0
+VLDT_FIN_DATE^효력종료일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_127r" title="타사투자경험증빙서류 등록내역?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="140" _ulen="104" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+INVT_EXPC_CLCD^투자경험구분코드^1^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="67" _ulen="49" >
+
+RMND_CERT_ISNC_YN^잔고증명서발급여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="232" _ulen="176" >
+
+DETL_SRNO^세부일련번호^11^0^7^0^0^0^0
+CERT_KIND_CODE^증명서종류코드^2^0^0^0^0^0^0
+ISTU_CLCD^기관구분코드^1^0^0^0^0^0^0
+OTCO_ISTU_CODE^타사기관코드^5^0^0^0^0^0^0
+ISTU_NAME^기관명^50^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_opop_066r" title="계좌Control 비밀번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="196" _ulen="150" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_EMPNO^관리 직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

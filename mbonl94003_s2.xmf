@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94003" scrname="전환(분류)신청" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,486,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contState" bgcolor="031:232245253" scroll_pos="0,0" ly_vert="10,51,355,90,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="lblNoData" visible="0" fontsize="4" fontstyle="01" caption="고객님은 현재 일반투자자 입니다." halign="1" multiline="1" ly_vert="10,0,335,90,0" />
+				<TABLE name="tblState" insidelinecolor="102:255255255" colcount="3" rowcount="3" outline="0000" transmode="1" designorder="1" ly_vert="10,20,335,60,1" >
+					<COL_INFO ly_vert_width="15,135,185" />
+					<ROW_INFO ly_vert_height="20,20,20" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" valign="0" halign="0" line="0,0" caption="-" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,0,1,0" valign="0" halign="0" line="0,0" caption="전문투자자 구분" fontsize="-2" impidxs="" />
+						<CELL cell_ly="2,0,2,0" valign="0" halign="2" line="0,0" fontsize="-2" impidxs="" />
+						<CELL cell_ly="0,1,0,1" valign="0" halign="0" line="0,0" caption="-" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,1,1,1" valign="0" halign="0" line="0,0" caption="전환일자" fontsize="-2" impidxs="" />
+						<CELL cell_ly="2,1,2,1" valign="0" halign="2" line="0,0" fontsize="-2" mask="1,0,,,1,####-##-##,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,2,0,2" valign="0" halign="0" line="0,0" caption="-" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,2,1,2" valign="0" halign="0" line="0,0" caption="유효기간" fontsize="-2" impidxs="" />
+						<CELL cell_ly="2,2,2,2" valign="0" halign="2" line="0,0" fontsize="-2" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="lblSubTitle" fontstyle="01" caption="당사 전문투자자 분류 현황" valign="0" ly_vert="6,20,355,26,1" />
+		<BUTTON name="btnSubmit" enable="0" caption="전환 신청" fontsize="4" btnimage="btn_20.9" ly_vert="0,426,375,60,1" />
+		<LABEL name="lblChgReasonText" visible="0" fontstyle="01" caption="일반투자자로의 전환 사유" valign="0" ly_vert="10,158,355,26,0" />
+		<EDIT name="edtChgReason" visible="0" fontsize="-2" imetype="0" maxlength="1000" ly_vert="10,184,355,52,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11466" _ulen="10708" >
+''--===========================================================================
+'' 01. 화 면 명 : 
+'' 02. 화면설명 : 
+'' 03. 작    성 : 
+'' 04. 수    정 : 
+''
+''--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_tInfo
+g_tInfo = {} ' 신청에 필요한 고객 정보들을 가지고 있는 테이블
+
+''****************************************************************************
+''            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+''****************************************************************************
+'============================================================================
+' f_GetTData(sKey) : 해당 key에 해당하는 value 반환, 예외처리 통과 못할 시 빈값 반환
+'============================================================================
+Function f_GetTData(sKey)
+	if g_tInfo == NULL then
+		return ""
+	else
+		if g_tInfo[sKey] == NULL or g_tInfo[sKey] == "" then
+			return ""
+		else
+			return g_tInfo[sKey]
+		end if
+	end if
+End Function
+
+'''****************************************************************************
+'''               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'''****************************************************************************
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	contState.tblState.visible = false
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "requestTR" then
+		Dim szAccount
+		
+		szAccount = Form.GetCtlProp( "#Account0", "caption" )
+		
+		for i=0 to 2
+			contState.tblState.SetCellString( i, 2, "" )
+		next
+		
+		contState.tblState.visible = false
+		contState.lblNoData.visible = false
+		lblChgReasonText.visible = false
+		edtChgReason.visible = false
+		
+		btnSubmit.enable = false
+		
+		if szAccount <> "" then
+			DATAMANAGER.RequestTranData( "obcsb_acif_721r" )
+		end if
+	end if
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn(sKeyName, sRet)
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "close_mbonl94002_p2" then
+		Dim szAccount
+		
+		szAccount = Form.GetCtlProp( "#Account0", "caption" )
+		
+		if szAccount <> "" then
+			DATAMANAGER.RequestTranData( "obcsb_acif_721r" )
+		end if
+
+	' 확인 후 공인인증 처리 완료 되면 전환 신청 TR 호출
+	elseif sKeyName == "mhetc90060_p5" then 
+		if sRet ~= "cancel" then
+			DATAMANAGER.RequestTranData( "obcsb_acif_720a" )
+		end if
+		
+     elseif sKeyName == "mhetc90060_px" Then 'v001
+         if sRet == "ok" Then
+	         DATAMANAGER.RequestTranData( "obcsb_acif_720a" )
+	     end if
+	end if
+End Sub
+
+'============================================================================
+' btnSubmit_OnClick() : 개인 전문투자자 전환(분류) 위험설명 팝업 오픈
+'============================================================================
+Sub btnSubmit_OnClick()
+	Dim szPassword
+		
+	szPassword = Form.GetCtlProp( "#edtPassword", "caption" )
+	
+	if szPassword <> "" then			
+		if edtChgReason.caption == "" then
+			Form.ShowAlert("알림", "일반투자자 전환사유를 입력하세요.")
+		else
+			Dim szCertUseType 
+			szCertUseType = Form.GetSharedData("&CERT_USE_TYPE", false )  'v001 로그인타입
+	
+			if szCertUseType == "1" or szCertUseType == 1 then '간편인증 v001
+			    Form.OpenFramePopup( "mhetc90060_px" , "" , mhetc90060_px)		'간편인증
+			else
+			    Form.OpenFramePopup( "mhetc90060_p5" , "" , sPosInfo)		'공인인증서_비밀번호입력 풀팝업
+			end if
+		end if
+	else
+		Form.ShowAlert("알림", "비밀번호를 입력해주세요")
+	end if
+End Sub
+
+'''****************************************************************************
+'''               		D A T A				M A N A G E R               
+'''****************************************************************************
+
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 인풋 데이터 세팅
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim szJumin, szUserName, szCustNum
+	szJumin = Form.GetSharedData("&JUMIN_NUM", false )
+	szUserName = Form.GetSharedData("&USER_NAME", false )
+	szCustNum = Form.GetSharedData("&CUST_NUM", false )
+	
+	if szTranID == "obcsb_acif_721r" then		
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "RCNO_PIP" , 0, szJumin )
+	
+	elseif szTranID == "obcsb_acif_720a" then		
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PROS_CLS_CODE" , 0, "3" )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "RCNO_TYPE_CODE" , 0, "01" )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "RCNO_PIP" , 0, szJumin ) '실명확인번호
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CUST_FULL_NAME" , 0, szUserName ) '고객풀명
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PFIN_CLS_CODE" , 0, f_GetTData("clsCode") ) '전문투자자구분코드
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PFIN_RGNO" , 0, f_GetTData("registerNum") ) '전문투자자등록번호
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PFIN_DSGT_DATE" , 0, null ) '전문투자자지정일자
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PFIN_VLDT_STA_DATE" , 0, null ) '전문투자자효력시작일자
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PFIN_VLDT_FIN_DATE" , 0, null ) '전문투자자효력종료일자
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PFIN_DSGT_APLT_DATE" , 0, null ) '전문투자자지정신청일자
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "GNRL_INVR_CNVR_REAS_CNTT", 0, Trim(edtChgReason.caption) ) '일반투자자전환사유내용
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "TORF_CNFR_YN", 0, null ) '진위확인여부
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "TORF_CNFR_EMPNO", 0, null ) '진위확인직원번호
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "ISTU_CLCD", 0, null ) '기관구분코드
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "OTCO_ISTU_CODE", 0, null ) '타사기관코드
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "TORF_CNFR_YMDH", 0, null ) '진위확인일시
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "SPCL_FNCM_TYPE_CODE" , 0, f_GetTData("fncmTypeCode") ) '전문금융소비자유형
+	
+	elseif szTranID == "obcsb_acif_097r" then
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CSNO" , 0, szCustNum )
+	end if
+End Sub
+'
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 수신 완료
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)	
+	Dim szMsgCode, szMsg, szSubMsg
+		
+	szMsgCode = DATAMANAGER.GetDataMsgCode(szTranID)
+	szMsg = DATAMANAGER.GetDataMsgText(szTranID)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if szTranID == "obcsb_acif_721r" then		
+		Dim szStaDate, szFinDate, szClsCode
+
+		szStaDate = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_VLDT_STA_DATE" , 0  ) '시작일자
+		szFinDate = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_VLDT_FIN_DATE" , 0  ) '종료일자	
+		
+		Dim szClsCode
+		
+		szClsCode = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_CLS_CODE" , 0 )
+
+		if g_tInfo <> NULL then
+			g_tInfo["clsCode"]		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_CLS_CODE" , 0 )
+			g_tInfo["registerNum"]		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_RGNO" , 0  )
+			g_tInfo["applyDate"] 		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_DSGT_APLT_DATE" , 0  ) '신청일자
+			g_tInfo["confirmDate"]		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_DSGT_DATE" , 0  ) '지정일자
+			g_tInfo["startDate"] 		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_VLDT_STA_DATE" , 0  ) '시작일자
+			g_tInfo["finalDate"] 		= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_VLDT_FIN_DATE" , 0  ) '종료일자
+			g_tInfo["fncmTypeCode"] 	= DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "SPCL_FNCM_TYPE_CODE" , 0  ) '전문금융소비자유형코드
+		end if
+
+		if 2 <= tonumber(szClsCode) and tonumber(szClsCode) <= 6 then
+			contState.tblState.visible = true
+			
+'			Dim szPassword
+'		
+'			szPassword = Form.GetCtlProp( "#edtPassword", "caption" )
+'			
+'			if szPassword <> "" then				
+				Dim szChangeDate
+				Dim szFormatStart, szFormatExp '날짜 형식에 맞게 포맷팅
+			
+				szChangeDate = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "PFIN_DSGT_DATE" , 0  ) '전문금융소비자유형코드
+				szFormatStart = Mid(szStaDate, 1, 4) & "-" & Mid(szStaDate, 5, 2) & "-" & Mid(szStaDate, 7, 2)
+				szFormatExp = Mid(szFinDate, 1, 4) & "-" & Mid(szFinDate, 5, 2) & "-" & Mid(szFinDate, 7, 2)
+				
+				szClsCode = Form.GetMetaData("전문투자자구분코드", szClsCode )
+				
+				contState.tblState.SetCellString( 0, 2, szClsCode )
+				'전환일자 obcsb_acif_097r 에서 조회하도록 수정
+'				contState.tblState.SetCellString( 1, 2, szChangeDate )
+				contState.tblState.SetCellString( 2, 2, szFormatStart & "~" & szFormatExp )
+				
+				lblChgReasonText.visible = true
+				edtChgReason.visible = true
+				btnSubmit.enable = true
+'			end if
+		else
+			contState.tblState.visible = false
+			lblChgReasonText.visible = false
+			edtChgReason.visible = false
+			contState.lblNoData.visible = true
+			
+			btnSubmit.enable = false
+		end if
+		
+		'전환일자 조회를 위해 호출
+		DATAMANAGER.RequestTranData( "obcsb_acif_097r" )
+	
+	elseif szTranID == "obcsb_acif_720a" then
+		Dim szSucsYN
+		szSucsYN = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "SUCS_YN" , 0  )
+		
+		if szSucsYN == "Y" then
+			Form.OpenPopup("mbonl94002_p2" , "switch_normal" , "")
+		end if
+	
+	elseif szTranID == "obcsb_acif_097r" then
+		Dim szChangeDate 
+		szChangeDate = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "CNVR_DATE" , 0  ) '전환일자
+		contState.tblState.SetCellString( 1, 2, szChangeDate )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+
+	Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+	
+	if szTranID == "obcsb_acif_721r" then
+		contState.tblState.visible = false
+		lblChgReasonText.visible = false
+		edtChgReason.visible = false
+		contState.lblNoData.visible = true
+		
+		btnSubmit.enable = false
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_721r" trcode="obcsb_acif_721r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcsb_acif_720a" trcode="obcsb_acif_720a" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcsb_acif_097r" trcode="obcsb_acif_097r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_721r" title="전문투자자정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="160" _ulen="120" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1334" _ulen="948" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_FULL_NAME^고객풀명^100^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+PFIN_CLS_CODE^전문투자자구분코드^1^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+PFIN_DSGT_DATE^전문투자자지정일자^8^0^0^0^0^0^0
+VLDT_STA_DATE^효력시작일자^8^0^0^0^0^0^0
+VLDT_FIN_DATE^효력종료일자^8^0^0^0^0^0^0
+PFIN_VLDT_STA_DATE^전문투자자효력시작일자^8^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+PFIN_DSGT_APLT_DATE^전문투자자지정신청일자^8^0^0^0^0^0^0
+PFIN_FA_AMT^전문투자자금융자산금액^19^0^7^0^0^0^0
+GNRL_INVR_CNVR_REAS_CNTT^일반투자자전환사유내용^100^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+OTCO_ISTU_CODE^타사기관코드^5^0^0^0^0^0^0
+ISTU_CLCD^기관구분코드^1^0^0^0^0^0^0
+TORF_CNFR_YN^진위확인여부^1^0^0^0^0^0^0
+TORF_CNFR_EMPNO^진위확인직원번호^9^0^0^0^0^0^0
+TORF_CNFR_DATE^진위확인일자^8^0^0^0^0^0^0
+TORF_CNFR_HOUR^진위확인시간^6^0^0^0^0^0^0
+SPCL_FNCM_TYPE_CODE^전문금융소비자유형코드^2^0^0^0^0^0^0
+FNCM_GRP_CODE^금융소비자그룹코드^1^0^0^0^0^0^0
+FNCM_GRP_DETL_CODE^금융소비자그룹세부코드^2^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_720a" title="전문투자자등록및변경" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="1292" _ulen="914" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_FULL_NAME^고객풀명^100^0^0^0^0^0^0
+PFIN_CLS_CODE^전문투자자구분코드^1^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+PFIN_DSGT_DATE^전문투자자지정일자^8^0^0^0^0^0^0
+PFIN_VLDT_STA_DATE^전문투자자효력시작일자^8^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+PFIN_DSGT_APLT_DATE^전문투자자지정신청일자^8^0^0^0^0^0^0
+PFIN_FA_AMT^전문투자자금융자산금액^19^0^7^0^0^0^0
+GNRL_INVR_CNVR_REAS_CNTT^일반투자자전환사유내용^100^0^0^0^0^0^0
+TORF_CNFR_YN^진위확인여부^1^0^0^0^0^0^0
+TORF_CNFR_EMPNO^진위확인직원번호^9^0^0^0^0^0^0
+ISTU_CLCD^기관구분코드^1^0^0^0^0^0^0
+OTCO_ISTU_CODE^타사기관코드^5^0^0^0^0^0^0
+TORF_CNFR_YMDH^진위확인일시^19^0^0^0^0^0^0
+SPCL_FNCM_TYPE_CODE^전문금융소비자유형코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+FNCM_GRP_CODE^금융소비자그룹코드^1^0^0^0^0^0^0
+FNCM_GRP_DETL_CODE^금융소비자그룹세부코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_097r" title="전문투자자 상태 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="40" _ulen="32" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="153" _ulen="121" >
+
+REG_YN^등록여부^1^0^0^0^0^0^0
+CNVR_DATE^전환일자^8^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="415" _ulen="303" >
+
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+PFIN_QLFC_CLCD^전문투자자자격구분코드^1^0^0^0^0^0^0
+EXAM_PRGS_STAT_CODE^심사진행상태코드^1^0^0^0^0^0^0
+EXAM_RSLT_CODE^심사결과코드^1^0^0^0^0^0^0
+RSLT_REG_DATE^결과등록일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="30" inout="out" _len="369" _ulen="271" >
+
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+PFIN_QLFC_CLCD^전문투자자자격구분코드^1^0^0^0^0^0^0
+EXAM_PRGS_STAT_CODE^심사진행상태코드^1^0^0^0^0^0^0
+EXAM_RSLT_CODE^심사결과코드^1^0^0^0^0^0^0
+RSLT_REG_DATE^결과등록일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="59" _ulen="47" >
+
+NXET_IQRY_KEY_VAL^다음조회키값^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

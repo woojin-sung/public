@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90080" scrname="모바일 OTP 다운로드" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label3" fontsize="5" fontstyle="01" caption="모바일 OTP 다운로드" ly_vert="10,11,333,55,1" />
+		<EDIT name="EdtPinPwd" enable="0" password="2" imetype="0" maxlength="6" hintcaption="숫자6자리 입력" imagefilepth="input_03.9" ly_vert="17,139,340,60,1" />
+		<LABEL name="Label0" caption="모바일 OTP 비밀번호" ly_vert="23,111,228,23,1" />
+		<BUTTON name="BtnNext" enable="0" caption="다   음" fgcolor="010:213049051" ly_vert="-3,559,382,48,1" />
+		<ACCOUNT name="CmbAcnt" enable="0" visible="0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135" totalacc="1" ly_vert="97,257,150,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4530" _ulen="4432" >
+'--===========================================================================
+'--===========================================================================
+
+Dim g_MsboVrsn
+Dim g_MOTPSrno
+
+'============================================================================
+Sub Form_OnFormInit()
+    EdtPinPwd.SetApplyLabel("숫자6자리 입력", 0, 76, "left", true)
+    Form.requestMOTP("MOTP_GET_VERSION" , "" , "90021")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+    If szTranID = "obcsb_oimf_170a" Then
+        Form.OpenFramePopup("mbotp86124" , "" , "")
+    End If
+    
+    If szTranID = "obcsb_oimf_172r" Then
+    
+        If DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "MOTP_SRNO" , 0) == "" Then
+            Form.MsgBox("OTP 정보 조회 오류" , "OTP 정보 없음" , "", 6)		    
+        Else
+            g_MOTPSrno = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "MOTP_SRNO" , 0)
+            EdtPinPwd.enable = True
+            BtnNext.enable = True
+        End If
+	
+    End If
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	If sKeyName == "CLOSE_YN" Then
+	
+	    If sRet == "Y" Then
+	        Form.CloseForm()
+	    End If
+	
+	End If
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEventMOTP(sEventName, sParam) 
+
+	Dim tmpList
+	If sEventName == "MOTP_GET_VERSION_RET" Then ' M SafeBox 버전 정보 가져오기
+		tmpList = Split(sParam, "★")
+		If tmpList[0] == "00000" Then
+			g_MsboVrsn = tmpList[2]
+			
+              DATAMANAGER.SetDataValue(0 , "obcsb_oimf_172r" , "InBlock1" , "ACNO"     , 0 , CmbAcnt.caption)
+              DATAMANAGER.SetDataValue(0 , "obcsb_oimf_172r" , "InBlock1" , "RCNO_PIP" , 0 , Form.GetSharedData("&JUMIN_NUM", false ))
+              DATAMANAGER.RequestTranData("obcsb_oimf_172r")			
+	      
+		Else
+			Form.ShowAlert("알림", "MSB 버전 추출 오류\n"..tmpList[1])
+		End If
+		
+	End If
+
+End Sub
+
+'============================================================================
+Sub BtnNext_OnClick()
+
+
+    If EdtPinPwd.caption == "" Then
+        Form.MsgBox("알림" , "모바일 OTP 비밀번호를 입력해주세요" , "", 6)		    
+    End If
+
+    If g_MOTPSrno == "" Then
+        g_MOTPSrno = "0"
+    End If
+
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "PROS_CLS_CODE"       , 0 , "I"                                     )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "CSNO"                , 0 , ""                                      )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "ACNO"                , 0 , CmbAcnt.caption                         )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "ACNT_PWD"            , 0 , ""                                      )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "MSBO_VRSN"           , 0 , g_MsboVrsn                              )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "CUST_TERM_ID"        , 0 , Form.GetDeviceID()                      )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "RCNO_PIP"            , 0 , Form.GetSharedData("&JUMIN_NUM", false ))
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "MOTP_ATHN_DATA_CNTT" , 0 , EdtPinPwd.caption2                      )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "OS_CLCD"             , 0 , Form.GetSharedData("&OS_TYPE", False)   )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "OS_VRSN"             , 0 , Form.GetSharedData("&OS_VERSION", False))
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "CUST_TERM_NAME"      , 0 , Form.GetDeviceModel()                   )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "MOTP_DNLD_YN"        , 0 , "Y"                                     )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "MOTP_SRNO"           , 0 , CDBL(g_MOTPSrno)                        )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "APLT_DATE"           , 0 , ""                                      )
+    DATAMANAGER.SetDataValue(0 , "obcsb_oimf_170a" , "InBlock1" , "APLT_SRNO"           , 0 , 0                                       )
+    DATAMANAGER.RequestTranData("obcsb_oimf_170a")
+	
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_170a" trcode="obcsb_oimf_170a" compress="1" encryption="1" />
+			<TRAN tranid="obcsb_oimf_172r" trcode="obcsb_oimf_172r" compress="1" encryption="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_170a" title="모바일OTP 등록/폐기" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="707" _ulen="533" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+MOTP_ATHN_DATA_CNTT^모바일OTP인증데이터내용^256^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_DNLD_YN^모바일OTP다운로드여부^1^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^13^0^7^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="309" _ulen="239" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_NO_1_KEY^모바일OTP번호1키^64^0^0^0^0^0^0
+MOTP_NO_2_KEY^모바일OTP번호2키^64^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+RSNC_YN^재발급여부^1^0^0^0^0^0^0
+MSBO_MOTP_SRNO^MOBILESAFEBOX모바일OTP일련번호^15^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_172r" title="OTP조회(실물&모바일)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="161" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1291" _ulen="963" >
+
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MOTP_STAT_CODE^모바일OTP상태코드^2^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_ISNC_YMDH^모바일OTP발급일시^14^0^0^0^0^0^0
+MOTP_LOCK_YMDH^모바일OTPLOCK일시^14^0^0^0^0^0^0
+MOTP_MISS_YMDH^모바일OTP분실일시^14^0^0^0^0^0^0
+MOTP_DSCD_YMDH^모바일OTP폐기일시^14^0^0^0^0^0^0
+VALD_PRD_STA_DATE^유효기간시작일자^8^0^0^0^0^0^0
+VALD_PRD_EXPI_DATE^유효기간만료일자^8^0^0^0^0^0^0
+MOTP_MTRT_GUDE_YN^모바일OTP만기안내여부^1^0^0^0^0^0^0
+LAST_VRFC_YMDH^최종검증일시^14^0^0^0^0^0^0
+MOTP_MSTK_CSNU^모바일OTP오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_MSTK_CSNU^모바일OTP인증오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_LOCK_YN^모바일OTP인증LOCK여부^1^0^0^0^0^0^0
+MOTP_ATHN_LOCK_YMDH^모바일OTP인증LOCK일시^14^0^0^0^0^0^0
+MOTP_ATHN_LAST_MOD_YMDH^모바일OTP인증최종수정일시^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="315" _ulen="247" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_USE_RANG_CODE^OTP사용범위코드^1^0^0^0^0^0^0
+OTP_STAT_CODE^OTP상태코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94004" scrname="장외파생거래요건등록_신청완료팝업" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="icon_notice_3" ly_vert="160,80,55,55,1" />
+		<LABEL name="lblTitle" fontsize="8" fontstyle="01" halign="1" valign="0" multiline="1" ly_vert="0,160,375,80,1" />
+		<BUTTON name="BtnOk" caption="확인" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="187,587,188,60,1" />
+		<TABLE name="tblOthers" outlinecolor="144:034034034" insidelinecolor="102:255255255" colcount="2" rowcount="4" designorder="1" ly_vert="10,459,355,110,1" >
+			<COL_INFO ly_vert_width="25,330" />
+			<ROW_INFO ly_vert_height="47,21,21,21" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="021:226226226" valign="0" halign="0" line="0,0" caption="※" paddinginfo="0,26,0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" bgcolor="021:226226226" valign="0" halign="0" line="0,0" caption="제출하신 지정확인서를 관리점 직원이 확인 후
+" paddinginfo="0,26,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" bgcolor="021:226226226" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" bgcolor="021:226226226" valign="0" halign="0" line="0,0" caption="전환처리가 완료됩니다." impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="021:226226226" valign="0" halign="0" line="0,0" caption="※" impidxs="" />
+				<CELL cell_ly="1,2,1,2" bgcolor="021:226226226" valign="0" halign="0" line="0,0" caption="전환 처리 완료 시, 문자로 안내 드립니다." impidxs="" />
+				<CELL cell_ly="0,3,0,3" bgcolor="021:226226226" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,3,1,3" bgcolor="021:226226226" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="imgBox" autosize="1" imgpath="bg_infobox.9" ly_vert="20,270,335,95,1" />
+		<LABEL name="Label0" fgcolor="146:124124124" caption="심사 진행을 위해" halign="1" multiline="1" ly_vert="20,280,335,25,1" />
+		<LABEL name="Label1" fgcolor="146:124124124" halign="1" ly_vert="20,305,335,25,1" />
+		<LABEL name="Label2" fgcolor="146:124124124" caption="진행될 예정이예요" halign="1" ly_vert="20,330,335,25,1" />
+		<BUTTON name="BtnList" caption="신청내역" fgcolor="004:000000000" fontsize="4" btnimage="btn_pop1.9.png" ly_vert="0,587,187,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3381" _ulen="3119" >
+'--===========================================================================
+' 01. 화 면 명 : 
+' 02. 화면설명 : 
+' 03. 작    성 : 
+' 04. 수    정 : 
+'
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+''****************************************************************************
+''               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+''****************************************************************************
+
+Dim g_szVCALL_TRGT_YN
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+
+	tblOthers.visible = false
+'szOpenData = "REG_FAIL"
+	if szOpenData <> "" or szOpenData <> NULL then
+		if szOpenData == "REG_SUCCESS" then	'등록완료
+			Image0.imgpath = "check_red"
+			
+			lblTitle.caption = "개인전문투자자\n장외파생상품 거래요건 등록\n신청이 완료되었습니다."
+			
+			g_szVCALL_TRGT_YN = Form.GetSharedData( "mbonl94004_VCALL_TRGT_YN", false)	'영상통화여부
+			if g_szVCALL_TRGT_YN = "Y" then
+				Label1.caption = "당사 직원의 영상 통화 연결이"
+				Label1.changeTextAttr(7, 5, 10, 0, false)
+			else
+				Label1.caption = "당사 직원의 유선 통화 연결이"
+				Label1.changeTextAttr(7, 5, 10, 0, false)
+			end if
+			
+		elseif szOpenData == "REG_FAIL" then	'신청불가
+			Image0.imgpath = "icon_notice_3"
+			
+			lblTitle.caption = "개인전문투자자\n장외파생상품 거래요건 등록\n신청이 불가합니다."
+			
+			Label2.visible = false
+			Label0.top = 290
+			Label1.top = 315
+			Label0.caption = "신청 가능 시간이 아닙니다."
+			Label0.changeTextAttr(0, 15, 10, 0, false)
+			Label1.caption = "(영업일 08:00~16:00까지 신청 가능)"
+			Label1.changeTextAttr(0, 25, 10, 0, false)
+		
+		end if
+	end if
+	
+End Sub
+
+'============================================================================
+' BtnOk_OnClick() : 화면 닫기
+'============================================================================
+Sub BtnOk_OnClick()
+	Form.SendReturnToParent("close_mbonl94004_p2" , "")
+	Form.CloseForm()
+	Form.OpenMainMenuWithIndex("3", "3", "0")
+End Sub
+
+'============================================================================
+Sub btnList_OnClick()
+	Form.SendReturnToParent("close_mbonl94004_p2" , "")
+	Form.CloseForm()
+	Form.OpenScreen("94005" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'OS타입
+	g_OsType = Form.GetSharedData("&OS_TYPE", false)
+	if g_OsType == "1" then 'AOS
+		Form.setCaptureEnblYN("Y")
+	end if
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

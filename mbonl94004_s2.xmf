@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94004" scrname="장외파생거래요건등록" version="2" writer="정민영" />
+	<FORM_INFO name="lblTitle" ly_vert="0,0,375,527,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="개인정보 수집·이용 동의" valign="0" ly_vert="10,7,355,40,1" />
+		<BUTTON name="btnCtcnAll0" enable="0" ly_vert="20,50,335,54,1" />
+		<IMAGE name="imgProcess" autosize="1" imgpath="bcs_step02" ly_vert="276,5,79,21,1" />
+		<CHKBUTTON name="chkSummary" visible="0" chkcaption="요약동의서 보기" unchkcaption="요약동의서 보기" ly_vert="29,415,145,32,0" />
+		<CHKBUTTON name="chkDetail" visible="0" chkcaption="상세동의서 보기" unchkcaption="상세동의서 보기" ly_vert="194,415,145,32,0" />
+		<BUTTON name="btnCtcnAll" enable="0" ly_vert="20,120,335,190,1" />
+		<LABEL name="lblIdentiText" caption="고유식별정보" paddinginfo="1,0,0,0" ly_vert="45,222,120,32,1" />
+		<LABEL name="lblInfoText" caption="개인(신용)정보" paddinginfo="1,0,0,0" ly_vert="45,258,120,32,1" />
+		<RADIOGROUP name="rdoIdentiAgree" visible="0" ly_vert="390,242,160,20,0" >
+			<RADIO_INFO>
+				<RADIO no="0" text="동의" position="0,0,75,20" />
+				<RADIO no="1" text="미동의" position="75,0,85,20" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<RADIOGROUP name="rdoInfoAgree" visible="0" ly_vert="393,253,160,20,0" >
+			<RADIO_INFO>
+				<RADIO no="0" text="동의" position="0,0,52,20" />
+				<RADIO no="1" text="미동의" position="75,0,68,20" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<CHKBUTTON name="chkAllAgree" visible="0" fontsize="4" fontstyle="01" chkcaption="   " unchkcaption="   " ly_vert="55,116,54,28,0" />
+		<BUTTON name="btnSummary" visible="0" btnimage="alpha" ly_vert="36,451,145,32,0" />
+		<BUTTON name="btnDetail" visible="0" btnimage="alpha" ly_vert="201,451,145,32,0" />
+		<LABEL name="lblCtcnShow" paddinginfo="30,0,0,0" click="1" ly_vert="34,50,278,54,1" />
+		<LABEL name="Label0" bgcolor="075:244244244" transmode="0" ly_vert="30,174,315,40,1" />
+		<LABEL name="lblRedCheck" fontstyle="01" caption="수집·이용" bgcolor="035:237246255" valign="0" paddinginfo="1,0,0,0" ly_vert="45,186,82,40,1" />
+		<LABEL name="lblBlackCheck" fontstyle="01" caption="에 관한 사항" valign="0" ly_vert="119,186,185,20,1" />
+		<IMAGE name="imgCheck2" imgpath="checkmenu_o" ly_vert="35,136,20,20,1" />
+		<LABEL name="lblCheckMsg" caption="모두 확인하고 동의합니다." click="1" ly_vert="56,120,287,54,1" />
+		<IMAGE name="imgidentiY" autosize="1" imgpath="check_off.png" ly_vert="175,227,20,20,1" />
+		<LABEL name="lblidentiY" caption="동의" click="1" ly_vert="198,222,65,32,1" />
+		<IMAGE name="imgidentiN" autosize="1" imgpath="check_off.png" ly_vert="255,227,20,20,1" />
+		<LABEL name="lblidentiN" caption="미동의" click="1" ly_vert="278,222,65,32,1" />
+		<IMAGE name="imgInfoY" autosize="1" imgpath="check_off.png" ly_vert="175,263,20,20,1" />
+		<LABEL name="lblInfoY" caption="동의" click="1" ly_vert="198,258,65,32,1" />
+		<IMAGE name="imgInfoN" autosize="1" imgpath="check_off.png" ly_vert="255,263,20,20,1" />
+		<LABEL name="lblInfoN" caption="미동의" click="1" ly_vert="278,258,65,32,1" />
+		<IMAGE name="imgCheck1" imgpath="checkmenu_o" ly_vert="35,67,20,20,1" />
+		<CHKBUTTON name="chkAgree" visible="0" fontsize="4" fontstyle="01" chkcaption="   " unchkcaption="  " ly_vert="62,37,25,28,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7977" _ulen="7709" >
+'--===========================================================================
+' 01. 화 면 명 : 
+' 02. 화면설명 : 
+' 03. 작    성 : 
+' 04. 수    정 : 필수 동의서 열람 + 동의모두체크 : 다음 버튼 활성화
+'
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_bSilence
+g_bSilence = false
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' f_ChangeBtnState() : 각각 체크해야할 버튼 확인하여 다음 버튼 활성화/비활성화
+'============================================================================
+Function f_ChangeBtnState()
+	if tonumber(rdoIdentiAgree.currentindex) == 0 and tonumber(rdoInfoAgree.currentindex) == 0 then
+		g_bSilence = false
+		chkAllAgree.checkstate = "1"
+		imgCheck2.imgpath = "checkmenu_o.png"
+	else
+		chkAllAgree.checkstate = "0"
+		imgCheck2.imgpath = "checkmenu_n.png"
+	end if
+	
+	if tonumber(chkAgree.checkstate) == 1 and tonumber(chkAllAgree.checkstate) == 1  then
+		Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", true)
+		
+	else
+		Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", false)
+	end if
+End Function
+''****************************************************************************
+''               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+''****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgCheck1.setMaintainingRatio("1")
+	imgCheck2.setMaintainingRatio("1")
+	
+	imgProcess.setMaintainingRatio("1")
+End Sub 
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	lblRedCheck.fgcolor = 265
+	
+	Dim szTheme
+	szTheme = Form.GetEnvData("common.theme")
+
+	lblCtcnShow.caption = "필수동의서(요약/상세) 보기 >"
+	
+	chkAllAgree.chksilence = "0"
+	
+	imgCheck1.imgpath = "checkmenu_n.png"
+	imgCheck2.imgpath = "checkmenu_n.png"
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "PREV_STEP" then
+		Dim szChkStaSummary, szChkStaDetail
+		
+		szChkStaSummary = Form.GetSharedData( "mbonl94002_s1_CHECK_SUMMARY", false)
+		szChkStaDetail = Form.GetSharedData( "mbonl94002_s1_CHECK_DETAIL", false)
+		
+		chkAgree.chksilence = "1"
+		imgCheck1.imgpath = "checkmenu_o.png"
+		
+		chkAllAgree_OnChange("1")
+	end if
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn(sKeyName, sRet)
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbonl94004_s21" then
+		if sRet == "ok_Mndt" then
+			Form.SetSharedData("mbonl94004_s21_Agree", "Y")
+				
+			chkAgree.chksilence = "1"
+			imgCheck1.imgpath = "checkmenu_o.png"
+			
+			f_ChangeBtnState()
+		else
+			Form.SetSharedData("mbonl94004_s21_Agree", "N")
+			
+			chkAgree.chksilence = "0"
+			imgCheck1.imgpath = "checkmenu_n.png"
+			
+			f_ChangeBtnState() 
+		end if
+	end if
+End Sub
+
+'============================================================================
+' chkAllAgree_OnChange(sCheckState) : 체크시 하단 동의 / 미동의로 모두 체크
+'============================================================================
+Sub chkAllAgree_OnChange(sCheckState)
+	if g_bSilence == false then
+		if tonumber(sCheckState) == 0 then
+			rdoIdentiAgree.currentindex = "1"
+			rdoInfoAgree.currentindex = "1"
+			
+		else
+			rdoIdentiAgree.currentindex = "0"
+			rdoInfoAgree.currentindex = "0"
+		end if
+		
+		f_ChangeBtnState() 
+	
+	else
+		g_bSilence = true
+	end if
+End Sub
+
+'============================================================================
+' rdoIdentiAgree_OnClick(nIndex) : 각각 체크해야할 버튼 확인하여 다음 버튼 활성화/비활성화
+'============================================================================
+Sub rdoIdentiAgree_OnClick(nIndex)	
+	if nIndex = 0 then
+		imgidentiY.imgpath = "check_on.png"
+		imgidentiN.imgpath = "check_off.png"
+	else
+		imgidentiY.imgpath = "check_off.png"
+		imgidentiN.imgpath = "check_on.png"
+	end if
+	f_ChangeBtnState()
+End Sub
+
+'============================================================================
+' rdoInfoAgree_OnClick(nIndex) : 각각 체크해야할 버튼 확인하여 다음 버튼 활성화/비활성화
+'============================================================================
+Sub rdoInfoAgree_OnClick(nIndex)
+	if nIndex = 0 then
+		imgInfoY.imgpath = "check_on.png"
+		imgInfoN.imgpath = "check_off.png"
+	else
+		imgInfoY.imgpath = "check_off.png"
+		imgInfoN.imgpath = "check_on.png"
+	end if
+	f_ChangeBtnState()
+End Sub
+
+'============================================================================
+' 동의서보기
+'============================================================================
+Sub lblCtcnShow_OnClick()
+
+	Form.OpenPopup("mbonl94004_s21", "Mndt", "")
+End Sub
+
+
+''============================================================================
+'Sub imgCheck1_OnClick()
+'	if CInt(chkAgree.checkstate) == 1 then		
+'		chkAgree.chksilence = "0"
+'		imgCheck1.imgpath = "checkmenu_n.png"
+'	else
+'		chkAgree.chksilence = "1"
+'		imgCheck1.imgpath = "checkmenu_o.png"
+'	end if
+'	
+'	f_ChangeBtnState() 
+'End Sub
+
+'============================================================================
+Sub imgCheck2_OnClick()
+	if CInt(chkAllAgree.checkstate) == 1 then
+		f_SetCheckState(false)
+	else
+		f_SetCheckState(true)
+	end if
+End Sub
+
+'============================================================================
+Function f_SetCheckState(bValue)
+	if bValue == true then
+		chkAllAgree.chksilence = "1"
+		imgCheck2.imgpath = "checkmenu_o.png"
+		chkAllAgree_OnChange("1")
+	else
+		chkAllAgree.chksilence = "0"
+		imgCheck2.imgpath = "checkmenu_n.png"
+		chkAllAgree_OnChange("0")
+	end if
+End Function
+
+'============================================================================
+Sub lblCheckMsg_OnClick()
+	imgCheck2_OnClick()
+End Sub
+
+'============================================================================
+Sub lblidentiY_OnClick()
+	rdoIdentiAgree.currentindex = 0
+	rdoIdentiAgree_OnClick(0)	
+End Sub
+
+'============================================================================
+Sub lblidentiN_OnClick()
+	rdoIdentiAgree.currentindex = 1
+	rdoIdentiAgree_OnClick(1)	
+End Sub
+
+
+'============================================================================
+Sub lblInfoY_OnClick()
+	rdoInfoAgree.currentindex = 0
+	rdoInfoAgree_OnClick(0)	
+End Sub
+
+'============================================================================
+Sub lblInfoN_OnClick()
+	rdoInfoAgree.currentindex = 1
+	rdoInfoAgree_OnClick(1)	
+End Sub
+
+'============================================================================
+Sub imgidentiY_OnClick()
+	lblidentiY_OnClick()
+End Sub
+
+'============================================================================
+Sub imgidentiN_OnClick()
+	lblidentiN_OnClick()
+End Sub
+
+'============================================================================
+Sub imgInfoY_OnClick()
+	lblInfoY_OnClick()
+End Sub
+
+'============================================================================
+Sub imgInfoN_OnClick()
+	lblInfoN_OnClick()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

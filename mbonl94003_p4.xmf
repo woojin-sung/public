@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94003" scrname="전환(분류)신청_회원사종류코드조회" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,317,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="구분" ly_vert="3,58,68,32,1" />
+		<COMBO name="cmbGubun" enable="0" initkeyindex="1" cbinputdatatext="BANK_CODE`은행
+MBCR_KIND_CODE`증권
+ISCO_CODE`보험
+E`기타" ly_vert="59,55,100,39,1" />
+		<LABEL name="Label5" caption="회원사명" ly_vert="177,58,67,32,1" />
+		<EDIT name="edtName" imetype="0" maxlength="40" minlength="40" ly_vert="263,55,100,39,1" />
+		<GRID name="Grid0" colcount="2" ly_vert="10,103,353,204,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_Code" halign="1" />
+				<LABEL name="th_cell0" caption="코드 값" halign="1" />
+				<LABEL name="bd_CodeName" />
+				<LABEL name="th_cell1" caption="코드 값 명" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" initrowcount="0" nexteventtr="obcpp_code_002r" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="130,245" ly_vert_visible="0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="130" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="35" />
+						<CELLINFO>
+							<CELL name="bd_Code" cell_ly="0,0,0,0" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="245" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="35" />
+						<CELLINFO>
+							<CELL name="bd_CodeName" cell_ly="0,0,0,0" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_Code" rangecellid="bd_Code" hlcolorcellid="bd_Code" />
+		</GRID>
+		<IMAGE name="Image0" imgpath="pop_header.9.png" ly_vert="-2,0,378,45,1" />
+		<LABEL name="Label10" fontsize="2" fontstyle="01" caption="회원사 종류코드 조회" bgcolor="064:188030030" halign="1" ly_vert="0,0,375,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_vert="331,9,24,24,1" />
+		<COMBO name="cmbGubun94002" enable="0" visible="0" initkeyindex="1" cbinputdatatext="B`BANK_CODE
+F`MBCR_KIND_CODE
+I`ISCO_CODE
+E`E" ly_vert="500,117,111,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5021" _ulen="4837" >
+'--===========================================================================
+' 01. 화 면 명 : 
+' 02. 화면설명 : 
+' 03. 작    성 : 
+' 04. 수    정 : 
+' 2022.04.28 : v0001 : KSJ : 지정심사신청 타사투자경험 등록(mbonl94002_p31) 공통사용 적용
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szMetaString
+Dim g_szOpenData		'v0001
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()	
+	'v0001 STA
+	g_szOpenData = ""
+	g_szOpenData = Trim(Form.GetOpenLinkData())
+	If g_szOpenData == "mbonl94002_p31" Then
+		cmbGubun.enable = true
+	End If
+	'v0001 FIN
+	
+	DATAMANAGER.RequestTranData("obcpp_code_029r")
+End Sub
+
+'============================================================================
+' 회원사 선택
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	szDeptCd = Grid0.GetCellData("bd_Code", lRow)
+	szDeptNm = Grid0.GetCellData("bd_CodeName", lRow)
+	
+	'v0001 STA 다른화면에 영향 최소화하기위해
+	If g_szOpenData == "mbonl94002_p31" Then
+		If cmbGubun94002.caption == cmbGubun.cbkeydata Then
+			Form.SendReturnToParent("close_mbonl94003_p4", szDeptCd & "★" & szDeptNm & "★" & cmbGubun94002.cbkeydata )
+		End if
+	Else
+		Form.SendReturnToParent("close_mbonl94003_p4", szDeptCd & "★" & szDeptNm)
+	End If
+	'v0001 FIN
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 회원사명 검색
+'============================================================================
+Sub edtName_OnEditComplete()
+	DATAMANAGER.RequestTranData("obcpp_code_002r")
+End Sub
+
+'============================================================================
+' 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' v0001 구분값 선택
+'============================================================================
+Sub cmbGubun_OnEditComplete(iIndex)
+	cmbGubun94002.currentindex = iIndex
+	Grid0.SetClear()
+	DATAMANAGER.RequestTranData("obcpp_code_029r")
+End Sub
+
+
+'****************************************************************************
+'               		D A T A				M A N A G E R               
+'****************************************************************************
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 인풋데이터 세팅
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcpp_code_029r" then
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "META_TERM_PHSC_NAME" , 0 ,  cmbGubun.cbkeydata )
+	
+	elseif szTranID == "obcpp_code_002r" then
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "IQRY_CLS_CODE" , 0 ,  "1" )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "META_TERM_PHSC_NAME" , 0 ,  g_szMetaString )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CODE_VALD_VAL_KOR_NAME" , 0 ,  Trim(edtName.caption) )
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 들어왔을때
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)	
+	if szTranID == "obcpp_code_029r" then
+		g_szMetaString = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "META_TERM_NAME" , 0)
+		
+		DATAMANAGER.RequestTranData("obcpp_code_002r")
+		
+	elseif szTranID == "obcpp_code_002r" then
+'		If DATAMANAGER.IsMoreNextData( sTranID ) = True Then
+'			DATAMANAGER.RequestNextData( sTranID )
+'		End If
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg) : 데이터 통신 오류
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+
+	if szSubMsg <> NULL or szSubMsg <> "" then
+		Form.ShowAlert("알림", szErrMsg)
+	
+	else
+		Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+	end if
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_code_002r" trcode="obcpp_code_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_code_029r" trcode="obcpp_code_029r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_code_002r" title="공통 코드 값 목록조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="225" _ulen="173" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+META_TERM_PHSC_NAME^메타용어물리명^200^0^0^0^0^0^0
+CODE_VALD_VAL_KOR_NAME^코드유효값한글명^200^0^0^0^0^0^0
+CODE_VALD_VAL^코드유효값^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="21" inout="out" _len="177" _ulen="137" >
+
+CODE_VALD_VAL^코드유효값^100^0^0^0^0^0^0
+CODE_VALD_VAL_KOR_NAME^코드유효값한글명^200^0^0^0^0^0^0
+CODE_VALD_VAL_EXPL^코드유효값설명^1000^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="120" _ulen="92" >
+
+CODE_VALD_VAL_SORT_SEQ^코드유효값정렬순서^10^0^0^0^0^0^0
+CODE_VALD_VAL^코드유효값^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_code_029r" title="메타 용어 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="65" _ulen="51" >
+
+META_TERM_PHSC_NAME^메타용어물리명^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="54" _ulen="44" >
+
+META_TERM_NAME^메타용어명^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

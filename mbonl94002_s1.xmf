@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94002" scrname="지정심사신청" version="2" writer="정민영" />
+	<FORM_INFO name="lblTitle" ly_vert="0,0,375,527,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="개인정보 수집·이용 동의" valign="0" ly_vert="10,20,355,40,1" />
+		<IMAGE name="imgProcess" autosize="1" imgpath="bcs_step01" ly_vert="276,5,79,21,1" />
+		<LABEL name="lblSubTitle" fgcolor="006:213049051" fontstyle="01" caption="필수 동의" valign="0" ly_vert="10,60,355,25,1" />
+		<LABEL name="lblRedLine" bgcolor="006:213049051" transmode="0" ly_vert="0,85,375,1,1" />
+		<CHKBUTTON name="chkSummary" chkcaption="요약동의서 보기" unchkcaption="요약동의서 보기" ly_vert="40,105,145,32,1" />
+		<CHKBUTTON name="chkDetail" chkcaption="상세동의서 보기" unchkcaption="상세동의서 보기" ly_vert="205,105,145,32,1" />
+		<BUTTON name="btnCtcnAll" enable="0" ly_vert="20,157,335,74,1" />
+		<LABEL name="lblRedCheck" fontstyle="01" caption="수집·이용" bgcolor="035:237246255" valign="0" ly_vert="30,261,82,40,1" />
+		<LABEL name="lblBlackCheck" fontstyle="01" caption="에 관한 사항" valign="0" ly_vert="104,261,185,20,1" />
+		<LABEL name="lblIdentiText" caption="고유식별정보" valign="0" ly_vert="40,291,120,36,1" />
+		<LABEL name="lblInfoText" caption="개인(신용)정보" valign="0" ly_vert="40,327,120,36,1" />
+		<RADIOGROUP name="rdoIdentiAgree" ly_vert="180,291,160,20,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="동의" position="0,0,75,20" />
+				<RADIO no="1" text="미동의" position="75,0,85,20" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<RADIOGROUP name="rdoInfoAgree" ly_vert="180,327,160,20,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="동의" position="0,0,52,20" />
+				<RADIO no="1" text="미동의" position="75,0,68,20" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<CHKBUTTON name="chkAllAgree" fontsize="4" fontstyle="01" chkcaption="   모두 확인하고 동의합니다." unchkcaption="   모두 확인하고 동의합니다." ly_vert="40,172,295,44,1" />
+		<BUTTON name="btnSummary" btnimage="alpha" ly_vert="40,105,145,32,1" />
+		<BUTTON name="btnDetail" btnimage="alpha" ly_vert="205,105,145,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5860" _ulen="5568" >
+'--===========================================================================
+' 01. 화 면 명 : 
+' 02. 화면설명 : 
+' 03. 작    성 : 
+' 04. 수    정 : 
+'
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_bSilence
+g_bSilence = false
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' f_ChangeBtnState() : 각각 체크해야할 버튼 확인하여 다음 버튼 활성화/비활성화
+'============================================================================
+Function f_ChangeBtnState()
+	if tonumber(rdoIdentiAgree.currentindex) == 0 and tonumber(rdoInfoAgree.currentindex) == 0 then
+		g_bSilence = false
+		chkAllAgree.checkstate = "1"
+	else
+		chkAllAgree.checkstate = "0"
+	end if
+	
+	' 210622 JHY : 요약/ 상세 둘 중 하나만 선택해도 다음으로 넘어갈 수 있도록 수정 (권오상 차장님 요청)
+	if tonumber(chkAllAgree.checkstate) == 1 and ( tonumber(chkSummary.checkstate) == 1 or tonumber(chkDetail.checkstate) == 1 ) then
+		Form.SetSharedData( "mbonl94002_s1_CHECK_SUMMARY" , chkSummary.checkstate)
+		Form.SetSharedData( "mbonl94002_s1_CHECK_DETAIL" , chkDetail.checkstate)
+		
+		Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", true)
+		
+	else
+		Form.triggerEvent("#", "BTN_NEXT_ENABLE_STATE", false)
+	end if
+End Function
+
+
+''****************************************************************************
+''               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+''****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgProcess.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	lblRedCheck.fgcolor = 265
+	
+	Dim szTheme
+	szTheme = Form.GetEnvData("common.theme")
+
+'	if szTheme == "white" then
+'		imgProcess.imgpath = "icon_1stepthird_w"
+'	else
+'		imgProcess.imgpath = "icon_1stepthird_b"
+'	end if
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "PREV_STEP" then
+		Dim szChkStaSummary, szChkStaDetail
+		
+		szChkStaSummary = Form.GetSharedData( "mbonl94002_s1_CHECK_SUMMARY", false)
+		szChkStaDetail = Form.GetSharedData( "mbonl94002_s1_CHECK_DETAIL", false)
+		
+		chkSummary.checkstate = szChkStaSummary == "1" and 1 or 0
+		chkDetail.checkstate = szChkStaDetail == "1" and 1 or 0
+		
+		chkAllAgree_OnChange("1")
+	end if
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn(sKeyName, sRet)
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "close_mbonl94002_p4" then
+		if sRet == "0" or sRet == "1" then
+			chkSummary.checkstate = sRet
+		end if
+		
+		f_ChangeBtnState()
+	
+	elseif sKeyName == "close_mbonl94002_p5" then
+		if sRet == "0" or sRet == "1" then
+			chkDetail.checkstate = sRet
+		end if
+		f_ChangeBtnState()
+	end if
+End Sub
+
+'============================================================================
+' chkAllAgree_OnChange(sCheckState) : 체크시 하단 동의 / 미동의로 모두 체크
+'============================================================================
+Sub chkAllAgree_OnChange(sCheckState)
+	if g_bSilence == false then
+		if tonumber(sCheckState) == 0 then
+			rdoIdentiAgree.currentindex = "1"
+			rdoInfoAgree.currentindex = "1"
+			
+		else
+			rdoIdentiAgree.currentindex = "0"
+			rdoInfoAgree.currentindex = "0"
+		end if
+		
+		f_ChangeBtnState() 
+	
+	else
+		g_bSilence = true
+	end if
+End Sub
+
+'============================================================================
+' rdoIdentiAgree_OnClick(nIndex) : 각각 체크해야할 버튼 확인하여 다음 버튼 활성화/비활성화
+'============================================================================
+Sub rdoIdentiAgree_OnClick(nIndex)
+	f_ChangeBtnState()
+End Sub
+
+'============================================================================
+' rdoInfoAgree_OnClick(nIndex) : 각각 체크해야할 버튼 확인하여 다음 버튼 활성화/비활성화
+'============================================================================
+Sub rdoInfoAgree_OnClick(nIndex)
+	f_ChangeBtnState()
+End Sub
+
+'============================================================================
+' btnDetail_OnClick(): 요약동의서 오픈
+'============================================================================
+Sub btnSummary_OnClick()
+	Form.OpenFramePopup("mbonl94002_p4" , "" , "")
+End Sub
+
+
+'============================================================================
+' btnDetail_OnClick(): 상세동의서 오픈
+'============================================================================
+Sub btnDetail_OnClick()
+	Form.OpenFramePopup("mbonl94002_p5" , "" , "")
+End Sub
+
+''****************************************************************************
+''               		D A T A				M A N A G E R               
+''****************************************************************************
+
+	</SCRIPT_INFO>
+</ROOT>

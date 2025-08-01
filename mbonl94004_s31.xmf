@@ -1,0 +1,938 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94004" scrname="장외파생거래요건등록" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,527,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnRerty" caption="재촬영" fgcolor="267:000000000" fontsize="4" btnimage="btn_27.9" ly_vert="385,592,189,58,1" />
+		<BUTTON name="BtnSend" caption="다음" fontsize="4" btnimage="btn_20.9" ly_vert="570,592,190,58,1" />
+		<LABEL name="Label7" fontsize="3" fontstyle="01" caption="신분증 본인확인" valign="0" ly_vert="10,7,355,40,1" />
+		<IMAGE name="imgProcess" autosize="1" imgpath="bcs_step03" ly_vert="276,5,79,21,1" />
+		<CONTAINER name="cont0" vscroll="1" scroll_pos="0,0" ly_vert="-1,40,375,477,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="lblInfo0" fgcolor="146:124124124" caption="신분증 정보를 확인해주세요." ly_vert="10,2,225,35,1" />
+				<LABEL name="lblInfo1" fgcolor="146:124124124" caption="실제 정보와 다른 경우 다시 촬영해주세요." ly_vert="10,24,350,32,1" />
+				<IMAGE name="imgIdCard" autosize="1" ly_vert="20,71,335,180,1" />
+				<EDIT name="edtSRNO" visible="0" imetype="0" maxlength="11" recvdatafield="obaci_acct_158a.OutBlock1.SRNO" ly_vert="20,65,335,10,0" import="0,1,0" />
+				<BUTTON name="Button0" enable="0" btnimage="input_03.9" ly_vert="20,269,335,200,1" />
+				<LABEL name="lblName" caption="이름" ly_vert="27,284,80,32,1" />
+				<LABEL name="lblBirth" caption="생년월일" ly_vert="27,326,80,32,1" />
+				<LABEL name="lblLicenseNo" caption="면허번호" ly_vert="27,369,80,32,1" />
+				<LABEL name="lblIssueDate" caption="발급일자" ly_vert="27,413,80,32,1" />
+				<EDIT name="edtName" fontstyle="01" imetype="0" hintcaption="  " ly_vert="125,282,219,35,1" />
+				<EDIT name="edtRcno" imetype="1" maxlength="6" hintcaption="  " clearall="0" ly_vert="125,324,219,35,1" />
+				<EDIT name="edtLicenseNo" enable="0" fontsize="4" imetype="0" hintcaption="  " imagefilepth="alpha" ly_vert="1300,367,205,35,1" />
+				<EDIT name="edtIssueDate" enable="0" imetype="0" hintcaption="  " imagefilepth="alpha" ly_vert="125,411,219,35,1" />
+				<LABEL name="lblLine" bgcolor="227:248084091" ly_vert="1,467,375,2,1" />
+				<EDIT name="edtLicense1" enable="0" halign="1" imetype="0" imagefilepth="alpha" ly_vert="125,367,30,35,1" />
+				<LABEL name="lblDash1" caption="-" halign="1" ly_vert="154,368,10,32,1" />
+				<EDIT name="edtLicense2" enable="0" halign="1" imetype="0" imagefilepth="alpha" ly_vert="166,367,30,35,1" />
+				<LABEL name="lblDash2" caption="-" halign="1" ly_vert="195,368,10,32,1" />
+				<EDIT name="edtLicense3" halign="1" password="1" imetype="1" maxlength="6" ly_vert="206,367,97,35,1" />
+				<LABEL name="lblDash3" caption="-" halign="1" ly_vert="303,368,10,32,1" />
+				<EDIT name="edtLicense4" enable="0" halign="1" imetype="0" imagefilepth="alpha" ly_vert="313,367,32,35,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CHKBUTTON name="ChkButton0" chkcaption="신분증인증SKIP" unchkcaption="신분증인증SKIP" ly_vert="241,33,164,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="31037" _ulen="27395" >
+'--===========================================================================
+' 01. 화 면 명 : 지정신청심사
+' 02. 화면설명 : mbonl94004_s2 개선건 적용 신분증 본인확인
+' 03. 작    성 : 2022.04.12
+' 04. 수    정 : 
+' 2022.08.12 : 전상일 : v0001 : 바이오인증 송수신 분리 개발
+' 2024.04.24 : 전상일 : v0002 : 캡쳐방지 위치 변경
+' 2023.04.26 : 전상일 : v0003 : 바이오인증 송수신 처리 대기 횟수 증가
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'============================================================================
+' OCR 데이터 및 특징점 추출데이터 (메인에서 취득)
+'============================================================================
+Dim g_szIdCardType	'신분증구분(주민등록증 10, 주민등록증(재외국민)12, 면허증11)
+Dim g_ImgData			'주민번호 마스킹 없는 이미지(서비스 전송용)
+
+Dim g_szIDNTF_CODE 	'신분증유형
+Dim g_szIDNTF_CLS_CODE '신분증구분코드(01:주민등록 02:운전면허 03:외국인증록증/국내거소신고증 04:국가유공자증 05:장애인등록증)
+
+Dim g_szNAME			'이름
+Dim g_szRCNO_PIP		'암호화된 실명확인번호		
+Dim g_szISSU_DATE		'발급일자
+Dim g_szLISENCE_NUM	'신분증번호
+
+'20230807 장외파생상품 개선 운전면허증 번호 세분화(비대면계좌개설과 동일하게 변경)
+Dim g_LISENCE_NUM1	'발급지역코드(평문)
+Dim g_LISENCE_NUM2     '발급년도(평문)
+Dim g_LISENCE_NUM3     '발급일련번호1(암호화)
+Dim g_LISENCE_NUM4     '발급일련번호2(암호화)
+
+Dim g_szRCNO_7		'실명확인번호 뒷 7자리 
+
+Dim g_szFEATURE		'특징점데이터
+Dim g_szFEATURE_LEN	'특징점데이터 길이
+Dim g_szFEATURE_SCORE 	'특징점 점수
+
+'============================================================================
+' 쉐어드변수 및 기타 전역변수
+'============================================================================
+Dim g_szSharedName	'성명
+Dim g_szSharedBirth	'생년월일
+
+Dim g_szRSPN_TYPE_CODE '진위확인응답유형코드(0:정상 9:오류  8:수기허용 R:재시도)
+Dim g_szRSPN_MSG	
+
+Dim g_szTR_DATE
+Dim g_szOTSDTRUNIQNO
+Dim g_szAFT_RCNO_PIP
+Dim g_szIDNTF_TORF_YN 	'신분증진위확인여부
+
+Dim g_szOsType	'OS타입(1:AOS / 2:IOS )
+
+DIM DEF_1ST_TIME
+DIM DEF_2ST_TIME
+
+DEF_1ST_TIME = 0.5
+DEF_2ST_TIME = 1.0
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+' f_DataSet() : 사진촬영 후 메인에서 받은 데이터 세팅
+'============================================================================
+Sub f_DataSet()
+
+	g_ImgData = ""
+
+	'주민등록증 10, 주민등록증(재외국민)12, 면허증11
+	g_szIdCardType = Form.GetSharedData("&RET_CARD_TYPE", 0)
+	
+	If g_szIdCardType == "10" or g_szIdCardType == "12" then
+		
+		cont0.edtLicenseNo.left = 500
+		cont0.edtLicenseNo.visible = false
+		cont0.lblLicenseNo.visible = false
+		
+		cont0.edtLicense1.visible = false
+		cont0.edtLicense2.visible = false
+		cont0.edtLicense3.visible = false
+		cont0.edtLicense4.visible = false
+		cont0.lblDash1.visible = false
+		cont0.lblDash2.visible = false
+		cont0.lblDash3.visible = false
+		
+		cont0.edtIssueDate.top = 367
+		cont0.lblIssueDate.top = 369
+		cont0.Button0.height = 152
+		
+		g_szIDNTF_CODE     =  "1"  
+		g_szIDNTF_CLS_CODE =  "01" 		
+		
+	Elseif g_szIdCardType == "11" then
+	
+'		'면허번호 중요정보로 숨김처리
+'		cont0.edtLicenseNo.left = 500
+'		cont0.edtLicenseNo.visible = false
+'		cont0.lblLicenseNo.visible = false
+'		
+'		cont0.edtIssueDate.top = 367
+'		cont0.lblIssueDate.top = 369
+'		cont0.Button0.height = 152
+		
+		g_szIDNTF_CODE     =  "2"  
+		g_szIDNTF_CLS_CODE =  "02"
+		
+	End if
+	
+	'OCR정보 세팅
+	cont0.edtName.caption  	= Form.GetSharedData("&RET_NAME", 0)				'이름
+	cont0.edtRcno.caption  	= left(Form.GetSharedData("&RET_BIRTHDAY", 0), 6)	'생년월일
+	cont0.edtLicenseNo.caption 	= Form.GetSharedData("&RET_LICENSE_NUM", 0) 		'면허번호
+	cont0.edtIssueDate.caption 	= Form.GetSharedData("&RET_ISSU_DATE", 0) 		'발급일자
+	
+	'운전면허번호 4영역으로 분할
+	cont0.edtLicense3.pwdlen = 6
+	
+	cont0.edtLicense1.caption = Form.GetSharedData("&RET_LICENSE_NUM1"	, 0 )
+	cont0.edtLicense2.caption = Form.GetSharedData("&RET_LICENSE_NUM2"	, 0 )
+	cont0.edtLicense3.caption = Form.GetSharedData("&RET_LICENSE_NUM3"	, 0 )
+	cont0.edtLicense4.caption = Form.GetSharedData("&RET_LICENSE_NUM4"	, 0 )
+	
+	
+	g_szNAME			= Form.GetSharedData("&RET_NAME"			,0 ) '이름
+	g_szRCNO_PIP		= Form.GetSharedData("&RET_JUMIN_NUM"		,0 ) '암호화된 실명확인번호
+	g_szISSU_DATE		= Form.GetSharedData("&RET_ISSU_DATE"		,0 ) '발급일자
+	
+	g_szFEATURE		= Form.GetSharedData("&RET_FEATURE"			,0 ) '특징점데이터
+	g_szFEATURE_SCORE	= Form.GetSharedData("&RET_FEATURE_SCORE"	,0 ) '특징점 점수
+	g_szFEATURE_LEN  	= Form.GetSharedData("&RET_FEATURE_LEN"		,0 ) '특징점데이터 길이
+'	g_SERIAL    	  = Form.GetSharedData("&RET_SERIAL"			, 0 ) 	'발급번호
+	g_szLISENCE_NUM	= Form.GetSharedData("&RET_LICENSE_NUM"		,0 ) '신분증번호
+
+	'운전면허증번호 4자리로 세분화
+	g_LISENCE_NUM1 	= Form.GetSharedData("&RET_LICENSE_NUM1"	, 0 ) 	'발급지역코드(평문) 
+	g_LISENCE_NUM2 	= Form.GetSharedData("&RET_LICENSE_NUM2"	, 0 ) 	'발급년도(평문)
+	g_LISENCE_NUM3 	= Form.GetSharedData("&RET_LICENSE_NUM3"	, 0 ) 	'발급일련번호1(암호화)
+	g_LISENCE_NUM4 	= Form.GetSharedData("&RET_LICENSE_NUM4"	, 0 ) 	'발급일련번호2(평문)
+
+	g_szRCNO_7		= Form.GetSharedData("&RET_JUMIN_NUM_BACK"	,0 ) '실명확인번호 뒷 7자리
+
+	Dim ImgMskData
+	ImgMskData 	    = Form.GetSharedData("&RET_MASK_IMAGE_ENC" 	,0 ) '주민번호 마스킹이미지
+	g_ImgData  	    = Form.GetSharedData("&RET_IMAGE_ENC"		,0 ) '주민번호 마스킹없는이미지
+	
+	if ImgMskData <> "" and g_ImgData <> "" then 
+		if LEN(g_ImgData) > 0  and LEN(ImgMskData) > 0 then
+			cont0.imgIdCard.SetImageDataEnc(ImgMskData)
+			
+'			'OCR정보 세팅
+'			cont0.edtName.caption  	= Form.GetSharedData("&RET_NAME", 0)				'이름
+'			cont0.edtRcno.caption  	= left(Form.GetSharedData("&RET_BIRTHDAY", 0), 6)	'생년월일
+'			cont0.edtLicenseNo.caption 	= Form.GetSharedData("&RET_LICENSE_NUM", 0) 		'면허번호
+'			cont0.edtIssueDate.caption 	= Form.GetSharedData("&RET_ISSU_DATE", 0) 		'발급일자
+			
+		end if
+	end if
+	
+End Sub
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	'==================================
+	' TEST
+	'==================================
+	nDev = Form.GetSharedData("&SERVER_MODE", false )	
+	if nDev == "1" then
+		ChkButton0.visible = true
+	else
+		ChkButton0.visible = false
+		ChkButton0.checkstate = 0
+	end if
+	'==================================
+		
+	'라벨글자색
+	cont0.lblInfo0.fgcolor = 269
+	cont0.lblInfo1.fgcolor = 269
+	
+	cont0.lblName.fgcolor 		= 268	
+	cont0.lblBirth.fgcolor 	= 268
+	cont0.lblLicenseNo.fgcolor 	= 268
+	cont0.lblIssueDate.fgcolor 	= 268
+	
+	'이름/생일 에디트 이미지
+	cont0.edtName.imagefilepth	= "login_input_off.9.png"
+	cont0.edtRcno.imagefilepth	= "login_input_off.9.png"
+	cont0.edtLicense3.imagefilepth = "login_input_off.9.png"
+
+	'OS타입
+	g_OsType = Form.GetSharedData("&OS_TYPE", false)
+	if g_OsType == "1" then 'AOS
+		Form.setCaptureEnblYN("N")
+	end if
+		
+	'거래일자 세팅
+	g_szTR_DATE  = Form.GetSharedData("&HOST_DATE", false )
+
+	'발급일자 컨트롤 세팅(평문으로 보여야함)
+	cont0.edtIssueDate.SetDispPlain()
+	
+	'신분증 데이터 세팅
+	Call f_DataSet()
+	
+	imgProcess.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgProcess.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+' cont0_edtName_OnClick() : 이름 선택 > 에디트 키패드로 인한 컨테이너 조정
+'============================================================================
+Sub cont0_edtName_OnClick()
+	cont0.edtName.imagefilepth	= "login_input_on.9.png"
+	
+	if g_OsType == "1" then 'AOS
+		cont0.lblLine.top = 505
+		cont0.SetScrollAutoSize()
+		cont0.scroll_pos = 25
+	else
+		cont0.lblLine.top = 505
+		cont0.scroll_pos = 20
+	end if
+End Sub
+'============================================================================
+' cont0_edtName_OnClick() : 이름 편집완료 > 에디트 키패드로 인한 컨테이너 조정
+'============================================================================
+Sub cont0_edtName_OnEditComplete()
+	cont0.edtName.imagefilepth = "login_input_off.9.png"
+	
+	if g_OsType == "1" then 'AOS
+		cont0.lblLine.top = 475
+		cont0.scroll_pos = 0
+		cont0.SetScrollAutoSize()
+	else
+		cont0.lblLine.top = 475
+		cont0.scroll_pos = 0
+	end if
+End Sub
+
+'============================================================================
+' cont0_edtName_OnClick() : 생일 선택 > 에디트 키패드로 인한 컨테이너 조정
+'============================================================================
+Sub cont0_edtRcno_OnClick()
+	cont0.edtRcno.imagefilepth = "login_input_on.9.png"
+
+	if g_OsType == "1" then 'AOS		
+		cont0.lblLine.top = 535
+		cont0.SetScrollAutoSize()
+		cont0.scroll_pos = 20	
+	else
+		cont0.lblLine.top = 535
+		cont0.scroll_pos = 90	
+	end if
+End Sub
+'============================================================================
+' cont0_edtRcno_OnEditComplete() : 생일 편집완료 > 에디트 키패드로 인한 컨테이너 조정
+'============================================================================
+Sub cont0_edtRcno_OnEditComplete()
+	cont0.edtRcno.imagefilepth	= "login_input_off.9.png"
+	if g_OsType == "1" then 'AOS
+		cont0.lblLine.top = 475
+		cont0.scroll_pos = 0
+		cont0.SetScrollAutoSize()
+	else	
+		cont0.lblLine.top = 475
+		cont0.scroll_pos = 0
+	end if
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn(sKeyName, sRet)
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbbdm85121_p1" then
+		if sRet == "complete_ok" then
+			
+			Form.SetSharedData("&RET_NAME" 		, g_szSharedName)	'이름
+			Form.SetSharedData("&RET_NAME" 		, g_szSharedName)	'이름
+			Form.SetSharedData("&RET_ISSU_DATE"  , cont0.edtIssueDate.caption)		'신분증 발급일자	
+			
+			'v0002
+			'if g_OsType == "1" then 'AOS
+			'	Form.setCaptureEnblYN("Y")
+			'end if
+			
+			Form.triggerEvent("#", "COMPLETE_TRUE_AND_FALSE", cont0.edtSRNO.caption)			
+		end if
+	
+	elseif sKeyName == "mbbdm85122" then
+		if sRet == "Retry" then
+			Form.triggerEvent("#", "RETRY", szSRNO)
+		end if
+		
+	end if
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	' 신분증전송-------------------------------------------------
+	if sEventName == "JUDGE_TRUE_AND_FALSE" then
+		if g_szIdCardType = "12" then 
+			strMsg = "재외국민은 비대면 업무신청이 불가합니다."
+			Form.OpenPopup("mbbdm85122" , strMsg)
+		
+		else
+			g_szSharedName 	= Form.GetSharedData("mbonl94004_USER_NAME" 	,false ) '이름
+			g_szSharedBirth	= Form.GetSharedData("mbonl94004_USER_BIRTH"	,false )	'생년월일 
+
+			'Test > 테스트Skip인경우, 체크 제외
+			if CInt(ChkButton0.checkstate) ~= 1 then 
+				'-------------------------------------------------
+				'입력데이터 확인 및 OCR데이터와 전단계화면 데이터 비교
+				'-------------------------------------------------
+				'========== [에러]알림팝업(mbbdm85121_p1) ==========
+				Dim szTitle, szMsg, szFlag 
+				szTitle = "알림"
+				szFlag = "error"
+				szMsg = ""
+				if Trim(cont0.edtName.caption) == "" or g_szSharedName <> Trim(cont0.edtName.caption) then 
+					szMsg = "이름을 확인하세요."
+					Form.OpenPopup("mbbdm85121_p1" , szTitle.."#"..szMsg.."#"..szFlag , "5")
+					exit Sub 
+				end if
+				
+				if Trim(cont0.edtRcno.caption) == "" or g_szSharedBirth <> Trim(cont0.edtRcno.caption) then
+					szMsg = "생년월일을 확인하세요.(주민번호 앞 6자리)"
+					Form.OpenPopup("mbbdm85121_p1" , szTitle.."#"..szMsg.."#"..szFlag , "5")
+					exit Sub 
+				end if
+				
+				rcnoLen = cont0.edtRcno.getLen(cont0.edtRcno.caption)
+				if cint(rcnoLen) < 6 then
+					szMsg = "생년월일을 확인하세요.(주민번호 앞 6자리)"
+					Form.OpenPopup("mbbdm85121_p1" , szTitle.."#"..szMsg.."#"..szFlag , "5")
+					exit Sub 	
+				end if
+				
+				if CInt(left(cont0.edtIssueDate.caption,4)) < 8 then
+					szMsg = "발급일자를 확인하주시기 바랍니다."
+					Form.OpenPopup("mbbdm85121_p1" , szTitle.."#"..szMsg.."#"..szFlag , "5")
+					exit Sub  
+				end if
+			end if
+
+			'-------------------------------------------------
+			'서비스호출
+			'재시도의 경우 obaci_acct_158a SKIP 후 obtss_idvs_001a Call
+			'-------------------------------------------------
+			If g_szRSPN_TYPE_CODE <> "R" then
+				if Len(g_ImgData) < 102400 then	'이미지 최대사이즈 
+					DATAMANAGER.RequestTranData("obaci_acct_158a")
+				else
+					Form.ShowAlert("알림", "등록할 수 있는 이미지 최대사이즈를 초과하였습니다.")
+				end if	
+			else
+				g_szRSPN_TYPE_CODE = ""
+				DATAMANAGER.RequestTranData("obtss_idvs_001a") 
+				'v0001
+				'Form.SetTimerEvent("1", 1, 30) '1:Set
+			end If
+		end if
+	end if
+End Sub
+
+
+
+'****************************************************************************
+'               		D  A  T  A  M  A  N  A  G  E  R               
+'****************************************************************************
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 인풋데이터 세팅
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)	
+	Select Case szTranID	
+			
+		'신분증 등록
+		Case "obaci_acct_158a"	
+			Dim szJumin 
+			szjumin = Form.GetSharedData("&JUMIN_NUM", false )	'취약점 보완후 암호화된 값으로 내려옴
+			
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATCH_FILE_SIZE"		, 0 	, Len(g_ImgData)				) 
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_IMG_DATA"		, 0 	, g_ImgData 					) 
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, g_szIDNTF_CODE 				) 
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_RCNO_PIP"		, 0 	, szjumin					)	'22.05.17 &JUMIN_NUM 쉐어드값으로 변경
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BRDT"  				, 0 	, Trim(cont0.edtRcno.caption)	) 
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MDAF_RCNO_PIP"		, 0 	, g_szRCNO_7 	 				)
+			
+		'금결원_신분증 진위확인
+		Case "obtss_idvs_001a"			
+			
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_CLS_CODE"             , 0 , g_szIDNTF_CLS_CODE			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"                   , 0 , g_szAFT_RCNO_PIP			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_RCNO_PIP"              , 0 , g_szRCNO_PIP					)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_FLNM"                 , 0 , cont0.edtName.caption		)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_IDNTF_FLNM"            , 0 , g_szNAME					)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ISNC_DATE_PIP"              , 0 , cont0.edtIssueDate.caption	)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_ISNC_DATE_PIP"         , 0 , g_szISSU_DATE				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "OLD_DRVN_LCNS_NO_PIP"       , 0 , "" 			)
+			'DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "OLD_DRVN_LCNS_NO_PIP"       , 0 , g_szLISENCE_NUM 			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_OLD_DRVN_LCNS_NO_PIP"  , 0 , ""   			)
+			'DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_OLD_DRVN_LCNS_NO_PIP"  , 0 , g_szLISENCE_NUM   			)
+			
+			'운전면허번호 4개 필드로 분리
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_ISNC_REGN_CODE" 		, 0 	, g_LISENCE_NUM1				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_ISNC_YEAR" 			, 0 	, g_LISENCE_NUM2				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_ISNC_SRNO_PIP" 		, 0 	, g_LISENCE_NUM3				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_ISNC_DETL_SRNO" 		, 0 	, g_LISENCE_NUM4				)
+			
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_SPFT_VLTN_SCOR"       , 0 , g_szFEATURE_SCORE			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATCH_FILE_SIZE"             , 0 , g_szFEATURE_LEN 			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_PHTG_DATA_CNTT"          , 0 , g_szFEATURE				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "NMET_CLS_CODE"              , 0 , "10" 						)	'10:비대면모바일
+			
+		'진위확인오류내역 
+		Case "obaci_idvs_003a"
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_TORF_CNFR_RSLT_CLCD" , 0 , g_szRSPN_TYPE_CODE			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"                  , 0 , g_szAFT_RCNO_PIP			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_TORF_CNFR_RCNO_PIP"  , 0 , g_szAFT_RCNO_PIP			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_CLS_CODE"            , 0 , g_szIDNTF_CLS_CODE			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_RCNO_PIP"             , 0 , g_szRCNO_PIP				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_FLNM"                , 0 , cont0.edtName.caption		)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_IDNTF_FLNM"           , 0 , g_szNAME					)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ISNC_DATE_PIP"             , 0 , cont0.edtIssueDate.caption	)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_ISNC_DATE_PIP"        , 0 , g_szISSU_DATE				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "OLD_DRVN_LCNS_NO_PIP"      , 0 , ""				)
+			'DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "OLD_DRVN_LCNS_NO_PIP"      , 0 , g_szLISENCE_NUM				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_OLD_DRVN_LCNS_NO_PIP" , 0 , ""				)
+			'DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_OLD_DRVN_LCNS_NO_PIP" , 0 , g_szLISENCE_NUM				)
+			
+			'운전면허번호 4개 필드로 분리
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_ISNC_REGN_CODE" 		, 0 	, g_LISENCE_NUM1				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_ISNC_YEAR" 			, 0 	, g_LISENCE_NUM2				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_ISNC_SRNO_PIP" 		, 0 	, g_LISENCE_NUM3				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_ISNC_DETL_SRNO" 		, 0 	, g_LISENCE_NUM4				)
+			
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_SPFT_VLTN_SCOR"      , 0 , g_szFEATURE_SCORE			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "TR_DATE"                   , 0 , g_szTR_DATE				)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "OTSD_TR_UNIQ_NO"           , 0 , g_szOTSDTRUNIQNO			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_TORF_YN"             , 0 , g_szIDNTF_TORF_YN			)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SCR_TYPE_CLS_CODE"         , 0 , "1" 						)
+			DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_UNIQ_NO"               , 0 , Form.GetSharedData( "&HOST_DATE", False ) & "D0000"	) '신분증 진위확인만 하는경우 : 오늘날짜+T0000(총 8자리)
+			
+		'2022.04.25 obcsb_nmet_102c 서비스 추가
+		Case "obcsb_nmet_102c"
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "NMET_BSWR_CLCD" 		, 0 , "010"					)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "REG_UNIQ_NO" 		, 0 , Form.GetSharedData( "&HOST_DATE", False ) & "D0000"	)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "BSWR_CLS_CODE"		, 0 , "2"					)	'2.신분증진위확인
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "OTSD_TR_UNIQ_NO"		, 0 , g_szOTSDTRUNIQNO			)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "TR_DATE"				, 0 , g_szTR_DATE				)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_SRNO"			, 0 , cont0.edtSRNO.caption		)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "RSPN_TYPE_CODE"		, 0 , g_szRSPN_TYPE_CODE		)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_TORF_YN"		, 0 , g_szIDNTF_TORF_YN		)
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_IMG_DATA_SIZE"	, 0 , g_szFEATURE_LEN			)
+		
+	End Select
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 수신 완료
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'신분증 등록
+	If szTranID = "obaci_acct_158a" then
+		cont0.edtSRNO.caption 	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "SRNO" 		, 0)	'신분증등록일련번호
+		g_szAFT_RCNO_PIP 		= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "MDAF_RCNO_PIP"	, 0) '변경후실명확인번호PIP
+		
+		g_szRSPN_TYPE_CODE = ""
+		DATAMANAGER.RequestTranData("obtss_idvs_001a") 
+		
+		Form.SetTimerEvent("1", 1, 30)
+
+	'금결원_신분증 진위확인
+	ElseIf szTranID = "obtss_idvs_001a" Then 
+		'Form.SetTimerEvent("1", 0, 30)
+		
+		g_BIOTrName	= szTranID
+		g_BIORetry	= 0
+		g_szOTSDTRUNIQNO = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "OTSD_TR_UNIQ_NO" , 0)
+		
+		Form.SetTimerEvent2(2,1,DEF_1ST_TIME) '처음1회는 0.5초 후 조회
+		
+	ElseIf szTranID == "obtss_idvs_002a" Then
+		sCODE 		= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "RSPN_CODE" 		, 0)
+		'g_szTR_DATE        = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "TR_DATE" 		, 0) '거래일자
+		'g_szOTSDTRUNIQNO   = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "OTSD_TR_UNIQ_NO"	, 0) '대외거래고유번호
+		g_szRSPN_TYPE_CODE = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "RSPN_TYPE_CODE"	, 0) '응답유형코드 (0:정상 9:오류  8:수기허용 R:재시도)
+		g_szRSPN_MSG       = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "RSPN_MSG_CNTT" 	, 0) '응답메시지내용
+		Recv_TR_Code	= DATAMANAGER.GetDataMsgCode(szTranID)
+		
+		if sCODE == "6617" or Recv_TR_Code == "6617" then
+			g_BIORetry = g_BIORetry + 1
+			'v0003
+			'if g_BIORetry >= 3 then 
+			if g_BIORetry >= 21 then 
+				Form.ShowAlert("알림", "등록에 실패하였습니다. 결제원 전문 처리중 오류")
+				g_BIORetry= 0 '초기화
+				Exit Sub
+			end if 
+			
+			Form.SetTimerEvent(3,1,DEF_2ST_TIME) '2회부터는 1초 후 조회, 3회 실패 시 서비스에서 에러처리
+			Exit Sub
+		end if
+		
+		
+		'정상
+		If g_szRSPN_TYPE_CODE == "0" Then 
+			
+			g_szTR_DATE = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "TR_DATE" 		, 0) '거래일자
+			
+			'신분증진위확인여부
+			g_szIDNTF_TORF_YN = "Y" 		
+			
+			'2022.04.25 obcsb_nmet_102c 서비스 추가
+			DATAMANAGER.RequestTranData("obcsb_nmet_102c")
+		Else
+			'TEST > 테스트-SKIP처리인경우, 정상으로 처리
+			if ChkButton0.checkstate == "1" or ChkButton0.checkstate == 1 then		
+				'신분증진위확인여부
+				g_szIDNTF_TORF_YN = "Y" 		
+				g_szRSPN_TYPE_CODE = "0"	'22.05.17 테스트일경우 추가
+				
+				'2022.04.25 obcsb_nmet_102c 서비스 추가
+				DATAMANAGER.RequestTranData("obcsb_nmet_102c")
+			else
+				'신분증진위확인여부
+				g_szIDNTF_TORF_YN = "N"
+	
+				'진위확인 오류내역 생성추가
+				DATAMANAGER.RequestTranData("obaci_idvs_003a")
+			end if
+		End If
+	
+	'2022.04.25 obcsb_nmet_102c 서비스 추가
+	ElseIf szTranID == "obcsb_nmet_102c" Then 	
+		'========== [정상]알림팝업(mbbdm85121_p1) ==========
+		Dim szTitle, szMsg, szFlag 
+		szTitle = "알림"
+		szMsg = "신분증 전송이 완료 되었습니다."
+		szFlag = "complete"
+		
+		if g_OsType == "1" then 'AOS
+			Form.setCaptureEnblYN("Y")
+		end if
+		
+		Form.OpenPopup("mbbdm85121_p1" , szTitle.."#"..szMsg.."#"..szFlag , "5")
+		
+    '진위확인이력생성 
+	ElseIf szTranID == "obaci_idvs_003a" Then		
+		Dim szMsg
+		szMsg = ""
+		If g_szRSPN_TYPE_CODE == "8" Then  '수기허용 
+			'수기허용도 진위확인 오류로 처리함
+			szMsg = "신분증정보가 불일치 합니다.\n재촬영하시거나,인식된 정보를 \n확인해주시기 바랍니다."
+		ElseIf g_szRSPN_TYPE_CODE == "R" Then	'재시도
+			szMsg = "신분증정보가 불일치 합니다.\n재촬영하시거나,인식된 정보를 \n확인해주시기 바랍니다."
+		ElseIf g_szRSPN_TYPE_CODE == "9" Then	'오류
+			szMsg = "이 신분증은 사용할 수 없습니다.\n확인 후 이용바랍니다."		
+		ElseIf g_szRSPN_TYPE_CODE == "7" Then		
+			szMsg = "죄송합니다. 시스템 문제로 \n신분증 진위확인을 하지 못하였습니다.\n추후 다시 시도하여 주시기 바랍니다."
+		Else
+			If Trim(g_szRSPN_MSG) <> "" Then
+				szMsg = g_szRSPN_MSG
+			Else
+				szMsg = "죄송합니다. 시스템 문제로 \n신분증 진위확인을 하지 못하였습니다.\n추후 다시 시도하여 주시기 바랍니다."
+			End If
+		End If
+		
+		if g_OsType == "1" then 'AOS
+			Form.setCaptureEnblYN("Y")
+		end if
+		
+		
+		Form.OpenPopup("mbbdm85122" , szMsg)	
+	end if	
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szMsg
+	szMsg = ""	
+	
+	if szTranID == "obaci_acct_158a" then
+		If szErrCode = "4984" then
+			'========== [에러]알림팝업(mbbdm85121_p1) ==========
+			szMsg = "생년월일을 확인하세요.(주민번호 앞 6자리)"
+			
+			Dim szTitle, szFlag 
+			szTitle = "알림"
+			szFlag = "error"
+			Form.OpenPopup("mbbdm85121_p1" , szTitle.."#"..szMsg.."#"..szFlag , "5")
+			
+		Else 
+			szMsg = "신분증 정보를 읽을 수 없습니다.다시 시도하여 주십시요."
+			Form.OpenPopup("mbbdm85122" , szMsg)	
+		End If
+		
+	
+	elseIf szTranID == "obtss_idvs_001a" or szTranID == "obtss_idvs_002a" Then 
+
+		'22.05.17 테스트일경우 추가
+		if ChkButton0.checkstate = "1" or ChkButton0.checkstate = 1 then
+			'테스트_신분증인증SKip
+		     Form.SetTimerEvent("1", 0, 30)
+		     
+			'g_szTR_DATE		= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "TR_DATE" 		, 0)
+			'g_szOTSDTRUNIQNO	= DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "OTSD_TR_UNIQ_NO" , 0)
+			g_szRSPN_TYPE_CODE = "0"	'0:정상 9:오류  8:수기허용 R:재시도	
+			g_szIDNTF_TORF_YN  = "Y" 	'신분증진위확인여부	
+			
+			'2022.04.25 obcsb_nmet_102c 서비스 추가
+			DATAMANAGER.RequestTranData("obcsb_nmet_102c")
+		Else
+			Dim szMsgTmp
+			szMsgTmp = DATAMANAGER.GetDataMsgSubText( szTranID )
+			szMsg = szErrMsg & Chr(13) & Chr(10) & szMsgTmp
+			
+			Form.OpenPopup("mbbdm85122" , szMsg)
+		End If
+		
+	'2022.04.25 obcsb_nmet_102c 서비스 추가
+	elseIf szTranID == "obcsb_nmet_102c" Then 
+		Dim szMsgTmp
+		szMsgTmp = DATAMANAGER.GetDataMsgSubText( szTranID )
+		szMsg = szErrMsg & Chr(13) & Chr(10) & szMsgTmp
+		
+		Form.OpenPopup("mbbdm85122" , szMsg)
+    '진위확인이력생성 
+	ElseIf szTranID == "obaci_idvs_003a" Then
+         '이력생성중 오류인 경우인 경우 오류종료처리하지 않고, 진위확인오류로 처리함
+		If g_szRSPN_TYPE_CODE = "8" Then  '수기허용 
+			'수기허용도 진위확인 오류로 처리함
+			szMsg = "신분증정보가 불일치 합니다.\n재촬영하시거나,인식된 정보를 \n확인해주시기 바랍니다."
+		ElseIf g_szRSPN_TYPE_CODE = "R" Then	'재시도
+			szMsg = "신분증정보가 불일치 합니다.\n재촬영하시거나,인식된 정보를 \n확인해주시기 바랍니다."
+		'v0003
+		ElseIf g_szRSPN_TYPE_CODE = "9" Then	'오류
+			'szMsg = "이 신분증은 사용할 수 없습니다.\n확인 후 이용바랍니다."		
+			szMsg = "죄송합니다. \n신분증 진위확인을 하지 못하였습니다.\n추후 다시 시도하여 주시기 바랍니다."		
+		ElseIf g_szRSPN_TYPE_CODE = "7" Then		
+			szMsg = "죄송합니다. 시스템 문제로 \n신분증 진위확인을 하지 못하였습니다.\n추후 다시 시도하여 주시기 바랍니다."
+		Else
+			If Trim(g_szRSPN_MSG) <> "" Then
+				szMsg = g_szRSPN_MSG
+			Else
+				szMsg = "죄송합니다. 시스템 문제로 \n신분증 진위확인을 하지 못하였습니다.\n추후 다시 시도하여 주시기 바랍니다."
+			End If
+		End If
+		
+		Form.OpenPopup("mbbdm85122" , szMsg)
+	end if
+	
+End Sub
+
+'============================================================================
+' Form_OnTimerEvent(sTimerID) : 타이머이벤트
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	If sTimerID == "1" or sTimerID == 1 Then
+		Form.ShowAlert("오류", "통신상태가 원활하지 않습니다.\n잠시 후 다시 처리해 주세요.")
+		Form.SetTimerEvent(sTimerID, 0, 30)
+		Exit Sub
+	  'v0001 jsi start
+	ElseIf sTimerID == "2" or sTimerID == 2 Then
+		Form.SetTimerEvent2(sTimerID, 0, DEF_1ST_TIME)
+		
+		DATAMANAGER.SetDataValue(0, "obtss_idvs_002a", "InBlock1", "OTSD_TR_UNIQ_NO"	, 0,  g_szOTSDTRUNIQNO)
+		DATAMANAGER.SetDataValue(0, "obtss_idvs_002a", "InBlock1", "RPCS_TMNU"			, 0,  g_BIORetry)
+		DATAMANAGER.RequestTranData("obtss_idvs_002a")
+		
+	ElseIf sTimerID == "3" or sTimerID == 3 Then
+		Form.SetTimerEvent(sTimerID, 0, DEF_2ST_TIME)
+		
+		DATAMANAGER.SetDataValue(0, "obtss_idvs_002a", "InBlock1", "OTSD_TR_UNIQ_NO"	, 0,  g_szOTSDTRUNIQNO)
+		DATAMANAGER.SetDataValue(0, "obtss_idvs_002a", "InBlock1", "RPCS_TMNU"			, 0,  g_BIORetry)
+		DATAMANAGER.RequestTranData("obtss_idvs_002a")
+		
+	'v0001 jsi end		
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'v0002
+	if g_OsType == "1" then 'AOS
+		Form.setCaptureEnblYN("Y")
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_acct_158a" trcode="obaci_acct_158a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_idvs_001a" trcode="obtss_idvs_001a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_idvs_003a" trcode="obaci_idvs_003a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_nmet_102c" trcode="obcsb_nmet_102c" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtss_idvs_002a" trcode="obtss_idvs_002a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_acct_158a" title="비대면계좌개설 신분증 등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="354" _ulen="262" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ATCH_FILE_SIZE^첨부파일사이즈^11^0^7^0^0^0^0
+UI_IMG_DATA^UI이미지데이터^102400^0^0^0^0^0^0
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+ORGL_RCNO_PIP^원실명확인번호PIP^68^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+MDAF_RCNO_PIP^변경후실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="101" _ulen="75" >
+
+SRNO^일련번호^11^0^7^0^0^0^0
+MDAF_RCNO_PIP^변경후실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_idvs_001a" title="금결원_신분증진위확인요청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="1062" _ulen="816" >
+
+IDNTF_CLS_CODE^신분증구분코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+ORGL_RCNO_PIP^원실명확인번호PIP^68^0^0^0^0^0^0
+IDNTF_FLNM^신분증성명^100^0^0^0^0^0^0
+ORGL_IDNTF_FLNM^원신분증성명^100^0^0^0^0^0^0
+ISNC_DATE_PIP^발급일자PIP^68^0^0^0^0^0^0
+ORGL_ISNC_DATE_PIP^원발급일자PIP^68^0^0^0^0^0^0
+OLD_DRVN_LCNS_NO_PIP^구운전면허번호PIP^68^0^0^0^0^0^0
+ORGL_OLD_DRVN_LCNS_NO_PIP^원구운전면허번호PIP^68^0^0^0^0^0^0
+PVAF_NO_PIP^보훈번호PIP^68^0^0^0^0^0^0
+ORGL_PVAF_NO_PIP^원보훈번호PIP^68^0^0^0^0^0^0
+IDNTF_SPFT_VLTN_SCOR^신분증특징평가점수^3^0^0^0^0^0^0
+NMET_CLS_CODE^비대면구분코드^2^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_ISNC_REGN_CODE^UI발급지역코드^2^0^0^0^0^0^0
+UI_ISNC_YEAR^UI발급년도^2^0^0^0^0^0^0
+UI_ISNC_SRNO_PIP^UI발급일련번호PIP^68^0^0^0^0^0^0
+UI_ISNC_DETL_SRNO^UI발급세부일련번호^2^0^0^0^0^0^0
+ATCH_FILE_SIZE^첨부파일사이즈^11^0^7^0^0^0^0
+UI_PHTG_DATA_CNTT^UI사진데이터내용^5120^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="239" _ulen="181" >
+
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+RSPN_TYPE_CODE^응답유형코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_idvs_003a" title="신분증 진위확인스캔처리(창구)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="2365" _ulen="1717" >
+
+SCR_TYPE_CLS_CODE^화면유형구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PXPR_YN^대리인여부^1^0^0^0^0^0^0
+ACPT_DTL_CNTT^접수상세내용^1000^0^0^0^0^0^0
+IDNTF_CMPR_PROS_YN^신분증강제처리여부^1^0^0^0^0^0^0
+TLMS_MNNO^전문관리번호^13^0^0^0^0^0^0
+IDNTF_TORF_YN^신분증진위여부^1^0^0^0^0^0^0
+IDNTF_SCAN_PROS_BRCD^신분증스캔처리지점코드^4^0^0^0^0^0^0
+IDNTF_SCAN_PROS_EMPNO^신분증스캔처리직원번호^9^0^0^0^0^0^0
+IDNTF_SCAN_PROS_YMDH^신분증스캔처리일시^19^0^0^0^0^0^0
+IDNTF_TORF_CNFR_DATE^신분증진위확인일자^8^0^0^0^0^0^0
+IDNTF_TORF_CNFR_PROS_BRCD^신분증진위확인처리지점코드^4^0^0^0^0^0^0
+IDNTF_TORF_CNFR_PROS_EMPNO^신분증진위확인처리직원번호^9^0^0^0^0^0^0
+IDNTF_TORF_CNFR_RSLT_CLCD^신분증진위확인결과구분코드^2^0^0^0^0^0^0
+IDNTF_TORF_CNFR_PROS_YMDH^신분증진위확인처리일시^19^0^0^0^0^0^0
+IDNTF_TORF_CNFR_RSCD^신분증진위확인응답코드^3^0^0^0^0^0^0
+IDNTF_TORF_BSWR_DETL_CLCD^신분증진위업무세부구분코드^2^0^0^0^0^0^0
+IDNTF_TORF_CNFR_BSWR_CLCD^신분증진위확인업무구분코드^2^0^0^0^0^0^0
+IDNTF_TORF_CNFR_BSWR_SCR_ID^신분증진위확인업무화면ID^10^0^0^0^0^0^0
+IDNTF_TORF_CNFR_BSWR_SCR_NO^신분증진위확인업무화면번호^15^0^0^0^0^0^0
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+ORGL_RCNO_PIP^원실명확인번호PIP^68^0^0^0^0^0^0
+IDNTF_FLNM^신분증성명^100^0^0^0^0^0^0
+ORGL_IDNTF_FLNM^원신분증성명^100^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+ORGL_ISNC_DATE^원발급일자^8^0^0^0^0^0^0
+OLD_DRVN_LCNS_NO^구운전면허번호^14^0^0^0^0^0^0
+ORGL_OLD_DRVN_LCNS_NO^원구운전면허번호^14^0^0^0^0^0^0
+ORGL_PVAF_NO^원보훈번호^9^0^0^0^0^0^0
+PVAF_NO^보훈번호^9^0^0^0^0^0^0
+IDNTF_SPFT_VLTN_SCOR^신분증특징평가점수^3^0^0^0^0^0^0
+IDNTF_CLS_CODE^신분증구분코드^2^0^0^0^0^0^0
+IDNTF_TORF_CNFR_RCNO_PIP^신분증진위확인실명확인번호PIP^68^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+UI_ISNC_REGN_CODE^UI발급지역코드^2^0^0^0^0^0^0
+UI_ISNC_YEAR^UI발급년도^2^0^0^0^0^0^0
+UI_ISNC_SRNO_PIP^UI발급일련번호PIP^68^0^0^0^0^0^0
+UI_ISNC_DETL_SRNO^UI발급세부일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="250" _ulen="188" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+IDNTF_TORF_CNFR_DATE^신분증진위확인일자^8^0^0^0^0^0^0
+ACPT_DTL_CNTT^접수상세내용^1000^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="151" _ulen="113" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+IDNTF_TORF_CNFR_DATE^신분증진위확인일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_nmet_102c" title="비대면본인인증및1원역이체관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="159" _ulen="117" >
+
+NMET_BSWR_CLCD^비대면업무구분코드^3^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+BSWR_CLS_CODE^업무구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="490" _ulen="362" >
+
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+ATHN_MTHD_CLS_CODE^인증방법구분코드^1^0^0^0^0^0^0
+ATHN_STAT_CLS_CODE^인증상태구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="320" _ulen="232" >
+
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+RSPN_TYPE_CODE^응답유형코드^1^0^0^0^0^0^0
+IDNTF_TORF_YN^신분증진위여부^1^0^0^0^0^0^0
+IDNTF_IMG_DATA_SIZE^신분증이미지데이터사이즈^9^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="220" _ulen="160" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_BANK_ACNO^입금은행계좌번호^30^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="125" _ulen="97" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCVN_DATE^수취일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtss_idvs_002a" title="금결원_신분증진위확인요청(송신" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="144" _ulen="110" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+RPCS_TMNU^재처리횟수^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="239" _ulen="181" >
+
+RSPN_CODE^응답코드^4^0^0^0^0^0^0
+RSPN_MSG_CNTT^응답메시지내용^100^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+RSPN_TYPE_CODE^응답유형코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

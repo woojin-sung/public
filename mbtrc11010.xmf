@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="13300" scrname="CFD잔고평가" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" itemcodetype="136" etcfunctions="" delegate="1" ly_vert="10,9,310,39,1" />
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,9,39,39,1" />
+		<FORMTAB name="fmtab0" tabcount="6" tabwidthtype="2" tabheadheight="40" usepg="1" pgbarheight="1" autosave="1" ly_vert="0,54,375,510,1" >
+			<PAGE name="page004795" caption="잔고" linkfile="mbtrc11000_t5" loadingtype="1" />
+			<PAGE name="page005177" caption="계좌현황" linkfile="mbtrc11000_t6" loadingtype="1" />
+			<PAGE name="page008634" caption="체결" linkfile="mbtrc11000_t3" loadingtype="1" />
+			<PAGE name="page006973" caption="손익현황" linkfile="mbtrc11000_t4" loadingtype="1" />
+			<PAGE name="page006813" caption="청산손익" linkfile="mbtrc11000_t7" loadingtype="1" />
+			<PAGE name="page005176" caption="월정산내역" linkfile="mbtrc11000_t8" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6068" _ulen="5656" >
+'--===========================================================================
+'--===========================================================================
+'20230307 HSZ : 잔고 탭 삭제, 월정산내역 탭 추가
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim g_szACNO, g_szASNO, g_szItemCode
+Dim g_nSNSType '1 카카오톡 , 2 카카오톡 화면 공유 , 3 트위터 , 4페이스북
+Dim g_szLastTab
+Dim g_szTitle
+g_szTitle = "알림"
+g_szLastTab = 0
+
+Dim g_AcntCode	'20230307 HSZ : CFD계좌코드(안심/일반)
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	'20230307 HSZ START : iOS만 currenttab 전에 세팅 -  폼탭 SetUseAnimation 활성화 위해
+	szOsType 	= Form.GetSharedData("&OS_TYPE", False)  '1.안드로이드 2.iOS
+	if szOsType = "2" then
+		fmtab0.setTabHeaderImage("tab_01_o.9.png","tab_01_n.9.png", 0.5)	
+	end if
+	'20230307 HSZ END
+	
+	Dim szScreenNo, szTab
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+	szTab = Form.GetOpenLinkData()
+	
+	If ( szTab = "" Or szTab = null ) And (fmtab0.currenttab <> 0 and fmtab0.currenttab <> "0") Then
+		szTab = fmtab0.currenttab
+	End If
+	
+	If Trim(szTab) <> "" Then '티커에서 넘어올 때
+		fmtab0.currenttab = szTab
+		fmtab0_OnTabChanged( CInt(szTab) )
+	Else	
+		If szScreenNo = "13300" Then		'계좌평가, (v002) 잔고평가
+			fmtab0.currenttab = "0"
+			
+		ElseIf szScreenNo = "13301" Then	'예수금/증거금, (v003) 계좌현황으로 명칭 변경
+			fmtab0.currenttab = "1"
+			
+		ElseIf szScreenNo = "13302" Then	'체결내역
+			fmtab0.currenttab = "2"
+		
+		ElseIf szScreenNo = "13304" Then	'손익현황
+			fmtab0.currenttab = "3"
+		
+		ElseIf szScreenNo = "13305" Then	'청산손익
+			fmtab0.currenttab = "4"
+		
+		ElseIf szScreenNo = "13308" Then	'월정산내역	
+			fmtab0.currenttab = "5"
+			
+		Else
+			fmtab0.currenttab = "0"
+		
+		End If
+	End If
+	
+'	20230307 HSZ START
+	fmtab0.SetUseAnimation("1")
+	szACNO = Trim(Form.GetCtlProp("acnt0", "total"))
+	if szACNO <> "" then
+		DATAMANAGER.RequestTranData("obtrc_comm_200r")
+	end if
+'	20230307 HSZ END
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName = "SCREEN_MENU" Then
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns1" , "", "")
+		end if
+		
+	End If
+
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", g_AcntCode)
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName = "MOVEPOP_RETURN"	then
+		Dim szListItems
+		szListItems	=	split(sRet,"★")
+		
+		if	szListItems(1)	=	"0"	then			'현재가
+'			Form.OpenScreen("11000" , g_szItemCode & "★" & "0") 
+		elseif 	szListItems(1)	=	"1"	then		'매수
+'			Form.OpenScreen("12000" , g_szItemCode & "★" & "0") 
+		elseif 	szListItems(1)	=	"2"	then		'매도
+'			Form.OpenScreen("12000" , g_szItemCode & "★" & "1") 
+		else
+		end if
+		
+	elseif sKeyName = "snsshare" Then			' 폼탭 초기화
+		g_nSNSType = Cint(sRet)
+		
+		If g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+			
+		End If		
+	end if 
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+'	20230307 HSZ START
+	DATAMANAGER.RequestTranData("obtrc_comm_200r")
+'	20230307 HSZ END
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+
+	fmtab0.currenttab = 	nCurrentTab	'20230307 HSZ: 탭 애니메이션 효과
+	
+	If nCurrentTab = 0 Then                       '계좌평가, (v002) 잔고평가
+		Form.setTitleCaption( "국내CFD 잔고" )
+
+	ElseIf nCurrentTab = 1 Then		'증거금/예수금, (v003) 계좌현황으로 명칭 변경
+		Form.setTitleCaption( "국내CFD 계좌현황" )
+		
+	ElseIf nCurrentTab = 2 Then		'체결
+		Form.setTitleCaption( "국내CFD 체결" )
+		
+	ElseIf nCurrentTab = 3 Then		'손익현황
+		Form.setTitleCaption( "국내CFD 손익현황" )
+	
+	ElseIf nCurrentTab = 4 Then		'청산손익
+		Form.setTitleCaption( "국내CFD 청산손익" )
+
+	ElseIf nCurrentTab = 5 Then		'월정산내역
+		Form.setTitleCaption( "국내CFD 월정산내역" )
+	End If
+	
+	g_szLastTab = nCurrentTab
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "RECEIVE", g_AcntCode)
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	btnSearch_OnClick()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+'	20230307 HSZ START
+	szACNO = Form.GetCtlProp("acnt0", "total")
+	szASNO = Form.GetCtlProp("acnt0", "sequence")
+	If szTranID = "obtrc_comm_200r" then
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ACNO" , 0 , szACNO)
+		DATAMANAGER.SetDataValue(0, szTranID , "InBlock1" , "ASNO" , 0 , szASNO)
+	End if
+'	20230307 HSZ END
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+'	20230307 HSZ START
+	If szTranID = "obtrc_comm_200r" then
+		g_AcntCode = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "CFD_MARG_GRAD_CODE" , 0)
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "CHANGE_ACCTNO", g_AcntCode)
+	End If
+'	20230307 HSZ END
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrc_comm_200r" trcode="obtrc_comm_200r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrc_comm_200r" title="CFD_계좌정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="98" _ulen="76" >
+
+CFD_MARG_GRAD_CODE^CFD증거금등급코드^1^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

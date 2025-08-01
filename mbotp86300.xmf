@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86300" scrname="타기관OTP이용등록_안내" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label1" fontsize="4" caption="타기관 OTP 이용 등록 안내" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_top_back_light" ly_vert="21,19,22,22,1" />
+		<BUTTON name="Button0" caption="확인" fgcolor="063:255255255" bgcolor="191:255255255" fontsize="4" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_phone_new" ly_vert="30,134,60,60,1" />
+		<LABEL name="Label2" caption="본인명의 휴대폰" ly_vert="100,148,250,32,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_id" ly_vert="30,207,60,60,1" />
+		<LABEL name="Label3" caption="신분증(주민등록증, 운전면허증)" multiline="1" ly_vert="100,212,264,50,1" />
+		<IMAGE name="Image2" autosize="1" imgpath="icon_account_new" ly_vert="30,280,60,60,1" />
+		<LABEL name="Label4" caption="본인명의 계좌(은행/증권계좌)" ly_vert="100,294,250,32,1" />
+		<LABEL name="Label5" bgcolor="090:238239240" transmode="0" ly_vert="0,370,375,10,1" />
+		<LABEL name="Label6" fontsize="-2" fontstyle="01" caption="이용가능 고객" ly_vert="30,399,250,20,1" />
+		<LABEL name="Label7" fontsize="-2" caption="만 19세 이상 개인(내국인, 본인)" ly_vert="30,424,250,20,1" />
+		<LABEL name="Label8" fontsize="-2" fontstyle="01" caption="이용시간" ly_vert="30,484,250,20,1" />
+		<LABEL name="Label9" fontsize="-2" caption="24시간 365일 (23:50~00:20 제외)" ly_vert="30,509,250,20,1" />
+		<LABEL name="Label10" fontsize="4" fontstyle="01" caption="타기관 OTP 등록을 위해" ly_vert="30,65,273,25,1" />
+		<LABEL name="Label11" fontsize="4" fontstyle="01" caption="아래 준비물을 미리 확인해주세요." ly_vert="30,90,337,25,1" />
+		<LABEL name="Label0" fontsize="-2" caption="법인은 로그인 후 등록 가능" ly_vert="30,445,250,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1636" _ulen="1558" >
+
+Dim g_szOpenType
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBackPress.setMaintainingRatio("1")
+	
+	Image0.setMaintainingRatio("1")
+	Image1.setMaintainingRatio("1")
+	Image2.setMaintainingRatio("1")	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+	
+	Label11.setHighlight(332, 0, 6)
+	
+	Label2.changeTextAttr(5, 3, 4, 0, true)
+	Label3.changeTextAttr(0, 3, 4, 0, true)
+	Label4.changeTextAttr(5, 2, 4, 0, true)
+	
+'	Dim szOpenData
+'	szOpenData = Form.GetOpenLinkData()
+'	'szOpenData = "기타★Super365Acnt★"
+'	if szOpenData <> "" and szOpenData <> null then
+'		Dim tSplit
+'		tSplit = Split(szOpenData, "★")
+'		
+'		'20230904 웹으로부터 연동된 슈퍼365 개설루트
+'		if tSplit(1) == "Super365Acnt" then
+'		    g_szOpenType = "Super365Acnt"
+'	    end if
+'	    
+'	    if #tSplit > 2 then
+'			if tSplit(2) == "Super365Acnt" then
+'				g_szOpenType = "Super365Acnt"
+'			end if
+'		end if
+'		
+'	end if
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	Form.SetSharedData( "mOTP_IntoClcd" , "NMET_BSWR" ) '20240226 jsi 추가 - 비대면인 경우 
+	Form.SetSharedData("BDM_NMETBSWRGB", "006") '타기관otp이용등록
+	Form.OpenNextPopup("mbbdm86130", "" , "" ) '휴대폰인증
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+
+Sub Form_OnFormBackKeyPressed()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

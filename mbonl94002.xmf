@@ -1,0 +1,1054 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94002" scrname="지정심사신청" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="LinkForm0" ly_vert="0,60,375,527,1" />
+		<BUTTON name="btnNext" caption="다음" fontsize="4" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" caption="개인전문투자자 지정 심사 신청" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="imgBack" autosize="1" imgpath="icon_top_back_light" ly_vert="21,19,24,24,1" />
+		<BUTTON name="btnBack" btnimage="alpha" ly_vert="13,8,40,40,1" />
+		<BUTTON name="btnRetry" caption="재촬영" fgcolor="267:000000000" fontsize="4" btnimage="btn_27.9" ly_vert="0,587,189,60,1" />
+		<BUTTON name="btnNextHalf" caption="다음" fontsize="4" btnimage="btn_20.9" ly_vert="185,587,190,60,1" />
+		<ACCOUNT name="Account0" visible="0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,135,136,137,138,139,140,200" etcfunctions="" ly_vert="400,79,150,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="29094" _ulen="26456" >
+'--===========================================================================
+' 01. 화 면 명 : 지정신청심사
+' 02. 화면설명 : 메인화면
+' 03. 작    성 : 
+' 04. 수    정 : 
+' 2022.04.13 : v0001 : KSJ : 신분증 등록 및 진위확인 개선
+' 2023.11.21 : v0002 : 전상일 : 모바일신분증 추가
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_nStep '현재 스텝
+Dim g_szApplyAbleYN '신청 가능YN
+Dim g_szVcallTrgtYn	'영상대상여부
+Dim g_szSRNO 	'신분증 진위 확인 후, 받은 일련번호
+
+Dim g_CERT_METHOD
+Dim szUserName, szJumin, szBirth 'v0002 모바일신분증 비교를 위해 전역변수로 변경
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' f_ChangeBtnState() : 각각 체크해야할 버튼 확인하여 다음 버튼 활성화/비활성화
+'============================================================================
+Function f_ChangeBtnState(sEnable)
+	btnRetry.visible = false
+	btnNextHalf.visible = false
+	btnNext.visible = true
+
+	if tonumber(sEnable) == 1 or sEnable == true then		
+		btnNext.enable = true
+		btnNext.btnimage = "btn_20.9"
+		btnNext.fgcolor = "273"
+	else
+		btnNext.enable = false
+		btnNext.btnimage = "btn_27.9"
+		btnNext.fgcolor = "269"
+	end if
+End Function
+
+'============================================================================
+' f_SetNextStep() : 단계에 맞는 링크폼 세팅 및 버튼 세팅
+'============================================================================
+Function f_SetNextStep()
+	if g_nStep == 0 then
+		LinkForm0.linkfile = "mbonl94002_s0"
+		btnNext.caption = "다음"
+		f_ChangeBtnState(true)
+		
+	elseif g_nStep == 1 then
+		LinkForm0.linkfile = "mbonl94002_s1"
+		btnNext.caption = "다음"
+		f_ChangeBtnState(false)
+		
+	elseif g_nStep == 2 then
+		LinkForm0.linkfile = "mbonl94002_s2"
+		btnNext.caption = "다음"
+		
+		f_ChangeBtnState(false)
+		
+'		f_ChangeBtnState(true) 'v0001	
+		
+	'v0001 STA
+	elseif g_nStep == 21 then
+		LinkForm0.linkfile = "mbonl94002_s21"
+		
+		btnRetry.visible = true
+		btnNextHalf.visible = true
+		btnNext.visible = false
+		
+		btnNextHalf.enable = true
+		btnNextHalf.btnimage = "btn_20.9"
+		btnNextHalf.fgcolor = "273"
+		
+	'v0001 FIN
+	
+	elseif g_nStep == 3 then
+		LinkForm0.linkfile = "mbonl94002_s3"
+		btnNext.caption = "심사신청"
+		f_ChangeBtnState(false)
+		
+		Form.triggerEvent("LinkForm0", "change_step3", g_szApplyAbleYN)
+	end if
+	
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+End Function
+
+'============================================================================
+' f_SetPrevStep() : 이전 화면으로 이동
+'============================================================================
+Function f_SetPrevStep()		
+	if g_nStep = 0 then
+		Form.MsgBox("알림", "신청을 종료하시겠습니까?", "Close_Form", 2)
+	else
+		if g_nStep = 1 then
+			g_nStep = 0
+		
+			LinkForm0.linkfile = "mbonl94002_s0"
+			btnNext.caption = "다음"
+			f_ChangeBtnState(true)
+			
+		elseif g_nStep == 2 then
+			g_nStep = 1
+			
+			LinkForm0.linkfile = "mbonl94002_s1"
+			btnNext.caption = "다음"
+			f_ChangeBtnState(true)
+			
+		'v0001 STA
+		elseif g_nStep == 21 then
+			g_nStep = 2
+			LinkForm0.linkfile = "mbonl94002_s2"
+			btnNext.caption = "다음"
+			f_ChangeBtnState(true)
+			
+		elseif g_nStep == 3 then	
+			'모바일신분증 추가
+			if g_CERT_METHOD == "1" then
+				g_nStep = 21
+				LinkForm0.linkfile = "mbonl94002_s21"
+				
+				btnRetry.visible = true
+				btnNextHalf.visible = true
+				btnNext.visible = false
+				
+				btnNextHalf.enable = true
+				btnNextHalf.btnimage = "btn_20.9"
+				btnNextHalf.fgcolor = "273"
+			else
+				g_nStep = 2
+				LinkForm0.linkfile = "mbonl94002_s2"
+				btnNext.caption = "다음"
+				
+				f_ChangeBtnState(false)
+			end if 
+		
+'		v0001 FIN
+		end if
+		
+		Form.triggerEvent("LinkForm0", "PREV_STEP", "")
+	end if
+End Function
+
+'============================================================================
+Function f_GetMobileData()
+	g_NAME		    = Form.GetSharedData("&RET_MOBILEID_NAME", 0)				'이름
+	g_RCNO 		    = Form.GetSharedData("&RET_MOBILEID_IHIDNUM", 0 )			'암호화된 실명확인번호
+	g_ISSU_DATE	    = Form.GetSharedData("&RET_MOBILEID_ISSUDE", 0)			'발급일자
+	g_BIRTH		    = Form.GetSharedData("&RET_MOBILEID_BIRTH", 0)			'생년월일
+	
+	ImgMskData 	    = Form.GetSharedData("&RET_MOBILEID_IMAGE_MASK" , 0)		'주민번호 마스킹이미지 
+	''20231207 jsi 수정: 이미지 처리 안함---------------------------------------------
+	g_ImgData  	    = Form.GetSharedData("&RET_MOBILEID_IMAGE", 0)			'주민번호 마스킹없는이미지
+	g_ImgFace	    = ""'Form.GetSharedData("&RET_MOBILEID_IMAGE_FACE", 0)			'얼굴 이미지
+	'20231207 jsi 수정: 이미지 처리 안함---------------------------------------------
+	if ImgMskData <> "" and g_ImgData <> "" then
+		g_ImgDataLen 	= Len(g_ImgData)
+	end if
+	if g_ImgFace <> "" and g_ImgFace <> "" then
+		g_ImgFaceLen 	= Len(g_ImgFace)
+	end if
+	
+	g_LISENCE_NUM   = Form.GetSharedData("&RET_MOBILEID_DLNO"	, 0 ) 	'신분증번호
+	
+	g_RCNO_7		  = Form.GetSharedData("&RET_MOBILEID_IHIDNUM7"	, 0 ) 	'실명확인번호 뒷 7자리
+End Function
+
+''****************************************************************************
+''               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+''****************************************************************************
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData( "mbonl94002_USER_NAME" , "")
+	Form.SetSharedData( "mbonl94002_USER_BIRTH" , "")
+	Form.SetSharedData( "mbonl94002_s1_CHECK_SUMMARY" , "")
+	Form.SetSharedData( "mbonl94002_s1_CHECK_DETAIL" , "")
+	'2022.04.22 현재 요건에는 없으나 추후 추가 요건을 통해 필요한 코드가 될 수 있으므로 주석처리
+'	'v0001 STA mbonl94002_p31 Shared값 초기화
+'	Form.SetSharedData( "mbonl94002_RgstExp_Firm0", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_Firm1", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_Firm2", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_Firm3", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_FirmNm0", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_FirmNm1", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_FirmNm2", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_FirmNm3", "" )		
+'	Form.SetSharedData( "mbonl94002_RgstExp_IMG0", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_IMG1", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_IMG2", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_IMG3", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_YN0", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_YN1", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_YN2", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_YN3", "" )
+'	'v0001 FIN
+
+	'v0002 모바일신분증 비교를 위해 초기화 로직 추가
+	szUserName = ""
+	szJumin    = ""
+	szBirth    = ""
+	g_CERT_METHOD = ""
+	Form.SetSharedData("mbonl_SCREEN_NO", "94002")
+	
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+	
+	g_nStep = 0
+	f_SetNextStep()
+	
+	DATAMANAGER.RequestTranData( "obacp_opop_064r" )
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "BTN_NEXT_ENABLE_STATE" then
+		f_ChangeBtnState(sParam)
+	
+	'v0001 STA 
+	'신분증 촬영 완료되었을때 ( 링크폼에 트리거 전달, 링크폼에서 열어도 부모화면으로 트리거 들어옴 )
+	elseif sEventName == "OCRCOMPLETE" then
+		g_nStep = 21
+		f_SetNextStep()
+
+	'mbbdm85122화면에서 다시 촬영하기 눌렀을때 mbonl94002_s21화면 popupreturn에서 부모화면으로 트리거 전달 
+	elseif sEventName == "RETRY" then
+		btnNextHalf.enable = true
+		btnNextHalf.btnimage = "btn_20.9"
+		btnNextHalf.fgcolor = "273"
+		
+		g_nStep = 21
+		f_SetPrevStep()
+		Form.triggerEvent("LinkForm0", "START_CAMERA", "")
+	'v0001 FIN
+
+	elseif sEventName == "ENABLE_NEXTHALF" then
+		btnNextHalf.enable = true
+		btnNextHalf.btnimage = "btn_20.9"
+		btnNextHalf.fgcolor = "273"
+	
+	elseif sEventName == "COMPLETE_SUBMIT" then
+		Form.CloseForm()
+		
+	elseif sEventName == "COMPLETE_TRUE_AND_FALSE" then
+		g_szSRNO = sParam
+		g_nStep = 3
+		f_SetNextStep()
+
+	elseif sEventName == "UPDATE_APLT_ABLE_YN" then
+		g_szApplyAbleYN = sParam
+	
+	'모바일신분증 관련 추가 start
+	elseif sEventName == "CERT_METHOD" then
+		g_CERT_METHOD = sParam
+		
+		if g_CERT_METHOD <> "" and g_CERT_METHOD <> null then
+			f_ChangeBtnState(true)
+		else
+			f_ChangeBtnState(false)
+		end if
+	
+	elseif sEventName == "MOBILEID_OPEN_COMPLETE" then
+		Dim szCode, szMsg
+		szCode = Form.GetSharedData("&RET_MOBILEID_TRXCODE", false)
+		szMsg = Form.GetSharedData("&RET_MOBILEID_M200", false)
+		
+		'모바일 신분증 앱 실행
+		Dim szRunApp
+		szRunApp = Form.runMobileIDApp(szMsg)
+'		Form.ShowAlert("szRunApp", szRunApp)
+		
+		if szRunApp == "-1" then
+			Form.MsgBox("안내", "행정안전부의 '모바일신분증' 앱이 설치되어 있지 않습니다.\n앱 설치 후 다시 진행해 주세요.", "NO_MOBILEID_APP", 6)
+		end if
+	
+	elseif sEventName == "MOBILEID_APP_RETURN" and sParam <> "" and sParam <> null then
+		Form.requestMobileID("MOBILEID_STATUS", "", "")
+		
+	elseif sEventName == "MOBILEID_STATUS_COMPLETE" then
+		Dim szStepCode, szResultCode
+		szStepCode = Form.GetSharedData("&RET_MOBILEID_STEPCODE", false)
+		szResultCode = Form.GetSharedData("&RET_MOBILEID_RESULTCODE", false)
+		
+		if szStepCode == "VP_VERIFY" and szResultCode == "0" then
+			Form.requestMobileID("MOBILEID_RESULT", "", "")
+		else
+			if szResultCode = "0" then 
+				'중복으로 떨어지는 경우가 있어 예외처리
+			elseif szResultCode = "-1" then
+				Form.ShowAlert("안내", "행정안전부의 '모바일신분증' 앱이 설치되어 있지 않습니다.\n앱 설치 후 다시 진행해 주세요.")
+			elseif szResultCode = "20202" then  '유효시간 초과
+				Form.ShowAlert("안내", "모바일 운전면허증 인증시간이 초과되었습니다.\n다시 시도해 주세요.")
+			elseif szResultCode = "20301" or szResultCode = "20302" then '유효한 모바일신분증 아닐 경우
+				Form.ShowAlert("안내", "모바일 운전면허증 정보 가져오기를 실패하였습니다.\n확인 후 다시 진행해 주세요.")
+			elseif szResultCode = "20901" then '사용자에 의한 취소
+				Form.ShowAlert("안내", "모바일 운전면허증 인증을 취소하였습니다.")
+			else	'기타 오류 전부
+				Form.ShowAlert("안내", "모바일 운전면허증 정보 가져오기를 실패하였습니다.\n확인 후 다시 시도해 주세요.")
+			end if
+			
+			f_ChangeBtnState(true)
+			
+'			btnNext.enable = true
+'					
+'			btnNext.btnimage = "btn_20.9"
+'			btnNext.fgcolor = "273"
+		end if
+	
+	elseif sEventName == "MOBILEID_RESULT_COMPLETE" then
+		Form.requestMobileID("MOBILEID_IMAGES", "", "")
+	
+	elseif sEventName == "MOBILEID_IMAGES_COMPLETE" then
+		Form.requestMobileID("MOBILEID_IMAGES_MASK", "", "")
+	
+	elseif sEventName == "MOBILEID_IMAGES_MASK_COMPLETE" then
+		Form.requestMobileID("MOBILEID_IMAGES_FACE", "", "")
+	
+	elseif sEventName == "MOBILEID_IMAGES_FACE_COMPLETE" then
+		
+		f_GetMobileData()
+		
+		'v0002
+		if szUserName <> g_NAME or szBirth <> Right(g_BIRTH,6)	then
+			Form.ShowAlert("안내", "본인 정보와 모바일신분증의 정보가 일치하지 않습니다.")
+			exit sub
+		end if 
+		
+		if g_FACE_YN == "Y" then
+			'업무신청 화면들의 안면인식 단계는 추후 추가
+		else
+			DATAMANAGER.RequestTranData( "obaci_acct_158a" )
+		end if	
+	elseif sEventName == "MOBILEID_OPEN_ERROR" or sEventName == "MOBILEID_STATUS_ERROR" or sEventName == "MOBILEID_RESULT_ERROR" or sEventName == "MOBILEID_IMAGE_ERROR" then
+		
+		Dim szRspCode, szErrCode, szErrMsg
+		szRspCode = Form.GetSharedData("&RET_MOBILEID_RESPONSE_CODE", false)
+		szErrCode = Form.GetSharedData("&RET_MOBILEID_ERROR", false)
+		szErrMsg = Form.GetSharedData("&RET_MOBILEID_ERROR_DESCRIPTION", false)
+		'Form.ShowAlert("jsi ERROR sEventName", sEventName)
+		'Form.ShowAlert("jsi ERROR szRspCode", szRspCode)
+		'Form.ShowAlert("jsi ERROR szErrCode", szErrCode)
+		'Form.ShowAlert("jsi ERROR szErrMsg", szErrMsg)
+		'complete으로 떨어지지만 혹시 몰라 남겨둠
+		if szErrCode = "0" then 
+				'중복으로 떨어지는 경우가 있어 예외처리
+		elseif szErrCode = "-1" then
+			Form.ShowAlert("안내", "행정안전부의 '모바일신분증' 앱이 설치되어 있지 않습니다.\n앱 설치 후 다시 진행해 주세요.")
+		elseif szErrCode = "20202" then '유효시간 초과
+			Form.ShowAlert("안내", "모바일 운전면허증 인증시간이 초과되었습니다.\n다시 시도해 주세요.")
+		elseif szErrCode = "20301" or szErrCode = "20302" then  '유효한 모바일신분증 아닐 경우	
+			Form.ShowAlert("안내", "모바일 운전면허증 정보 가져오기를 실패하였습니다.\n확인 후 다시 진행해 주세요.")
+		elseif szErrCode = "20901" then '사용자에 의한 취소 
+			Form.ShowAlert("안내", "모바일 운전면허증 인증을 취소하였습니다.")
+		else	 '기타 오류 전부
+			Form.ShowAlert("안내", "모바일 운전면허증 정보 가져오기를 실패하였습니다.\n확인 후 다시 시도해 주세요.")
+		end if
+		
+		f_ChangeBtnState(true)
+		
+'		btnNext.enable = true
+'				
+'		btnNext.btnimage = "btn_20.9"
+'		btnNext.fgcolor = "273"	
+		
+	else
+		'Form.ShowAlert("jsi" , sEventName)
+'		btnNext.enable = true
+'				
+'		btnNext.btnimage = "btn_20.9"
+'		btnNext.fgcolor = "273"	
+'		
+'		f_ChangeBtnState(true)
+	end if
+	'모바일신분증 관련 추가 end
+'	end if
+	
+End Sub
+
+'============================================================================
+' Form_OnMsgBoxClose(sKeyName, sRet)
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "Close_Form" then
+		if sRet == "ok" then
+			Form.CloseForm()
+		end if
+	
+	elseif sKeyName == "MOBILE_CERT_COMPLETE" then
+		g_nStep = 3
+		f_SetNextStep()
+	
+	elseif sKeyName == "MOVE_STORE" and sRet <> "" and sRet <> null then
+		if sRet <> "ok" then
+			Dim szOsType
+			szOsType = Form.GetSharedData("&OS_TYPE", false )
+			if szOsType == "1" then
+				Form.runStoreApp("", "market://details?id=com.imeritz.smartmeritz")
+			elseif szOsType == "2" then
+				Form.OpenAppStore("1104272974")
+			end if
+		else
+			f_ChangeBtnState(true)
+		end if
+	end if
+End Sub
+
+'============================================================================
+' Form_OnPopupReturn(sKeyName, sRet)
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "close_mbonl94002_p1" then
+		Form.triggerEvent("LinkForm0", "request_submit_TR", g_szSRNO)
+	
+	elseif sKeyName == "close_mbonl94002_p3" then
+		' 업무신청 중단할 경우, 메뉴 닫기
+		if sRet == "return_to_start" then
+			'Form.CloseForm()
+			
+		elseif sRet == "continue_next_step" then
+			DATAMANAGER.RequestTranData( "obcsb_acif_091a" )
+		end if
+	end if
+End Sub
+
+'============================================================================
+' Form_OnFormBackKeyPressed() : 이전 스텝으로 이동
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	
+	f_SetPrevStep()
+End Sub
+
+'============================================================================
+' Form_OnFormClose()
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData( "mbonl94002_USER_NAME" , "")
+	Form.SetSharedData( "mbonl94002_USER_BIRTH" , "")
+	Form.SetSharedData( "mbonl94002_s1_CHECK_SUMMARY" , "")
+	Form.SetSharedData( "mbonl94002_s1_CHECK_DETAIL" , "")
+	'2022.04.22 현재 요건에는 없으나 추후 추가 요건을 통해 필요한 코드가 될 수 있으므로 주석처리
+'	'v0001 STA mbonl94002_p31 Shared값 초기화
+'	Form.SetSharedData( "mbonl94002_RgstExp_Firm0", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_Firm1", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_Firm2", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_Firm3", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_FirmNm0", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_FirmNm1", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_FirmNm2", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_FirmNm3", "" )		
+'	Form.SetSharedData( "mbonl94002_RgstExp_IMG0", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_IMG1", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_IMG2", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_IMG3", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_YN0", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_YN1", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_YN2", "" )
+'	Form.SetSharedData( "mbonl94002_RgstExp_YN3", "" )
+'	'v0001 FIN
+	
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+End Sub
+
+'============================================================================
+' btnBack_OnClick() : 이전 스텝으로 이동
+'============================================================================
+Sub btnBack_OnClick()
+	f_SetPrevStep()
+End Sub
+
+'============================================================================
+' btnNext_OnClick() : 스텝 이동
+'============================================================================
+Sub btnNext_OnClick()
+	if g_nStep == 0 then
+		DATAMANAGER.RequestTranData( "obcsb_acif_091r" )
+	
+	elseif g_nStep == 1 then
+		g_nStep = 2
+		f_SetNextStep()
+		
+	elseif g_nStep == 2 then
+		'모바일신분증 추가
+		DATAMANAGER.SetDataValue( 0, "obcsb_face_004r" , "InBlock1" , "IDNTF_KIND_CODE" , 0 , "M")
+		DATAMANAGER.RequestTranData( "obcsb_face_004r" )
+		
+'		Form.triggerEvent("LinkForm0", "START_CAMERA", "")
+		
+	elseif g_nStep == 3 then
+		Form.openPopupAnimation("mbonl94002_p1", "", "", "2")
+
+	end if
+End Sub
+
+'============================================================================
+' btnNext_OnClick() : 스텝 이동
+'============================================================================
+Sub btnNextHalf_OnClick()
+	btnNextHalf.enable = false
+	btnNextHalf.btnimage = "btn_27.9"
+	btnNextHalf.fgcolor = "269"
+	
+	Form.triggerEvent("LinkForm0", "JUDGE_TRUE_AND_FALSE", "")
+End Sub
+
+'============================================================================
+'  btnRetry_OnClick() : 재촬영
+'============================================================================
+Sub btnRetry_OnClick()
+	'v0001 STA
+	g_nStep = 21
+	f_SetPrevStep()
+	Form.triggerEvent("LinkForm0", "START_CAMERA", "")
+	'v0001 FIN
+End Sub
+
+
+''****************************************************************************
+''               		D A T A				M A N A G E R               
+''****************************************************************************
+
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 데이터 인풋 세팅
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim szCustNum, szAccount
+	
+	szCustNum = Form.GetSharedData("&CUST_NUM", false )
+	szAccount = Account0.caption
+
+	if szTranID == "obacp_opop_064r" then		
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "ACNO" , 0, szAccount )
+		
+	elseif szTranID == "obcsb_acif_091a" then
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CSNO" , 0 , szCustNum  )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "ACNO" , 0 , szAccount  )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PROS_CLS_CODE" , 0 , "0"  )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CONT_CLS_CODE" , 0 , "4"  )
+	
+	elseif szTranID == "obcsb_acif_091r" then
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "PROS_CLS_CODE" , 0 , "P"  )
+		DATAMANAGER.SetDataValue( false, szTranID , "InBlock1" , "CSNO" , 0 , szCustNum  )
+	
+	'모바일신분증 관련 추가 start
+	elseif szTranID == "obaci_acct_158a" then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATCH_FILE_SIZE"		, 0 	, g_ImgDataLen			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_IMG_DATA"		, 0 	, g_ImgData		)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, "3" 	 			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_RCNO_PIP"		, 0 	, g_RCNO 		)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BRDT"				, 0 	, Right(g_BIRTH,6)			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MDAF_RCNO_PIP"		, 0 	, g_RCNO_7	 				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE"		, 0 	, "I" 				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SRNO"				, 0 	, ""	 				)
+	
+	elseif szTranID == "obaci_acct_158a_1" then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATCH_FILE_SIZE"		, 0 	, g_ImgFaceLen			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_IMG_DATA"		, 0 	, g_ImgFace		)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "IDNTF_KIND_CODE"		, 0 	, "3" 	 			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ORGL_RCNO_PIP"		, 0 	, g_MDAF_RCNO_PIP 		)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "BRDT"				, 0 	, Right(g_BIRTH,6)			)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MDAF_RCNO_PIP"		, 0 	, g_RCNO_7	 				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE"		, 0 	, "U" 				)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SRNO"				, 0 	, g_szSRNO	 				)
+	
+	elseif szTranID == "obcsb_nmet_102c" then
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "NMET_BSWR_CLCD" 		, 0 , "010"					)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "REG_UNIQ_NO" 		, 0 , Form.GetSharedData( "&HOST_DATE", False ) & "T0000"	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "BSWR_CLS_CODE"		, 0 , "2"					)	'2.신분증진위확인
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "OTSD_TR_UNIQ_NO"		, 0 , g_szOTSDTRUNIQNO			)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "TR_DATE"				, 0 , Form.GetSharedData( "&HOST_DATE", False )				)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_SRNO"			, 0 , g_szSRNO		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "RSPN_TYPE_CODE"		, 0 , "0"		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_TORF_YN"		, 0 , "Y"		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_IMG_DATA_SIZE"	, 0 , 1			)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock2", "RCNO_PIP"	, 0 , g_MDAF_RCNO_PIP		)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_KIND_CODE"	, 0 , "3"		)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "IDNTF_FLNM"	, 0 , g_NAME		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ORGL_RCNO_PIP"	, 0 , g_RCNO		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ORGL_IDNTF_FLNM"	, 0 , g_NAME		)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ISNC_DATE"	, 0 , g_ISSU_DATE		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ORGL_ISNC_DATE"	, 0 , g_ISSU_DATE 		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "OLD_DRVN_LCNS_NO"	, 0 , ""		)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock3", "ORGL_OLD_DRVN_LCNS_NO"	, 0 , ""		)
+	
+	'모바일신분증 관련 추가 end
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 수신 완료
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obacp_opop_064r" then
+		
+		szJumin = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "RCNO" , 0 ) '실명확인번호
+		
+		szUserName = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "CSNM" , 0 ) '고객명
+		szBirth = Left(szJumin, 6)
+
+		Form.SetSharedData( "mbonl94002_USER_NAME" , szUserName)
+		Form.SetSharedData( "mbonl94002_USER_BIRTH" , szBirth)
+
+	elseif szTranID == "obcsb_acif_091a" then
+		DATAMANAGER.RequestTranData( "obcsb_acif_091r" )
+	
+	elseif szTranID == "obcsb_acif_091r" then
+		Dim sData
+		
+		g_szApplyAbleYN = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "APLT_ABLE_YN" , 0 )
+		g_szVcallTrgtYn = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock7" , "VCALL_TRGT_YN" , 0 )
+		
+		Form.SetSharedData( "mbonl94002_VCALL_TRGT_YN", g_szVcallTrgtYn)
+		
+		if g_szApplyAbleYN == "Y" or g_szApplyAbleYN == "R" or g_szApplyAbleYN == "M" then
+			sData = "CONTINUE_NEXT_STEP_"..g_szApplyAbleYN.."|"..g_szVcallTrgtYn
+			
+			Form.OpenPopup("mbonl94002_p3", sData , "")
+			
+		else
+			Dim szPrgsCode, szhtmxIsnc
+			
+			szPrgsCode  = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock1" , "EXAM_PRGS_STAT_CODE" , 0  ) '심사진행상태코드
+			szhtmxIsnc  = DATAMANAGER.GetDataValue( false, szTranID , "OutBlock3" , "HMTX_ISNC_NO" , 0  ) '심사진행상태코드
+
+			if szPrgsCode == "0" and szhtmxIsnc == "" then
+				Dim nCount
+				nCount = DATAMANAGER.GetDataCount( false, szTranID , "OutBlock1" )
+
+				if nCount == 0 then
+					Form.OpenPopup("mbonl94002_p3" , "해당 고객은 현재 신청불가 상태(심사중 등의 이유)로 심사신청을 진행할 수 없습니다.".."|"..g_szVcallTrgtYn , "")
+				else
+					g_nStep = 1
+					f_SetNextStep()
+				end if
+			else
+				Form.OpenPopup("mbonl94002_p3" , "해당 고객은 현재 신청불가 상태(심사중 등의 이유)로 심사신청을 진행할 수 없습니다.".."|"..g_szVcallTrgtYn , "")
+			end if
+		end if
+	
+	'모바일신분증 추가 start
+	elseif szTranID == "obcsb_face_004r" then
+		Dim szFaceYn
+		szFaceYn = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "FACEID_ACMP_YN" , 0 )
+		
+		'모바일신분증은 안면인식 처리 안함 추후 수정..s
+		szFaceYn = "N"
+		
+		g_FACE_YN = szFaceYn
+		
+		if g_CERT_METHOD == "1" then
+			Form.triggerEvent("LinkForm0", "START_CAMERA", "")
+		elseif g_CERT_METHOD == "2" then
+			'20231204 모바일 신분증 진행 시 앱버전 체크
+			Dim szAppVer, szOSType, nAppVer
+			szAppVer = Form.GetSharedData("&APP_VERSION", false)
+			szOSType = Form.GetSharedData("&OS_TYPE", false)
+			nAppVer = replace(szAppVer, ".", "")
+			
+			if szOSType == "1" then
+				if CInt(nAppVer) > 238 then
+					f_ChangeBtnState(false)
+					
+					Form.requestMobileID("MOBILEID_OPEN", "", "")
+				else
+					Form.MsgBox("안내", "해당 버전에서는 모바일신분증 이용이 불가합니다. 앱 업데이트 후 이용해주세요.", "MOVE_STORE", 7, "확인", "업데이트 하러가기")
+				end if
+			else
+				if CInt(nAppVer) > 2536 then
+					f_ChangeBtnState(false)
+					
+					Form.requestMobileID("MOBILEID_OPEN", "", "")
+				else
+					Form.MsgBox("안내", "해당 버전에서는 모바일신분증 이용이 불가합니다. 앱 업데이트 후 이용해주세요.", "MOVE_STORE", 7, "확인", "업데이트 하러가기")
+				end if
+			end if
+			
+'			Form.requestMobileID("MOBILEID_OPEN", "", "")
+		end if
+		
+	elseif szTranID == "obaci_acct_158a" then
+		g_szSRNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "SRNO" , 0 )
+		g_MDAF_RCNO_PIP = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1" , "MDAF_RCNO_PIP" , 0 )
+	'20231207 jsi obaci_acct_158a_1 호출 안함---------------------------------------------------------
+	'	DATAMANAGER.RequestTranData( "obaci_acct_158a_1" )
+		
+	'elseif szTranID == "obaci_acct_158a_1" then
+'		Form.ShowAlert(szTranID, "호출완료")
+	'20231207 jsi obaci_acct_158a_1 호출 안함---------------------------------------------------------	
+		
+		DATAMANAGER.RequestTranData( "obcsb_nmet_102c" )
+	
+	elseif szTranID == "obcsb_nmet_102c" then
+		Form.MsgBox("안내", "모바일 운전면허증을 통한\n본인인증이 완료되었습니다.", "MOBILE_CERT_COMPLETE", 6)
+		
+'		g_nStep = 3
+'		f_SetNextStep()
+	
+	'모바일신분증 추가 end
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if szTranID == "obcsb_acif_091r" then
+		Dim szErrorMsg
+		szErrorMsg = szErrMsg & "(" & szSubMsg & ")"
+		
+		Form.OpenPopup("mbonl94002_p3" , szErrorMsg.."|N" , "")
+	
+	else
+		Form.ShowAlert("알림"..szTranID, szErrMsg & "(" & szSubMsg & ")")
+	end if
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_091r" trcode="obcsb_acif_091r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_opop_064r" trcode="obacp_opop_064r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_acif_091a" trcode="obcsb_acif_091a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_158a" trcode="obaci_acct_158a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_nmet_102c" trcode="obcsb_nmet_102c" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_face_004r" trcode="obcsb_face_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_158a_1" trcode="obaci_acct_158a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_091r" title="개인전문투자자 심사내역 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="248" _ulen="188" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1387" _ulen="1031" >
+
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+EXAM_PRGS_STAT_CODE^심사진행상태코드^1^0^0^0^0^0^0
+EXAM_RSLT_CODE^심사결과코드^1^0^0^0^0^0^0
+RSLT_REG_DATE^결과등록일자^8^0^0^0^0^0^0
+DPNM^부서명^40^0^0^0^0^0^0
+APLT_EMPL_NAME^신청직원명^40^0^0^0^0^0^0
+EXAM_EMPL_NAME^심사직원명^40^0^0^0^0^0^0
+REG_YN^등록여부^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+NELG_REAS^부적격사유^200^0^0^0^0^0^0
+APLT_ABLE_YN^신청가능여부^1^0^0^0^0^0^0
+DOCU_RPLT_CLCD^서류보완구분코드^1^0^0^0^0^0^0
+RECDNG_TELNO^녹취전화번호^16^0^0^0^0^0^0
+RECDNG_DATE^녹취일자^8^0^0^0^0^0^0
+RECDNG_HOUR^녹취시간^6^0^0^0^0^0^0
+RECDNG_EMPNO^녹취직원번호^9^0^0^0^0^0^0
+REG_EMPL_NAME^등록직원명^40^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+PROD_SVC_PRSN_CRIN_YN^상품서비스개인신용정보여부^1^0^0^0^0^0^0
+PFIN_RGNO^전문투자자등록번호^20^0^0^0^0^0^0
+CRIN_AGRM_YN^신용정보동의여부^1^0^0^0^0^0^0
+CNPL_TELNO^연락처전화번호^16^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+RECDNG_OPNN^녹취의견^100^0^0^0^0^0^0
+RECDNG_RSLT_CLCD^녹취결과구분코드^1^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="592" _ulen="440" >
+
+INVT_EXPC_SLCT_YN^투자경험선택여부^1^0^0^0^0^0^0
+INVT_EXPC_SFCN_YN^투자경험충족여부^1^0^0^0^0^0^0
+INVT_EXPC_AVRG_AMT^투자경험평균금액^19^0^7^0^0^0^0
+INVT_EXPC_DRAM^투자경험차액^19^0^7^0^0^0^0
+INVT_EXPC_OPNG_DATE^투자경험개설일자^8^0^0^0^0^0^0
+INVT_EXPC_PRD_YEAR^투자경험기간년도^4^0^0^0^0^0^0
+INVT_EXPC_PRD_MONTH^투자경험기간월^2^0^0^0^0^0^0
+INVT_EXPC_ATCH_YN^투자경험첨부여부^1^0^0^0^0^0^0
+CO_NAME^회사명^100^0^0^0^0^0^0
+HLDN_PRD_MNCN^보유기간월수^6^0^7^0^0^0^0
+OP_ACNO^운영계좌번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="484" _ulen="360" >
+
+INCM_SLCT_YN^소득선택여부^1^0^0^0^0^0^0
+INCM_SFCN_YN^소득충족여부^1^0^0^0^0^0^0
+INCM_AMT^소득금액^20^3^7^0^0^0^0
+INCM_DRAM^소득차액^19^0^7^0^0^0^0
+SELF_INCM_AMT^본인소득금액^19^0^7^0^0^0^0
+MATE_INCM_AMT^배우자소득금액^19^0^7^0^0^0^0
+MATE_ADUP_YN^배우자합산여부^1^0^0^0^0^0^0
+INCM_ATCH_YN^소득첨부여부^1^0^0^0^0^0^0
+HMTX_ISNC_CLCD^홈택스발급구분코드^1^0^0^0^0^0^0
+HMTX_ISNC_NO^홈택스발급번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="355" _ulen="265" >
+
+SPCL_SLCT_YN^전문선택여부^1^0^0^0^0^0^0
+SPCL_QLFC_SFCN_YN^전문자격충족여부^1^0^0^0^0^0^0
+SPCL_QLFC_KIND_CODE^전문자격종류코드^2^0^0^0^0^0^0
+SPCL_ATCH_YN^전문첨부여부^1^0^0^0^0^0^0
+SPCL_QLFC_RGNO^전문자격등록번호^11^0^0^0^0^0^0
+CARR_PRD^경력기간^4^0^7^0^0^0^0
+CARR_CO_CNT^경력회사수^13^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="684" _ulen="498" >
+
+TOTAL_ASET_SLCT_YN^총자산선택여부^1^0^0^0^0^0^0
+TOTAL_ASET_SFCN_YN^총자산충족여부^1^0^0^0^0^0^0
+TOTAL_ASET_AMT^총자산금액^19^0^7^0^0^0^0
+TOTAL_ASET_DRAM^총자산차액^19^0^7^0^0^0^0
+TOTAL_ASET_ATCH_YN^총자산첨부여부^1^0^0^0^0^0^0
+SELF_FA_AMT^본인금융자산금액^19^0^7^0^0^0^0
+SELF_OWN_RLES_AMT^본인소유부동산금액^19^0^7^0^0^0^0
+SELF_HIRE_RLES_AMT^본인임차부동산금액^19^0^7^0^0^0^0
+MATE_FA_AMT^배우자금융자산금액^19^0^7^0^0^0^0
+MATE_OWN_RLES_AMT^배우자소유부동산금액^19^0^7^0^0^0^0
+MATE_HIRE_RLES_AMT^배우자임차부동산금액^19^0^7^0^0^0^0
+MATE_ADUP_YN^배우자합산여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock6" inout="out" _len="1492" _ulen="1094" >
+
+NTAS_SLCT_YN^순자산선택여부^1^0^0^0^0^0^0
+NTAS_SFCN_YN^순자산충족여부^1^0^0^0^0^0^0
+NTAS_AMT^순자산금액^20^3^7^0^0^0^0
+NTAS_DRAM^순자산차액^19^0^7^0^0^0^0
+NTAS_ATCH_YN^순자산첨부여부^1^0^0^0^0^0^0
+SELF_FA_AMT^본인금융자산금액^19^0^7^0^0^0^0
+SELF_NRSD_RLES_AMT^본인비거주부동산금액^19^0^7^0^0^0^0
+SELF_TOTAL_LBLT_AMT^본인총부채금액^19^0^7^0^0^0^0
+SELF_RLES_ASCR_AMT^본인부동산담보대출금액^19^0^7^0^0^0^0
+MATE_FA_AMT^배우자금융자산금액^19^0^7^0^0^0^0
+MATE_NRSD_RLES_AMT^배우자비거주부동산금액^19^0^7^0^0^0^0
+MATE_TOTAL_LBLT_AMT^배우자총부채금액^19^0^7^0^0^0^0
+MATE_RLES_ASCR_AMT^배우자부동산담보대출금액^19^0^7^0^0^0^0
+MATE_ADUP_YN^배우자합산여부^1^0^0^0^0^0^0
+ASET_AMT1^자산금액^19^0^7^0^0^0^0
+LBLT_AMT1^부채금액^19^0^7^0^0^0^0
+REGN_ZIP1^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP1^상세우편번호^3^0^0^0^0^0^0
+POST1^우편주소^100^0^0^0^0^0^0
+DTAD1^상세주소^100^0^0^0^0^0^0
+ASET_AMT2^자산금액^19^0^7^0^0^0^0
+LBLT_AMT2^부채금액^19^0^7^0^0^0^0
+REGN_ZIP2^지역우편번호^3^0^0^0^0^0^0
+DTL_ZIP2^상세우편번호^3^0^0^0^0^0^0
+POST2^우편주소^100^0^0^0^0^0^0
+DTAD2^상세주소^100^0^0^0^0^0^0
+ASET_AMT^자산금액^19^0^7^0^0^0^0
+LBLT_AMT^부채금액^19^0^7^0^0^0^0
+WDNG_YN^결혼여부^1^0^0^0^0^0^0
+SELF_RSDC_CLCD^본인거주구분코드^1^0^0^0^0^0^0
+MATE_RSDC_CLCD^배우자거주구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="973" _ulen="699" >
+
+VCALL_TRGT_YN^영상통화대상여부^1^0^0^0^0^0^0
+VCALL_CMPT_YN^영상통화완료여부^1^0^0^0^0^0^0
+RECDNG_CLS_CODE^녹취구분코드^1^0^0^0^0^0^0
+COUN_CHAN_NAME^상담채널명^40^0^0^0^0^0^0
+FRST_APLT_DATE^최초신청일자^8^0^0^0^0^0^0
+FRST_CONT_CLS_CODE^최초접촉구분코드^1^0^0^0^0^0^0
+FRST_VCALL_YN^최초영상통화여부^1^0^0^0^0^0^0
+FRST_PFIN_RGNO^최초전문투자자등록번호^20^0^0^0^0^0^0
+PXPR_YN^대리인여부^1^0^0^0^0^0^0
+PXPR_NAME^대리인명^40^0^0^0^0^0^0
+PXPR_GNDR_CLS_CODE^대리인성별구분코드^1^0^0^0^0^0^0
+PXPR_AGE^대리인연령^4^0^7^0^0^0^0
+PXPR_BRDT^대리인생년월일^8^0^0^0^0^0^0
+PXPR_CUST_RLTS_CODE^대리인고객관계코드^2^0^0^0^0^0^0
+PXPR_CUST_RLTS_ETC_CNTT^대리인고객관계기타내용^100^0^0^0^0^0^0
+PXPR_CLPH_ARCD^대리인휴대폰지역번호^4^0^0^0^0^0^0
+PXPR_CLPH_TONO^대리인휴대폰국번호^4^0^0^0^0^0^0
+PXPR_CPNO^대리인휴대폰번호^11^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_opop_064r" title="종합계좌 기준 계좌Control 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="336" _ulen="254" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+MANG_BRCD^관리 지점코드^4^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌 상태 코드^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_GRAD_CODE^고객등급코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_091a" title="개인전문투자자 심사접수 및 신?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="584" _ulen="438" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+EXAM_PRGS_STAT_CODE^심사진행상태코드^1^0^0^0^0^0^0
+CNCL_YN^취소여부^1^0^0^0^0^0^0
+EXAM_RSLT_CODE^심사결과코드^1^0^0^0^0^0^0
+NELG_REAS^부적격사유^200^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+DOCU_RPLT_CLCD^서류보완구분코드^1^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="137" _ulen="105" >
+
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+APRV_APLT_NO^승인신청번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_158a" title="비대면계좌개설 신분증 등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="436" _ulen="324" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ATCH_FILE_SIZE^첨부파일사이즈^11^0^7^0^0^0^0
+UI_IMG_DATA^UI이미지데이터^102400^0^0^0^0^0^0
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+ORGL_RCNO_PIP^원실명확인번호PIP^68^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+MDAF_RCNO_PIP^변경후실명확인번호PIP^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="101" _ulen="75" >
+
+SRNO^일련번호^11^0^7^0^0^0^0
+MDAF_RCNO_PIP^변경후실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_nmet_102c" title="비대면본인인증및1원역이체관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="159" _ulen="117" >
+
+NMET_BSWR_CLCD^비대면업무구분코드^3^0^0^0^0^0^0
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+BSWR_CLS_CODE^업무구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="490" _ulen="362" >
+
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+ATHN_MTHD_CLS_CODE^인증방법구분코드^1^0^0^0^0^0^0
+ATHN_STAT_CLS_CODE^인증상태구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CPNO^휴대폰번호^4^0^0^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="993" _ulen="723" >
+
+OTSD_TR_UNIQ_NO^대외거래고유번호^13^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+IDNTF_SRNO^신분증일련번호^11^0^7^0^0^0^0
+RSPN_TYPE_CODE^응답유형코드^1^0^0^0^0^0^0
+IDNTF_TORF_YN^신분증진위여부^1^0^0^0^0^0^0
+IDNTF_IMG_DATA_SIZE^신분증이미지데이터사이즈^9^0^7^0^0^0^0
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+IDNTF_FLNM^신분증성명^100^0^0^0^0^0^0
+ORGL_RCNO_PIP^원실명확인번호PIP^68^0^0^0^0^0^0
+ORGL_IDNTF_FLNM^원신분증성명^100^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+ORGL_ISNC_DATE^원발급일자^8^0^0^0^0^0^0
+OLD_DRVN_LCNS_NO^구운전면허번호^14^0^0^0^0^0^0
+ORGL_OLD_DRVN_LCNS_NO^원구운전면허번호^14^0^0^0^0^0^0
+IDNTF_TORF_CNFR_RSCD^신분증진위확인응답코드^3^0^0^0^0^0^0
+MBL_IDNTF_TR_NO^모바일신분증거래번호^25^0^0^0^0^0^0
+MBL_IDNTF_REUS_YN^모바일신분증재사용여부^1^0^0^0^0^0^0
+MBL_IDNTF_RSLT_CODE^모바일신분증결과코드^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" inout="in" _len="220" _ulen="160" >
+
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_BANK_ACNO^입금은행계좌번호^30^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+OPN_OTSD_TR_UNIQ_NO^오픈뱅킹대외거래고유번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="159" _ulen="123" >
+
+REG_UNIQ_NO^등록고유번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+RCVN_DATE^수취일자^8^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_face_004r" title="안면인식_수행여부 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="59" _ulen="45" >
+
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="61" _ulen="45" >
+
+FACEID_ACMP_YN^안면인식수행여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86140" scrname="개인(신용)정보선택약관팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="labTitle" fontsize="4" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="imgExit" autosize="1" imgpath="icon_close_s.png" ly_vert="20,20,24,24,1" />
+		<BUTTON name="bntOK" caption="확인" fontsize="4" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="20,103,335,440,1" />
+		<TAB name="Tab0" tabheadheight="40" tabwidthtype="1" tabcount="2" ly_vert="20,60,335,40,1" >
+			<PAGE name="0" caption="요약동의서" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="1" caption="상세동의서" >
+				<CONTROL_INFO/>
+			</PAGE>
+		</TAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2139" _ulen="2057" >
+
+Dim g_szDev
+Dim g_szOpenData
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szDev = Form.GetSharedData("&SERVER_MODE", False )
+	
+	g_szOpenData = Form.GetOpenLinkData()
+
+	if g_szOpenData <> "" and g_szOpenData <> null then
+		if g_szOpenData == "Mndt" then
+			labTitle.caption = "개인(신용)정보 처리 필수 동의"
+			
+			'필수	'요약동의서
+			if g_szDev == "1" or g_szDev == 1 then
+				WebView0.urlpath = "https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm20.pdf"
+			else
+				WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm20.pdf"
+			end if 
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Tab0_OnTabChanged(nCurrentTab)
+	if g_szOpenData <> "" and g_szOpenData <> null then
+		'필수
+		if g_szOpenData == "Mndt" then
+			if nCurrentTab == 0 then	'요약동의서
+				if g_szDev == "1" or g_szDev == 1 then
+					WebView0.urlpath = "https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm20.pdf"
+				else
+					WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm20.pdf"
+				end if 
+				
+'				ShowAlert("요약동의서", "https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm20.pdf")
+			else	'상세동의서
+				if g_szDev == "1" or g_szDev == 1 then
+					WebView0.urlpath = "https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm19.pdf"
+				else
+					WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm19.pdf"
+				end if 
+				
+'				ShowAlert("상세동의서", "https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm19.pdf")
+			end if
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub imgExit_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub bntOK_OnClick()
+	Form.SendReturnToParent("mbonl94004_s21" , "ok_" & g_szOpenData)
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

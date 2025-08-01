@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94002" scrname="개인정보수집_상세동의_전문투자자용" version="2" writer="성주혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="0,0,375,560,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,561,187,45,1" />
+		<BUTTON name="btnOk" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,561,188,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2328" _ulen="2125" >
+'============================================================================
+' 01.화면명 	: 개인정보수집_요약동의_전문투자자용
+' 02.화면설명	: 개인정보수집_요약동의_전문투자자용
+' 03.작성	: 2021.06.15
+' 04.수정	: 2023.07.07 : 고승연 : v0002 : [T2305310024] 개인정보수집동의서 변경
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szReturn
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szUrl
+
+	g_nMode = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+	g_OStype = Form.GetSharedData("OS_TYPE", false)
+	
+	if g_nMode == "0" then
+		szUrl = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/mts_prv_agree.html"	'운영계 주소
+	elseif g_nMode == "1" then
+		szUrl = "https://testhome.imeritz.com/include/resource/comm/ctcn/pdf/mts_prv_agree.html"	'테스트계주소
+	end if
+	
+	WebView0.viewtype = 0
+	WebView0.urlpath = szUrl
+	
+	Form.SetScreenName("개인정보 수집·이용 상세동의서")
+	
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+End Sub
+
+'============================================================================
+' btnOk_OnClick() : 화면 닫기
+'============================================================================
+Sub btnOk_OnClick()
+	g_szReturn = "1"
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+' btnCancel_OnClick() : 화면 닫기
+'============================================================================
+Sub btnCancel_OnClick()
+	g_szReturn = "0"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' Form_OnFormClose() : 리턴값 반환
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("close_mbonl94002_p5" , g_szReturn)
+	
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

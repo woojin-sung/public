@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86125" scrname="모바일 OTP 비밀번호 변경" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container1" vscroll="1" scroll_pos="0,0" ly_vert="0,60,374,527,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="Label5" fontsize="2" fontstyle="01" caption="변경할 OTP 비밀번호 입력" ly_vert="10,253,262,26,1" />
+				<COMBO name="CmbAcnt" fontsize="4" cblistcount="20" popuptitle="계좌를 선택해주세요." imagefilepth="input_03.9" ly_vert="20,1,335,74,1" />
+				<EDIT name="EdtPwd" fontsize="4" password="2" imetype="1" maxlength="4" minlength="4" hintcaption="비밀번호를 입력해주세요." imagefilepth="input_03.9" ly_vert="20,85,335,74,1" />
+				<EDIT name="EdtBfPwd" enable="0" fontsize="4" password="2" imetype="1" maxlength="6" hintcaption="숫자 6자리 입력" imagefilepth="input_03.9" ly_vert="20,169,335,74,1" />
+				<EDIT name="EdtAfPwd" enable="0" fontsize="4" password="2" imetype="1" maxlength="6" hintcaption="숫자 6자리 입력" imagefilepth="input_03.9" ly_vert="20,283,335,74,1" />
+				<EDIT name="EdtAfPwdCnfr" enable="0" fontsize="4" password="2" imetype="1" maxlength="6" hintcaption="숫자 6자리 입력" imagefilepth="input_03.9" ly_vert="20,367,335,74,1" />
+				<CONTAINER name="Container2" scroll_pos="0,0" ly_vert="20,458,335,40,1" scroll_ly_vert="0,0" >
+					<CONTROL_INFO>
+						<IMAGE name="Image1" autosize="1" imgpath="icon_info.png" ly_vert="20,11,12,18,1" />
+						<LABEL name="Label1" caption="안내사항" ly_vert="42,11,76,18,1" />
+						<IMAGE name="Image2" autosize="1" imgpath="icon_caret_down.png" ly_vert="305,20,10,6,1" />
+					</CONTROL_INFO>
+				</CONTAINER>
+				<CONTAINER name="Container3" bgcolor="272:246246246" scroll_pos="0,0" ly_vert="20,503,335,0,1" scroll_ly_vert="0,0" >
+					<CONTROL_INFO>
+						<LABEL name="Label4" bgcolor="272:246246246" transmode="0" multiline="1" ly_vert="0,0,335,156,1" />
+						<IMAGE name="Image3" autosize="1" imgpath="icon_dot.png" ly_vert="20,20,18,18,1" />
+						<IMAGE name="Image4" autosize="1" imgpath="icon_dot.png" ly_vert="20,98,18,18,1" />
+						<LABEL name="Label2" caption="OTP 인증생성 시 본인확인을 위해 필요한
+모바일 OTP 비밀번호(숫자6자리)를 입력
+하시기 바랍니다." bgcolor="272:246246246" transmode="0" multiline="1" ly_vert="32,16,287,58,1" />
+						<LABEL name="Label3" caption="타인에게 유출되지 않도록 각별히 유의하
+시기 바랍니다." bgcolor="272:246246246" transmode="0" multiline="1" ly_vert="32,97,287,38,1" />
+					</CONTROL_INFO>
+				</CONTAINER>
+				<LABEL name="LblDummy" ly_vert="27,485,100,32,1" />
+				<BUTTON name="BtnAccordion" btnimage="alpha" ly_vert="21,459,333,37,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="BtnNext" enable="0" caption="다음" fontsize="4" fontstyle="01" ly_vert="0,587,375,60,1" />
+		<LABEL name="Label0" fontsize="4" fontstyle="01" caption="모바일 OTP 비밀번호 변경" halign="1" ly_vert="0,0,375,60,1" />
+		<BUTTON name="ButtonBack" btnimage="alpha" ly_vert="10,14,35,32,1" />
+		<IMAGE name="Image0" imgpath="icon_top_back_light.png" ly_vert="10,0,30,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="16798" _ulen="15774" >
+'--===========================================================================
+'--===========================================================================
+
+Dim g_MsboVrsn
+Dim g_MOTPSrno
+Dim aFlag '아코디언 플래그
+
+'연락처
+Dim	g_HomeNo '자택전화
+Dim	g_ClphNo '휴대전화
+Dim	g_WorkNo '직장전화
+
+Dim	g_OSClcd
+'============================================================================
+Sub Form_OnFormInit()
+
+	Container1.Container2.bgcolor = 271
+	Container1.Container3.bgcolor = 272
+	
+	aFlag = 0
+	
+	g_IntoClcd	= Form.GetSharedData( "mOTP_IntoClcd", False )
+	g_OSClcd	= Form.GetSharedData("&OS_TYPE", false)
+	
+	Container1.CmbAcnt.SetApplyLabel("종합계좌번호" , 0 , 268 , "left" , True)
+	Container1.EdtPwd.SetApplyLabel("종합계좌비밀번호" , 0 , 268 , "left" , True)
+	Container1.EdtBfPwd.SetApplyLabel("모바일 OTP 비밀번호", 0, 268, "left", True)
+	Container1.EdtAfPwd.SetApplyLabel("모바일 OTP 비밀번호", 0, 268, "left", True)
+	Container1.EdtAfPwdCnfr.SetApplyLabel("모바일 OTP 비밀번호 확인", 0, 268, "left", True)
+	
+	szTheme = Form.GetEnvData("common.theme")
+	BtnNext.fgcolor = "269"
+	BtnNext.enable = False
+	If szTheme == "white" Then
+	    BtnNext.btnimage			= "btn_21.9"
+	Else
+	    BtnNext.btnimage			= "btn_27.9"
+	End If
+	
+	
+	'Container1.EdtPwd.SetUseResultLabel(True , 1) help msg 사용하지 않기로 함
+	
+	fn_CntInit() '컨트롤 초기화
+
+    DATAMANAGER.SetDataValue(0 , "obaci_acct_185r", "InBlock1" , "RCNO"      , 0 , "NMET")
+	DATAMANAGER.SetDataValue(0 , "obaci_acct_185r", "InBlock1" , "RCNO_PIP" , 0 , Form.GetSharedData("&JUMIN_NUM", false ))
+	DATAMANAGER.RequestTranData("obaci_acct_185r")
+    
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+    If szTranID = "obaci_acct_185r" Then
+    
+        For i = 0 To DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1") - 1
+
+            ACNO = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "ACNO"  , i)
+            Form.SetCtlProp("Container1.CmbAcnt", "cbadddatatext", Left(ACNO,4) & "-" & Right(ACNO,4) )
+	    
+        Next
+	
+		Container1.CmbAcnt.Setstatus("focus")
+		Container1.CmbAcnt.caption = "종합계좌를 선택해주세요"
+		Container1.CmbAcnt.fgcolor = 270
+			
+    End If
+    
+    If szTranID == "obacp_comm_004r" Then
+        g_HomeNo = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "OWHS_TELNO"      , 0)  '자택전화
+        g_ClphNo = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "CLPH_TELNO"      , 0)  '휴대전화
+        g_WorkNo = DATAMANAGER.GetDataValue( 0 , szTranID, "OutBlock1", "WRPL_WHOL_TELNO" , 0)  '직장전화
+    End If
+    
+    If szTranID = "obacp_opop_066r" Then
+    
+        'Container1.EdtPwd.SetResultLabel("1","complete","비밀번호 검증 성공","Container1") help msg 안쓰기로함
+        'Container1.SetScrollAutoSize() help msg 안쓰기로 함
+        Container1.EdtBfPwd.SetShowKeypad(true)
+        Form.requestMOTP("MOTP_GET_VERSION" , "" , "86125")	  
+
+    End If
+    
+    If szTranID = "obcsb_oimf_172r" Then
+    
+        If DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "MOTP_SRNO" , 0) == "" Then
+            Form.MsgBox("OTP 정보 조회 오류" , "OTP 정보 없음" , "", 6)		    
+        Else
+            
+            g_MOTPSrno = DATAMANAGER.GetDataValue(0 , szTranID , "OutBlock1" , "MOTP_SRNO" , 0)
+	    
+            Container1.EdtBfPwd.enable = True
+            Container1.EdtAfPwd.enable = True
+            Container1.EdtAfPwdCnfr.enable = True
+	    
+            BtnNext.enable   = True
+            BtnNext.btnimage = "btn_20.9"
+	       BtnNext.fgcolor = "273"
+        End If
+    End If    
+	
+    If szTranID = "obcsb_oimf_173a" Then
+    
+        Form.OpenPopup("mbotp86126" , "" , "") '완료팝업
+    
+    End If
+    
+    If szTranID == "obacp_comm_058r" Then
+    
+         BtnNext.enable   = True
+         BtnNext.btnimage = "btn_20.9" 
+         BtnNext.fgcolor = "273"
+		
+    End If
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+    If szTranID = "obacp_comm_004r" Then
+        strMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+        If strMsg = "" Then
+            Form.ShowAlert("알림", szErrMsg)
+            'Form.MsgBox("연락처 정보 조회 오류" , szErrMsg , "", 6)	
+        Else
+            Form.ShowAlert("알림", szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")")
+            'Form.MsgBox("연락처 정보 조회 오류" , szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")" , "", 6)
+        End If	    	        
+    End If
+
+	If szTranID = "obacp_comm_058r" Then
+		BtnNext.enable   = False
+         BtnNext.fgcolor = "269"
+         szTheme = Form.GetEnvData("common.theme")
+         If szTheme == "white" Then 
+             BtnNext.btnimage = "btn_21.9"
+         Else
+             BtnNext.btnimage = "btn_27.9"
+         End If
+		
+
+
+		strMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+		If strMsg = "" Then
+		    Form.ShowAlert("알림", szErrMsg)
+		    'Form.MsgBox("모바일OTP 비밀번호 유효성 검증 오류" , szErrMsg , "", 6)	
+		Else
+		    Form.ShowAlert("알림", szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")")
+		    'Form.MsgBox("모바일OTP 비밀번호 유효성 검증 오류" , szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")" , "", 6)
+		End If
+	End If	
+
+	If szTranID = "obacp_opop_066r" Then
+	
+        'Container1.EdtPwd.SetResultLabel("1","error","비밀번호 검증 오류","Container1") help msg 안쓰기로 함
+        'Container1.SetScrollAutoSize() help msg 안쓰기로 함
+        'Container1.EdtBfPwd.SetShowKeypad(true)	
+	
+        subMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+        pwErrorMsg = szErrMsg & "★("&subMsg&")"
+	
+        Form.OpenPopup("mbbdm85203" , pwErrorMsg , "5")
+	
+        'If Container1.
+        'If strMsg = "" Then
+            'Form.MsgBox("계좌비밀번호 오류" , szErrMsg , "", 6)	
+        'Else
+            'Form.MsgBox("계좌비밀번호 오류" , szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")" , "", 6)
+        'End If	    
+
+
+        Container1.EdtBfPwd.caption = ""
+        Container1.EdtAfPwd.caption = ""
+        Container1.EdtAfPwdCnfr.caption = ""
+
+        Container1.EdtBfPwd.enable = False
+        Container1.EdtAfPwd.enable = False
+        Container1.EdtAfPwdCnfr.enable = False
+	
+	End If
+	
+	If szTranID = "obcsb_oimf_172r" Then
+        strMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+        If strMsg = "" Then
+            Form.ShowAlert("알림", szErrMsg)
+            'Form.MsgBox("OTP 정보 조회 오류" , szErrMsg , "", 6)	
+        Else
+            Form.ShowAlert("알림", szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")")
+            'Form.MsgBox("OTP 정보 조회 오류" , szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")" , "", 6)
+        End If	    	    
+	End If		
+	
+	If szTranID = "obcsb_oimf_173a" Then
+        strMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+        If strMsg = "" Then
+            Form.ShowAlert("알림", szErrMsg)
+            'Form.MsgBox("모바일OTP 비밀번호 변경 오류" , szErrMsg , "", 6)	
+        Else
+            Form.ShowAlert("알림", szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")")
+            'Form.MsgBox("모바일OTP 비밀번호 변경 오류" , szErrMsg & Chr(13) & Chr(10) & "(" & strMsg & ")" , "", 6)
+        End If	    	    
+	End If
+	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName == "CLOSE_YN" Then
+	    If sRet == "Y" Then
+	        Form.CloseForm()
+	    End If
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEventMOTP(sEventName, sParam) 
+
+	Dim tmpList
+	If sEventName == "MOTP_GET_VERSION_RETURN_86125" Then ' M SafeBox 버전 정보 가져오기
+		tmpList = Split(sParam, "★")
+		If tmpList[0] == "00000" Then
+			g_MsboVrsn = tmpList[2]
+			
+              DATAMANAGER.SetDataValue(0 , "obcsb_oimf_172r" , "InBlock1" , "ACNO"     , 0 , Container1.CmbAcnt.caption)
+              DATAMANAGER.SetDataValue(0 , "obcsb_oimf_172r" , "InBlock1" , "RCNO_PIP" , 0 , Form.GetSharedData("&JUMIN_NUM", false ))
+              DATAMANAGER.RequestTranData("obcsb_oimf_172r")			
+	      
+		Else
+			Form.ShowAlert("알림", "MSB 버전 추출 오류\n"..tmpList[1])
+		End If
+		
+	End If
+
+End Sub
+
+'============================================================================
+Sub Container1_EdtPwd_OnEditComplete()
+
+    ACNO = Left(Container1.CmbAcnt.caption,4) & Right(Container1.CmbAcnt.caption,4) '작대기 제거
+    PWD = Container1.EdtPwd.caption
+
+    DATAMANAGER.SetDataValue(0, "obacp_opop_066r" , "InBlock1" , "ACNO"     , 0 , ACNO)
+    DATAMANAGER.SetDataValue(0, "obacp_opop_066r" , "InBlock1" , "ACNT_PWD" , 0 , PWD )
+    DATAMANAGER.RequestTranData("obacp_opop_066r")
+    
+End Sub
+
+'============================================================================
+Sub Container1_EdtPwd_OnClick()
+
+    Container1.EdtBfPwd.caption = ""
+    Container1.EdtAfPwd.caption = ""
+    Container1.EdtAfPwdCnfr.caption = ""
+
+    Container1.EdtBfPwd.enable = False
+    Container1.EdtAfPwd.enable = False
+    Container1.EdtAfPwdCnfr.enable = False
+    
+    BtnNext.enable   = False
+    BtnNext.fgcolor = "269"
+    szTheme = Form.GetEnvData("common.theme")
+    If szTheme == "white" Then
+        BtnNext.btnimage = "btn_21.9"
+    Else
+        BtnNext.btnimage = "btn_27.9"
+    End If
+    
+    
+End Sub
+
+'============================================================================
+Sub Container1_CmbAcnt_OnEditComplete(iIndex)
+	
+	fn_CntInit() '컨트롤 초기화
+	
+	tmpACNO = Left(Container1.CmbAcnt.caption , 4) & Right(Container1.CmbAcnt.caption , 4)
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_004r", "InBlock1", "ACNO", 0, tmpACNO )
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_004r", "InBlock1", "ELFN_ID", 0 , Form.GetSharedData("&USER_ID", false ))        
+	DATAMANAGER.RequestTranData("obacp_comm_004r")
+
+	Container1.EdtPwd.SetShowKeypad(true)
+	
+End Sub
+
+'============================================================================
+Sub BtnNext_OnClick()
+
+    If Trim(Container1.EdtBfPwd.caption) == "" Then
+        Form.MsgBox("알림", "현재 모바일OTP 비밀번호를 입력해주세요.", "" , 0)
+        Exit Sub        
+    End If
+    
+    If Trim(Container1.EdtAfPwd.caption) == "" Then
+        Form.MsgBox("알림", "변경할 모바일OTP 비밀번호를 입력해주세요.", "" , 0)
+        Exit Sub        
+    End If    
+    
+    If Trim(Container1.EdtAfPwdCnfr.caption) == "" Then
+        Form.MsgBox("알림", "입력확인 모바일OTP 비밀번호를 입력해주세요.", "" , 0)
+        Exit Sub        
+    End If        
+
+    If Container1.EdtAfPwd.caption <> Container1.EdtAfPwdCnfr.caption Then
+        Form.MsgBox("알림", "변경할 모바일OTP 비밀번호가 일치하지 않습니다.", "" , 0)
+        Exit Sub
+    End If
+    
+    If Container1.EdtBfPwd.caption == Container1.EdtAfPwd.caption Then
+        Form.MsgBox("알림", "변경전후 모바일OTP 비밀번호가 동일합니다.", "" , 0)
+        Exit Sub        
+    End If
+    
+	tmpACNO = Left(Container1.CmbAcnt.caption , 4) & Right(Container1.CmbAcnt.caption , 4)
+	
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "PROS_CLS_CODE"           , 0 , "M"                       )
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "ACNO"                    , 0 , tmpACNO                   )
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "ACNT_PWD"                , 0 , Container1.EdtPwd.caption  )
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "CSNO"                    , 0 , ""                        ) '서비스에서 세팅
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "MOTP_SRNO"               , 0 , g_MOTPSrno                )
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "MSBO_VRSN"               , 0 , g_MsboVrsn                )
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "CUST_TERM_ID"            , 0 , Form.GetDeviceID()        )
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "MOTP_ATHN_TYPE_CLCD"     , 0 , ""                        ) '서비스에서 세팅
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "MOTP_ATHN_DATA_CNTT"     , 0 , Container1.EdtAfPwd.caption)
+	DATAMANAGER.SetDataValue(0 , "obcsb_oimf_173a" , "InBlock1" , "PRE_MOTP_ATHN_DATA_CNTT" , 0 , Container1.EdtBfPwd.caption)
+	
+	DATAMANAGER.RequestTranData("obcsb_oimf_173a")        
+	
+
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub Container1_BtnAccordion_OnClick()
+
+	If aFlag == 0 Then
+	
+	    Container1.LblDummy.top = 680
+	    Container1.SetScrollAutoSize()
+	    Container1.Container3.setHeightResize(156)
+	    Container1.scroll_pos = 185
+	    
+	    Container1.Container2.Image2.imgpath = "icon_caret_up.png"
+	
+	    aFlag = 1
+	
+	ElseIf aFlag == 1 Then
+	
+	    Container1.Container3.setHeightResize(0)
+	    Container1.LblDummy.top = 485
+	    Form.SetTimerEvent("9999", 1 , 1)
+	    
+	    Container1.Container2.Image2.imgpath = "icon_caret_down.png"
+	    
+	    aFlag = 0
+	
+	End If
+	
+End Sub
+
+'============================================================================
+Sub Container1_EdtAfPwdCnfr_OnClick()
+	If g_OSClcd <> "1" Then '아이폰은 에디트 위치를 자동으로 올려주지 않음.
+		Container1.LblDummy.top = 567 + 90
+		Container1.SetScrollAutoSize()
+		Container1.scroll_pos = 90
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if trim(sTimerID) == "9999" then
+		Form.SetTimerEvent("9999", 0, 1)
+		Container1.scroll_pos = 0
+		Container1.SetScrollAutoSize()
+	end if
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ButtonBack_OnClick()
+    Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub Container1_EdtBfPwd_OnEditComplete()
+	Container1.EdtAfPwd.SetShowKeypad(true)
+End Sub
+
+'============================================================================
+Sub Container1_EdtAfPwd_OnEditComplete()
+	Container1.EdtAfPwdCnfr.SetShowKeypad(true)
+End Sub
+
+
+'============================================================================
+Sub Container1_EdtAfPwdCnfr_OnEditComplete()
+	If g_OSClcd <> "1" Then '아이폰은 에디트 위치를 자동으로 올려주지 않음.
+		Container1.LblDummy.top = 567
+		Container1.SetScrollAutoSize()
+		Container1.scroll_pos = 0
+	End If
+	
+	tmpACNO = Left(Container1.CmbAcnt.caption , 4) & Right(Container1.CmbAcnt.caption , 4)    
+	
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_058r", "InBlock1", "PROS_CLS", 0 , "7" 		 )	'[MTS] 계좌비밀번호 변경시 체크
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_058r", "InBlock1", "ACNO"    , 0 , tmpACNO )  '계좌번호
+	DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "LOGN_ID" , 0 , Form.GetSharedData("&USER_ID", false ))  'ID
+	
+	'비밀번호복호화하여 비교해야하므로 ARIA값으로 넘겨줌(caption2 API사용)
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_058r", "InBlock1", "PWD_PIP"     , 0 , Container1.EdtAfPwd.caption2     )  '비밀번호
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_058r", "InBlock1", "CNFR_PWD_PIP", 0 , Container1.EdtAfPwdCnfr.caption2 )  '확인비밀번호
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_058r", "InBlock1", "RCNO"		 , 0 , ""			)  '실명확인번호(서비스에서 조회)		
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_058r", "InBlock1", "WRPL_TELNO"  , 0 , g_WorkNo        )  '직장전화
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_058r", "InBlock1", "CLPH_TELNO"  , 0 , g_ClphNo        )  '휴대전화
+	DATAMANAGER.SetDataValue( 0, "obacp_comm_058r", "InBlock1", "OWHS_TELNO"  , 0 , g_HomeNo        )  '자택전화    
+	
+	DATAMANAGER.RequestTranData("obacp_comm_058r")
+	
+
+End Sub
+
+Function fn_CntInit()
+    Container1.EdtPwd.caption = ""	
+	
+    Container1.EdtBfPwd.caption = ""
+    Container1.EdtAfPwd.caption = ""
+    Container1.EdtAfPwdCnfr.caption = ""
+
+    Container1.EdtBfPwd.enable = False
+    Container1.EdtAfPwd.enable = False
+    Container1.EdtAfPwdCnfr.enable = False	
+End Function
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_173a" trcode="obcsb_oimf_173a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_opop_066r" trcode="obacp_opop_066r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_comm_058r" trcode="obacp_comm_058r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_172r" trcode="obcsb_oimf_172r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_comm_004r" trcode="obacp_comm_004r" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_185r" trcode="obaci_acct_185r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_173a" title="모바일OTP PIN 초기화 및 변경" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="531" _ulen="399" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_DATA_CNTT^모바일OTP인증데이터내용^256^0^0^0^0^0^0
+PRE_MOTP_ATHN_DATA_CNTT^이전모바일OTP인증데이터내용^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="55" _ulen="43" >
+
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_opop_066r" title="계좌Control 비밀번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="196" _ulen="150" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_EMPNO^관리 직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_comm_058r" title="비밀번호 유효성 검증체크" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="485" _ulen="367" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+LOGN_ID^로그인ID^16^0^0^0^0^0^0
+MDBF_PWD_PIP^변경전비밀번호PIP^68^0^0^0^0^0^0
+PWD_PIP^비밀번호PIP^68^0^0^0^0^0^0
+CNFR_PWD_PIP^확인비밀번호PIP^68^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+WRPL_TELNO^직장전화번호^15^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_172r" title="OTP조회(실물&모바일)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="161" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1257" _ulen="937" >
+
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_STAT_CODE^모바일OTP상태코드^2^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_ISNC_YMDH^모바일OTP발급일시^14^0^0^0^0^0^0
+MOTP_LOCK_YMDH^모바일OTPLOCK일시^14^0^0^0^0^0^0
+MOTP_MISS_YMDH^모바일OTP분실일시^14^0^0^0^0^0^0
+MOTP_DSCD_YMDH^모바일OTP폐기일시^14^0^0^0^0^0^0
+VALD_PRD_STA_DATE^유효기간시작일자^8^0^0^0^0^0^0
+VALD_PRD_EXPI_DATE^유효기간만료일자^8^0^0^0^0^0^0
+MOTP_MTRT_GUDE_YN^모바일OTP만기안내여부^1^0^0^0^0^0^0
+LAST_VRFC_YMDH^최종검증일시^14^0^0^0^0^0^0
+MOTP_MSTK_CSNU^모바일OTP오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_MSTK_CSNU^모바일OTP인증오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_LOCK_YN^모바일OTP인증LOCK여부^1^0^0^0^0^0^0
+MOTP_ATHN_LOCK_YMDH^모바일OTP인증LOCK일시^14^0^0^0^0^0^0
+MOTP_ATHN_LAST_MOD_YMDH^모바일OTP인증최종수정일시^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="315" _ulen="247" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_USE_RANG_CODE^OTP사용범위코드^1^0^0^0^0^0^0
+OTP_STAT_CODE^OTP상태코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="131" _ulen="103" >
+
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+UI_PRHB_REAS^UI불가사유^30^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_comm_004r" title="연락처 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="62" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="281" _ulen="207" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+OWHS_TELNO^자택전화번호^40^0^0^0^0^0^0
+WRPL_WHOL_TELNO^직장전체전화번호^16^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+NRML_YN^정상여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_185r" title="비대면계좌개설시 추가개설가능" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="93" _ulen="69" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="183" _ulen="137" >
+
+OVRL_ACNT_EXST_YN^종합계좌존재여부^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_BRNM^관리지점명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

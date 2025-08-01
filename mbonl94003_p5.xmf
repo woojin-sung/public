@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94003" scrname="전환(분류)신청_지정확인서제출" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="전문투자자 지정 확인서 제출" valign="0" ly_vert="10,75,355,30,1" />
+		<LABEL name="Label1" fgcolor="146:124124124" fontstyle="01" caption="전문투자자 지정 확인을 위해 전문투자자 지정확인서를 제출합니다." valign="0" multiline="1" ly_vert="10,105,350,42,1" />
+		<CONTAINER name="contProcess" scroll_pos="0,0" ly_vert="0,450,375,120,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" designorder="1" ly_vert="20,0,335,120,1" >
+					<COL_INFO ly_vert_width="25,310" />
+					<ROW_INFO ly_vert_height="40,40,40" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" line="0,0" impidxs="" />
+						<CELL cell_ly="1,0,1,0" valign="0" halign="0" line="0,0" caption="금융투자회사 지정 또는 금융투자협회 지정된
+지정확인서만 가능합니다." impidxs="" />
+						<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+						<CELL cell_ly="1,1,1,1" valign="0" halign="0" line="0,0" caption="지정확인서는 원본으로 촬영되어야 하며 훼손,
+구김, 낙서, 이물질 등이 없어야 합니다." impidxs="" />
+						<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+						<CELL cell_ly="1,2,1,2" valign="0" halign="0" line="0,0" caption="흔들리거나, 빛반사 없이 초점을 맞추어
+촬영해야 합니다." impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<IMAGE name="Image1" imgpath="icon_1step" ly_vert="20,0,20,20,1" />
+				<IMAGE name="Image2" imgpath="icon_2step" ly_vert="20,40,20,20,1" />
+				<IMAGE name="Image3" imgpath="icon_3step" ly_vert="20,80,20,20,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" caption="전문투자자 분류(전환) 신청" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="imgBack" autosize="1" imgpath="icon_top_back_light" ly_vert="21,19,24,24,1" />
+		<BUTTON name="btnBack" btnimage="alpha" ly_vert="13,8,40,40,1" />
+		<BUTTON name="btnLeft" caption="촬영하기" fgcolor="267:255255255" fontsize="4" btnimage="btn_27.9" ly_vert="0,587,189,60,1" />
+		<BUTTON name="btnRight" caption="이미지업로드" fontsize="4" btnimage="btn_20.9" ly_vert="185,587,190,60,1" />
+		<IMAGE name="imgPicture" autosize="1" imgpath="icon_cnsh" ly_vert="87,147,200,290,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5339" _ulen="4749" >
+''--===========================================================================
+'' 01. 화 면 명 : 전환(분류)신청_지정확인서제출
+'' 02. 화면설명 : 
+'' 03. 작    성 : 21.08.04 JHY
+'' 04. 수    정 : 2023.08.24 : 고승연 : v0002 : 화면명 수정
+''
+''--===========================================================================
+''****************************************************************************
+''               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+''****************************************************************************
+'
+''============================================================================
+'' OCR 데이터 및 특징점 추출데이터 (메인에서 취득)
+''============================================================================
+Dim g_szImg ' 촬영한 사진 데이터
+Dim g_szImgSize ' 촬영한 사진 데이터 사이즈
+
+Dim g_szChoice
+Dim g_isImgComplete ' 사진 선택했는지 여부
+
+g_isImgComplete = false
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+''****************************************************************************
+''               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+''****************************************************************************
+
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	' 이미지 선택 또는 촬영 후 트리거이벤트로 이미지 전달
+	' 정상처리 시, 공유변수 통해 이미지 데이터 가져오기 
+	' # 트리거 이벤트 명  : CAPTURECOMPLETE
+	' # sParam            : 1 정상 / 0 비정상
+	' # 캡쳐이미지        : &RET_CAPTURE_IMAGE
+	if sEventName = "CAPTURECOMPLETE" then
+'		if sParam = "1" then
+			g_szImg = Form.GetSharedData("&RET_CAPTURE_IMAGE", true )
+			imgPicture.SetImageDataEnc(g_szImg)
+			
+			if Len(g_szImg) < 102400 then	'이미지 최대사이즈 
+				g_szImgSize = Len(g_szImg)
+			else
+				Form.ShowAlert("알림", "등록할 수 있는 이미지 최대사이즈를 초과하였습니다.")
+			end if	
+			
+			g_isImgComplete = true
+
+			btnLeft.caption = "재시도"
+			btnRight.caption = "등록"
+'		end if
+	end if 
+End Sub
+
+'============================================================================
+' btnBack_OnClick() : 화면 닫기
+'============================================================================
+Sub btnBack_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnLeft_OnClick() : 카메라 여는것으로 추후 수정 필요
+'============================================================================
+Sub btnLeft_OnClick()	
+	'재시도인 경우
+	if g_isImgComplete == true then
+		if g_szChoice == "camera" then
+			' 카메라 앱으로 촬영 후 이미지 가져오기
+			Form.runOsCamera()
+		elseif g_szChoice == "gallery" then
+			' 갤러리 앱 으로 이미지 가져오기
+			Form.getGalleryImage()	
+		end if
+	else
+		g_szChoice = "camera"
+		g_isImgComplete = false
+	
+		Form.runOsCamera()
+	end if
+	
+'	btnSubmit.visible = true
+End Sub
+
+'============================================================================
+' btnRight_OnClick() : 갤러리 여는것으로 추후 수정 필요
+'============================================================================
+Sub btnRight_OnClick()
+	if g_isImgComplete == true then
+		if g_szImg == NULL or g_szImg == "" then
+			Form.ShowAlert("알림", "이미지 등록에 오류가 발생하였습니다. 다시 시도 부탁드립니다.")
+		else
+			Form.SendReturnToParent("mbonl94003_p5" , g_szImg & "★" & g_szImgSize)
+			Form.CloseForm()
+		end if
+	else
+		g_isImgComplete = false
+		g_szChoice = "gallery"
+		
+		Form.getGalleryImage()	
+	end if
+End Sub
+
+'''****************************************************************************
+'''               		D A T A				M A N A G E R               
+'''****************************************************************************
+'
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 인풋데이터 세팅
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 들어왔을때
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg) : 데이터 통신 오류
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+
+	Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obaci_acct_158a" trcode="obaci_acct_158a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obaci_acct_158a" title="비대면계좌개설 신분증 등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="354" _ulen="262" >
+
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ATCH_FILE_SIZE^첨부파일사이즈^11^0^7^0^0^0^0
+UI_IMG_DATA^UI이미지데이터^102400^0^0^0^0^0^0
+IDNTF_KIND_CODE^신분증종류코드^1^0^0^0^0^0^0
+ORGL_RCNO_PIP^원실명확인번호PIP^68^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+MDAF_RCNO_PIP^변경후실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="101" _ulen="75" >
+
+SRNO^일련번호^11^0^7^0^0^0^0
+MDAF_RCNO_PIP^변경후실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="94002" scrname="(공통)메세지박스" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" autosize="1" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgPopBg" imgpath="popup_bg_common.9" ly_vert="29,134,312,260,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="알 림" halign="1" ly_vert="49,168,275,32,1" />
+		<IMAGE name="imgClose" imgpath="icon_main_13" ly_vert="304,149,21,21,1" />
+		<BUTTON name="btnOk" visible="0" caption="확인" fontsize="2" btnimage="btn_26.9" ly_vert="185,334,156,60,0" />
+		<BUTTON name="btnCancel" visible="0" caption="취소" fontsize="2" btnimage="btn_25.9" ly_vert="29,334,156,60,0" />
+		<LABEL name="lblContents" multiline="1" ly_vert="39,217,292,100,1" />
+		<BUTTON name="btnFullOK" visible="0" caption="확인" btnimage="btn_22.9" ly_vert="29,334,312,60,0" />
+		<LABEL name="lblContentsSub01" halign="1" multiline="1" ly_vert="40,394,292,46,1" />
+		<LABEL name="lblContentsSub02" fgcolor="071:107107107" fontsize="-2" halign="1" multiline="1" ly_vert="38,444,295,64,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4243" _ulen="3719" >
+Dim g_szOpenData
+Dim g_szVcallTrgtYn
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+
+	Dim sData
+	sData = Form.GetOpenLinkData()
+	
+	if sData <> null and sData <> "" then
+		Dim tData
+		tData = Split(sData, "|")
+		
+		g_szOpenData = tData(0)
+		g_szVcallTrgtYn = tData(1)
+	end if
+
+	' 메세지 내용에 따라 하단 버튼 내용 분기
+	if g_szOpenData == "CONTINUE_NEXT_STEP_Y" or g_szOpenData == "CONTINUE_NEXT_STEP_R" or g_szOpenData == "CONTINUE_NEXT_STEP_M" then
+		Dim szMsg
+		Dim szMsgSub01
+		Dim szMsgSub02
+		
+'		if g_szOpenData == "CONTINUE_NEXT_STEP_Y" then
+'			szMsg = "해당 고객님은 당사 지정 신청 내역이 없습니다.\n당사 지정심사 신청을 진행하시겠습니까?"
+'		
+'		elseif g_szOpenData == "CONTINUE_NEXT_STEP_R" then
+'			szMsg = "해당 고객님은 당사 지정 신청 내역이 없으나 현재, 타금융투자업자 또는 협회 지정으로 전문투자자 대우를 받고 계십니다.\n당사 지정심사 신청을 진행하시겠습니까?"
+'		
+'		elseif g_szOpenData == "CONTINUE_NEXT_STEP_M" then
+'			szMsg = "해당 고객님은 효력 종료된 당사 지정 신청 내역이 있습니다.\n당사 지정심사 신청을 진행하시겠습니까?"
+'		
+'		end if
+		
+		szMsg = "당사 지정심사 신청을 진행하시겠습니까?" '알림 메시지 일괄 통일.
+		
+		if g_szVcallTrgtYn = "Y" then
+			lblContentsSub01.top = 197
+			lblContentsSub02.top = 227
+			szMsgSub01 = "[영상통화 대상 고객입니다]"
+			szMsgSub02 = "심사 신청 후 영상통화가 진행 되오니,\n영상통화 시 신분증을 준비해주세요."
+			lblContents.top = 250
+		else
+			szMsgSub01 = ""
+			szMsgSub02 = ""
+		end if
+		
+		lblContents.caption = szMsg
+		lblContentsSub01.caption = szMsgSub01
+		lblContentsSub02.caption = szMsgSub02
+		
+		btnCancel.caption = "아니오"
+		btnOk.caption = "예"
+		
+		btnCancel.visible = true
+		btnOk.visible = true
+		
+	else
+		btnFullOK.visible = true
+		lblContents.caption = g_szOpenData
+	end if
+	
+	btnCancel.fgcolor = 269
+	imgDim.imgpath = "alpha128.png"
+
+End Sub
+
+'============================================================================
+' btnOk_OnClick() : 화면 닫기 (메뉴 닫도록)
+'============================================================================
+Sub btnOk_OnClick()
+	if g_szOpenData == "CONTINUE_NEXT_STEP_Y" or g_szOpenData == "CONTINUE_NEXT_STEP_R" or g_szOpenData == "CONTINUE_NEXT_STEP_M" then
+		Form.SendReturnToParent("close_mbonl94002_p3" , "continue_next_step")
+	else
+		Form.SendReturnToParent("close_mbonl94002_p3" , "return_to_start")
+	end if
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnCancel_OnClick() : 화면 닫기
+'============================================================================
+Sub btnCancel_OnClick()
+	if g_szOpenData == "CONTINUE_NEXT_STEP_Y" or g_szOpenData == "CONTINUE_NEXT_STEP_R" or g_szOpenData == "CONTINUE_NEXT_STEP_M" then
+		Form.SendReturnToParent("close_mbonl94002_p3" , "return_to_start")
+	end if
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' imgClose_OnClick() : 화면 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' imgDim_OnClick() : 화면 닫기
+'============================================================================
+Sub imgDim_OnClick()
+	Form.CloseForm()	
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnFullOK_OnClick() : 화면 닫기
+'============================================================================
+Sub btnFullOK_OnClick()
+	Form.SendReturnToParent("close_mbonl94002_p3" , "return_to_start")
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

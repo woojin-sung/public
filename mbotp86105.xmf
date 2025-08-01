@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86105" scrname="모바일OTP관리" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Cont0" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0,375,647,1" >
+			<CONTROL_INFO>
+				<BUTTON name="Button4" btnimage="input_03.9" ly_vert="20,350,339,72,1" />
+				<BUTTON name="Button3" btnimage="input_03.9" ly_vert="20,265,339,72,1" />
+				<BUTTON name="Button2" btnimage="input_03.9" ly_vert="20,180,339,72,1" />
+				<BUTTON name="Button1" btnimage="input_03.9" ly_vert="20,95,339,72,1" />
+				<IMAGE name="Image12" imgpath="icon_arrow2_r" ly_vert="324,117,24,24,1" />
+				<LABEL name="Label2" fontstyle="01" caption="모바일 OTP 발급" ly_vert="33,102,275,32,1" />
+				<LABEL name="Label3" fgcolor="146:124124124" fontsize="-2" caption="신규발급, 재발급, 다운로드" ly_vert="33,125,276,32,1" />
+				<IMAGE name="Image13" imgpath="icon_arrow2_r" ly_vert="324,202,24,24,1" />
+				<LABEL name="Label4" fontstyle="01" caption="모바일 OTP 비밀번호 변경" ly_vert="33,187,275,32,1" />
+				<LABEL name="Label5" fgcolor="146:124124124" fontsize="-2" caption="현재 모바일 OTP 비밀번호를 알고 있는 경우" ly_vert="33,210,276,32,1" />
+				<IMAGE name="Image14" imgpath="icon_arrow2_r" ly_vert="324,287,24,24,1" />
+				<LABEL name="Label6" fontstyle="01" caption="모바일 OTP 비밀번호 재설정" ly_vert="33,272,275,32,1" />
+				<LABEL name="Label7" fgcolor="146:124124124" fontsize="-2" caption="모바일 OTP 비밀번호 분실 등의 경우" ly_vert="33,295,276,32,1" />
+				<IMAGE name="Image15" imgpath="icon_arrow2_r" ly_vert="324,372,24,24,1" />
+				<LABEL name="Label8" fontstyle="01" caption="모바일 OTP 폐기" ly_vert="33,357,275,32,1" />
+				<LABEL name="Label9" fgcolor="146:124124124" fontsize="-2" ly_vert="33,380,276,32,1" />
+				<IMAGE name="Image06" visible="0" imgpath="img_box.9" ly_vert="15,520,339,72,0" />
+				<IMAGE name="Image16" imgpath="ic_link.9" ly_vert="319,542,21,29,1" />
+				<LABEL name="Label10" fontstyle="01" caption="모바일 OTP 인증" ly_vert="28,527,275,32,1" />
+				<LABEL name="Label11" click="1" ly_vert="326,604,32,32,1" />
+				<LABEL name="Label12" bgcolor="029:255212175" click="1" ly_vert="18,604,32,32,1" />
+				<LABEL name="Label13" click="1" ly_vert="137,601,52,32,1" />
+				<LABEL name="Label14" fontsize="10" fontstyle="01" caption="모바일 OTP 관리" ly_vert="40,14,247,35,1" />
+				<IMAGE name="imgClose" imgpath="icon_main_13" ly_vert="324,4,40,40,1" />
+				<LABEL name="Label15" caption="원하시는 업무를 선택해주세요." ly_vert="10,46,290,35,1" />
+				<LABEL name="Label16" click="1" ly_vert="196,601,52,32,1" />
+				<IMAGE name="Image0" imgpath="icon_top_back_light.png" ly_vert="10,0,34,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12652" _ulen="11492" >
+'2023.04.06 V001 양현정 휴대폰인증 맵id변경
+'이용안내
+Dim g_MotpSrno
+Dim g_btnNo
+Dim g_Open
+
+'============================================================================
+Sub Form_OnTriggerEventMOTP(sEventName, sParam) 
+scr_no = Form.GetSharedData("&POPUP_SCREEN_NO", false)
+'Form.ShowAlert( scr_no, sEventName & "=" & sParam )
+	Dim tmpList
+	tmpList = Split(sParam, "★")
+	If sEventName == "MOTP_GET_VERSION_RETURN_86105" Then ' M SafeBox 버전 정보 가져오기
+		If tmpList[0] == "00000" Then
+			g_MsboVrsn = tmpList[2]
+		Else
+			Form.ShowAlert("알림", "MSB 버전 추출 오류\n"..tmpList[1])
+		End If
+	End If
+
+	If sEventName == "MOTP_ISSU_RETURN_86105" Then 'M SafeBox에 MOTP정보 심기
+		If tmpList[0] == "00000" Then
+			rslt_data = "86102" & "☆" & g_TitleNm & "☆" & "Y" & "완료"
+		Else
+			rslt_data = "86102" & "☆" & g_TitleNm & "☆" & "N" & "완료"
+		End If
+		Form.OpenPopup( "mbotp86105_rslt.xmf", rslt_data, "" )
+	End If
+	
+	If sEventName == "MOTP_GETINFO_RETURN_86105" Then
+		If tmpList[0] == "00000" Then
+			g_MotpSrno = tmpList[2]
+		End If
+	End If
+	
+	If sEventName == "MOTP_DISCARD_RETURN_86105" Then
+		If tmpList[0] == "00000" Then
+			Form.ShowAlert("폐기", "모바일OTP폐기완료\n" & g_MotpSrno)
+		End If
+	End If
+	
+'	If sEventName == "MOTP_DISCARD_RET" Then
+'		MSGBOX sEventName & "\n" & sParam
+'	End If
+End Sub
+
+'============================================================================
+' 모바일 OTP 발급
+'============================================================================
+Sub Cont0_Button1_OnClick()
+	g_btnNo = 1
+	'Form.OpenNextPopup( "mbotp86100.xmf", "", "" )
+	Form.OpenPopup( "mbotp86100.xmf", "", "" )
+	g_Open = "" 
+'	If g_ScrNo == "D" Then
+'		Form.OpenPopup( "mbotp86100.xmf", "", "" )
+'	Else
+'		Form.SetSharedData("BDM_NMETBSWRGB", "300")
+'		Form.OpenPopup("mbbdm85110.xmf", "", "")
+'	End If
+'	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Cont0_Image12_OnClick()
+	Cont0_Button1_OnClick()	
+End Sub
+
+'============================================================================
+' 모바일 OTP 비밀번호 변경
+'============================================================================
+Sub Cont0_Button2_OnClick()
+	'로그인 여부 체크
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )		
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+		If g_MotpSrno == Null Or Len(g_MotpSrno) == 0 Then
+			Form.ShowAlert("알림", "스마트폰에 발급된 OTP정보가 없습니다.")
+			Exit Sub
+		End If
+		g_btnNo = 2
+		Form.OpenNextPopup( "mbotp86125.xmf" , "" , "" )
+	'	Form.CloseForm( )
+	else	
+		g_Open = "mbotp86125"
+		Form.OpenPopup("mhetc90021","","")		
+	end if
+End Sub
+
+'============================================================================
+Sub Cont0_Image13_OnClick()
+	Cont0_Button2_OnClick()	
+End Sub
+
+'============================================================================
+' 모바일 OTP 비밀번호 재설정
+'============================================================================
+Sub Cont0_Button3_OnClick()
+	'로그인 여부 체크
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )		
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+		If g_MotpSrno == Null Or Len(g_MotpSrno) == 0 Then
+			Form.ShowAlert("알림", "스마트폰에 발급된 OTP정보가 없습니다.")
+			Exit Sub
+		End If
+		g_btnNo = 3
+		Form.SetSharedData("BDM_NMETBSWRGB", "301")
+		'V001
+		'Form.OpenNextPopup("mbbdm85110.xmf", "", "")
+		Form.OpenNextPopup("mbbdm86130.xmf", "", "")
+	'	Dim szData
+	'	szData = "P☆안내☆테스트"
+	'	Form.OpenPopup( "mbotp86101.xmf" , szData , "" )
+	'	Form.CloseForm( )
+	else	
+		g_Open = "mbbdm86130"
+		Form.OpenPopup("mhetc90021","","")		
+	end if
+End Sub
+
+'============================================================================
+Sub Cont0_Image14_OnClick()
+	Cont0_Button3_OnClick()	
+End Sub
+
+'============================================================================
+' 모바일 OTP 폐기
+'============================================================================
+Sub Cont0_Button4_OnClick()
+	'로그인 여부 체크
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )		
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+	'Form.ShowAlert(g_MotpSrno, Len(g_MotpSrno))
+		If g_MotpSrno == Null Or Len(g_MotpSrno) == 0 Then
+			Form.ShowAlert("알림", "스마트폰에 발급된 OTP정보가 없습니다.")
+			Exit Sub
+		End If
+	
+	'	g_btnNo = 4
+		Form.OpenNextPopup( "mbotp86127.xmf" , "" , "" )
+	'	Form.CloseForm( )
+	else	
+		g_Open = "mbotp86127"
+		Form.OpenPopup("mhetc90021","","")		
+	end if
+End Sub
+
+'============================================================================
+Sub Cont0_Image15_OnClick()
+	Cont0_Button4_OnClick()
+End Sub
+
+'============================================================================
+
+Sub Cont0_Image06_OnClick()
+	Form.SetSharedData("&MOTP_PUSH" , "PUSH_SUCC") 
+	Form.OpenPopup( "mhetc90060_motp.xmf" , "" , "" )
+	Form.CloseForm( )
+End Sub
+
+'Form.OpenFramePopup( 'sMapFile , sOpenData , sPosInfo )
+'============================================================================
+Sub Form_OnFormInit()
+	Cont0.Image06.visible = False
+	Cont0.Label10.visible = False
+	Cont0.Image16.visible = False
+	Form.SetSharedData( "mOTP_IntoClcd"	, "MTS" )
+	
+	g_RcnoPIP	= Form.GetSharedData("&JUMIN_NUM", false )
+	g_CustTermID	=	Trim(Form.GetDeviceID())
+	g_OSClcd		=	Form.GetSharedData("&OS_TYPE", false)
+	g_OSVrsn		=	Form.GetSharedData("&OS_VERSION", false)
+	g_CustTermName	=	Form.GetDeviceModel()
+	
+	Dim sLOGIN_TYPE
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", False )
+    If CInt(sLOGIN_TYPE) > 1 Then '로그인상태인 경우 모바일 및 실물OTP조회
+		DATAMANAGER.RequestTranData("obcsb_oimf_172r")
+    End If	
+	Form.SetTimerEvent2( 0, 1, 0.2)
+	
+End Sub
+
+'============================================================================
+Sub Cont0_Label11_OnClick()
+	Form.ShowAlert("mOTP SRno", g_MOtpSrno)
+End Sub
+
+'============================================================================
+Sub Cont0_Label12_OnClick()
+	Form.requestMOTP("MOTP_DISCARD", g_MOtpSrno, "86105")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+'Form.ShowAlert("TranBefo", szTranID)
+	If	szTranID == "obcsb_oimf_172r" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP", 0, g_RcnoPIP )
+	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+Form.showalert( Form.GetSharedData("&POPUP_SCREEN_NO", false), "TranComp (" & szTranID )
+
+	If	szTranID == "obcsb_oimf_172r" Then
+		
+		AblePrhbYn		= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock3", "ABLE_PRHB_YN"		, 0 )
+		PrhbReas		= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock3", "UI_PRHB_REAS"		, 0 )
+		g_Csno		= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock3", "CSNO"			, 0 )
+		
+		g_MOtpSrnoSvr	= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "MOTP_SRNO"		, 0 )
+		g_CustTermIDSrvr= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "CUST_TERM_ID"		, 0 )
+		g_OtpSrno		= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "OTP_CARD_SRNO"	, 0 )
+		g_OtpStatCode	= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "OTP_STAT_CODE"	, 0 )
+		g_OtpSuplCoCode	= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "OTP_SUPL_CO_CODE"	, 0 )
+		g_IsncIstuCode	= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "OTP_ISNC_ISTU_CODE"	, 0 )
+		'모바일OTP사용 가능여부 체크
+		If AblePrhbYn <> "Y" Then
+			If AblePrhbYn == "1" Then
+				Form.ShowAlert("안내", "모바일 OTP 발급이 불가합니다.\n개인정보노출 등록 고객")
+			ElseIf AblePrhbYn  == "2" Then
+				Form.ShowAlert("안내", "모바일 OTP 발급이 불가합니다.\n미성년자 발급 불가")
+			ElseIf AblePrhbYn  == "3" Then
+				Form.ShowAlert("안내", "외국인은 모바일 OTP 발급이 불가능 합니다.")
+			ElseIf AblePrhbYn  == "4" Then
+				Form.ShowAlert("안내", "법인은 모바일 OTP 발급이 불가능 합니다.")
+			End If
+			Form.CloseForm()
+		End If
+
+		'발급 or 다운로드 결정
+		If Len(Trim(g_MOtpSrno)) == 0 Then ' 단말에 OTP가 없는 경우
+			If Len(Trim(g_MOtpSrnoSvr)) == 0 Then '서버에 등록되지 않은경우
+				g_ScrNo = "R" ' 일반등록
+			ElseIf g_CustTermID == g_CustTermIDSrvr Then '기기ID가 같은 경우
+				g_ScrNo = "D" ' 다운로드
+			Else '기기가 변경된 경우
+				g_ScrNo = "M" ' 재등록
+			End If
+		Else '단말에 OTP가 등록되어 있는경우
+			If Len(Trim(g_MOtpSrnoSvr)) == 0 Then
+				
+			ElseIf g_MOtpSrnoSvr ==Trim(g_MOtpSrno) Then  '일련번호가 같은경우
+				g_ScrNo = "N"
+			Else
+				g_ScrNo = "M" '재등록
+			End If
+		End If
+		
+		'실물OTP 폐기여부
+		If Len(Trim(g_OtpSrno)) > 0 And g_OtpStatCode == "01" Then
+			g_DscdYN = "Y"
+		Else
+			g_DscdYN = "N"
+		End If
+		
+'		Form.SetTimerEvent( 0, 0, 0.3)
+'		If 	g_ScrNo == "D" Then '다운로드
+'			Form.MsgBox( "안내", "이미 같은 기기에서 모바일 OTP를 발급받은 이력이 있습니다.\n새로운OTP를 발급하시겠습니까?", "dnld", 1 )
+'		ElseIf 	g_ScrNo == "N" Then '정상인데 재발급
+'			Form.MsgBox( "안내", "현재 기기에서 발급하신 모바일 OTP가 있습니다.\n기존 모바일 OTP는 폐기하고 새로운 OTP를 발급하시겠습니까?", "isnc", 1 )
+'		ElseIf 	g_ScrNo == "M" Then '기기변경으로 재발급
+'			Form.MsgBox( "안내", "기존에 등록된 기기와 발급 정보가 다릅니다.\n새로운 OTP를 발급하시겠습니까?", "mod_isnc", 1 )
+'		End If
+
+	End If
+End Sub
+
+'============================================================================
+Sub Cont0_Label13_OnClick()
+	Form.OpenPopup( "mbotp86100.xmf", "", "" )
+End Sub
+
+
+'============================================================================
+Sub Cont0_imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Cont0_Label16_OnClick()
+	Form.requestMOTP("MOTP_ISSUE" , "010900000107★C712399C4E87C3768A9B0910BE012C2A84812169F2EC2C8D8887AA663705FCD0★00000000000000000000000000000000" , "86101")
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+'Form.showalert( Form.GetSharedData("&POPUP_SCREEN_NO", false), "TimerEvent (" & sTimerID )
+	If sTimerID == 0 Or sTimerID == "0" Then
+		Form.requestMOTP("MOTP_GETINFO" , "" , "86105")
+		Form.SetTimerEvent2(0, 0, 0.2)
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+'	If g_btnNo == 4 Then
+'		Form.OpenPopup( "mbotp86127.xmf" , "" , "" )
+'	End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Form.ShowAlert("안내", szErrMsg & "(" & DATAMANAGER.GetDataMsgSubText(szTranID) & ")" )
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'20240311 KKM 로그인시 모바일OTP비밀번호변경, 재설정, 모바일OTP폐기
+	if sKeyName == "Login_Type" then
+		if Cint(sRet) > 1 then
+			if g_Open == "mbotp86125" then
+				If g_MotpSrno == Null Or Len(g_MotpSrno) == 0 Then
+					Form.ShowAlert("알림", "스마트폰에 발급된 OTP정보가 없습니다.")
+					Exit Sub
+				End If
+				g_btnNo = 2
+				Form.OpenNextPopup( "mbotp86125.xmf" , "" , "" )			
+				
+			elseif g_Open == "mbbdm86130" then
+				If g_MotpSrno == Null Or Len(g_MotpSrno) == 0 Then
+					Form.ShowAlert("알림", "스마트폰에 발급된 OTP정보가 없습니다.")
+					Exit Sub
+				End If
+				g_btnNo = 3
+				Form.SetSharedData("BDM_NMETBSWRGB", "301")
+				Form.OpenNextPopup("mbbdm86130.xmf", "", "")
+		
+			elseif g_Open == "mbotp86127" then
+				If g_MotpSrno == Null Or Len(g_MotpSrno) == 0 Then
+					Form.ShowAlert("알림", "스마트폰에 발급된 OTP정보가 없습니다.")
+					Exit Sub
+				End If
+			'	g_btnNo = 4
+				Form.OpenNextPopup("mbotp86127.xmf" , "" , "" )				
+				
+			end if	
+		end if 
+	else 
+'Form.ShowAlert("mbotp86105", "Form_OnPopupReturn")
+		Form.SetTimerEvent2( 0, 1, 0.2) ' 모바일OTP 정보 추출.
+	end if
+End Sub
+
+'============================================================================
+Sub Cont0_Image0_OnClick()
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_172r" trcode="obcsb_oimf_172r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_172r" title="OTP조회(실물&모바일)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="161" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1257" _ulen="937" >
+
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_STAT_CODE^모바일OTP상태코드^2^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_ISNC_YMDH^모바일OTP발급일시^14^0^0^0^0^0^0
+MOTP_LOCK_YMDH^모바일OTPLOCK일시^14^0^0^0^0^0^0
+MOTP_MISS_YMDH^모바일OTP분실일시^14^0^0^0^0^0^0
+MOTP_DSCD_YMDH^모바일OTP폐기일시^14^0^0^0^0^0^0
+VALD_PRD_STA_DATE^유효기간시작일자^8^0^0^0^0^0^0
+VALD_PRD_EXPI_DATE^유효기간만료일자^8^0^0^0^0^0^0
+MOTP_MTRT_GUDE_YN^모바일OTP만기안내여부^1^0^0^0^0^0^0
+LAST_VRFC_YMDH^최종검증일시^14^0^0^0^0^0^0
+MOTP_MSTK_CSNU^모바일OTP오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_MSTK_CSNU^모바일OTP인증오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_LOCK_YN^모바일OTP인증LOCK여부^1^0^0^0^0^0^0
+MOTP_ATHN_LOCK_YMDH^모바일OTP인증LOCK일시^14^0^0^0^0^0^0
+MOTP_ATHN_LAST_MOD_YMDH^모바일OTP인증최종수정일시^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="315" _ulen="247" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_USE_RANG_CODE^OTP사용범위코드^1^0^0^0^0^0^0
+OTP_STAT_CODE^OTP상태코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="131" _ulen="103" >
+
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+UI_PRHB_REAS^UI불가사유^30^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
