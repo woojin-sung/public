@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="42070" scrname="상품선물최근월물현재가" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab0" tabcount="3" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,76,375,487,1" >
+			<PAGE name="page006984" caption="호가" linkfile="mhprc42070_t1" loadingtype="1" />
+			<PAGE name="page000316" caption="시간별" linkfile="mhprc42070_t2" loadingtype="1" />
+			<PAGE name="page000774" caption="일별" linkfile="mhprc42070_t3" loadingtype="1" />
+		</FORMTAB>
+		<LINKFORM name="linkfmHoga" linkfile="mhprc42070_s1" bordercolor="017:216216216" ly_vert="0,0,375,76,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1121" _ulen="1067" >
+'============================================================================
+Dim g_szCd,g_szName,g_Mask
+Dim g_nfmTab
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	tmp = Split(Form.GetOpenLinkData(), "★")
+	g_szCd = tmp(0)
+	g_szName = tmp(1)
+	g_Mask = tmp(2)
+	
+	Form.SetScreenName(g_szName)	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	Form.triggerEvent("linkfmHoga", "INIT_CODE", g_szCd & "★" & g_Mask) 						' 링크화면에 종목코드 던지기
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "INIT_CODE", g_szCd & "★" & g_Mask )	' 탭화면에 종목코드 던지기
+	
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	g_nfmTab = nCurrentTab
+	Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "INIT_CODE", g_szCd & "★" & g_Mask )
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	Form_OnFormInit()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

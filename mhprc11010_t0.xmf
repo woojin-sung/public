@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11010" scrname="관심종목_스타일_Main" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,517,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="LinkFm" ly_vert="0,0,375,517,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3868" _ulen="3616" >
+
+'============================================================================
+' 화 면 명 : 관심종목_스타일_Main
+' 화면설명 : 관심종목 스타일이 변경될때 화면전환시키는 메인화면
+' 작    성 : 2016.01.08 ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szScreen
+g_szScreen = ""
+
+Dim g_szScreenNo '20210823 HSZ 국내CFD 화면 추가
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	if Trim(g_szScreen) == ""  then
+	
+		LinkFm.linkfile = "mhprc11010_t1"
+	else
+		LinkFm.linkfile = g_szScreen
+	end if
+	
+	'20210823 HSZ START : CFD 화면 추가
+	if g_szScreenNo = "13101" then
+		LinkFm.linkfile = "mhprc11010_t1"
+	End if
+	'20210823 HSZ END
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "STYLE" then
+		'20210823 HSZ START : CFD 화면 추가
+		if g_szScreenNo = "13101" then
+			exit Sub
+		end if
+		'20210823 HSZ END
+		
+		if sParam == "SET_STYLE2" then
+			LinkFm.linkfile = "mhprc11010_t2"
+			g_szScreen = "mhprc11010_t2"
+			Form.triggerEvent("LinkFm", "STYLE", sParam)
+		elseif sParam == "SET_STYLE3" then
+			LinkFm.linkfile = "mhprc11010_t3"
+			g_szScreen = "mhprc11010_t3"
+		'	20211115 HSZ START : 스타일4 추가 
+		elseif sParam == "SET_STYLE4" then
+			LinkFm.linkfile = "mhprc11010_t4"
+			g_szScreen = "mhprc11010_t4"
+		else
+			LinkFm.linkfile = "mhprc11010_t1"
+			g_szScreen = "mhprc11010_t1"
+		end if
+	' ----------------------------------------------------------------------
+	' 메인화면에서 관심종목 조회를 요청 Trigger
+	' ----------------------------------------------------------------------	
+	elseif sEventName == "GW_LIST" then	
+		Form.triggerEvent("LinkFm", "GW_LIST", sParam)
+	' ----------------------------------------------------------------------
+	' 메인화면에서 관심종목 추가 Trigger
+	' ----------------------------------------------------------------------	
+	elseif sEventName == "GW_ADD" then
+		Form.triggerEvent("LinkFm", "GW_ADD", sParam)
+	' ----------------------------------------------------------------------
+	' 그룹변경시 바로 적용(스타일2에 필요한 트리거)
+	' ----------------------------------------------------------------------	
+	elseif sEventName == "CHANGE_GROUP" then
+		Form.triggerEvent("LinkFm", "CHANGE_GROUP", "")
+	' ----------------------------------------------------------------------
+	' 메인화면에서 차트설정 변경후 조회를 요청 Trigger
+	' ----------------------------------------------------------------------	
+	elseif sEventName == "SET_CHART" then
+		Form.triggerEvent("LinkFm", "SET_CHART", sParam)
+	end if
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_szScreenNo 		 = Form.GetSharedData( "&SCREEN_NO" , false )			' 화면번호 20210823 HSZ CFD
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

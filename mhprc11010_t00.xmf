@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11010" scrname="관심종목_스타일_Main" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,524,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="LinkFm" ly_vert="0,0,375,524,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10137" _ulen="9185" >
+
+'============================================================================
+' 화 면 명 : 관심종목_스타일_Main
+' 화면설명 : 관심종목 스타일이 변경될때 화면전환시키는 메인화면
+' 작    성 : 2016.01.08 ssang
+'20230602 KKM 기존 관심종목스타일 1,2,3,4 사용하지 않고 관심종목스타일 10(두줄),11(한줄),12(차트) 추가
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szScreen
+g_szScreen = ""
+
+Dim g_szScreenNo '20210823 HSZ 국내CFD 화면 추가
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+'	if Trim(g_szScreen) == ""  then	
+'		LinkFm.linkfile = "mhprc11010_t10" '관심종목 스타일10 디폴트
+'	else
+'		'관심종목 스타일1,2,3,4 를 10,11,12로 변경
+'		if g_szScreen == "mhprc11010_t1" then '1 >> 10 
+'			g_szScreen = "mhprc11010_t10"
+'		elseif g_szScreen == "mhprc11010_t2" then '2 >> 10
+'			g_szScreen = "mhprc11010_t10"
+'		elseif g_szScreen == "mhprc11010_t3" then '3 >> 12
+'			g_szScreen = "mhprc11010_t12"
+'		elseif g_szScreen == "mhprc11010_t4" then  '4 >> 10 
+'			g_szScreen = "mhprc11010_t10"
+'		end if 
+'		
+'		LinkFm.linkfile = g_szScreen
+'	end if
+	
+	'20230810 KKM START : 저장된 스타일에 따라 설정
+	szStyle = Form.GetEnvData("GW_STYLE")
+	'관심종목 스타일1,2,3,4 를 신규 10(두줄),11(한줄),12(차트)로 변경, 10(두줄)을 디폴트로 설정
+	if szStyle == "SET_STYLE2" then  '2 >> 10
+		LinkFm.linkfile = "mhprc11010_t10"
+		g_szScreen = "mhprc11010_t10"			
+		Form.triggerEvent("LinkFm", "STYLE", sParam)
+	elseif szStyle == "SET_STYLE3" then '3 >> 12
+		LinkFm.linkfile = "mhprc11010_t12"
+		g_szScreen = "mhprc11010_t12"			
+	elseif szStyle == "SET_STYLE4" then '4 >> 10 			
+		LinkFm.linkfile = "mhprc11010_t10"
+		g_szScreen = "mhprc11010_t10"			
+	elseif szStyle == "SET_STYLE10" then '10(두줄)		
+		LinkFm.linkfile = "mhprc11010_t10"
+		g_szScreen = "mhprc11010_t10"
+	elseif szStyle == "SET_STYLE11" then			
+		LinkFm.linkfile = "mhprc11010_t11" '11(한줄)
+		g_szScreen = "mhprc11010_t11"			
+	elseif szStyle == "SET_STYLE12" then			
+		LinkFm.linkfile = "mhprc11010_t12" '12(차트)
+		g_szScreen = "mhprc11010_t12"
+	else 
+		LinkFm.linkfile = "mhprc11010_t10" '디폴트: 10(두줄)
+		g_szScreen = "mhprc11010_t10"
+	end if	
+	
+	'CFD 화면 추가
+	if g_szScreenNo = "13101" then
+		'LinkFm.linkfile = "mhprc11010_t10" '20230602 KKM 관심종목 스타일10 디폴트
+		g_szScreen = "mhprc11010_t10" 
+	End if	
+	LinkFm.linkfile = g_szScreen
+	'20230810 KKM END	
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	if sEventName = "STYLE" then
+		' CFD 화면 추가
+'		if g_szScreenNo = "13101" then
+'			exit Sub
+'		end if
+
+		'관심종목 스타일1,2,3,4 를 신규 10(두줄),11(한줄),12(차트)로 변경, 10(두줄)을 디폴트로 설정
+		if sParam == "SET_STYLE2" then  '2 >> 10
+			LinkFm.linkfile = "mhprc11010_t10"
+			g_szScreen = "mhprc11010_t10"			
+			Form.triggerEvent("LinkFm", "STYLE", sParam)
+		elseif sParam == "SET_STYLE3" then '3 >> 12
+			LinkFm.linkfile = "mhprc11010_t12"
+			g_szScreen = "mhprc11010_t12"			
+		elseif sParam == "SET_STYLE4" then '4 >> 10 			
+			LinkFm.linkfile = "mhprc11010_t10"
+			g_szScreen = "mhprc11010_t10"			
+		elseif sParam == "SET_STYLE10" then '10(두줄)		
+			LinkFm.linkfile = "mhprc11010_t10"
+			g_szScreen = "mhprc11010_t10"
+		elseif sParam == "SET_STYLE11" then			
+			LinkFm.linkfile = "mhprc11010_t11" '11(한줄)
+			g_szScreen = "mhprc11010_t11"			
+		elseif sParam == "SET_STYLE12" then			
+			LinkFm.linkfile = "mhprc11010_t12" '12(차트)
+			g_szScreen = "mhprc11010_t12"		
+		else 
+			LinkFm.linkfile = "mhprc11010_t10" '디폴트: 10(두줄)
+			g_szScreen = "mhprc11010_t10"
+		end if
+		
+	' ----------------------------------------------------------------------
+	' 메인화면에서 관심종목 조회를 요청 Trigger
+	' ----------------------------------------------------------------------	
+	elseif sEventName == "GW_LIST" then	
+		Form.triggerEvent("LinkFm", "GW_LIST", sParam)
+	' ----------------------------------------------------------------------
+	' 메인화면에서 관심종목 추가 Trigger
+	' ----------------------------------------------------------------------	
+	elseif sEventName == "GW_ADD" then
+		Form.triggerEvent("LinkFm", "GW_ADD", sParam)
+	' ----------------------------------------------------------------------
+	' 그룹변경시 바로 적용(스타일2에 필요한 트리거)
+	' ----------------------------------------------------------------------	
+	elseif sEventName == "CHANGE_GROUP" then
+		Form.triggerEvent("LinkFm", "CHANGE_GROUP", sParam)
+	' ----------------------------------------------------------------------
+	' 메인화면에서 차트설정 변경후 조회를 요청 Trigger
+	' ----------------------------------------------------------------------	
+	elseif sEventName == "SET_CHART" then
+		Form.triggerEvent("LinkFm", "SET_CHART", sParam)
+		
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' 두줄,한줄 화면에서 오른쪽파업화면이 보여질때 스타일버튼 보이지 않도록 설정메인화면에서 차트설정 변경후 조회를 요청 Trigger
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName == "SET_STYLE_VISIBLE" then
+		Form.triggerEvent("#", sEventName, sParam)
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' 관심그룹수를 서브화면에 보내는 Trigger
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName == "GW_COUNT" then
+		Form.triggerEvent("LinkFm", "GW_COUNT", sParam)			
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' 오른쪽 팝업 닫기 요청 Trigger
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName = "CLOSE_RIGHT" then
+		Form.triggerEvent("LinkFm", "CLOSE_RIGHT", sParam)
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' 최초 관심그룹 등록과 종목등록 Trigger
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName = "GROUP_ADD2" then
+		Form.triggerEvent("#", "GROUP_ADD2", "")
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' 최근조회/보유종목에서 종목등록되었을 때 현재그룹 재조회요청 Trigger 
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName = "ADD2" then
+		Form.triggerEvent("#", "ADD2", "") 
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' 최근조회/보유종목 이외에서 종목삭제되었을 때 현재그룹 재조회요청 Trigger 
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName = "DEL" then
+		Form.triggerEvent("#", "DEL", "") 
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' 최근조회/보유종목 에서 종목삭제되었을 때 관심종목수만 조회하는 요청 Trigger 
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName = "DEL2" then
+		Form.triggerEvent("#", "DEL2", "") 
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' 탭별 종목이 없을 경우 메시지 처리
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName = "SET_VISIBLE" then
+		Form.triggerEvent("#", "SET_VISIBLE", "") 
+	' ----------------------------------------------------------------------------------------------------------------------------
+	' TOPROW 값 저장 요청 Trigger	'20231026 HSZ
+	' ----------------------------------------------------------------------------------------------------------------------------
+	elseif sEventName = "GW_SETTOPROW" then
+		Form.triggerEvent("LinkFm", "GW_SETTOPROW", sParam)
+		
+	'20240524_01 KBC START : 해외주식 고도화		
+	elseif sEventName == "GESTURE" then		
+		Form.triggerEvent("#", "GESTURE", sParam) 'SUB화면 -> 관심메인
+	'20240524_01 KBC END
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_szScreenNo 		 = Form.GetSharedData( "&SCREEN_NO" , false )			' 화면번호 20210823 HSZ CFD
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

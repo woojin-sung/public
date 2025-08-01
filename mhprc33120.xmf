@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="33120" scrname="투자자동향" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="linkfmHoga" linkfile="mhprc34000_s1" bordercolor="017:216216216" ly_vert="0,0,375,76,1" />
+		<FORMTAB name="fmtab0" tabcount="1" tabheadwidth="80" tabheadheight="0" autosave="1" ly_vert="0,76,375,486,1" >
+			<PAGE name="page005730" caption="투자자" linkfile="mhprc33120_t1" loadingtype="1" />
+		</FORMTAB>
+		<LABEL name="lblItemCode" ly_vert="428,156,100,32,1" />
+		<LABEL name="Label0" caption=" " bgcolor="066:238239240" transmode="0" ly_vert="-2,78,375,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1239" _ulen="1127" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 선옵현재가
+' 02. 화면설명 : 선옵현재가
+' 03. 작    성 : 2017.04.30 LES
+'-------------------------------------------------------------------------------------------
+
+Dim g_szItemCode
+Dim g_nfmTab
+Dim g_nSNSType '1 카카오톡 , 2 카카오톡 화면 공유 , 3 트위터 , 4페이스북
+
+'============================================================================
+
+Sub Form_OnFormInit()
+
+	Dim szStyle
+	szStyle	= Form.LoadConfigData("mhprc34000", "Style"	)	'현재가 스타일
+		
+	If szStyle = "0" Then
+		linkfmHoga.linkfile = "mhprc34000_s2"
+	ElseIf szStyle = "1" Then
+		linkfmHoga.linkfile = "mhprc34000_s1"
+	Else
+		linkfmHoga.linkfile = "mhprc34000_s2"
+	End If
+
+	
+	
+	g_szItemCode = Form.getFutureCodeNight(0,"CM",true)
+	lblItemCode.caption = g_szItemCode
+	
+	Form.triggerEvent("linkfmHoga", "INIT_CODE", g_szItemCode) 	' 링크화면에 종목코드 던지기
+
+End Sub
+
+
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	
+	if sKey = "ITEMCODE" then
+		g_szItemCode = sValue
+		lblItemCode.caption = sValue		
+	End If
+	
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

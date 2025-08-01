@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="11020" scrname="메리츠Watching_계좌선택팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,475,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnCloseBot" caption="저장" btnimage="btn_01.9" ly_vert="65,404,175,39,1" />
+		<GRID name="grdAcnt01" colcount="4" ly_vert="1,65,325,325,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_acno" mask="1,0,,,1,####-####,0,1,1" halign="2" />
+				<LABEL name="bd_asno" mask="1,0,-,,1,,0,1,1" halign="1" />
+				<LABEL name="bd_cell3" halign="2" ly_vert="0,0,100,20,1" />
+				<CHKBUTTON name="bd_regyn" margin="20,0,0,0" />
+				<LABEL name="bd_cell4" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="43,120,33,115" ly_vert_visible="0,0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="43" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_regyn" cell_ly="0,0,0,0" line="0,1" import="0,1,5" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="120" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_acno" cell_ly="0,0,0,0" line="0,1" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="33" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_asno" cell_ly="0,0,0,0" line="0,1" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="115" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_cell4" cell_ly="0,0,0,0" line="0,1" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_regyn" rangecellid="bd_regyn" hlcolorcellid="bd_regyn" />
+		</GRID>
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle01" fontsize="2" fontstyle="01" caption="계좌선택" bgcolor="064:255255255" halign="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="ImageClose" autosize="1" imgpath="ic_pop_close" ly_vert="264,15,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4891" _ulen="4671" >
+'============================================================================
+' 01.화면명 	: 메리츠Watching_계좌평가
+' 02.화면설명	: 메리츠Watching_계좌평가계좌선택화면
+' 03.작성	: 2016.03.09
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim	g_szUserID	'사용자ID
+
+g_szUserID	=	""
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	g_szUserID	=		Form.GetSharedData("&USER_ID", 0 )
+	
+	
+	if	g_szUserID	<> null		then
+		DATAMANAGER.RequestTranData("ooase_user_100r")
+	end	if
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if	szTranID	=	"ooase_user_100r"	then
+		DATAMANAGER.SetDataValue(0,"ooase_user_100r", "InBlock1", "ELFN_ID", 0, g_szUserID)
+	end	if
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim	bIsMore
+	
+	bIsMore	=	false
+
+	if	szTranID	=	"ooase_user_100r"	then
+		bIsMore	=	DATAMANAGER.IsMoreNextData("ooase_user_100r")
+	
+		if	bIsMore	=	true		then
+			DATAMANAGER.SetDataValue(0,"ooase_user_100r", "InBlock1", "ELFN_ID", 0, g_szUserID)
+			DATAMANAGER.RequestNextData("ooase_user_100r")
+		end	if
+	end	if
+	
+End Sub
+
+
+'============================================================================
+'ImageClose_OnClick
+'============================================================================
+Sub ImageClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'btnCloseBot_OnClick
+'============================================================================
+Sub btnCloseBot_OnClick()
+	Dim	szOutdata	'리턴할데이터
+	Dim	szCnt		'그리드카운트
+	Dim	szAcno, szAsno, szRegYN
+	
+	szOutdata	=	""
+	szAcno		=	""
+	szAsno		=	""
+	szRegYN		=	""
+	
+	szCnt 	=	grdAcnt01.rowcount 
+	szOutdata	=	szCnt 
+	
+	
+	for	i = 0 	to		szCnt - 1 
+		szAcno		=	""
+		szAsno		=	""
+		szRegYN		=	""
+	
+		szAcno	=	grdAcnt01.GetCellData("bd_acno", i)
+		szAsno	=	grdAcnt01.GetCellData("bd_asno", i)
+		szRegYN	=	grdAcnt01.GetCellData("bd_regyn", i)
+		
+		if	trim(szRegYN)				=	"1"	then		'체크한경우
+			szRegYN	=	"1"
+		elseif	trim(szRegYN)			=	"0"	then		'체크안한경우
+			szRegYN	=	"0"
+		elseif	trim(szRegYN)			=	"Y"	then		'캔슬일경우
+			szRegYN	=	"0"
+		elseif	trim(szRegYN)			=	"N"	then		'등록되어있는경우
+			szRegYN	=	"1"
+		elseif	len(trim(szRegYN))	=	0	then		'미체크시
+			szRegYN	=	"0"
+		end	if
+		
+		szOutdata	=	szOutdata & "★" & szAcno & "★" & szAsno & "★" & szRegYN
+	next
+	
+	Form.SendReturnToParent("mhprc11020_pc", szOutdata)
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Form.ShowAlert(szTranID, szErrMsg)
+End Sub
+
+'===========================================================================
+'szTranID
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	dim	szDataCnt
+	dim	szOrg, szTrs
+
+	szDataCnt	=	"0"
+	szOrg	=	""
+	szTrs	=	""
+	
+	if	szTranID		=	"ooase_user_100r"	then
+		szDataCnt	=	DATAMANAGER.GetDataCount(0, "ooase_user_100r" , "OutBlock1")
+	
+		'등록해제시 체크박스 버튼 처리
+		for	i = 0	to	szDataCnt - 1
+			szOrg	=	DATAMANAGER.GetDataValue(0, "ooase_user_100r", "OutBlock1", "CANC_YN" , i)
+			
+			if	trim(szOrg)	=	"N"	then		'N-->등록되어있음
+				szTrs	=	"1"
+			else								'Y,공백 -->등록안되어있으므로 미체크처리
+				szTrs	=	"0"
+			end if	
+			
+			DATAMANAGER.SetDataValue(0, "ooase_user_100r", "OutBlock1", "CANC_YN", i, szTrs)
+		next
+	end	if
+End Sub
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ooase_user_100r" trcode="ooase_user_100r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ooase_user_001a" trcode="ooase_user_001a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ooase_user_100r" title="계좌수익률 PUSH서비스 신청조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="45" _ulen="37" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="290" _ulen="224" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+CYCL_CLCD^주기구분코드^1^0^0^0^0^0^0
+CANC_YN^해지여부^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CNTT^내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="35" _ulen="31" >
+
+CNTT^내용^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ooase_user_001a" title="계좌수익률 PUSH서비스 신청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" occurs="30" inout="in" _len="245" _ulen="185" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+CYCL_CLCD^주기구분코드^1^0^0^0^0^0^0
+CANC_YN^해지여부^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
