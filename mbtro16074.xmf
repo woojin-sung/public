@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="00000" scrname="해외주식 체결내역" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt1" itemcodetype="100,119,200" delegate="1" finaceexcept="1" benefitexcept="1" ly_vert="10,9,310,39,1" />
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,9,39,39,1" />
+		<FORMTAB name="fmtab0" tabcount="2" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,54,375,509,1" >
+			<PAGE name="page004663" caption="주문체결" linkfile="mbtro16074_t1.xmf" loadingtype="1" />
+			<PAGE name="page004795" caption="일별체결" linkfile="mbtro16074_t2.xmf" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1218" _ulen="1198" >
+--===========================================================================
+--===========================================================================
+'===========================================================================
+Dim g_szAcno
+Dim g_szAsno
+'===========================================================================
+Sub Call_Tran()
+
+	g_szAcno = left(acnt1.caption,8)
+	g_szAsno = right(acnt1.caption,2)
+	
+	
+	if Cint(fmtab0.currenttab) = 0 or Cint(fmtab0.currenttab) = 1 then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "TRANCALL", g_szAcno & "||" & g_szAsno)
+	else
+		Form.ShowAlert("Error", "유효하지않은 탭입니다.")
+		exit sub
+	end if
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	Call_Tran()
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	Call_Tran()
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	Call_Tran()
+End Sub
+
+'============================================================================
+Sub acnt1_ChangeAccount()
+	Call_Tran()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

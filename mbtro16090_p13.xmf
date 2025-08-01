@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16090" scrname="개인(신용)정보선택약관팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<LABEL name="labTitle" fontsize="4" fontstyle="01" halign="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="imgExit" autosize="1" imgpath="icon_close_s.png" ly_vert="20,20,24,24,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="0,103,375,591,1" />
+		<TAB name="Tab0" tabheadheight="40" tabwidthtype="1" tabcount="2" ly_vert="0,60,375,40,1" >
+			<PAGE name="0" caption="요약동의서" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="1" caption="상세동의서" >
+				<CONTROL_INFO/>
+			</PAGE>
+		</TAB>
+		<BUTTON name="btnOK" caption="확인" btnimage="btn_20.9" ly_vert="0,696,375,60,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_21.9" ly_vert="500,696,187,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2021" _ulen="1929" >
+'해외주식 개인(신용)정보 동의서 요약/상세
+Dim g_szDev
+Dim g_szOpenData
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szDev = Form.GetSharedData("&SERVER_MODE", False )
+	
+	g_szOpenData = Form.GetOpenLinkData()
+	if g_szOpenData <> "" and g_szOpenData <> null then
+		labTitle.caption = g_szOpenData
+			
+		'필수'요약동의서
+		if g_szDev == "1" or g_szDev == 1 then 
+			WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm6.pdf" '요약	
+		else
+			WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm6.pdf" '요약	
+		end if 
+	end if
+End Sub
+
+'============================================================================
+Sub Tab0_OnTabChanged(nCurrentTab)
+	if g_szOpenData <> "" and g_szOpenData <> null then
+		if nCurrentTab == 0 then	'요약동의서
+			if g_szDev == "1" or g_szDev == 1 then
+				WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm6.pdf" '요약	
+			else
+				WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm6.pdf" '요약	
+			end if 
+		else	'상세동의서
+			if g_szDev == "1" or g_szDev == 1 then
+				WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm7.pdf" '상세
+			else
+				WebView0.urlpath = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm7.pdf" '상세
+			end if 
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub imgExit_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	Form.SendReturnToParent("nrsmbtro16090_p13" , "OK")
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.SendReturnToParent("nrsmbtro16090_p13" , "CANCEL")
+	Form.CloseForm()		
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

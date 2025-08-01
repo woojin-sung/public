@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="12000" scrname="주식주문_수량입력창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblBack" bgcolor="038:255255255" transmode="0" ly_vert="0,81,375,566,1" />
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9.png" ly_vert="0,81,375,45,1" />
+		<FORMTAB name="fmTab" tabcount="2" tabheadheight="0" ly_vert="0,164,375,483,1" >
+			<PAGE name="page000020" caption="수량입력" linkfile="mbtrs12000_s1" />
+			<PAGE name="page009754" caption="금액입력" linkfile="mbtrs12000_s2" />
+		</FORMTAB>
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="수량입력" bgcolor="064:197070070" halign="1" ly_vert="0,81,375,45,1" />
+		<IMAGE name="imgAmt" imgpath="tab_01_n.9.png" ly_vert="187,126,188,40,1" />
+		<EDIT name="edtQty" enable="0" visible="0" imetype="0" ly_vert="600,50,100,32,0" />
+		<EDIT name="edtPrc" enable="0" visible="0" imetype="0" ly_vert="600,10,330,32,0" />
+		<EDIT name="edtType" enable="0" visible="0" imetype="0" ly_vert="560,50,33,32,0" />
+		<IMAGE name="imgQty" imgpath="tab_01_o.9.png" ly_vert="0,126,188,40,1" />
+		<LABEL name="lblQty" fgcolor="061:188030030" caption="수량입력" halign="1" ly_vert="43,127,100,38,1" />
+		<LABEL name="lblAmt" caption="금액입력" halign="1" ly_vert="231,127,100,38,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="320,81,45,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="331,91,24,24,1" />
+		<IMAGE name="imgDim" imgpath="bg_dim40.9.png" ly_vert="0,0,375,81,1" />
+		<EDIT name="edtMk" imetype="0" ly_vert="480,90,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4892" _ulen="4812" >
+
+'============================================================================
+' 화 면 명 : 주식주문_수량/금액입력창
+' 화면설명 : 주식주문 수량/금액입력시
+' 작    성 : 2016.02.15 ~ 2016.  .       ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+' Init_Data
+'============================================================================
+Function Init_Data(szTab)
+	if CStr(szTab) == "0" then
+		if Trim(edtQty.caption) <> "" then
+			Form.triggerEvent("fmTab." & fmTab.currenttabpageid, "INIT", edtQty.caption)
+			edtQty.caption = ""		
+		end if
+	elseif CStr(szTab) == "1" then
+		if Trim(edtPrc.caption) <> "" then
+			Form.triggerEvent("fmTab." & fmTab.currenttabpageid, "INIT", edtPrc.caption)
+			edtPrc.caption = ""		
+		end if
+	end if
+End Function
+
+'============================================================================
+' Change_Tab
+'============================================================================
+Function Change_Tab(szTab)
+	if szTab == "0" then
+		imgQty.imgpath = "tab_01_o.9.png"
+		imgAmt.imgpath = "tab_01_n.9.png"
+		
+		lblQty.fgcolor = "61"
+		lblAmt.fgcolor = "49"	
+	elseif szTab == "1" then
+		imgQty.imgpath = "tab_01_n.9.png"
+		imgAmt.imgpath = "tab_01_o.9.png"	
+	
+		lblQty.fgcolor = "49"
+		lblAmt.fgcolor = "61"
+	end if
+	
+	fmTab.currenttab = szTab
+	Init_Data(sztab)
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpen
+	
+'	Form.SetScreenName("수량입력")
+	szOpen = Form.GetOpenLinkData()
+	
+	if szOpen <> "" then
+		tData = Split(szOpen, "★")
+		
+		if tData(0) == "2" or tData(0) == "3" then
+			imgQty.visible = false
+			imgAmt.visible = false
+			lblQty.visible = false
+			lblAmt.visible = false		
+		end if
+		
+		edtType.caption = tData(0)
+		edtQty.caption  = tData(1)
+		edtMk.caption   = tData(2)
+		edtPrc.caption  = tData(3)
+		
+		
+		Init_Data(fmTab.currenttab)
+	end if
+End Sub
+
+'============================================================================
+' Form_OnTriggerEvent
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "CLOSE_FORM" then
+		Form.CloseForm()
+	elseif sEventName == "RETURN_QTY" then
+'		if Trim(sParam) <> "" then
+			Form.SendReturnToParent("QTY_POPUP", sParam)
+'		end if
+		
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+' fmTab_OnTabChanged
+'============================================================================
+Sub fmTab_OnTabChanged(nCurrentTab)
+'	Init_Data(nCurrentTab)
+End Sub
+
+'============================================================================
+' imgQty_OnClick
+'============================================================================
+Sub imgQty_OnClick()
+	Change_Tab("0")
+End Sub
+
+'============================================================================
+' imgAmt_OnClick
+'============================================================================
+Sub imgAmt_OnClick()
+	Change_Tab("1")	
+End Sub
+
+'============================================================================
+' lblQty_OnClick
+'============================================================================
+Sub lblQty_OnClick()
+	Change_Tab("0")
+End Sub
+'============================================================================
+' lblAmt_OnClick
+'============================================================================
+Sub lblAmt_OnClick()
+	Change_Tab("1")
+End Sub
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

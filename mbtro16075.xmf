@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="해외주식 주문가능금액_메인" version="2" writer="이현우" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="cmbAcnt" itemcodetype="100,119,200" delegate="1" finaceexcept="1" benefitexcept="1" ly_vert="10,9,310,39,1" />
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,9,39,39,1" />
+		<LINKFORM name="LinkForm" linkfile="mbtro16075_t2" ly_vert="2,53,371,507,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3994" _ulen="3696" >
+'===========================================================================
+Dim g_szAcno
+Dim g_szAsno
+Dim g_szCsno
+Dim g_szSvcdYn
+'===========================================================================
+' Form 초기화
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'Initialize global values
+	g_szAcno = cmbAcnt.total				'계좌번호
+	g_szAsno = cmbAcnt.sequence				'일련번호
+	g_szCsno = ""	
+	g_szSvcdYn = ""
+	
+	'고객정보 요청 for CSNO
+	DATAMANAGER.RequestTranData("obacp_comm_005r")
+End Sub
+'============================================================================
+' DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'고객정보 요청 for CSNO
+	if szTranID = "obacp_comm_005r" then
+		DATAMANAGER.SetDataValue(0, "obacp_comm_005r", "InBlock1", "IQRY_CLS_CODE", 0 , "2")
+		DATAMANAGER.SetDataValue(0, "obacp_comm_005r", "InBlock1", "ACNO", 0 , g_szAcno)
+		DATAMANAGER.SetDataValue(0, "obacp_comm_005r", "InBlock1", "ASNO", 0 , g_szAsno)
+	end if 
+	
+	'통합증거금 약정여부
+	if szTranID = "obpds_srvc_158r" then
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_158r", "InBlock1", "PROS_CLS_CODE", 0 , "1")
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_158r", "InBlock1", "CSNO", 0 , g_szCsno)
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_158r", "InBlock1", "SVCD", 0 , "081")
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_158r", "InBlock1", "ACNO", 0 , g_szAcno)
+		DATAMANAGER.SetDataValue(0, "obpds_srvc_158r", "InBlock1", "ASNO", 0 , g_szAsno)
+	end if 
+	
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'고객정보 요청 for CSNO
+	if szTranID = "obacp_comm_005r" then
+		'고객번호
+		g_szCsno = DATAMANAGER.GetDataValue(0, "obacp_comm_005r", "OutBlock1", "CSNO" , 0 )
+		'통합증거금 약정여부
+		DATAMANAGER.RequestTranData("obpds_srvc_158r")
+	end if
+	
+	'통합증거금 약정여부
+	if szTranID = "obpds_srvc_158r" Then
+		g_szSvcdYn = DATAMANAGER.GetDataValue(0, "obpds_srvc_158r", "OutBlock1", "STPL_STAT_CLS_CODE" , 0 )
+		'Call MainLogic
+		Call_Tran()
+	end if
+	
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	'고객정보 요청 for CSNO
+	if szTranID = "obacp_comm_005r" then
+		Form.ShowAlert("안내", "고객정보를 가져올 수 없습니다.")
+	end if
+	
+	'통합증거금 약정여부
+	if szTranID = "obpds_srvc_158r" Then
+		Form.ShowAlert("안내", "통합증거금 약정여부를 확인할 수 없습니다.")
+	end if
+End Sub
+
+'===========================================================================
+' TriggerEvent_CallTran
+'============================================================================
+Sub Call_Tran()
+
+	g_szAcno = left(cmbAcnt.caption,8)
+	g_szAsno = right(cmbAcnt.caption,2)	
+	
+	'계좌번호 & 일련번호 & 통합증거금 약정여부
+	Form.triggerEvent("LinkForm", "SearchBalance", g_szAcno & "||" & g_szAsno & "||" & g_szSvcdYn)
+End Sub
+'============================================================================
+' 조회버튼
+'============================================================================
+Sub btnSearch_OnClick()
+	Call_Tran()
+End Sub
+'============================================================================
+' 계좌변경
+'============================================================================
+Sub cmbAcnt_ChangeAccount()
+	'고객정보 요청 for CSNO
+	g_szAcno = cmbAcnt.total				'계좌번호
+	g_szAsno = cmbAcnt.sequence				'일련번호
+	DATAMANAGER.RequestTranData("obacp_comm_005r")
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_158r" trcode="obpds_srvc_158r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_comm_005r" trcode="obacp_comm_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_158r" title="약정내역조회TR(약정단위별)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="240" _ulen="178" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+RMND_SRNO^잔고일련번호^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="1355" _ulen="1015" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스 일련번호^11^0^7^0^0^0^0
+SVC_MANG_UNIT_CODE^서비스 관리 단위 코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+CUST_ACNO^고객 계좌번호^24^0^0^0^0^0^0
+RMND_SRNO^잔고 일련번호^3^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+KOR_ISSU_ABWR_NAME^한글 종목 약어 명^40^0^0^0^0^0^0
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널 유형 구분 코드^3^0^0^0^0^0^0
+APLT_DATE^신청 일자^8^0^0^0^0^0^0
+REG_PROS_EMPNO^등록 처리 직원번호^9^0^0^0^0^0^0
+SVC_CANC_CLS_CODE^서비스 해지 구분 코드^1^0^0^0^0^0^0
+CANC_DATE^해지 일자^8^0^0^0^0^0^0
+CANC_PROS_EMPNO^해지 처리 직원번호^9^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+STPL_STAT_CLS_CODE^약정 상태 구분 코드^2^0^0^0^0^0^0
+REG_APRV_DATE^등록 승인 일자^8^0^0^0^0^0^0
+MOD_APRV_DATE^변경 승인 일자^8^0^0^0^0^0^0
+CANC_APRV_DATE^해지 승인 일자^8^0^0^0^0^0^0
+REG_BRCD^등록 지점코드^4^0^0^0^0^0^0
+MNPL_BRCD^조작 지점코드^4^0^0^0^0^0^0
+MNPL_YMDH^조작 일시1^19^0^0^0^0^0^0
+MNPL_TRNO^조작 단말번호^39^0^0^0^0^0^0
+MNPL_EMPNO^조작 직원번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="54" _ulen="40" >
+
+SVC_SRNO^서비스 일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_comm_005r" title="계좌기준 고객정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="126" _ulen="94" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1107" _ulen="815" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_ABWR_NAME^고객약어명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+CUST_CLS_CODE^고객구분코드^1^0^0^0^0^0^0
+CUST_GRAD_CODE^고객등급코드^2^0^0^0^0^0^0
+BDCR_CLCD^신용불량구분코드^1^0^0^0^0^0^0
+DRVT_ODER_ABLE_CODE^파생주문가능코드^2^0^0^0^0^0^0
+CBSC_GRAD_CODE^CB스코어등급코드^2^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌상태코드^1^0^0^0^0^0^0
+BKKP_NAME^부기명^40^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+INDV_MANG_BRCD^개별관리지점코드^4^0^0^0^0^0^0
+JOIN_RCMD_EMPNO^가입권유직원번호^9^0^0^0^0^0^0
+MANG_EMPNO^관리직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리직원명^40^0^0^0^0^0^0
+LNKD_BANK_CLS_CODE^연계은행구분코드^1^0^0^0^0^0^0
+OLD_PRCD^구상품코드^3^0^0^0^0^0^0
+ONLN_RNMC_DATE^온라인실명확인일자^8^0^0^0^0^0^0
+JOIN_BRCD^가입지점코드^4^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

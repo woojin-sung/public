@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="12010" scrname="주식호가주문_기타팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBack" autosize="1" imgpath="bg_dim40.9.png" ly_vert="0,0,375,647,1" />
+		<TABLE name="tblLow" insidelinecolor="102:255255255" colcount="3" rowcount="1" outline="1011" designorder="1" ly_vert="5,566,160,35,1" >
+			<COL_INFO ly_vert_width="20,70,70" />
+			<ROW_INFO ly_vert_height="35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" usesign="1" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" mask="0,0,,,0,,0,1,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,0,2,0" fgcolor="006:199056017" line="1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="tblHigh" insidelinecolor="102:255255255" colcount="3" rowcount="1" outline="1110" designorder="1" ly_vert="5,182,160,35,1" >
+			<COL_INFO ly_vert_width="20,70,70" />
+			<ROW_INFO ly_vert_height="35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" usesign="1" halign="0" line="0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" mask="0,0,,,0,,0,1,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,0,2,0" fgcolor="006:199056017" line="1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<GRID name="grdHoga" colcount="3" ly_vert="5,217,160,350,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_prc" mask="0,0,,,0,,0,1,0" halign="2" autofontsize="1" />
+				<LABEL name="bd_text" halign="1" />
+				<LABEL name="bd_sign" usesign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" cursorstyle="1" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="20,70,70" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="20" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="34" />
+						<CELLINFO>
+							<CELL name="bd_sign" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="34" />
+						<CELLINFO>
+							<CELL name="bd_prc" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="34" />
+						<CELLINFO>
+							<CELL name="bd_text" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_sign" rangecellid="bd_sign" hlcolorcellid="bd_sign" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6627" _ulen="6329" >
+
+'============================================================================
+' 화 면 명 : 주식호가주문_기타팝업
+' 화면설명 : 주식호가주문에서 기타(매수/매도)버튼 클릭시 팝업오픈
+' 작    성 : 2016.02.25 ~ 2016.  .       ssang
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_szGbn		' 매매구분(0:매수, 1:매도)
+Dim g_nCPrc		' 현재가
+Dim g_nHPrc		' 상한가
+Dim g_nLPrc		' 하한가
+Dim g_nBPrc		' 기준가
+Dim g_nUnit		' 호가단위
+Dim g_szMk		' 시장구분 20160407 : ELW때문에 추가
+Dim g_szType, g_szColor
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'===========================================================================
+' 색상 리턴함수
+'===========================================================================
+Function GetFgColor(nNum)
+	if nNum > g_nBPrc then
+		return "6"
+	elseif nNum < g_nBPrc then
+		return "7"
+	else
+		return "12"
+	end if
+	
+End Function
+
+'===========================================================================
+' _tonumber : 숫자 리턴함수
+'===========================================================================
+Function _tonumber(szData)
+	return tonumber(szData) or 0
+End Function
+
+'============================================================================
+' Return_Data
+'============================================================================
+Function Return_Data(szData)
+	if Trim(szData) <> "" then
+		if g_szGbn == "0" then
+			Form.SendReturnToParent("RETURN_ETCBUY", szData)
+		elseif g_szGbn == "1" then
+			Form.SendReturnToParent("RETURN_ETCSELL", szData)
+		end if
+	end if
+	
+	Form.CloseForm()
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpen 
+	Dim nCnt, nCalc
+	Dim tData
+	
+	szOpen = Form.GetOpenLinkData()
+
+	if szOpen == null or Trim(szOpen) == "" then
+		Exit Sub
+	end if
+
+	' 매매구분★현재가★상한가★하한가★기준가★호가단위★시장구분
+	tData = Split(szOpen, "★")
+
+	g_szGbn = tData(0)
+	
+	if g_szGbn == "0" then
+		grdHoga.left = 5
+		tblHigh.left = 5
+		tblLow.left  = 5
+		
+		g_szType = "매수"
+		g_szColor = "1"	
+	elseif g_szGbn == "1" then
+		grdHoga.left = 210
+		tblHigh.left = 210
+		tblLow.left  = 210
+		
+		g_szType = "매도"
+		g_szColor = "2"		
+	else
+		return
+	end if
+	
+	g_nCPrc = _tonumber(tData(1))
+	g_nHPrc = _tonumber(tData(2))
+	g_nLPrc = _tonumber(tData(3))	
+	g_nBPrc = _tonumber(tData(4))	
+	g_nUnit = _tonumber(tData(5))
+	g_szMk  = tData(6)			' 시장구분 20160407 : ELW때문에 추가
+
+	' 20160407 : ELW 추가
+	if g_szMk == "W" then
+		nCnt = 20
+		nCalc = g_nUnit * 10
+		nRow = 0
+		nPrc = g_nCPrc + nCalc
+		
+		For i = 0 to nCnt-1 
+			nPrc = nPrc - g_nUnit
+	
+			if nPrc <= 0 then
+				if i -1 >= 4 then
+					nRow = nRow-4
+				end if
+				
+				grdHoga.toprow = nRow
+				Exit Sub
+			end if
+			
+			grdHoga.insertrow = i
+			grdHoga.SetCellData("bd_prc", i, nPrc)
+			grdHoga.SetCellData("bd_text", i, g_szType)
+			
+			grdHoga.SetCellFgColor("bd_prc", i, GetFgColor(nPrc))
+			grdHoga.SetCellFgColor("bd_text", i, g_szColor)
+			
+			if nPrc == g_nCPrc then
+				grdHoga.SetCellBgColor( "bd_prc", i, "29" )
+				nRow = i
+			end if
+		Next
+
+		if nRow > 0 then
+			if nRow >= 4 then
+				'grdHoga.selectrow = nRow
+				nRow = nRow-4
+			end if
+		end if
+		
+		grdHoga.toprow = nRow
+	else
+		nCnt = (g_nHPrc-g_nLPrc)/g_nUnit-1
+		
+		if nCnt > 0 then
+			Dim nRow, nPrc
+			
+			nRow = 0
+			nPrc = g_nHPrc
+			grdHoga.rowcount = nCnt
+			
+			For i = 0 to grdHoga.rowcount-1 
+				nPrc = nPrc - g_nUnit
+			
+				grdHoga.SetCellData("bd_prc", i, nPrc)
+				grdHoga.SetCellData("bd_text", i, g_szType)
+				
+				grdHoga.SetCellFgColor("bd_prc", i, GetFgColor(nPrc))
+				grdHoga.SetCellFgColor("bd_text", i, g_szColor)
+				
+				if nPrc == g_nCPrc then
+					grdHoga.SetCellBgColor( "bd_prc", i, "29" )
+					nRow = i
+				end if
+			Next
+			
+			tblHigh.SetCellString(0, 0, "1" )
+			tblHigh.SetCellString(0, 1, g_nHPrc)
+			tblHigh.SetCellString(0, 2, g_szType)
+			
+			tblHigh.SetCellFgColor(0, 1, GetFgColor(g_nHPrc))
+			tblHigh.SetCellFgColor(0, 2, g_szColor)
+			
+			tblLow.SetCellString(0, 0, "4")
+			tblLow.SetCellString(0, 1, g_nLPrc)
+			tblLow.SetCellString(0, 2, g_szType)
+			
+			tblLow.SetCellFgColor(0, 1, GetFgColor(g_nLPrc))
+			tblLow.SetCellFgColor(0, 2, g_szColor)
+	
+			if nRow > 0 then
+				if nRow >= 4 then
+					'grdHoga.selectrow = nRow
+					nRow = nRow-4
+				end if
+			end if
+			
+			grdHoga.toprow = nRow
+		end if
+	end if
+End Sub
+
+'============================================================================
+' tblHigh_OnClick : 20160407 예외처리 추가
+'============================================================================
+Sub tblHigh_OnClick(lRow , lColumn)
+	if lColumn == 2 then '매수
+		Dim szPrc
+		
+		szPrc = tblHigh.GetCellString(0, 1)
+		
+		if Trim(szPrc) <> "" then
+			Return_Data(szPrc)
+		end if
+	end if
+End Sub
+
+'============================================================================
+' tblLow_OnClick : 20160407 예외처리 추가
+'============================================================================
+Sub tblLow_OnClick(lRow , lColumn)
+	if lColumn == 2 then '매수
+		Dim szPrc
+		
+		szPrc = tblLow.GetCellString(0, 1)
+		
+		if Trim(szPrc) <> "" then
+			Return_Data(szPrc)
+		end if
+	end if
+End Sub
+
+'============================================================================
+' grdHoga_OnClickUp
+'============================================================================
+Sub grdHoga_OnClickUp(lRow, szCellID)
+	if szCellID == "bd_text" then
+		Dim szPrc
+		
+		szPrc = grdHoga.GetCellData("bd_prc", lRow)
+		Return_Data(szPrc)
+	end if
+End Sub
+
+'============================================================================
+' imgBack_OnClick
+'============================================================================
+Sub imgBack_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

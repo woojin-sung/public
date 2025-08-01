@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="12000" scrname="주식주문_예수금팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,365,210,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" autosize="1" imgpath="pop_header.9.png" ly_vert="0,0,365,55,1" />
+		<TABLE name="tblData" insidelinecolor="102:255255255" colcount="3" rowcount="4" outline="0101" designorder="1" ly_vert="10,70,345,124,1" >
+			<COL_INFO ly_vert_width="115,115,115" />
+			<ROW_INFO ly_vert_height="28,34,28,34" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" caption="예수금(D+2)" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" fgcolor="065:102102102" bgcolor="066:238239240" caption="수표금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,0,2,0" fgcolor="065:102102102" bgcolor="066:238239240" line="0,1" caption="대출금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,0,1" import="0,1,2" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" import="0,2,4" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" import="1,1,3" halign="2" line="0,1" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" bgcolor="066:238239240" caption="미수금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" fgcolor="065:102102102" bgcolor="066:238239240" caption="이자미납금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,2,2,2" fgcolor="065:102102102" bgcolor="066:238239240" line="0,1" caption="인출가능금" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" import="0,3,10" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,3,1,3" import="0,3,12" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,3,2,3" import="0,1,6" halign="2" line="0,1" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="예수금" bgcolor="064:197070070" halign="1" ly_vert="0,0,365,55,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="309,5,45,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="321,15,24,24,1" />
+		<BUTTON name="btnInquiry" caption="조회" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="0,280,365,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4686" _ulen="4540" >
+
+'============================================================================
+' 화 면 명 : 주식주문_예수금팝업
+' 화면설명 : 주식주문에서 상단연결팝업에서 예수금 선택시 오픈
+' 작    성 : 2016.02.12 ~ 2016.  .       ssang
+' [Modify] ==================================================================
+' 2020.08.20 : 정민영 : v0001 : [T2007130018] 레버리지ETF/ETN 기본예탁금관련(OutBlock6) obacb_balc_024rTR 재매핑
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szAcnt, g_szAcntCd
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             
+'****************************************************************************
+
+'============================================================================
+' Init_Table
+'============================================================================
+Sub Init_Table()
+	tblData.SetCellString(1, 0, "")
+	tblData.SetCellString(1, 1, "")
+	tblData.SetCellString(1, 2, "")
+	tblData.SetCellString(3, 0, "")
+	tblData.SetCellString(3, 1, "")
+	tblData.SetCellString(3, 2, "")
+End Sub
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpen
+	Dim tData
+
+	szOpen = Form.GetOpenLinkData()
+	
+	if Trim(szOpen) == "" then
+		Exit Sub
+	end if
+
+	tData = Split(szOpen, "★")
+	
+	if UBound(tData) > 0 then
+		g_szAcnt   = tData(0)
+		g_szAcntCd = tData(1)
+
+		Init_Table()
+		DATAMANAGER.RequestTranData("obacb_balc_024r")
+		DATAMANAGER.RequestTranData("obacb_balc_105r")
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnSendTranBefore
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	' ----------------------------------------------------------------------
+	' 예수금 조회
+	' ----------------------------------------------------------------------	
+	if szTranID = "obacb_balc_024r" then	 
+		DATAMANAGER.ClearInputData(0, "obacb_balc_024r")
+		
+		DATAMANAGER.SetDataValue(0, "obacb_balc_024r", "InBlock1", "ACNO", 0, g_szAcnt)
+		DATAMANAGER.SetDataValue(0, "obacb_balc_024r", "InBlock1", "ASNO", 0, g_szAcntCd)
+	' ----------------------------------------------------------------------
+	' 평가내역 조회
+	' ----------------------------------------------------------------------			
+	elseif szTranID = "obacb_balc_105r" then	 
+		DATAMANAGER.ClearInputData(0, "obacb_balc_105r")
+		DATAMANAGER.SetDataValue(0, "obacb_balc_105r", "InBlock1", "WRAP_ACNT_YN", 0, "N")
+		DATAMANAGER.SetDataValue(0, "obacb_balc_105r", "InBlock1", "ACNO", 0, g_szAcnt)
+		DATAMANAGER.SetDataValue(0, "obacb_balc_105r", "InBlock1", "ASNO", 0, g_szAcntCd)
+	end if
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranError
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+'	if Trim(szSubMsg) <> "" then
+'		Form.Toast(1, szErrMsg & "(" & szSubMsg & ")", true)	
+'	else
+'		Form.Toast(1, szErrMsg, true)
+'	end if
+End Sub
+
+'============================================================================
+' btnInquiry_OnClick
+'============================================================================
+Sub btnInquiry_OnClick()
+	Init_Table()
+	DATAMANAGER.RequestTranData("obacb_balc_024r")
+	DATAMANAGER.RequestTranData("obacb_balc_105r")
+End Sub
+
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacb_balc_024r" trcode="obacb_balc_024r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obacb_balc_105r" trcode="obacb_balc_105r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacb_balc_024r" title="종합계좌 예수금 상세 내역 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1326" _ulen="1002" >
+
+TFAM^예수금^19^0^7^0^0^0^0
+UI_D1_AFT_TFAM^UI 1일 후 예수금^19^0^7^0^0^0^0
+UI_D2_AFT_TFAM^UI 2일 후 예수금^19^0^7^0^0^0^0
+WTMN_ABLE_CASH_AMT^인출 가능 현금 금액^19^0^7^0^0^0^0
+WTMN_ABLE_ATMT_INVT_AMT^인출가능자동투자금액^19^0^7^0^0^0^0
+UI_CSEQ_ASET_DRNG_ABLE_AMT^UI현금성자산출금가능금액^19^0^7^0^0^0^0
+DRNG_ABLE_AMT^출금 가능 금액^19^0^7^0^0^0^0
+UI_PRDY_SELN_EXCL_AMT^UI 전일 매도 정산 금액^19^0^7^0^0^0^0
+UI_TDAY_SELN_EXCL_AMT^UI 당일 매도 정산 금액^19^0^7^0^0^0^0
+UI_PRDY_BYOV_EXCL_AMT^UI 전일 매수1 정산 금액^19^0^7^0^0^0^0
+UI_TDAY_BYOV_EXCL_AMT^UI 당일 매수1 정산 금액^19^0^7^0^0^0^0
+UI_PRDY_SELN_BYOV_EXCL_AMT^UI전일매도매수정산금액^19^0^7^0^0^0^0
+UI_TDAY_SELN_BYOV_EXCL_AMT^UI당일매도매수정산금액^19^0^7^0^0^0^0
+UI_NXDY_LQDT_ANTC_AMT^UI 익일 반대매매 예상 금액^19^0^7^0^0^0^0
+ATMT_INVT_VLTN_AMT^자동투자평가금액^19^0^7^0^0^0^0
+UI_D1_AFT_DRNG_ABLE_AMT^UI1일후출금가능금액^19^0^7^0^0^0^0
+UI_D2_AFT_DRNG_ABLE_AMT^UI2일후출금가능금액^19^0^7^0^0^0^0
+SMAM_LOAN_VLTN_AMT^소액대출평가금액^19^0^7^0^0^0^0
+UI_D1_AFT_UNCL_RPMN_RQRD_AMT^UI1일후미수변제소요금액^19^0^7^0^0^0^0
+UI_D2_AFT_UNCL_RPMN_RQRD_AMT^UI2일후미수변제소요금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="1079" _ulen="811" >
+
+NSAV_TFAM^비저축 예수금^19^0^7^0^0^0^0
+UI_PRDY_CASH_ENTM_MARG^UI 전일 현금 위탁 증거금^19^0^7^0^0^0^0
+UI_TDAY_CASH_ENTM_MARG^UI 당일 현금 위탁 증거금^19^0^7^0^0^0^0
+SBSC_MARG^청약 증거금^19^0^7^0^0^0^0
+CHECK_AMT^수표 금액^19^0^7^0^0^0^0
+RSCH_AMT^기타수표 금액^19^0^7^0^0^0^0
+PRVS_SUSP_AMT^지급정지금액^19^0^7^0^0^0^0
+CRDT_MORG_CASH_AMT^신용 담보 현금 금액^19^0^7^0^0^0^0
+ODER_ABLE_CASH_AMT^주문 가능 현금 금액^19^0^7^0^0^0^0
+UI_PRDY_SBSN_ENTM_MARG^UI 전일 대용 위탁 증거금^19^0^7^0^0^0^0
+UI_TDAY_SBSN_ENTM_MARG^UI 당일 대용 위탁 증거금^19^0^7^0^0^0^0
+ODER_ABLE_SBSN_AMT^주문 가능 대용 금액^19^0^7^0^0^0^0
+IISC_BYOV_MARG^집합투자증권매수증거금^19^0^7^0^0^0^0
+OM_BOND_MARG^장외 채권 증거금^19^0^7^0^0^0^0
+RGHT_SBSN_AMT^권리 대용 금액^19^0^7^0^0^0^0
+UI_RP_ENTM_MARG^UI RP 위탁 증거금^19^0^7^0^0^0^0
+MNEC_MARG^환전증거금^20^3^7^0^0^0^0
+OTHR_CRNC_MARG^타통화증거금^19^0^7^0^0^0^0
+SMNO_ODER_MARG^소수주문증거금^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="1521" _ulen="1135" >
+
+CRDT_LOAN_AMT^신용대출금액^19^0^7^0^0^0^0
+UI_CRDT_STLN_AMT^UI 신용 대주 금액^19^0^7^0^0^0^0
+DEPS_ASCR_AMT^예탁 담보대출 금액^19^0^7^0^0^0^0
+SELN_ASCR_AMT^매도 담보대출 금액^19^0^7^0^0^0^0
+SBSC_FNDS_ASCR_AMT^청약 자금 담보대출 금액^19^0^7^0^0^0^0
+CRDT_MORG_AMT^신용 담보 금액^19^0^7^0^0^0^0
+SPLM_MORG_CASH_AMT^추가 담보 현금 금액^19^0^7^0^0^0^0
+SPLM_MORG_SBSN_AMT^추가 담보 대용 금액^19^0^7^0^0^0^0
+MORG_DFCN_AMT^담보 부족 금액^19^0^7^0^0^0^0
+MORG_RATE^담보 비율^9^4^7^0^0^0^0
+CASH_UNAM^현금 미수금^19^0^7^0^0^0^0
+CASH_UNAM_OVFE^현금 미수금 연체료^19^0^7^0^0^0^0
+LOAN_INT_NTPD_AMT^대출 이자 미납 금액^19^0^7^0^0^0^0
+UNCL_CRDT_INT_OVFE^미수 신용 이자 연체료^19^0^7^0^0^0^0
+ETC_LNDN_AMT^기타 대여 금액^19^0^7^0^0^0^0
+ETC_LNDN_AMT_OVFE^기타 대여 금액 연체료^19^0^7^0^0^0^0
+ETC_UNAM^기타 미수금^19^0^7^0^0^0^0
+ETC_UNCL_AMT_OVFE^기타 미수 금액 연체료^19^0^7^0^0^0^0
+UNCL_SCRT_RSRV_AMT^미수 증권 확보 금액^19^0^7^0^0^0^0
+FEE_UNAM^수수료미수금^19^0^7^0^0^0^0
+NNRD_LOAN_AMT^미상환대출금액^19^0^7^0^0^0^0
+CNTG_RFLC_MORG_DFCN_AMT^체결 반영 담보 부족 금액^19^0^7^0^0^0^0
+CNTG_RFLC_MORG_RATE^체결반영담보비율^10^5^7^0^0^0^0
+SMAM_LOAN_AMT^소액대출금액^19^0^7^0^0^0^0
+UI_D1_AFT_INT_AMT^UI1일후이자금액^19^0^7^0^0^0^0
+UI_D2_AFT_INT_AMT^UI2일후이자금액^19^0^7^0^0^0^0
+NNRD_OVRD_INT^미상환연체이자^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="160" _ulen="124" >
+
+SRFC_BAL^표면 잔액^19^0^7^0^0^0^0
+LOAN_LIMT_AMT^대출 한도 금액^19^0^7^0^0^0^0
+TRUST_LOAN_LIMT_AMT^신탁 대출 한도 금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="775" _ulen="581" >
+
+TOTAL_VLTN_AMT^총 평가 금액^19^0^7^0^0^0^0
+SBSN_AMT^대용 금액^19^0^7^0^0^0^0
+CRDT_ODER_ABLE_AMT^신용주문가능금액^19^0^7^0^0^0^0
+CRDT_MORG_SBSN_AMT^신용 담보 대용 금액^19^0^7^0^0^0^0
+SPLM_CRDT_MORG_SBSN_AMT^추가신용담보대용금액^19^0^7^0^0^0^0
+UI_CASH_MAX_ODER_ABLE_AMT30^UI현금최대주문가능금액30^19^0^7^0^0^0^0
+STND_VLTN_DEPS_TTAM^기준평가예탁총액^19^0^7^0^0^0^0
+VLTN_DEPS_TTAM^평가예탁총액^19^0^7^0^0^0^0
+CRDT_STUP_GRMN^신용설정보증금^19^0^7^0^0^0^0
+CRDT_STUP_STND_AMT^신용설정기준금액^19^0^7^0^0^0^0
+UI_CASH_MAX_ODER_ABLE_AMT^UI현금최대주문가능금액^19^0^7^0^0^0^0
+LOAN_MORG_RATE^대출담보비율^17^6^7^0^0^0^0
+IF_KONEX_DEPS_TTAM^IF코넥스예탁총액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock6" inout="out" _len="182" _ulen="140" >
+
+VLTN_DEPS_TTAM^평가예탁총액^19^0^7^0^0^0^0
+ETF_BASC_DEPS_AMT^ETF기본예탁금액^19^0^7^0^0^0^0
+ETF_BASC_DPMN_GRAD_CODE^ETF기본예탁금등급코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacb_balc_105r" title="개별계좌 평가내역 출력" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="170" _ulen="130" >
+
+WRAP_ACNT_YN^WRAP 계좌 여부^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="436" _ulen="332" >
+
+TFAM^예수금^19^0^7^0^0^0^0
+UI_D2_AFT_TFAM^UI2일후예수금^19^0^7^0^0^0^0
+MKSC_VLTN_AMT^유가증권평가금액^19^0^7^0^0^0^0
+LOAN_AMT^대출금액^19^0^7^0^0^0^0
+VLTN_AMT^평가금액^19^0^7^0^0^0^0
+WTMN_ABLE_CASH_AMT^인출가능현금금액^19^0^7^0^0^0^0
+WTMN_ABLE_ATMT_INVT_AMT^인출가능자동투자금액^19^0^7^0^0^0^0
+BYNG_AMT^매입금액^19^0^7^0^0^0^0
+ASET_VLTN_AMT^자산평가금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="1180" _ulen="956" >
+
+UI_VLTN_AMT1^UI평가금액1^19^0^7^0^0^0^0
+UI_VLTN_AMT2^UI평가금액2^19^0^7^0^0^0^0
+UI_VLTN_AMT3^UI평가금액3^19^0^7^0^0^0^0
+UI_VLTN_AMT4^UI평가금액4^19^0^7^0^0^0^0
+UI_VLTN_AMT5^UI평가금액5^19^0^7^0^0^0^0
+UI_VLTN_AMT6^UI평가금액6^19^0^7^0^0^0^0
+UI_VLTN_AMT7^UI평가금액7^19^0^7^0^0^0^0
+UI_VLTN_PRLS_AMT1^UI평가손익금액1^20^3^7^0^0^0^0
+UI_VLTN_PRLS_AMT2^UI평가손익금액2^20^3^7^0^0^0^0
+UI_VLTN_PRLS_AMT3^UI평가손익금액3^20^3^7^0^0^0^0
+UI_VLTN_PRLS_AMT4^UI평가손익금액4^20^3^7^0^0^0^0
+UI_VLTN_PRLS_AMT5^UI평가손익금액5^20^3^7^0^0^0^0
+UI_VLTN_PRLS_AMT6^UI평가손익금액6^20^3^7^0^0^0^0
+UI_VLTN_PRLS_AMT7^UI평가손익금액7^20^3^7^0^0^0^0
+UI_LOAN_AMT1^UI대출금액1^19^0^7^0^0^0^0
+UI_LOAN_AMT2^UI대출금액2^19^0^7^0^0^0^0
+UI_LOAN_AMT3^UI대출금액3^19^0^7^0^0^0^0
+UI_LOAN_AMT4^UI대출금액4^19^0^7^0^0^0^0
+UI_LOAN_AMT5^UI대출금액5^19^0^7^0^0^0^0
+UI_LOAN_AMT6^UI대출금액6^19^0^7^0^0^0^0
+UI_LOAN_AMT7^UI대출금액7^19^0^7^0^0^0^0
+UI_VLTN_AMT13^UI평가금액13^19^0^7^0^0^0^0
+UI_VLTN_PRLS_AMT13^UI평가손익금액13^20^3^7^0^0^0^0
+UI_LOAN_AMT13^UI대출금액13^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="67" _ulen="51" >
+
+CNTG_RFLC_MORG_RATE^체결반영담보비율^10^5^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
