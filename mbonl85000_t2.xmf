@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85000" scrname="ID 계좌번호 추가/해지_계좌해지" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,421,1" />
+	<CONTROL_INFO>
+		<LABEL name="lbl0" visible="0" fgcolor="065:102102102" fontsize="-2" fontstyle="01" caption="해지할 계좌를 선택해주세요." bgcolor="066:238239240" transmode="0" halign="1" ly_vert="20,10,335,30,0" />
+		<GRID name="grd0" visible="0" colcount="3" ly_vert="0,50,375,290,0" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<CHKBUTTON name="bd_cell0" chkbtnimage="checkmenu_o" unchkbtnimage="checkmenu_n" />
+				<LABEL name="bd_cell1" mask="1,0,,,1,####-####,0,1,1,0,0" />
+				<LABEL name="bd_cell2" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="21,25,329" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="21" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="45" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" line="0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="25" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="45" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,0" import="0,1,-1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="329" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="45" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" line="0,0" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell2" rangecellid="bd_cell2" hlcolorcellid="bd_cell2" />
+		</GRID>
+		<BUTTON name="btn0" enable="0" caption="해지" btnimage="btn_20.9" ly_vert="0,371,375,50,1" />
+		<LABEL name="LblInfo" visible="0" fgcolor="065:102102102" fontsize="-2" caption="계좌 해지 후 재접속하시면 해지정보를 확인 할 수 있습니다." halign="1" ly_vert="0,335,375,30,0" />
+		<LABEL name="Label0" caption="해지 가능한 계좌가 없습니다." halign="1" ly_vert="0,80,375,30,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6868" _ulen="6474" >
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_nTRCount		'조회된 TR 개수
+Dim g_szList
+Dim g_nNextCount		'NextData 조회시 grid Index값 설정을 위한 변수
+Dim g_nSelectCount	'선택한 셀의 개수
+Dim g_nSuccesCount	'처리한 TR의 회수
+
+'============================================================================
+' 							FORM 함수
+'============================================================================
+Sub Form_OnFormInit()	
+	g_nSelectCount	= 0
+	g_nSuccesCount	= 0
+	
+	grd0.SetCellData("bd_cell0", 0, 0)
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName = "계좌해지" then
+		g_szList = Split(sParam, "★")
+	end if
+	
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_313r", "InBlock1", "CSNO", 		0, g_szList(0))
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_313r", "InBlock1", "ELFN_ID",	0, g_szList(1))
+	
+	g_nNextCount = 0
+	
+	DATAMANAGER.RequestTranData("obpds_srvc_313r")
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+
+	'공인인증서 인증 화면 리턴
+	if sKeyName == "mhetc90060_p5"  then
+
+		if sRet ~= "cancel" then
+			Call f_StrtDel()
+		end if
+		
+	end if
+	
+End Sub
+
+'============================================================================
+' 							DATAMANAGER 함수
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID == "obpds_srvc_313r" then
+		g_nTRCount = DATAMANAGER.GetDataCount(0, "obpds_srvc_313r", "OutBlock1")
+		
+		if g_nTRCount > 0 then
+			Label0.visible	= false
+			grd0.visible		= true
+			lbl0.visible		= true
+'			LblInfo.visible	= true
+			
+			for i = 0 to g_nTRCount - 1
+				grd0.SetCellData("bd_cell0", i, 0)
+				g_nNextCount = g_nNextCount + 1
+				
+				grd0.SetCellData("bd_cell0", i, 0)
+				grd0.SetCellBgColor("bd_cell0", i, "38")
+				grd0.SetCellBgColor("bd_cell1", i, "38")
+				grd0.SetCellBgColor("bd_cell2", i, "38")
+			next
+			
+			if DATAMANAGER.IsMoreNextData("obpds_srvc_313r") == true then
+				DATAMANAGER.RequestNextData("obpds_srvc_313r")
+			end if
+			
+		else
+			Label0.visible	= true
+			grd0.visible		= false
+			lbl0.visible		= false
+			LblInfo.visible	= false
+		end if
+		
+		btn0.enable 		= false
+		g_nSelectCount	= 0
+		g_nSuccesCount	= 0
+		
+	elseif szTranID == "obpds_srvc_316a" then
+	
+		if g_nSuccesCount ~= 0 and g_nSuccesCount == g_nSelectCount then
+			g_nSelectCount = 0
+			g_nSuccesCount = 0
+			Form.ShowAlert("알림", "ID계좌번호가 변경 되었습니다.(계좌해지)")
+			
+			'20230901 계좌리스트 재조회 추가
+			Form.RequestCommand("RE_ACCT_LIST" , "" , "")
+			
+			DATAMANAGER.RequestTranData("obpds_srvc_313r")			'완료후 재조회
+		end if
+		
+		DATAMANAGER.RequestTranData("obpds_srvc_313r")			'버퍼로 인해 처리만 되고 팝업창이 안뜨고 재조회도 안되는 경우 대비
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	
+	if szTranID == "obpds_srvc_316a" then
+		szSubErr			= DATAMANAGER.GetDataMsgSubText("obpds_srvc_316a")
+		g_nSuccesCount	= 0
+		
+		Form.ShowAlert("알림", szErrMsg.."("..szSubErr..")")
+	end if
+	
+End Sub
+
+'============================================================================
+' 							CONTORL 함수
+'============================================================================
+' 해지 버튼
+'============================================================================
+Sub btn0_OnClick()
+	Dim szAcnt
+	
+	if g_nSelectCount == 0 then
+		Form.MsgBox("알림", "해지할 계좌를 선택하여 주십시오.", 0, 6)
+		Exit Sub
+	end if
+	
+	Form.OpenFramePopup("mhetc90060_p5", "" , "")	'공인인증서 인증 화면 팝업
+End Sub
+
+'============================================================================
+' 계좌 선택
+'============================================================================
+Sub grd0_OnClickUp(lRow, szCellID)
+
+	if szCellID = "bd_cell0" then
+	
+		if grd0.GetCellData("bd_cell0", lRow) == "0" then
+			g_nSelectCount = g_nSelectCount - 1
+		elseif grd0.GetCellData("bd_cell0", lRow) == "1" then
+			'16-03-31 다건 처리 30건 제한 안내 문구 추가
+			g_nSelectCount = g_nSelectCount + 1
+		end if
+		
+	end if
+	
+	if g_nSelectCount > 0 then
+		btn0.enable = true
+	else
+		btn0.enable = false
+	end if
+	
+	if g_nSelectCount > 29 then
+		Form.ShowAlert( "알림", "최대 30건씩 처리 가능합니다.")
+		for i = 0 to grd0.rowcount 
+			if grd0.GetCellData("bd_cell0", i) ~= "1" then
+				grd0.SetCellEnable( "bd_cell0", i, false)
+			end if
+		next
+		Exit Sub
+	elseif g_nSelectCount == 29 then
+		for i = 0 to grd0.rowcount 
+			if grd0.GetCellData("bd_cell0", i) ~= "1" then
+				grd0.SetCellEnable( "bd_cell0", i, true)
+			end if
+		next
+		Exit Sub
+	end if
+	
+End Sub
+
+'============================================================================
+Sub grd0_OnScrollEnd()
+	DATAMANAGER.RequestNextData("obpds_srvc_313r")
+End Sub
+
+'============================================================================
+' 							사용자 함수
+'============================================================================
+' 계좌해지 시작
+'============================================================================
+Function f_StrtDel()
+
+	for i = 0 to g_nTRCount - 1
+	
+		if grd0.GetCellData("bd_cell0", i) == "1" then	
+			Call SetDel(i)
+		end if
+		
+	next
+	
+	DATAMANAGER.RequestTranData("obpds_srvc_316a")
+End Function
+
+'============================================================================
+' 계좌해지 처리 세팅 함수(obpds_srvc_316a)
+'============================================================================
+Function SetDel(nIndex)
+	szAcnt = grd0.GetCellData("bd_cell1", nIndex)
+	
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_316a", "InBlock1", "PROS_CLS_CODE",	g_nSuccesCount, "D")
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_316a", "InBlock1", "SVCD",			g_nSuccesCount, "016")
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_316a", "InBlock1", "HTS_SOON_YN",	g_nSuccesCount , "N")
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_316a", "InBlock1", "CONT_CLS_CODE",	g_nSuccesCount, "4")
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_316a", "InBlock1", "CSNO",			g_nSuccesCount, g_szList(0))
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_316a", "InBlock1", "ACNO",			g_nSuccesCount, szAcnt)
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_316a", "InBlock2", "ACNO",			g_nSuccesCount, szAcnt)
+	DATAMANAGER.SetDataValue(0 , "obpds_srvc_316a", "InBlock2", "ELFN_ID",		g_nSuccesCount, g_szList(1))
+	
+	g_nSuccesCount = g_nSuccesCount + 1
+End Function
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_313r" trcode="obpds_srvc_313r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="SVCD" idx="2" defconst="016" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="obpds_srvc_316a" trcode="obpds_srvc_316a" compress="1" encryption="1" inputcheck="1" digitalsign="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_313r" title="HTS계좌연결 등록계좌 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="195" _ulen="147" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="203" _ulen="159" >
+
+REG_ACNO^등록계좌번호^8^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+HTS_SOON_YN^HTS불원여부^1^0^0^0^0^0^0
+MNPL_YMDH^조작일시^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="49" _ulen="37" >
+
+REG_ACNO^등록계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_316a" title="HTS계좌연결 계좌등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" occurs="30" inout="in" _len="340" _ulen="256" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+HTS_SOON_YN^HTS불원여부^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="30" inout="in" _len="117" _ulen="89" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="55" _ulen="43" >
+
+PROS_RSLT_CODE^처리결과코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

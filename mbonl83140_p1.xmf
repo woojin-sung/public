@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="83140" scrname="반대의사 신청팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,614,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="cont0" ly_vert="0,64,375,481,1" scroll_ly_vert="0,64,375,481,1" >
+			<CONTROL_INFO>
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="4" rowcount="5" designorder="1" ly_vert="5,0,365,210,1" >
+					<COL_INFO ly_vert_width="80,109,68,108" />
+					<ROW_INFO ly_vert_height="50,50,50,30,30" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" bgcolor="090:238239240" caption="종목명" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,0,1,0" fontsize="-2" impidxs="" />
+						<CELL cell_ly="2,0,2,0" bgcolor="090:238239240" caption="종목코드" fontsize="-2" impidxs="" />
+						<CELL cell_ly="3,0,3,0" fontsize="-2" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,1,0,1" bgcolor="090:238239240" caption="반대의사
+마감일" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,1,1,1" fontsize="-2" mask="1,0,,,1,####-##-##,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="2,1,2,1" bgcolor="090:238239240" caption="기준일자" fontsize="-2" impidxs="" />
+						<CELL cell_ly="3,1,3,1" fontsize="-2" mask="1,0,,,1,####-##-##,0,1,1,0,0" impidxs="" />
+						<CELL cell_ly="0,2,0,2" bgcolor="090:238239240" caption="매수
+청구가격" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,2,1,2" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+						<CELL cell_ly="2,2,2,2" bgcolor="090:238239240" caption="전일종가" fontsize="-2" impidxs="" />
+						<CELL cell_ly="3,2,3,2" halign="2" mask="0,0,,,0,,-1,1,1,0,0" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,3,0,4" bgcolor="090:238239240" caption="반대의사
+가능수량" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,3,1,3" bgcolor="090:238239240" caption="현금+신용" fontsize="-2" impidxs="" />
+						<CELL cell_ly="2,3,3,3" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+						<CELL cell_ly="1,4,1,4" bgcolor="090:238239240" caption="유통" fontsize="-2" impidxs="" />
+						<CELL cell_ly="2,4,3,4" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<EDIT name="Edit0" mask="0,0,,,0,,0,1,1,0,0" halign="2" imetype="1" ly_vert="110,265,255,38,1" />
+				<EDIT name="Edit1" mask="0,0,,,0,,0,1,1,0,0" halign="2" imetype="1" ly_vert="110,303,255,38,1" />
+				<LABEL name="Label1" fontsize="-2" caption="반대의사 신청" bgcolor="090:238239240" transmode="0" ly_vert="0,224,375,32,1" />
+				<TABLE name="Table1" insidelinecolor="102:255255255" colcount="1" rowcount="2" designorder="1" ly_vert="5,265,100,76,1" >
+					<COL_INFO ly_vert_width="100" />
+					<ROW_INFO ly_vert_height="38,38" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" bgcolor="090:238239240" caption="현금+신용" fontsize="-2" impidxs="" />
+						<CELL cell_ly="0,1,0,1" bgcolor="090:238239240" caption="유통" fontsize="-2" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<LABEL name="lblScrollPos" ly_vert="400,0,100,10,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<EDIT name="EdtPswd" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="283,10,86,39,1" />
+		<ACCOUNT name="acnt0" enable="0" bgcolor="052:255255255" itemcodetype="100,102,105,107,131,132,138,139,140,200" etcfunctions="" accpwdctl="EdtPswd" ly_vert="6,10,271,39,1" />
+		<BUTTON name="btnReg" caption="신청하기" btnimage="btn_05.9" ly_vert="10,558,355,40,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="11105" _ulen="10117" >
+--===========================================================================
+Dim g_sPlain_rm
+Dim g_szCertUserType
+Dim g_OsType
+Dim g_szCurKeyPad
+Dim g_sGubunCode
+'============================================================================
+Dim g_szMangCode
+Function f_CheckBefore()
+	if acnt0.total == "" or acnt0.total == null then
+		Form.ShowAlert("알림", "계좌번호를 확인해 주시기 바랍니다.")
+		return False
+	end if
+	
+	if EdtPswd.caption == "" or EdtPswd.caption == null then
+		Form.ShowAlert("알림", "계좌 비밀번호를 입력해 주세요.")
+		return False
+	end if
+	
+	dim szCode
+	szCode = cont0.Table0.GetCellString(0, 1)
+	if szCode == "" or szCode == null then
+		Form.ShowAlert("알림", "종목 정보가 없습니다.")
+		return False
+	end if
+	
+	if EdtPswd.caption == "" or EdtPswd.caption == null then
+		Form.ShowAlert("알림", "계좌 비밀번호를 입력해 주세요.")
+		return False
+	end if
+	
+	if (cont0.Edit0.caption == "" and cont0.Edit1.caption == "") or
+		(CInt(cont0.Edit0.caption) <= 0 and Int(cont0.Edit1.caption) <= 0) then
+		Form.ShowAlert("알림", "신청 수량을 입력해 주시기 바랍니다.")
+		return False
+	end if
+	
+	return true
+End Function
+
+'============================================================================
+Function f_Proc()
+	'반대의사 신청																		> test skip
+	DATAMANAGER.RequestTranData( "obrgt_dmac_109a" )
+End Function
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_szCertUserType = Form.GetSharedData("&CERT_USE_TYPE", false )  'v001 로그인타입
+	g_sPlain_rm = Form.GetSharedData("&g_sPlain_rm" , false) '암호화 여부
+	g_OsType = Form.GetSharedData("&OS_TYPE", FALSE )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetScreenName( "반대의사 신청" )
+	
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		dim tData
+		tData = Split(szOpenData, "★")
+		'전달데이터
+		'0 : 종목코드
+		'1 : 종목명
+		'2 : 마감일
+		'3 : 기준일
+		'4 : 청구금액
+		'5 : 전일종가
+		'6 : 현금+신용 가능 수량
+		'7 : 유통 가능 수량
+		'8 : 관리 지점코드
+		cont0.Table0.SetCellString(0, 3, tData(0))
+		cont0.Table0.SetCellString(0, 1, tData(1))
+		cont0.Table0.SetCellString(1, 1, tData(2))
+		cont0.Table0.SetCellString(1, 3, tData(3))
+		cont0.Table0.SetCellString(2, 1, CDbl(tData(4)))
+		cont0.Table0.SetCellString(2, 3, tData(5))
+		cont0.Table0.SetCellString(3, 2, CDbl(tData(6)))
+		cont0.Table0.SetCellString(4, 2, CDbl(tData(7)))
+		
+		g_szMangCode = tData(8)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mhetc90060_p9" or sKeyName == "mhetc90060_pa" or sKeyName == "mhetc90060_pb"  or sKeyName == "mhetc90060_motp" then
+		if sRet == "ok" then
+			Form.OpenFramePopup( "mhetc90060_p5" , "" , sPosInfo)		'공인인증서_비밀번호입력 풀팝업	> test skip
+		end if 													'							> test skip
+	elseif sKeyName == "mhetc90060_p5" then 							'							> test skip
+		if sRet ~= "cancel" then									'							> test skip
+			f_Proc()
+		end if
+	'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)									
+	elseif sKeyName == "mhetc90190_p1" then										
+		'if sRet == "ok" then									
+		'end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obrgt_dmac_109a" then
+		Dim sPwd, szDate
+		'비밀번호 암호화
+		If g_sPlain_rm == "1" Then
+		    sPwd = EdtPswd.caption
+		Else
+		    sPwd = EdtPswd.encdata
+		    if Trim(sPwd) == "" or Trim(sPwd) == null then
+			    sPwd = EdtPswd.caption
+		    end if
+		End If
+		'InBlock1
+		szDate = cont0.Table0.GetCellString(1, 3)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE"	, 0, "U"				)'처리구분코드
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "JOB_CLS_CODE"	, 0, "1"				)'작업구분코드
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RGHT_STND_DATE"	, 0, szDate			)'기준일자
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MANG_BRCD"		, 0, g_szMangCode		)'관리지점코드
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO"			, 0, acnt0.total		)'계좌번호
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ASNO"			, 0, acnt0.sequence	)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PWD"			, 0, sPwd			)
+		'InBlock2
+		dim szItemCode, szDMPR_ABLE_QTY, szCRCL_DMPR_ABLE_QTY, szOPST_INTN_EXRS_QTY, szCRCL_OPST_INTN_EXRS_QTY
+		szItemCode = cont0.Table0.GetCellString(0, 3)
+		szDMPR_ABLE_QTY = cont0.Table0.GetCellString(3, 2)
+		szCRCL_DMPR_ABLE_QTY = cont0.Table0.GetCellString(4, 2)
+		szOPST_INTN_EXRS_QTY = cont0.Edit0.caption
+		szCRCL_OPST_INTN_EXRS_QTY = cont0.Edit1.caption
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "ISCD"					, 0, szItemCode 				)'종목코드
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "DMPR_ABLE_QTY"			, 0, szDMPR_ABLE_QTY 			)'현금+신용 가능수량
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CRCL_DMPR_ABLE_QTY"		, 0, szCRCL_DMPR_ABLE_QTY		)'유통 가능수량
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "OPST_INTN_EXRS_QTY"		, 0, szOPST_INTN_EXRS_QTY		)'현금+신용 신청수량
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock2", "CRCL_OPST_INTN_EXRS_QTY"	, 0, szCRCL_OPST_INTN_EXRS_QTY	)'유통 신청수량
+	elseif szTranID == "obcsb_oimf_625r" then
+		Dim sDeviceID, sACNO, sACNO_PWD
+		
+		sDeviceID = Form.GetDeviceID()
+		sACNO = acnt0.total
+		
+		'v0001
+		'AS-IS
+		'sACNO_PWD = Form.GetEncData(g_szList(2))
+		
+		'TO-BE
+		'obcsb_oimf_625r 에 pw전달하지 않아도됨. 기존 g_szList(2)는 rght_type_code로, 잘못된 값 전달중이었음. 삭제처리.
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS_CODE" 		, 0 , "5" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "REG_CLCD" 			, 0 , "1" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "DRNG_ACNO" 			, 0 , sACNO )
+		'DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PWD" , 0 , sACNO_PWD )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MNRC_BANK_CODE" 		, 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MNRC_ACNO" 			, 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "TACT_AMT" 			, 0 , "" )
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "UI_TERM_IDNT_KEY" 	, 0 , sDeviceID )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obrgt_dmac_109a" then
+		Dim sMsg, sSubMsg
+		sMsg = DATAMANAGER.GetDataMsgText( szTranID )
+		sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+		
+		if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+			sMsg = sMsg.." "..sSubMsg
+		end if
+		
+		Form.MsgBox( "알림", sMsg, "", 6 )
+		btnReg.enable = false
+	elseif szTranID == "obcsb_oimf_625r" then	'보안인증
+		Dim sSPLM_ATHN_NCSR_YN 
+		sSPLM_ATHN_NCSR_YN = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "SPLM_ATHN_NCSR_YN" , 0 )
+		g_sGubunCode = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock2", "SCRC_OTP_CLS_CODE" , 0 )
+		
+		'보안매체구분코드 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+		Select Case g_sGubunCode
+			Case "0"
+				Form.OpenFramePopup( "mhetc90060_p9" , "" , sPosInfo)		'공인인증서_보안카드화면
+			Case "1"
+				Form.OpenFramePopup( "mhetc90060_pa" , "" , sPosInfo)		'공인인증서_부가정보
+			Case "2"	
+				'Form.MsgBox( "알림", "이용하시는 보안매체가 없거나 사고등록 되어있어 온라인 처리가 불가능합니다.", "", 6 )
+				RegisterOTP() '2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+			Case "3"
+				Form.OpenFramePopup( "mhetc90060_pb" , "" , sPosInfo)		'공인인증서_일반/스마트OTP
+			Case "4"
+				Form.OpenPopup( "mhetc90060_motp" , "motp_success" , "")		'공인인증서_일반/스마트OTP
+			Case "9"
+				Form.MsgBox( "알림", "기타오류가 발생했습니다.", "", 6 )
+		End Select
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	If szSubMsg <> null and Trim(szSubMsg) <> "" Then
+		szErrMsg = szErrMsg & "(" & szSubMsg & ")" 
+	end if
+	
+	Form.ShowAlert( "알림", szErrMsg )
+End Sub
+
+'============================================================================
+Sub cont0_Edit0_OnEditComplete()
+	g_szPreKeyPad = "Edit0"
+	
+	if g_OSType <> "1" and g_szPreKeyPad == g_szCurKeyPad then
+		cont0.lblScrollPos.top = 0
+		cont0.SetScrollAutoSize()
+		cont0.scroll_pos = 0
+	end if
+
+	dim nAbleQty, nEdit0
+	nAbleQty = CDbl(cont0.Table0.GetCellString(3, 2))
+	nEdit0 = CDbl(cont0.Edit0.caption)
+	
+	if nEdit0 > nAbleQty then
+		Form.ShowAlert("알림", "현금+신용 가능 수량보다 큽니다.")
+		cont0.Edit0.caption = "0"
+		Exit Sub
+	end if
+End Sub
+
+'============================================================================
+Sub cont0_Edit0_OnClick()
+	IF g_OsType <> "1" THEN '안드로이드가 아닌경우에만
+		g_szCurKeyPad = "Edit0"
+		
+		if g_OSType <> "1" then
+			cont0.lblScrollPos.top = 500
+			cont0.SetScrollAutoSize()
+			cont0.scroll_pos = 80
+		end if
+	END IF 
+End Sub
+
+'============================================================================
+Sub cont0_Edit1_OnEditComplete()
+	g_szPreKeyPad = "Edit1"
+	
+	if g_OSType <> "1" and g_szPreKeyPad == g_szCurKeyPad then
+		cont0.lblScrollPos.top = 0
+		cont0.SetScrollAutoSize()
+		cont0.scroll_pos = 0
+	end if
+	
+	dim nAbleQty, nEdit0
+	nAbleQty = CDbl(cont0.Table0.GetCellString(4, 2))
+	nEdit0 = CDbl(cont0.Edit1.caption)
+	
+	if nEdit0 > nAbleQty then
+		Form.ShowAlert("알림", "유통 가능 수량보다 큽니다.")
+		cont0.Edit1.caption = "0"
+		Exit Sub
+	end if
+End Sub
+
+'============================================================================
+Sub cont0_Edit1_OnClick()
+	IF g_OsType <> "1" THEN '안드로이드가 아닌경우에만
+		g_szCurKeyPad = "Edit1"
+		
+		if g_OSType <> "1" then
+			cont0.lblScrollPos.top = 500
+			cont0.SetScrollAutoSize()
+			cont0.scroll_pos = 80
+		end if
+	END IF  
+End Sub
+
+'============================================================================
+Sub btnReg_OnClick()
+	if f_CheckBefore() then
+'		f_Proc() 'TEST
+		DATAMANAGER.RequestTranData( "obcsb_oimf_625r" )
+	end if
+End Sub
+
+'============================================================================
+'2024-02-01 : 인증매체 등록(공통 mhetc90190_p1)
+'============================================================================
+Sub RegisterOTP()
+	'계좌번호★주민번호(필수아님)★Y/N( 모바일OTP/타기관OTP 발급 완료 후 인증 처리 진행여부를 판단함)★Y/N(처리 완료시 화면닫기)	
+	Form.OpenPopup("mhetc90190_p1", acnt0.total &"★"& "" &"★"& "N" &"★"& "Y", "")	
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obrgt_dmac_109a" trcode="obrgt_dmac_109a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_625r" trcode="obcsb_oimf_625r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obrgt_dmac_109a" title="반대의사입력-온라인용" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="299" _ulen="223" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+JOB_CLS_CODE^작업구분코드^1^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+RGHT_STND_DATE^권리기준일자^8^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="703" _ulen="507" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+DMPR_ABLE_QTY^매수청구가능수량^19^0^7^0^0^0^0
+CRDT_DMPR_ABLE_QTY^신용매수청구가능수량^19^0^7^0^0^0^0
+CRCL_DMPR_ABLE_QTY^유통매수청구가능수량^19^0^7^0^0^0^0
+LOAN_ABLE_QTY^대출가능수량^19^0^7^0^0^0^0
+DMPR_QTY^매수청구수량^19^0^7^0^0^0^0
+CRDT_DMPR_QTY^신용매수청구수량^19^0^7^0^0^0^0
+CRCL_DMPR_QTY^유통매수청구수량^19^0^7^0^0^0^0
+OPST_INTN_EXRS_QTY^반대의사표시수량^19^0^7^0^0^0^0
+CRDT_OPST_INTN_EXRS_QTY^신용반대의사표시수량^19^0^7^0^0^0^0
+CRCL_OPST_INTN_EXRS_QTY^유통반대의사표시수량^19^0^7^0^0^0^0
+LOAN_OPST_INTN_EXRS_QTY^대출반대의사표시수량^14^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_625r" title="추가인증대상조회(스마트폰)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="358" _ulen="272" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+REG_CLCD^등록구분코드^1^0^0^0^0^0^0
+DRNG_ACNO^출금계좌번호^8^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+MNRC_BANK_CODE^입금은행코드^3^0^0^0^0^0^0
+MNRC_ACNO^입금계좌번호^20^0^0^0^0^0^0
+TACT_AMT^이체금액^19^0^7^0^0^0^0
+UI_TERM_IDNT_KEY^UI단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="213" _ulen="165" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+REG_DATE^등록일자^8^0^0^0^0^0^0
+CANC_DATE^해지일자^8^0^0^0^0^0^0
+SPLM_ATHN_NCSR_YN^추가인증필요여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="67" _ulen="51" >
+
+SCRC_OTP_CLS_CODE^보안카드OTP구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

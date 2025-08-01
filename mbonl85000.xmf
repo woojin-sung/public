@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85000" scrname="ID 계좌연결" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fontsize="1" caption="로그인중인 ID를 확인해주세요." halign="1" ly_vert="0,0,375,30,1" />
+		<BUTTON name="Button0" enable="0" fgcolor="004:000000000" fontstyle="01" ly_vert="118,35,140,30,1" />
+		<LABEL name="LblID" halign="1" autofontsize="1" ly_vert="118,35,140,30,1" />
+		<FORMTAB name="fmtab0" fontstyle="01" tabcount="2" tabwidthtype="1" tabheadheight="40" ly_vert="0,101,375,461,1" >
+			<PAGE name="page008647" caption="계좌연결" linkfile="mbonl85000_t1" loadingtype="1" />
+			<PAGE name="page002838" caption="계좌해지" linkfile="mbonl85000_t2" loadingtype="1" />
+		</FORMTAB>
+		<LABEL name="Label1" bgcolor="039:242242242" transmode="0" ly_vert="0,96,375,5,1" />
+		<LABEL name="Label2" visible="0" fgcolor="146:124124124" fontsize="-2" caption="자동 발급된 ID입니다." halign="1" ly_vert="113,68,150,20,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3671" _ulen="3541" >
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_szData				'고객번호 & 비밀번호
+Dim g_plain_rm  			'v0001 메모리평문적용여부
+
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+'	Dim sLOGIN_TYPE
+'	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false)
+'	
+'	if sLOGIN_TYPE = "1" then
+'		Form.MsgBox("알림", "로그인이 필요한 화면입니다.\n로그인 하시겠습니까?", "NEED_LOGIN", 2)
+'		Exit Sub
+'	end if
+	
+	'v0001 메모리평문적용여부(0:미적용 / 1:적용)
+	g_plain_rm	= Form.GetSharedData("&PLAIN_RM", false)
+	
+	if Form.GetSharedData("&USER_ID", false ) <> "" then
+		LblID.caption = Form.GetSharedData("&USER_ID", false )
+	end if
+	
+	DATAMANAGER.RequestTranData("obcsb_efif_000r")
+	
+	fmtab0_OnTabChanged(0)
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+
+'	if sKeyName == "NEED_LOGIN" then
+'		
+'		if sRet == "ok" then
+'			Form.OpenPopup("mhetc90021", "" , "")
+'			
+'			if Form.GetSharedData("&OS_TYPE", false) == "1" then
+'				Form.CloseForm()
+'			end if
+'			
+'		else
+'			Form.CloseForm()
+'		end if
+'		
+'	end if
+	
+End Sub
+
+''============================================================================
+'Sub Form_OnTriggerEvent(sEventName, sParam)
+'	
+'	Form.ShowAlert(sEventName, sParam)
+'	
+'	if sEventName == "onLogoutResult" then
+'		LblID.caption = ""
+'	elseif sEventName == "&Login" then
+'		LblID.caption = Form.GetSharedData("&USER_ID", false )
+'	end if
+'
+'End Sub
+
+'============================================================================
+' fmtab0_OnTabChanged(nCurrentTab)
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	g_szData = Form.GetSharedData("&CUST_NUM", false ) & "★" & LblID.caption 
+			
+	if nCurrentTab == 0 then
+		Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "계좌추가", g_szData)
+	else
+		Form.triggerEvent( "fmtab0." & fmtab0.currenttabpageid, "계좌해지", g_szData)
+	end if
+	
+End Sub
+
+'============================================================================
+'						DATAMANAGER 함수
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	if szTranID = "obcsb_efif_000r" then
+		Dim RCNO_PIP
+		RCNO_PIP	= Form.GetSharedData("&JUMIN_NUM", false)
+		
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "PROS_CLS_CODE",	0, "1")
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RCNO_PIP",		0, RCNO_PIP)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID == "obcsb_efif_000r" then
+		Dim nCnt
+		nCnt = DATAMANAGER.GetDataCount(false, szTranID, "OutBlock1")
+		
+		if nCnt > 0 then
+			
+			for i = 0 to nCnt - 1
+				Dim USER_ID, ELFN_ID
+				USER_ID = Form.GetSharedData("&USER_ID", false)
+				ELFN_ID = DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "ELFN_ID", 	i)
+				
+				if USER_ID == ELFN_ID then
+				
+					if "Y" == DATAMANAGER.GetDataValue(false, szTranID, "OutBlock1", "ATMT_ISNC_YN", i) then
+						Label2.visible = true
+					else
+						Label2.visible = false
+					end if
+					
+				end if
+
+			next
+
+		end if
+		
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_logn_022a" trcode="obcpp_logn_022a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_efif_000r" trcode="obcsb_efif_000r" compress="1" encryption="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_logn_022a" title="Login TR(MTS)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="194" _ulen="148" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+CONN_PWD^접속비밀번호^68^0^0^0^0^0^0
+QTTN_EXUS_LOGN_YN^시세전용로그인여부^1^0^0^0^0^0^0
+TERM_IDNT_KEY^단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="939" _ulen="677" >
+
+CONN_PRMS_CLS_CODE^접속허용구분코드^1^0^0^0^0^0^0
+PWD_ERR_TMNU^비밀번호에러횟수^4^0^7^0^0^0^0
+CONN_PWD_INIT_YN^접속비밀번호초기화여부^1^0^0^0^0^0^0
+CONN_WARN_CLS_CODE^접속경고구분코드^1^0^0^0^0^0^0
+AUTH_ATHN_ISTU_DSBL_YN^공인인증기관장애여부^1^0^0^0^0^0^0
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+BANK_ACNT_FRST_CONN_YN^은행계좌최초접속여부^1^0^0^0^0^0^0
+DPLC_CONN_PRMS_YN^중복접속허용여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+SSTM_DATE^시스템일자^8^0^0^0^0^0^0
+USE_STA_TIME^사용시작시각^9^0^0^0^0^0^0
+PWD_MSTK_ABLE_TMNU^비밀번호오류가능횟수^4^0^7^0^0^0^0
+QTTN_EXUS_LOGN_YN^시세전용로그인여부^1^0^0^0^0^0^0
+DN_DATA^DN데이터^256^0^0^0^0^0^0
+CONN_CUST_INS_IPAD^접속고객내부IP주소^39^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_efif_000r" title="고객HTSID조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="266" _ulen="198" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+BRNC_PWD^지점 비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="330" _ulen="254" >
+
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ID_REG_DATE^ID 등록 일자^8^0^0^0^0^0^0
+ELFN_PWD_MSTK_TMNU^전자금융 비밀번호 오류 횟수^4^0^7^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+PROS_CSNU^처리건수^8^0^7^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+ATMT_ISNC_YN^자동발급여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="46" _ulen="38" >
+
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

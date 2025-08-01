@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="83130" scrname="공모주 자동 대체 약정" version="2" writer="윤유정" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<EDIT name="edtPW" halign="1" password="2" imetype="1" maxlength="8" hintcaption="비밀번호" ly_vert="283,9,86,39,1" />
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="1,56,375,504,1" >
+			<PAGE name="page004888" caption="환불금 입금" linkfile="mbonl83120_t1" loadingtype="1" />
+			<PAGE name="page004776" caption="공모주 입고" linkfile="mbonl83120_t2" loadingtype="1" />
+		</FORMTAB>
+		<ACCOUNT name="acnt0" itemcodetype="100,102,105,200" finaceexcept="1" ly_vert="6,9,275,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7005" _ulen="6509" >
+'===========================================================================
+' 01. 화 면 명 : 공모주 자동 대체 약정(환불금 입금, 공모주 입고)
+' 02. 화면설명 : 공모주 자동대체약정 서비스 폼탭
+' 03. 작    성 : 2016.11.09 : 윤유정
+' 04. 수    정 : 2020. 09. 16. 성주혁 MTS 메모리 보안 v0001
+'===========================================================================
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_szData  '계좌번호 & 비밀번호
+Dim g_Acno    '계좌번호
+Dim g_TabType '폼탭
+Dim g_szCSNO  '고객번호
+Dim g_Asno	 '계좌일련번호
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+'============================================================================
+'TR_Inquiry
+'============================================================================
+Function TR_Inquiry(szTranID)
+	if szTranID == "obpds_srvc_070r" then	'약정고객정보조회
+		DATAMANAGER.SetDataValue(0,"obpds_srvc_070r", "InBlock1", "ACNO"  , 0 , acnt0.total)
+		DATAMANAGER.RequestTranData("obpds_srvc_070r")
+	elseif szTranID == "obacp_opop_066r" then
+	
+		'v0001
+		'AS-IS
+		'sACNT_PWD = Form.GetEncData(edtPW.caption)
+		
+		'TO-BE
+		if plain_rm =="1" then
+			sACNT_PWD = edtPW.caption
+		else
+			sACNT_PWD = Form.GetEncData(edtPW.caption)
+		end if
+
+		DATAMANAGER.SetDataValue( 0, "obacp_opop_066r", "InBlock1", "ACNO" , 0 , acnt0.total )
+		DATAMANAGER.SetDataValue( 0, "obacp_opop_066r", "InBlock1", "ACNT_PWD" , 0 , sACNT_PWD )
+		DATAMANAGER.RequestTranData("obacp_opop_066r")
+	
+	end if
+	
+	
+End Function
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obpds_srvc_070r" then	'약정고객정보조회
+		g_szCSNO = DATAMANAGER.GetDataValue(0, "obpds_srvc_070r", "OutBlock1", "CSNO" , 0)
+		Form.SetSharedData("CSNO_83130" , g_szCSNO)
+	elseif szTranID == "obacp_opop_066r" then
+'		g_szData = acnt0.total & "★" & edtPW.caption & "★" & "No"			'계좌번호 & 비밀번호
+'	
+'		if edtPW.caption == "" or edtPW.caption == Null then
+'			szData = acnt0.total & "★" & "" & "★" & "No"			'계좌번호 & 비밀번호
+'			
+'		end if
+'		
+'		g_TabType = CInt(FormTab0.currenttab)
+'		
+'		if g_TabType == 0 then
+'			Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+'			Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "환불금입금", g_szData)
+'		elseif g_TabType == 1 then
+'			Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "공모주입고", g_szData)
+'		end if
+		
+		g_szData = acnt0.total & "★" & edtPW.caption  '계좌번호 & 비밀번호
+		g_TabType = CInt(FormTab0.currenttab)
+		
+		if g_TabType == 0 then
+			Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+			Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "환불금입금", g_szData)
+		elseif g_TabType == 1 then
+			Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+			Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "공모주입고", g_szData)
+		end if
+		
+		'edtPW.caption = ""
+		
+		
+		Form.SetSharedData("CSNO_83130" , g_szCSNO)
+	end if
+End Sub
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+	'Form.SetScreenName("공모주 자동 대체 약정")
+	Form.SetTitleCaption("공모주 자동 대체 약정")
+
+	'v0001
+	'MTS메모리평문 적용유무
+	'plain_rm = ( 0 : 미적용 / 1 : 적용 )
+	plain_rm = Form.GetSharedData("&PLAIN_RM", false )
+
+	TR_Inquiry("obpds_srvc_070r")
+
+	edtPW.caption = ""
+	g_szData = acnt0.total & "★" & ""
+	FormTab0.currenttab = "0"	
+	g_TabType = CInt(FormTab0.currenttab)
+	
+	if g_TabType == 0 then
+	   Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+	   Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "환불금입금", g_szData)
+	else
+	   Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+	   Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "공모주입고", g_szData) 
+	end if   
+End Sub
+'============================================================================
+' FormTab0_OnTabChanged - 탭 변경할 때 조회
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	
+	'edtPW.caption = ""
+	g_szData = acnt0.total & "★" & edtPW.caption
+	g_TabType = CInt(FormTab0.currenttab)
+	
+	if g_TabType == 0 then
+		Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "환불금입금", g_szData)
+	elseif g_TabType == 1 then
+		Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "공모주입고", g_szData)
+	end if
+	
+	'edtPW.caption = ""
+End Sub
+'============================================================================
+' edtPW_OnEditComplete()
+'============================================================================
+Sub edtPW_OnEditComplete()
+	if edtPW.caption ~= null then
+		TR_Inquiry( "obacp_opop_066r" ) '비밀번호검증
+	end if
+End Sub
+'============================================================================
+Sub acnt0_ChangeAccount()
+	edtPW.caption = "" '계좌 바뀔때마다 비밀번호 초기화
+	g_szData = acnt0.total & "★" & edtPW.caption  '계좌번호 & 비밀번호
+	g_TabType = CInt(FormTab0.currenttab)
+	
+	if g_TabType == 0 then
+		Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "환불금입금", g_szData)
+	elseif g_TabType == 1 then
+		Form.SetSharedData("ASNO_83130" , acnt0.sequence)
+		Form.triggerEvent( "FormTab0." & FormTab0.currenttabpageid, "공모주입고", g_szData)
+	end if
+	
+	'edtPW.caption = ""
+End Sub
+'============================================================================
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+	if szTranID == "obacp_opop_066r" then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+	elseif szTranID == "obpds_srvc_070r" then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+	end if
+	
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_070r" trcode="obpds_srvc_070r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_opop_066r" trcode="obacp_opop_066r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_070r" title="약정고객정보조회 TR" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="350" _ulen="266" >
+
+ETC_CNTT^기타 내용^100^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+MANG_BRCD^관리 지점코드^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_opop_066r" title="계좌Control 비밀번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="196" _ulen="150" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_EMPNO^관리 직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
