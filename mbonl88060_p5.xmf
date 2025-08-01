@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88026" scrname="단기사채_매수신청_완료팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="icon_confirm" ly_vert="150,31,74,74,1" />
+		<LABEL name="lblLine" bgcolor="143:049050052" transmode="0" paddinginfo="1,0,0,0" ly_vert="20,216,335,1,1" />
+		<LABEL name="lblTableTitle" fontstyle="01" caption="나의 주문현황" autofontsize="1" paddinginfo="1,0,0,0" ly_vert="20,180,269,25,1" />
+		<LABEL name="lblTableSub1" fontsize="-2" caption="주문계좌" paddinginfo="1,0,0,0" ly_vert="20,229,100,32,1" />
+		<LABEL name="lblTableSub2" fontsize="-2" caption="종목명" paddinginfo="1,0,0,0" ly_vert="20,261,100,32,1" />
+		<LABEL name="lblTableSub3" fontsize="-2" caption="매수금리(세전)" paddinginfo="1,0,0,0" ly_vert="20,293,100,32,1" />
+		<LABEL name="lblResult1" fontsize="4" fontstyle="01" caption="단기사채 매수 신청이 
+완료되었습니다." halign="1" multiline="1" ly_vert="20,106,335,60,1" />
+		<LABEL name="lblTableSub4" fontsize="-2" caption="액면금액" paddinginfo="1,0,0,0" ly_vert="20,325,113,32,1" />
+		<LABEL name="lblTableSub5" fontsize="-2" caption="매수결제금액" paddinginfo="1,0,0,0" ly_vert="20,357,100,32,1" />
+		<LABEL name="lblTableSub6" fontsize="-2" caption="만기 이자 금액(세전)" paddinginfo="1,0,0,0" ly_vert="20,389,140,32,1" />
+		<LABEL name="lblTableSub7" fontsize="-2" caption="세금(후취)" paddinginfo="1,0,0,0" ly_vert="20,421,100,32,1" />
+		<LABEL name="lblTableSub8" fontsize="-2" caption="만기 정산금액" paddinginfo="1,0,0,0" ly_vert="20,451,100,32,1" />
+		<LABEL name="lblTableSub9" fontsize="-2" caption="발행일" paddinginfo="1,0,0,0" ly_vert="20,483,100,32,1" />
+		<LABEL name="lblTableSub10" fontsize="-2" caption="만기일" paddinginfo="1,0,0,0" ly_vert="20,515,100,32,1" />
+		<LABEL name="lblTableData1" fontsize="-2" fontstyle="01" halign="2" autofontsize="1" ly_vert="164,229,190,32,1" />
+		<LABEL name="lblTableData2" fontsize="-2" fontstyle="01" mask="1,0,,,1,########################################...,0,1,1,0,0" halign="2" multiline="1" ly_vert="139,255,215,45,1" />
+		<LABEL name="lblTableData3" fontsize="-2" fontstyle="01" mask="0,0,,%,0,,2,1,0,0,0" halign="2" ly_vert="164,293,190,32,1" />
+		<LABEL name="lblTableData4" fontsize="-2" fontstyle="01" mask="0,0,,원,0,,0,1,0,0,0" halign="2" ly_vert="164,325,190,32,1" />
+		<LABEL name="lblTableData5" fontsize="-2" fontstyle="01" mask="0,0,,원,0,,0,1,0,0,0" halign="2" ly_vert="164,357,190,32,1" />
+		<LABEL name="lblTableData6" fontsize="-2" fontstyle="01" mask="0,0,,원,0,,0,1,0,0,0" halign="2" autofontsize="1" ly_vert="194,389,160,32,1" />
+		<LABEL name="lblTableData7" fontsize="-2" fontstyle="01" mask="0,0,,원,0,,0,1,0,0,0" halign="2" ly_vert="164,421,190,32,1" />
+		<LABEL name="lblTableData8" fontsize="-2" fontstyle="01" mask="0,0,,원,0,,0,1,0,0,0" halign="2" ly_vert="164,451,190,32,1" />
+		<LABEL name="lblTableData9" fontsize="-2" fontstyle="01" mask="1,0,,,1,####.##.##,0,1,1,0,0" halign="2" ly_vert="164,483,190,32,1" />
+		<LABEL name="lblTableData10" fontsize="-2" fontstyle="01" mask="1,0,,,1,####.##.##,0,1,1,0,0" halign="2" ly_vert="164,515,190,32,1" />
+		<BUTTON name="btnList" caption="주문내역 조회" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_20.9" ly_vert="187,597,188,50,1" />
+		<LABEL name="lblLine0" bgcolor="021:226226226" transmode="0" paddinginfo="1,0,0,0" ly_vert="20,555,335,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3921" _ulen="3679" >
+dim	g_szRet	'리턴값
+
+dim g_SHTR_BOND_REG_CLS_CODE	'단기사채등록구분코드
+dim g_PBLC_DATE	'발행일
+dim g_PSNT_DATE	'매수일(현재일자)
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		dim tData, szProdCd, szProdText
+		tData = Split(szOpenData, "★")
+		szProdCd = Form.GetAccountInfo(tData(0), "productcode")
+		szProdText = Form.GetMetaData("상품코드", szProdCd)
+		
+		
+		lblTableData1.caption 		= "["&szProdText&"] "&Left(tData(0),4)&"-"&Mid(tData(0),5,4)&"-"&Right(tData(0),2)
+			
+		'종목명 긴 경우, 멀티라인 2줄까지만 출력되도록..
+		if Len(tData(1)) > 40 then
+			lblTableData2.fontsize = -4
+		else
+			lblTableData2.fontsize = -2
+		end if
+		
+		lblTableData2.caption 		= tData(1)
+		lblTableData3.caption 		= tData(2)
+		lblTableData4.caption 		= tData(3)
+		lblTableData5.caption 		= tData(4)
+		lblTableData6.caption 		= tData(5)
+		lblTableData7.caption 		= tData(6)
+		lblTableData8.caption 		= tData(7)
+		g_PBLC_DATE 				= tData(8)
+		lblTableData10.caption 	= tData(9)		
+		g_SHTR_BOND_REG_CLS_CODE	= tData(10)
+		g_PSNT_DATE 				= tData(11)
+		
+		if g_SHTR_BOND_REG_CLS_CODE == "1" then	'발행물
+			lblTableSub9.caption = "발행일"
+			
+			lblTableData9.caption = g_PBLC_DATE'tData(8)
+			
+		else
+			'유통물인 경우, 발행일 대신 매수일(obsap_deal_003r.PSNT_DATE)로 셋팅!
+			lblTableSub9.caption = "매수신청일"
+			
+			lblTableData9.caption = g_PSNT_DATE	'tData(11)
+			
+		end if
+		
+	end if
+	
+	
+'	szIsNm = "메리츠증권 20230424-60"	'test
+''	szIsNm = "유동화 단기사채 메타그린제칠차 20230315-92-1(E)"	'test
+'	
+'	if Len(szIsNm) > 40 then
+'		lblTableData2.fontsize = -2
+'	else
+'		lblTableData2.fontsize = 0
+'	end if
+'	
+'	lblTableData2.caption = szIsNm	'eplace(szIsNm, ".", "\n")
+'	lblTableData3.caption = 123.56
+End Sub
+
+'============================================================================
+Sub btnList_OnClick
+	g_szRet = "ALL_CLOSE"
+	
+	'주문내역
+	Form.OpenNextPopup("mbonl88061", "", "")
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	g_szRet = "ALL_CLOSE"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbonl88060_p5" ,  g_szRet)
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	g_szRet = "ALL_CLOSE"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Function Str_Chk(str, sGubn)
+	dim i							'루프용 
+	dim chk_n						'숫자 체크
+	dim chk_c						'영문 체크
+	dim chk_t						'특수 체크
+    
+	chk_n = 0 '숫자
+	chk_c = 0 '영어
+	chk_t = 0 '특수문자
+    
+	For i = 1 to Len(str)
+		nAscii = Asc(Mid(str, i, 1))
+		
+	    '48~57 : 0~9
+	    '65~90 : A~Z
+	    '97~122: a~z
+		If nAscii >=48 and nAscii <=57 Then 
+		    chk_n = 1 	
+		Elseif   (nAscii >=65 and nAscii <=90) or ( nAscii >=97 and nAscii <=122) Then
+		    chk_c = 1 
+		Elseif   (nAscii >=33 and nAscii <=47) or ( nAscii >=58 and nAscii <=64)  or ( nAscii >=91 and nAscii <=96)  or ( nAscii >=123 and nAscii <=126) Then
+		    chk_t = 1 
+		Else 
+		   If nAscii <> 32 Then 'space	
+			   return False
+		   End If
+		End if 		    
+	Next
+    
+	If sGubn == "ENG_NAME" then
+		If chk_n == 1 Then  
+			return False
+		End if
+	End if
+	
+	return True
+End Function 
+
+'============================================================================
+Sub btnList_OnClick()
+'	Form.OpenNextPopup("mbonl90301", "1")
+	Form.OpenScreen(54140, "1")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

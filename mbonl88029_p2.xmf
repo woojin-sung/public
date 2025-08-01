@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="슈퍼365수익금확인_기간선택" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,352,375,303,1" />
+		<LABEL name="lblAllText" fontsize="1" fontstyle="01" caption="선택해주세요" halign="1" ly_vert="11,363,352,35,1" />
+		<BUTTON name="BtnMod" caption="확인" bgcolor="289:255255255" bgcolor2="233:102101101" fontsize="2" btnimage="btn_26.9" ly_vert="-3,597,381,50,1" />
+		<LABEL name="Label1" fontstyle="01" caption="거래일자" ly_vert="6,390,100,32,1" />
+		<IMAGE name="imgExit" imgpath="ic_close.png" ly_vert="331,369,21,21,1" />
+		<IMAGE name="imgRdo3" imgpath="input_03_n.9" ly_vert="17,429,100,32,1" />
+		<IMAGE name="imgRdo4" imgpath="input_03_n.9" ly_vert="137,429,100,32,1" />
+		<IMAGE name="imgRdo5" imgpath="input_03_n.9" ly_vert="257,429,100,32,1" />
+		<CALENDAR name="CalStaDate" dispmode="1735215461" ly_vert="32,470,140,32,1" />
+		<CALENDAR name="CarFinDate" dispmode="-291017025" ly_vert="202,470,140,32,1" />
+		<LABEL name="Label2" caption="~" halign="1" ly_vert="177,470,19,32,1" />
+		<LABEL name="lblPrd1week" fontsize="-2" caption="1개월" halign="1" click="1" ly_vert="17,429,100,32,1" />
+		<LABEL name="lblPrd1mon" fontsize="-2" caption="3개월" halign="1" click="1" ly_vert="137,429,100,32,1" />
+		<LABEL name="lblPrdIsrt" fontsize="-2" caption="직접입력" halign="1" click="1" ly_vert="257,429,100,32,1" />
+		<CALENDAR name="CalPsntDate" visible="0" dispmode="54989568" ly_vert="229,211,140,32,0" />
+		<LABEL name="lblLine1" bgcolor="132:215215215" transmode="0" ly_vert="17,517,340,1,1" />
+		<LABEL name="lblText1" fontstyle="01" caption="대여 예상 수익 포함하여 보기" ly_vert="6,528,223,32,1" />
+		<BUTTON name="btnOnOff" ly_vert="287,532,70,24,1" />
+		<LABEL name="lblText2" fgcolor="127:162162162" fontsize="-2" caption="발생 예정인 대여수수료 수익을 미리 확인할 수 있어요." ly_vert="9,552,346,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8922" _ulen="8396" >
+'============================================================================
+' 슈퍼365 수익금 확인하기 항목선택 팝업
+'============================================================================
+' 2023.03.07 v001. 슈퍼365 대여수익 관련 항목 개발
+'============================================================================
+
+Dim g_PrdClsCd	'1:1개월 2:3개월 3:직접입력
+Dim g_Sta_Date
+Dim g_Fin_Date
+Dim g_PsntDate
+Dim g_EndAbleYn
+'v001
+Dim g_LndnStplYN
+Dim g_LndnFeeYN   'Y : 대여수익 포함, N : 대여수익 미포함
+
+'부모화면에서 넘어온 일자
+Dim g_MSta_Date
+Dim g_MFin_Date
+
+'============================================================================
+'f_SetToggleUI(nFlag) : 항목 클릭에 따른 색깔 변동 처리
+'============================================================================
+Function f_SetToggleUI(nFlag)
+	
+	dim szToggleImg0, szToggleImg1, szToggleColor0, szToggleColor1, szToggleImg2
+	szToggleImg0 		= "input_01_n.9.png" 	'비활성 이미지
+	szToggleImg1 		= "input_01_o.9.png" 	'활성화 이미지
+	szToggleImg2 		= "input_02_d.9.png" 	'비활성 이미지
+	szToggleColor0 	= "127" 				'비활성 컬러
+	szToggleColor1 	= "67" 				'활성화 컬러
+	
+	if g_PrdClsCd <> "3" then
+		CalStaDate.visible = false
+		CarFinDate.visible = false
+		Label2.visible = false
+	end if
+
+	CalStaDate.caption = g_PsntDate
+	CarFinDate.caption = g_PsntDate
+	
+	if nFlag == 3 then	 '거래일자:1개월
+		if g_PrdClsCd == "1" then
+			imgRdo3.imgpath = szToggleImg0
+			g_PrdClsCd = ""
+			g_Sta_Date = ""
+			g_Fin_Date = ""
+			g_MSta_Date = ""
+			g_MFin_Date = ""
+		else			
+			CalStaDate.visible = false
+			CarFinDate.visible = false
+			Label2.visible = false
+		
+			imgRdo3.imgpath = szToggleImg1
+			imgRdo4.imgpath = szToggleImg0
+			imgRdo5.imgpath = szToggleImg0	
+			
+			g_PrdClsCd = "1"
+			
+			tmp_date = LEFT(CalPsntDate.caption,4) & "-" & RIGHT(LEFT(CalPsntDate.caption,6),2) & "-" & RIGHT(CalPsntDate.caption,2)
+			tmpPrd1month = CStr(DateAdd("d",0,DateAdd("m",-1,CDate(CStr(tmp_date)))))
+			tmpPrd1month = Replace(tmpPrd1month, "-", "")
+
+			g_Sta_Date = tmpPrd1month
+			g_Fin_Date = CalPsntDate.caption
+			
+		end if
+		
+	elseif nFlag == 4 then	 '거래일자:3개월
+		if g_PrdClsCd == "2" then
+			imgRdo4.imgpath = szToggleImg0
+			g_PrdClsCd = ""
+			g_Sta_Date = ""
+			g_Fin_Date = ""
+			g_MSta_Date = ""
+			g_MFin_Date = ""
+		else			
+			CalStaDate.visible = false
+			CarFinDate.visible = false
+			Label2.visible = false
+			
+			imgRdo3.imgpath = szToggleImg0
+			imgRdo4.imgpath = szToggleImg1
+			imgRdo5.imgpath = szToggleImg0	
+			
+			g_PrdClsCd = "2"	
+				
+			tmp_date = LEFT(CalPsntDate.caption,4) & "-" & RIGHT(LEFT(CalPsntDate.caption,6),2) & "-" & RIGHT(CalPsntDate.caption,2)
+			tmpPrd3month = CStr(DateAdd("d",0,DateAdd("m",-3,CDate(CStr(tmp_date)))))
+			tmpPrd3month = Replace(tmpPrd3month, "-", "")
+
+			g_Sta_Date = tmpPrd3month
+			g_Fin_Date = CalPsntDate.caption
+			
+		end if
+		
+	elseif nFlag == 5 then	 '거래일자:직접입력
+		if g_PrdClsCd == "3" then
+			imgRdo5.imgpath = szToggleImg0
+			g_PrdClsCd = ""	
+			g_Sta_Date = ""
+			g_Fin_Date = ""
+			g_MSta_Date = ""
+			g_MFin_Date = ""
+			
+			CalStaDate.visible = false
+			CarFinDate.visible = false
+			Label2.visible = false			
+			
+		else
+			imgRdo3.imgpath = szToggleImg0
+			imgRdo4.imgpath = szToggleImg0
+			imgRdo5.imgpath = szToggleImg1	
+			
+			g_PrdClsCd = "3"	
+			
+			CalStaDate.visible = true
+			CarFinDate.visible = true
+			Label2.visible = true	
+			
+			'Form.ShowAlert("g_Sta_Date", g_Sta_Date)
+			'Form.ShowAlert("g_Fin_Date", g_Fin_Date)
+			if g_MSta_Date == "" or g_MSta_Date == null then
+				g_Sta_Date = CalPsntDate.caption
+			else 
+				g_Sta_Date = g_MSta_Date
+			end if
+			
+			if g_MFin_Date == "" or g_MFin_Date == null then
+				g_Fin_Date = CalPsntDate.caption
+			else
+				g_Fin_Date = g_MFin_Date
+			end if
+			
+'			if len(trim(g_Sta_Date)) == 0 then
+'				g_Sta_Date = g_PsntDate
+'				g_Fin_Date = g_PsntDate	
+'			end if
+			
+		end if
+		
+	end if
+			
+	CalStaDate.caption = g_Sta_Date
+	CarFinDate.caption = g_Fin_Date		
+	
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+Sub Form_OnFormInitBefore()
+	g_PrdClsCd = ""
+	g_Sta_Date = ""
+	g_Fin_Date = ""
+	
+	imgExit.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	btnOnOff.SetApplySwitch( "OFF", "ON", "269", "261", "286", "289") 
+	g_PsntDate = CalPsntDate.caption
+	
+	g_Sta_Date = g_PsntDate
+	g_Fin_Date = g_PsntDate
+	
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	
+	if szOpenData <> "" and szOpenData <> null then
+		
+		'msgbox "popup szOpenData="&szOpenData
+		
+		dim tData
+		tData = Split(szOpenData, "★")
+		
+		'g_PrdClsCd = tData(0)		'1:1개월 2:3개월 3:직접입력
+
+		if tData(0) == "1" then
+			f_SetToggleUI(3)
+		elseif tData(0) == "2" then			
+			f_SetToggleUI(4)
+		elseif tData(0) == "3" then			
+			g_Sta_Date = tData(1)
+			g_Fin_Date = tData(2)		
+			g_MSta_Date = tData(1)
+			g_MFin_Date = tData(2)
+			
+			f_SetToggleUI(5)
+		end if
+		
+		g_LndnStplYN = tData(3)
+		g_LndnFeeYN = tData(4)
+		if g_LndnFeeYN == "Y" then
+			btnOnOff.switchindex = "1"
+		else
+			btnOnOff.switchindex = "0"
+		end if
+	end if
+	
+	if g_LndnStplYN = "Y" then
+		lblText1.visible = true
+		lblText2.visible = true
+		btnOnOff.visible = true
+	else
+		lblText1.visible = false
+		lblText2.visible = false
+		btnOnOff.visible = false
+		lblLine1.visible = false
+		
+		'약정이 없는 경우 사이즈 좆정
+		imgMain.top         = Form.calcUnResize(imgMain.top, "1") + 80
+		imgMain.height      = Form.calcUnResize(imgMain.height, "1") - 80
+		lblAllText.top      = Form.calcUnResize(lblAllText.top, "1") + 80
+		imgExit.top         = Form.calcUnResize(imgExit.top, "1") + 80
+		Label1.top          = Form.calcUnResize(Label1.top, "1") + 80
+		lblPrd1week.top     = Form.calcUnResize(lblPrd1week.top, "1") + 80
+		lblPrd1mon.top      = Form.calcUnResize(lblPrd1mon.top, "1") + 80
+		lblPrdIsrt.top      = Form.calcUnResize(lblPrdIsrt.top, "1") + 80
+		imgRdo3.top         = Form.calcUnResize(imgRdo3.top, "1") + 80
+		imgRdo4.top         = Form.calcUnResize(imgRdo4.top, "1") + 80
+		imgRdo5.top         = Form.calcUnResize(imgRdo5.top, "1") + 80
+		CalStaDate.top      = Form.calcUnResize(CalStaDate.top, "1") + 80
+		CarFinDate.top      = Form.calcUnResize(CarFinDate.top, "1") + 80
+		Label2.top          = Form.calcUnResize(Label2.top, "1") + 80
+	end if
+	
+End Sub
+
+
+Sub lblPrd1week_OnClick()
+	f_SetToggleUI(3)
+End Sub
+
+Sub lblPrd1mon_OnClick()
+	f_SetToggleUI(4)
+End Sub
+
+Sub lblPrdIsrt_OnClick()
+	f_SetToggleUI(5)
+End Sub
+
+Sub CalStaDate_OnEditComplete()
+	g_Sta_Date = CalStaDate.caption
+End Sub
+
+Sub CarFinDate_OnEditComplete()
+	g_Fin_Date = CarFinDate.caption
+End Sub
+
+'============================================================================
+' 변경처리
+'============================================================================
+Sub BtnMod_OnClick()
+
+	g_EndAbleYn = "Y"
+	
+	if g_PrdClsCd = "" then
+		g_EndAbleYn = "N"
+		Form.ShowAlert( "안내" , "거래일자 구분이 선택되지 않았습니다.")		
+	elseif g_PrdClsCd = "3" then			
+		if g_Sta_Date == "" then
+			g_EndAbleYn = "N"
+			Form.ShowAlert( "안내" , "시작일자를 확인하세요.")
+		elseif g_Fin_Date == "" then
+			g_EndAbleYn = "N"
+			Form.ShowAlert( "안내" , "종료일자를 확인하세요.")		
+		elseif g_Sta_Date > g_Fin_Date then
+			g_EndAbleYn = "N"
+			Form.ShowAlert( "안내" , "조회시작일("&g_Sta_Date&")이 종료일("&g_Fin_Date&")이후입니다.")
+		end if
+	end if
+	
+	if g_EndAbleYn == "Y" then
+		Form.CloseForm()
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgExit_OnClick()	'X버튼 클릭시
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'여백클릭시 꺼지도록 함
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'화면닫기전 안드로이드-백버튼 작동N 원복(부모화면에서 호출했던 상태로)
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	'v001. SendData 추가
+	Dim sSendData
+	sSendData = g_PrdClsCd&"★"&g_Sta_Date&"★"&g_Fin_Date
+	
+	if btnOnOff.switchindex == "1" then
+		g_LndnFeeYN = "Y"
+	else
+		g_LndnFeeYN = "N"
+	end if
+
+	sSendData = sSendData&"★"&g_LndnFeeYN
+	Form.SendReturnToParent( "mbonl88029_p2" , sSendData )	
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

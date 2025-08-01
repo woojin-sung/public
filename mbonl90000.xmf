@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90000" scrname="Bond Home" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,602,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblbg" bgcolor="039:242242242" ly_vert="0,0,375,45,1" />
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_top_back_light" ly_vert="20,10,20,20,1" />
+		<LABEL name="lblTitle" fontsize="3" caption="Bond365" bgcolor="320:255255255" click="1" ly_vert="40,6,222,30,1" />
+		<LABEL name="lblStats" fontsize="-2" caption="보유/주문현황" halign="2" paddinginfo="1,0,0,0" click="1" ly_vert="260,6,97,30,1" />
+		<IMAGE name="imgStats" autosize="1" imgpath="icon_receipt" ly_vert="248,11,18,18,1" />
+		<FORMTAB name="fmtab0" tabcount="4" tabwidthtype="1" tabheadheight="48" ly_vert="0,40,375,562,1" >
+			<PAGE name="page004548" caption="Home" linkfile="mbonl90001" loadingtype="1" />
+			<PAGE name="page005122" caption="단기사채" linkfile="mbonl88060" loadingtype="1" />
+			<PAGE name="page009680" caption="채권(장외)" linkfile="mbonl90201" loadingtype="1" />
+			<PAGE name="page002020" caption="채권(장내)" linkfile="mhprc54000" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5293" _ulen="4961" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : Bond Home
+' 02. 화면설명 : Bond Home
+' 03. 작    성 : 
+'  2023.11.06  신규 작성
+'     Bond Home  	mbonl90001
+'         - 오늘의채권 	 mbonl90001_s1, 
+'         - 수익률Top5 	 mbonl90001_s2
+'         - Bond365_News  	 mbonl90001_s3, mbonl90031
+'         - 채권Report  	 mbonl90001_s4, mbonl90041
+'         - ETF/ETN  		 mbonl90001_s5, mbonl90051
+'         - MerizOn  		 mbonl90001_s6
+'     채권가이드  mbonl90002
+'     단기사채	mbonl90101
+'     채권(장외)	mbonl90201
+'     채권(장내)  mbonl90301
+'             
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim g_szOpenData
+
+'20240610 HSZ START: 장내채권 상세필터 저장기능
+Dim g_isOpen		'FORMINIT 후 트리거 처음 탄건지 확인 FLAG
+g_isOpen = true
+
+Dim g_isPrev
+g_isPrev = ""
+'20240610 HSZ END
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetSharedData("mbonl90000_TAB", fmtab0.currenttab)
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBackPress.SetMaintainingRatio("1")
+	imgStats.SetMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	
+	g_isOpen = true	'20240610 HSZ
+	
+	szScreenNo = Form.GetSharedData("&SCREEN_NO", False)
+	
+	g_szOpenData = ""
+	g_szOpenData = Form.GetOpenLinkData()	'전체, 채권, 단기사채
+	
+	if g_szOpenData <> "" then
+		Form.SetSharedData("BOND_OPEN_DATA", g_szOpenData)
+		
+		if Instr(g_szOpenData, "88061") > 0 or Instr(g_szOpenData, "88062") > 0 then 
+			fmtab0.currenttab = 1
+		else 
+			'장내채권 화면에서 돌아온 경우			
+			fmtab0.currenttab = CInt(g_szOpenData)
+		End If
+		
+	else
+		'메뉴, 다른 화면에서 진입한 경우
+		select case szScreenNo
+			case "54100"		fmtab0.currenttab = 0
+			case "88061"		fmtab0.currenttab = 1
+			case "54130"		fmtab0.currenttab = 2
+			case "54000"		fmtab0.currenttab = 3
+			case "88062"		fmtab0.currenttab = 1
+		end select
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.openPrevScreen()
+End Sub
+
+'============================================================================
+Sub lblTitle_OnClick()
+	Form.openPrevScreen()
+End Sub
+
+'============================================================================
+Sub lblStats_OnClick()
+	'20240221 mbonl90301 화면 탭 제어용 세팅
+	Form.SetSharedData("90301_TAB", "0")
+	Form.OpenScreen(54140, "")
+End Sub
+
+'============================================================================
+Sub imgStats_OnClick()
+	lblStats_OnClick()
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	g_szLastTab = nCurrentTab
+	
+	if nCurrentTab == 3 then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "BOND", g_isPrev)		'20240610 HSZ g_isPrev 파라미터 추가
+		g_isPrev = ""
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	Dim szList, szValue
+'	Form.ShowAlert("TriggerEvent", sEventName .. " : " .. sParam)
+	
+	if sEventName == "QUICK_LINK" then
+		'홈화면에서 바로가기 영역 선택 했을 때 
+		szList = split(sParam, "★")
+		
+		fmtab0.currenttab = szList(0)
+		
+		if CInt(szList(0)) == 1 then
+			'단기사채 탭
+			
+		elseif CInt(szList(0)) == 2 then
+			'장외채권 탭
+			Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "QUICK_LINK", szList(1))
+			
+		elseif CInt(szList(0)) == 3 then
+			'장내채권 탭
+			Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "BOND", "")
+		end if
+	
+	elseif sEventName == "QUICK_LINK2" then
+		'맞춤형Bond365에서 장내채권 선택
+		szValue = sParam
+		
+		fmtab0.currenttab = CInt(szValue)
+	
+	end if
+	
+End Sub
+
+'============================================================================
+'20240610 HSZ START: 장내채권 상세필터 저장기능
+'============================================================================
+Sub Form_OnTriggerEventSCREEN(sEventName,sParam)
+	if g_isOpen = true then
+		g_isOpen = false
+		if sEventName = "PREV" then
+			nTab = CInt(Form.GetSharedData("BONDHOME_TAB", true ))
+			if nTab = 3 then
+				g_isPrev = "PREV"
+				fmtab0.currenttab = nTab
+				call fmtab0_OnTabChanged(nTab)
+			end if
+		end if
+	end if
+
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

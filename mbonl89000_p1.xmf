@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="89000" scrname="영업점안내 상세팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="3" designorder="1" ly_vert="-1,0,376,72,1" >
+			<COL_INFO ly_vert_width="140,186,50" />
+			<ROW_INFO ly_vert_height="24,24,24" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="서울 본점(영업부)" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" line="0,0" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,0,2,2" line="1,0" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,1,1" fgcolor="065:102102102" halign="0" line="0,0" caption="서울시 영등포구 여의도동 34-10 메리츠 종금증권빌딩 2층" fontsize="-2" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" halign="0" line="0,1" caption="02)785-6611" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" fgcolor="065:102102102" line="0,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="-2,69,378,495,1" />
+		<BUTTON name="BtnCall0" btnimage="call" ly_vert="332,21,27,27,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2686" _ulen="2320" >
+'============================================================================
+Dim g_Phone
+
+Sub Table0_OnClick(lRow , lColumn)
+	if lColumn == 2 then
+		Form.SendCall( g_Phone )
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sTitle, sAddres, sPhone, sGps_lat,sGps_Lon
+	sData = Form.GetOpenLinkData( )
+	if sData == "0" then
+		sTitle = "본점"
+		sAddres = " 서울시 영등포구 국제금융로6길 15 2층"
+		sTelphone = "02) 6309-4700"
+		sGps_lat = "37.5220963"
+		sGps_Lon = "126.9284835"
+		g_Phone = "0263094700" 
+	elseif sData == "1" then
+		sTitle = "서울 강남금융센터"
+		sAddres = "서울시 강남구 삼성동 테헤란로 407, EK타워 6,7,8,9층"
+		sTelphone = "02) 6286-6611"
+		sGps_lat = "37.505286"
+		sGps_Lon = "127.0501238"
+		g_Phone = "0262866611"
+	elseif sData == "2" then
+		sTitle = "서울 광화문금융센터"
+		sAddres = "서울시 종로구 새문안로 92 2층, 6층"
+		sTelphone = "02)2011-6611"
+		sGps_lat = "37.5697473"
+		sGps_Lon = "126.9748885"
+		g_Phone = "0220116611"
+	elseif sData == "3" then
+		sTitle = "대구 금융센터"
+		sAddres = "대구광역시 수성구 동대구로 334 교원공제회 대구회관 3층, 5층"
+		sTelphone = "053) 605-6611"
+		sGps_lat = "35.8600369"
+		sGps_Lon = "128.6271784"
+		g_Phone = "0536056611"
+	elseif sData == "4" then
+		sTitle = "부산 금융센터"
+		sAddres = "부산시 부산진구 서전로 8 현대캐피탈빌딩 11,12층"
+		sTelphone = "051) 604-6611"
+		sGps_lat = "35.157515"
+		sGps_Lon = "129.060444"
+		g_Phone = "0516046611"
+	elseif sData == "5" then
+		sTitle = "영업부금융센터" '20180204 KBC
+		sAddres = "서울시 영등포구 국제금융로10, Three IFC 2, 22층" '20180204 KBC
+		sTelphone = "02) 6454-6611" ' 20180205 HAMWG : 영업부 전화번호 변경
+		sGps_lat = "37.525077"
+		sGps_Lon = "126.926014"
+		g_Phone = "0264546611" ' 20180205 HAMWG : 영업부 전화번호 변경
+	elseif sData == "6" then
+		sTitle = "서울 도곡금융센터"
+		sAddres = "서울시 강남구 도곡동 언주로30길 39 린스퀘어 9층" '20200709 SWJ : 건물명 변경
+		sTelphone = "02) 6007-6611"
+		sGps_lat = "37.4888138"
+		sGps_Lon = "127.0532538"
+		g_Phone = "0260076611"
+	end if
+	
+	Table0.SetCellString( 0, 0, sTitle )
+	Table0.SetCellString( 1, 0, sAddres )
+	Table0.SetCellString( 2, 0, sTelphone )
+	
+	WebView0.urlpath = "http://www.google.co.kr/maps/place/" & sGps_lat & "," & sGps_Lon
+End Sub
+'http://www.google.co.kr/maps/place/37.5220963,126.9284835
+'============================================================================
+Sub BtnCall0_OnClick()
+	Form.SendCall( g_Phone )
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88026" scrname="CDS계약신청_약관동의팝업" version="2" writer="최지희" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnNext" caption="확인" fgcolor="211:222222222" fontstyle="01" btnimage="btn_26.9.png" ly_vert="187,597,188,50,1" />
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" halign="1" autofontsize="1" fonttype="1" ly_vert="20,0,335,60,1" />
+		<FORMTAB name="fmtab" tabcount="6" tabheadwidth="0" tabheadheight="0" usepg="1" ly_vert="20,60,335,489,1" >
+			<PAGE name="1" caption="계좌설정 약관(전문투자자용)" linkfile="mbonl88026_p10" loadingtype="1" />
+			<PAGE name="2" caption="장외파생상품거래 기본계약서" linkfile="mbonl88026_p10" loadingtype="1" />
+			<PAGE name="3" caption="금융거래정보제공동의서" linkfile="mbonl88026_p10" loadingtype="1" />
+			<PAGE name="4" caption="장외파생상품 투자를 위한 전문투자자 대우 확인서" linkfile="mbonl88026_p10" loadingtype="1" />
+			<PAGE name="5" caption="개인 전문투자자에 대한 보호제도 미적용 확인서" linkfile="mbonl88026_p10" loadingtype="1" />
+			<PAGE name="6" caption="개인정보제공 및 활용동의" linkfile="mbonl88026_p10" loadingtype="1" />
+		</FORMTAB>
+		<LABEL name="lblPage" halign="1" autofontsize="1" ly_vert="0,559,375,18,1" />
+		<BUTTON name="btnClose" caption="취소" fgcolor="013:051051051" btnimage="btn_25.9.png" ly_vert="0,597,187,50,1" />
+		<LINKFORM name="lnkMain" linkfile="mbonl88026_p10" visible="0" ly_vert="20,60,335,489,0" />
+		<IMAGE name="imgPrev" autosize="1" imgpath="icon_arrow3_l" ly_vert="20,311,24,24,1" />
+		<IMAGE name="imgNext" autosize="1" imgpath="icon_arrow3_r" ly_vert="329,311,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5959" _ulen="5799" >
+'===========================================================================
+' 화  면  명 : (공통)약관동의풀팝업P
+' 화  면  ID : 
+' 개      요 : 
+' 작      성 : 2021.10.06 최지희
+' 수      정 : 
+'===========================================================================
+Dim g_szOpenData 
+Dim g_tOpenData
+Dim g_tAgreeIndex 
+Dim g_nCnt           ' 약관 갯수
+Dim g_nIndex
+'============================================================================
+Sub Form_OnFormInit()
+	g_szOpenData = ""
+	g_tOpenData = {}
+	g_tAgreeIndex = {}
+	g_nCnt = 0            ' 약관 갯수
+	g_nIndex = 1
+	
+	g_szOpenData = trim( Form.GetOpenLinkData( ) )
+	if nil ~= g_szOpenData and "" ~= g_szOpenData then
+		g_tOpenData = Split(g_szOpenData, "☆")
+	    g_nCnt = #g_tOpenData
+	end if
+
+    if g_nCnt > 0 then
+        if g_nCnt == 1 then
+            btnNext.caption = "확인"
+		    lnkMain.visible = "1"
+		    imgPrev.visible = "0"
+		    imgNext.visible = "0"
+		    fmtab.visible = "0"
+        else
+		   imgPrev.visible = "0"
+            btnNext.caption = "다음"
+		    
+        end if
+		f_SetUI()
+    end if   
+    
+End Sub
+
+'============================================================================
+function f_SetUI()
+    if g_nCnt > 0 then
+		'하단에 약관갯수 표기
+		lblPage.caption = g_nIndex .."/".. g_nCnt
+
+		if g_nIndex <= g_nCnt then
+			if trim(g_tOpenData[g_nIndex-1]) ~= "" then
+				'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+				Dim tData
+				Dim szTitle
+				Dim szUrlType
+				Dim szData 
+				
+				tData = Split(g_tOpenData[g_nIndex-1], "★")
+				szTitle       = trim( tData[0] )
+				szUrlType     = trim( tData[2] )
+				szData        = trim( tData[1] )
+				table.insert(g_tAgreeIndex, tData[5])
+				lblTitle.caption = szTitle
+				
+				Form.triggerEvent("fmtab."..fmtab.currenttabpageid, "InitData", szData)
+				Form.triggerEvent("lnkMain", "InitData", szData)
+
+			end if
+		else
+			g_nIndex = 0
+		end if
+
+		if g_nCnt == g_nIndex then
+		   imgNext.visible = "0"
+            btnNext.caption = "확인"
+		else
+			if g_nIndex == 1 then
+				imgPrev.visible = "0"
+				imgNext.visible = "1"
+			else
+				imgPrev.visible = "1"
+			end if 
+			
+            btnNext.caption = "다음"
+		end if
+    end if
+End Function
+
+'============================================================================
+Sub Form_OnFormClose()
+	Dim szData
+	
+	if #g_tAgreeIndex > 0 then
+		for i = 0 to #g_tAgreeIndex -1
+			if i == 0 then
+				szData = g_tAgreeIndex[i]
+			else
+				szData = szData.."☆"..g_tAgreeIndex[i]
+			end if
+		next
+	else
+		szData = "close"
+	end if
+	
+	Form.SendReturnToParent("mbonl88026_p2" ,  szData)
+End Sub                                                                            
+
+'============================================================================
+Sub btnNext_OnClick()
+	Dim szPopup
+	szPopup = ""
+	
+	if g_nCnt > 0 then
+		Dim bClose
+		bClose = false
+		
+		if g_nCnt == 1 then
+			bClose = true
+		else
+			if g_nCnt > g_nIndex then
+				g_nIndex = g_nIndex + 1
+				f_SetUI()
+			elseif g_nCnt == g_nIndex then
+				bClose = true  
+			end if
+		end if
+
+		if bClose == true then
+			for i = 0 to #g_tAgreeIndex -1
+				if g_tAgreeIndex[i] == "6" then
+					szPopup = "Y"
+					'Form.OpenPopup("mbonl88026_p3", "", "")
+				else
+					szPopup = "N"
+					'Form.CloseForm()
+				end if
+			next
+		end if
+	end if
+	if szPopup == "Y" then
+		Form.OpenPopup("mbonl88026_p3", "", "")
+	elseif szPopup == "N" then
+		Form.CloseForm()
+	end if 
+End Sub
+
+'============================================================================
+Sub btnClose_OnClick()
+	g_tAgreeIndex = {}
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub fmtab_OnTabChanged(nCurrentTab)
+	if g_nCnt > 0 then
+		Dim bClose
+		bClose = false
+		
+		if g_nCnt == 1 then
+			bClose = true
+		else
+			if g_nCnt > g_nIndex then
+				g_nIndex = g_nIndex + 1
+				f_SetUI()
+			elseif g_nCnt == g_nIndex then
+				bClose = true  
+			end if
+		end if
+			
+		if bClose == true then
+			for i = 0 to #g_tAgreeIndex -1
+				if g_tAgreeIndex[i] == "6" then
+					szPopup = "Y"
+					'Form.OpenPopup("mbonl88026_p3", "", "")
+				else
+					szPopup = "N"
+					'Form.CloseForm()
+				end if
+			next
+		end if
+		if szPopup == "Y" then
+			Form.OpenPopup("mbonl88026_p3", "", "")
+		elseif szPopup == "N" then
+			Form.CloseForm()
+		end if 		
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbonl88026_p3" then
+		' mbonl88026_p3 이 팝업의 리턴
+		if trim(sRet) == "ok" then
+			Form.CloseForm()
+		else
+'			Form.OpenPopup("mbonl88026_p3", "", "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub imgNext_OnClick()
+	if g_nCnt > 0 then
+		Dim bClose
+		bClose = false
+		
+		if g_nCnt == 1 then
+			bClose = true
+		else
+			if g_nCnt > g_nIndex then
+				g_nIndex = g_nIndex + 1
+				f_SetUI()
+			elseif g_nCnt == g_nIndex then
+				bClose = true  
+			end if
+		end if
+		
+		if bClose == true then
+			for i = 0 to #g_tAgreeIndex -1
+				if g_tAgreeIndex[i] == "6" then
+					szPopup = "Y"
+					'Form.OpenPopup("mbonl88026_p3", "", "")
+				else
+					szPopup = "N"
+					'Form.CloseForm()
+				end if
+			next
+		end if
+		if szPopup == "Y" then
+			Form.OpenPopup("mbonl88026_p3", "", "")
+		elseif szPopup == "N" then
+			Form.CloseForm()
+		end if 	
+	end if
+End Sub
+
+'============================================================================
+Sub imgPrev_OnClick()
+	if g_nCnt > 0 then
+		if g_nIndex > 1 then
+			g_nIndex = g_nIndex - 1
+			f_SetUI()
+		end if	
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgPrev.setMaintainingRatio("1")
+	imgNext.setMaintainingRatio("1")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

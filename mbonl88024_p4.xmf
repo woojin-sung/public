@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="보유주식수익서비스_약정신청정보조회" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,393,375,257,1" />
+		<BUTTON name="BtnCancel" caption="해지" fgcolor="004:000000000" bgcolor="289:057061072" bgcolor2="233:102101101" fontsize="2" btnimage="btn_27.9" ly_vert="0,597,188,50,1" />
+		<LABEL name="lblUnderLine" bgcolor="021:226226226" transmode="0" ly_vert="14,443,347,1,1" />
+		<LABEL name="lblAllText" fontsize="1" fontstyle="01" caption="신청정보" ly_vert="11,403,180,35,1" />
+		<BUTTON name="BtnMod" caption="변경" bgcolor="289:057061072" bgcolor2="233:102101101" fontsize="2" btnimage="btn_20.9" ly_vert="187,597,188,50,1" />
+		<LABEL name="Label0" caption="신청계좌" ly_vert="11,459,100,32,1" />
+		<LABEL name="Label1" caption="주식재활용통보방법" ly_vert="11,496,149,32,1" />
+		<LABEL name="Label2" fontstyle="01" halign="2" ly_vert="139,459,224,32,1" />
+		<LABEL name="Label3" fontstyle="01" halign="2" ly_vert="163,497,200,32,1" />
+		<EDIT name="edtPassword" visible="0" fontsize="-2" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="279,399,90,39,0" />
+		<LABEL name="Label4" caption="지분율 보유 여부" ly_vert="11,533,124,32,1" />
+		<LABEL name="Label5" fontstyle="01" halign="2" ly_vert="139,533,224,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2944" _ulen="2661" >
+'============================================================================
+' 01. 화 면 명 : 보유주식 수익 서비스 변경해지처리 팝업
+' 02. 화면설명 : 보유주식 수익 서비스 변경해지처리 팝업
+' 03. 작    성 : 2022.08.02 양현정
+' 04. 수    정 : 
+'
+'============================================================================
+
+Dim gAcnt
+Dim g_InfrMthdFlag
+Dim g_SvcSrno
+Dim g_Pwd
+Dim g_PlainRm
+Dim gSpfHldnYn
+Dim gProsClsCd	'처리구분 리턴값
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+Sub Form_OnFormInitBefore()
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v005	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		
+		dim tData, szProdCd, szProdText
+		tData = Split(szOpenData, "★")
+		
+		szProdCd = Form.GetAccountInfo(tData(0), "productcode")
+		szProdText = Form.GetMetaData("상품코드", szProdCd)
+		
+		gAcnt = tData(0)
+		g_InfrMthdFlag = tData(1)
+		g_SvcSrno = tData(2)
+		gSpfHldnYn = tData(3)
+		
+		Label2.caption = "["&szProdText&"] "&Left(gAcnt,4)&"-"&Mid(gAcnt,5,4)&"-"&Right(gAcnt,2)
+		
+		if g_InfrMthdFlag = "1" then
+			Label3.caption = "알림톡·문자"
+		elseif g_InfrMthdFlag = "2" then
+			Label3.caption = "온라인 조회"
+		end if
+		
+		if gSpfHldnYn = "Y" then
+			Label5.caption = "보유"
+		else
+			Label5.caption = "미보유"
+		end if
+		
+	end if
+End Sub
+
+'============================================================================
+' 해지처리
+'============================================================================
+Sub BtnCancel_OnClick()	
+	gProsClsCd = "3" '해지처리
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 변경처리
+'============================================================================
+Sub BtnMod_OnClick()
+	gProsClsCd = "2" 	'변경처리
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'여백클릭시 꺼지도록 함
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'화면닫기전 안드로이드-백버튼 작동N 원복(부모화면에서 호출했던 상태로)
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+
+	Form.SendReturnToParent( "mbonl88024_p4" , gProsClsCd )	
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

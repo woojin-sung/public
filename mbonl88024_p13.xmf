@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="보유주식수익서비스_해지팝업" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="24,223,320,180,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="안내" halign="1" ly_vert="0,223,375,51,1" />
+		<IMAGE name="imgExit" visible="0" imgpath="icon_close.png" ly_vert="312,237,21,21,0" />
+		<LABEL name="lblSubTitle" halign="1" multiline="1" ly_vert="24,223,320,180,1" />
+		<BUTTON name="BtnCancel" caption="취소" fgcolor="095:000000000" fontsize="2" btnimage="btn_25.9" ly_vert="24,373,161,50,1" />
+		<BUTTON name="BtnContinue" caption="확인" bgcolor="143:049050052" bgcolor2="233:102101101" fontsize="2" btnimage="btn_26.9" ly_vert="184,373,161,50,1" />
+		<EDIT name="edtPassword" visible="0" fontsize="-2" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="245,263,90,39,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2428" _ulen="2104" >
+'============================================================================
+' 01. 화 면 명 : 보유주식 수익 서비스 해지 안내팝업
+' 02. 화면설명 : 보유주식 수익 서비스 해지 안내팝업
+' 03. 작    성 : 2022.08.02 양현정
+' 04. 수    정 : 
+'
+'============================================================================
+
+Dim g_szTheme     '테마구분  white/black
+Dim gAcnt
+Dim g_SvcSrno
+Dim gCancYn		'해지여부
+
+'============================================================================
+Sub Form_OnFormInit()
+	'안드로이드-백버튼 작동Y
+	'부모창(mbonl88024) 백버튼N 상태에서 팝업오픈 되므로 백버튼 동작하도록 설정	
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+
+    '테마구분 white/black
+	g_szTheme 	= Form.GetEnvData("common.theme")
+	
+     '이미지설정		
+	'If g_szTheme = "black" Then
+	'	BtnCancel.imgpath   = "btn_27.9"   
+	'Else
+	'	BtnCancel.imgpath   = "btn_27.9"  'white모드도 동일 
+	'End If
+	'BtnContinue.imgpath = "btn_20.9"
+
+	lblSubTitle.caption = "보유주식 수익 서비스를 해지하시겠습니까?"
+	
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		
+		dim tData, szProdCd, szProdText
+		tData = Split(szOpenData, "★")
+		
+		gAcnt = tData(0)
+		g_SvcSrno = tData(1)
+		
+	end if	
+
+End Sub
+
+
+'============================================================================
+Sub BtnCancel_OnClick()
+	gCancYn = "N"
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub BtnContinue_OnClick()
+	gCancYn = "Y"
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'화면닫기전 안드로이드-백버튼 작동N 원복(부모화면에서 호출했던 상태로)
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+
+	Form.SendReturnToParent("mbonl88024_p13" , gCancYn)
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	imgExit_OnClick()
+End Sub
+'============================================================================
+Sub imgBg_OnClick()
+	imgExit_OnClick()
+End Sub
+'============================================================================
+Sub imgExit_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

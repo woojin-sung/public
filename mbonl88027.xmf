@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88027" scrname="CDS거래신청/내역조회" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" bgcolor="052:255255255" itemcodetype="100" etcfunctions="" accpwdctl="edtPswd" hedgeacc="1" ly_vert="10,10,355,35,1" />
+		<FORMTAB name="fmtab" tabcount="2" tabwidthtype="1" tabheadheight="36" ly_vert="0,53,375,509,1" >
+			<PAGE name="0" caption="신청" linkfile="mbonl88027_s1" loadingtype="1" />
+			<PAGE name="1" caption="신청내역조회" linkfile="mbonl88027_s2" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1590" _ulen="1518" >
+
+
+'============================================================================
+Sub Form_OnFormInit()
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "INIT_SCREEN", acnt0.total & acnt0.sequence)
+End Sub
+
+'============================================================================
+Sub fmtab_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "INIT_SCREEN", acnt0.total & acnt0.sequence)
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	'CDS 거래신청 할 종목 데이터 수신
+	If sEventName == "SEND_REG_DATA" And sParam <> "" And sParam <> null Then
+		Form.OpenPopup("mbonl88027_p7" , sParam , "")
+	
+	'상단 우측 유의사항
+	ElseIf sEventName == "INFO_CLICK" Then
+'		If CInt(fmtab.currenttab) == 0 Then
+'			Form.OpenFramePopup("mbonl88027_p5" , "" , "")
+'		Else
+			Form.OpenFramePopup("mbonl88027_p6" , "" , "")
+'		End If
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'신청완료 팝업에서부터 내려온 이벤트
+	If sKeyName == "MOVE_TAB" And sRet <> "" And sRet <> null Then
+		fmtab.currenttab = sRet
+		
+		Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "INIT_SCREEN", acnt0.total & acnt0.sequence)
+	End If
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "INIT_SCREEN", acnt0.total & acnt0.sequence)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

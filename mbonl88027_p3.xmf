@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88027" scrname="CDS거래신청/내역조회_검색조건" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgAlpha" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,178,375,469,1" />
+		<BUTTON name="BtnContinue" caption="확인" bgcolor="289:255255255" bgcolor2="233:102101101" fontsize="2" btnimage="btn_20.9" ly_vert="0,597,375,50,1" />
+		<LABEL name="Label0" fontsize="1" fontstyle="01" caption="선택해주세요" halign="1" fonttype="1" ly_vert="20,187,335,32,1" />
+		<LABEL name="Label1" fontsize="1" fontstyle="01" caption="일자" fonttype="1" ly_vert="20,227,335,20,1" />
+		<RADIOGROUP name="rdoPeriod" buttonshape="1" buttonsnumber="3" ly_vert="15,255,345,40,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="1주일" radioimage="input_01_n.9.png" position="0,0,108,35" />
+				<RADIO no="1" text="1개월" radioimage="input_01_n.9.png" position="118,0,108,35" />
+				<RADIO no="2" text="직접입력" radioimage="input_01_n.9.png" position="236,0,108,35" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<CALENDAR name="cldFrom" dispmode="-1579033" ly_vert="15,305,140,32,1" />
+		<LABEL name="Label2" caption="~" ly_vert="153,305,20,32,1" />
+		<CALENDAR name="cldTo" dispmode="-1579033" ly_vert="180,305,140,32,1" />
+		<LABEL name="Label3" bgcolor="102:216216216" transmode="0" ly_vert="15,359,345,1,1" />
+		<LABEL name="Label4" fontsize="1" fontstyle="01" caption="진행상태 구분" fonttype="1" ly_vert="20,377,335,20,1" />
+		<RADIOGROUP name="rdoStatus" buttonshape="1" buttonsnumber="6" ly_vert="15,405,345,185,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" radioimage="input_01_n.9.png" position="0,0,167,35" />
+				<RADIO no="1" text="신청완료(승인요청)" radioimage="input_01_n.9.png" position="0,45,167,35" />
+				<RADIO no="2" text="승인완료" radioimage="input_01_n.9.png" position="177,45,167,35" />
+				<RADIO no="3" text="재투자승인" radioimage="input_01_n.9.png" position="0,90,167,35" />
+				<RADIO no="4" text="취소" radioimage="input_01_n.9.png" position="177,90,167,35" />
+				<RADIO no="5" text="해지" radioimage="input_01_n.9.png" position="0,135,167,35" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3221" _ulen="3103" >
+
+
+'Dim g_szStatus
+'Dim g_szPeriodType
+'Dim g_szFromDate
+'Dim g_szToDate
+'
+'============================================================================
+Sub Form_OnFormInit()
+	'진행상태구분값★기간구분값★시작일자★종료일자
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	If szOpenData <> "" And szOpenData <> null Then
+		Dim tData
+		tData = Split(szOpenData, "★")
+		
+		If tData[0] == "%" Then
+			rdoStatus.currentindex = "0"
+		ElseIf tData[0] == "1" Then
+			rdoStatus.currentindex = "1"
+		ElseIf tData[0] == "2" Then
+			rdoStatus.currentindex = "2"
+		ElseIf tData[0] == "3" Then
+			rdoStatus.currentindex = "3"
+		ElseIf tData[0] == "4" Then
+			rdoStatus.currentindex = "4"
+		ElseIf tData[0] == "5" Then
+			rdoStatus.currentindex = "5"
+		End If
+		
+		If tData[1] == "1" Then
+			rdoPeriod.currentindex = "0"
+			
+			cldFrom.enable = false
+			cldTo.enable = false
+			
+		ElseIf tData[1] == "2" then
+			rdoPeriod.currentindex = "1"
+			
+			cldFrom.enable = false
+			cldTo.enable = false
+			
+		Else
+			rdoPeriod.currentindex = "2"
+			
+			cldFrom.enable = true
+			cldTo.enable = true
+			
+			cldFrom.caption = tData[2]
+			cldTo.caption = tData[3]
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub imgAlpha_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub BtnContinue_OnClick()
+	Dim szReturnData
+	If rdoStatus.currentindex == "0" Then
+		szReturnData = "%"
+	ElseIf rdoStatus.currentindex == "1" Then
+		szReturnData = "1"
+	ElseIf rdoStatus.currentindex == "2" Then
+		szReturnData = "2"
+	ElseIf rdoStatus.currentindex == "3" Then
+		szReturnData = "3"
+	ElseIf rdoStatus.currentindex == "4" Then
+		szReturnData = "4"
+	ElseIf rdoStatus.currentindex == "5" Then
+		szReturnData = "5"
+	End If
+	
+	If rdoPeriod.currentindex == "0" Then
+		szReturnData = szReturnData & "★" & "1" & "★" & cldFrom.caption & "★" & cldTo.caption
+	ElseIf rdoPeriod.currentindex == "1" Then
+		szReturnData = szReturnData & "★" & "2" & "★" & cldFrom.caption & "★" & cldTo.caption
+	Else
+		szReturnData = szReturnData & "★" & "3" & "★" & cldFrom.caption & "★" & cldTo.caption
+	End If
+	
+	Form.SendReturnToParent("COND_RETURN" , szReturnData)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub rdoPeriod_OnClick(nIndex)
+	If nIndex == 2 Then
+		cldFrom.enable = true
+		cldTo.enable = true
+	Else
+		cldFrom.enable = false
+		cldTo.enable = false
+	End If
+End Sub
+
+'============================================================================
+Sub cldFrom_OnEditComplete()
+	Dim szFromDt, szToDt
+	szFromDt = CInt(cldFrom.caption)
+	szToDt = CInt(cldTo.caption)
+	If szFromDt > szToDt Then
+		Form.ShowAlert("알림", "날짜를 다시 선택해 주세요.")
+		cldFrom.caption = cldTo.caption
+	End If
+End Sub
+
+'============================================================================
+Sub cldTo_OnEditComplete()
+	Dim szFromDt, szToDt
+	szFromDt = CInt(cldFrom.caption)
+	szToDt = CInt(cldTo.caption)
+	If szFromDt > szToDt Then
+		Form.ShowAlert("알림", "날짜를 다시 선택해 주세요.")
+		cldTo.caption = cldFrom.caption
+	End If
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

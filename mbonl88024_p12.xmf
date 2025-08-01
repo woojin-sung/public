@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="내수익금확인하기_항목선택" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,318,375,337,1" />
+		<LABEL name="lblUnderLine" fgcolor="146:124124124" bgcolor="041:228226226" transmode="0" ly_vert="14,458,347,1,1" />
+		<LABEL name="lblAllText" fontsize="1" fontstyle="01" caption="선택해주세요" halign="1" ly_vert="11,328,352,35,1" />
+		<BUTTON name="BtnMod" caption="확인" bgcolor="289:057061072" bgcolor2="233:102101101" fontsize="2" btnimage="btn_26.9" ly_vert="0,597,375,50,1" />
+		<LABEL name="Label0" fontstyle="01" caption="수수료 구분" ly_vert="16,369,100,32,1" />
+		<LABEL name="Label1" fontstyle="01" caption="거래일자" ly_vert="16,475,100,32,1" />
+		<IMAGE name="imgExit" imgpath="icon_close.png" ly_vert="331,337,21,21,1" />
+		<IMAGE name="imgRdo0" imgpath="input_03_n.9" ly_vert="17,404,100,32,1" />
+		<IMAGE name="imgRdo1" imgpath="input_03_n.9" ly_vert="137,404,100,32,1" />
+		<IMAGE name="imgRdo2" imgpath="input_03_n.9" ly_vert="257,404,100,32,1" />
+		<IMAGE name="imgRdo3" imgpath="input_03_n.9" ly_vert="17,509,100,32,1" />
+		<IMAGE name="imgRdo4" imgpath="input_03_n.9" ly_vert="137,509,100,32,1" />
+		<IMAGE name="imgRdo5" imgpath="input_03_n.9" ly_vert="257,509,100,32,1" />
+		<CALENDAR name="CalStaDate" dispmode="1735215461" ly_vert="32,550,140,32,1" />
+		<CALENDAR name="CarFinDate" dispmode="-291017025" ly_vert="202,550,140,32,1" />
+		<LABEL name="Label2" caption="~" halign="1" ly_vert="177,550,19,32,1" />
+		<LABEL name="lblfeeAllchk" fontsize="-2" caption="전체" halign="1" click="1" ly_vert="17,404,100,32,1" />
+		<LABEL name="lblfeeCls1" fontsize="-2" caption="대여거래" halign="1" click="1" ly_vert="137,404,100,32,1" />
+		<LABEL name="lblfeeCls2" fontsize="-2" caption="보유주식수익" halign="1" click="1" ly_vert="257,404,100,32,1" />
+		<LABEL name="lblPrd1week" fontsize="-2" caption="1주일" halign="1" click="1" ly_vert="17,509,100,32,1" />
+		<LABEL name="lblPrd1mon" fontsize="-2" caption="1개월" halign="1" click="1" ly_vert="137,509,100,32,1" />
+		<LABEL name="lblPrdIsrt" fontsize="-2" caption="직접입력" halign="1" click="1" ly_vert="257,509,100,32,1" />
+		<CALENDAR name="CalPsntDate" visible="0" dispmode="54989568" ly_vert="229,366,140,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8325" _ulen="7701" >
+'============================================================================
+' 01. 화 면 명 : 보유주식 수익 서비스 - 내수익금 확인하기 항목선택 팝업
+' 02. 화면설명 : 보유주식 수익 서비스 - 내수익금 확인하기 항목선택 팝업
+' 03. 작    성 : 2022.08.22 양현정
+' 04. 수    정 : 
+'
+'============================================================================
+
+Dim g_FeeClsCd
+Dim g_PrdClsCd
+Dim g_Sta_Date
+Dim g_Fin_Date
+Dim g_PsntDate
+Dim g_EndAbleYn
+
+
+'============================================================================
+'f_SetToggleUI(nFlag) : 항목 클릭에 따른 색깔 변동 처리
+'============================================================================
+Function f_SetToggleUI(nFlag)
+	
+	dim szToggleImg0, szToggleImg1, szToggleColor0, szToggleColor1, szToggleImg2
+	szToggleImg0 		= "input_01_n.9.png" 	'비활성 이미지
+	szToggleImg1 		= "input_01_o.9.png" 	'활성화 이미지
+	szToggleImg2 		= "input_02_d.9.png" 	'비활성 이미지
+	szToggleColor0 	= "127" 				'비활성 컬러
+	szToggleColor1 	= "67" 				'활성화 컬러
+	
+	if g_PrdClsCd <> "3" then
+		CalStaDate.visible = false
+		CarFinDate.visible = false
+		Label2.visible = false
+	end if
+
+	CalStaDate.caption = g_PsntDate
+	CarFinDate.caption = g_PsntDate	
+	
+	if nFlag == 0 then '수수료구분-전체
+		if g_FeeClsCd == "%" then
+			imgRdo0.imgpath = szToggleImg0
+			
+			g_FeeClsCd = ""
+		else
+			imgRdo0.imgpath = szToggleImg1
+			imgRdo1.imgpath = szToggleImg0
+			imgRdo2.imgpath = szToggleImg0
+			
+			g_FeeClsCd = "%"
+		end if
+	elseif nFlag == 1 then '수수료구분-대여거래
+		if g_FeeClsCd == "1" then
+			imgRdo1.imgpath = szToggleImg0
+			g_FeeClsCd = ""
+		else
+			imgRdo0.imgpath = szToggleImg0
+			imgRdo1.imgpath = szToggleImg1
+			imgRdo2.imgpath = szToggleImg0
+			
+			g_FeeClsCd = "1"	
+		end if
+	elseif nFlag == 2 then '수수료구분-보유주식수익
+		if g_FeeClsCd == "2" then
+			imgRdo2.imgpath = szToggleImg0
+			g_FeeClsCd = ""
+		else
+			imgRdo0.imgpath = szToggleImg0
+			imgRdo1.imgpath = szToggleImg0
+			imgRdo2.imgpath = szToggleImg1
+			
+			g_FeeClsCd = "2"		
+		end if
+	elseif nFlag == 3 then	 '거래일자:1주일
+		if g_PrdClsCd == "1" then
+			imgRdo3.imgpath = szToggleImg0
+			g_PrdClsCd = ""
+			g_Sta_Date = ""
+			g_Fin_Date = ""
+		else
+			CalStaDate.visible = false
+			CarFinDate.visible = false
+			Label2.visible = false
+		
+			imgRdo3.imgpath = szToggleImg1
+			imgRdo4.imgpath = szToggleImg0
+			imgRdo5.imgpath = szToggleImg0	
+			
+			g_PrdClsCd = "1"
+			
+			CalStaDate.addday = -7
+			
+			g_Sta_Date = CalStaDate.caption
+			g_Fin_Date = g_PsntDate	
+			
+		end if
+		
+	elseif nFlag == 4 then	 '거래일자:1개월
+		if g_PrdClsCd == "2" then
+			imgRdo4.imgpath = szToggleImg0
+			g_PrdClsCd = ""
+			g_Sta_Date = ""
+			g_Fin_Date = ""				
+		else
+			CalStaDate.visible = false
+			CarFinDate.visible = false
+			Label2.visible = false
+			
+			imgRdo3.imgpath = szToggleImg0
+			imgRdo4.imgpath = szToggleImg1
+			imgRdo5.imgpath = szToggleImg0	
+			
+			g_PrdClsCd = "2"	
+								
+			dim tYear, tMon, tDay, tDay2, tCalcDate
+
+			tDay  = CalStaDate.calday
+			CalStaDate.addday = (-1)*CInt(tDay)	'전달 마지막날..
+			
+			tYear = CalStaDate.calyear
+			tMon  = CalStaDate.calmonth 
+			tDay2 = CalStaDate.calday
+			
+			if CInt(tDay) > CInt(tDay2) then
+				tDay = tDay2
+			end if
+			
+			if cInt(tMon) < 10 then
+				tMon = CStr("0"&CInt(tMon))
+			end if
+			
+			if cInt(tDay) < 10 then
+				tDay = CStr("0"&CInt(tDay))
+			end if
+			
+			tCalcDate = CStr(tYear)&CStr(tMon)&CStr(tDay)
+			
+			g_Sta_Date = tCalcDate
+			g_Fin_Date = g_PsntDate
+					
+		end if
+		
+	elseif nFlag == 5 then	 '거래일자:직접입력
+		if g_PrdClsCd == "3" then
+			imgRdo5.imgpath = szToggleImg0
+			g_PrdClsCd = ""	
+			g_Sta_Date = ""
+			g_Fin_Date = ""				
+			
+			CalStaDate.visible = false
+			CarFinDate.visible = false
+			Label2.visible = false			
+			
+		else
+			imgRdo3.imgpath = szToggleImg0
+			imgRdo4.imgpath = szToggleImg0
+			imgRdo5.imgpath = szToggleImg1	
+			
+			g_PrdClsCd = "3"	
+			
+			CalStaDate.visible = true
+			CarFinDate.visible = true
+			Label2.visible = true	
+			
+			'g_Sta_Date = g_PsntDate
+			'g_Fin_Date = g_PsntDate	
+			if len(trim(g_Sta_Date)) == 0 then
+				g_Sta_Date = g_PsntDate
+				g_Fin_Date = g_PsntDate	
+			end if
+			
+		end if
+		
+	end if
+	
+	CalStaDate.caption = g_Sta_Date
+	CarFinDate.caption = g_Fin_Date		
+	
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+Sub Form_OnFormInitBefore()
+	g_FeeClsCd = ""
+	g_PrdClsCd = ""
+	g_Sta_Date = ""
+	g_Fin_Date = ""
+	
+	'g_PsntDate = GetSharedData("&HOST_DATE", false)
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_PsntDate = CalPsntDate.caption
+	
+	g_Sta_Date = g_PsntDate
+	g_Fin_Date = g_PsntDate
+	
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	
+	if szOpenData <> "" and szOpenData <> null then
+		
+		'msgbox "popup szOpenData="&szOpenData
+		
+		dim tData
+		tData = Split(szOpenData, "★")
+		
+		'g_FeeClsCd = tData(0)		'%:전체 1:대여거래 2:보유주식수익
+		'g_PrdClsCd = tData(1)		'1:1주일 2:1개월 3:직접입력
+		
+		'msgbox "popup g_FeeClsCd="&tData(0)	
+		'msgbox "popup g_PrdClsCd="&tData(1)	
+		'msgbox "popup g_Sta_Date="&tData(2)	
+		'msgbox "popup g_Fin_Date="&tData(3)	
+		
+		if tData(0) == "%" then
+			f_SetToggleUI(0)
+		elseif tData(0) == "1" then	
+			f_SetToggleUI(1)
+		elseif tData(0) == "2" then	
+			f_SetToggleUI(2)
+		end if	
+		
+		if tData(1) == "1" then
+			f_SetToggleUI(3)
+		elseif tData(1) == "2" then			
+			f_SetToggleUI(4)
+		elseif tData(1) == "3" then			
+			g_Sta_Date = tData(2)
+			g_Fin_Date = tData(3)		
+			
+			f_SetToggleUI(5)
+		end if
+			
+	end if
+End Sub
+
+Sub lblfeeAllchk_OnClick()
+	f_SetToggleUI(0)
+End Sub
+
+Sub lblfeeCls1_OnClick()
+	f_SetToggleUI(1)
+End Sub
+
+Sub lblfeeCls2_OnClick()
+	f_SetToggleUI(2)
+End Sub
+
+Sub lblPrd1week_OnClick()
+	f_SetToggleUI(3)
+End Sub
+
+Sub lblPrd1mon_OnClick()
+	f_SetToggleUI(4)
+End Sub
+
+Sub lblPrdIsrt_OnClick()
+	f_SetToggleUI(5)
+End Sub
+
+Sub CalStaDate_OnEditComplete()
+	g_Sta_Date = CalStaDate.caption
+End Sub
+
+Sub CarFinDate_OnEditComplete()
+	g_Fin_Date = CarFinDate.caption
+End Sub
+
+'============================================================================
+' 변경처리
+'============================================================================
+Sub BtnMod_OnClick()
+
+	g_EndAbleYn = "Y"
+	
+	if g_FeeClsCd == "" then
+		g_EndAbleYn = "N"
+		Form.ShowAlert( "안내" , "수수료 구분이 선택되지 않았습니다.")				
+	elseif g_PrdClsCd = "" then
+		g_EndAbleYn = "N"
+		Form.ShowAlert( "안내" , "거래일자 구분이 선택되지 않았습니다.")		
+	elseif g_PrdClsCd = "3" then			
+		if g_Sta_Date == "" then
+			g_EndAbleYn = "N"
+			Form.ShowAlert( "안내" , "시작일자를 확인하세요.")
+		elseif g_Fin_Date == "" then
+			g_EndAbleYn = "N"
+			Form.ShowAlert( "안내" , "종료일자를 확인하세요.")		
+		elseif g_Sta_Date > g_Fin_Date then
+			g_EndAbleYn = "N"
+			Form.ShowAlert( "안내" , "조회시작일("&g_Sta_Date&")이 종료일("&g_Fin_Date&")이후입니다.")
+		end if		
+	end if	
+	
+	if g_EndAbleYn == "Y" then
+		Form.CloseForm()
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgExit_OnClick()	'X버튼 클릭시
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+'여백클릭시 꺼지도록 함
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'화면닫기전 안드로이드-백버튼 작동N 원복(부모화면에서 호출했던 상태로)
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	
+	Dim sSendData
+	sSendData = g_FeeClsCd&"★"&g_PrdClsCd&"★"&g_Sta_Date&"★"&g_Fin_Date
+
+	Form.SendReturnToParent( "mbonl88024_p12" , sSendData )	
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

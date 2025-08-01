@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="82010" scrname="단기사채_매수_동의신청팝업" version="2" writer="이아영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" autosize="1" imgpath="alpha" ly_vert="0,0,375,363,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg.9" ly_vert="0,363,375,284,1" />
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="-1,0,375,363,1" />
+		<LABEL name="lblAllAgree" fgcolor="127:162162162" fontsize="2" fontstyle="01" caption="모두 확인하고, 동의합니다." click="1" ly_vert="40,385,305,22,1" />
+		<BUTTON name="btnOk" enable="0" caption="확인" fontstyle="01" btnimage="btn_15.9" ly_vert="-2,596,380,50,1" />
+		<CHKBUTTON name="chkAllAgree" visible="0" chkbtnimage="icon_chk_off.png" unchkbtnimage="icon_chk_on.png" ly_vert="420,381,30,30,0" />
+		<LABEL name="lblLine" bgcolor="027:216216216" transmode="0" ly_vert="15,423,345,1,1" />
+		<CHKBUTTON name="chkAgree1" visible="0" chkcaption="신용거래융자 핵심설명서" unchkcaption="신용거래융자 핵심설명서" ly_vert="400,475,265,30,0" />
+		<IMAGE name="imgUIChk1" autosize="1" imgpath="icon_check_off" ly_vert="26,447,13,13,1" />
+		<LABEL name="lblChkText1" fgcolor="127:162162162" caption="투자설명서" click="1" ly_vert="40,445,300,20,1" />
+		<IMAGE name="imgUIChkSub" autosize="1" imgpath="icon_check_off" ly_vert="26,481,13,13,1" />
+		<LABEL name="lblChkTextSub" fgcolor="127:162162162" caption="단기사채 만기상환 시, 세금은 후취로 징수됨을 
+확인합니다." valign="0" multiline="1" click="1" ly_vert="40,481,311,40,1" />
+		<IMAGE name="imgAllAgree" autosize="1" imgpath="icon_check_off" ly_vert="22,387,18,18,1" />
+		<CHKBUTTON name="chkAgree2" visible="0" chkcaption="신용거래융자 핵심설명서" unchkcaption="신용거래융자 핵심설명서" ly_vert="410,485,265,30,0" />
+		<IMAGE name="imgChk1" imgpath="ic_link.9" ly_vert="20,445,330,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10657" _ulen="10303" >
+Dim g_AcntNo
+Dim g_AcntSeq
+Dim g_AttachFile
+
+Dim g_tAgreeUrl 	'2차 개발시 약관 추가예정. 현재는 1개!
+Dim g_tAgreeState 	
+
+dim g_szUnCheckImg, g_szCheckImg'체크이미지
+dim g_szUnCheckFg, g_szCheckFg	'체크 폰트 컬러
+
+dim g_szRet
+
+Dim g_bAllView
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgAllAgree.setMaintainingRatio("1")
+	imgUIChk1.setMaintainingRatio("1")
+	imgUIChkSub.setMaintainingRatio("1")
+'	imgChk1.setMaintainingRatio("1")
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	If szOpenData <> "" And szOpenData <> null Then
+		tData = Split(szOpenData, "★")
+		
+		g_AcntNo 		= tData[0]
+		g_AcntSeq 		= tData[1]
+		g_AttachFile 		= tData[2]
+	end if
+	
+	g_szUnCheckImg = "icon_check_off.png"
+	g_szCheckImg = "icon_check_on.png"
+	g_szUnCheckFg = "127"
+	g_szCheckFg = "4"
+
+	g_bAllView = false
+	
+	Form.SetTimerEvent(10, 1, 1)
+		
+'
+'	Dim sDev
+'	sDev = Form.GetSharedData("&SERVER_MODE", False )
+'	
+'	If sDev == "1" Or sDev == 1 Then
+'		g_tAgreeUrl = {
+'		    {g_AttachFile, "투자설명서",  "urlpath", "N", ""}
+'		}	
+''		g_tAgreeUrl = {
+''		    {"http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_04.pdf", "신용거래융자 핵심설명서",  "urlpath", "N", ""}
+''		}
+'		
+'	Else '운영
+'		g_tAgreeUrl = {
+'		    {g_AttachFile, "투자설명서",  "urlpath", "N", ""}
+'		}
+''		g_tAgreeUrl = {
+''		    {"http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_04.pdf", "신용거래융자 핵심설명서",  "urlpath", "N", ""}
+''		}
+'	End If
+'	
+	g_tAgreeState = {"0"}
+	tOpenData = Form.GetOpenLinkData()
+	tData1 = Split(tOpenData,"★")
+	
+	g_szRet = ""
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+
+	Form.SetTimerEvent(10, 0, 1)
+
+	Dim sDev
+	sDev = Form.GetSharedData("&SERVER_MODE", False )
+	
+	If sDev == "1" Or sDev == 1 Then
+		g_tAgreeUrl = {
+		    {g_AttachFile, "투자설명서",  "urlpath", "N", ""}
+		}	
+'		g_tAgreeUrl = {
+'		    {"http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_04.pdf", "신용거래융자 핵심설명서",  "urlpath", "N", ""}
+'		}
+		
+	Else '운영
+		g_tAgreeUrl = {
+		    {g_AttachFile, "투자설명서",  "urlpath", "N", ""}
+		}
+'		g_tAgreeUrl = {
+'		    {"http://home.imeritz.com/include/resource/comm/ctcn/pdf/meritz_info_04.pdf", "신용거래융자 핵심설명서",  "urlpath", "N", ""}
+'		}
+	End If
+	
+End Sub
+
+'============================================================================
+Sub chkAllAgree_OnChange(sCheckState)
+	if sCheckState == "1" then
+		chkAllAgree.chksilence = "0"
+		
+		Dim szAllData
+		
+		tCnt = 0
+		
+		for i=0 to tCnt
+			Dim szData
+'			if g_tAgreeState[i] == "0" then
+				'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+				szData = g_tAgreeUrl[i][1].."★"..g_tAgreeUrl[i][0].."★"..g_tAgreeUrl[i][2].."★"..g_tAgreeUrl[i][3].."★"..g_tAgreeUrl[i][4].."★"..(i+1).."★".."0"
+				if szAllData == "" or szAllData == null then
+					szAllData = szData
+				else
+					szAllData = szAllData.."☆"..szData
+				end if
+'			end if
+		next
+	    
+	    g_bAllView = true
+	    
+		if #szAllData > 0 then
+			Form.OpenPopup( "mbonl88060_p12" ,  szAllData , "" )
+		end if
+	else
+		g_tAgreeState = {"0"}
+		
+		f_AllAgreeCheck()
+		
+	end if
+End Sub
+
+
+'============================================================================
+Sub imgAllAgree_OnClick()
+	if chkAllAgree.checkstate == "1" then
+		chkAllAgree.checkstate = "0"
+		chkAllAgree_OnChange("0")
+	else
+		chkAllAgree.checkstate = "1"
+		chkAllAgree_OnChange("1")
+	end if
+End Sub
+
+'============================================================================
+Sub lblAllAgree_OnClick()
+	if chkAllAgree.checkstate == "1" then
+		chkAllAgree.checkstate = "0"
+		chkAllAgree_OnChange("0")
+	else
+		chkAllAgree.checkstate = "1"
+		chkAllAgree_OnChange("1")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mbonl88060_p12" then
+	    if trim(sRet) ~= "" and trim(sRet) ~= nil and sRet ~= "close" then
+			Dim tReturnData
+			Dim nCnt
+			
+			tReturnData = Split(sRet, "☆")			 
+
+			nCnt = #tReturnData
+			for i = 0 to nCnt - 1
+				Dim nIndex      
+				nIndex = tonumber(tReturnData[i]) - 1
+				g_tAgreeState[nIndex] = "1"
+			next
+			
+			if g_bAllView then
+				f_AllAgreeCheck()
+			else
+				f_AgreeCheck()
+			end if
+	    end if	
+	end if
+End Sub
+
+'============================================================================
+Function f_CheckButtonEnable()
+	If chkAgree1.checkstate == "1" And chkAgree2.checkstate == "1" Then
+		btnOk.enable = true
+	Else
+		btnOk.enable = false
+	End If
+End Function
+
+'============================================================================
+Function f_AgreeCheck()
+	for i = 0 to #g_tAgreeState - 1
+		Form.SetCtlProp("chkAgree"..i+1, "chksilence", g_tAgreeState[i])		
+		
+		if g_tAgreeState[i] == "1" then
+			Form.SetCtlProp("imgUIChk"..i+1, "imgpath", g_szCheckImg)
+			Form.SetCtlProp("lblChkText"..i+1, "fgcolor", g_szCheckFg)
+		else
+			Form.SetCtlProp("imgUIChk"..i+1, "imgpath", g_szUnCheckImg)
+			Form.SetCtlProp("lblChkText"..i+1, "fgcolor", g_szUnCheckFg)
+		end if
+	next
+	
+	if chkAgree1.checkstate == "1" and chkAgree2.checkstate == "1" then
+		imgAllAgree.imgpath = g_szCheckImg
+		lblAllAgree.fgcolor = g_szCheckFg
+	
+		chkAllAgree.chksilence = "1"
+		btnOk.enable = "1"
+	else
+		imgAllAgree.imgpath = g_szUnCheckImg
+		lblAllAgree.fgcolor = g_szUnCheckFg
+	
+		chkAllAgree.chksilence = "0"
+		btnOk.enable = "0"
+	end if
+End Function 
+
+'============================================================================
+Function f_AllAgreeCheck()
+	Dim nAll
+	nAll = 0
+
+	for i = 0 to #g_tAgreeState - 1
+	
+		Form.SetCtlProp("chkAgree"..i+1, "chksilence", g_tAgreeState[i])		
+		Form.SetCtlProp("chkAgree"..i+2, "chksilence", g_tAgreeState[i])		
+		
+		if g_tAgreeState[i] == "1" then
+			Form.SetCtlProp("imgUIChk"..i+1, "imgpath", g_szCheckImg)
+			Form.SetCtlProp("lblChkText"..i+1, "fgcolor", g_szCheckFg)
+		
+			if i == 0 then	'건설사채권(CP) 주요내용 확인
+				Form.SetCtlProp("imgUIChkSub", "imgpath", g_szCheckImg)
+				Form.SetCtlProp("lblChkTextSub", "fgcolor", g_szCheckFg)
+			end if
+			nAll = nAll + 1
+		else
+			Form.SetCtlProp("imgUIChk"..i+1, "imgpath", g_szUnCheckImg)
+			Form.SetCtlProp("lblChkText"..i+1, "fgcolor", g_szUnCheckFg)
+			
+			if i == 0 then	'건설사채권(CP) 주요내용 확인
+				Form.SetCtlProp("imgUIChkSub", "imgpath", g_szUnCheckImg)
+				Form.SetCtlProp("lblChkTextSub", "fgcolor", g_szUnCheckFg)
+			end if
+		end if
+		
+	next
+
+	tCnt = 0
+
+	if nAll == tCnt+1 then
+		imgAllAgree.imgpath = g_szCheckImg
+		lblAllAgree.fgcolor = g_szCheckFg
+	
+		chkAllAgree.chksilence = "1"
+		btnOk.enable = "1"
+	else
+		imgAllAgree.imgpath = g_szUnCheckImg
+		lblAllAgree.fgcolor = g_szUnCheckFg
+	
+		chkAllAgree.chksilence = "0"
+		btnOk.enable = "0"
+	end if
+
+End Function
+
+'============================================================================
+Sub chkAgree1_OnChange(sCheckState)
+	if sCheckState == "1" then
+		chkAgree1.chksilence = "0"
+
+		'타이틀, url, 웹뷰type, 동의여부, 동의텍스트, 인덱스, 현재체크상태
+		Dim szAllData
+		szAllData = g_tAgreeUrl[0][1].."★"..g_tAgreeUrl[0][0].."★"..g_tAgreeUrl[0][2].."★"..g_tAgreeUrl[0][3].."★"..g_tAgreeUrl[0][4].."★".."1".."★".."0"
+		
+		g_bAllView = false
+		
+	     Form.OpenPopup( "mbonl88060_p12" ,  szAllData , "" )
+	else
+		Dim nIdex
+		nIdex = 0
+		g_tAgreeState[nIdex] = "0"
+'		f_AllAgreeCheck()
+	
+		f_AgreeCheck()
+	end if
+End Sub
+
+
+'============================================================================
+Sub imgUIChk1_OnClick()
+	if chkAgree1.checkstate == "0" then
+		chkAgree1.checkstate = "1"
+		chkAgree1_OnChange("1")
+	else
+		chkAgree1.checkstate = "0"
+		chkAgree1_OnChange("0")
+	end if 
+End Sub
+
+'============================================================================
+Sub lblChkText1_OnClick()
+	if chkAgree1.checkstate == "0" then
+		chkAgree1.checkstate = "1"
+		chkAgree1_OnChange("1")
+	else
+		chkAgree1.checkstate = "0"
+		chkAgree1_OnChange("0")
+	end if 
+End Sub
+
+'============================================================================
+Sub imgChk1_OnClick()
+	if chkAgree1.checkstate == "0" then
+		chkAgree1.checkstate = "1"
+		chkAgree1_OnChange("1")
+	else
+		chkAgree1.checkstate = "0"
+		chkAgree1_OnChange("0")
+	end if 
+End Sub
+
+'============================================================================
+Sub imgUIChkSub_OnClick()
+	if chkAgree2.checkstate == "0" then
+		chkAgree2.checkstate = "1"
+		chkAgree2_OnChange("1")
+	else
+		chkAgree2.checkstate = "0"
+		chkAgree2_OnChange("0")
+	end if 
+End Sub
+
+'============================================================================
+Sub lblChkTextSub_OnClick()
+	if chkAgree2.checkstate == "0" then
+		chkAgree2.checkstate = "1"
+		chkAgree2_OnChange("1")
+	else
+		chkAgree2.checkstate = "0"
+		chkAgree2_OnChange("0")
+	end if 
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	if chkAgree1.checkstate == "1" then
+		g_szRet = "ok"
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent( "mbonl88060_p4" , g_szRet )	
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub chkAgree2_OnChange(sCheckState)
+	if sCheckState == "1" then
+		Form.SetCtlProp("imgUIChkSub", "imgpath", g_szCheckImg)
+		Form.SetCtlProp("lblChkTextSub", "fgcolor", g_szCheckFg)
+	else
+		Form.SetCtlProp("imgUIChkSub", "imgpath", g_szUnCheckImg)
+		Form.SetCtlProp("lblChkTextSub", "fgcolor", g_szUnCheckFg)
+	end if
+	
+	if chkAgree1.checkstate == "1" and chkAgree2.checkstate == "1" then
+		imgAllAgree.imgpath = g_szCheckImg
+		lblAllAgree.fgcolor = g_szCheckFg
+	
+		chkAllAgree.chksilence = "1"
+		btnOk.enable = "1"
+	else
+		imgAllAgree.imgpath = g_szUnCheckImg
+		lblAllAgree.fgcolor = g_szUnCheckFg
+	
+		chkAllAgree.chksilence = "0"
+		btnOk.enable = "0"
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

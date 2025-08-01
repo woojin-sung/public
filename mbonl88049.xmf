@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88049" scrname="코넥스 투자자유의사항 고지/확인" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="cmbAcct" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,200" accpwdctl="editPswd" totalacc="1" ly_vert="6,9,271,39,1" />
+		<EDIT name="edtPswd" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" clearall="0" ly_vert="283,9,86,39,1" />
+		<TABLE name="tblState" insidelinecolor="102:255255255" colcount="2" rowcount="1" designorder="1" ly_vert="0,67,375,39,1" >
+			<COL_INFO ly_vert_width="130,245" />
+			<ROW_INFO ly_vert_height="39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" caption="확인여부" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="10,122,355,40,1" >
+			<COL_INFO ly_vert_width="355" />
+			<ROW_INFO ly_vert_height="20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" valign="2" halign="0" line="0,0" caption="코넥스 종목거래를 위해서는" fontsize="-1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" valign="0" halign="0" line="0,0" caption="코넥스 투자자유의사항을 확인하셔야 합니다." fontsize="-1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="imgDot1" autosize="1" imgpath="icon_dot.png" ly_vert="6,126,18,18,1" />
+		<LABEL name="Label0" bgcolor="144:034034034" transmode="0" ly_vert="20,256,335,1,1" />
+		<IMAGE name="Image0" ly_vert="40,186,295,40,1" />
+		<BUTTON name="Button0" fgcolor="095:000000000" btnimage="alpha" ly_vert="40,186,295,40,1" />
+		<BUTTON name="BtnProcess" enable="0" caption="확인(동의)" btnimage="btn_01.9" ly_vert="18,289,335,35,1" />
+		<LABEL name="Label1" caption="코넥스 투자자 위험고지문" halign="1" border="1" ly_vert="40,186,295,40,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5611" _ulen="5473" >
+--===========================================================================
+--===========================================================================
+Dim g_sPlainRm
+Dim g_sPopupCheckYN
+Dim g_sCheckYN
+Dim g_sACNO
+'============================================================================
+Function f_SetBtnEnable()
+	if g_sCheckYN == "Y" then
+		BtnProcess.enable = false	
+	else
+		if g_sPopupCheckYN == "Y" then
+			BtnProcess.enable = true
+		else
+			BtnProcess.enable = false
+		end if
+	end if
+End Function
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_sPlainRm = Form.GetSharedData("&PLAIN_RM", FALSE )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'Image0.imgpath = "img_bgbox.9.png"
+	Label1.fgcolor = "4"
+	if cmbAcct.caption <> "" and cmbAcct.caption <> null then
+		g_sPopupCheckYN = "N"
+		DATAMANAGER.RequestTranData( "obacp_opop_065r" )
+		DATAMANAGER.RequestTranData( "obpds_srvc_432r" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	dim nPassword
+	If g_sPlainRm = "1" Then
+		nPassword = edtPswd.caption
+	Else
+		nPassword = Form.GetEncData(edtPswd.caption)
+	End If
+		
+	if szTranID == "obacp_opop_065r" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ACNO", 0, cmbAcct.total )
+	elseif szTranID == "obpds_srvc_432r" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ACNO", 0, cmbAcct.total )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ACNT_PWD", 0, nPassword )
+	elseif szTranID == "obpds_srvc_431a" then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "PROS_CLS_CODE", 0, "I" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "CONT_CLS_CODE", 0, "4" )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ACNO", 0, cmbAcct.total )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ASNO", 0, g_sACNO )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1", "ACNT_PWD", 0, nPassword )
+	end if
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obacp_opop_065r" then
+		dim nDataCnt
+		nDataCnt = CInt( DATAMANAGER.GetDataCount(0, szTranID , "OutBlock1"))
+		
+		if nDataCnt > 0 then
+			dim sPRCD, szAcntState
+			
+			For i=0 To nDataCnt-1 
+				sPRCD = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "PRCD", i )
+				szAcntState = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "ACNT_STAT_CODE", i )
+				if (sPRCD == "100" or sPRCD == "105" or sPRCD == "106" 
+					or sPRCD == "107" or sPRCD == "117" or sPRCD == "119")
+					and szAcntState == "1" then
+						
+					g_sACNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "ASNO", i )
+					Exit For
+				end if
+			Next
+			
+			if g_sACNO == "" or g_sACNO == null then
+				g_sACNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "ASNO", 0 )
+			end if
+		end if
+		
+		if g_sACNO == "" or g_sACNO == null then
+			g_sACNO = cmbAcct.sequence
+		end if
+		
+	elseif szTranID == "obpds_srvc_432r" then
+		dim szCheckYN
+		szCheckYN = Trim(DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "RISK_NTIC_AGRM_YN", 0 ))
+		
+		if szCheckYN == "Y" then
+			g_sCheckYN = "Y"
+			tblState.SetCellString(0, 1, "확인")
+		else
+			g_sCheckYN = "N"
+			tblState.SetCellString(0, 1, "미확인")
+		end if
+		
+		f_SetBtnEnable()
+	elseif szTranID == "obpds_srvc_431a" then
+		DATAMANAGER.RequestTranData( "obpds_srvc_432r" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	dim szSubMsg
+	szSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	if szSubMsg <> "" and szSubMsg <> null then
+		Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+	else
+		Form.ShowAlert("알림", szErrMsg )
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	If sKeyName == "mbonl82020_p6" then
+		if sRet == "코넥스 투자자 위험고지문" then
+			g_sPopupCheckYN = "Y"
+			'Image0.imgpath = "img_bg.9.png"
+			'Label1.fgcolor = "62"
+			f_SetBtnEnable()
+		else
+			f_SetBtnEnable()
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	dim sURLheader, sURL
+	
+	If g_ServerMode == "1" Then	'개발기
+		sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/files/"
+	Else
+		sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/files/"
+	End If
+	sURL = sURLheader & "talk_yk33.pdf"
+
+	Form.SetSharedData("OPEN_URL", sURL )
+	Form.OpenFramePopup("mbonl82020_p6" , "코넥스 투자자 위험고지문", "")
+End Sub
+
+
+
+'============================================================================
+Sub BtnProcess_OnClick()
+	if edtPswd.caption == "" or edtPswd.caption == null then
+		Form.ShowAlert("알림", "계좌 비밀번호를 입력해 주세요.")
+		
+		Exit Sub
+	end if
+	
+	if g_sPopupCheckYN == "Y" then
+		DATAMANAGER.RequestTranData( "obpds_srvc_431a" )
+	else
+		Form.ShowAlert("알림", "코넥스 투자자 위험고지문을 확인해 주세요.")
+	end if
+End Sub
+
+'============================================================================
+Sub cmbAcct_ChangeAccount()
+	if cmbAcct.caption <> "" and cmbAcct.caption <> null then
+		g_sPopupCheckYN = "N"
+		DATAMANAGER.RequestTranData( "obacp_opop_065r" )
+		DATAMANAGER.RequestTranData( "obpds_srvc_432r" )
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_432r" trcode="obpds_srvc_432r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_431a" trcode="obpds_srvc_431a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obacp_opop_065r" trcode="obacp_opop_065r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_432r" title="코넥스 위험고지 등록내역 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="83" _ulen="63" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="232" _ulen="176" >
+
+RISK_NTIC_AGRM_YN^위험고지동의여부^1^0^0^0^0^0^0
+CNFR_DATE^확인일자^8^0^0^0^0^0^0
+MNPL_YMDH^조작일시^19^0^0^0^0^0^0
+MNPL_TRNO^조작단말번호^39^0^0^0^0^0^0
+MNPL_EMPNO^조작직원번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_431a" title="코넥스 위험고지 등록" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="218" _ulen="162" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="102" _ulen="78" >
+
+RISK_NTIC_AGRM_YN^위험고지동의여부^1^0^0^0^0^0^0
+CNFR_DATE^확인일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obacp_opop_065r" title="개별상품 기준 계좌Control 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="99" inout="out" _len="756" _ulen="564" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+MANG_BRCD^관리 지점코드^4^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌 상태 코드^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+OLD_PRCD^구 상품코드^3^0^0^0^0^0^0
+UI_INPR_NAME^UI 개별상품 명^80^0^0^0^0^0^0
+FNPR_EXUS_YN^금융상품전용여부^1^0^0^0^0^0^0
+ISSU_DETL_DVCD^종목세부분류코드^2^0^0^0^0^0^0
+INVT_TRGT_RSTC_YN^투자대상제한여부^1^0^0^0^0^0^0
+CUST_GRAD_CODE^고객등급코드^2^0^0^0^0^0^0
+MANG_EMPNO^관리직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리직원명^40^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

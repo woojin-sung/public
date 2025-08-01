@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88024" scrname="보유주식수익서비스_완료팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="check_red.png" margin="0,0,5,0" ly_vert="136,55,100,100,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="4" outline="0000" designorder="1" ly_vert="50,179,275,95,1" >
+			<COL_INFO ly_vert_width="275" />
+			<ROW_INFO ly_vert_height="30,30,5,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" valign="2" line="0,0" caption="보유주식 수익 서비스 신청이" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" caption="완료되었습니다." fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="146:124124124" line="0,0" fontsize="-3" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_15.9" ly_vert="10,597,355,45,1" />
+		<IMAGE name="Image1" imgpath="img_bgbox.9.png" ly_vert="22,293,334,199,1" />
+		<LABEL name="lblUnderLine0" bgcolor="080:228226226" transmode="0" ly_vert="30,338,320,2,1" />
+		<LABEL name="Label0" fontstyle="01" halign="2" autofontsize="1" ly_vert="115,348,232,32,1" />
+		<LABEL name="lblTableSub1" caption="신청계좌" ly_vert="34,348,77,32,1" />
+		<LABEL name="Label1" fontstyle="01" halign="2" ly_vert="202,380,145,32,1" />
+		<LABEL name="lblTableTitle" fontsize="2" fontstyle="01" caption="나의 신청현황" ly_vert="34,302,171,32,1" />
+		<LABEL name="Label2" fontstyle="01" halign="2" ly_vert="167,449,180,32,1" />
+		<LABEL name="lblTableSub2" caption="주식재활용거래 통보방법" ly_vert="34,380,182,32,1" />
+		<LABEL name="lblTableSub3" caption="계약서류 통보방법" ly_vert="34,449,130,32,1" />
+		<LABEL name="lblTableSub4" caption="지분율 보유 여부" ly_vert="34,414,130,32,1" />
+		<LABEL name="Label3" fontstyle="01" halign="2" ly_vert="167,414,180,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2967" _ulen="2631" >
+'============================================================================
+' 01. 화 면 명 : 보유주식 수익 서비스 약정완료 팝업
+' 02. 화면설명 : 보유주식 수익 서비스 약정완료 팝업
+' 03. 작    성 : 2022.08.02 양현정
+' 04. 수    정 : 
+'
+'============================================================================
+
+dim gAcnt
+dim g_szNotiFlag				'이용동의서류 제공방식 선택 상태
+dim g_InfrMthdFlag			'대차거래 통보방법 선택 상태
+dim g_5IssuHldnFlag			'지분율5%이상 종목보유 여부 선택 상태
+dim g_ProsClsCd				'처리구분
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		
+		dim tData, szProdCd, szProdText
+		tData = Split(szOpenData, "★")
+		
+		szProdCd = Form.GetAccountInfo(tData(0), "productcode")
+		szProdText = Form.GetMetaData("상품코드", szProdCd)
+		
+		gAcnt = tData(0)
+		g_ProsClsCd = tData(1)
+		g_InfrMthdFlag = tData(2)
+		g_szNotiFlag = tData(3)
+		g_5IssuHldnFlag = tData(4)
+		
+		'Label0.caption = "["&szProdText&"] "&Left(gAcnt,4)&"-"&Mid(gAcnt,5,4)&"-"&Right(gAcnt,2)
+		Label0.caption = Left(gAcnt,4)&"-"&Mid(gAcnt,5,4)&"-"&Right(gAcnt,2)
+		
+		if g_InfrMthdFlag = "1" then
+			Label1.caption = "알림톡·문자"
+		elseif g_InfrMthdFlag = "2" then
+			Label1.caption = "온라인 직접 조회"
+		end if
+		
+		if g_szNotiFlag = "talk" then
+			Label2.caption = "알림톡·문자"
+		elseif g_szNotiFlag = "email" then
+			Label2.caption = "이메일"
+		end if
+		
+		if g_5IssuHldnFlag = "Y" then
+			Label3.caption = "보유"
+		elseif g_5IssuHldnFlag = "N" then
+			Label3.caption = "미보유"
+		else
+			'Label3.visible = false
+			'lblTableSub4.visible = false
+			'lblTableSub3.top = 414
+			'Label2.top = 414
+		end if
+
+		if g_ProsClsCd = "I" then
+			Table0.SetCellString(0, 0, "보유주식 수익 서비스 신청이")
+			Table0.SetCellString(1, 0, "완료 되었습니다.")
+			
+			lblTableSub3.visible = true
+			Label2.visible = true
+		elseif g_ProsClsCd = "U" then
+			Table0.SetCellString(0, 0, "보유주식 수익 서비스 정보가")
+			Table0.SetCellString(1, 0, "변경 되었습니다.")
+			
+			lblTableSub3.visible = false
+			Label2.visible = false
+		end if
+
+	end if
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.CloseForm()
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbonl88024_p3" , "CLOSE")
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

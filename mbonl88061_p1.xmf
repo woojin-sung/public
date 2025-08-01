@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="71052" scrname="단기사채_신청내역상세팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDim" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,183,375,450,1" />
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="-1,5,375,639,1" />
+		<LABEL name="lblName" fontsize="4" fontstyle="01" bgcolor="064:188030030" autofontsize="1" ly_vert="25,190,325,50,1" />
+		<LABEL name="lblLine" bgcolor="132:215215215" transmode="0" ly_vert="25,240,325,1,1" />
+		<TABLE name="tbl0" insidelinecolor="102:255255255" colcount="2" rowcount="11" outline="0000" designorder="1" ly_vert="25,250,325,330,1" >
+			<COL_INFO ly_vert_width="140,185" />
+			<ROW_INFO ly_vert_height="30,30,30,30,30,30,30,30,30,30,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="0,0" caption="매매구분" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="2" line="0,0" fontsize="-1" mask="1,0,,,1,,0,1,0,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="액면금액" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,1,,0,1,0,0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,0" caption="매수결제금액" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,1,,0,1,0,0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" halign="0" line="0,0" caption="매수금리(세전)" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,3,1,3" halign="2" line="0,0" fontsize="-1" mask="0,0,,%,0,,2,1,0,0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="0,0" caption="세금납입방식" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,4,1,4" halign="2" line="0,0" fontsize="-1" impidxs="" />
+				<CELL cell_ly="0,5,0,5" halign="0" line="0,0" caption="만기 이자 금액(세전)" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,5,1,5" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,6,0,6" halign="0" line="0,0" caption="세금(후취)" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,6,1,6" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,7,0,7" halign="0" line="0,0" caption="만기정산금액" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,7,1,7" halign="2" line="0,0" fontsize="-1" mask="0,0,,원,0,,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,8,0,8" halign="0" line="0,0" caption="매수신청일" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,8,1,8" halign="2" line="0,0" fontsize="-1" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,9,0,9" halign="0" line="0,0" caption="매수일" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,9,1,9" halign="2" line="0,0" fontsize="-1" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+				<CELL cell_ly="0,10,0,10" halign="0" line="0,0" caption="만기일" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,10,1,10" halign="2" line="0,0" fontsize="-1" mask="1,0,,,1,####.##.##,0,1,1,0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="BtnOK" caption="확인" bgcolor="289:255255255" bgcolor2="233:102101101" fontsize="2" btnimage="btn_26.9" ly_vert="-3,597,381,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1260" _ulen="1230" >
+'============================================================================
+' 단기사채 신청내역 상세
+'============================================================================
+
+Dim g_tData
+Dim g_szCode
+Dim g_szData
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()	
+	
+	If szOpenData <> "" And szOpenData <> null Then
+		g_tData = Split(szOpenData, "★")
+		
+		lblName.caption = g_tData[0]
+		
+		tbl0.SetCellString(0, 1, g_tData[1])
+		tbl0.SetCellString(1, 1, g_tData[2])
+		tbl0.SetCellString(2, 1, g_tData[3])
+		tbl0.SetCellString(3, 1, g_tData[4])
+		tbl0.SetCellString(4, 1, g_tData[5])
+
+		' 20230306 요건 추가!
+		tbl0.SetCellString(5, 1, g_tData[6])
+		tbl0.SetCellString(6, 1, g_tData[7])
+		tbl0.SetCellString(7, 1, g_tData[8])
+
+		tbl0.SetCellString(8, 1, g_tData[9])
+		tbl0.SetCellString(9, 1, g_tData[10])
+		tbl0.SetCellString(10, 1, g_tData[11])
+	End If
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub BtnOK_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

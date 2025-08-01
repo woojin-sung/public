@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87051" scrname="해외주식거래신청_영문명변경" version="2" writer="윤유정" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,309,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="고객영문명 등록/변경" bgcolor="064:188030030" halign="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" visible="0" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,0" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" designorder="1" ly_vert="4,65,301,85,1" >
+			<COL_INFO ly_vert_width="80,221" />
+			<ROW_INFO ly_vert_height="40,5,40" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="039:242242242" line="0,0" caption="변경 전" impidxs="" />
+				<CELL cell_ly="1,0,1,0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="039:242242242" line="0,0" caption="변경 후" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="Edit0" imetype="3" ly_vert="88,111,217,38,1" />
+		<EDIT name="Edit1" enable="0" imetype="3" ly_vert="88,66,217,38,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" fontstyle="01" btnimage="btn_02.9" ly_vert="25,254,127,39,1" />
+		<BUTTON name="btnModify" caption="확인" fontstyle="01" btnimage="btn_01.9" ly_vert="157,254,127,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4524" _ulen="4186" >
+' 2023.11.29 v001 장원혁 : 외화이체화면에 수정된 영문명 전달
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim	g_PreEngName
+	g_PreEngName = ""
+Dim	g_NewEngName
+	g_NewEngName = ""
+Dim	g_Acno
+Dim	g_Asno
+Dim g_sScreenNo 'v001
+
+'============================================================================
+'					F O R M	F U N C T I O N
+'============================================================================
+Sub Form_OnFormInit()
+
+    g_sScreenNo = Form.GetSharedData("&SCREEN_NO", false )	 'v001
+	g_PreEngName	= Form.GetOpenLinkData()
+	g_Acno 		= Form.GetSharedData("89040_ACNO", false)
+	g_Asno 		= Form.GetSharedData("89040_ASNO", false)
+
+	if trim(g_PreEngName) <> "" then
+		Edit1.caption = g_PreEngName
+	else
+		Edit1.caption = "미등록"
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	
+	if sKeyName == "MODIFY" then
+		Form.SendReturnToParent("NewEngName", "ok")
+		Form.CloseForm()
+	end if
+	
+End Sub
+
+'============================================================================
+'				D A T A M A N A G E R	F U N C T I O N
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	'외화 가상계좌 등록(영문명변경)
+	if szTranID == "obtsd_fbnk_001a" then
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "PROS_CLS_CODE", 		0, "5")			'처리구분코드
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "TACT_LNKD_ISTU_CODE",	0, "701")		'이체연계기관코드
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "ACNO", 				0, g_Acno)		'계좌번호
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "ASNO", 				0, g_Asno)		'계좌일련번호
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "CONT_CLS_CODE", 		0, "4")			'접촉구분코드
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "CUST_ENG_NAME",		0, g_NewEngName)	'고객영문명
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	'외화 가상계좌 등록(영문명변경)
+	if szTranID == "obtsd_fbnk_001a" then
+		Form.MsgBox("알림", "고객영문명 등록/변경이 완료되었습니다.", "MODIFY", 6)
+		
+		If g_sScreenNo == "64010" Then '외화이체 v001
+		    Form.SendReturnToParent("EngName" , g_NewEngName)
+		    Form.CloseForm()
+		End If
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	szSubErr = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+	if szSubErr <> "" and szSubErr <> null then
+		Form.ShowAlert( "알림" , szErrMsg.."\n("..szSubErr..")")
+	else
+		Form.ShowAlert( "알림" , szErrMsg)
+	end if
+	
+End Sub 
+
+'============================================================================
+'				C O N T R O L	 F U N C T I O N
+'============================================================================
+' 닫기 버튼
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 변경 후
+'============================================================================
+Sub Edit0_OnEditComplete()
+	g_NewEngName = Edit0.caption
+End Sub
+
+'============================================================================
+' 취소버튼
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 확인 버튼
+'============================================================================
+Sub btnModify_OnClick()
+
+	if trim(g_NewEngName) <> "" then
+	
+		if trim(g_PreEngName) == trim(g_NewEngName) then
+			Form.ShowAlert("알림", "변경 전/후가 같은 영문명입니다.")
+			Exit Sub
+		end if		
+		
+		DATAMANAGER.RequestTranData("obtsd_fbnk_001a")
+	else
+	
+		if trim(g_PreEngName) <> "" then
+			Form.ShowAlert("알림", "변경할 영문명을 확인해주세요.")
+		else
+			Form.ShowAlert("알림", "사용할 영문명을 확인해주세요.")
+		end if
+
+		Exit Sub
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtsd_fbnk_001a" trcode="obtsd_fbnk_001a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtsd_fbnk_001a" title="외화 가상계좌 등록/해지 요청(?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="369" _ulen="275" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+TACT_LNKD_ISTU_CODE^이체연계기관코드^3^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출직원번호^9^0^0^0^0^0^0
+CUST_ENG_NAME^고객영문명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="201" _ulen="149" >
+
+VRTL_ACNO^가상계좌번호^16^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌상태코드^1^0^0^0^0^0^0
+APLT_SRNO^신청일련번호^11^0^7^0^0^0^0
+LNKD_TLMS_MNNO^연계전문관리번호^13^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

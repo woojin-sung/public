@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="보유주식수익서비스_대여거래안내" version="2" writer="정민영" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,59,375,591,1" />
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" caption="대여거래 알아보기" halign="1" ly_vert="0,65,375,40,1" />
+		<IMAGE name="imgExit" imgpath="icon_close.png" ly_vert="331,72,21,21,1" />
+		<LABEL name="lblSubTitle" fgcolor="146:124124124" fontsize="-2" caption="- 대여 중인 주식에 발생한 배당금 및 유/무상증자 권리는
+   모두 대여자에게 귀속됩니다. (의결권 제외)
+
+- 주식 대여로 발생하는 수수료는 기타 소득으로 분류되며
+   22%의 기타 소득세가 부가됩니다. (연간 합계 300만원
+   초과시 종합과세 대상에 포함)
+
+- 대주주, 주요주주 및 특수관계인, 주식을 발생한 기업의
+   임원인 경우, 주식 대여시 지분공시 의무가 발생합니다.
+   특정주식을 제외하고 싶다면 대여불가 종목을 설정하거나
+   별도 계좌를 개설하여 관리하시기 바랍니다." valign="0" multiline="1" ly_vert="6,406,352,190,1" />
+		<BUTTON name="BtnContinue" caption="확인" bgcolor="232:232078084" bgcolor2="233:102101101" fontsize="2" btnimage="btn_26.9" ly_vert="0,597,375,50,1" />
+		<LABEL name="Label0" fontsize="-1" fontstyle="01" caption="기타 유의사항" ly_vert="17,375,100,32,1" />
+		<IMAGE name="Image0" imgpath="icon_dot" ly_vert="6,381,18,18,1" />
+		<LABEL name="Label1" fontsize="-1" fontstyle="01" caption="대여거래란 ?" ly_vert="17,105,100,32,1" />
+		<IMAGE name="Image1" imgpath="icon_dot" ly_vert="6,111,18,18,1" />
+		<LABEL name="lbl1Line1" fgcolor="146:124124124" fontsize="-1" caption="고객(대여자)이 보유한 주식을 필요로 하는" valign="0" multiline="1" ly_vert="15,135,350,18,1" />
+		<LABEL name="lbl1Line2" fgcolor="146:124124124" fontsize="-1" caption="기관투자자(차입자)에게 대여하여" valign="0" multiline="1" ly_vert="15,150,350,18,1" />
+		<LABEL name="lbl1Line3" fgcolor="146:124124124" fontsize="-1" valign="0" multiline="1" ly_vert="15,165,357,18,1" />
+		<LABEL name="lbl1Line4" fgcolor="146:124124124" fontsize="-1" valign="0" multiline="1" ly_vert="15,180,358,20,1" />
+		<LABEL name="lbl1Line5" fgcolor="146:124124124" fontsize="-1" valign="0" multiline="1" ly_vert="15,205,357,20,1" />
+		<LABEL name="lbl1Line6" fgcolor="146:124124124" fontsize="-1" valign="0" multiline="1" ly_vert="15,220,358,20,1" />
+		<LABEL name="lbl1Line7" fgcolor="146:124124124" fontsize="-1" caption="하실 수 있습니다." valign="0" multiline="1" ly_vert="15,236,172,20,1" />
+		<IMAGE name="Image2" autosize="1" imgpath="img_rental" ly_vert="33,261,313,101,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3611" _ulen="3025" >
+'============================================================================
+' 01. 화 면 명 : 보유주식 수익 서비스 대차거래 안내팝업
+' 02. 화면설명 : 보유주식 수익 서비스 대차거래안내팝업
+' 03. 작    성 : 2022.08.02 양현정
+' 04. 수    정 : 
+'
+'============================================================================
+
+Dim  g_szTheme                  '테마구분  white/black
+
+'============================================================================
+'문구 색깔 변경..
+'============================================================================
+Function f_SetLabelColor()
+
+	Dim nStaOffset, nLen
+	
+	'3 Line
+	lbl1Line3.caption = "대여주식으로부터 발생된 대여 수수료를 받아"
+
+	nStaOffset = lbl1Line3.getLen("대여주식으로부터 발생된 ")
+	nLen       = lbl1Line3.getLen("대여 수수료를 받아")
+	
+	'lbl1Line3.changeTextAttr(0, nStaOffset-1, 146, -1, false)
+	lbl1Line3.changeTextAttr(nStaOffset, nLen, 289, -1, false)	
+	
+	'4 Line
+	lbl1Line4.caption = "추가수익을 낼 수 있는 거래입니다."
+	
+	nStaOffset = lbl1Line4.getLen("추가수익을 ")
+	nLen       = lbl1Line4.getLen("낼 수 있는 거래입니다.")	
+	
+	lbl1Line4.changeTextAttr(0, nStaOffset-1, 289, -1, false)
+	'lbl1Line4.changeTextAttr(nStaOffset, nLen, 146, -1, false)	
+	
+	'5 Line
+	lbl1Line5.caption = "대여주식은 대여주문화면에서 언제든지 매도가"
+	
+	nStaOffset = lbl1Line5.getLen("대여주식은 대여주문화면에서 ")
+	nLen       = lbl1Line5.getLen("언제든지 매도")
+	
+	'lbl1Line5.changeTextAttr(0, nStaOffset-1, 146, -1, false)
+	lbl1Line5.changeTextAttr(nStaOffset, nLen, 289, -1, false)		
+	
+	'6 Line
+	lbl1Line6.caption = "가능하며 대여된 주식을 언제든지 반환요청(상환)"
+	
+	nStaOffset = lbl1Line5.getLen("가능하며 대여된 주식을 ")
+	nLen       = lbl1Line5.getLen("언제든지 반환요청")	
+	
+	lbl1Line6.changeTextAttr(nStaOffset, nLen, 289, -1, false)		
+	
+End Function
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'안드로이드-백버튼 작동Y
+	'부모창(mbonl88024) 백버튼N 상태에서 팝업오픈 되므로 백버튼 동작하도록 설정	
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+
+    '테마구분 white/black
+	g_szTheme = Form.GetEnvData("common.theme")
+
+     '이미지설정
+	'imgBg.imgpath       = "alpha128"
+	imgExit.imgpath     = "icon_close"
+
+	BtnContinue.imgpath = "btn_20.9"
+	
+	'라벨 색상 변경
+	f_SetLabelColor()
+	
+End Sub
+
+
+'============================================================================
+Sub BtnContinue_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'화면닫기전 안드로이드-백버튼 작동N 원복(부모화면에서 호출했던 상태로)
+	'Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+
+	'Form.SendReturnToParent("mbbdm85110_p2" , g_BDM_CLEAR_YN)
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	imgExit_OnClick()
+End Sub
+'============================================================================
+Sub imgBg_OnClick()
+	imgExit_OnClick()
+End Sub
+'============================================================================
+Sub imgExit_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image2.setMaintainingRatio("1")
+
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88030" scrname="옵션거래신청" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="Account0" itemcodetype="101,120" etcfunctions="" accpwdctl="EditPW" ly_vert="6,9,271,39,1" />
+		<EDIT name="EditPW" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" savecheckpwd="1" ly_vert="283,9,86,39,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="6" designorder="1" ly_vert="0,56,375,525,1" >
+			<COL_INFO ly_vert_width="150,225" />
+			<ROW_INFO ly_vert_height="39,39,39,39,39,330" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="거래신청 상태" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" halign="0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="파생계좌 유형" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,1,1,1" import="4,1,51" halign="0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="기본예탁금" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="파생 최초 개설일" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,3,1,3" import="3,1,6" halign="0" mask="1,0,,,1,####/##/##,0,1,1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="파생투자경험(타사포함)" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,4,1,4" import="3,1,4" halign="0" mask="1,0,,,1,,0,1,1" impidxs="" />
+				<CELL cell_ly="0,5,1,5" valign="0" halign="0" caption="
+※ 일반개인 신규투자자(유형C)에 해당되시는 경우 아래 내용이
+    충족되어야 신청 가능합니다.
+   
+    1) 사전투자경험(교육 1시간 이상, 모의투자 3시간 이상)
+        이수
+   
+    2) 계좌개설 후 선물/옵션 미결제약정 10거래일 이상   
+        보유(거래포함)
+        - 단, 타사 “선물/옵션 미결제약정 보유경험”이 있는 경우 
+          해당 사항과 상관없이 신청 가능
+   
+※ 파생 2단계(옵션 신규매도) 신청 시 예탁금이 상향되어 신규
+    주문이 불가할 수 있습니다." fontsize="-2" paddinginfo="0,10,0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="ButtonOK" caption="신청" btnimage="btn_05.9" ly_vert="100,500,175,44,1" />
+		<LABEL name="LabelSRNO" ly_vert="440,429,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12809" _ulen="11605" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 옵션거래신청
+' 02. 화면설명 : 옵션거래신청
+' 03. 작    성 : 2016.02.15 김보라
+' 04. 수    정 : 2017.03.09  : 김유경 : 파생상품 개인투자자 보호제도 변경에 따라 2차사전교육/자격증 항목 추가 v0001
+'						            (obcsb_drvt_009r추가)
+'              : 2018.07.13	  : 윤유정 : obcsb_drvt_003r IO 변경(조회항목 추가) v0002
+' 2019.11.08   : 정민영 : v0003 : KRX제도개선_3차
+' 2019.12.06   : 정민영 : v0004 : 안내문구수정
+'			: 2020.09.16 : 권오상 : v005 : T2008250015 : 메모리평문 취약점 수정
+' 2020.12.05 : 정민영 : v005 보완조치
+' 2021.05.24 : 정민영 : v007 : T2105070009 : 개인신용정보동의제도 개편안 반영
+'            : obpds_srvc_045a IO변경분 적용
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'계좌컨트롤
+'101선물옵션,120WRAP(선물)
+Dim g_sAcc '계좌번호
+Dim g_sCSNO '고객번호
+Dim g_Invr_Tpcd     'v0003 투자유형
+Dim g_OptnTrAbleYN  'v0003 옵션가능여부
+Dim	g_PlainRm 'v005
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'===========================================================================
+' 계좌비밀번호 입력체크함수
+'===========================================================================
+Function GetPWCkeck()
+	Dim sACNT_PWD 
+	sACNT_PWD = Form.GetCtlProp( "EditPW", "caption" )
+	
+	if sACNT_PWD == null or sACNT_PWD == "" then
+		Form.MsgBox( "알림", "비밀번호를 입력해주세요.", "", 6 )	
+		return true
+	end if
+	
+	return false
+End Function	
+
+'===========================================================================
+' 속성 초기화함수
+'===========================================================================
+Function SetControlViewClear()
+	LabelSRNO.caption = ""
+	
+	Table0.SetCellString( 0, 1, "" )
+	Table0.SetCellString( 1, 1, "" )
+	Table0.SetCellString( 2, 1, "" )
+	Table0.SetCellString( 3, 1, "" )
+	Table0.SetCellString( 4, 1, "" )
+	Table0.SetCellString( 5, 1, "" ) 'v0001
+	
+	g_Invr_Tpcd    = "" 'v0003 투자유형
+	g_OptnTrAbleYN = "" 'v0003 옵션가능여부
+End Function
+
+'===========================================================================
+' 조회함수
+'===========================================================================
+Function SetRequestData()
+	if EditPW.caption ~= null and EditPW.caption ~= "" then
+		SetControlViewClear()
+		DATAMANAGER.RequestTranData( "obcsb_acif_000r" ) '고객정보조회
+	end if
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v005
+	
+	Form.setTitleCaption("파생 2단계(옵션 신규매도) 거래신청") 'v0001
+	
+	g_sAcc = Account0.caption
+	g_sCSNO = ""
+
+	'v0001 5->6
+	Dim sText
+	'sText = Table0.GetCellString( 6, 0 ).."\n\"선물옵션예탁금\" 화면에서 확인 가능합니다."
+	sText = Table0.GetCellString( 6, 0 ).."\n\"당일/익일증거금>상세\" 화면에서 확인 가능합니다."
+	
+	Table0.SetCellString( 6, 0, sText ) '
+	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "alert" then
+		if sRet == "ok" then
+			DATAMANAGER.RequestTranData( "obpds_srvc_045a" ) '거래신청
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim sACNT_PWD 
+'	sACNT_PWD = Form.GetCtlProp( "EditPW", "caption" ) 'v005
+'	sACNT_PWD = Form.GetEncData(sACNT_PWD)'v005
+
+	'v005
+	If g_PlainRm = "1" Then '보안모듈 적용
+		sACNT_PWD = Form.GetCtlProp( "EditPW", "caption" )
+	Else
+		'화면 최초오픈시에는 비밀번호가 Null 이므로 GetCtlprop()오류발생/GetCtlProp()와 GetEncData() 분리
+		'sACNT_PWD = Form.GetEncData(Form.GetCtlProp( "EditPW", "caption" ))
+		sACNT_PWD = Form.GetCtlProp( "EditPW", "caption" )
+		sACNT_PWD = Form.GetEncData(sACNT_PWD)
+	End If
+	
+	if szTranID == "obcsb_acif_000r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "PROS_CLS_CODE" , 0 , "I" )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "ACNO" , 0 , Left(g_sAcc, 8) )
+		DATAMANAGER.SetDataValue( 0, "obcsb_acif_000r", "InBlock1", "ACNT_PWD" , 0 , sACNT_PWD )
+	elseif szTranID == "obcsb_drvt_003r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_drvt_003r", "InBlock1", "ACNO" , 0 , Left(g_sAcc, 8) )
+		DATAMANAGER.SetDataValue( 0, "obcsb_drvt_003r", "InBlock1", "ASNO" , 0 , Right(g_sAcc, 2) )
+		DATAMANAGER.SetDataValue( 0, "obcsb_drvt_003r", "InBlock1", "ACNT_PWD" , 0 , sACNT_PWD )
+	elseif szTranID == "obpds_srvc_069r" then
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_069r", "InBlock1", "CSNO" , 0 , g_sCSNO )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_069r", "InBlock1", "SVCD" , 0 , "066" )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_069r", "InBlock1", "ACNO" , 0 , Left(g_sAcc, 8) )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_069r", "InBlock1", "PROS_CLS_CODE" , 0 , "0" )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_069r", "InBlock1", "STPL_STAT_CLS_CODE" , 0 , "01" ) '정상
+	elseif szTranID == "obpds_srvc_045a" then
+		if Table0.GetCellString( 0, 1 ) == "등록" then
+			DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "PROS_CLS_CODE" , 0 , "D" )
+		else
+			DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "PROS_CLS_CODE" , 0 , "I" )
+		end if
+		
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "CSNO" , 0 , g_sCSNO )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "SVCD" , 0 , "066" )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "SVC_SRNO" , 0 , LabelSRNO.caption )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "SVC_MANG_UNIT_CODE" , 0 , "03" )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "ACNO" , 0 , Left(g_sAcc, 8) )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "ASNO" , 0 , Right(g_sAcc, 2) )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "ACNT_PWD" , 0 , sACNT_PWD )
+		DATAMANAGER.SetDataValue( 0, "obpds_srvc_045a", "InBlock1", "CONT_CLS_CODE" , 0 , "4" )
+	elseif szTranID == "obtrf_cntg_306r" then
+		DATAMANAGER.SetDataValue( 0, "obtrf_cntg_306r", "InBlock1", "ACNO" , 0 , Left(g_sAcc, 8) )
+		DATAMANAGER.SetDataValue( 0, "obtrf_cntg_306r", "InBlock1", "ASNO" , 0 , Right(g_sAcc, 2) )
+		DATAMANAGER.SetDataValue( 0, "obtrf_cntg_306r", "InBlock1", "ACNT_PWD" , 0 , sACNT_PWD )
+	'v0001 sta
+	elseif szTranID == "obcsb_drvt_009r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_drvt_009r", "InBlock1", "ACNO" , 0 , Left(g_sAcc, 8) )
+	'v0001 fin
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_acif_000r" then	
+		g_sCSNO = DATAMANAGER.GetDataValue( 0, "obcsb_acif_000r", "OutBlock1", "CSNO" , 0 )
+		
+		DATAMANAGER.RequestTranData( "obcsb_drvt_003r" ) '최초계좌개설일자조회
+		DATAMANAGER.RequestTranData( "obpds_srvc_069r" ) '신청내역조회
+		DATAMANAGER.RequestTranData( "obtrf_cntg_306r" ) '예탁금조회		
+		DATAMANAGER.RequestTranData( "obcsb_drvt_009r" ) '2차사전교육/자격증조회 v0001
+	elseif szTranID == "obpds_srvc_069r" then
+		Dim nCnt
+		nCnt = DATAMANAGER.GetDataCount( 0, "obpds_srvc_069r", "OutBlock1" )
+		
+		if nCnt > 0 then
+			Dim sMoASNO, ASNO
+			sMoASNO = Right(g_sAcc, 2)
+			
+			for i = 0 to nCnt-1 
+				ASNO = DATAMANAGER.GetDataValue( 0, "obpds_srvc_069r", "OutBlock1", "ASNO" , i )
+				
+				if sMoASNO == ASNO then
+					LabelSRNO.caption = DATAMANAGER.GetDataValue( 0, "obpds_srvc_069r", "OutBlock1", "SVC_SRNO" , i )
+					Table0.SetCellString( 0, 1, "등록" )
+					ButtonOK.caption = "해지"
+					
+					Exit For
+				end if
+			next
+		end if
+		
+		if Table0.GetCellString( 0, 1 ) ~= "등록" then
+			Table0.SetCellString( 0, 1, "미등록" )
+			ButtonOK.caption = "신청"
+		end if
+	elseif szTranID == "obpds_srvc_045a" then
+		Dim sMsg, sSubMsg
+		sMsg = DATAMANAGER.GetDataMsgText( szTranID )
+		sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+		
+		if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+			sMsg = sMsg.." "..sSubMsg
+		end if
+		
+		Form.MsgBox( "알림", sMsg, "", 6 )
+		
+		SetControlViewClear()
+		DATAMANAGER.RequestTranData( "obcsb_drvt_003r" ) '최초계좌개설일자조회
+		DATAMANAGER.RequestTranData( "obpds_srvc_069r" ) '신청내역조회
+		DATAMANAGER.RequestTranData( "obtrf_cntg_306r" ) '예탁금조회
+		DATAMANAGER.RequestTranData( "obcsb_drvt_009r" ) '2차사전교육/자격증조회 v0001
+		
+	elseif szTranID == "obtrf_cntg_306r" then	' 20160330 추가
+		Dim szCode		'기본 예탁금 등급 코드
+		Dim szData		'받은 기본예탁금 등급코드를 변환하여 기본 예탁금으로 변환
+		Dim szInvtTypeCode '투자유형코드    v0001
+		Dim szInvtTypeNm   '투자유형코드명  v0001
+		szCode = DATAMANAGER.GetDataValue(0, "obtrf_cntg_306r", "OutBlock1", "BASC_DPMN_GRAD_CODE", 0)
+		szData = Form.GetMetaData("기본예탁금등급코드", szCode)
+		Table0.SetCellString( 2, 1, szData )	 'v0001
+	'v0001 sta
+		szInvtTypeCode = DATAMANAGER.GetDataValue(0, "obtrf_cntg_306r", "OutBlock1", "INVT_TYPE_CODE", 0)
+		szInvtTypeNm   = Form.GetMetaData("투자유형코드", szInvtTypeCode)
+		Table0.SetCellString( 1, 1, szInvtTypeNm )	 		
+		
+	elseif szTranID == "obcsb_drvt_009r" then	
+		ScndEdctCmno = DATAMANAGER.GetDataValue(0, "obcsb_drvt_009r", "OutBlock1", "SCND_SCTY_EDCT_CMCO_NO"  , 0)
+		DrvtInvtQlcd = DATAMANAGER.GetDataValue(0, "obcsb_drvt_009r", "OutBlock1", "DRVT_INVT_EXPC_QLCR_CODE", 0)
+			
+		'v0003 2차 사전교육/자격증여부 삭제
+'		If g_OptnTrAbleYN == "Y" Or (len(trim(EdctCmno)) > 0 or len(trim(DrvtInvtQlcd)) > 0) Then
+'			Table0.SetCellString( 4, 1, "Y" )
+'		Else
+'			Table0.SetCellString( 4, 1, "N" )
+'		End If
+		
+		'v0003 투자유형코드
+		g_Invr_Tpcd = DATAMANAGER.GetDataValue(0, "obcsb_drvt_009r", "OutBlock1", "DRVT_INVR_TPCD"  , 0)
+	'v0001 fin
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+		szErrMsg = szErrMsg.." "..sSubMsg
+	end if
+	
+	if szTranID == "obpds_srvc_045a" or szTranID == "obcsb_drvt_003r" then
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+	end if
+End Sub
+
+'============================================================================
+' 계좌 변경
+'============================================================================
+Sub Account0_ChangeAccount()
+	g_sAcc = Account0.caption
+End Sub
+
+'============================================================================
+' 비밀번호 입력
+'============================================================================
+Sub EditPW_OnEditComplete()
+	SetRequestData()
+End Sub
+'============================================================================
+Sub EditPW_OnCompletedAccountPassword()
+	SetRequestData()
+End Sub
+
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	if GetPWCkeck() then
+		Exit Sub
+	end if
+	
+	if Table0.GetCellString( 0, 1 ) ~= "등록" then
+		Dim sText
+		'v0003 1년 초과 체크 삭제
+		'sText = "1) \"옵션신청 가능여부\"가 \"Y\"인 경우에만 옵션신청이 가능합니다.\n"..
+		'		"2) \"파생계좌 유형\"이 \"C(일반투자자)\"인 경우, 최초 계좌 개설일이 1년 초과해야 옵션거래신청이 가능합니다."
+		'Form.MsgBox( "알림", sText, "alert", 1 )
+		'Exit Sub
+		
+		'v0003 A/B 유형은 약정불필요	
+		If g_Invr_Tpcd == "01" Then  '01.전문투자자대우 02.일반
+			sText = "전문투자자 대우(유형A/유형B) 고객은\n"..
+					"별도 신청 없이 옵션 신규매도가 가능합니다."
+			Form.MsgBox( "알림", sText, "", 6 )
+			Exit Sub
+		End If
+	End If
+	
+	DATAMANAGER.RequestTranData( "obpds_srvc_045a" ) '거래신청
+	
+End Sub
+
+
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_000r" trcode="obcsb_acif_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_069r" trcode="obpds_srvc_069r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_045a" trcode="obpds_srvc_045a" compress="1" encryption="1" inputcheck="1" digitalsign="1" />
+			<TRAN tranid="obcsb_drvt_003r" trcode="obcsb_drvt_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtrf_cntg_306r" trcode="obtrf_cntg_306r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_drvt_009r" trcode="obcsb_drvt_009r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_000r" title="고객정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2084" _ulen="1580" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_CNFR_YN^고객 확인 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호 유형 코드^2^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+RLNM_ASCT_NO^실명 조합 번호^20^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+PSPR_NO^여권 번호^10^0^0^0^0^0^0
+CONO^법인등록번호^13^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인 구분 코드^2^0^0^0^0^0^0
+CNSG_YN^수탁 여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC 전문 투자자 여부^1^0^0^0^0^0^0
+KYC_SPCL_INVR_RGNO^KYC 전문 투자자 등록번호^20^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+SSTS_YN^공매도 여부^1^0^0^0^0^0^0
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+CNSG_RFUS_REAS_CODE^수탁 거부 사유 코드^3^0^0^0^0^0^0
+STA_DATE^시작 일자^8^0^0^0^0^0^0
+FIN_DATE^종료 일자^8^0^0^0^0^0^0
+BRTH_CTCD^출생국가코드^3^0^0^0^0^0^0
+AMRC_YN^미국인여부^1^0^0^0^0^0^0
+AML_BSTP_LRDV_CODE^AML업종대분류코드^2^0^0^0^0^0^0
+AML_BSTP_SMDV_CODE^AML업종소분류코드^5^0^0^0^0^0^0
+GIIN^GIIN^20^0^0^0^0^0^0
+LSTN_YN^상장여부^1^0^0^0^0^0^0
+DSTC_DATE^파기일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_069r" title="약정내역조회 TR" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="221" _ulen="167" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+STPL_STAT_CLS_CODE^약정 상태 구분 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="1355" _ulen="1015" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스 일련번호^11^0^7^0^0^0^0
+SVC_MANG_UNIT_CODE^서비스 관리 단위 코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+CUST_ACNO^고객 계좌번호^24^0^0^0^0^0^0
+RMND_SRNO^잔고 일련번호^3^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+KOR_ISSU_ABWR_NAME^한글 종목 약어 명^40^0^0^0^0^0^0
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널 유형 구분 코드^3^0^0^0^0^0^0
+APLT_DATE^신청 일자^8^0^0^0^0^0^0
+REG_PROS_EMPNO^등록 처리 직원번호^9^0^0^0^0^0^0
+SVC_CANC_CLS_CODE^서비스 해지 구분 코드^1^0^0^0^0^0^0
+CANC_DATE^해지 일자^8^0^0^0^0^0^0
+CANC_PROS_EMPNO^해지 처리 직원번호^9^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+STPL_STAT_CLS_CODE^약정 상태 구분 코드^2^0^0^0^0^0^0
+REG_APRV_DATE^등록 승인 일자^8^0^0^0^0^0^0
+MOD_APRV_DATE^변경 승인 일자^8^0^0^0^0^0^0
+CANC_APRV_DATE^해지 승인 일자^8^0^0^0^0^0^0
+REG_BRCD^등록 지점코드^4^0^0^0^0^0^0
+MNPL_BRCD^조작 지점코드^4^0^0^0^0^0^0
+MNPL_YMDH^조작 일시1^19^0^0^0^0^0^0
+MNPL_TRNO^조작 단말번호^39^0^0^0^0^0^0
+MNPL_EMPNO^조작 직원번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="124" _ulen="92" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스 일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_045a" title="서비스약정메인 TR" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="1543" _ulen="1163" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스 일련번호^11^0^7^0^0^0^0
+SVC_MANG_UNIT_CODE^서비스 관리 단위 코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+RMND_SRNO^잔고 일련번호^3^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널 유형 구분 코드^3^0^0^0^0^0^0
+APLT_DATE^신청 일자^8^0^0^0^0^0^0
+REG_PROS_EMPNO^등록 처리 직원번호^9^0^0^0^0^0^0
+SVC_CANC_CLS_CODE^서비스 해지 구분 코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출 직원번호^9^0^0^0^0^0^0
+ELW_EDCT_CMCO_YN^ELW교육이수여부^1^0^0^0^0^0^0
+EDCT_CMCO_NO^교육이수번호^14^0^0^0^0^0^0
+KYC_BSWR_DIV_CODE^KYC 업무 분류 코드^2^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_PROD_GRAD_CODE^KYC 상품 등급 코드^2^0^0^0^0^0^0
+PROS_YN^처리 여부^1^0^0^0^0^0^0
+STND_DATE^기준 일자^8^0^0^0^0^0^0
+REG_SRNO^등록 일련번호^11^0^7^0^0^0^0
+KYC_DVPD_EPMD_CODE^KYC파생상품유의코드^2^0^0^0^0^0^0
+KYC_DRVT_PROS_YN^KYC 파생 처리 여부^1^0^0^0^0^0^0
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+PROS_SRNO^처리일련번호^11^0^7^0^0^0^0
+AGRM_RQCL_DOCU_CLCD^동의징구서류구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="175" _ulen="131" >
+
+PROS_RSLT_CODE^처리 결과 코드^2^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스 일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_drvt_003r" title="당사 거래확인서 발급 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="122" _ulen="90" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="925" _ulen="671" >
+
+DRVT_INVR_TPCD^파생투자자유형코드^2^0^0^0^0^0^0
+THCO_DRVT_FRST_OPNG_DATE^당사파생최초개설일자^8^0^0^0^0^0^0
+LAST_OTST_STPL_HLDN_DATE^최종미결제약정보유일자^8^0^0^0^0^0^0
+OTST_STPL_HLDN_VALD_DATE^미결제약정보유유효일자^8^0^0^0^0^0^0
+OPTN_TR_ABLE_YN^옵션거래가능여부^1^0^0^0^0^0^0
+EDCT_CMCO_YN^교육이수여부^1^0^0^0^0^0^0
+FRST_ACNT_OPNG_DATE^최초계좌개설일자^8^0^0^0^0^0^0
+ISNC_CO_NAME^발급회사명^40^0^0^0^0^0^0
+CO_NAME^회사명^100^0^0^0^0^0^0
+SCTY_EDCT_CMCO_NO^협회교육이수번호^20^0^0^0^0^0^0
+SCTY_EDCT_CMCO_DATE^협회교육이수일자^8^0^0^0^0^0^0
+EXCH_MOCK_TR_CMCO_NO^거래소모의거래이수번호^20^0^0^0^0^0^0
+EXCH_MOCK_TR_CMCO_DATE^거래소모의거래이수일자^8^0^0^0^0^0^0
+SCND_SCTY_EDCT_CMCO_NO^2차협회교육이수번호^20^0^0^0^0^0^0
+SCND_SCTY_EDCT_CMCO_DATE^2차협회교육이수일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="2" inout="out" _len="260" _ulen="214" >
+
+UI_CLS_CODE^UI구분코드^1^0^0^0^0^0^0
+UI_CLS_NAME^UI구분명^10^0^0^0^0^0^0
+UI_CMCO_YN^UI이수여부^1^0^0^0^0^0^0
+UI_CMCO_DATE^UI이수일자^8^0^0^0^0^0^0
+UI_SMDV_NAME^UI소분류명^100^0^0^0^0^0^0
+UI_CMCO_HOUR^UI이수시간^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrf_cntg_306r" title="선물옵션예탁종합정보" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2860" _ulen="2146" >
+
+ACRS_DPCD_NAME^실적 부서코드 명^40^0^0^0^0^0^0
+TOTAL_TFAM^총 예수금^19^0^7^0^0^0^0
+CASH_TFAM^현금 예수금^19^0^7^0^0^0^0
+TOTAL_WTMN_ABLE_AMT^총 인출 가능 금액^19^0^7^0^0^0^0
+WTMN_ABLE_CASH_AMT^인출 가능 현금 금액^19^0^7^0^0^0^0
+TTAM_DFCN_AMT^총액 부족 금액^19^0^7^0^0^0^0
+CASH_DFCN_AMT^현금 부족 금액^19^0^7^0^0^0^0
+TTAM_NRSK_MARG^총액 순위험 증거금^19^0^7^0^0^0^0
+CASH_NRSK_MARG^현금 순위험 증거금^19^0^7^0^0^0^0
+TTAM_ODER_MARG^총액 주문 증거금^19^0^7^0^0^0^0
+CASH_ODER_MARG^현금 주문 증거금^19^0^7^0^0^0^0
+CNTG_PRC^체결 가격^19^0^7^0^0^0^0
+TOTAL_ENTM_MARG^총 위탁 증거금^19^0^7^0^0^0^0
+CASH_ENTM_MARG^현금 위탁 증거금^19^0^7^0^0^0^0
+ODER_ABLE_SBSN_AMT^주문 가능 대용 금액^19^0^7^0^0^0^0
+ODER_ABLE_CASH_AMT^주문 가능 현금 금액^19^0^7^0^0^0^0
+TOTAL_MNTN_MARG^총 유지 증거금^19^0^7^0^0^0^0
+CASH_MNTN_MARG^현금 유지 증거금^19^0^7^0^0^0^0
+SPMR_TTAM^추가 증거금 총액^19^0^7^0^0^0^0
+SPMR_CASH_AMT^추가 증거금 현금 금액^19^0^7^0^0^0^0
+MARG_GRAD_NAME^증거금 등급 명^40^0^0^0^0^0^0
+SBSN_AMT^대용 금액^19^0^7^0^0^0^0
+CANC_SBSN_ABLE_AMT^해지 대용 가능 금액^19^0^7^0^0^0^0
+STUP_AMT^설정 금액^19^0^7^0^0^0^0
+SBSN_SCRT_PURT_INVT_AMT^대용 증권 순수 투자 금액^19^0^7^0^0^0^0
+PRDY_SBSN_SELN_AMT^전일 대용 매도 금액^19^0^7^0^0^0^0
+TDAY_SBSN_SELN_AMT^당일 대용 매도 금액^19^0^7^0^0^0^0
+SBSN_STUP_SELN_DCRS_AMT^대용 설정 매도 감소 금액^19^0^7^0^0^0^0
+DEAL_ARBT_AMT^매매 차익 금액^19^0^7^0^0^0^0
+MKCL_AFT_SBSN_STUP_AMT^장마감 후 대용 설정 금액^19^0^7^0^0^0^0
+FRCR_SBSN_AMT^외화 대용 금액^20^3^7^0^0^0^0
+FRCR_IO_AMT^외화 입출 금액^19^0^7^0^0^0^0
+NXDY_DEPS_TTAM^익일 예탁 총액^19^0^7^0^0^0^0
+NXDY_DEPS_CASH_AMT^익일 예탁 현금 금액^19^0^7^0^0^0^0
+OPTN_STLM_DFAM_AMT^옵션결제차금금액^19^0^7^0^0^0^0
+FUTS_EXCT_AMT^선물 정산차금 금액^19^0^7^0^0^0^0
+FEE^수수료^19^0^7^0^0^0^0
+OPTN_VLTN_AMT^옵션 평가 금액^19^0^7^0^0^0^0
+UNAM_AMT^미수금 금액^19^0^7^0^0^0^0
+CHECK_AMT^수표 금액^19^0^7^0^0^0^0
+MKCL_AFT_MNRC_AMT^장마감 후 입금 금액^19^0^7^0^0^0^0
+BAL_RMND_FRCR_AMT^잔액 잔고 외화 금액^19^0^7^0^0^0^0
+OPTN_BYOV_AMT^옵션매수금액^19^0^7^0^0^0^0
+OPTN_SELN_AMT^옵션 매도 금액^19^0^7^0^0^0^0
+TR_MARG_CLS_CODE^거래 증거금 구분 코드^2^0^0^0^0^0^0
+MARG_LIMT_AMT^증거금한도금액^19^0^7^0^0^0^0
+PSTN_DELTA_QTY^포지션 델타 수량^19^0^7^0^0^0^0
+PSTN_DELTA_STND_QTY^포지션 델타 기준 수량^19^0^7^0^0^0^0
+QTY_LIMT_EXCS_YN^수량 한도 초과 여부^1^0^0^0^0^0^0
+BASC_DPMN_GRAD_CODE^기본예탁금등급코드^1^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+INVT_TYPE_CODE^투자유형코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_drvt_009r" title="파생상품 계좌고객정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="39" _ulen="31" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1181" _ulen="879" >
+
+DRVT_INVR_TPCD^파생투자자유형코드^2^0^0^0^0^0^0
+FRST_OPNG_DATE^최초개설일자^8^0^0^0^0^0^0
+LAST_OTST_STPL_HLDN_DATE^최종미결제약정보유일자^8^0^0^0^0^0^0
+SCTY_EDCT_CMCO_YN^협회교육이수여부^1^0^0^0^0^0^0
+SCTY_EDCT_CMCO_NO^협회교육이수번호^20^0^0^0^0^0^0
+SCTY_EDCT_CMCO_DATE^협회교육이수일자^8^0^0^0^0^0^0
+DRVT_INVT_EXPC_QLCR_CODE^파생투자경험자격증코드^2^0^0^0^0^0^0
+EXCH_ID^거래소ID^20^0^0^0^0^0^0
+EXCH_MOCK_TR_CMCO_NO^거래소모의거래이수번호^20^0^0^0^0^0^0
+EXCH_MOCK_TR_CMCO_DATE^거래소모의거래이수일자^8^0^0^0^0^0^0
+OCRN_CSNU^발생건수^11^0^7^0^0^0^0
+CUST_GRAD_CODE^고객등급코드^2^0^0^0^0^0^0
+CUST_SCOR^고객점수^8^3^7^0^0^0^0
+UI_RISK_ITEM_SCOR^UI위험항목점수^4^0^7^0^0^0^0
+TOTAL_SCOR^총점수^8^3^7^0^0^0^0
+SCND_SCTY_EDCT_CMCO_DATE^2차협회교육이수일자^8^0^0^0^0^0^0
+SCND_SCTY_EDCT_CMCO_NO^2차협회교육이수번호^20^0^0^0^0^0^0
+EXPI_DATE^만료일자^8^0^0^0^0^0^0
+OPTN_TR_ABLE_YN^옵션거래가능여부^1^0^0^0^0^0^0
+GRP_CODE^그룹코드^1^0^0^0^0^0^0
+HOUR_INTV1^시간간격1^4^0^7^0^0^0^0
+HOUR_INTV2^시간간격2^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="436" _ulen="324" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+INVT_TYPE_CODE^투자유형코드^1^0^0^0^0^0^0
+BYOV_RFUS_ACDN_YN^매수거부사고여부^1^0^0^0^0^0^0
+BASC_DPMN_GRAD_CODE^기본예탁금등급코드^1^0^0^0^0^0^0
+STPL_YN^약정여부^1^0^0^0^0^0^0
+UI_INPR_NAME^UI개별상품명^80^0^0^0^0^0^0
+UI_ACNT_PRNM^UI계좌상품명^60^0^0^0^0^0^0
+BASC_DPMN_TPCD^기본예탁금유형코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
