@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="91005" scrname="환경설정_알림" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,522,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Cont0" vscroll="1" scroll_pos="0,0" ly_vert="0,0,375,522,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<TABLE name="Table0" insidelinecolor="102:255255255" colcount="3" rowcount="6" designorder="1" ly_vert="0,0,375,226,1" >
+					<COL_INFO ly_vert_width="267,85,23" />
+					<ROW_INFO ly_vert_height="29,51,29,26,40,51" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,2,0" bgcolor="066:238239240" line="0,1" caption="체결통보" fontsize="-2" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="체결통보 알림 사용" autofontsize="1" impidxs="" />
+						<CELL cell_ly="1,1,1,1" fgcolor="128:188030030" halign="2" line="0,0" autofontsize="1" impidxs="" />
+						<CELL cell_ly="2,1,2,1" line="1,0" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,2,2,2" bgcolor="066:238239240" line="0,1" caption="장운영정보 알림" fontsize="-2" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,3,0,3" halign="0" line="0,0" caption="장운영 알림 사용" autofontsize="1" impidxs="" />
+						<CELL cell_ly="1,3,1,4" fgcolor="128:188030030" halign="2" line="0,1" autofontsize="1" impidxs="" />
+						<CELL cell_ly="2,3,2,4" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,4,0,4" fgcolor="100:102102102" halign="0" line="0,1" caption="장시작 및 마감 알림 및 사이드카, 서킷브레이크
+발생시 알림" fontsize="-3" autofontsize="1" impidxs="" />
+						<CELL cell_ly="0,5,0,5" halign="0" line="0,1" caption="진동사용" autofontsize="1" impidxs="" />
+						<CELL cell_ly="1,5,1,5" halign="2" line="0,1" autofontsize="1" impidxs="" />
+						<CELL cell_ly="2,5,2,5" autofontsize="1" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+				<IMAGE name="Image4" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="357,42,13,22,1" />
+				<IMAGE name="Image5" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="527,327,13,22,1" />
+				<IMAGE name="Image6" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="527,378,13,22,1" />
+				<IMAGE name="Image7" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="357,131,13,22,1" />
+				<IMAGE name="Image8" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="357,190,13,22,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5711" _ulen="5245" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 환경설정
+' 02. 화면설명 : 환경설정_알림
+' 03. 작    성 : 2020.02.20 길병철
+'-------------------------------------------------------------------------------------------
+'============================================================================
+'체결통보알림사용("alrim.chegyul")
+'사용하지않음("0"),알림음사용("1"),진동+알림음사용("2") - 초기값 "1"
+
+'장운영알림사용("alrim.market")
+'사용하지않음("0"),사용("1") - 초기값 "1"
+
+'장운영알림진동사용("alrim.market_vibration") - 신규
+'사용하지않음("0"),사용("1") - 초기값 "1"
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sChegyulKey 		'체결통보알림사용
+Dim g_sAlrimMarketKey 		'장운영알림사용
+Dim g_sAlrimMarketVibKey 	'장운영알림진동사용
+
+Dim G_SCREENCHOICE_FILE 	'선택화면팝업
+
+Dim DEF_ROW_CHEGYULINFO
+	DEF_ROW_CHEGYULINFO = 1
+Dim DEF_ROW_MRKTINFO
+	DEF_ROW_MRKTINFO = 3
+Dim DEF_ROW_VIBRATE
+	DEF_ROW_VIBRATE	= 4
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' 환경설정값리턴함수
+'============================================================================
+Function GetConfigData(sKey, nRow, nCol)
+	Dim sValue
+	sValue = Form.GetEnvData(sKey)
+	
+	if sValue == null or Trim(sValue) == "" then
+		sValue = "1" '기본값 On
+	end if
+	
+	if sKey == g_sChegyulKey then
+		if sValue == "0" then 
+			sValue = "미사용"
+		elseif sValue == "1" then 
+			sValue = "알림음"
+		else
+			sValue = "진동+알림음"
+		end if
+	else
+		if sValue == "1" then 'On
+			sValue = "사용"
+		else 'Off
+			sValue = "미사용"
+		end if
+	end if
+	
+	Cont0.Table0.SetCellString( nRow, nCol, sValue )
+	
+	if sValue == "미사용" then
+		Cont0.Table0.SetCellFgColor( nRow, nCol, "4" )
+	else
+		Cont0.Table0.SetCellFgColor( nRow, nCol, "128" )
+	end if
+End Function
+
+'============================================================================
+' 환경설정값세팅함수
+'============================================================================
+Function SetConfigData(sKey, nRow, nCol)
+	Dim sValue
+	sValue = Cont0.Table0.GetCellString( nRow, nCol )
+	
+	if sKey == g_sChegyulKey then
+		if sValue == "미사용" then 
+			sValue = "0"
+		elseif sValue == "알림음" then 
+			sValue = "1"
+		else
+			sValue = "2"
+		end if
+	else
+		if sValue == "사용" then
+			sValue = "0"
+		else
+			sValue = "1"
+		end if
+	end if
+	
+	Form.SetEnvData(1, sKey, sValue)
+End Function 
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_sChegyulKey 		= "alrim.chegyul"
+	g_sAlrimMarketKey 	= "alrim.market"
+	g_sAlrimMarketVibKey 	= "alrim.market_vibration"
+	G_SCREENCHOICE_FILE 	= "nhetc91005_p3"
+	
+
+	GetConfigData(g_sChegyulKey, 		DEF_ROW_CHEGYULINFO, 1)
+	GetConfigData(g_sAlrimMarketKey, 	DEF_ROW_MRKTINFO, 1)
+	GetConfigData(g_sAlrimMarketVibKey, 	DEF_ROW_VIBRATE, 1)	
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == G_SCREENCHOICE_FILE then
+		if sRet == g_sChegyulKey then
+			GetConfigData(g_sChegyulKey, DEF_ROW_CHEGYULINFO, 1)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Cont0_Table0_OnClick(lRow , lColumn)
+	'색상있는 영역 클릭시에만 이벤트 처리
+	If lColumn > 0 Then
+		if lRow == DEF_ROW_CHEGYULINFO then '체결통보알림사용
+			Form.OpenPopup(G_SCREENCHOICE_FILE , g_sChegyulKey , "")
+		
+		elseif lRow == DEF_ROW_MRKTINFO then '장운영알림사용
+			SetConfigData(g_sAlrimMarketKey, lRow, 1)
+			GetConfigData(g_sAlrimMarketKey, lRow, 1)
+		
+		elseif lRow == DEF_ROW_VIBRATE then '장운영알림진동사용
+			SetConfigData(g_sAlrimMarketVibKey, lRow, 1)
+			GetConfigData(g_sAlrimMarketVibKey, lRow, 1)
+		
+		end if
+	End If
+End Sub
+
+
+'============================================================================
+' 체결통보알림사용
+'============================================================================
+Sub Cont0_Image4_OnClick()
+	Form.OpenPopup(G_SCREENCHOICE_FILE , g_sChegyulKey , "")
+End Sub
+
+'============================================================================
+' 장운영알림사용
+'============================================================================
+Sub Cont0_Image7_OnClick()
+	SetConfigData(g_sAlrimMarketKey, DEF_ROW_MRKTINFO, 1)
+	GetConfigData(g_sAlrimMarketKey, DEF_ROW_MRKTINFO, 1)
+End Sub
+
+'============================================================================
+' 장운영알림진동사용
+'============================================================================
+Sub Cont0_Image8_OnClick()
+	SetConfigData(g_sAlrimMarketVibKey, DEF_ROW_VIBRATE, 1)
+	GetConfigData(g_sAlrimMarketVibKey, DEF_ROW_VIBRATE, 1)
+End Sub
+
+'============================================================================
+
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="02030" scrname="해외주식 고유 잔고" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,563,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,9,39,39,1" />
+		<FORMTAB name="fmtab0" tabcount="1" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,151,375,412,1" >
+			<PAGE name="page1" caption="해외주식잔고(종가)" linkfile="nbnts02030_t1" loadingtype="1" />
+		</FORMTAB>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="4" rowcount="3" transmode="1" designorder="1" ly_vert="-1,56,376,94,1" >
+			<COL_INFO ly_vert_width="102,86,105,83" />
+			<ROW_INFO ly_vert_height="32,31,31" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,3,0" caption="해외주식 상품 자산 종합" fontstyle="01" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" bgcolor="039:242242242" halign="0" caption="해외주식매입금(￦)" fontsize="-4" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" import="0,2,0" halign="2" fontsize="-3" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" bgcolor="039:242242242" halign="0" caption="해외주식평가손익(￦)" fontsize="-4" autofontsize="1" impidxs="" />
+				<CELL cell_ly="3,1,3,1" import="0,2,2" halign="2" fontsize="-3" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="039:242242242" halign="0" caption="해외주식평가(￦)" fontsize="-4" autofontsize="1" impidxs="" />
+				<CELL cell_ly="1,2,1,2" import="0,2,1" halign="2" fontsize="-3" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,2,2,2" bgcolor="039:242242242" halign="0" caption="해외주식평가손익률(%)" fontsize="-4" autofontsize="1" impidxs="" />
+				<CELL cell_ly="3,2,3,2" import="0,2,3" halign="2" fontsize="-3" mask="0,0,,,0,,2,1,1,0,0" plusminuscolor="1" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="edtFundCd" halign="1" imetype="1" maxlength="4" minlength="0" ly_vert="5,8,58,39,1" />
+		<BUTTON name="btnFncd" btnimage="btn_etc20.9" ly_vert="66,8,39,39,1" />
+		<LABEL name="lblFundNm" border="1" ly_vert="110,8,211,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3171" _ulen="3029" >
+'============================================================================
+Dim g_szAcno
+Dim g_szAsno
+Dim g_szFncd
+'============================================================================
+' 펀드코드 가져오기 컨트롤러 설정
+'============================================================================
+Sub Form_OnFormInitBefore()
+	edtFundCd.setFundCd()
+	edtFundCd.setFundNmCtl("lblFundNm")
+	g_szFncd = edtFundCd.caption
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+
+	if len(trim(g_szFncd)) > 0 Then			
+		Call_Tran()
+	End if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	' 상단 해외주식자산 평가
+	DATAMANAGER.SetDataValue( false, "obtro_oder_303r", "InBlock1", "FNCD"					, 0 , g_szFncd) 
+	DATAMANAGER.SetDataValue( false, "obtro_oder_303r", "InBlock1", "PROD_PSTN_CLS_CODE"		, 0 , "1" )
+End Sub
+'============================================================================
+Sub Call_Tran()
+	
+	' 상단 해외주식자산 평가
+	DATAMANAGER.RequestTranData("obtro_oder_303r")
+
+	if Cint(fmtab0.currenttab) = 0 then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "REQUEST", g_szFncd)
+	else
+		Form.ShowAlert("Error", "유효하지않은 탭입니다.")
+		exit sub
+	end if
+
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	g_szFncd = edtFundCd.caption
+	Call_Tran()
+End Sub
+'============================================================================
+' 탭 변경시
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	Call_Tran()	
+End Sub
+
+'============================================================================
+' 펀드코드 변경시 
+'============================================================================
+Sub edtFundCd_OnEditComplete()
+	
+	If Len(edtFundCd.caption) < 1 Then
+		g_szFncd = ""
+	End if
+	
+	g_szFncd = edtFundCd.caption
+	Call_Tran()
+End Sub
+'============================================================================
+' 돋보기 클릭
+'============================================================================
+Sub btnFncd_OnClick()
+	Form.OpenFramePopup("nhnts00001_p1" , "", "")
+End Sub
+'============================================================================
+' 돋보기 리턴
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	
+	if sKeyName = "FUNDINFO" then
+		szFundData = Split(sRet, "★")
+		
+		if UBOUND(szFundData) > 0 then
+			edtFundCd.caption = szFundData(0)
+			edtFundCd_OnEditComplete()
+		end if 
+	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	
+	if szTranID == "obtro_oder_303r" then
+		'데이터 없음
+		if szErrCode = "5820" then
+			' Set 0
+			Table0.SetCellString(1, 1, 0)
+			Table0.SetCellString(1, 3, 0)
+			Table0.SetCellString(2, 1, 0)
+			Table0.SetCellString(2, 3, 0)
+		end if
+	end if
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtro_oder_303r" trcode="obtro_oder_303r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtro_oder_303r" title="해외주식 고유 하단 잔고(MTS)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="101" _ulen="75" >
+
+FNCD^펀드코드^4^0^0^0^0^0^0
+PROD_PSTN_CLS_CODE^상품포지션구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="1153" _ulen="853" >
+
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+ISNM^종목명^100^0^0^0^0^0^0
+HLDN_QTY^보유수량^19^0^7^0^0^0^0
+SELN_ABLE_QTY^매도가능수량^19^0^7^0^0^0^0
+AVRG_UNPR^평균단가^26^6^7^0^0^0^0
+VLTN_PRLS_CAMT^평가손익통화금액^20^4^7^0^0^0^0
+VLTN_ERT^평가수익률^11^4^7^0^0^0^0
+PSNT_PRC^현재가격^20^6^7^0^0^0^0
+PRDY_VRSS_RSFL_CRNC_PRC^전일대비등락통화가격^20^8^7^0^0^0^0
+BYOV_CAMT^매수통화금액^20^4^7^0^0^0^0
+FRCR_VLTN_AMT^외화평가금액^20^3^7^0^0^0^0
+EXRT^환율^12^4^7^0^0^0^0
+OVRS_STCK_SYMB_ISCD^해외주식심볼종목코드^12^0^0^0^0^0^0
+OVRS_EXCH_VNDR_IDNO^해외거래소벤더식별번호^6^0^0^0^0^0^0
+DCPN_LOEQ_CIPH^소수점이하자릿수^5^0^7^0^0^0^0
+BYOV_UNIT_QTY^매수단위수량^19^0^7^0^0^0^0
+SELN_UNIT_QTY^매도단위수량^19^0^7^0^0^0^0
+SELN_CNTG_QTY^매도체결수량^19^0^7^0^0^0^0
+BYOV_CNTG_QTY^매수체결수량^19^0^7^0^0^0^0
+PROD_PSTN_CLS_CODE^상품포지션구분코드^1^0^0^0^0^0^0
+OVRS_STCK_RSFL_TPCD^해외주식등락유형코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="195" _ulen="149" >
+
+WNCR_ACBK_AMT^원화장부금액^19^0^7^0^0^0^0
+WNCR_VLTN_AMT^원화평가금액^19^0^7^0^0^0^0
+WNCR_VLTN_PRLS_AMT^원화평가손익금액^19^0^7^0^0^0^0
+PLRT^손익률^23^6^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="40" _ulen="32" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

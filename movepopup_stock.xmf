@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="9999" scrname="MovePopup" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,190,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="-1,2,376,639,1" />
+		<CONTAINER name="Container1" scroll_pos="0,0" ly_vert="0,0,380,214,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<LABEL name="Label5" caption="  " transmode="0" ly_vert="0,0,380,204,1" />
+				<BUTTON name="Button0" enable="0" visible="0" fgcolor="013:051051051" fontsize="-5" fontstyle="01" btnimage="alpha" ly_vert="2,3,66,25,0" />
+				<BUTTON name="Button1" enable="0" visible="0" fgcolor="013:051051051" fontsize="-5" fontstyle="01" btnimage="alpha" ly_vert="66,3,66,25,0" />
+				<BUTTON name="Button2" enable="0" visible="0" fgcolor="013:051051051" fontsize="-5" fontstyle="01" btnimage="alpha" ly_vert="120,3,66,25,0" />
+				<FORMTAB name="FormTab0" tabcount="3" tabheadheight="0" usepg="1" ly_vert="3,30,289,155,1" >
+					<PAGE name="page001829" caption="차트" linkfile="movepopup_stock_t2" />
+					<PAGE name="page007130" caption="상세" linkfile="movepopup_stock_t1" />
+					<PAGE name="page004734" caption="뉴스" linkfile="movepopup_stock_t3" />
+				</FORMTAB>
+				<LABEL name="page" fgcolor="146:124124124" fontsize="-10" caption="●○○" halign="1" ly_vert="93,173,100,25,1" />
+				<BUTTON name="Button3" caption="현재가" fgcolor="013:051051051" btnimage="btn_03.9" ly_vert="300,30,70,29,1" />
+				<BUTTON name="Button4" caption="차트" fgcolor="013:051051051" btnimage="btn_03.9" ly_vert="300,61,70,29,1" />
+				<BUTTON name="Button5" caption="뉴스" fgcolor="013:051051051" btnimage="btn_03.9" ly_vert="300,92,70,29,1" />
+				<BUTTON name="Button6" caption="매수" fgcolor="145:255255255" btnimage="btn_05.9" ly_vert="300,123,70,29,1" />
+				<BUTTON name="Button7" caption="매도" fgcolor="145:255255255" btnimage="btn_06.9" ly_vert="300,154,70,29,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5776" _ulen="5658" >
+Dim g_szItemCode,g_szItemMarket
+Dim g_szSelectedItem
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+'	szMk = "J"
+'	szCd = "005930"
+	
+'	Request_113r()
+'	Request_001r()
+'	Request_002r()
+	
+
+	
+End Sub
+
+'============================================================================
+Sub Request_113r() '대표시장
+	
+	DATAMANAGER.SetDataValue(0, "ohhts_1001_113r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0 , szMk)
+	DATAMANAGER.SetDataValue(0, "ohhts_1001_113r", "InBlock1", "FID_INPUT_ISCD", 0 , szCd)
+	DATAMANAGER.RequestTranData("ohhts_1001_113r")
+
+End Sub
+'============================================================================
+Sub Request_001r()
+
+	DATAMANAGER.SetDataValue(0, "ohhts_1001_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0 , szMk)
+	DATAMANAGER.SetDataValue(0, "ohhts_1001_001r", "InBlock1", "FID_INPUT_ISCD", 0 , szCd)
+	DATAMANAGER.RequestTranData("ohhts_1001_001r")
+
+End Sub
+
+'============================================================================
+Sub Request_002r() '기관/외인 데이터
+	
+	DATAMANAGER.SetDataValue(0, "ohhts_1086_002r", "InBlock1", "FID_INPUT_ISCD", 0 , szCd)
+	DATAMANAGER.RequestTranData("ohhts_1086_002r")
+
+End Sub
+'============================================================================
+Sub Request_indexName()
+
+	szIndexName  = Form.GetItemCodeInfo( szCd , "indexname")
+	'Container0.Table0.SetCellString(0, 2, szIndexName)
+	Container1.Button1.caption = "#" & szIndexName
+End Sub
+
+
+'============================================================================
+Sub Request_Scale()
+	
+	scalecode =  Form.GetItemCodeInfo( szCd, "scalecode" )
+		
+	if scalecode == "0" or scalecode == 0 then
+		szScalecode = "제외"
+	elseif scalecode == "1" or scalecode == 1 then
+		szScalecode = "대형주"
+	elseif scalecode == "2" or scalecode == 2 then
+		szScalecode = "중형주"
+	elseif scalecode == "3" or scalecode == 3 then
+		szScalecode = "소형주"
+	else
+		szScalecode = ""
+	end if
+	
+	'Container0.Table0.SetCellString(0, 4, szScalecode)
+	Container1.Button2.caption = "#" & szScalecode
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID = "ohhts_1001_113r" then
+		szMk_Kor_Name = DATAMANAGER.GetDataValue(0, "ohhts_1001_113r", "OutBlock1", "FID_RPRS_MRKT_KOR_NAME" , 0)
+		Container1.Button0.caption = "#" & szMk_Kor_Name
+		
+		if szMk_Kor_Name == "ETF" or szMk_Kor_Name =="ETN" or szMk_Kor_Name == "ELW" then
+			Container1.Button0.visible = true
+			Container1.Button1.visible = false
+			Container1.Button2.visible = false
+			
+			
+		elseif szMk_Kor_Name == "" then
+			Container1.Button0.visible = false
+			Container1.Button1.visible = false
+			Container1.Button2.visible = false
+			
+		
+		else
+			Container1.Button0.visible = true
+			Container1.Button1.visible = true
+			Container1.Button2.visible = true
+			
+			
+		
+			
+			Request_Scale()
+			Request_indexName()
+		end if
+	
+	elseif szTranID = "ohhts_1001_001r" then
+	
+		szBstp_Kor_Name = DATAMANAGER.GetDataValue(0, "ohhts_1001_001r", "OutBlock1", "FID_RPRS_BSTP_KOR_ISNM" , 0)
+				
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Container1_FormTab0_OnTabChanged(nCurrentTab)
+	if nCurrentTab == 0 or nCurrentTab == "0" then
+		Container1.page.caption = "●○○"
+	elseif nCurrentTab == 1 or nCurrentTab == "1" then
+		Container1.page.caption = "○●○"
+	elseif nCurrentTab == 2 or nCurrentTab == "2" then
+		Container1.page.caption = "○○●"
+	end if
+	
+	Form.triggerEvent("FormTab0." & Container1.FormTab0.currenttabpageid, "INIT_CODE", g_szItemCode)
+	
+	
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "SelectCode" then
+		g_szItemCode = sParam
+		g_szSelectedItem = sParam 
+		Form.triggerEvent("FormTab0." & Container1.FormTab0.currenttabpageid, "INIT_CODE", sParam)
+		
+		
+		'상단 업종/시장 조회
+		szMk = Form.GetItemCodeInfo(sParam, "market")
+		szCd = sParam
+		'Form.ShowAlert(sParam, szMk)
+'		if szMk == "F" or szMk == "O" or szMk == "MF" then
+'			Container1.Button0.visible = false
+'			Container1.Button1.visible = false
+'			Container1.Button2.visible = false
+'		else	
+'			Container1.Button0.visible = true
+'			Container1.Button1.visible = true
+'			Container1.Button2.visible = true
+			
+			Request_113r()
+			Request_001r()
+			Request_002r()
+		'end if
+		
+	end if
+		
+End Sub
+
+'============================================================================
+Sub Container1_Button3_OnClick() '현재가
+
+	Form.OpenScreen("11000" , g_szSelectedItem & "★" & "0") 
+	
+End Sub
+
+'============================================================================
+Sub Container1_Button4_OnClick() '차트
+
+	Form.OpenScreen("13000" , g_szSelectedItem) 
+
+End Sub
+
+'============================================================================
+Sub Container1_Button5_OnClick() '뉴스
+
+	Form.OpenScreen("44000" , g_szSelectedItem ) 
+
+End Sub
+
+'============================================================================
+Sub Container1_Button6_OnClick() '매도
+
+	Form.OpenScreen("12000" , "기타" &  "★" & "1" &  "★"& g_szSelectedItem )
+
+
+End Sub
+
+'============================================================================
+Sub Container1_Button7_OnClick() '매수
+
+	Form.OpenScreen("12000" , "기타" &  "★" & "0" &  "★"& g_szSelectedItem ) 
+
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_1001_113r" trcode="ohhts_1001_113r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_1001_001r" trcode="ohhts_1001_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_1086_002r" trcode="ohhts_1086_002r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="FID_INPUT_COND_MRKT_DIV_CODE" idx="0" defconst="V" />
+					<FIELD name="FID_INPUT_COND_SCR_DIV_CODE" idx="1" defconst="1086" />
+				</TRBLOCK>
+			</TRAN>
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_1001_113r" title="시장명&배당락" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="126" _ulen="102" >
+
+FID_RPRS_MRKT_KOR_NAME^FID대표시장한글명^40^0^0^824^1000^0^0
+FLNG_CLS_CODE^락구분코드^2^0^0^1905^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1001_001r" title="현재가(시세&상세내역)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="149" toutblk="OutBlock1" _ulen="117" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="3850" _ulen="3126" >
+
+FID_ISSU_STAT_CLS_CODE^FID종목상태구분코드^2^0^0^6016^1000^0^0
+FID_MARG_RATE^FID증거금비율^9^2^7^144^1000^0^0
+FID_RPRS_MRKT_KOR_NAME^FID대표시장한글명^40^0^0^824^1000^0^0
+FID_NW_HPRC_LPRC_CLCD^FID신고가저가구분코드^10^0^0^6521^1000^0^0
+FID_RPRS_BSTP_KOR_ISNM^FID대표업종한글종목명^40^0^0^822^1000^0^0
+FID_TMPR_SUSP_YN^FID임시정지여부^2^0^0^6167^1000^0^0
+FID_OPRC_RANG_EXTS_YN^FID시가범위연장여부^2^0^0^6168^1000^0^0
+FID_CLPR_RANG_EXTS_YN^FID종가범위연장여부^2^0^0^6169^1000^0^0
+FID_CRDT_ABLE_YN^FID신용가능여부^2^0^0^6378^1000^0^0
+FID_GRMN_RATE_CLS_CODE^FID보증금비율구분코드^5^0^0^6134^1000^0^0
+FID_ELW_PBLC_YN^FIDELW발행여부^2^0^0^6135^1000^0^0
+FID_STCK_PRPR^FID주식현재가^13^0^7^4^1000^0^0
+FID_PRDY_VRSS^FID전일대비^13^0^7^5^1000^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^6^1000^0^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^7^1000^0^0
+FID_ACML_VOL^FID누적거래량^19^0^7^14^1000^0^0
+FID_PRDY_VRSS_VOL_RATE^FID전일대비거래량비율^9^2^7^15^1000^0^0
+FID_PRDY_SMNS_HOUR_VOL_RATE^FID전일동일시간거래량비율^9^2^7^1050^1000^0^0
+FID_OPRC^FID시가^13^0^7^17^1000^0^0
+FID_HPRC^FID고가^13^0^7^18^1000^0^0
+FID_LPRC^FID저가^13^0^7^19^1000^0^0
+FID_MXPR^FID상한가^13^0^7^26^1000^0^0
+FID_LLAM^FID하한가^13^0^7^27^1000^0^0
+FID_SDPR^FID기준가^13^0^7^24^1000^0^0
+FID_WGHN_AVRG_PRC^FID가중평균가격^9^2^7^38^1000^0^0
+FID_SSTS_CNTG_QTY^FID공매도체결수량^13^0^7^410^1000^0^0
+FID_FRGN_EHRT^FID외국인소진율^9^2^7^41^1000^0^0
+FID_WHOL_FNCG_RMND_RATE^FID전체융자잔고비율^9^2^7^2757^1000^0^0
+FID_FRGN_HLDN_QTY_ICDC^FID외국인보유수량증감^13^0^7^2650^1000^0^0
+FID_PVT_SCND_DMRS^FID피벗2차디저항^13^0^7^48^1000^0^0
+FID_PVT_FST_DMRS^FID피벗1차디저항^13^0^7^49^1000^0^0
+FID_PVT_PONT^FID피벗포인트^13^0^7^50^1000^0^0
+FID_PVT_FST_DMSP^FID피벗1차디지지^13^0^7^51^1000^0^0
+FID_PVT_SCND_DMSP^FID피벗2차디지지^13^0^7^52^1000^0^0
+FID_DMRS^FID디저항^13^0^7^296^1000^0^0
+FID_DMSP^FID디지지^13^0^7^295^1000^0^0
+FID_FCAM^FID액면가^14^3^7^39^1000^0^0
+FID_SSPR^FID대용가^13^0^7^25^1000^0^0
+FID_ASPR_UNIT^FID호가단위^13^0^7^6166^1000^0^0
+FID_DEAL_QTY_UNIT^FID매매수량단위^13^0^7^11^1000^0^0
+FID_CPFN^FID자본금^19^0^7^29^1000^0^0
+FID_LSTN_STCN^FID상장주수^19^0^7^30^1000^0^0
+FID_AVLS^FID시가총액^19^0^7^28^1000^0^0
+FID_PRDY_AVLS_RANK^FID전일시가총액순위^5^0^7^490^1000^0^0
+FID_FRGN_HLDN_QTY^FID외국인보유수량^13^0^7^149^1000^0^0
+FID_PER^FIDPER^9^2^7^42^1000^0^0
+FID_PBR^FIDPBR^9^2^7^43^1000^0^0
+FID_FNAF_EPS^FID재무EPS^26^2^7^210^1000^0^0
+FID_FNAF_BPS^FID재무BPS^26^2^7^212^1000^0^0
+FID_DRYY_HGPR^FID연중최고가^13^0^7^157^1000^0^0
+FID_DRYY_HGPR_DATE^FID연중최고가일자^8^0^0^352^1000^0^0
+FID_DRYY_HGPR_RATE^FID연중최고가비율^9^2^7^6071^1000^0^0
+FID_DRYY_LWPR^FID연중최저가^13^0^7^158^1000^0^0
+FID_DRYY_LWPR_RATE^FID연중최저가비율^9^2^7^6072^1000^0^0
+FID_DRYY_LWPR_DATE^FID연중최저가일자^8^0^0^353^1000^0^0
+FID_52_WEEK_HGPR^FID52주최고가^13^0^7^32^1000^0^0
+FID_52_WEEK_HGPR_RATE^FID52주최고가비율^9^2^7^33^1000^0^0
+FID_52_WEEK_HGPR_DATE^FID52주최고가일자^8^0^0^34^1000^0^0
+FID_52_WEEK_LWPR^FID52주최저가^13^0^7^35^1000^0^0
+FID_52_WEEK_LWPR_RATE^FID52주최저가비율^9^2^7^36^1000^0^0
+FID_52_WEEK_LWPR_DATE^FID52주최저가일자^8^0^0^37^1000^0^0
+FID_SSTS_YN^FID공매도여부^2^0^0^6141^1000^0^0
+FID_SHRN_ISCD^FID단축종목코드^9^0^0^1^1000^0^0
+FID_SLTR_YN^FID정리매매여부^2^0^0^965^1000^0^0
+FID_INVT_EPMD_CNTT^FID투자유의내용^50^0^0^350^1000^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^2^1000^0^0
+FID_STAC_MONTH^FID결산월^2^0^0^44^1000^0^0
+FID_PRDY_VOL^FID전일거래량^19^0^7^133^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_1086_002r" title="종목별 외국인/기관 상세(추정)" realdata="0" attribute="1" dessvr="1" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="232" toutblk="OutBlock1" _ulen="180" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_COND_SCR_DIV_CODE^FID입력조건화면분류코드^6^0^0^9101^9999^0^0
+FID_INPUT_ISCD^FID입력종목코드^12^0^0^9030^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="1" inout="out" _len="5236" _ulen="4000" >
+
+FID_PRSN_SELN_VOL^FID개인매도거래량^19^0^7^1600^1012^0^0
+FID_PRSN_SHNU_VOL^FID개인매수거래량^19^0^7^1601^1012^0^0
+FID_PRSN_SELN_TR_PBMN^FID개인매도거래대금^19^0^7^1602^1012^0^0
+FID_PRSN_SHNU_TR_PBMN^FID개인매수거래대금^19^0^7^1603^1012^0^0
+FID_PRSN_NTBY_VOL^FID개인순매수거래량^19^0^7^1636^1012^0^0
+FID_PRSN_NTBY_TR_PBMN^FID개인순매수거래대금^19^0^7^1643^1012^0^0
+FID_FRGN_SELN_VOL^FID외국인매도거래량^19^0^7^1604^1012^0^0
+FID_FRGN_SHNU_VOL^FID외국인매수거래량^19^0^7^1605^1012^0^0
+FID_FRGN_SELN_TR_PBMN^FID외국인매도거래대금^19^0^7^1606^1012^0^0
+FID_FRGN_SHNU_TR_PBMN^FID외국인매수거래대금^19^0^7^1607^1012^0^0
+FID_FRGN_NTBY_VOL^FID외국인순매수거래량^19^0^7^201^1012^0^0
+FID_FRGN_NTBY_TR_PBMN^FID외국인순매수거래대금^19^0^7^1644^1012^0^0
+FID_ORGN_SELN_VOL^FID기구매도거래량^19^0^7^1608^1012^0^0
+FID_ORGN_SHNU_VOL^FID기구매수거래량^19^0^7^1609^1012^0^0
+FID_ORGN_SELN_TR_PBMN^FID기구매도거래대금^19^0^7^1610^1012^0^0
+FID_ORGN_SHNU_TR_PBMN^FID기구매수거래대금^19^0^7^1611^1012^0^0
+FID_ORGN_NTBY_VOL^FID기구순매수거래량^19^0^7^202^1012^0^0
+FID_ORGN_NTBY_TR_PBMN^FID기구순매수거래대금^19^0^7^1645^1012^0^0
+FID_SCRT_SELN_VOL^FID증권매도거래량^19^0^7^1652^1012^0^0
+FID_SCRT_SHNU_VOL^FID증권매수거래량^19^0^7^1653^1012^0^0
+FID_SCRT_SELN_TR_PBMN^FID증권매도거래대금^19^0^7^1654^1012^0^0
+FID_SCRT_SHNU_TR_PBMN^FID증권매수거래대금^19^0^7^1655^1012^0^0
+FID_SCRT_NTBY_VOL^FID증권순매수거래량^19^0^7^1656^1012^0^0
+FID_SCRT_NTBY_TR_PBMN^FID증권순매수거래대금^19^0^7^1657^1012^0^0
+FID_INSU_SELN_VOL^FID보험매도거래량^19^0^7^1616^1012^0^0
+FID_INSU_SHNU_VOL^FID보험매수거래량^19^0^7^1617^1012^0^0
+FID_INSU_SELN_TR_PBMN^FID보험매도거래대금^19^0^7^1618^1012^0^0
+FID_INSU_SHNU_TR_PBMN^FID보험매수거래대금^19^0^7^1619^1012^0^0
+FID_INSU_NTBY_VOL^FID보험순매수거래량^19^0^7^1638^1012^0^0
+FID_INSU_NTBY_TR_PBMN^FID보험순매수거래대금^19^0^7^1647^1012^0^0
+FID_IVTR_SELN_VOL^FID투자신탁매도거래량^19^0^7^1624^1012^0^0
+FID_IVTR_SHNU_VOL^FID투자신탁매수거래량^19^0^7^1625^1012^0^0
+FID_IVTR_SELN_TR_PBMN^FID투자신탁매도거래대금^19^0^7^1626^1012^0^0
+FID_IVTR_SHNU_TR_PBMN^FID투자신탁매수거래대금^19^0^7^1627^1012^0^0
+FID_IVTR_NTBY_VOL^FID투자신탁순매수거래량^19^0^7^1640^1012^0^0
+FID_IVTR_NTBY_TR_PBMN^FID투자신탁순매수거래대금^19^0^7^1649^1012^0^0
+FID_PE_FUND_SELN_VOL^FID사모펀드매도거래량^19^0^7^1795^1012^0^0
+FID_PE_FUND_SHNU_VOL^FID사모펀드매수거래량^19^0^7^1797^1012^0^0
+FID_PE_FUND_SELN_TR_PBMN^FID사모펀드매도거래대금^19^0^7^1794^1012^0^0
+FID_PE_FUND_SHNU_TR_PBMN^FID사모펀드매수거래대금^19^0^7^1796^1012^0^0
+FID_PE_FUND_NTBY_VOL^FID사모펀드순매수거래량^19^0^7^1799^1012^0^0
+FID_PE_FUND_NTBY_TR_PBMN^FID사모펀드순매수거래대금^19^0^7^1798^1012^0^0
+FID_BANK_SELN_VOL^FID은행매도거래량^19^0^7^1620^1012^0^0
+FID_BANK_SHNU_VOL^FID은행매수거래량^19^0^7^1621^1012^0^0
+FID_BANK_SELN_TR_PBMN^FID은행매도거래대금^19^0^7^1622^1012^0^0
+FID_BANK_SHNU_TR_PBMN^FID은행매수거래대금^19^0^7^1623^1012^0^0
+FID_BANK_NTBY_VOL^FID은행순매수거래량^19^0^7^1639^1012^0^0
+FID_BANK_NTBY_TR_PBMN^FID은행순매수거래대금^19^0^7^1648^1012^0^0
+FID_MRBN_SELN_VOL^FID종금매도거래량^19^0^7^1628^1012^0^0
+FID_MRBN_SHNU_VOL^FID종금매수거래량^19^0^7^1629^1012^0^0
+FID_MRBN_SELN_TR_PBMN^FID종금매도거래대금^19^0^7^1630^1012^0^0
+FID_MRBN_SHNU_TR_PBMN^FID종금매수거래대금^19^0^7^1631^1012^0^0
+FID_MRBN_NTBY_VOL^FID종금순매수거래량^19^0^7^1641^1012^0^0
+FID_MRBN_NTBY_TR_PBMN^FID종금순매수거래대금^19^0^7^1650^1012^0^0
+FID_FUND_SELN_VOL^FID기금매도거래량^19^0^7^1612^1012^0^0
+FID_FUND_SHNU_VOL^FID기금매수거래량^19^0^7^1613^1012^0^0
+FID_FUND_SELN_TR_PBMN^FID기금매도거래대금^19^0^7^1614^1012^0^0
+FID_FUND_SHNU_TR_PBMN^FID기금매수거래대금^19^0^7^1615^1012^0^0
+FID_FUND_NTBY_VOL^FID기금순매수거래량^19^0^7^1637^1012^0^0
+FID_FUND_NTBY_TR_PBMN^FID기금순매수거래대금^19^0^7^1646^1012^0^0
+FID_ETC_ORGT_SELN_VOL^FID기타단체매도거래량^19^0^7^1834^1012^0^0
+FID_ETC_ORGT_SHNU_VOL^FID기타단체매수거래량^19^0^7^1832^1012^0^0
+FID_ETC_ORGT_SELN_TR_PBMN^FID기타단체매도거래대금^19^0^7^1835^1012^0^0
+FID_ETC_ORGT_SHNU_TR_PBMN^FID기타단체매수거래대금^19^0^7^1833^1012^0^0
+FID_ETC_ORGT_NTBY_VOL^FID기타단체순매수거래량^19^0^7^1828^1012^0^0
+FID_ETC_ORGT_NTBY_TR_PBMN^FID기타단체순매수거래대금^19^0^7^1829^1012^0^0
+FID_ETC_CORP_SELN_VOL^FID기타법인매도거래량^19^0^7^1789^1012^0^0
+FID_ETC_CORP_SHNU_VOL^FID기타법인매수거래량^19^0^7^1791^1012^0^0
+FID_ETC_CORP_SELN_TR_PBMN^FID기타법인매도거래대금^19^0^7^1788^1012^0^0
+FID_ETC_CORP_SHNU_TR_PBMN^FID기타법인매수거래대금^19^0^7^1790^1012^0^0
+FID_ETC_CORP_NTBY_VOL^FID기타법인순매수거래량^19^0^7^1793^1012^0^0
+FID_ETC_CORP_NTBY_TR_PBMN^FID기타법인순매수거래대금^19^0^7^1792^1012^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

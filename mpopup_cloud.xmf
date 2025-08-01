@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90150" scrname="ID선택 안내팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="GridBank" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,639,1" />
+		<IMAGE name="Image4" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBG" imgpath="popup_bg.9" ly_vert="0,360,375,300,1" />
+		<BUTTON name="BtnReuse" enable="0" visible="0" caption="확인" fgcolor="320:246247248" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="-2,597,378,51,0" />
+		<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="1" rowcount="8" outline="0000" designorder="1" ly_vert="0,375,376,127,1" >
+			<COL_INFO ly_vert_width="376" />
+			<ROW_INFO ly_vert_height="1,23,10,17,35,20,20,1" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="334:034034034" line="0,0" fontsize="1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,2" fgcolor="334:034034034" line="0,0" caption="인증서를 연결할 ID를 선택해주세요." fontsize="1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" fontsize="1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="321:115118124" line="0,0" fontsize="1" impidxs="" />
+				<CELL cell_ly="0,5,0,5" fgcolor="321:115118124" line="0,0" fontsize="1" impidxs="" />
+				<CELL cell_ly="0,6,0,6" line="0,0" impidxs="" />
+				<CELL cell_ly="0,7,0,7" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<PANNEL name="Pannel0" ly_vert="1,415,373,56,1" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" ly_vert="20,4,331,44,1" />
+				<LABEL name="Label0" halign="1" ly_vert="20,12,330,28,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="56" gap="5" >
+				<CELL name="Label0" />
+				<CELL name="Image0" />
+			</CARD_INFO>
+		</PANNEL>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2458" _ulen="2416" >
+'============================================================================
+' 01. 화 면 명 : ID선택 팝업
+' 02. 화면설명 :
+' 03. 작    성 : 
+'============================================================================
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_nSaveIndex
+g_nSaveIndex = -1
+
+Dim g_sLabelID
+g_sLabelID = ""
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()
+	
+	'szData = "pedro429" & "♥" & "pedro430" '& "♥" & "pedro431"  & "♥" & "pedro429" & "♥" & "pedro430" '& "♥" & "pedro431" & "♥" & "pedro430" & "♥" & "pedro431" 
+	
+	sAcntList = Split(szData, "♥")
+	
+	Pannel0.rowcount = 0
+	
+	if Ubound(sAcntList) > 0 then
+		
+		Pannel0.rowcount = Cint(#sAcntList)
+		
+		if Cint(#sAcntList) > 5 then
+			nFitSize = 5
+		else
+			nFitSize = Cint(#sAcntList) - 1
+		end if
+			
+		Pannel0.top = 475 - 56 * (nFitSize - 1)
+		Pannel0.height = 610 - Pannel0.top
+			
+		imgBG.top   = 410 - 56 * (nFitSize - 1)
+		tblInfo.top = 425 - 56 * (nFitSize - 1)
+			
+		imgBG.height = 300  + 56 * (nFitSize - 1)
+			
+		for i = 0 to Cint(#sAcntList) - 1
+			Pannel0.SetCellValue("Label0",i, sAcntList(i))	
+			Pannel0.setPropCardCell("imgpath","Image0", i , "btn_line2_n.9")
+		next
+	end if
+	
+End Sub
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Form.transmode = false
+End Sub
+'============================================================================
+Sub BtnReuse_OnClick()
+	
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+	if g_sLabelID <> "" then
+		Form.SendReturnToParent("mpopup_cloud", g_sLabelID)
+	end if
+End Sub
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+	if sCellID == "Image0" then
+		if g_nSaveIndex <> nIndex then
+			Pannel0.setPropCardCell("imgpath" ,"Image0", nIndex, "btn_line2_o.9")
+			Pannel0.setPropCardCell("imgpath" ,"Image0", g_nSaveIndex, "btn_line2_n.9")
+		end if
+		
+		g_nSaveIndex = nIndex
+		
+		g_sLabelID = Pannel0.GetCellValue("Label0",nIndex)
+		Form.CloseForm()
+		
+	end if
+	
+	if sCellID == "Label0" then
+		Pannel0_OnClick(nIndex, "Image0")
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

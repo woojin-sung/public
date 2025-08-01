@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="03000" scrname="부서코드조회" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,317,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="부서구분" ly_vert="3,58,68,32,1" />
+		<COMBO name="cboAcngCd" cbinputdatatext="%`전체
+01`영업점
+02`본사영업부서
+03`영업지원부서
+04`후선부서
+05`합계부서
+06`이관부서
+07`이관전부서
+08`테스트지점
+09`본부
+10`해외사무소
+11`PB CENTER" ly_vert="79,55,100,39,1" export="0,0,1" />
+		<LABEL name="Label5" caption="부서명" ly_vert="187,58,57,32,1" />
+		<EDIT name="edtFundNm" imetype="0" maxlength="40" minlength="40" senddatafield="obcpp_dept_008r.InBlock1.DEPT_ABWR_NAME" ly_vert="263,55,100,39,1" export="0,0,0" />
+		<GRID name="Grid0" colcount="2" ly_vert="10,103,353,204,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" halign="1" />
+				<LABEL name="th_cell0" caption="부서코드" halign="1" />
+				<LABEL name="bd_cell1" />
+				<LABEL name="th_cell1" caption="부서명" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="130,245" ly_vert_visible="0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="130" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="35" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" import="0,1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="245" ly_vert_visible="0" />
+					<TOPHEADER rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="35" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" import="0,1,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<IMAGE name="Image0" imgpath="pop_header.9.png" ly_vert="-2,0,378,45,1" />
+		<LABEL name="Label10" fontsize="2" fontstyle="01" caption="부서코드 조회" bgcolor="064:188030030" halign="1" ly_vert="0,0,375,45,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close" ly_vert="331,9,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1113" _ulen="1111" >
+--===========================================================================
+--===========================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	DATAMANAGER.RequestTranData("obcpp_dept_008r")
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	szDeptCd = Grid0.GetCellData("bd_cell0", lRow)
+	szDeptNm = Grid0.GetCellData("bd_cell1", lRow)
+	
+	Form.SendReturnToParent("DEPTINFO", szDeptCd & "★" & szDeptNm)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub cboAcngCd_OnEditComplete(iIndex)
+	DATAMANAGER.RequestTranData("obcpp_dept_008r")
+End Sub
+
+'============================================================================
+Sub edtFundNm_OnEditComplete()
+	DATAMANAGER.RequestTranData("obcpp_dept_008r")
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_dept_008r" trcode="obcpp_dept_008r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_dept_008r" title="부서코드부서명조회(팝업)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="139" _ulen="109" >
+
+DEPT_ABWR_NAME^부서약어명^40^0^0^0^0^0^0
+DEPT_CLS_CODE^부서구분코드^2^0^0^0^0^0^0
+STND_DATE^기준일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="15" inout="out" _len="86" _ulen="68" >
+
+DPCD^부서코드^4^0^0^0^0^0^0
+DEPT_ABWR_NAME^부서약어명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="39" _ulen="31" >
+
+DPCD^부서코드^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
