@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86000" scrname="OTP관리" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" fontsize="-2" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113" etcfunctions="" accpwdctl="edtPW" totalacc="1" ly_vert="6,59,271,39,1" />
+		<EDIT name="edtPW" halign="1" password="2" imetype="1" maxlength="8" hintcaption="비밀번호" ly_vert="283,59,86,39,1" />
+		<FORMTAB name="fmtab0" fontstyle="01" tabcount="3" tabwidthtype="2" tabheadheight="40" autosave="1" ly_vert="0,107,375,540,1" >
+			<PAGE name="page008012" caption="보정처리" linkfile="mbonl86000_t2" loadingtype="1" />
+			<PAGE name="page002464" caption="사고등록/해지" linkfile="mbonl86000_t3" loadingtype="1" />
+			<PAGE name="page000081" caption="이력조회" linkfile="mbonl86000_t4" loadingtype="1" />
+		</FORMTAB>
+		<BUTTON name="btn0" caption="조회" fgcolor="018:102102102" btnimage="btn_02.9.png" ly_vert="283,59,86,39,1" />
+		<IMAGE name="Image0" enable="0" visible="0" imgpath="icon_top_back_light.png" ly_vert="10,0,34,60,0" />
+		<LABEL name="lblTitle" fontsize="3" caption="OTP관리" multiline="1" paddinginfo="1,0,0,0" click="1" ly_vert="49,10,234,35,1" />
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_main_01" ly_vert="9,17,24,21,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5547" _ulen="5189" >
+'============================================================================
+' 01. 화 면 명 : OTP관리
+' 02. 화면설명 : OTP관리
+' 03. 작    성 : 2016. 02. 05. 유창재
+' 04. 수    정 : 2016. 12. 01. 윤유정 : 스마트OTP 탭 추가 v0001
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_nFmtabIndex			'폼탭 Index
+Dim g_szData				'계좌번호와 비밀번호
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+End Sub
+
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	btn0.visible = False
+	
+	g_nFmtabIndex = fmtab0.currenttab
+	
+	g_szData = acnt0.total & "★" & edtPW.caption
+	
+'	Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "사용등록", g_szData) 
+    fmtab0_OnTabChanged(CInt(g_nFmtabIndex)) '폼탭 자동저장 설정변경 2016.04.20
+	edtPW.caption = ""
+End Sub
+'============================================================================
+' fmtab0_OnTabChanged(nCurrentTab)
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	edtPW.caption = ""
+	
+	g_szData = acnt0.total & "★" & edtPW.caption
+	g_nFmtabIndex = nCurrentTab
+	
+	Select Case g_nFmtabIndex
+'240109	타기관이용등록/해지 삭제
+'		Case 0
+'			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "사용등록", g_szData)
+		Case 0
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "보정처리", g_szData)
+		Case 1
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "사고등록", g_szData)
+		Case 2
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "이력조회", g_szData)
+		Case 3 'v0001
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "스마트OTP", g_szData) 'v0001
+			
+	End Select
+	
+'	if g_nFmtabIndex == 2 then
+'		btn0.visible = True
+'		edtPW.visible = False
+'	else
+		btn0.visible = False
+		edtPW.visible = True
+'	end if
+	
+End Sub
+'============================================================================
+' edtPW_OnEditComplete()
+'============================================================================
+Sub edtPW_OnEditComplete()
+	
+	g_szData = acnt0.total & "★" & edtPW.caption	
+
+'240109	타기관이용등록/해지 삭제
+	Select Case g_nFmtabIndex
+'		Case 0
+'			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "사용등록", g_szData)
+		Case 0
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "보정처리", g_szData)
+		Case 1
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "사고등록", g_szData)
+		Case 2
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "이력조회", g_szData)
+		Case 3 'v0001
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "스마트OTP", g_szData) 'v0001
+	End Select
+End Sub
+
+'============================================================================
+' btn0_OnClick() : 조회버튼은 이력조회일때만 생성되므로 이력조회 Trigger만 보냄
+'============================================================================
+Sub btn0_OnClick()
+	
+	g_szData = acnt0.total
+	
+	Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "이력조회", g_szData)
+	
+End Sub
+'============================================================================
+' acnt0_ChangeAccount() : 계좌변경시
+'============================================================================
+Sub acnt0_ChangeAccount()
+	edtPW.caption = ""
+	
+	g_szData = acnt0.total & "★" & edtPW.caption
+	
+'240109	타기관이용등록/해지 삭제	
+	Select Case g_nFmtabIndex
+'		Case 0
+'			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "사용등록", g_szData)
+		Case 0
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "보정처리", g_szData)
+		Case 1
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "사고등록", g_szData)
+		Case 2
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "이력조회", g_szData)
+		Case 3 'v0001
+			Form.triggerEvent( "fmtab0."&fmtab0.currenttabpageid , "스마트OTP", g_szData) 'v0001
+	End Select
+
+End Sub
+
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "Reset" then
+		edtPW.caption = ""
+	elseif sEventName == "Reset1" then
+		edtPW.caption = ""
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	
+'	fmtab0_OnTabChanged(g_nFmtabIndex)
+	
+End Sub
+
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	g_FormCloseClcd = "BCK"
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	g_FormCloseClcd = "BCK"
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87054" scrname="위탁증거금 등급 변경" version="2" writer="윤유정" />
+	<FORM_INFO name="Form" ly_vert="0,0,310,340,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="위탁증거금 등급 변경" bgcolor="064:188030030" halign="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+		<BUTTON name="btnModify" caption="변경 신청" fontstyle="01" btnimage="btn_01.9" ly_vert="92,289,127,39,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" designorder="1" ly_vert="1,103,307,83,1" >
+			<COL_INFO ly_vert_width="107,200" />
+			<ROW_INFO ly_vert_height="39,5,39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="039:242242242" line="0,0" caption="현재 증거금 등급" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="039:242242242" line="0,0" caption="신규 증거금 등급" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="Edit0" enable="0" caption="100%징수(수수료포함)" fontstyle="01" imetype="3" ly_vert="112,148,190,38,1" />
+		<EDIT name="Edit1" enable="0" imetype="3" ly_vert="112,104,190,38,1" />
+		<ACCOUNT name="Account0" bgcolor="052:255255255" itemcodetype="100,119,200" finaceexcept="1" ly_vert="4,59,250,39,1" />
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="266,59,39,39,1" />
+		<TABLE name="Table3" insidelinecolor="102:255255255" colcount="1" rowcount="6" outline="0000" designorder="1" ly_vert="-5,196,315,85,1" >
+			<COL_INFO ly_vert_width="315" />
+			<ROW_INFO ly_vert_height="20,15,15,5,15,15" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="006:213049051" valign="0" halign="0" line="0,0" caption=" ※ 유의사항" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="146:124124124" valign="0" halign="0" line="0,0" caption="· 신용정보제공 미동의고객의 경우 [고객/계좌 ▷ 고객정보 ▷" fontsize="-4" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="146:124124124" valign="0" halign="0" line="0,0" caption="   개인(신용)정보동의]에서 동의 해주셔야 변경이 가능합니다." fontsize="-4" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="146:124124124" valign="0" halign="0" line="0,0" fontsize="-3" impidxs="" />
+				<CELL cell_ly="0,4,0,4" fgcolor="146:124124124" valign="0" halign="0" line="0,0" caption="· 신용불량, 미수동결계좌, 공매도여부에 따라 증거금 등급" fontsize="-4" impidxs="" />
+				<CELL cell_ly="0,5,0,5" fgcolor="146:124124124" valign="0" halign="0" line="0,0" caption="   변경이 불가할 수 있습니다." fontsize="-4" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4396" _ulen="4156" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 위탁증거금 등급 변경
+' 02. 화면설명 : 위탁증거금 등급 변경
+' 03. 작    성 : 김효준
+' 04. 수    정 : 2021.01.18 : 김효준 : v001: 신규 ( [7457]해외주식 거래신청 > 고객 영문명 등록/변경 - mbonl87051_p1 참조)
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim	g_Acno
+Dim	g_AcntPwd
+
+Dim g_MargGradCode
+    g_MargGradCode   = "" '증거금등급코드
+    
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_Acno    = Form.GetSharedData("87054_ACNO", false)
+	g_Asno    = Form.GetSharedData("87054_ASNO", false)
+	g_AcntPwd = Form.GetSharedData("87054_ACNT_PWD", false)
+	
+	DATAMANAGER.SetDataValue(0,"obacp_comm_008r", "InBlock1", "ACNO" , 0 , g_Acno)	
+	DATAMANAGER.SetDataValue(0,"obacp_comm_008r", "InBlock1", "ASNO" , 0 , g_Asno)	
+	DATAMANAGER.SetDataValue(0,"obacp_comm_008r", "InBlock1", "ACNT_PWD" , 0 , g_AcntPwd)
+	DATAMANAGER.RequestTranData("obacp_comm_008r")
+	
+End Sub
+'============================================================================
+' imgClose_OnClick
+'============================================================================
+Sub imgClose_OnClick()
+	Form.SendReturnToParent("NewGradCode", "Cancle")  
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub btnModify_OnClick()
+	If Trim(g_MargGradCode) <> "4" Then
+		DATAMANAGER.ClearInputData(0, "obaci_acct_029a")
+		
+		DATAMANAGER.SetDataValue(0,"obaci_acct_029a", "InBlock1", "CONT_CLS_CODE"  , 0 , "4")	'4.온라인
+		DATAMANAGER.SetDataValue(0,"obaci_acct_029a", "InBlock1", "ACNO"           , 0 , g_Acno)	
+		DATAMANAGER.SetDataValue(0,"obaci_acct_029a", "InBlock1", "ASNO"           , 0 , g_Asno)	
+		DATAMANAGER.SetDataValue(0,"obaci_acct_029a", "InBlock1", "ACNT_PWD"       , 0 , g_AcntPwd)
+		DATAMANAGER.SetDataValue(0,"obaci_acct_029a", "InBlock1", "MARG_GRAD_CODE" , 0 , "4") '4.100%징수(수수료포함)
+		
+		DATAMANAGER.RequestTranData("obaci_acct_029a")
+	Else
+		Form.ShowAlert( "알림" , "변경할 등급을 확인해주세요.")
+		Exit Sub
+	End If
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If szTranID == "obaci_acct_029a" Then
+		Form.SendReturnToParent("NewGradCode", "Ok")  
+		Form.CloseForm()
+		
+	ElseIf szTranID == "obacp_comm_008r" Then 
+		g_MargGradCode = DATAMANAGER.GetDataValue(0, "obacp_comm_008r", "OutBlock1", "MARG_GRAD_CODE" , 0)
+		
+		If Trim(g_MargGradCode) = "4" Then
+			btnModify.enable 	= False
+		Else
+			btnModify.enable 	= True
+		End If
+		
+		If Trim(g_MargGradCode) = "1" Then
+			Edit1.caption = "40%징수"
+		ElseIf Trim(g_MargGradCode) = "3" Then
+			Edit1.caption = "100%징수(수수료미포함)"
+		ElseIf Trim(g_MargGradCode) = "4" Then
+			Edit1.caption = "100%징수(수수료포함)"
+		ElseIf Trim(g_MargGradCode) = "6" Then
+			Edit1.caption = "기본(종목별차등)"
+		ElseIf Trim(g_MargGradCode) = "6" Then
+			Edit1.caption = "특별증거금(우대)"
+		End If
+	End If
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	If szTranID == "obaci_acct_029a" Then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+		Exit Sub
+	End If
+End Sub 
+
+'============================================================================
+Sub btnSearch_OnClick()
+	DATAMANAGER.SetDataValue(0,"obacp_comm_008r", "InBlock1", "ACNO" , 0 , g_Acno)	
+	DATAMANAGER.SetDataValue(0,"obacp_comm_008r", "InBlock1", "ASNO" , 0 , g_Asno)	
+	DATAMANAGER.SetDataValue(0,"obacp_comm_008r", "InBlock1", "ACNT_PWD" , 0 , g_AcntPwd)
+	DATAMANAGER.RequestTranData("obacp_comm_008r")	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacp_comm_008r" trcode="obacp_comm_008r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_029a" trcode="obaci_acct_029a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacp_comm_008r" title="개별계좌 정보 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="7784" _ulen="5740" >
+
+PRCD^상품코드^3^0^0^0^0^0^0
+JOIN_DATE^가입 일자^8^0^0^0^0^0^0
+INDV_MANG_BRCD^개별관리지점코드^4^0^0^0^0^0^0
+JOIN_BRCD^가입 지점코드^4^0^0^0^0^0^0
+MANG_EMPNO^관리 직원번호^9^0^0^0^0^0^0
+JOIN_RCMD_EMPNO^가입 권유 직원번호^9^0^0^0^0^0^0
+INPR_BKKP_NAME^개별상품 부기 명^40^0^0^0^0^0^0
+ACNT_STAT_CODE^계좌 상태 코드^1^0^0^0^0^0^0
+FNPR_EXUS_YN^금융상품전용여부^1^0^0^0^0^0^0
+RNMC_YN^실명확인여부^1^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+CNRC_PRD^계약 기간^4^0^7^0^0^0^0
+CNRC_AMT^계약 금액^19^0^7^0^0^0^0
+ENTM_ONSL_CLS_CODE^위탁자기구분코드^2^0^0^0^0^0^0
+TXCM_TRPR_CLS_CODE^세금우대 대상자 구분 코드^1^0^0^0^0^0^0
+INVT_TYPE_CODE^투자 유형 코드^1^0^0^0^0^0^0
+DEAL_RPRT_SNDN_YN^매매 보고서 발송 여부^1^0^0^0^0^0^0
+INVR_DIV_CODE^투자자 분류 코드^4^0^0^0^0^0^0
+FRGN_INVT_TRGT_CLS_CODE^외국인 투자 대상 구분 코드^1^0^0^0^0^0^0
+MARG_GRAD_CODE^증거금 등급 코드^1^0^0^0^0^0^0
+BASC_DPMN_WTMN_YN^기본 예탁금 인출 여부^1^0^0^0^0^0^0
+FTOP_PRDY_DEAL_YN^선물옵션 전일 매매 여부^1^0^0^0^0^0^0
+BASC_DPMN_GRAD_CODE^기본 예탁금 등급 코드^1^0^0^0^0^0^0
+ODQT_LIMT_GRAD_CODE^주문수량 한도 등급 코드^1^0^0^0^0^0^0
+TR_MARG_CLS_CODE^거래 증거금 구분 코드^2^0^0^0^0^0^0
+FTOP_ODER_SHAP_CODE^선물옵션 주문 형태 코드^1^0^0^0^0^0^0
+MIN_MARG_GRAD_CODE^최소 증거금 등급 코드^1^0^0^0^0^0^0
+INVT_TRGT_RSTC_YN^투자 대상 제한 여부^1^0^0^0^0^0^0
+RMND_CERT_ISNC_DATE^잔고 증명서 발급 일자^8^0^0^0^0^0^0
+LAST_TR_DATE^최종 거래 일자^8^0^0^0^0^0^0
+CLSR_DATE^폐쇄 일자^8^0^0^0^0^0^0
+CLSR_REAS_CODE^폐쇄 사유 코드^2^0^0^0^0^0^0
+CANC_DATE^해지 일자^8^0^0^0^0^0^0
+CANC_CLS_CODE^해지 구분 코드^1^0^0^0^0^0^0
+SPCI_CANC_REAS_CODE^특별 해지 사유 코드^2^0^0^0^0^0^0
+PAYM_MTHD_CLS_CODE^납입 방법 구분 코드^2^0^0^0^0^0^0
+STPL_DATE^약정 일자^8^0^0^0^0^0^0
+STPL_CANC_DATE^약정해지일자^8^0^0^0^0^0^0
+REG_DATE^등록 일자^8^0^0^0^0^0^0
+LNKD_ACNO^연계 계좌번호^8^0^0^0^0^0^0
+LNKD_ASNO^연계 계좌일련번호^2^0^0^0^0^0^0
+INTG_DATE^통합 일자^8^0^0^0^0^0^0
+STPL_YN^약정 여부^1^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+CANC_YN^해지 여부^1^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+TXTN_APLY_TYPE_CODE^과세 적용 유형 코드^1^0^0^0^0^0^0
+IISC_TXTN_APLY_CODE^집합투자증권과세적용코드^1^0^0^0^0^0^0
+RP_TXTN_APLY_CODE^RP 과세 적용 코드^1^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+BKKP_NAME^부기 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+MANG_BRCD^관리 지점코드^4^0^0^0^0^0^0
+UI_ACNT_PROD_CLS_CODE^UI 계좌 상품 구분 코드^1^0^0^0^0^0^0
+ACNT_CLS_CODE^계좌 구분 코드^1^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+MSIN_PROS_AMT^잡수익처리금액^19^0^7^0^0^0^0
+MDAF_ACNO^변경후계좌번호^12^0^0^0^0^0^0
+MDBF_ACNO^변경전계좌번호^12^0^0^0^0^0^0
+MVIN_DATE^전입일자^8^0^0^0^0^0^0
+MVOT_DATE^전출일자^8^0^0^0^0^0^0
+EMPL_NAME^직원 명^40^0^0^0^0^0^0
+ABLE_AMT^가능 금액^19^0^7^0^0^0^0
+BCDT_CLS_NAME^자료 구분 명^40^0^0^0^0^0^0
+CNVR_DATE^전환일자^8^0^0^0^0^0^0
+ISNC_DATE^발급일자^8^0^0^0^0^0^0
+MDIA_SRNO^매체일련번호^16^0^7^0^0^0^0
+ISNC_TMNU^발급횟수^4^0^7^0^0^0^0
+PXPR_YN^대리인여부^1^0^0^0^0^0^0
+PXPR_NAME^대리인명^40^0^0^0^0^0^0
+PXPR_RCNO^대리인실명확인번호^13^0^0^0^0^0^0
+UI_RCNO^UI실명확인번호^14^0^0^0^0^0^0
+ACNT_PXPR_RLTS_CODE^계좌대리인관계코드^2^0^0^0^0^0^0
+PXPR_RCNO_TYPE_CODE^대리인실명확인번호유형코드^2^0^0^0^0^0^0
+PXPR_REGN_ZIP^대리인지역우편번호^3^0^0^0^0^0^0
+PXPR_DTL_ZIP^대리인상세우편번호^3^0^0^0^0^0^0
+PSSR_SRNO^우편일련번호^3^0^0^0^0^0^0
+PXPR_POST^대리인우편주소^100^0^0^0^0^0^0
+PXPR_DTAD^대리인상세주소^100^0^0^0^0^0^0
+PXPR_ARCD^대리인지역번호^4^0^0^0^0^0^0
+PXPR_TONO^대리인국번호^4^0^0^0^0^0^0
+PXPR_TELNO^대리인전화번호^4^0^0^0^0^0^0
+NW_ADDR_USE_YN^신주소사용여부^1^0^0^0^0^0^0
+BLDN_MNNO^건물관리번호^25^0^0^0^0^0^0
+UI_CNVR_YN^UI전환여부^1^0^0^0^0^0^0
+UI_CNVR_BEF_BRCD^UI전환전지점코드^4^0^0^0^0^0^0
+UI_RP_ISSU_EXRS_YN^UIRP종목표시여부^1^0^0^0^0^0^0
+STTG_TR_YN^전략거래여부^1^0^0^0^0^0^0
+STTG_TR_REG_DATE^전략거래등록일자^8^0^0^0^0^0^0
+UNCL_FRZN_YN^미수동결여부^1^0^0^0^0^0^0
+SSTS_OCRN_YN^공매도발생여부^1^0^0^0^0^0^0
+BDCR_CLCD^신용불량구분코드^1^0^0^0^0^0^0
+UI_CRIN_UTLZ_AGRM_YN1^UI신용정보이용동의여부1^1^0^0^0^0^0^0
+UI_CRIN_UTLZ_AGRM_YN2^UI신용정보이용동의여부2^1^0^0^0^0^0^0
+UI_CRIN_OFER_AGRM_YN1^UI신용정보제공동의여부1^1^0^0^0^0^0^0
+UI_CRIN_OFER_AGRM_YN2^UI신용정보제공동의여부2^1^0^0^0^0^0^0
+UI_PXPR_NTNT_CTCD^UI대리인국적국가코드^3^0^0^0^0^0^0
+UI_PXPR_ABRD_ADDR^UI대리인국외주소^200^0^0^0^0^0^0
+UI_PXPR_NCNO^UI대리인국가번호^5^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_ARCD^UI대리인국외전화지역번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_TONO^UI대리인국외전화국번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TLPH_SRNO^UI대리인국외전화일련번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_TENO^UI대리인국외교환번호^4^0^0^0^0^0^0
+UI_PXPR_ABRD_WHOL_TELNO^UI대리인국외전체전화번호^16^0^0^0^0^0^0
+UI_COMN_AGRM_YN1^UI공통동의여부1^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN2^UI공통동의여부2^1^0^0^0^0^0^0
+UI_COMN_AGRM_YN3^UI공통동의여부3^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN7^UI상품동의여부7^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN8^UI상품동의여부8^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN9^UI상품동의여부9^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN10^UI상품동의여부10^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN11^UI상품동의여부11^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN12^UI상품동의여부12^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN13^UI상품동의여부13^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN4^UI상품동의여부4^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN2^UI상품동의여부2^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN5^UI상품동의여부5^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN3^UI상품동의여부3^1^0^0^0^0^0^0
+UI_PROD_AGRM_YN6^UI상품동의여부6^1^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호유형코드^2^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+BRDY_DATE^생일일자^8^0^0^0^0^0^0
+LSC_CLCD^음양력구분코드^1^0^0^0^0^0^0
+PAYM_FIN_DATE^납입종료일자^8^0^0^0^0^0^0
+PNSN_PRVS_FORM_CLCD^연금지급방식구분코드^1^0^0^0^0^0^0
+PNSN_PRVS_APLT_ABLE_DATE^연금지급신청가능일자^8^0^0^0^0^0^0
+PNSN_PRVS_BEGN_SCDL_DATE^연금지급개시예정일자^8^0^0^0^0^0^0
+PNSN_PRVS_FIN_DATE^연금지급종료일자^8^0^0^0^0^0^0
+PNSN_PRVS_PRD^연금지급기간^4^0^7^0^0^0^0
+PNSN_PRVS_CYCL_CLCD^연금지급주기구분코드^1^0^0^0^0^0^0
+INAG_TYPE_CODE^통보처유형코드^2^0^0^0^0^0^0
+PNSN_PRVS_BANK_CODE^연금지급은행코드^3^0^0^0^0^0^0
+PNSN_PRVS_BANK_ACNO^연금지급은행계좌번호^16^0^0^0^0^0^0
+BANK_NAME^은행명^40^0^0^0^0^0^0
+VRTL_ACNO^가상계좌번호^16^0^0^0^0^0^0
+OVDV_ACNT_CLCD^해외파생계좌구분코드^1^0^0^0^0^0^0
+MARG_TPCD^증거금유형코드^1^0^0^0^0^0^0
+ODER_ABLE_TPCD^주문가능유형코드^1^0^0^0^0^0^0
+OVDV_HEDG_CLCD^해외파생헷지구분코드^1^0^0^0^0^0^0
+SPMR_OCRN_YN^추가증거금발생여부^1^0^0^0^0^0^0
+PCUR_SPMR_OCRN_YN^통화별추가증거금발생여부^1^0^0^0^0^0^0
+RMT_NAME^수취인명^40^0^0^0^0^0^0
+PXPR_RCNO_PIP^대리인실명확인번호PIP^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_029a" title="개별상품 증거금 등급 변경" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="225" _ulen="167" >
+
+CONT_CLS_CODE^접촉구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+MARG_GRAD_CODE^증거금 등급 코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

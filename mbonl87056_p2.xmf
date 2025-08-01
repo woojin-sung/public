@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87052" scrname="해외주식 소수점 거래_해지팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" imgpath="bg_dim40.9.png" ly_vert="0,0,375,647,1" />
+		<CONTAINER name="cont0" containerimage="popup_bg.9" scroll_pos="0,0" ly_vert="0,323,375,324,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<BUTTON name="Button0" btnimage="alpha" ly_vert="-5,0,385,325,1" />
+				<LABEL name="lblText" fontsize="5" fontstyle="01" caption="계좌 비밀번호" fonttype="3" ly_vert="9,0,145,47,1" />
+				<EDIT name="edtPassword" halign="1" password="2" imetype="1" maxlength="8" minlength="4" ly_vert="20,55,336,39,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2488" _ulen="2358" >
+--===========================================================================
+' 2023.10.27 : 전상일 : v002 비밀번호 클리어 로직 추가
+--===========================================================================
+dim g_szAcno, g_szAsno
+dim g_PlainRm
+dim g_szSvcSrno
+dim g_bRegFlag
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'암호화 버전
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v005
+	'오픈데이터
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		dim tAcntInfo
+		tAcntInfo = Split(szOpenData, "★")
+		
+		g_szAcno = tAcntInfo[0]
+		g_szAsno = tAcntInfo[1]
+		g_szSvcSrno = tAcntInfo[2]
+		g_bRegFlag = true
+		'0.5초 후 보안키패드 띄움
+		Form.SetTimerEvent2(1, 1, 0.5)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID, 0, 0.5)
+	
+	if Cint(sTimerID) = 1 then
+		if g_szAcno = "" then
+			Form.MsgBox("알림", "계좌번호가 입력되지 않았습니다.", "pwdcheck", 0)
+		else
+			cont0.edtPassword.setShowKeypad(True)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub imgBg_OnClick()
+	g_bRegFlag = false
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub cont0_edtPassword_OnEditComplete()
+	if g_szAcno == "" or g_szAcno == null then
+		Exit Sub
+	end if
+	
+	if CInt(cont0.edtPassword.pwdlen) < 4 or cont0.edtPassword.caption == "" or cont0.edtPassword.caption == null then
+		Exit Sub
+	else
+		if CInt(g_szSvcSrno) > 0 and g_szSvcSrno <> "" then
+			Form.CloseForm()
+		else
+			Form.ShowAlert("안내", "서비스 일련번호 값이 없습니다.")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub cont0_Button0_OnClick()
+	cont0.edtPassword.setShowKeypad(True)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	edtPassword.caption = "" 'v002
+'	Form.SetSharedData("&BACK_PRESS_ENABLE", "N")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+'	Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")
+	if g_bRegFlag == true then
+		Form.SendReturnToParent("POP_CANCEL" , cont0.edtPassword.caption)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

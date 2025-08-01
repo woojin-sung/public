@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87051" scrname="해외주식거래신청_영문명변경" version="2" writer="윤유정" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,309,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="고객영문명 등록/변경" bgcolor="064:188030030" halign="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" visible="0" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,0" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" fontstyle="01" btnimage="btn_02.9" ly_vert="25,254,127,39,1" />
+		<BUTTON name="btnModify" caption="확인" fontstyle="01" btnimage="btn_01.9" ly_vert="157,254,127,39,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" designorder="1" ly_vert="1,63,307,83,1" >
+			<COL_INFO ly_vert_width="82,225" />
+			<ROW_INFO ly_vert_height="39,5,39" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="039:242242242" line="0,0" caption="변경 전" impidxs="" />
+				<CELL cell_ly="1,0,1,0" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="039:242242242" line="0,0" caption="변경 후" impidxs="" />
+				<CELL cell_ly="1,2,1,2" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="Edit0" imetype="3" ly_vert="87,108,220,38,1" />
+		<EDIT name="Edit1" enable="0" imetype="3" ly_vert="87,64,220,38,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8001" _ulen="7665" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 해외주식 거래신청_영문명변경
+' 02. 화면설명 : 해외주식 거래신청_영문명변경
+' 03. 작    성 : 2018.01.11 윤유정
+' 04. 수    정 : 2018.02.13 윤유정 : 고객정보 obcsb_acif_000r 로 직접 받아오도록 변경(수정전:부모창 shared) v0001
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim	g_PreEngName
+	g_PreEngName = ""
+Dim	g_NewEngName
+	g_NewEngName = ""
+Dim	g_ProsCls
+Dim	g_Acno
+Dim	g_AcntPwd
+Dim	g_NtntCtcd			'국적국가
+	g_NtntCtcd = ""
+Dim	g_RsdcNtnlTxrtCode 	'거주국가
+	g_RsdcNtnlTxrtCode = ""
+Dim	g_LscClcd 			'양력구분 
+	g_LscClcd = ""
+Dim	g_Brdt				'생년월일
+	g_Brdt = ""
+Dim	g_WdngDate			'결혼 일자
+	g_WdngDate = ""
+Dim	g_BrthCtcd			'출생국가코드
+	g_BrthCtcd = ""
+Dim	g_AmrcYn				'미국인 여부
+	g_AmrcYn = ""
+Dim	g_AmlBstpLrdvCode		'AML업종대분류코드
+	g_AmlBstpLrdvCode = ""
+Dim	g_AmlBstpSmdvCode		'AML업종소분류코드
+	g_AmlBstpSmdvCode = ""
+Dim	g_Giin				'GIIN
+	g_Giin = ""	
+Dim	g_Lstn_yn			'상장여부
+	g_Lstn_yn = ""
+Dim	g_OvrsTxpmChdYn		'해외납세자여부
+	g_OvrsTxpmChdYn = ""
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_Acno = Form.GetSharedData("87051_ACNO", false)
+	g_AcntPwd = Form.GetSharedData("87051_ACNT_PWD", false)
+	
+	'v0001
+'	g_sRevData = Split ( Form.GetOpenLinkData() , "★" , 0 , 0 )
+'	
+'	g_ProsCls 			= g_sRevData[0]
+'	g_PreEngName 			= g_sRevData[1]
+'	g_NtntCtcd 			= g_sRevData[2]
+'	g_RsdcNtnlTxrtCode 	= g_sRevData[3]
+'	g_LscClcd 			= g_sRevData[4]
+'	g_Brdt 				= g_sRevData[5]
+'	g_WdngDate 			= g_sRevData[6]
+'	g_BrthCtcd 			= g_sRevData[7]
+'	g_AmrcYn 			= g_sRevData[8]
+'	g_AmlBstpLrdvCode 	= g_sRevData[9]
+'	g_AmlBstpSmdvCode 	= g_sRevData[10]
+'	g_Giin				= g_sRevData[11]
+'	g_Lstn_yn 			= g_sRevData[12]
+'	g_OvrsTxpmChdYn 		= g_sRevData[13]
+
+'	If Trim(g_PreEngName) <> "" Then
+'		Edit1.caption = g_PreEngName
+'	Else
+'		Edit1.caption = "미등록"
+'	End If
+
+	DATAMANAGER.SetDataValue(0,"obcsb_acif_000r", "InBlock1", "ACNO" , 0 , g_Acno)	
+	DATAMANAGER.SetDataValue(0,"obcsb_acif_000r", "InBlock1", "ACNT_PWD" , 0 , g_AcntPwd)
+	DATAMANAGER.RequestTranData("obcsb_acif_000r")
+	
+End Sub
+'============================================================================
+' imgClose_OnClick
+'============================================================================
+Sub imgClose_OnClick()
+	'Form.SendReturnToParent("NewEngName", Trim(g_PreEngName) & "★" & "Cancle")  
+	Form.SendReturnToParent("NewEngName", "Cancle")  
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnCancel_OnClick - 취소버튼
+'============================================================================
+Sub btnCancel_OnClick()
+	'Form.SendReturnToParent("NewEngName", Trim(g_PreEngName) & "★" & "Cancle")  
+	Form.SendReturnToParent("NewEngName", "Cancle")  
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub btnModify_OnClick()
+	If Trim(g_NewEngName) <> "" Then
+		If g_ProsCls = "U" Then
+			If Trim(g_PreEngName) == Trim(g_NewEngName) Then
+				Form.ShowAlert( "알림" , "변경 전/후가 같은 영문명입니다.")
+				Exit Sub
+			End If
+		End If
+		
+'		Form.SendReturnToParent("NewEngName", Trim(g_NewEngName) & "★" & "Ok")  
+'		Form.CloseForm()
+
+		DATAMANAGER.ClearInputData(0, "obcsb_acif_002u")
+		
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "ACNO" 					, 0 , g_Acno)
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "ACNT_PWD" 				, 0 , g_AcntPwd)
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "CUST_ENG_NAME" 			, 0 , Trim(g_NewEngName))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "NTNT_CTCD" 			, 0 , Trim(g_NtntCtcd))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "RSDC_NTNL_TXRT_CODE"	, 0 , Trim(g_RsdcNtnlTxrtCode))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "LSC_CLCD"				, 0 , Trim(g_LscClcd))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "BRDT"					, 0 , Trim(g_Brdt))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "WDNG_DATE"				, 0 , Trim(g_WdngDate))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "BRTH_CTCD"				, 0 , Trim(g_BrthCtcd))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "AMRC_YN"				, 0 , Trim(g_AmrcYn))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "AML_BSTP_LRDV_CODE"		, 0 , Trim(g_AmlBstpLrdvCode))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "AML_BSTP_SMDV_CODE"		, 0 , Trim(g_AmlBstpSmdvCode))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "GIIN"					, 0 , Trim(g_Giin))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "LSTN_YN"				, 0 , Trim(g_Lstn_yn))
+		DATAMANAGER.SetDataValue(0, "obcsb_acif_002u" , "InBlock1" , "OVRS_TXPM_CHD_YN"		, 0 , Trim(g_OvrsTxpmChdYn))
+		DATAMANAGER.RequestTranData("obcsb_acif_002u")		
+	Else
+		Form.ShowAlert( "알림" , "변경할 영문명을 확인해주세요.")
+		Exit Sub
+	End If
+End Sub
+'============================================================================
+Sub Edit0_OnEditComplete()
+	g_NewEngName = Edit0.caption
+End Sub
+
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If szTranID == "obcsb_acif_002u" Then
+		'Form.SendReturnToParent("NewEngName", Trim(g_NewEngName) & "★" & "Ok")  
+		Form.SendReturnToParent("NewEngName", "Ok")  
+		Form.CloseForm()
+		
+	'v0001 obcsb_acif_000r 추가
+	ElseIf szTranID == "obcsb_acif_000r" Then 
+		g_PreEngName	 		= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "CUST_ENG_NAME" , 0)
+		g_NtntCtcd 			= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "NTNT_CTCD" , 0)
+		g_RsdcNtnlTxrtCode	= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "RSDC_NTNL_TXRT_CODE" , 0)
+		g_LscClcd 			= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "SLCN_CLS_CODE" , 0)
+		g_Brdt 				= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "BRDT" , 0)
+		g_WdngDate 			= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "WDNG_DATE" , 0)
+		g_BrthCtcd 			= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "BRTH_CTCD" , 0)
+		g_AmrcYn 			= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "AMRC_YN" , 0)
+		g_AmlBstpLrdvCode 	= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "AML_BSTP_LRDV_CODE" , 0)
+		g_AmlBstpSmdvCode 	= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "AML_BSTP_SMDV_CODE" , 0)
+		g_Giin 				= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "GIIN" , 0)
+		g_Lstn_yn 			= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "LSTN_YN" , 0)
+		g_OvrsTxpmChdYn 		= DATAMANAGER.GetDataValue(0, "obcsb_acif_000r", "OutBlock1", "OVRS_TXPM_CHD_YN" , 0)
+		
+		If Trim(g_PreEngName) <> "" Then
+			Edit1.caption = g_PreEngName
+		Else
+			Edit1.caption = "미등록"
+		End If
+	End If
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	If szTranID == "obcsb_acif_002u" Then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+		Exit Sub
+	End If
+End Sub 
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_acif_002u" trcode="obcsb_acif_002u" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="obcsb_acif_000r" trcode="obcsb_acif_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_acif_002u" title="고객정보변경" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="1655" _ulen="1243" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+SNOT_EMPNO^파출 직원번호^9^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+PSPR_NO^여권 번호^10^0^0^0^0^0^0
+CONO^법인등록번호^13^0^0^0^0^0^0
+LSC_CLCD^음양력구분코드^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+PBLT_TLPH_RCMS_YN^홍보전화수신여부^1^0^0^0^0^0^0
+PRML_RCMS_YN^홍보물수신여부^1^0^0^0^0^0^0
+PBLT_SMS_RCMS_YN^홍보SMS수신여부^1^0^0^0^0^0^0
+PBLT_EMAIL_RCMS_YN^홍보이메일수신여부^1^0^0^0^0^0^0
+RELF_SMS_RCMS_YN^안심SMS수신여부^1^0^0^0^0^0^0
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+BRTH_CTCD^출생국가코드^3^0^0^0^0^0^0
+AMRC_YN^미국인여부^1^0^0^0^0^0^0
+AML_BSTP_LRDV_CODE^AML업종대분류코드^2^0^0^0^0^0^0
+AML_BSTP_SMDV_CODE^AML업종소분류코드^5^0^0^0^0^0^0
+GIIN^GIIN^20^0^0^0^0^0^0
+LSTN_YN^상장여부^1^0^0^0^0^0^0
+OVRS_TXPM_CHD_YN^해외납세자여부^1^0^0^0^0^0^0
+FRGN_IDNT_CLCD^외국인식별구분코드^1^0^0^0^0^0^0
+FRGN_IDNO^외국인식별번호^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_000r" title="고객정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2185" _ulen="1655" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_CNFR_YN^고객 확인 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호 유형 코드^2^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+RLNM_ASCT_NO^실명 조합 번호^20^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+PSPR_NO^여권 번호^10^0^0^0^0^0^0
+CONO^법인등록번호^13^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인 구분 코드^2^0^0^0^0^0^0
+CNSG_YN^수탁 여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC 전문 투자자 여부^1^0^0^0^0^0^0
+KYC_SPCL_INVR_RGNO^KYC 전문 투자자 등록번호^20^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+SSTS_YN^공매도 여부^1^0^0^0^0^0^0
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+CNSG_RFUS_REAS_CODE^수탁 거부 사유 코드^3^0^0^0^0^0^0
+STA_DATE^시작 일자^8^0^0^0^0^0^0
+FIN_DATE^종료 일자^8^0^0^0^0^0^0
+BRTH_CTCD^출생국가코드^3^0^0^0^0^0^0
+AMRC_YN^미국인여부^1^0^0^0^0^0^0
+AML_BSTP_LRDV_CODE^AML업종대분류코드^2^0^0^0^0^0^0
+AML_BSTP_SMDV_CODE^AML업종소분류코드^5^0^0^0^0^0^0
+GIIN^GIIN^20^0^0^0^0^0^0
+LSTN_YN^상장여부^1^0^0^0^0^0^0
+DSTC_DATE^파기일자^8^0^0^0^0^0^0
+OVRS_TXPM_CHD_YN^해외납세자여부^1^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

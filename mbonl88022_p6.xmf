@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88022" scrname="대차중개약정_약관설명서(전체)" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" halign="1" autofontsize="1" ly_vert="0,0,375,60,1" />
+		<IMAGE name="imgClose" imgpath="ic_close.png" ly_vert="1000,10,21,21,1" />
+		<BUTTON name="btnPrev" caption="취소" fgcolor="013:051051051" btnimage="btn_25.9.png" ly_vert="0,597,187,50,1" />
+		<BUTTON name="btnNext" caption="다음" btnimage="btn_26.9.png" ly_vert="187,597,188,50,1" />
+		<LABEL name="lblCount" halign="1" ly_vert="0,559,375,20,1" />
+		<FORMTAB name="fmtab" tabcount="10" tabheadheight="0" usepg="1" ly_vert="20,60,335,489,1" >
+			<PAGE name="page0" caption="0" linkfile="mbwat61022_p7" />
+			<PAGE name="page1" caption="1" linkfile="mbwat61022_p7" />
+			<PAGE name="page2" caption="2" linkfile="mbwat61022_p7" />
+			<PAGE name="page3" caption="3" linkfile="mbwat61022_p7" />
+			<PAGE name="page4" caption="4" linkfile="mbwat61022_p7" />
+			<PAGE name="page5" caption="5" linkfile="mbwat61022_p7" />
+			<PAGE name="page6" caption="6" linkfile="mbwat61022_p7" />
+			<PAGE name="page7" caption="7" linkfile="mbwat61022_p7" />
+			<PAGE name="page8" caption="8" linkfile="mbwat61022_p7" />
+			<PAGE name="page9" caption="9" linkfile="mbwat61022_p7" />
+		</FORMTAB>
+		<IMAGE name="imgPrev" autosize="1" imgpath="icon_arrow3_l.png" ly_vert="20,311,24,24,1" />
+		<IMAGE name="imgNext" autosize="1" imgpath="icon_arrow3_r.png" ly_vert="329,311,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3798" _ulen="3602" >
+'============================================================================
+' 01. 화 면 명 : 약관 동의 팝업
+' 02. 화면설명 : 약관 동의 팝업
+' 03. 작    성 : 2022.10.04 양현정 (참고 mbwat61022_p4, mbonl87056_p6)
+'			   9개 약관까지 조회가능?.. FormTab 개수가 현재 9개임..(참고)
+' 04. 수    정 : 
+'
+'============================================================================
+
+Dim g_sReturnType
+Dim g_bAgree
+
+Dim g_tData, g_nStep, g_tTitle
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgClose.setMaintainingRatio("1")
+	imgPrev.setMaintainingRatio("1")
+	imgNext.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_bAgree = false
+	g_nStep = 0	
+	
+	dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	
+	if szOpenData <> "" and szOpenData <> null then
+		
+		dim tTemp
+		tTemp = Split(szOpenData, "♥")		
+		g_tData = Split(tTemp(0), "★")		'URL경로 리스트
+		g_tTitle = Split(tTemp(1), "★")		'타이틀명 리스트
+		
+		lblCount.caption = "1/"..#g_tData
+		
+	end if
+
+	if g_tData <> null and g_tData <> "" then
+		for i = 9 to 0 step -1
+			if #g_tData < i+1 then
+				fmtab.deletepage = "page"..i
+			end if
+		next
+	end if
+	
+	if g_tData <> null and g_tData <> "" then
+		if #g_tData == 1 then
+			btnNext.caption = "확인"
+		end if
+		
+		f_SetNext()
+	end if
+End Sub
+
+'============================================================================
+Sub btnPrev_OnClick()
+	Form.CloseForm()
+	'f_SetPrev()
+End Sub
+
+Sub f_SetPrev()
+	if g_nStep == 1 then
+		Form.CloseForm()
+	else
+		g_nStep = g_nStep - 1
+		lblCount.caption = g_nStep.."/"..#g_tData
+		
+		if g_nStep > 1 then
+			btnPrev.caption = "이전"
+		else
+			btnPrev.caption = "취소"
+		end if
+		
+		if g_nStep < #g_tData then
+			btnNext.caption = "다음"
+		else
+			btnNext.caption = "확인"
+		end if
+		
+		f_SetUrl()
+	end if
+End Sub
+
+'============================================================================
+Sub btnNext_OnClick()
+	f_SetNext()
+End Sub
+
+Sub f_SetNext()
+	if g_nStep == #g_tData then		
+		g_bAgree = true
+		
+		Form.CloseForm()
+	else
+		g_nStep = g_nStep + 1
+		lblCount.caption = g_nStep.."/"..#g_tData
+		
+		'if g_nStep > 1 then
+		'	btnPrev.caption = "이전"
+		'else
+			btnPrev.caption = "취소"
+		'end if
+		
+		if g_nStep < #g_tData then
+			btnNext.caption = "다음"
+		else
+			btnNext.caption = "확인"
+		end if
+		
+		f_SetUrl()
+	end if
+End Sub
+
+Sub f_SetUrl()
+	Dim sType, sData, sMode, sTest
+	sType = ""
+	sData = ""
+	sMode = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+	
+	if sMode == "1" then
+		sTest = "test"
+	end if
+	
+	sType = "urlpath"
+	sData = g_tData(g_nStep-1)	
+	
+	lblTitle.caption = g_tTitle(g_nStep-1)
+	Form.triggerEvent("fmtab."..fmtab.currenttabpageid, sType, sData)
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgPrev_OnClick()
+	if g_nStep > 1 then
+		f_SetPrev()
+	end if
+End Sub
+
+'============================================================================
+Sub imgNext_OnClick()
+	if g_nStep < #g_tData then
+		f_SetNext()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+
+	if g_bAgree == true then
+		Form.SendReturnToParent("mbonl88022_p6", "AGREE")	'전체 확인시 호출명으로 리턴
+	else
+		Form.SendReturnToParent("mbonl88022_p6", "cancel")
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

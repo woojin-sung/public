@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87055" scrname="대용설정_대용질권설정/해지팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="4" rowcount="9" outline="0100" designorder="1" ly_vert="0,0,375,541,1" >
+			<COL_INFO ly_vert_width="120,67,94,94" />
+			<ROW_INFO ly_vert_height="35,35,35,35,65,51,29,35,221" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" line="0,1" caption="종목명" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,3,0" halign="0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="대용가" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,3,1" halign="2" mask="0,0,,원,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="가능수량" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,3,2" halign="2" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="가능금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,3,3,3" halign="2" mask="0,0,,원,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,4,3,4" impidxs="" />
+				<CELL cell_ly="0,5,3,5" halign="0" line="0,1" caption="수량" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,6,1,6" fgcolor="065:102102102" bgcolor="066:238239240" caption="설정수량" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,6,3,6" fgcolor="065:102102102" bgcolor="066:238239240" caption="설정금액" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,7,1,7" mask="0,0,,,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="2,7,3,7" mask="0,0,,원,0,,0,1,1,0,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,8,3,8" valign="0" halign="0" line="0,0" caption="
+위 수량을 설정하시겠습니까?" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<EDIT name="EditInput" mask="0,0,,,0,,0,1,0,0,0" halign="2" imetype="1" ly_vert="46,211,195,39,1" />
+		<BUTTON name="ButtonRequest" caption="금액 계산" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="247,211,108,39,1" />
+		<BUTTON name="ButtonOK" caption="확인" fgcolor="128:188030030" btnimage="btn_pop2.9.png" ly_vert="187,562,188,45,1" />
+		<RADIOGROUP name="RdoGubun" initselectionuse="1" initselection="1" ly_vert="20,160,346,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="금액기준" selforecolor="004:000000000" position="0,0,84,39" />
+				<RADIO no="1" text="수량기준" selforecolor="004:000000000" position="170,0,84,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="0,562,187,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6358" _ulen="5932" >
+'--===========================================================================
+' 01. 화 면 명 : 대용설정_대용질권설정/해지팝업
+' 02. 화면설명 : 대용설정_대용질권설정/해지팝업
+' 03. 작    성 : 2021.11.29 김수진
+' 04. 수    정 : 
+'--===========================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szRetData
+Dim g_szState		'신청 : set, 해지 : cancel
+Dim g_szType
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_szState = Form.GetOpenLinkData()		'신청 : set, 해지 : cancel
+	if g_szState == null or g_szState == "" then
+		Exit Sub
+	end if
+
+	If g_szState == "set" Then
+		Form.SetScreenName("대용질권 설정")
+		Table0.SetCellString( 6, 0, "설정수량" )
+		Table0.SetCellString( 6, 2, "설정금액" )
+	Else
+		Form.SetScreenName("대용질권 해지")
+		Table0.SetCellString( 6, 0, "해지수량" )
+		Table0.SetCellString( 6, 2, "해지금액" )
+	End If
+	
+	g_szRetData = "cancel"	
+
+	Dim szName, nPrice, nAbleQty, nAmount
+	
+	szName = Form.GetSharedData("mbonl87055_t2_name" , false)
+	nPrice = CDbl(Form.GetSharedData("mbonl87055_t2_price" , false))
+	nAbleQty = CDbl(Form.GetSharedData("mbonl87055_t2_ableqty" , false))
+	g_szType = Form.GetSharedData("mbonl87055_t2_type" , false) '추가
+	
+	'2024-03-12 CFD 채권대용추가
+	If g_szType == "03" Then
+		nAmount = nPrice * (nAbleQty/10)
+	Else
+		nAmount = nPrice * nAbleQty
+	End If
+	
+
+	Table0.SetCellString( 0, 1, szName )
+	Table0.SetCellString( 1, 1, nPrice )
+	Table0.SetCellString( 2, 1, nAbleQty )
+	Table0.SetCellString( 3, 1, nAmount )
+End Sub
+
+'============================================================================
+' RdoGubun_OnClick(nIndex) : 금액기준 수량기준 선택
+'============================================================================
+Sub RdoGubun_OnClick(nIndex)
+	EditInput.caption = ""
+	
+	if nIndex == 0 then
+		Table0.SetCellString( 5, 0, "금액" )	
+		
+		EditInput.mask = "0,0,,원,0,,0,1,0"
+	else
+		Table0.SetCellString( 5, 0, "수량" )	
+		
+		EditInput.mask = "0,0,, ,0,,0,1,0"
+	end if
+	
+	Table0.SetCellString( 7, 0, "" )
+	Table0.SetCellString( 7, 2, "" )
+End Sub
+
+'============================================================================
+' EditInput_OnEditComplete()
+'============================================================================
+Sub EditInput_OnEditComplete()
+	Table0.SetCellString( 7, 0, "" )
+	Table0.SetCellString( 7, 2, "" )
+End Sub
+
+'============================================================================
+' ButtonRequest_OnClick ()
+'============================================================================
+Sub ButtonRequest_OnClick()
+	Dim nSetPrice
+	'금액기준
+	if RdoGubun.currentindex == "0" then	
+		if EditInput.caption == "" or EditInput.caption == "0" then
+			Form.MsgBox( "알림", "금액을 확인하세요.", "", 6 )
+			Exit Sub
+		end if
+		if CDbl(EditInput.caption) > CDbl(Table0.GetCellString( 3, 1 )) then
+			Form.MsgBox( "알림", "가능금액을 초과합니다.", "", 6 )
+			Exit Sub	
+		end if
+		
+		Dim nAbleQty
+		
+		
+		'2024-03-12 CFD 채권대용추가
+		If g_szType == "03" Then
+			nAbleQty = ( CDbl(EditInput.caption) / CDbl(Table0.GetCellString( 1, 1 )) ) * 10
+		Else
+			nAbleQty = CDbl(EditInput.caption) / CDbl(Table0.GetCellString( 1, 1 ))
+		End If
+		
+		if nAbleQty == Int(nAbleQty) then
+			nAbleQty = Int(nAbleQty)
+		else
+			nAbleQty = Int(nAbleQty) + 1
+		end if
+		Table0.SetCellString( 7, 0, nAbleQty )
+		
+		
+		'2024-03-12 CFD 채권대용추가
+		If g_szType == "03" Then
+			nSetPrice = (nAbleQty/10) * CDbl(Table0.GetCellString( 1, 1 ))
+		Else
+			nSetPrice = nAbleQty * CDbl(Table0.GetCellString( 1, 1 ))
+		End If
+		
+	'수량기준
+	else
+		if EditInput.caption == "" or EditInput.caption == "0" then
+			Form.MsgBox( "알림", "수량을 확인하세요.", "", 6 )
+			Exit Sub
+		end if
+		
+		if CDbl(EditInput.caption) > CDbl(Table0.GetCellString( 2, 1 )) then
+			Form.MsgBox( "알림", "가능수량을 초과합니다.", "", 6 )
+			Exit Sub	
+		end if
+		
+		Table0.SetCellString( 7, 0, EditInput.caption )
+		
+		'2024-03-12 CFD 채권대용추가
+		If g_szType == "03" Then
+			nSetPrice = (CDbl(EditInput.caption)/10) * CDbl(Table0.GetCellString( 1, 1 ))
+		Else
+			nSetPrice = CDbl(EditInput.caption) * CDbl(Table0.GetCellString( 1, 1 ))
+		End If
+	end if
+	
+	Table0.SetCellString( 7, 2, nSetPrice )
+End Sub
+
+'============================================================================
+' ButtonOK_OnClick() : 확인 버튼
+'============================================================================
+Sub ButtonOK_OnClick()
+	if CDbl(Table0.GetCellString( 7, 0 )) == 0 or CDbl(Table0.GetCellString( 7, 2 )) == 0 then
+		If g_szState == "set" Then
+			Form.MsgBox( "알림", "설정수량 및 설정금액을 확인하세요.", "", 6 )
+		Else
+			Form.MsgBox( "알림", "해지수량 및 해지금액을 확인하세요.", "", 6 )
+		End If
+		Exit Sub
+	end if
+	
+	Form.SetSharedData("mbonl87055_t2_inputqty" , Table0.GetCellString( 7, 0 ))
+	Form.SetSharedData("mbonl87055_t2_inputprc" , Table0.GetCellString( 7, 2 ))
+	
+	g_szRetData = "ok"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' ButtonCancel_OnClick() : 취소 버튼
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm() 
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbonl87055" , g_szRetData)
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="oblon_pros_810a" trcode="oblon_pros_810a" compress="1" encryption="1" inputcheck="1" digitalsign="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="oblon_pros_810a" title="oblon_pros_810a" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="375" _ulen="283" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+LOAN_DTL_TYPE_CODE^대출 상세 유형 코드^4^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+FRML_MRKT_DEAL_QTY_UNIT^정규 시장 매매 수량 단위^11^0^7^0^0^0^0
+APLT_QTY^신청 수량^19^0^7^0^0^0^0
+APLT_AMT^신청 금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="84" _ulen="68" >
+
+APLT_QTY^신청 수량^19^0^7^0^0^0^0
+APLT_AMT^신청 금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

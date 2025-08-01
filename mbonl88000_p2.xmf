@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88000" scrname="자동해지 보완처리" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="acnt0" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133" etcfunctions="" accpwdctl="edtPW" totalacc="1" ly_vert="10,10,269,39,1" />
+		<EDIT name="edtPW" autofontsize="1" halign="1" password="2" imetype="1" maxlength="8" hintcaption="비밀번호" ly_vert="285,10,80,39,1" />
+		<TABLE name="tbl0" insidelinecolor="102:255255255" colcount="2" rowcount="3" designorder="1" ly_vert="0,57,375,556,1" >
+			<COL_INFO ly_vert_width="185,190" />
+			<ROW_INFO ly_vert_height="39,387,130" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" caption="국내파생ETF 자동해지현황" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,1" impidxs="" />
+				<CELL cell_ly="1,2,1,2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<WEBVIEW name="web0" enable="0" urlpath="about:blank" fontsize="1" ly_vert="0,97,375,159,1" />
+		<BUTTON name="btnOK" caption="확인" btnimage="btn_05.9" ly_vert="198,507,147,44,1" />
+		<EDIT name="edtSerNum" imetype="0" maxlength="11" ly_vert="553,161,113,38,1" />
+		<LABEL name="lblSerNum" caption="서비스 일련번호" ly_vert="421,167,124,27,1" />
+		<BUTTON name="btnCancel" caption="닫기" fgcolor="004:000000000" fontstyle="01" btnimage="btn_02.9" ly_vert="25,507,147,44,1" />
+		<BUTTON name="btnKyc" caption="투자성향진단" btnimage="btn_05.9" ly_vert="115,340,147,44,1" />
+		<TABLE name="tbl1" outlinecolor="028:255255255" insidelinecolor="028:255255255" colcount="4" rowcount="3" designorder="1" ly_vert="18,262,341,75,1" >
+			<COL_INFO ly_vert_width="126,23,73,119" />
+			<ROW_INFO ly_vert_height="25,25,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,4,0" halign="0" line="0,0" caption="■ 투자성향진단이 필요한 경우" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" caption="    ⇒ 투자성향진단" fontsize="-1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="0" line="0,0" caption="후" fontsize="-2" impidxs="" />
+				<CELL cell_ly="2,1,2,1" halign="0" line="0,0" caption="확인버튼" fontsize="-1" fontstyle="01" impidxs="" />
+				<CELL cell_ly="3,1,3,1" halign="0" line="0,0" caption="을 눌러 " fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,3,2" halign="0" line="0,0" caption="         보완조치완료여부를 확인하세요." fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<TABLE name="tbl2" outlinecolor="028:255255255" insidelinecolor="028:255255255" colcount="4" rowcount="3" designorder="1" ly_vert="18,396,343,75,1" >
+			<COL_INFO ly_vert_width="95,58,43,147" />
+			<ROW_INFO ly_vert_height="25,25,25" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,4,0" halign="0" line="0,0" caption="■ 부적정확인서 등록이 필요한 경우" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,0" caption="    ⇒ 확인버튼" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="1,1,3,1" halign="0" line="0,0" caption="을 눌러 부적정확인서를 등록하신 후 " fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,3,2" halign="0" line="0,0" caption="          보완조치완료여부를 확인하세요." fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="13392" _ulen="11996" >
+'============================================================================
+' 01. 화 면 명 : 파생상품ETF거래신청
+' 02. 화면설명 : 파생상품ETF거래신청
+' 03. 작    성 : 2016.03.03 유창재
+' 04. 수    정 : 2018.01.15 윤유정 : 국내/해외파생 ETF 나눠서 조회 v0001
+'			: 2020.09.16 : 권오상 : v002 : T2008250015 : 메모리평문 취약점 수정
+'			: 2023.11.22 : 권오상 : V003 : 투자성향진단 신규 화면으로 변경
+'============================================================================
+'****************************************************************************
+'					G L O B A L	V A R I A B L E
+'****************************************************************************
+Dim g_szCustNum			'고객번호
+Dim g_szPW				'비밀번호
+
+Dim g_SUCS_YN				'처리결과
+Dim g_INCL_Code			'KYC 투자성향등급코드
+Dim g_PROD_Code			'KYC 상품등급코드
+Dim g_DVPD_Code			'KYC 파생상품유의코드
+Dim g_DRVT_YN				'KYC 파생 처리 여부
+Dim g_STND_Date			'기준일자
+Dim g_REG_Srno			'등록일련번호
+Dim g_SVCD				'서비스코드(054.국내ETF / 083.해외ETF) v0001
+Dim g_Flg353r				'ETP보완조치 이전 팝업 결정 FLAG -> 0:팝업ok(054,083 둘다 보완조치) / 1:팝업no(083만 보완조치) v0001
+Dim	g_PlainRm 'v002
+'****************************************************************************
+'					P E R S O N A L	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' 
+'============================================================================
+Function SetTrans()
+	DATAMANAGER.RequestTranData( "obpds_srvc_353r_1" )
+'	if tbl0.GetCellString( 0, 1) <> "승인완료" then
+''		g_szApproveCode = "I"
+'		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "PROS_CLS_CODE" , 0 , "I")
+'		DATAMANAGER.RequestTranData( "obpds_srvc_045a" )
+'	end if
+End Function
+'****************************************************************************
+'					C O M M O N	F U N C T I O N
+'****************************************************************************
+'============================================================================
+' 
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szText
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v002
+	edtPW.caption = ""
+	szText = "<html><body> 국내파생ETF자동해지 고지문<br><br>"&
+			"● 국내파생ETF 거래는 투자정보제공이 필요하며, 초고위험(1등급)상품으로 고수익지향형 고객님께 적정합니다.<br><br>"&
+			"● 국내파생ETF 자동해지 안내문자 수신일포함 5영업일내 보완조치가 필요합니다 (미조치시 자동해지됨) <br><br>"
+			&"</body></html>"
+	web0.loaddata = szText
+	
+'	g_szCustNum = Form.GetSharedData( "&CUST_NUM" , false )
+	
+	g_SUCS_YN = Form.GetSharedData( "KYC_SUCS_YN" , false )
+	g_STND_Date = Form.GetSharedData( "KYC_STND_DATE", false )
+	g_REG_Srno = Form.GetSharedData( "KYC_REG_SRNO", false )
+	' 현재는 703r TR에서 받아옴
+	g_INCL_Code = Form.GetSharedData( "KYC_INVT_INCL_GRAD_CODE", false )
+	g_PROD_Code = Form.GetSharedData( "KYC_PROD_GRAD_CODE", false )
+	g_DVPD_Code = Form.GetSharedData( "KYC_DVPD_EPMD_CODE", false )
+	g_DRVT_YN = Form.GetSharedData( "KYC_DRVT_PROS_YN", false )
+	
+	DATAMANAGER.RequestTranData( "obcsb_acif_000r" )
+	
+	g_SVCD = "054" 'v0001
+	g_Flg353r = 0 'v0001
+	
+End Sub
+'============================================================================
+' 
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	if szTranID == "obpds_srvc_353r" then
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_353r", "InBlock1", "CSNO" , 0 , g_szCustNum)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_353r", "InBlock1", "SVCD" , 0 , g_SVCD) 'v0001
+	elseif szTranID == "obpds_srvc_353r_1" then
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_353r_1", "InBlock1", "CSNO" , 0 , g_szCustNum)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_353r_1", "InBlock1", "SVCD" , 0 , g_SVCD) 'v0001
+	'v0001 353r_2 추가
+	elseif szTranID == "obpds_srvc_353r_2" then 
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_353r_2", "InBlock1", "CSNO" , 0 , g_szCustNum)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_353r_2", "InBlock1", "SVCD" , 0 , g_SVCD)
+	elseif szTranID == "obpds_srvc_045a" then			'ETF약정
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "ACNO" , 0 , acnt0.total)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "ACNT_PWD" , 0 , g_szPW)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "CSNO" , 0 , g_szCustNum)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "SVCD" , 0 , "054")		'054 ETF, 021 ELW
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "SVC_MANG_UNIT_CODE" , 0 , "01")
+		
+		if g_SUCS_YN == "Y" then
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "STND_DATE" , 0 , g_STND_Date)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "REG_SRNO" , 0 , g_REG_Srno)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "PROS_YN" , 0 , "Y")
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "KYC_INVT_INCL_GRAD_CODE" , 0 , g_INCL_Code )
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "KYC_PROD_GRAD_CODE" , 0 , g_PROD_Code)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "KYC_BSWR_DIV_CODE" , 0 , "02")
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "KYC_DVPD_EPMD_CODE" , 0 , g_DVPD_Code)
+		DATAMANAGER.SetDataValue( 0 , "obpds_srvc_045a", "InBlock1", "KYC_DRVT_PROS_YN" , 0 , g_DRVT_YN)
+		end if
+	elseif szTranID == "obcsb_acif_000r" then
+		DATAMANAGER.SetDataValue( 0 , "obcsb_acif_000r", "InBlock1", "ACNO" , 0 , acnt0.total)
+	end if
+	
+End Sub
+'============================================================================
+' 
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim szMsgCode	
+	
+	
+'	if szTranID == "obpds_srvc_323r" then
+'		szMsgCode = DATAMANAGER.GetDataMsgCode( "obpds_srvc_323r" )
+'		if szMsgCode = "5766" then
+'			tbl0.SetCellString( 0 , 1 , "등록" )
+'			btnOK.enable = false
+'		else
+'			tbl0.SetCellString( 0 , 1 , "미등록" )
+'			btnOK.enable = true
+'		end if
+     if szTranID == "obpds_srvc_353r" then
+         if DATAMANAGER.GetDataValue( 0, "obpds_srvc_353r", "OutBlock1", "STPL_STAT_CLS_CODE" , 0) = "11" Then
+	         tbl0.SetCellString( 0 , 1 , "자동해지대상" )
+		    btnOK.enable = true
+		else
+'		    Form.ShowAlert( "알림" , "자동해지대상이 아니므로 해당화면 이용이 불가합니다")
+'		    Form.CloseForm(0)
+			'v0001 sta 
+			'국내파생ETF 자동해지대상이 아니면 해외파생ETF 조회
+			tbl0.SetCellString(0, 0, "해외ETP 자동해지현황")
+			
+			Dim szText
+			szText = "<html><body> 해외ETP 자동해지 고지문<br><br>"&
+					"● 해외ETP 거래는 투자정보제공이 필요하며, 초고위험(1등급)상품으로 고수익지향형 고객님께 적정합니다.<br><br>"&
+					"● 해외ETP 자동해지 안내문자 수신일포함 5영업일내 보완조치가 필요합니다 (미조치시 자동해지됨) <br><br>"
+					&"</body></html>"
+			web0.loaddata = szText
+			
+			g_SVCD = "083" 
+			g_Flg353r = 1 
+			DATAMANAGER.RequestTranData( "obpds_srvc_353r_2" )
+			'v0001 fin
+		end if
+	'v0001 sta
+	elseif szTranID == "obpds_srvc_353r_2" then
+		if DATAMANAGER.GetDataValue( 0, "obpds_srvc_353r_2", "OutBlock1", "STPL_STAT_CLS_CODE" , 0) = "11" Then
+			If g_Flg353r == 0 Then 
+				Form.MsgBox("알림", "국내파생ETF 부적정 등록이 완료되었습니다. \n해외ETP 거래를 위해 부적정 등록을 진행하시겠습니까?", "ETP_YN", 1)
+			Else
+				tbl0.SetCellString( 0 , 1 , "자동해지대상" )
+				btnOK.enable = true
+			End If
+		else
+			Form.ShowAlert( "알림" , "국내ETF/해외ETP 보완조치가 모두 완료되었습니다.") 
+			Form.CloseForm(0)
+		end if
+	'v0001 fin 
+	elseif szTranID == "obpds_srvc_353r_1" then
+         if DATAMANAGER.GetDataValue( 0, "obpds_srvc_353r_1", "OutBlock1", "STPL_STAT_CLS_CODE" , 0) = "01" Then
+			'v0001 sta
+		    '해외파생ETF 조회
+		    If g_SVCD == "054" Then
+			     g_SVCD = "083" 
+			     g_Flg353r = 0 
+				DATAMANAGER.RequestTranData( "obpds_srvc_353r_2" )
+		    Else
+			     tbl0.SetCellString( 0 , 1 , "보완조치완료" )
+				Form.ShowAlert( "알림" , "보완조치가 완료되었습니다.")
+		    End If
+		    'v0001 fin
+		else
+			'szData = "88000" & "★" & acnt0.total & "★" & edtPW.caption & "★" & g_SVCD 'v0001
+			If g_SVCD == "054" Then
+			    szData = "88000" & "★" & acnt0.total & "★" & edtPW.caption & "★" & g_SVCD
+			ElseIf g_SVCD == "083" Then
+				szData = "87050" & "★" & acnt0.total & "★" & "" & "★" & edtPW.caption & "★" & g_SVCD
+			End If
+		    Form.OpenFramePopup( "mbonl81010_p1" , szData , sPosInfo)
+		end if   
+	elseif szTranID == "obcsb_acif_000r" then
+		g_szCustNum = DATAMANAGER.GetDataValue( 0, "obcsb_acif_000r", "OutBlock1", "CSNO" , 0)
+		
+		tbl0.SetCellString( 0 , 1 , "" )
+		g_SVCD = "054" 'v0001
+		DATAMANAGER.RequestTranData( "obpds_srvc_353r" )
+	elseif szTranID == "obpds_srvc_045a" then
+		Form.ShowAlert( "알림", "처리가 완료되었습니다.")
+		DATAMANAGER.RequestTranData( "obcsb_acif_000r" )
+	end if
+	
+End Sub
+'============================================================================
+' 
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	
+	if szTranID == "obpds_srvc_353r" then
+		tbl0.SetCellString( 0 , 1 , "조회오류" )
+	elseif szTranID == "obpds_srvc_045a" then
+		szSubErr = DATAMANAGER.GetDataMsgSubText( szTranID )
+		Form.ShowAlert( "알림" , szErrMsg.."("..szSubErr..")")
+	end if
+	
+End Sub
+'============================================================================
+' 
+'============================================================================
+Sub btnOK_OnClick()
+	Dim szData
+	
+	if edtPW.caption == "" then
+		Form.ShowAlert( "알림" , "비밀번호를 입력하세요.")
+		Exit Sub
+	else
+		'szData = "88000" & "★" & acnt0.total & "★" & edtPW.caption 'v0001
+		If g_SVCD == "054" Then
+		    szData = "88000" & "★" & acnt0.total & "★" & edtPW.caption
+		ElseIf g_SVCD == "083" Then
+			szData = "87050" & "★" & acnt0.total & "★" & "" & "★" & edtPW.caption & "★" & g_SVCD
+		End If
+	end if
+     DATAMANAGER.RequestTranData( "obpds_srvc_353r_1" )
+     
+	'
+End Sub
+'============================================================================
+' 
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	
+	if sKeyName == "KYCCHK_RETURN" then			'투자성향진단 OK면 Y값내려줌
+		if sRet == "Y" then
+			SetTrans()
+		end if
+	end if
+	
+End Sub
+'============================================================================
+' 
+'============================================================================
+Sub edtPW_OnEditComplete()
+	
+'	g_szPW = Form.GetEncData( edtPW.caption ) 'v002
+	'v0
+	If g_PlainRm = "1" Then '보안모듈 적용
+		g_szPW = edtPW.caption
+	Else
+		g_szPW = Form.GetEncData( edtPW.caption )
+	End If
+
+	DATAMANAGER.RequestTranData( "obcsb_acif_000r" )
+	
+End Sub
+'============================================================================
+' 
+'============================================================================
+Sub acnt0_ChangeAccount()
+
+	DATAMANAGER.RequestTranData( "obcsb_acif_000r" )
+	edtPW.caption = ""
+	g_szPW = ""
+	
+End Sub
+'============================================================================
+' btnCancel_OnClick()
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' btnCancel_OnClick()
+'============================================================================
+Sub btnKyc_OnClick()
+     if edtPW.caption == "" then
+		Form.ShowAlert( "알림" , "비밀번호를 입력하세요.")
+		Exit Sub
+	else
+		szData = acnt0.caption & "★" & edtPW.caption
+	end if
+	
+'	Form.OpenFramePopup("mbonl81010_s1" , szData, sPosInfo) V003
+	Form.OpenPopup("mbonl81010_s2" , szData, "") 'V003
+End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)	
+	
+	if sKeyName == "ETP_YN" then
+		if sRet == "ok" then	
+			g_SVCD = "083" 
+		     tbl0.SetCellString(0, 0, "해외ETP 자동해지현황")
+		     
+		     Dim szText
+			szText = "<html><body> 해외ETP 자동해지 고지문<br><br>"&
+					"● 해외ETP 거래는 투자정보제공이 필요하며, 초고위험(1등급)상품으로 고수익지향형 고객님께 적정합니다.<br><br>"&
+					"● 해외ETP 자동해지 안내문자 수신일포함 5영업일내 보완조치가 필요합니다 (미조치시 자동해지됨) <br><br>"
+					&"</body></html>"
+			web0.loaddata = szText
+		     
+		     tbl0.SetCellString( 0 , 1 , "자동해지대상" )
+ 		     btnOK.enable = true
+		else
+			g_SVCD = "054" 
+			Exit Sub
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obpds_srvc_323r" trcode="obpds_srvc_323r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="SVCD" idx="2" defconst="054" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="obcsb_acif_000r" trcode="obcsb_acif_000r" compress="1" encryption="1" inputcheck="1" useattr="0" >
+				<TRBLOCK name="InBlock1" >
+					<FIELD name="PROS_CLS_CODE" idx="0" defconst="I" />
+				</TRBLOCK>
+			</TRAN>
+			<TRAN tranid="obpds_srvc_353r" trcode="obpds_srvc_353r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_353r_1" trcode="obpds_srvc_353r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obpds_srvc_353r_2" trcode="obpds_srvc_353r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obpds_srvc_323r" title="HTS-WTS용 서비스 내역 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="148" _ulen="110" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="159" _ulen="119" >
+
+SVCD^서비스코드^3^0^0^0^0^0^0
+SVC_SRNO^서비스일련번호^11^0^7^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+APRV_YN^승인여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_acif_000r" title="고객정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="134" _ulen="102" >
+
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2138" _ulen="1620" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+CUST_CNFR_YN^고객 확인 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+CUST_ABWR_NAME^고객 약어 명^40^0^0^0^0^0^0
+CUST_ENG_NAME^고객 영문 명^40^0^0^0^0^0^0
+RCNO_TYPE_CODE^실명확인번호 유형 코드^2^0^0^0^0^0^0
+INMR_CLS_CODE^소득자 구분 코드^3^0^0^0^0^0^0
+RLNM_ASCT_NO^실명 조합 번호^20^0^0^0^0^0^0
+FRGN_UNIQ_NO^외국인 고유 번호^6^0^0^0^0^0^0
+NTFR_CLS_CODE^내외국인 구분 코드^1^0^0^0^0^0^0
+RSDT_CLS_CODE^거주자 구분 코드^1^0^0^0^0^0^0
+NTNT_CTCD^국적 국가코드^3^0^0^0^0^0^0
+CUST_CLS_CODE^고객 구분 코드^1^0^0^0^0^0^0
+CUST_DETL_CLS_CODE^고객 세부 구분 코드^2^0^0^0^0^0^0
+RSDC_NTNL_TXRT_CODE^거주 국가 세율 코드^2^0^0^0^0^0^0
+PSPR_NO^여권 번호^10^0^0^0^0^0^0
+CONO^법인등록번호^13^0^0^0^0^0^0
+SLCN_CLS_CODE^양력 구분 코드^1^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+WDNG_DATE^결혼 일자^8^0^0^0^0^0^0
+MARG_LEVY_CLS_CODE^증거금징수구분코드^1^0^0^0^0^0^0
+RNMC_CLS_CODE^실명확인 구분 코드^2^0^0^0^0^0^0
+CNSG_YN^수탁 여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC 투자 권유 구분 코드^1^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC 투자 성향 등급 코드^2^0^0^0^0^0^0
+KYC_SPCL_INVR_YN^KYC 전문 투자자 여부^1^0^0^0^0^0^0
+KYC_SPCL_INVR_RGNO^KYC 전문 투자자 등록번호^20^0^0^0^0^0^0
+MTRT_DATE^만기 일자^8^0^0^0^0^0^0
+SSTS_YN^공매도 여부^1^0^0^0^0^0^0
+GNDR_CLS_CODE^성별 구분 코드^1^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC 유효 기간 만기 일자^8^0^0^0^0^0^0
+CNSG_RFUS_REAS_CODE^수탁 거부 사유 코드^3^0^0^0^0^0^0
+STA_DATE^시작 일자^8^0^0^0^0^0^0
+FIN_DATE^종료 일자^8^0^0^0^0^0^0
+BRTH_CTCD^출생국가코드^3^0^0^0^0^0^0
+AMRC_YN^미국인여부^1^0^0^0^0^0^0
+AML_BSTP_LRDV_CODE^AML업종대분류코드^2^0^0^0^0^0^0
+AML_BSTP_SMDV_CODE^AML업종소분류코드^5^0^0^0^0^0^0
+GIIN^GIIN^20^0^0^0^0^0^0
+LSTN_YN^상장여부^1^0^0^0^0^0^0
+DSTC_DATE^파기일자^8^0^0^0^0^0^0
+OVRS_TXPM_CHD_YN^해외납세자여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obpds_srvc_353r" title="파생상품ETF거래 약정 자동해지" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="76" _ulen="58" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="220" _ulen="164" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+STPL_STAT_CLS_CODE^약정상태구분코드^2^0^0^0^0^0^0
+LAST_ATMT_CANC_TRGT_CLS_CODE^최종자동해지대상구분코드^2^0^0^0^0^0^0
+CANC_REAS^해지사유^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

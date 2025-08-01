@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86011" scrname="이용기기 지정-기존 등록기기 삭제 팝업" version="2" writer="함태우" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" ly_vert="0,0,375,522,1" />
+		<IMAGE name="imgMain" imgpath="popup_bg.9" ly_vert="0,266,375,381,1" />
+		<BUTTON name="Button1" caption="변경 후 계속 진행하기" bgcolor="125:131139154" fontsize="2" fontstyle="01" ly_vert="0,597,375,50,1" />
+		<LABEL name="Label9" fontstyle="01" caption="기기지정현황" valign="0" ly_vert="20,392,152,20,1" />
+		<LABEL name="Label10" fgcolor="238:073100122" mask="1,0,,대,1,,0,1,1" halign="2" ly_vert="275,382,80,20,1" />
+		<GRID name="Grid0" colcount="4" ly_vert="20,424,335,150,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" mask="1,0,· ,,1,####.##.##,0,1,1" />
+				<LABEL name="bd_cell1" halign="2" paddinginfo="0,0,10,0" />
+				<IMAGE name="bd_cell2" autosize="1" />
+				<LABEL name="bd_cell3" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="5" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="150,155,5,20" ly_vert_visible="0,0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="150" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="155" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="5" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="bd_cell3" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="20" ly_vert_visible="0" />
+					<BODY rowcount="1" >
+						<ROWINFO ly_vert_height="30" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,0" line="0,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+		<LABEL name="Label11" fgcolor="238:073100122" caption="5" mask="1,0,,대,1,,0,1,1" halign="2" ly_vert="260,392,100,20,1" />
+		<LABEL name="Label1" caption="안전한 금융거래를 위해 이용기기 지정은" halign="1" valign="0" ly_vert="0,287,375,20,1" />
+		<LABEL name="Label0" bgcolor="017:216216216" transmode="0" ly_vert="15,377,345,1,1" />
+		<LABEL name="Label2" caption="최대 5대까지 가능합니다." halign="1" ly_vert="0,313,375,20,1" />
+		<LABEL name="Label3" caption="미사용 기기는 삭제 해주세요." halign="1" ly_vert="0,339,375,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2329" _ulen="2223" >
+'--===========================================================================
+'--===========================================================================
+
+
+Dim g_szSelectRow
+'============================================================================
+Sub Button1_OnClick()
+
+	if Grid0.rowcount == 5 or g_szSelectRow == "" then
+		Form.MsgBox("알림","기존 등록된 기기를 먼저 해지 후 등록 가능합니다.")
+	else
+		Form.SendReturnToParent( "mbonl86011_p4" , g_szSelectRow )
+		Form.CloseForm( )
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'Grid0.rowcount = 5
+	g_szSelectRow = ""
+	
+	Form.SetTimerEvent2(1, 1, 0.05)
+	
+	Dim szData
+	Dim szList
+	szData = Form.GetOpenLinkData()
+	
+	szList = Split(szData, "◆")
+	
+	if UBOUND(szList) < 1 then
+		Exit sub
+	End if
+	
+	Dim idx
+	
+	for i = 1 to 5
+		idx = i * 4 - 3
+		Grid0.SetCellData("bd_cell0", i-1, szList[idx])'날짜
+		Grid0.SetCellData("bd_cell1", i-1, szList[idx - 1])'이름
+	next
+	
+	Button1.btnimage = "btn_21.9"
+	'Button1.enable = 0
+End Sub
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	if szCellID == "bd_cell2" then
+		g_szSelectRow = g_szSelectRow .. "◆".. lRow
+		Grid0.SetDeleteRow(lRow)
+		Label11.caption = Grid0.rowcount
+		
+		Button1.btnimage = "btn_20.9"
+		'Button1.enable = 1
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+'Sub imgExit_OnClick()	'X버튼 클릭시
+'	Form.CloseForm()
+'End Sub
+
+'============================================================================
+'여백클릭시 꺼지도록 함
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+
+	if Cint(sTimerID) == 1 then
+		Form.SetTimerEvent2(Cint(sTimerID), 0, 0.5)
+		
+		for i = 1 to 5
+			Grid0.setMaintainingRatio("bd_cell2", i-1, "1")
+			Grid0.SetCellImage("bd_cell2",i-1, "icon_remove")
+		next
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

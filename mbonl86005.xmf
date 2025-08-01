@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86005" scrname="OTP관리" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Cont0" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0,375,647,1" >
+			<CONTROL_INFO>
+				<BUTTON name="Button2" btnimage="input_03.9" ly_vert="20,180,339,72,1" />
+				<BUTTON name="Button1" btnimage="input_03.9" ly_vert="20,95,339,72,1" />
+				<IMAGE name="Image12" imgpath="icon_arrow2_r" ly_vert="324,117,24,24,1" />
+				<LABEL name="Label2" fontstyle="01" caption="타기관 OTP 이용 등록" ly_vert="33,102,275,32,1" />
+				<LABEL name="Label3" fgcolor="146:124124124" fontsize="-2" caption="보유하고 있는 실물 OTP 등록, 해지" ly_vert="33,125,276,32,1" />
+				<IMAGE name="Image13" imgpath="icon_arrow2_r" ly_vert="324,202,24,24,1" />
+				<LABEL name="Label4" fontstyle="01" caption="OTP 조회ㆍ관리" ly_vert="33,187,275,32,1" />
+				<LABEL name="Label5" fgcolor="146:124124124" fontsize="-2" caption="보정, 사고등록, 이력조회" ly_vert="33,210,276,32,1" />
+				<LABEL name="Label14" fontsize="10" fontstyle="01" caption="OTP 관리" ly_vert="40,14,247,35,1" />
+				<IMAGE name="imgClose" imgpath="icon_main_13" ly_vert="324,4,40,40,1" />
+				<LABEL name="Label15" caption="원하시는 업무를 선택해주세요." ly_vert="10,46,290,35,1" />
+				<IMAGE name="Image0" imgpath="icon_top_back_light.png" ly_vert="10,0,34,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2858" _ulen="2770" >
+Dim g_OSType
+g_OSType = ""
+
+Dim g_Open
+g_Open = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'Cont0.Image12.SetMaintainingRatio("1")
+	'Cont0.Image13.SetMaintainingRatio("1")
+	'Cont0.imgClose.SetMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	s_OSTYPE = Form.GetSharedData("&OS_TYPE", false ) 'iOS("2")Android("1")
+	g_OSType = s_OSTYPE	
+
+	g_RcnoPIP	= Form.GetSharedData("&JUMIN_NUM", false )
+	g_CustTermID	=	Trim(Form.GetDeviceID())
+	g_OSClcd		=	Form.GetSharedData("&OS_TYPE", false)
+	g_OSVrsn		=	Form.GetSharedData("&OS_VERSION", false)
+	g_CustTermName	=	Form.GetDeviceModel()
+
+	DATAMANAGER.RequestTranData("obcsb_oimf_172r")
+	Form.SetTimerEvent2( 0, 1, 0.2)
+End Sub
+
+'============================================================================
+' 타기관 OTP 이용등록
+'============================================================================
+Sub Cont0_Button1_OnClick()
+
+	'로그인 여부 체크
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )		
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+		'타기관 OTP 목록 조회
+		'Form.OpenNextPopup( "nrsotp86000.xmf", "", "" )
+		Form.OpenNextPopup( "mbotp86000.xmf", "", "" )
+	else
+'		'안내
+'		if g_OSType == "2" then
+'			Form.OpenNextPopup( "mbotp86300.xmf", "POPUP_ALL_CLOSE", "" ) 
+'		else
+'			Form.OpenNextPopup( "mbotp86300.xmf", "", "" )
+'		end if
+		
+		'g_Open = "86300"
+		Form.OpenPopup("mbotp86300","","")	'20240311 KKM 수정			
+	end if
+End Sub
+
+'============================================================================
+' OTP 관리
+'============================================================================
+Sub Cont0_Button2_OnClick()
+
+	'로그인 여부 체크
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )		
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+		Form.OpenNextPopup( "mbonl86000.xmf" , "" , "" )
+	else	
+'		if g_OSType == "2" then
+'			Form.OpenScreen("86000", "POPUP_ALL_CLOSE")
+'		else
+'			Form.OpenScreen("86000", "")
+'		end if
+'		Form.CloseForm( )	
+		
+		g_Open = "86000"
+		Form.OpenPopup("mhetc90021","","")		
+	end if
+End Sub
+
+'============================================================================
+Sub Cont0_imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+'msgbox sKeyName & " :: " & sRet
+	if sKeyName == "Login_Type" then
+		if Cint(sRet) > 1 then
+			if g_Open == "86000" then
+				Form.OpenNextPopup( "mbonl86000.xmf" , "" , "" )
+			end if	
+		end if 
+	end if 
+End Sub
+
+'============================================================================
+Sub Cont0_Image0_OnClick()
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_172r" trcode="obcsb_oimf_172r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_172r" title="OTP조회(실물&모바일)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="161" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1257" _ulen="937" >
+
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_STAT_CODE^모바일OTP상태코드^2^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_ISNC_YMDH^모바일OTP발급일시^14^0^0^0^0^0^0
+MOTP_LOCK_YMDH^모바일OTPLOCK일시^14^0^0^0^0^0^0
+MOTP_MISS_YMDH^모바일OTP분실일시^14^0^0^0^0^0^0
+MOTP_DSCD_YMDH^모바일OTP폐기일시^14^0^0^0^0^0^0
+VALD_PRD_STA_DATE^유효기간시작일자^8^0^0^0^0^0^0
+VALD_PRD_EXPI_DATE^유효기간만료일자^8^0^0^0^0^0^0
+MOTP_MTRT_GUDE_YN^모바일OTP만기안내여부^1^0^0^0^0^0^0
+LAST_VRFC_YMDH^최종검증일시^14^0^0^0^0^0^0
+MOTP_MSTK_CSNU^모바일OTP오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_MSTK_CSNU^모바일OTP인증오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_LOCK_YN^모바일OTP인증LOCK여부^1^0^0^0^0^0^0
+MOTP_ATHN_LOCK_YMDH^모바일OTP인증LOCK일시^14^0^0^0^0^0^0
+MOTP_ATHN_LAST_MOD_YMDH^모바일OTP인증최종수정일시^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="315" _ulen="247" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_USE_RANG_CODE^OTP사용범위코드^1^0^0^0^0^0^0
+OTP_STAT_CODE^OTP상태코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="131" _ulen="103" >
+
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+UI_PRHB_REAS^UI불가사유^30^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

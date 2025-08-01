@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87052" scrname="해외주식 소수점 거래_약관팝업" version="2" writer="정민영" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="labTitle" fontsize="4" fontstyle="01" caption="약관 및 이용고지 보기" halign="1" autofontsize="1" ly_vert="50,0,275,60,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="20,64,335,489,1" />
+		<BUTTON name="bntOK" caption="확인" fontsize="4" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+		<IMAGE name="imgNext" autosize="1" imgpath="icon_arrow3_r.png" ly_vert="329,311,24,24,1" />
+		<IMAGE name="imgPrev" autosize="1" imgpath="icon_arrow3_l.png" ly_vert="20,311,24,24,1" />
+		<IMAGE name="imExit" autosize="1" imgpath="icon_close.png" ly_vert="20,18,24,24,1" />
+		<LABEL name="lblPage" halign="1" ly_vert="0,559,375,18,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2139" _ulen="2133" >
+Dim g_nURL_Cnt
+Dim g_tURL, g_tTitle
+Dim g_nNowCnt
+Dim g_sReturnType
+Dim g_bAgree
+'============================================================================
+Function f_SetNextUrl()
+	
+	if g_nNowCnt+1 >= g_nURL_Cnt then
+		Exit Function
+	else
+		g_nNowCnt = g_nNowCnt + 1
+		WebView0.urlpath = g_tURL(g_nNowCnt)
+		labTitle.caption = g_tTitle(g_nNowCnt)
+		lblPage.caption = g_nNowCnt+1&"/"&g_nURL_Cnt
+	end if
+End Function
+
+'============================================================================
+Function f_SetPrevUrl()
+	if g_nNowCnt == 0 then
+		Exit Function
+	else
+		g_nNowCnt = g_nNowCnt - 1
+		WebView0.urlpath = g_tURL(g_nNowCnt)
+		labTitle.caption = g_tTitle(g_nNowCnt)
+		lblPage.caption = g_nNowCnt+1&"/"&g_nURL_Cnt
+	end if
+End Function
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_bAgree = false
+	dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		dim tTemp
+		tTemp = Split(szOpenData, "♥")
+		g_sReturnType = tTemp(0)
+		g_tURL = Split(tTemp(1), "★")
+		g_tTitle = Split(tTemp(2), "★")
+		g_nNowCnt = 0
+		if #g_tURL > 0 then
+			g_nURL_Cnt = #g_tURL
+			WebView0.urlpath = g_tURL(g_nNowCnt)
+			labTitle.caption = g_tTitle(g_nNowCnt)
+			lblPage.caption = g_nNowCnt+1&"/"&g_nURL_Cnt
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub imgNext_OnClick()
+	f_SetNextUrl()
+End Sub
+
+'============================================================================
+Sub imgPrev_OnClick()
+	f_SetPrevUrl()
+End Sub
+
+'============================================================================
+Sub bntOK_OnClick()
+	g_bAgree = true
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imExit_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	if g_bAgree == true then
+		Form.SendReturnToParent("mbonl87056_p6", g_sReturnType)
+	else
+		Form.SendReturnToParent("mbonl87056_p6", "cancel")
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

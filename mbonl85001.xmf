@@ -1,0 +1,1331 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="85001" scrname="계좌번호_찾기" version="2" writer="정민영" />
+	<FORM_INFO name="Form" acecnt="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" vscroll="1" ly_vert="0,84,375,506,1" scroll_ly_vert="0,84,375,506,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="휴대폰 인증" ly_vert="20,10,342,20,1" />
+				<EDIT name="edtName" fontsize="4" imetype="0" maxlength="40" hintcaption="이름을 입력해주세요" imagefilepth="input_03.9" ly_vert="20,76,335,74,1" />
+				<EDIT name="edtRcno" visible="0" fontsize="4" password="1" imetype="1" maxlength="13" hintcaption="주민등록번호를 입력해주세요." imagefilepth="input_03.9" ly_vert="20,166,335,74,0" />
+				<LABEL name="lblScrollPos" bgcolor="227:248084091" ly_vert="14,422,336,13,1" />
+				<COMBO name="cmbMcco" visible="0" fontsize="4" cbinputdatatext="<![CDATA[1`SKT
+2`KT
+3`LG U+
+5`SKT 알뜰폰
+6`KT 알뜰폰
+7`LG 알뜰폰]]>" popuptitle="통신사를 선택해주세요" imagefilepth="input_03.9" disptype="-1" ly_vert="20,257,335,74,0" />
+				<EDIT name="edtHPNo" visible="0" fontsize="4" mask="1,0,,,1,###-####-####,0,1,1,0,0" imetype="1" maxlength="13" hintcaption="휴대폰번호를 입력하세요" imagefilepth="input_03.9" ly_vert="20,346,335,74,0" />
+				<EDIT name="edtAthnNo" enable="0" visible="0" fontsize="4" imetype="1" maxlength="6" minlength="6" hintcaption="인증번호를 입력하세요" imagefilepth="input_03.9" ly_vert="20,526,335,74,0" />
+				<LABEL name="lblSubTitle" fgcolor="321:115118124" valign="0" multiline="1" ly_vert="20,42,357,20,1" />
+				<BUTTON name="btnCtcnAgrm" visible="0" btnimage="input_03.9" ly_vert="20,436,335,74,0" />
+				<CHKBUTTON name="chkCtcnAgrm" visible="0" fontsize="4" chkcaption=" 휴대폰 본인인증 약관동의" unchkcaption=" 휴대폰 본인인증 약관동의" chkbtnimage="checkmenu_o" unchkbtnimage="checkmenu_n" ly_vert="40,439,260,68,0" />
+				<BUTTON name="btnAthnRetry" visible="0" btnimage="alpha" halign="2" ly_vert="273,610,82,32,0" />
+				<LABEL name="lblAthnTime" visible="0" caption="3:00" halign="2" valign="2" ly_vert="262,552,53,32,0" />
+				<IMAGE name="imgAthnShow" visible="0" autosize="1" imgpath="icon_arrow_right_off.png" des="약관보기" ly_vert="316,460,24,24,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="btnNext" visible="0" caption="다음" fontsize="4" btnimage="btn_20.9" ly_vert="0,597,375,50,0" />
+		<EDIT name="edtRqstTlmsNo" imetype="0" ly_vert="407,131,149,32,1" />
+		<EDIT name="edtVrfcTlmsNo" imetype="0" ly_vert="407,167,149,32,1" />
+		<LABEL name="labTitle" fontsize="4" fontstyle="01" caption="계좌번호 찾기" halign="1" ly_vert="0,0,375,60,1" />
+		<CHKBUTTON name="chkSkip" fontsize="-3" chkcaption="테스트인증Skip" unchkcaption="테스트인증Skip" ly_vert="31,45,154,41,1" />
+		<EDIT name="edt091TlmsNo2" imetype="0" ly_vert="407,260,149,32,1" />
+		<EDIT name="edt091TlmsNo1" imetype="0" ly_vert="407,206,149,32,1" />
+		<IMAGE name="ImgBackPress" imgpath="icon_arrow_left_on" ly_vert="17,15,24,33,1" />
+		<IMAGE name="imgCaution" autosize="1" imgpath="icon_notice.png" ly_vert="338,19,20,20,1" />
+		<BUTTON name="BtnCaution" btnimage="alpha" ly_vert="323,9,45,43,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="46747" _ulen="40681" >
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_sz_OSType        'OS타입
+Dim g_szScreenNo       '화면번호 - 20240119 HSZ
+Dim g_nDev
+
+Dim g_HPSec            '본인인증유효시간(3분)
+    g_HPSec = 180
+Dim g_nCnt             '본인인증용호출횟수
+    g_nCnt = 0
+Dim g_Frst_YN          '인증번호요청구분용
+    g_Frst_YN = "Y"
+    
+'스크롤체크용(입력항목갯수만큼 설정) - 컨트롤 visible 체크가 안되는 경우가 있어 변수로 변경
+Dim g_Cntt1
+    g_Cntt1 = "N"
+Dim g_Cntt2
+    g_Cntt2 = "N"
+Dim g_Cntt3
+    g_Cntt3 = "N"
+Dim g_Cntt4
+    g_Cntt4 = "N"
+Dim g_Cntt5
+    g_Cntt5 = "N"
+Dim g_Cntt6
+    g_Cntt6 = "N"
+
+'20230620 SWJ START
+Dim g_closeflag
+Dim g_sData
+'20230620 SWJ END
+Dim g_BtnCaution_YN
+'============================================================================
+' 							FORM 함수
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBackPress.setMaintainingRatio("1")
+	imgCaution.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'안드로이드-백버튼 작동X
+	'부모창이 먼저 닫히는 오류방지를 위해 해당화면은 백버튼 작동X 처리
+	Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	
+	'OSType 1.안드로이드 2.IOS
+	g_sz_OSType = Form.GetSharedData("&OS_TYPE", False)
+	
+	'화면번호 - 메뉴오픈 CASE 처리위함
+	g_szScreenNo = Form.GetSharedData( "&POPUP_SCREEN_NO" , false )	'20240119 HSZ
+
+	'iOS 스크롤 제어용
+	if g_sz_OSType == "2" then
+		contMain.setExceptInvisibleCtl(true)
+		contMain.setScrollAutoSize()
+	else
+		contMain.setScrollBarVisible("2")
+	end if
+
+	contMain.lblSubTitle.caption = "본인 명의의 휴대폰으로 인증을 진행해주세요."
+	
+	'재요청버튼 문구
+	contMain.btnAthnRetry.caption = "재요청 >"
+	contMain.btnAthnRetry.fgcolor = 267   '검은색
+	
+	'테스트용 인증스킵 체크
+	g_nDev = Form.GetSharedData("&SERVER_MODE", False )
+	If g_nDev == "1" Or g_nDev == 1 Then
+'금보원앱심사까지 Hidden
+'chkSkip.visible = False
+'chkSkip.checkstate = "0"
+		chkSkip.visible = True
+		chkSkip.checkstate = "0"   '자동체크 제외 "1"  '자동체크
+	Else
+		chkSkip.visible = False
+		chkSkip.checkstate = "0"
+	End If
+
+	'서비스에 대한 토스메시지 제거
+	DATAMANAGER.SetNotifyDataMessage("obcsb_oimf_653a"   , False)  '인증번호 요청
+	DATAMANAGER.SetNotifyDataMessage("obcsb_oimf_654a"   , False)  '인증확인 요청
+	DATAMANAGER.SetNotifyDataMessage("obcsb_oimf_654a_1" , False)  '인증확인 요청검증
+	DATAMANAGER.SetNotifyDataMessage("obcsb_oimf_655r"   , False)  '인증결과 검증
+
+	'항목가이드 Default 설정 (267.검정색)
+	contMain.edtName.SetApplyLabel   ("이름"         , 0, 267, "left", false)  'True.필수입력 / False.선택입력
+	contMain.edtRcno.SetApplyLabel   ("주민등록번호" , 0, 267, "left", false)
+	contMain.cmbMcco.SetApplyLabel   ("통신사"       , 0, 267, "left", false, 111) 'HWG
+	contMain.edtHPNo.SetApplyLabel   ("휴대폰번호"   , 0, 267, "left", false)
+	contMain.edtAthnNo.SetApplyLabel ("인증번호"     , 0, 267, "left", false)
+    
+	'통신사선택콤보 타입 설정
+	contMain.cmbMcco.cbtype = 5
+	
+	'헬퍼텍스트 설정
+	contMain.edtName.SetUseResultLabel  (True, 1)  'True.사용가능 / False.사용불가, 라인수
+	contMain.edtRcno.SetUseResultLabel  (True, 1)
+	contMain.cmbMcco.SetUseResultLabel  (True, 1)
+	contMain.edtHPNo.SetUseResultLabel  (True, 1)
+	contMain.edtAthnNo.SetUseResultLabel(True, 2)
+	
+	'주민등록번호 자릿수 설정
+	contMain.edtRcno.pwdlen = 13
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose() 
+    '화면닫기전 안드로이드-백버튼 작동Y 원복
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")    
+    
+    '20230620 SWJ START
+    if g_closeflag then
+	    Form.OpenPopup("mhetc90190_s1", "FindAcnt" & "@" & g_sData)
+	    g_closeflag = ""
+    end if
+    '20230620 SWJ END
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'안드로이드-백버튼 작동X
+	'부모창이 먼저 닫히는 오류방지를 위해 해당화면은 백버튼 작동X 처리
+	Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	
+	'휴대폰 본인인증 약관동의
+	If sKeyName == "mbbdm85110_p1"  Then
+	
+		If sRet == "ok" Then
+		
+			'약관동의 체크
+			If contMain.chkCtcnAgrm.checkstate == "0" Or contMain.chkCtcnAgrm.checkstate == 0 Then  '0.uncheck 1.check
+				contMain.chkCtcnAgrm.checkstate = "1"
+				contMain_chkCtcnAgrm_OnChange("1")
+			End If
+		
+		End If
+		
+	' 계좌번호찾기 리턴(고객정보 없는 경우)
+	elseif sKeyName == "mbonl85001_p2" then
+	
+		' 비대면계좌 개설(비대면계좌개설 안내로 이동)
+		if sRet == "OK" then
+			Dim sloginType
+			sloginType = Form.GetSharedData("&LOGIN_TYPE", false)
+			
+			if Cint(sloginType) > 1 then
+				sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"
+				Form.MsgBox("알림", sText, "LOGOUT_MSG", 1)
+			else
+				Form.SetSharedData("&SCREEN_AUTH" , "99")
+'				Form.OpenPopup("mbbdm85100", "", "")
+
+				'20240119 HSZ START: 메뉴에서 진입 시, 현재 화면 닫기처리
+				if g_szScreenNo = "85110" then
+					Form.openNextPopup("mbbdm85100", "", "")
+				else
+					Form.OpenPopup("mbbdm85100", "", "")		'기존로직
+				end if
+				'20240119 HSZ END
+			end if
+			
+		' 확인(인증/OTP센터로 이동)
+		elseif sRet == "CONFIRM" then
+'			20240119 HSZ START: 메뉴에서 진입 시, 메뉴트리로 이동
+			if g_szScreenNo = "85110" then	'메뉴진입 case
+				if g_sz_OSType = "1" then
+					Form.OpenMainMenuWithIndex(3,1,0)
+				end if
+				Form.CloseForm()
+			else							'기존 로직
+				Form.OpenPopup("mhetc90120", "", "")
+			end if
+'			20240119 HSZ END
+		end if
+	
+	' 계좌번호찾기 리턴(고객정보 있는 경우)
+	elseif sKeyName == "mbonl85001_p1" then
+		Dim szData
+		g_sData	= Form.GetSharedData("mbonl85001_p1_ACNO",	true)	'20230620 SWJ START : 전역변수로 변경
+		szData	= Form.GetSharedData("MeritzAuth_FindAcnt",	true)
+		
+		if sRet == "RETURN" then
+		
+			if szData == "Y" then
+				'20230613 SWJ START : 고객명 정보 SET
+				Form.SetSharedData("Meritz_OTP_CustName" , contMain.edtName.Caption )
+				'20230613 SWJ END
+				
+				'20230620 SWJ START : iOS 화면 안열리는 현상이 있어서 mbonl85001_p1과 함꼐 일부 수정
+				g_closeflag = true
+				Form.CloseForm()
+				'20230620 SWJ END
+			else
+				Form.CloseForm()
+				Form.SendReturnToParent("mbonl85001", g_sData)
+			end if
+		
+		elseif sRet == "CLOSE" then
+			
+			if szData == "Y" then
+				Form.OpenNextPopup("mhetc90190_s1", "", "")
+			else
+				Form.CloseForm()
+			end if
+		'20240119 HSZ START: 메뉴오픈 추가
+		elseif sRet == "MENU_CLOSE" then
+			if g_sz_OSType = "1" then
+				Form.OpenMainMenuWithIndex(3,1,0)
+			end if
+			Form.CloseForm()
+		'20240119 HSZ END	
+		end if
+	elseif sKeyName == "mbonl85001_p3" then 
+		g_BtnCaution_YN = "N"
+	End If
+	
+End Sub
+
+'============================================================================
+' IOS-인증문자 자동 설정
+Sub Form_OnTriggerEvent(sEventName, sParam)
+    If sEventName == "event_HpCertNo" Then
+        If sParam <>"" Then
+            strData = Split(sParam,":")
+            If len(strData[1]) == 8 Then
+                strCertNo = Mid(strData[1],2,6)
+                contMain.edtAthnNo.caption = strCertNo
+            End If
+        End If
+    End If
+End Sub
+
+'============================================================================
+' 본인인증용 타이머
+Sub Form_OnTimerEvent(sTimerID)
+
+    'sTimerID = 0 : 인증번호 요청
+    'sTimerID = 1 : 인증확인 요청/요청검증
+    'sTimerID = 2 : 인증유효시간
+    'sTimerID = 5 : 통신사콤보 자동펼치기
+
+    '인증번호 요청 -------------------------------------------------------
+    If  sTimerID == 0 Or sTimerID == "0" Then
+        '인증요청 타이머종료
+        Form.SetTimerEvent(0, 0, 1)
+
+        '인증유효횟수 설정
+        g_nCnt = CInt(g_nCnt) + 1
+
+        '인증유효횟수 초과 체크
+        If CInt(g_nCnt) > 10 Then
+            contMain.edtAthnNo.SetResultLabel("1","error","본인인증에 실패하였습니다. 다시 시도하여 주시기 바랍니다.","contMain")
+
+            '인증번호 재요청버튼 Show
+            contMain.edtAthnNo.caption    = ""
+            contMain.edtAthnNo.enable     = False
+            contMain.btnAthnRetry.visible = True
+            contMain.btnAthnRetry.enable  = True
+
+            '3분 타이머 초기화
+            InitCountTimer()
+            Exit Sub
+        End If
+
+        '인증확인 요청
+        DATAMANAGER.RequestTranData "obcsb_oimf_654a"
+
+    '인증확인 요청검증 -------------------------------------------------------
+    ElseIf sTimerID == 1 Or sTimerID == "1" Then
+        '검증요청 타이머종료
+        Form.SetTimerEvent(1, 0, 1)
+
+        '인증유효횟수 설정
+        g_nCnt = CInt(g_nCnt)+1
+
+        '인증유효횟수 초과 체크
+        If CInt(g_nCnt) > 10 Then
+            contMain.edtAthnNo.SetResultLabel("1","error","SMS 검증요청이 실패하였습니다. 잠시 후 다시 시도해 주십시오.","contMain")
+
+            '인증번호 재요청버튼 Show
+            contMain.edtAthnNo.caption    = ""
+            contMain.edtAthnNo.enable     = False
+            contMain.btnAthnRetry.visible = True
+            contMain.btnAthnRetry.enable  = True
+
+            '3분 타이머 초기화
+            InitCountTimer()
+            Exit Sub
+        End If
+
+        '인증결과 검증
+        DATAMANAGER.RequestTranData "obcsb_oimf_655r"
+
+    '휴대폰본인인증 유효시간(3분) -------------------------------------------------------
+    ElseIf sTimerID == 2 Or sTimerID == "2" Then
+        If g_HPSec == 0 Then
+            contMain.edtAthnNo.SetResultLabel("1","error","인증시간이 만료되었습니다.\n다시 시도하여 주시기 바랍니다","contMain")
+
+            '유효시간체크 종료
+            Form.SetTimerEvent(2, 0, 1)
+
+            '인증번호 재요청버튼 Show
+            contMain.edtAthnNo.caption    = ""
+            contMain.edtAthnNo.enable     = False
+            contMain.btnAthnRetry.visible = True
+            contMain.btnAthnRetry.enable  = True
+            
+            '시간만료시엔 초기화시키지 않는다
+            contMain.lblAthnTime.caption = "0:00"
+
+        Else
+            Dim nMin, nSec
+            nMin  = Int(CInt(g_HPSec) / 60 )
+            nSec  = CInt(g_HPSec) Mod  60
+            If Len(nSec) == 1 Then
+                nSec = "0"..nSec
+                nSec = nSec
+            End If
+
+            '#:##
+            contMain.lblAthnTime.caption = nMin..":"..nSec
+            g_HPSec = CInt(g_HPSec)-1
+        End If
+
+    'LES START
+    '통신사콤보 포커싱 및 자동펼치기
+    ElseIf sTimerID = "5" Or sTimerID = 5 Then
+        Form.SetTimerEvent2(sTimerID, 0, 0.8)
+
+        If CInt(contMain.cmbMcco.currentindex) < 1 And Trim(contMain.cmbMcco.caption) == "통신사를 선택해주세요" Then
+            contMain.cmbMcco.openList()
+        End If
+	
+    End If
+	
+	'통신사 선택 후 휴대전화번호 키패드 자동 노출
+	if sTimerID == 50 or sTimerID == "50" then
+		Form.SetTimerEvent2(50, 0, 0.1)
+		contMain.edtHPNo.SetShowKeypad(True)
+	end if
+	
+	if sTimerID == 70 or sTimerID == "70" then
+		if g_BtnCaution_YN <> "Y" then
+			Form.SetTimerEvent2(70, 0, 1)
+			contMain.edtRcno.SetShowKeypad(True)	
+		end if 
+	end if
+	
+				
+End Sub
+
+'============================================================================
+' 이전단계로
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+    '안드로이드-백버튼 작동X
+    '부모창이 먼저 닫히는 오류방지를 위해 해당화면은 백버튼 작동X 처리
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+
+	if sKeyName == "LOGOUT_MSG" then
+	
+		if sRet == "ok" then
+			'1parm (0.문구없음 1.문구있음)
+			'2parm (0.권한상관없이 로그아웃만 함 1.화면권한에 따라 닫을 화면 로그아웃)
+			Form.LogOut(0, 1)
+			Form.SetSharedData("&SCREEN_AUTH", "99")
+'			Form.OpenPopup("mbbdm85100", "", "")
+			'20240119 HSZ START: 메뉴에서 진입 시, 현재 화면 닫기처리
+			if g_szScreenNo = "85110" then
+				Form.openNextPopup("mbbdm85100", "", "")
+			else
+				Form.OpenPopup("mbbdm85100", "", "")		'기존로직
+			end if
+			'20240119 HSZ END
+		end if
+		
+    End If
+    
+End Sub
+
+'============================================================================
+' 						DATAMANAGER 함수
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	'간편 인증 계좌번호 찾기(계좌 여부 체크)
+	if szTranID == "obaci_acct_401r" then	
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "IQRY_CLS_CODE",	0, "1")
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "CLPH_TELNO", 		0, Trim(contMain.edtHPNo.caption))
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "RCNO_PIP", 		0, contMain.edtRcno.caption)
+		DATAMANAGER.SetDataValue(false, szTranID, "InBlock1", "CSNM", 			0, contMain.edtName.caption)
+	end if
+
+    '기체크된 인증번호체크결과 helpmsg 숨기기
+    if szTranID == "obcsb_oimf_653a" Or szTranID == "obcsb_oimf_654a_1" Or szTranID == "obcsb_oimf_655r" Then
+        contMain.edtAthnNo.SetResultLabel("0","complete","","contMain")
+    end if
+
+    '인증번호 요청 -------------------------------------------------------------
+    if szTranID == "obcsb_oimf_653a" Then
+        '인증검증건수 초기화
+        g_nCnt = 0
+    
+        '요청전문번호/검증전문번호 초기화
+        edtRqstTlmsNo.caption = ""
+        edtVrfcTlmsNo.caption = ""
+
+        '통신사확인(인증프로그램에서 체크하는 2자리로만 매핑)
+        strRd = contMain.cmbMcco.currentindex
+        If strRd == "0" Or strRd == 0 Then
+            strRd_Key = "SK"  'SKT    -메타값 STK
+        ElseIf strRd == "1" Or strRd == 1 Then
+            strRd_Key = "KT"  'KT   -메타값 KTF
+        ElseIf strRd == "2" Or strRd == 2 Then
+            strRd_Key = "LG"  'LGU+ -메타값 LGT
+        ElseIf strRd == "3" Or strRd == 3 Then
+            strRd_Key = "AL"  'SK알뜰 -메타값 SKA
+        ElseIf strRd == "4" Or strRd == 4 Then
+            strRd_Key = "KA"  'KT알뜰 -메타값 KTA
+        ElseIf strRd == "5" Or strRd == 5 Then
+            strRd_Key = "LA"  'LGU+알뜰 -메타값 LGA
+        End If
+
+        '휴대폰번호
+        If Len(Trim(contMain.edtHPNo.caption)) == 10 Then  '###-###-####
+            strArcd = mid(Trim(contMain.edtHPNo.caption), 1, 3)
+            strTono = mid(Trim(contMain.edtHPNo.caption), 4, 3)
+            strSrno = mid(Trim(contMain.edtHPNo.caption), 7, 4)
+        Else  '###-####-####
+            strArcd = mid(Trim(contMain.edtHPNo.caption), 1, 3)
+            strTono = mid(Trim(contMain.edtHPNo.caption), 4, 4)
+            strSrno = mid(Trim(contMain.edtHPNo.caption), 8, 4)
+        End If
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS"       , 0, "N"                      )  'N.비대면
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATHN_BSWR_CLCD" , 0, "2"                      )  '전체실명번호검증을 위해 4.본인인증+생년월일 -> 2.본인인증 전문변경
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MCCO_CODE"      , 0, strRd_Key                )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SVCD"           , 0, "N2"                     )  
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RRNO_PIP"       , 0, contMain.edtRcno.caption )  '주민번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CSNM"           , 0, contMain.edtName.caption )  '고객명
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CLPH_ARCD"      , 0, strArcd                  )  '휴대폰번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CLPH_TONO"      , 0, strTono                  )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CLPH_SRNO"      , 0, strSrno                  )
+
+    '인증확인 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a" Then
+        '인증검증건수 초기화
+        'g_nCnt = 0
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS"            , 0, "3"                      )  '3.(비대면)1차 응답코드 조회
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATHN_BSWR_CLCD"      , 0, "2"                      )  '전체실명번호검증을 위해 4.본인인증+생년월일
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SMS_ATHN_NO"         , 0, ""                       )
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RRNO_PIP"            , 0, contMain.edtRcno.caption )  '주민번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "NICE_ISTU_TLMS_MNNO" , 0, edtRqstTlmsNo.caption    )  '인증번호요청전문번호
+
+    '인증확인 요청검증 ---------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a_1" Then
+        '요청검증전문번호 초기화
+        edtVrfcTlmsNo.caption = ""
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS"            , 0, "4"                        )  '4.(비대면)2차 확인 전송
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATHN_BSWR_CLCD"      , 0, "2"                        )  '전체실명번호검증을 위해 4.본인인증+생년월일
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RRNO_PIP"            , 0, contMain.edtRcno.caption  )  '주민번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "NICE_ISTU_TLMS_MNNO" , 0, edtRqstTlmsNo.caption      )  '인증번호요청전문번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SMS_ATHN_NO"         , 0, contMain.edtAthnNo.caption )  '인증번호
+
+    '인증결과 검증 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_655r" Then
+        '인증검증건수 초기화
+        'g_nCnt = 0
+
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "PROS_CLS"             , 0, "N"                        )  'N.비대면
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ATHN_BSWR_CLCD"       , 0, "2"                        )  '전체실명번호검증을 위해 4.본인인증+생년월일
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RRNO_PIP"             , 0, contMain.edtRcno.caption   )  '암호화주민번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "NICE_ISTU_TLMS_MNNO"  , 0, edtVrfcTlmsNo.caption      )  '인증번호검증전문번호
+        DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "SMS_ATHN_NO"          , 0, contMain.edtAthnNo.caption )  '인증번호
+    End If
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	'간편 인증 계좌번호 찾기(계좌 여부 체크)
+	if szTranID == "obaci_acct_401r" then
+		Dim nCnt
+		nCnt = DATAMANAGER.GetDataCount(false, szTranID, "OutBlock1")
+		
+		if nCnt > 0 then			
+			Form.SetSharedData("mbonl85001_CPNO",		Trim(contMain.edtHPNo.caption))
+			Form.SetSharedData("mbonl85001_RCNO_PIP",	contMain.edtRcno.caption)
+			Form.SetSharedData("mbonl85001_CSNM",		contMain.edtName.caption)
+	
+			Form.OpenPopup("mbonl85001_p1", "", "")
+		else
+			Form.OpenPopup("mbonl85001_p2", "", "")
+		end if
+
+	end if
+
+    '인증번호 요청 -------------------------------------------------------------
+    If szTranID == "obcsb_oimf_653a" Then  
+        '요청전문번호 설정
+        sTemp = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "NICE_ISTU_TLMS_MNNO", 0)
+        edtRqstTlmsNo.caption = Trim(sTemp)
+
+        '인증번호 요청 타이머실행
+        Form.SetTimerEvent(0, 1, 1)
+
+    '인증확인 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a" Then
+        Form.ShowAlert("확인", "인증번호가 정상적으로 발송 되었습니다.")
+    
+        g_HPSec = 180             '인증가능시간설정
+        Form.SetTimerEvent(2, 1, 1)
+
+    '인증확인 요청검증 ---------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a_1" Then
+        '인증확인 요청전문번호 설정
+         sTemp = DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "NICE_ISTU_TLMS_MNNO", 0)
+         edtVrfcTlmsNo.caption = Trim(sTemp)
+
+         '인증확인 요청검증 타이머실행
+         Form.SetTimerEvent(1, 1, 1)
+
+    '인증결과 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_655r" Then
+
+        '3분 타이머 초기화
+        InitCountTimer()
+
+        '인증완료 메시지 표시
+        contMain.edtAthnNo.SetResultLabel("1","complete","인증되었습니다.","contMain")
+
+        '인증이 정상적으로 처리된 후, 정보 변경 못하도록 전체 비활성화(보안성 보완)
+        contMain.edtName.enable      = False
+        contMain.edtRcno.enable      = False
+        contMain.cmbMcco.enable      = False
+        contMain.edtHPNo.enable      = False
+        contMain.btnCtcnAgrm.enable  = False
+        contMain.chkCtcnAgrm.bringFront("1")   '(IOS)인증완료후, 비활성화를 위해 제일 앞단으로 위치 (순서주의! btnCtcnAgrm 처리후해야함)
+        contMain.chkCtcnAgrm.enable  = False
+        contMain.imgAthnShow.enable  = False
+        contMain.edtAthnNo.enable    = False
+        contMain.btnAthnRetry.enable = False
+
+        contMain.btnAthnRetry.visibe = False  '재요청버튼은 hidden
+        contMain.lblAthnTime.visibe  = False  '인증유효시간 hidden
+       
+        '확인버튼 활성화
+        btnNext.visible = True
+	
+        btnNext.btnimage = "btn_20.9"
+        btnNext.fgcolor = "273"
+	   
+	   Form.SetSharedData("Meritz_OTP_PhoneNum" , contMain.edtHPNo.Caption )
+	 end if
+	 
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+    '오류메시지 설정
+    strSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+    If Trim(strSubMsg) ~= null And Trim(strSubMsg) ~= "" Then
+        strMsg2 = szErrMsg.."("..Trim(strSubMsg)..")"
+        strMsg = szErrMsg.."\n"..Trim(strSubMsg)
+    Else
+        strMsg2 = szErrMsg
+        strMsg = szErrMsg
+    End If
+
+    '인증번호 요청 -------------------------------------------------------------
+    If szTranID == "obcsb_oimf_653a" Then
+        contMain.edtAthnNo.SetResultLabel("1","error",strMsg,"contMain")
+
+        '인증번호 재요청버튼 Show
+        contMain.edtAthnNo.caption    = ""
+        contMain.edtAthnNo.enable     = False
+        contMain.btnAthnRetry.visible = True
+        contMain.btnAthnRetry.enable  = True
+
+    '인증확인 요청 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a" Then
+        If szErrCode == "3021" Or szErrCode == 3021 Then
+            '전문미수신인경우, 인증번호 재요청(타이머 실행)
+            Form.SetTimerEvent(0, 1, 1)
+        Else
+            contMain.edtAthnNo.SetResultLabel("1","error",strMsg,"contMain")
+
+            '인증번호 재요청버튼 Show
+            contMain.edtAthnNo.caption    = ""
+            contMain.edtAthnNo.enable     = False
+            contMain.btnAthnRetry.visible = True
+            contMain.btnAthnRetry.enable  = True
+        End If
+
+    '인증확인 요청검증 ---------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_654a_1" Then
+        contMain.edtAthnNo.SetResultLabel("1","error",strMsg,"contMain")
+
+        '인증번호 재요청버튼 Show
+        contMain.edtAthnNo.caption    = ""
+        contMain.edtAthnNo.enable     = False
+        contMain.btnAthnRetry.visible = True
+        contMain.btnAthnRetry.enable  = True
+
+    '인증결과 검증 -------------------------------------------------------------
+    ElseIf szTranID == "obcsb_oimf_655r" Then
+        If szErrCode == "3021" Or szErrCode == 3021 Then        
+            '전문미수신인경우, 인증확인 요청검증 재요청(타이머 실행)
+            Form.SetTimerEvent(1, 1, 1)
+        Else
+            contMain.edtAthnNo.SetResultLabel("1","error",strMsg,"contMain")
+
+            '인증번호 재요청버튼 Show
+            'contMain.edtAthnNo.caption    = ""
+            'contMain.edtAthnNo.enable     = True  'False 
+            If contMain.lblAthnTime.caption == "3:00" And CInt(g_HPSec) = 180 Then
+                contMain.edtAthnNo.caption    = ""
+                contMain.edtAthnNo.enable     = True
+                contMain.btnAthnRetry.visible = True
+                contMain.btnAthnRetry.enable  = True
+            Else
+                '인증번호체크중 오류인 경우에는 인증유효시간까지 재입력가능
+                contMain.btnAthnRetry.visible = False
+                contMain.btnAthnRetry.enable  = False
+            End If
+        End If
+	
+    else
+    
+        btnNext.enable = true	'20230419 추가
+	
+        btnNext.btnimage = "btn_20.9"
+        btnNext.fgcolor = "273"		
+		
+        Form.ShowAlert("오류", strMsg2)
+    End If
+
+End Sub
+
+'============================================================================
+'							CONTORL 함수
+'============================================================================
+' 입력항목 Show
+' 이름 -> 주민등록번호 -> 통신사 -> 휴대폰번호 -> 약관 -> 인증번호 순으로 Show
+'============================================================================
+Sub contMain_edtName_OnEditComplete() '이름
+	g_Cntt1 = "Y"  '스크롤설정 체크용 변수 설정
+	
+	nTop = 0
+	nContResize = 0
+	
+	If contMain.edtName.caption ~= "" Or contMain.edtName.caption ~= null Then
+	
+		If Len(replace(contMain.edtName.caption, " " , "")) == 0 Then
+			contMain.edtName.SetResultLabel("1","error","이름을 입력해주세요.","contMain")
+			Exit Sub
+		Else
+			'이름 공백 체크
+			sStr = Len(contMain.edtName.Caption)
+			sRplStr = Len(replace(contMain.edtName.caption, " " , ""))
+			
+			If sStr <> sRplStr Then
+				contMain.edtName.SetResultLabel("1","error","이름을 확인해주세요.(공백 불가)","contMain")
+				Exit Sub
+			End If
+			
+		End If
+	
+		contMain.edtName.SetResultLabel("0","complete","","contMain")
+	
+		'스크롤 설정
+		'아래컨트롤이 오픈된 후에는 스크롤증가 없음
+		'If contMain.edtRcno.visible == True Then
+		If g_Cntt2 == "Y" Then
+			nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+		Else
+			nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 120 'HWG 'CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+		End If
+		
+		'LES nTop = CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+		nTop = CInt(Form.calcUnResize(contMain.edtName.top, "1"))
+		
+		'항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+		contMain.lblScrollPos.top = nContResize
+		'스크롤사이즈 자동조정
+		contMain.SetScrollAutoSize()
+		'현재 스크롤위치 설정
+		contMain.scroll_pos = nTop
+		
+		'주민등록번호 Show
+		g_Cntt2 = "Y"  '스크롤설정 체크용 변수 설정
+		contMain.edtRcno.visible = True
+		
+		'주민등록번호 입력키보드 자동보이기
+		If contMain.edtRcno.caption == "" Or contMain.edtRcno.caption == null Then
+			Form.SetTimerEvent2("70", 1, 1)    '타이머
+			'Form.showAlert("jsi","들어오나???")
+			
+		End If
+		
+	End If
+	
+End Sub
+
+'============================================================================
+Sub contMain_edtRcno_OnEditComplete() '주민등록번호
+    nTop = 0
+    nContResize = 0
+	
+	If contMain.edtRcno.caption ~= "" Or contMain.edtRcno.caption ~= null Then
+		'13자리 입력체크
+		nLen = contMain.edtRcno.pwdlen
+		
+		If Cint(nLen) == 0 Then
+			contMain.edtRcno.SetResultLabel("1","error","주민등록번호를 입력해주세요.","contMain")
+			exit sub
+	    else
+			
+			If CInt(nLen) < 13  Or CInt(nLen) > 13 Then
+			    contMain.edtRcno.SetResultLabel("1","error","주민등록번호 13자리를 입력해주세요.","contMain")
+			    Exit Sub
+			End If
+	
+			contMain.edtRcno.SetResultLabel("0","complete","","contMain")
+	
+			'스크롤 설정
+			'아래컨트롤이 오픈된 후에는 스크롤증가 없음
+			'If contMain.cmbMcco.visible == True Then
+			If g_Cntt3 == "Y" Then
+			    nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+			Else
+			    nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 90 'HWG 'CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+			End If
+			
+			'LES nTop = CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+			nTop = CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+	
+			'항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+			contMain.lblScrollPos.top = nContResize
+			'스크롤사이즈 자동조정
+			contMain.SetScrollAutoSize()
+			'현재 스크롤위치 설정
+			contMain.scroll_pos = nTop
+	
+			'통신사 Show
+			 g_Cntt3 = "Y"  '스크롤설정 체크용 변수 설정
+			contMain.cmbMcco.visible = True
+
+			Form.SetTimerEvent2(5, 1, 0.8)
+		
+			if contMain.cmbMcco.cbkeydata == "" Or contMain.cmbMcco.cbkeydata == null then
+				contMain.cmbMcco.Setstatus("focus")
+			end if
+		End If
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub contMain_cmbMcco_OnEditComplete(iIndex)  '통신사
+    g_UnAble = "N"
+    nTop = 0
+    nContResize = 0
+
+    If iIndex ~= "" Or iIndex ~= null Then
+
+        '스크롤 설정
+        '아래컨트롤이 오픈된 후에는 스크롤증가 없음
+        'If contMain.edtHPNo.visible == True Then
+        If g_Cntt4 == "Y" Then
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+        Else
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 90 'HWG 'CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+        End If
+        'LES nTop = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+
+        '항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+        contMain.lblScrollPos.top = nContResize
+        '스크롤사이즈 자동조정
+        contMain.SetScrollAutoSize()
+        '현재 스크롤위치 설정
+        contMain.scroll_pos = nTop
+
+        '휴대폰번호 Show
+        g_Cntt4 = "Y"  '스크롤설정 체크용 변수 설정
+        contMain.edtHPNo.visible = True
+
+        '휴대폰번호 -입력키보드 자동보이기
+        If contMain.edtHPNo.caption == "" Or contMain.edtHPNo.caption == null Then
+			'통신사 콤보 cbtype = 5 로 바꾼 후 아래 setshowkeypad가 안 먹히는듯 하여 타이머로 변경
+			Form.SetTimerEvent2(50, 1, 0.1)
+			
+			
+'            contMain.edtHPNo.SetShowKeypad(True)
+        End If
+    End If
+End Sub
+'============================================================================
+Sub contMain_edtHPNo_OnEditComplete()   '휴대폰번호
+    nTop = 0
+    nContResize = 0
+
+    If contMain.edtHPNo.caption ~= "" Or contMain.edtHPNo.caption ~= null Then
+        '10자리 미만 또는 11자리 초과 또는 '0xx'가 아닌경우 입력시
+        If Mid(contMain.edtHPNo.caption, 1, 2) ~= "01" Then
+            contMain.edtHPNo.SetResultLabel("1","error","정확한 휴대폰번호를 입력해 주세요.","contMain")
+            Exit Sub
+        ElseIf Len(Trim(contMain.edtHPNo.caption)) < 10 Then
+            contMain.edtHPNo.SetResultLabel("1","error","정확한 휴대폰번호를 입력해 주세요.","contMain")
+            Exit Sub
+        ElseIf Len(Trim(contMain.edtHPNo.caption)) > 11 Then
+            contMain.edtHPNo.SetResultLabel("1","error","정확한 휴대폰번호를 입력해 주세요.","contMain")
+            Exit Sub
+        End If
+
+        contMain.edtHPNo.SetResultLabel("0","complete","","contMain")
+
+        '스크롤 설정
+        '아래컨트롤이 오픈된 후에는 스크롤증가 없음
+        'If contMain.btnCtcnAgrm.visible == True Then
+        If g_Cntt5  == "Y" Then
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+        Else
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 90 'HWG 'CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+        End If
+        'LES nTop = CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+
+        '항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+        contMain.lblScrollPos.top = nContResize
+        '스크롤사이즈 자동조정
+        contMain.SetScrollAutoSize()
+        '현재 스크롤위치 설정
+        contMain.scroll_pos = nTop
+
+        '약관동의  Show
+        g_Cntt5 = "Y"  '스크롤설정 체크용 변수 설정
+        contMain.btnCtcnAgrm.visible = True
+        contMain.chkCtcnAgrm.visible = True
+        contMain.imgAthnShow.visible = True
+
+        '약관동의 -키보드선택 없음
+    End If
+End Sub
+'============================================================================
+Sub contMain_chkCtcnAgrm_OnChange(sCheckState)  '약관동의
+    nTop = 0
+    nContResize = 0
+
+    If sCheckState == "1" Or sCheckState == 1 Then
+        'contMain.chkCtcnAgrm.chkbtnimage = "check_square_on.png"
+
+        '스크롤 설정
+        '아래컨트롤이 오픈된 후에는 스크롤증가 없음
+        'If contMain.edtAthnNo.visible == True Then
+        If g_Cntt6 == "Y" Then
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1"))
+        Else
+            nContResize = CInt(Form.calcUnResize(contMain.lblScrollPos.top, "1")) + 90 'HWG 'CInt(Form.calcUnResize(contMain.edtAthnNo.top, "1"))
+        End If
+        'LES nTop = CInt(Form.calcUnResize(contMain.edtAthnNo.top, "1"))
+        nTop = CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+
+        '항목을 위로 올리면서 스크롤을 늘리기 위해 컨테이너상의 마지막 컴포턴트 위치를 아래로 강제 처리함
+        contMain.lblScrollPos.top = nContResize
+        '스크롤사이즈 자동조정
+        contMain.SetScrollAutoSize()
+        '현재 스크롤위치 설정
+        contMain.scroll_pos = nTop
+
+        '약관동의시 -> 인증번호 자동 발송(최초 1번만)
+       'If contMain.btnAthnRetry.visible == False Then
+        If g_Frst_YN == "Y" Then
+            contMain_btnAthnRetry_OnClick()
+        Else
+           g_Frst_YN = "N"
+        End If
+
+        '인증항목 show
+        g_Cntt6 = "Y"  '스크롤설정 체크용 변수 설정
+        contMain.edtAthnNo.visible    = True
+        contMain.edtAthnNo.enable     = True
+        contMain.lblAthnTime.visible  = True
+        contMain.lblAthnTime.bringFront("1")  '인증유효시간을 제일앞단으로 위치시킴
+	 
+        'contMain.btnAthnRetry.visible = True  '최초 인증번호 요청시에는 활성화 안함
+        'contMain.btnAthnRetry.enable  = False        
+    Else
+        'contMain.chkCtcnAgrm.chkbtnimage = "check_square_off.png"
+
+	   '휴대폰인증중 약관해지된 경우, 재요청하도록 유도 -----------------------
+	   '타이머이벤트 종료
+	   User_Stop_Timer()
+	   '3분타이머 초기화
+        InitCountTimer()
+        '인증번호 재요청버튼 Show
+        contMain.edtAthnNo.caption    = ""
+        contMain.edtAthnNo.enable     = False
+        contMain.btnAthnRetry.visible = True
+        contMain.btnAthnRetry.enable  = True
+	
+    End If
+End Sub
+'============================================================================
+Sub contMain_edtAthnNo_OnEditComplete()  '인증번호
+    If contMain.edtAthnNo.caption == "" Or contMain.edtAthnNo.caption == null Then
+        contMain.edtAthnNo.SetResultLabel("1","error","인증번호가 입력되지 않았습니다.","contMain")
+        Exit Sub
+    Else
+        If Len(Trim(contMain.edtAthnNo.caption)) == 0 Then
+            contMain.edtAthnNo.SetResultLabel("1","error","인증번호가 입력되지 않았습니다.","contMain")
+            Exit Sub
+        ElseIf Len(Trim(contMain.edtAthnNo.caption)) > 0 And Len(Trim(contMain.edtAthnNo.caption)) < 6  Then
+            contMain.edtAthnNo.SetResultLabel("1","error","인증번호를 확인해주세요.(숫자 6자리)","contMain")
+            Exit Sub
+        End If
+    End If
+
+    contMain.edtAthnNo.SetResultLabel("0","complete","","contMain")
+
+    '인증확인 요청검증
+    DATAMANAGER.RequestTranData( "obcsb_oimf_654a_1")
+End Sub
+
+'============================================================================
+' 휴대폰 본인인증 약관동의 Show
+'============================================================================
+Sub contMain_imgAthnShow_OnClick()
+    Form.OpenPopup("mbbdm86130_p1", "", "")
+End Sub
+
+'============================================================================
+' 휴대폰 인증번호 재요청
+'============================================================================
+Sub contMain_btnAthnRetry_OnClick()
+    nTop = 0
+    nContResize = 0
+
+   'If contMain.chkCtcnAgrm.checkstate == "0" Or contMain.chkCtcnAgrm.checkstate == 0 Then  '0.uncheck 1.check
+   '     'contMain.edtAthnNo.SetResultLabel("1","error","휴대폰 본인인증 약관동의를 하지 않으셨습니다.","contMain")
+   '    Form.ShowAlert("오류", "휴대폰 본인인증 약관동의를 하지 않으셨습니다.")
+   '    exit sub
+   'End If
+    If CheckData() = True Then
+        contMain.edtAthnNo.SetResultLabel("0","complete","","contMain")
+
+        '기존 인증번호 Clear
+        contMain.edtAthnNo.caption = ""
+        contMain.edtAthnNo.enable  = True
+
+        '타이머 초기화
+        InitCountTimer()
+
+        '기 인증처리 중인 전문정보 초기화
+        edtRqstTlmsNo.caption  = ""
+        edtVrfcTlmsNo.caption  = ""
+
+        '재요청버튼 비활성화/숨김
+        'contMain.btnAthnRetry.enable  = False
+        contMain.btnAthnRetry.visible  = False
+
+        '테스트용 인증서 Skip
+         If CInt(chkSkip.checkstate) == 1 Then
+			'확인버튼 활성화
+               btnNext.visible = True
+		
+               btnNext.btnimage = "btn_20.9"
+               btnNext.fgcolor = "273"				
+         Else
+              '인증번호 요청
+               DATAMANAGER.RequestTranData( "obcsb_oimf_653a" )
+         End If
+	 
+    End If
+    
+End Sub
+
+'============================================================================
+' 테스트인증Skip
+'============================================================================
+Sub chkSkip_OnChange(sCheckState)
+    If g_nDev == "1" Or g_nDev == 1 Then  '개발서버인 경우에만 동작하도록.
+        '휴대폰 본인인증 약관동의 & 테스트인증Skip 해제한 경우, 인증처리 할수 있도록 인증요청버튼 활성화 처리
+        If contMain.chkCtcnAgrm.checkstate == "1" Or contMain.chkCtcnAgrm.checkstate == 1 Then
+           '타이머이벤트 모두 종료
+            User_Stop_Timer()
+
+            If CInt(chkSkip.checkstate) == 1 Then
+               '확인버튼 활성화
+                btnNext.visible = True
+
+                btnNext.btnimage = "btn_20.9"
+                btnNext.fgcolor = "273"
+            Else
+               '확인버튼 비활성화
+                btnNext.visible = False
+		
+                If Form.GetEnvData("common.theme") = "black" Then
+				btnNext.btnimage = "btn_27.9"
+                Else 
+				btnNext.btnimage = "btn_21.9"
+                End If
+                btnNext.fgcolor = "269"	
+            End If
+        Else
+            '확인버튼 비활성화
+            btnNext.visible = False
+	    
+            If Form.GetEnvData("common.theme") = "black" Then
+			btnNext.btnimage = "btn_27.9"
+            Else 
+			btnNext.btnimage = "btn_21.9"
+            End If
+            btnNext.fgcolor = "269"	    
+        End If
+    End If
+End Sub
+
+'============================================================================
+' 닫기
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Dim szData
+	szData = Form.GetSharedData("MeritzAuth_FindAcnt", true)
+	
+	if szData == "Y" then
+		Form.OpenNextPopup("mhetc90190_s1", "", "")	
+	else
+		Form.CloseForm()
+	end if
+
+End Sub
+
+'============================================================================
+' 안내사항
+'============================================================================
+Sub imgCaution_OnClick()
+	Form.OpenPopup("mbonl85001_p3", "" , "")
+End Sub
+
+'============================================================================
+' 안내사항
+'============================================================================
+Sub BtnCaution_OnClick()
+	'Form.showAlert("jsi","느낌표 들어오나???")
+	g_BtnCaution_YN = "Y"
+	Form.OpenPopup("mbonl85001_p3", "" , "")
+End Sub
+
+'============================================================================
+' 다음Page로
+'============================================================================
+Sub btnNext_OnClick()
+    
+    '필수항목체크
+    If CheckData() = True Then
+	    btnNext.enable = False
+	    
+		If Form.GetEnvData("common.theme") = "black" Then
+			btnNext.btnimage = "btn_27.9"
+		Else 
+			btnNext.btnimage = "btn_21.9"
+		End If
+		btnNext.fgcolor = "269"
+
+		DATAMANAGER.RequestTranData("obaci_acct_401r")   
+    End If
+End Sub
+
+'============================================================================
+'							사용자 함수
+'============================================================================
+'인증번호 만료기간 3분 타이머 초기화
+Function InitCountTimer()
+	btnNext.enable = true	'20230417 추가
+	
+	btnNext.btnimage = "btn_20.9"
+	btnNext.fgcolor = "273"
+	
+    contMain.lblAthnTime.caption = "3:00"
+    contMain.lblAthnTime.visivle = False
+    g_HPSec = 180
+    Form.SetTimerEvent(2, 0, 1)  '3분타이머 종료
+End Function
+
+'============================================================================
+Function CheckData()
+    If Trim(contMain.edtName.caption) == "" Or Trim(contMain.edtName.caption) == null Then
+        '(순서주의) 포커스후->Alert처리해야함
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtName.top, "1"))
+        Form.ShowAlert("오류", "이름을 입력해주세요.")
+        return False
+    Else
+        '이름 공백 체크
+        sStr = Len(contMain.edtName.Caption)
+        sRplStr = Len(replace(contMain.edtName.caption, " " , ""))
+        If sStr <> sRplStr Then
+            contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtName.top, "1"))
+            Form.ShowAlert("오류", "이름을 입력해주세요.(공백 불가)")
+            return False
+        End If
+    End If
+
+    If Trim(contMain.edtRcno.caption) == "" Or Trim(contMain.edtRcno.caption) == null Then
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+        Form.ShowAlert("오류", "주민등록번호를 입력해주세요.")
+        return False
+    Else
+        nLen = contMain.edtRcno.pwdlen
+        If CInt(nLen) < 13 Then
+            contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtRcno.top, "1"))
+            Form.ShowAlert("오류", "주민번호를 확인해주세요.(13자리)")
+            return False
+        End If
+    End If
+
+    If Trim(contMain.cmbMcco.caption) == "" Or Trim(contMain.cmbMcco.caption) == null Then
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.cmbMcco.top, "1"))
+        Form.ShowAlert("오류", "통신사를 확인해주세요.")
+        return False    
+    End If
+'
+    If Trim(contMain.edtHPNo.caption) == "" Or Trim(contMain.edtHPNo.caption) == null Then
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+        Form.ShowAlert("오류", "휴대폰번호를 입력해주세요.")
+        return False
+    ElseIf Mid(contMain.edtHPNo.caption,1,2) <> "01" Then 
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+        Form.ShowAlert("오류", "정확한 휴대폰번호를 입력해주세요.")
+        return False
+    Else
+        If Len(contMain.edtHPNo.Caption) < 10 Or Len(contMain.edtHPNo.Caption) > 11 Then
+            contMain.scroll_pos = CInt(Form.calcUnResize(contMain.edtHPNo.top, "1"))
+            Form.ShowAlert("오류", "정확한 휴대폰번호를 입력해주세요.")
+            return False
+        End If
+    End If
+
+    If CInt(contMain.chkCtcnAgrm.checkstate) < 1 Then  '0.uncheck 1.check
+        contMain.scroll_pos = CInt(Form.calcUnResize(contMain.btnCtcnAgrm.top, "1"))
+        Form.ShowAlert("안내", "휴대폰 본인명의 인증서비스를 위한 약관에 전체 동의가 필요합니다.")
+        return False
+    End If
+    
+    return True
+end Function 
+'============================================================================
+Function User_Stop_Timer()
+
+    'sTimerID = 0 : 인증번호 요청
+    'sTimerID = 1 : 인증확인 요청/요청검증
+    'sTimerID = 2 : 인증유효시간
+    
+    Form.SetTimerEvent(0, 0, 1)
+    Form.SetTimerEvent(1, 0, 1)
+    Form.SetTimerEvent(2, 0, 1)
+End Function 
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_653a" trcode="obcsb_oimf_653a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_654a" trcode="obcsb_oimf_654a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_655r" trcode="obcsb_oimf_655r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_654a_1" trcode="obcsb_oimf_654a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_401r" trcode="obaci_acct_401r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_639a" trcode="obcsb_oimf_639a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_653a" title="NICE 휴대폰 인증 전송 요청(NEW" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="717" _ulen="543" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+MCCO_CODE^이동통신사코드^3^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+CLPH_ARCD^휴대폰지역번호^4^0^0^0^0^0^0
+CLPH_TONO^휴대폰국번호^4^0^0^0^0^0^0
+CLPH_SRNO^휴대폰일련번호^4^0^0^0^0^0^0
+SVCD^서비스코드^3^0^0^0^0^0^0
+UI_MNRC_BANK_NAME^UI입금은행명^40^0^0^0^0^0^0
+RMT_NAME^수취인명^40^0^0^0^0^0^0
+UI_TOTAL_CSNU^UI총건수^3^0^0^0^0^0^0
+UI_AMT_SMTN^UI금액합계^19^0^7^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="85" _ulen="57" >
+
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_654a" title="NICE휴대폰 인증확인 요청전송(N" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="413" _ulen="305" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+SMS_ATHN_NO^SMS인증번호^8^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="85" _ulen="57" >
+
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_655r" title="NICE 휴대폰 인증 결과검증(NEW)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="413" _ulen="305" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+RRNO^주민등록번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+SMS_ATHN_NO^SMS인증번호^8^0^0^0^0^0^0
+NICE_ISTU_TLMS_MNNO^한국신용정보기관전문관리번호^10^0^0^0^0^0^0
+RRNO_PIP^주민등록번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="129" _ulen="103" >
+
+MSG_DATA^메시지데이터^100^0^0^0^0^0^0
+RSMS_TMNU^재송신횟수^4^0^7^0^0^0^0
+CIKEY_NO^CIKEY번호^88^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_401r" title="간편 인증 계좌번호 찾기" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="214" _ulen="162" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="290" _ulen="220" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+PRCD^상품코드^3^0^0^0^0^0^0
+PRNM^상품명^100^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+BRDT^생년월일^8^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_639a" title="비대면 고객 임시난수번호 생성" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="101" _ulen="77" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="98" _ulen="74" >
+
+CUST_CNVR_SRNO^고객전환일련번호^13^0^0^0^0^0^0
+DETH_YN^사망여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

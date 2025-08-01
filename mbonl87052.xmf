@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87052" scrname="해외주식/ETP 약정신청" version="2" writer="윤유정" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab0" tabcount="2" tabwidthtype="1" tabheadheight="36" ly_vert="0,0,375,562,1" >
+			<PAGE name="page002171" caption="해외주식 거래신청" linkfile="mbonl87051.xmf" />
+			<PAGE name="page000061" caption="해외ETP 거래신청" linkfile="mbonl87050.xmf" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2126" _ulen="1936" >
+'============================================================================
+' 01. 화 면 명 : 해외주식/ETP 거래 약정 신청 통합 탭
+' 02. 화면설명 : 해외주식/ETP 거래 약정 신청 통합 탭
+' 03. 작    성 : 2018.01.29 윤유정
+'============================================================================
+Sub Form_OnFormInit()
+	f_EventPopup()
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+	etp_first_open = Form.GetSharedData( "ETP_FIRST_OPEN" , false ) ' v0001
+	
+	if etp_first_open == "" or etp_first_open == null then ' v0001
+		etp_first_open = "N"
+	End if
+	
+	If szScreenNo == "87050" Then
+		Form.SetScreenName("해외ETP 거래신청")
+		FormTab0.currenttab = 1
+	ElseIf szScreenNo == "87051" Then
+		Form.SetScreenName("해외주식 거래신청")
+		FormTab0.currenttab = 0
+	End If
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	If nCurrentTab == 0 Then
+		Form.SetTitleCaption("해외주식 거래신청")
+	ElseIf nCurrentTab == 1 Then
+		Form.SetTitleCaption("해외ETP 거래신청")
+	End If
+End Sub
+
+'============================================================================
+' 해외주식 공지팝업
+'============================================================================
+function f_EventPopup()
+    Dim szEndDate
+    Dim szToday
+    Dim szDate
+    Dim nDiffDay
+    
+    szEndDate = "20180731"                            ' 팝업노출일
+    szToday = Form.GetSharedData("&HOST_DATE", false )    ' 현재일
+    szDate = Form.GetEnvData("EVENT_DATE_YH")            ' 일주일간 열지 않기 체크한 날짜
+    
+    if tonumber(Form.DiffDate(szToday, szEndDate)) >= 0 then
+        if szDate == null or szDate == "" then
+            Form.OpenPopup("popup_noti", "" , "")
+        else
+            nDiffDay =  tonumber(Form.DiffDate(szDate, szToday))
+            if nDiffDay > 7 then
+                Form.SetEnvData("EVENT_DATE_YH", "")
+                Form.OpenPopup("popup_noti", "" , "")
+            end if
+        end if
+    end if
+end function
+
+	</SCRIPT_INFO>
+</ROOT>

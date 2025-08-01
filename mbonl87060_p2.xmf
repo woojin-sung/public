@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87060" scrname="위탁증거금변경_완료팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="check_red" margin="0,0,5,0" ly_vert="160,65,55,55,1" />
+		<IMAGE name="Image1" imgpath="img_bgbox.9.png" ly_vert="20,290,335,80,1" />
+		<LABEL name="lblResult1" fontsize="2" fontstyle="01" caption="위탁증거금 변경이
+완료되었습니다." halign="1" multiline="1" ly_vert="20,125,335,50,1" />
+		<LABEL name="lblTableData1" fontstyle="01" halign="1" ly_vert="30,303,315,25,1" />
+		<LABEL name="lblTableData2" fgcolor="010:213049051" fontstyle="01" halign="1" ly_vert="30,327,315,25,1" />
+		<BUTTON name="btnList" caption="주문하러가기" fgcolor="004:000000000" btnimage="btn_pop1.9.png" ly_vert="1,597,187,50,1" />
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_20.9" ly_vert="187,597,188,50,1" />
+		<LABEL name="Label0" fgcolor="146:124124124" caption="변경된 증거금으로 주문이 가능해요." halign="1" ly_vert="20,200,335,19,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1435" _ulen="1395" >
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		dim tData, szProdCd, szProdText
+		tData = Split(szOpenData, "★")
+		szProdCd = Form.GetAccountInfo(tData(0)..tData(1), "productcode")
+		szProdText = Form.GetMetaData("상품코드", szProdCd)
+		
+		lblTableData1.caption = "["&szProdText&"] "&Left(tData(0),4)&"-"&Mid(tData(0),5,4)&"-"&tData(1)
+		lblTableData2.caption = tData(2).." 증거금"
+	end if
+End Sub
+
+'============================================================================
+Sub btnList_OnClick
+	'국내 주식주문 화면으로 이동
+	Form.OpenScreen("12000", "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	Form.OpenScreen("87060", "")
+'	Form.OpenPopup("mbonl87060" , "" , "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbonl87060_p2" ,  "close")
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

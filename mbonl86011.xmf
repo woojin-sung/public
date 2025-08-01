@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="86011" scrname="이용기기 지정" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,642,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtabTerminalService" tabcount="2" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,0,375,642,1" >
+			<PAGE name="page003122" caption="약정및기기지정" linkfile="mbonl86011_t1" loadingtype="1" />
+			<PAGE name="page002845" caption="지정기기조회/해지" linkfile="mbonl86011_t2" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4770" _ulen="4478" >
+'============================================================================
+' 01. 화 면 명 : 중요거래단말지정서비스
+' 02. 화면설명 : 중요거래단말지정서비스 폼탭
+' 03. 작    성 : 2016.01.18 ~ 최지희
+' 2020.11.19 : 정민영 : v0001 : [T2008250015] 실명확인번호 메모리 내 평문 노출 취약점 조치(HTS, MTS)
+'            : - 미사용TR obcsb_oimf_608r 삭제
+' 2022.10.12 : 양현정 : v0002 : 이체 화면으로 호출시(이용기기약정+간편이체는 mbbnk63010, 이용기기약정만 mbbnk63010_p0)
+'============================================================================
+Dim gsData
+Dim g_term63010ProsYn 'JWH
+Dim g_termRegYn 'JWH
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+
+
+'============================================================================
+' fmtabTerminalService_OnTabChanged - 탭 변경할 때 조회
+'============================================================================
+Sub fmtabTerminalService_OnTabChanged(nCurrentTab)
+	if nCurrentTab == 0 then
+		Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "enroll", szParam)
+		if gsData == "mbbnk63010" then
+			Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "63010", "")
+		elseif gsData == "mbbnk63010_p0" then			
+			Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "63010_p0", "")
+		end if
+	elseif nCurrentTab == 1 then
+		Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "cancel", szParam)
+		if gsData == "mbbnk63010" then
+			Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "63010", "")
+		elseif gsData == "mbbnk63010_p0" then			
+			Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "63010_p0", "")
+		end if
+	end if
+End Sub
+
+
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+		
+	gsData = Form.GetOpenLinkData( )
+	g_term63010ProsYn = "N" 'JWH
+	g_termRegYn = "N" 'JWH
+	   
+	if CInt(fmtabTerminalService.currenttab) == 0 then
+	   Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "enroll", szParam)
+	
+	   if gsData == "mbbnk63010" then	   		   
+		   'msgbox ( "szData=("&szData&")")
+	
+		   Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "63010", "")
+	   elseif gsData == "mbbnk63010_p0" then	   				   
+		   Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "63010_p0", "")
+	   end if
+	elseif CInt(fmtabTerminalService.currenttab) == 1 then   
+	   Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "cancel", szParam) 	   
+	end if   
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	if sEventName == "ChangeTab" then
+		if sParam == "1" then
+			fmtabTerminalService.currenttab = "1"
+			Form.triggerEvent("fmtabTerminalService." & fmtabTerminalService.currenttabpageid, "cancel", szParam)
+		end if
+	elseif sEventName == "INFO_CLICK" then
+		Form.OpenFramePopup("mbonl86011_p5" , "" , "")
+	
+	elseif sEventName == "63010_CLOSE" then	'v0002 이용기기약정+간편이체약정후 리턴
+		'Form.SendReturnToParent( sEventName , sParam) JWH 주석처리
+		'msgbox( "sEventName="&sEventName&" sParam="&sParam)
+		'Form.CloseForm() JWH 주석처리
+		g_term63010ProsYn = "Y" 'JWH
+		
+	ElseIf sEventName == "TERM_REG_SUCC" Then 'v0002 이용기기약정 후 이체화면으로 리턴
+	    'Form.SendReturnToParent( sEventName , sParam) JWH 주석처리
+	    'Form.CloseForm() JWH 주석처리
+	    g_termRegYn = "Y" 'JWH
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose() 'JWH
+
+    If g_term63010ProsYn = "Y" Then
+        Form.SendReturnToParent( "63010_CLOSE" , "Y" )
+    End If
+
+	If g_termRegYn == "Y" Then
+	    Form.SendReturnToParent( "TERM_REG_SUCC" , "Y" )
+	End If
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

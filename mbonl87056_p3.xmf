@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87052" scrname="해외주식 소수점 거래_완료팝업" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="icon_confirm" margin="0,0,5,0" ly_vert="155,64,70,70,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="4" outline="0000" designorder="1" ly_vert="50,179,275,95,1" >
+			<COL_INFO ly_vert_width="275" />
+			<ROW_INFO ly_vert_height="30,30,5,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" valign="2" line="0,0" caption="해외주식 소수점 거래 신청이" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" caption="완료되었습니다." fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" fgcolor="146:124124124" line="0,0" fontsize="-3" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<IMAGE name="Image1" imgpath="img_bgbox.9.png" ly_vert="22,332,334,92,1" />
+		<LABEL name="Label0" fontstyle="01" halign="1" autofontsize="1" ly_vert="55,350,269,32,1" />
+		<LABEL name="Label1" halign="1" ly_vert="55,380,269,32,1" />
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_26.9" ly_vert="187,597,191,50,1" />
+		<BUTTON name="btnOrder" caption="주문하기" fgcolor="005:000000000" btnimage="btn_21.9" ly_vert="0,597,187,50,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1623" _ulen="1489" >
+--===========================================================================
+--===========================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		dim tData, szProdCd, szProdText
+		tData = Split(szOpenData, "★")
+		szProdCd = Form.GetAccountInfo(tData(0), "productcode")
+		szProdText = Form.GetMetaData("상품코드", szProdCd)
+		
+		Label0.caption = "["&szProdText&"] "&Left(tData(0),4)&"-"&Mid(tData(0),5,4)&"-"&Right(tData(0),2)
+		Label1.caption = tData(1)
+		
+		if tData(2) == "1" then
+			Table0.SetCellString( 3, 0, "해외 소수점 주문이 가능해졌어요.")
+		elseif tData(2) == "2" then
+			Table0.SetCellString( 3, 0, "해외 (소수점·ETP) 주문이 가능해졌어요.")
+		elseif tData(2) == "3" then
+			Table0.SetCellString( 3, 0, "해외 (주식·소수점·ETP) 주문이 가능해졌어요.")
+		elseif tData(2) == "4" then
+			Table0.SetCellString( 3, 0, "해외 (주식·소수점) 주문이 가능해졌어요.")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	Form.OpenScreen("87052", "")
+End Sub
+
+'============================================================================
+Sub btnOrder_OnClick()
+	Form.OpenScreen("16092", "")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image0.setMaintainingRatio("1")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

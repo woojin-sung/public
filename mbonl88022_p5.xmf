@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="88022" scrname="대차중개약정_약관설명서(개별)" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="20,60,335,489,1" />
+		<BUTTON name="ButtonOK" caption="확인" btnimage="btn_26.9.png" ly_vert="187,597,188,50,1" />
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_25.9.png" ly_vert="0,597,187,50,1" />
+		<LABEL name="lblTitle" fontsize="4" fontstyle="01" halign="1" autofontsize="1" ly_vert="0,0,375,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1913" _ulen="1855" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 담보대출신청
+' 02. 화면설명 : 담보대출신청_약관설명서
+' 03. 작    성 : 2016.02.26 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sRevData
+Dim g_sRetData 
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	g_sRevData = Form.GetOpenLinkData()
+	
+	if g_sRevData == null or Trim(g_sRevData) == "" then
+		Exit Sub
+	end if
+	
+'	Form.SetScreenName(g_sRevData)
+	lblTitle.caption = g_sRevData
+	g_sRetData = "cancel"
+	
+	Dim sURL
+	sURL = Form.GetSharedData("OPEN_URL", true )
+	WebView0.urlpath = sURL
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mbonl88022_p5" , g_sRetData)
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	g_sRetData = g_sRevData
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

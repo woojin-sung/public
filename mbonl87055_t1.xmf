@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87055" scrname="대용설정_대용등록" version="2" writer="장원혁" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,522,1" />
+	<CONTROL_INFO>
+		<ACCOUNT name="cmbAcct" bgcolor="052:255255255" itemcodetype="101,120,136" etcfunctions="" accpwdctl="editPswd" ly_vert="6,9,271,39,1" />
+		<EDIT name="edtPswd" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" clearall="0" ly_vert="283,9,86,39,1" />
+		<TABLE name="tblState" insidelinecolor="102:255255255" colcount="2" rowcount="2" outline="0101" designorder="1" ly_vert="0,57,375,70,1" >
+			<COL_INFO ly_vert_width="135,240" />
+			<ROW_INFO ly_vert_height="35,35" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="대용등록 상태" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,0,1,0" autofontsize="1" impidxs="" />
+				<CELL cell_ly="0,1,0,1" fgcolor="065:102102102" bgcolor="066:238239240" halign="0" caption="대용 계좌번호" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" autofontsize="1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnOK" caption="대용계좌 등록" btnimage="btn_01.9" ly_vert="100,468,175,44,1" />
+		<ACCOUNT name="cmbAcct2" enable="0" bgcolor="052:255255255" itemcodetype="100,105,107,117,200" etcfunctions="" finaceexcept="1" benefitexcept="1" ly_vert="135,92,240,35,1" />
+		<LABEL name="lblBg" bgcolor="070:237237237" transmode="0" ly_vert="10,145,355,40,1" />
+		<LABEL name="lblNoti" caption="안내" ly_vert="43,149,271,32,1" />
+		<IMAGE name="imgNoti" imgpath="icon_info" ly_vert="25,156,12,18,1" />
+		<TABLE name="tblNoti" insidelinecolor="102:255255255" colcount="2" rowcount="3" outline="0000" designorder="1" ly_vert="10,185,355,136,1" >
+			<COL_INFO ly_vert_width="20,335" />
+			<ROW_INFO ly_vert_height="84,26,26" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="006:213049051" bgcolor="075:244244244" valign="0" halign="0" line="0,0" caption="·" fontsize="-2" paddinginfo="0,20,0,0" impidxs="" />
+				<CELL cell_ly="1,0,1,0" bgcolor="075:244244244" valign="0" halign="0" line="0,0" caption="대용계좌 지정은 동일인 계좌에 한하여 지정 가능하며,
+복수 계좌의 지정은 불가합니다.
+(예시 : 1개의 선물옵션계좌와 N개의 종합매매계좌 
+등록불가)" fontsize="-2" paddinginfo="0,20,0,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" bgcolor="075:244244244" valign="0" halign="0" line="0,0" caption="·" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,1,1,1" bgcolor="075:244244244" valign="0" halign="0" line="0,0" caption="대용계좌 등록 시 관리점변경, 계좌폐쇄 등이 불가 합니다." fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,0,2" bgcolor="075:244244244" valign="0" halign="0" line="0,0" caption="·" fontsize="-2" impidxs="" />
+				<CELL cell_ly="1,2,1,2" bgcolor="075:244244244" valign="0" halign="0" line="0,0" caption="CFD안심계좌는 대용계좌 연결이 불가합니다." fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<ACCOUNT name="cmbAcctWrap" enable="0" visible="0" itemcodetype="119" etcfunctions="" ly_vert="135,92,240,35,0" />
+		<ACCOUNT name="cmbAcctCanc" enable="0" visible="0" itemcodetype="100,105,107,117,118,119,200" etcfunctions="" ly_vert="135,92,240,35,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8288" _ulen="7662" >
+'--===========================================================================
+' 01. 화 면 명 : 대용설정_대용등록
+' 02. 화면설명 : 대용설정_대용등록
+' 03. 작    성 : 2021.11.25 김수진 
+' 04. 수    정 : 
+'   2022.12.19 : 양현정 : v0001 prcd별 컨트롤 속성 변경 추가
+'--===========================================================================
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szPlain_rm		'메모리 평문적용 여부
+Dim g_szState			'등록이지 해지인지
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+' f_ClearData() : 초기화
+'============================================================================
+Function f_ClearData()
+	tblState.SetCellString( 0 , 1, "")
+	cmbAcct2.caption = ""
+	cmbAcct2.enable = false
+	
+	'v0001
+	cmbAcctWrap.caption = ""		'Wrap계좌설정용
+	cmbAcctWrap.enable = false
+	cmbAcctCanc.caption = ""		'해지용
+	cmbAcctCanc.enable = false	
+End Function
+'===========================================================================
+' f_GetPWCkeck() : 계좌비밀번호 입력체크함수
+'===========================================================================
+Function f_GetPWCkeck()
+	Dim szACNT_PWD 
+	szACNT_PWD = Form.GetCtlProp( "edtPswd", "caption" )
+
+	If szACNT_PWD == null or szACNT_PWD == "" Then
+		Form.MsgBox( "알림", "비밀번호를 입력해주세요.", "", 6 )	
+		return true
+	End If
+	
+	return false
+End Function	
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+' Form_OnFormInit()
+'============================================================================
+Sub Form_OnFormInit()
+	'메모리평문적용여부(0:미적용 / 1:적용)
+	g_szPlain_rm 		= Form.GetSharedData("&PLAIN_RM", false)
+End Sub
+'============================================================================
+' Form_OnTriggerEvent(sEventName, sParam)
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	f_ClearData()
+	if sEventName == "changeTab" then
+		'장내파생 연계 계좌 조회
+		DATAMANAGER.RequestTranData( "obacp_opop_033r" )
+	end if	
+End Sub
+
+'============================================================================
+' cmbAcct_ChangeAccount() : 계좌변경
+'============================================================================
+Sub cmbAcct_ChangeAccount()
+	'장내파생 연계 계좌 조회
+	DATAMANAGER.RequestTranData( "obacp_opop_033r" )
+End Sub
+
+'============================================================================
+' btnOK_OnClick : 대용질권 지정/해지
+'============================================================================
+Sub btnOK_OnClick()
+	'계좌비밀번호 입력체크함수
+	If f_GetPWCkeck() Then
+		Exit Sub
+	End If
+	
+	'장내파생 대용 계좌정보 관리
+	DATAMANAGER.RequestTranData( "obaci_acct_033a" )	
+End Sub
+''****************************************************************************
+''               		D  A  T  A  M  A  N  A  G  E  R               
+''****************************************************************************
+'============================================================================
+' DATAMANAGER_OnSendTranBefore(szTranID) : 인풋데이터 세팅	
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'장내파생 연계 계좌 조회
+	If szTranID == "obacp_opop_033r" Then
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" , 0 , cmbAcct.total	)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ASNO" , 0 , cmbAcct.sequence )
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNT_PWD" , 0 , "" )
+	'장내파생 대용 계좌정보 관리
+	ElseIf szTranID == "obaci_acct_033a" Then
+		Dim szACNT_PWD 
+		if g_szPlain_rm == "1" then  			'MTS메모리평문 적용상태일때
+		    szACNT_PWD = edtPswd.caption
+		else  								'MTS메모리평문 미적용상태일때
+		    szACNT_PWD = Form.GetEncData(edtPswd.caption)
+		end if
+	
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "CONT_CLS_CODE" , 0 , "4"	 		)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "PROS_CLS_CODE" , 0 , g_szState	 		)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNO" 		, 0 , cmbAcct.total		)
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ASNO" 		, 0 , cmbAcct.sequence 	)		
+		DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "ACNT_PWD" 	, 0 , szACNT_PWD 			)
+		
+		'v0001
+		if g_szState == "2" then
+			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LNKD_ACNO" 	, 0 , cmbAcctCanc.total	)
+			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LNKD_ASNO" 	, 0 , cmbAcctCanc.sequence 	)		
+		elseif cmbAcct.itemcodetype == "120" then	
+			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LNKD_ACNO" 	, 0 , cmbAcctWrap.total	)
+			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LNKD_ASNO" 	, 0 , cmbAcctWrap.sequence 	)				
+		else
+			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LNKD_ACNO" 	, 0 , cmbAcct2.total		)
+			DATAMANAGER.SetDataValue( 0, szTranID , "InBlock1" , "LNKD_ASNO" 	, 0 , cmbAcct2.sequence 	)		
+		end if
+
+	End If
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranComplete(szTranID) : 데이터 수신 완료
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	'장내파생 연계 계좌 조회
+	If szTranID == "obacp_opop_033r" Then	
+		Dim szMsgCode
+		szMsgCode = DATAMANAGER.GetDataMsgCode( szTranID )
+		Dim szACNO, szASNO
+		szACNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "LNKD_ACNO" , 0 )
+		szASNO = DATAMANAGER.GetDataValue( 0, szTranID , "OutBlock1", "LNKD_ASNO" , 0 )
+		
+		'v0001
+		cmbAcctCanc.visible = false
+		cmbAcct2.visible = false
+		cmbAcctWrap.visible = false		
+
+		If szMsgCode == "5766" Then
+			g_szState = "2"
+			tblState.SetCellString( 0 , 1, "등록")
+			
+			'v0001
+			'cmbAcct2.caption = szACNO..szASNO
+			'cmbAcct2.enable = false
+			cmbAcctCanc.caption = szACNO..szASNO
+			cmbAcctCanc.enable = false
+			cmbAcctCanc.visible = true
+
+			btnOK.caption = "대용계좌 해지"
+		ElseIf szMsgCode == "5820" Then
+			g_szState = "1"
+			tblState.SetCellString( 0 , 1, "미등록")
+			
+			'v0001
+			if cmbAcct.itemcodetype == "120" then
+				cmbAcctWrap.enable = true
+				cmbAcctWrap.visible = true
+			else
+				cmbAcct2.enable = true
+				cmbAcct2.visible = true
+			end if
+			btnOK.caption = "대용계좌 등록"
+		Else
+			f_ClearData()
+			btnOK.enable = false
+		End If
+		
+	'장내파생 대용 계좌정보 관리
+	ElseIf szTranID == "obaci_acct_033a" Then
+		f_ClearData()
+		
+		If g_szState == "1" Then
+			Form.ShowAlert("알림", "대용계좌 등록 완료되었습니다.")
+		Else
+			Form.ShowAlert("알림", "대용계좌 해지 완료되었습니다.")
+		End If
+		
+		'장내파생 연계 계좌 조회
+		DATAMANAGER.RequestTranData( "obacp_opop_033r" )
+	End If
+End Sub
+'============================================================================
+' DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg) : 데이터 통신 오류
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim sSubMsg
+	sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+	
+	if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+		szErrMsg = szErrMsg.." "..sSubMsg
+	end if
+	
+	if szTranID == "obaci_acct_033a" then
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+	end if
+End Sub
+
+
+
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacp_opop_033r" trcode="obacp_opop_033r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obaci_acct_033a" trcode="obaci_acct_033a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacp_opop_033r" title="장내파생 연계 계좌 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="228" _ulen="168" >
+
+LNKD_ACNO^연계 계좌번호^8^0^0^0^0^0^0
+LNKD_ASNO^연계 계좌일련번호^2^0^0^0^0^0^0
+LNKD_ACNT_DSGT_DATE^연계 계좌 지정 일자^8^0^0^0^0^0^0
+LNKD_ACNT_CANC_DATE^연계 계좌 해지 일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obaci_acct_033a" title="장내파생 대용 계좌정보 관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="365" _ulen="269" >
+
+CONT_CLS_CODE^접촉 구분 코드^1^0^0^0^0^0^0
+PROS_CLS_CODE^처리 구분 코드^1^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+LNKD_ACNO^연계 계좌번호^8^0^0^0^0^0^0
+LNKD_ASNO^연계 계좌일련번호^2^0^0^0^0^0^0
+SNOT_EMPNO^파출 직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="132" _ulen="100" >
+
+LNKD_ACNT_DSGT_DATE^연계 계좌 지정 일자^8^0^0^0^0^0^0
+LNKD_ACNT_CANC_DATE^연계 계좌 해지 일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

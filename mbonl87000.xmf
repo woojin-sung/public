@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="87000" scrname="알리미서비스" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<EDIT name="edtPassword" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" ly_vert="289,9,80,39,1" />
+		<FORMTAB name="fmtabNotificationService" currenttab="2" tabcount="3" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,58,375,504,1" >
+			<PAGE name="page000039" caption="계좌일반" linkfile="mbonl87000_t1" loadingtype="1" />
+			<PAGE name="page007327" caption="체결통보" linkfile="mbonl87000_t2" loadingtype="1" />
+			<PAGE name="page005763" caption="e-mail" linkfile="mbonl87000_t3" loadingtype="1" />
+		</FORMTAB>
+		<ACCOUNT name="cmbAccount" itemcodetype="100" etcfunctions="" accpwdctl="edtPassword" totalacc="1" ly_vert="6,9,278,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6214" _ulen="5884" >
+'============================================================================
+' 01. 화 면 명 : 알리미서비스
+' 02. 화면설명 : 알리미서비스 폼탭
+' 03. 작    성 : 2016.01.18 ~ 최지희
+'			: 2020.09.16 : 권오상 : v001 : T2008250015 : 메모리평문 취약점 수정
+'============================================================================
+
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+Dim g_szAccountNumber	'계좌번호 8글자
+Dim g_szAccountSerialNumber	'계좌일련번호 2글자
+Dim g_szAccountPassword	'계좌 비밀번호
+Dim g_szAllData	'계좌 + 일련번호 + 비밀번호
+
+
+Dim g_szPros, g_szSVCD, g_szAPRV
+Dim g_szEmailpros, g_szEmailSVCD, g_szEmailAPRV
+Dim g_szARCD, g_szTONO, g_szCPNO
+Dim g_szInagTypeCode, g_szInagSrno
+
+Dim	g_PlainRm 'v001
+
+'****************************************************************************
+'                     P E R S O N A L     F U N C T I O N
+'****************************************************************************
+
+'****************************************************************************
+'                       C O M M O N     F U N C T I O N
+'****************************************************************************
+
+'============================================================================
+' cmbAccount_ChangeAccount
+'============================================================================
+Sub cmbAccount_ChangeAccount()
+	g_szAccountNumber = cmbAccount.total
+	edtPassword.caption = ""
+'	g_szAccountPassword = Form.GetEncData(edtPassword.caption) 'v001
+	'v001
+	If g_PlainRm = "1" Then '보안모듈 적용
+		g_szAccountPassword = edtPassword.caption
+	Else
+		g_szAccountPassword = Form.GetEncData(edtPassword.caption)
+	End If
+	
+	fmtabNotificationService_OnTabChanged(fmtabNotificationService.currenttab)
+End Sub
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v001
+	
+	g_szAccountNumber = cmbAccount.total
+'	g_szAccountPassword = Form.GetEncData(edtPassword.caption) 'v001
+	'v001
+	If g_PlainRm = "1" Then '보안모듈 적용
+		g_szAccountPassword = edtPassword.caption
+	Else
+		g_szAccountPassword = Form.GetEncData(edtPassword.caption)
+	End If
+	
+	g_szAllData = cmbAccount.total & "★" & cmbAccount.sequence & "★" & edtPassword.caption
+	Form.triggerEvent("fmtabNotificationService." & fmtabNotificationService.currenttabpageid, "AccountData", g_szAllData)
+	Form.triggerEvent( "fmtabNotificationService."& fmtabNotificationService.currenttabpageid, "PASSWORD", g_szAccountPassword )
+End Sub
+
+'============================================================================
+' edtPassword_OnEditComplete
+'============================================================================
+Sub edtPassword_OnEditComplete()
+'	g_szAccountPassword = Form.GetEncData(edtPassword.caption) 'v001
+	'v001
+	If g_PlainRm = "1" Then '보안모듈 적용
+		g_szAccountPassword = edtPassword.caption
+	Else
+		g_szAccountPassword = Form.GetEncData(edtPassword.caption)
+	End If
+	Form.triggerEvent("fmtabNotificationService." & fmtabNotificationService.currenttabpageid, "AccountData", g_szAllData)
+	Form.triggerEvent( "fmtabNotificationService."& fmtabNotificationService.currenttabpageid, "PASSWORD", g_szAccountPassword )
+End Sub
+
+'============================================================================
+' fmtabNotificationService_OnTabChanged
+'============================================================================
+Sub fmtabNotificationService_OnTabChanged(nCurrentTab)
+'	g_szAccountPassword = Form.GetEncData(edtPassword.caption) 'v001
+	'v001
+	If g_PlainRm = "1" Then '보안모듈 적용
+		g_szAccountPassword = edtPassword.caption
+	Else
+		g_szAccountPassword = Form.GetEncData(edtPassword.caption)
+	End If
+	
+	g_szAllData = cmbAccount.total & "★" & cmbAccount.sequence & "★" & edtPassword.caption
+	
+	Form.triggerEvent("fmtabNotificationService." & fmtabNotificationService.currenttabpageid, "AccountData", g_szAllData)
+	Form.triggerEvent( "fmtabNotificationService."& fmtabNotificationService.currenttabpageid, "PASSWORD", g_szAccountPassword )
+End Sub
+
+
+
+
+'============================================================================
+' Container1_btnCancel_OnClick
+'============================================================================
+Sub Container1_btnCancel_OnClick()
+	if g_szAccountPassword == "" then
+		Form.MsgBox("알림", "계좌 비밀번호를 입력하세요.", "", 0)
+		exit sub
+	end if
+	
+	Form.MsgBox("알림", "알리미 서비스 약정을 해지하시겠습니까?", "btnCancelOK", 1)
+End Sub
+
+
+'============================================================================
+' Container1_btnEnroll_OnClick - 신청
+'============================================================================
+Sub Container1_btnEnroll_OnClick()
+	if g_szAccountPassword == "" then
+		Form.MsgBox("알림", "계좌 비밀번호를 입력하세요", "", 0)
+		exit sub
+	end if
+	
+	if Container0.GridPro0.rowcount < "1" then
+		Form.MsgBox("알림", "등록 할 휴대폰 번호가 없습니다.", "", 0)
+		exit sub
+	end if
+	
+	Container0.Grid0.SetClear( )
+	
+	for i=0 to Container0.GridPro0.rowcount-1
+		if Container0.GridPro0.GetCellData( "bd_cell2" , i ) <> "" then
+			Container0.Grid0.insertrow = 0
+			Container0.Grid0.SetCellData( "bd_cell0", i, Container0.GridPro0.GetCellData( "bd_cell0", i ) )
+			Container0.Grid0.SetCellData( "bd_cell1", i, Container0.GridPro0.GetCellData( "bd_cell2", i ) )
+			Container0.Grid0.SetCellData( "bd_cell2", i, Container0.GridPro0.GetCellData( "bd_cell3", i ) )
+		end if	
+	next
+	Call TR_Inquiry("obpds_srvc_030a")	'선택SMS약정
+End Sub
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "INFO_CLICK" then
+		Form.OpenFramePopup("mbonl87000_p1" , "" , "")
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
