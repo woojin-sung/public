@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="43110" scrname="해외선옵-관심-환경설정" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<TABLE name="tblSet" insidelinecolor="102:255255255" colcount="3" rowcount="10" outline="0000" designorder="1" ly_vert="0,0,375,631,1" >
+			<COL_INFO ly_vert_width="215,131,29" />
+			<ROW_INFO ly_vert_height="29,49,49,29,48,29,49,49,49,251" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,2,0" bgcolor="066:238239240" line="0,1" caption="관심그룹 추가 표시" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="0,1" caption="최근조회 종목" paddinginfo="6,0,0,0" impidxs="" />
+				<CELL cell_ly="1,1,1,1" halign="2" line="0,1" impidxs="" />
+				<CELL cell_ly="2,1,2,1" line="0,1" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="0,1" caption="보유종목" autofontsize="1" paddinginfo="6,0,0,0" impidxs="" />
+				<CELL cell_ly="1,2,1,2" halign="2" line="0,1" impidxs="" />
+				<CELL cell_ly="2,2,2,2" line="0,1" impidxs="" />
+				<CELL cell_ly="0,3,2,3" bgcolor="066:238239240" line="0,1" caption="종목 선택시 연결화면" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="0,1" caption="종목 선택" autofontsize="1" paddinginfo="6,0,0,0" impidxs="" />
+				<CELL cell_ly="1,4,1,4" fgcolor="038:255255255" halign="2" line="0,1" impidxs="" />
+				<CELL cell_ly="2,4,2,4" line="0,1" impidxs="" />
+				<CELL cell_ly="0,5,2,5" bgcolor="066:238239240" line="0,1" caption="기타" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,6,0,6" halign="0" line="0,1" caption="좌우스크롤시 관심그룹 변경" paddinginfo="6,0,0,0" impidxs="" />
+				<CELL cell_ly="1,6,1,6" halign="2" line="0,1" impidxs="" />
+				<CELL cell_ly="2,6,2,6" line="0,1" impidxs="" />
+				<CELL cell_ly="0,7,0,7" halign="0" line="0,1" caption="시세 변동 표시" paddinginfo="6,0,0,0" impidxs="" />
+				<CELL cell_ly="1,7,1,7" halign="2" line="0,1" impidxs="" />
+				<CELL cell_ly="2,7,2,7" line="0,1" impidxs="" />
+				<CELL cell_ly="0,8,0,8" halign="0" line="0,1" caption="관심종목 설정 초기화" paddinginfo="6,0,0,0" impidxs="" />
+				<CELL cell_ly="1,8,1,8" halign="2" line="0,1" impidxs="" />
+				<CELL cell_ly="2,8,2,8" line="0,1" impidxs="" />
+				<CELL cell_ly="0,9,2,9" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnInit" caption="초기화" fgcolor="004:000000000" btnimage="btn_02.9.png" ly_vert="268,336,100,39,1" />
+		<IMAGE name="imgRecent" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="356,43,13,22,1" />
+		<IMAGE name="imgHolding" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="356,92,13,22,1" />
+		<IMAGE name="imgSwipe" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="356,247,13,22,1" />
+		<IMAGE name="imgBorder" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="356,296,13,22,1" />
+		<IMAGE name="imgStyle" autosize="1" imgpath="icon_arrow1_r.png" ly_vert="356,169,13,22,1" />
+		<COMBO name="cmbStyle" fgcolor="038:255255255" cblistwidth="1" cbinputdatatext="0`연결버튼 표시
+1`현재가 화면
+2`주문화면
+3`차트화면" popuptitle="연결화면" imagefilepth="alpha" ly_vert="224,158,151,45,1" />
+		<LABEL name="lblStyle" fgcolor="010:213049051" halign="2" ly_vert="226,159,125,43,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8889" _ulen="8217" >
+
+'============================================================================
+' 화 면 명 : 관심종목_환경설정
+' 화면설명 : 관심종목의 설정팝업
+' 작    성 : 2016.01.15     ssang
+'============================================================================
+
+' -- 관심그룹 추가 표시 -- 
+' 최근 조회 종목			: GLOBAL_INTR_RECENT  
+' 보유 종목				: GLOBAL_INTR_HOLDING
+
+' -- 종목 사용시 연결 화면	: GLOBAL_INTR_SCREEN_MOVE --
+' 연결버튼 표시			: 0
+' 현재가 화면으로 이동		: 1
+' 주문 화면으로 이동		: 2
+' 차트 화면으로 이동		: 3
+
+' -- 기타 --
+' 좌.우 스크롤시 관심그룹 변경	: GLOBAL_INTR_SWIPE
+' 시세 변동 표시				: GLOBAL_INTR_RORDER
+
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+' 설정테이블
+Dim g_tSetTable()
+'g_tSetTable = {}
+
+' 항목 사용여부
+Dim g_szClick
+g_szClick = ""
+
+Dim g_bFrist
+g_bFirst = false
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+'============================================================================
+' Init_SetTable : 설정테이블 초기화
+'============================================================================
+Function Init_SetTable()
+	g_tSetTable.Recent   = 1
+	g_tSetTable.Holding  = 1
+	g_tSetTable.Swipe    = 1
+	g_tSetTable.Border   = 1
+	
+	Form.SetEnvData("1", "GLOBAL_INTR_RECENT"  , g_tSetTable.Recent)		' 최근 조회 종목
+	Form.SetEnvData("1", "GLOBAL_INTR_HOLDING" , g_tSetTable.Holding)		' 보유종목
+	Form.SetEnvData("1", "GLOBAL_INTR_SWIPE"   , g_tSetTable.Swipe)			' 좌.우 스크롤시 관심그룹 변경
+	Form.SetEnvData("1", "GLOBAL_INTR_RORDER"  , g_tSetTable.Border)		' 시세 변동 표시
+	
+	Form.SetEnvData("1", "GLOBAL_INTR_SCREEN_MOVE", 0)
+End Function
+
+'============================================================================
+' Set_TableData : 사용영역 네이밍 및 폰트 색상 적용
+'============================================================================
+Function Set_TableData(nRow, szName)
+	tblSet.SetCellString(nRow, 1, szName)
+	
+	if Trim(szName) == "사용" then
+		tblSet.SetCellFgColor(nRow, 1, "10")	
+	else
+		tblSet.SetCellFgColor(nRow, 1, "12")	
+	end if
+End Function
+
+'============================================================================
+' Init_Control : 설정 초기화(0: 화면오픈, 1:초기화버튽클릭)
+'============================================================================
+Function Init_Control(nIdx)
+	if nIdx == 1 then							' 초기화 버튼 클릭시
+		Set_TableData(1, "사용")
+		Set_TableData(2, "사용")
+		Set_TableData(6, "사용")
+		Set_TableData(7, "사용")
+		
+		cmbStyle.currentindex = 0
+		
+		Init_SetTable()
+	else										' Form_init
+		if Form.GetEnvData("GLOBAL_INTR_RECENT") == "" then
+			g_tSetTable.Recent = 1
+			Set_TableData(1, "사용")
+			Form.SetEnvData("1", "GLOBAL_INTR_RECENT", g_tSetTable.Recent)
+		else
+			if Form.GetEnvData("GLOBAL_INTR_RECENT") == "1" then
+				g_tSetTable.Recent = 1
+				Set_TableData(1, "사용")
+			else
+				g_tSetTable.Recent = 0
+				Set_TableData(1, "미사용")
+			end if
+		end if
+		
+		if Form.GetEnvData("GLOBAL_INTR_HOLDING") == "" then
+			g_tSetTable.Holding = 1
+			Set_TableData(2, "사용")
+			Form.SetEnvData("1", "GLOBAL_INTR_HOLDING", g_tSetTable.Holding)
+		else
+			if Form.GetEnvData("GLOBAL_INTR_HOLDING") == "1" then
+				g_tSetTable.Holding = 1
+				Set_TableData(2, "사용")
+			else
+				g_tSetTable.Holding = 0
+				Set_TableData(2, "미사용")
+			end if
+		end if
+		
+		if Form.GetEnvData("GLOBAL_INTR_SCREEN_MOVE") == "1" then
+			cmbStyle.currentindex = 1
+		elseif Form.GetEnvData("GLOBAL_INTR_SCREEN_MOVE") == "2" then
+			cmbStyle.currentindex = 2
+		elseif Form.GetEnvData("GLOBAL_INTR_SCREEN_MOVE") == "3" then
+			cmbStyle.currentindex = 3
+		else
+			cmbStyle.currentindex = 0			
+		end if
+		
+		if Form.GetEnvData("GLOBAL_INTR_SWIPE") == "" then	' 20160325 초기화 사용으로 변경
+			g_tSetTable.Swipe = 1
+			Set_TableData(6, "사용")
+		else
+			if Form.GetEnvData("GLOBAL_INTR_SWIPE") == "1" then
+				g_tSetTable.Swipe = 1
+				Set_TableData(6, "사용")
+			else
+				g_tSetTable.Swipe = 0
+				Set_TableData(6, "미사용")
+			end if
+		end if
+		
+		if Form.GetEnvData("GLOBAL_INTR_RORDER")	== "" then
+			g_tSetTable.Border = 1
+			Set_TableData(7, "사용")
+		else
+			if Form.GetEnvData("GLOBAL_INTR_RORDER")	== "1" then
+				g_tSetTable.Border = 1
+				Set_TableData(7, "사용")
+			else
+				g_tSetTable.Border = 0
+				Set_TableData(7, "미사용")
+			end if
+		end if
+	end if
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szDefault
+
+	Form.SetScreenName("환경설정")
+	Init_Control(0)
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+	' 관심종목화면에 셋팅 적용 알림
+	Form.SendReturnToParent("GLOBAL_INTR_SET", g_szClick)
+End Sub
+
+'============================================================================
+' btnInit_OnClick : 초기화버튼 클릭
+'============================================================================
+Sub btnInit_OnClick()
+	Init_Control(1)
+End Sub
+
+'============================================================================
+' cmbStyle_OnEditComplete
+'============================================================================
+Sub cmbStyle_OnEditComplete(iIndex)
+	if g_bFirst == false then
+		g_bFirst = true
+	else
+		g_szClick = "CLICK"
+		Form.SetEnvData("1", "GLOBAL_INTR_SCREEN_MOVE", iIndex)
+	end if
+	
+	lblStyle.caption = cmbStyle.caption
+End Sub
+
+'============================================================================
+' imgRecent_OnClick
+'============================================================================
+Sub imgRecent_OnClick()
+	if g_tSetTable.Recent == 1 then
+		g_tSetTable.Recent = 0
+		Set_TableData(1, "미사용")		
+	else
+		g_tSetTable.Recent = 1
+		Set_TableData(1, "사용")			
+	end if
+	
+	g_szClick = "CLICK"
+	Form.SetEnvData("1", "GLOBAL_INTR_RECENT", g_tSetTable.Recent)			' 최근 조회 종목
+End Sub
+
+'============================================================================
+' imgHolding_OnClick
+'============================================================================
+Sub imgHolding_OnClick()
+	if g_tSetTable.Holding == 1 then
+		g_tSetTable.Holding = 0
+		Set_TableData(2, "미사용")			
+	else
+		g_tSetTable.Holding = 1
+		Set_TableData(2, "사용")			
+	end if
+	
+	g_szClick = "CLICK"
+	Form.SetEnvData("1", "GLOBAL_INTR_HOLDING", g_tSetTable.Holding)		' 보유종목
+End Sub
+
+'============================================================================
+' imgSwipe_OnClick
+'============================================================================
+Sub imgSwipe_OnClick()
+	if g_tSetTable.Swipe == 1 then	
+		g_tSetTable.Swipe = 0
+		Set_TableData(6, "미사용")		
+	else
+		g_tSetTable.Swipe = 1
+		Set_TableData(6, "사용")		
+	end if	
+	
+	g_szClick = "CLICK"
+	Form.SetEnvData("1", "GLOBAL_INTR_SWIPE", g_tSetTable.Swipe)		' 좌.우 스크롤시 관심그룹 변경
+End Sub
+
+'============================================================================
+' imgBorder_OnClick
+'============================================================================
+Sub imgBorder_OnClick()
+	if g_tSetTable.Border == 1 then
+		g_tSetTable.Border = 0
+		Set_TableData(7, "미사용")		
+	else
+		g_tSetTable.Border = 1
+		Set_TableData(7, "사용")			
+	end if	
+	
+	g_szClick = "CLICK"
+	Form.SetEnvData("1", "GLOBAL_INTR_RORDER", g_tSetTable.Border)		' 시세 변동 표시
+End Sub
+
+'============================================================================
+' tblSet_OnClick
+'============================================================================
+Sub tblSet_OnClick(lRow , lColumn)
+	if lColumn == 1 or lColumn == 2 then
+		if lRow == 1 then			' 최근조회 종목
+			imgRecent_OnClick()
+		elseif lRow == 2 then			' 보유종목
+			imgHolding_OnClick()
+		elseif lRow == 6 then			' 좌우스크롤시 관심그룹 변경
+			imgSwipe_OnClick()
+		elseif lRow == 7 then			' 시세 변동 표시
+			imgBorder_OnClick()
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

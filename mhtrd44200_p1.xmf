@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44200" scrname="주요종목_그리드서브폼" version="2" writer="이준행" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label1" click="1" ly_vert="0,0,375,647,1" />
+		<CONTAINER name="Container0" containerimage="alpha" scroll_pos="0,0" ly_vert="0,0,375,171,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" imgpath="btn_link_bg.9" ly_vert="0,0,375,171,1" />
+				<BUTTON name="Button0" enable="0" visible="0" fgcolor="095:000000000" btnimage="btn_etc16.9" ly_vert="0,850,75,59,0" />
+				<BUTTON name="Button1" enable="0" visible="0" fgcolor="095:000000000" btnimage="btn_etc16.9" ly_vert="75,850,75,59,0" />
+				<BUTTON name="Button2" enable="0" visible="0" fgcolor="095:000000000" btnimage="btn_etc10.9" ly_vert="150,850,75,59,0" />
+				<BUTTON name="Button3" enable="0" visible="0" fgcolor="095:000000000" btnimage="btn_etc11.9" ly_vert="225,850,75,59,0" />
+				<BUTTON name="Button4" enable="0" visible="0" fgcolor="095:000000000" btnimage="btn_etc16.9" ly_vert="300,850,75,59,0" />
+				<TABLE name="tblData" insidelinecolor="102:255255255" colcount="4" rowcount="5" designorder="1" ly_vert="0,10,375,160,1" >
+					<COL_INFO ly_vert_width="85,102,85,103" />
+					<ROW_INFO ly_vert_height="32,32,32,32,32" />
+					<CELL_INFO>
+						<CELL cell_ly="0,0,0,0" bgcolor="081:229229229" caption="거래소" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,0,1,0" import="0,1,15" fontsize="-2" impidxs="" />
+						<CELL cell_ly="2,0,2,0" bgcolor="081:229229229" caption="품목구분" fontsize="-2" impidxs="" />
+						<CELL cell_ly="3,0,3,0" import="0,1,34" fontsize="-2" impidxs="" />
+						<CELL cell_ly="0,1,0,1" bgcolor="081:229229229" caption="거래통화" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,1,1,1" import="0,1,18" fontsize="-2" impidxs="" />
+						<CELL cell_ly="2,1,2,1" bgcolor="081:229229229" caption="계약단위" fontsize="-2" impidxs="" />
+						<CELL cell_ly="3,1,3,1" import="0,1,23" fontsize="-2" mask="0,0,,,0,,0,1,1" impidxs="" />
+						<CELL cell_ly="0,2,0,2" bgcolor="081:229229229" caption="틱사이즈" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,2,1,2" fontsize="-2" mask="0,0,,,0,,-1,1,1" impidxs="" />
+						<CELL cell_ly="2,2,2,2" bgcolor="081:229229229" caption="틱가치" fontsize="-2" impidxs="" />
+						<CELL cell_ly="3,2,3,2" fontsize="-2" mask="0,0,,,0,,-1,1,1" impidxs="" />
+						<CELL cell_ly="0,3,0,3" bgcolor="081:229229229" caption="위탁증거금" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,3,1,3" fontsize="-2" mask="0,0,,,0,,-1,1,1" impidxs="" />
+						<CELL cell_ly="2,3,2,3" bgcolor="081:229229229" caption="유지증거금" fontsize="-2" impidxs="" />
+						<CELL cell_ly="3,3,3,3" fontsize="-2" mask="0,0,,,0,,-1,1,1" impidxs="" />
+						<CELL cell_ly="0,4,0,4" bgcolor="081:229229229" caption="결제방식" fontsize="-2" impidxs="" />
+						<CELL cell_ly="1,4,1,4" import="0,1,24" fontsize="-2" mask="1,0,,,1,,4,1,1" impidxs="" />
+						<CELL cell_ly="2,4,3,4" fontsize="-2" impidxs="" />
+					</CELL_INFO>
+				</TABLE>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7312" _ulen="7184" >
+--===========================================================================
+--===========================================================================
+
+Dim g_szItemCode
+
+'============================================================================
+Sub Form_OnFormInit()
+'	Form.SetCtlProp("btnBuy", "fgcolor"	, "62")
+'	Form.SetCtlProp("btnSell", "fgcolor"	, "62")
+	
+	listInfo = Split ( Form.GetOpenLinkData() , "★" , 0 , 0 )
+	
+	if ( #listInfo == 1 ) then
+		exit sub
+	end if
+	
+	szCode		= listInfo[0]			'코드
+	nYPos	 	= Int(listInfo[1])
+	nHeight	 	= Int(listInfo[2])
+	
+	'ShowAlert( nYPos , nHeight )
+	
+	g_szItemCode = szCode
+	
+	nScreenHeight = 650 ' 임시로 잡음
+	
+	sConImageName = "Container0.Image0" 
+	nConHeight = Int(Form.GetCtlProp("Container0", "height"))
+	
+	nImageTop = Int(Form.GetCtlProp(sConImageName, "top"))
+	nImageHeight = Int(Form.GetCtlProp(sConImageName, "height"))
+	
+	if nConHeight + nYPos + nHeight > nScreenHeight then ' 위로 떠야 하는 경우
+		szTop = "164"
+		
+		'- 7 패딩 값, 삭제 금지
+		Form.SetCtlProp("Container0", "top" , nYPos - nConHeight + 7 )
+'				Form.SetCtlProp(sConImageName , "top", nImageTop - IMAGE_ARROW_HEIGT)
+		Form.SetCtlProp(sConImageName , "imgpath", "btn_link_bg2.9")
+		Form.SetCtlProp("Container0.tblData", "top" , 4)
+		
+	else ' 아래로 떠야 하는 경우
+		szTop = "170"
+		
+		Form.SetCtlProp("Container0", "top" , nYPos + nHeight - 14 )
+'				Form.SetCtlProp(sConImageName , "height", nImageHeight - IMAGE_ARROW_HEIGT)
+		Form.SetCtlProp(sConImageName , "imgpath", "btn_link_bg.9")
+		Form.SetCtlProp("Container0.tblData", "top" , 10)
+
+	end if
+	'ShowAlert ( nYPos , nHeight )  
+	
+	For i = 0 to 4
+		szButton = "Container0" & "." & "Button" & i
+		
+		' KMC 160307
+		Form.SetCtlProp(szButton, "top"		, szTop)
+		Form.SetCtlProp(szButton, "caption"	, listInfo[i+3])
+		szSize	=	0
+		
+		if i > 0 then
+			szSize	=	len(listInfo[i+3])
+			if	szSize	>= 18		then
+				Form.SetCtlProp(szButton, "fontsize", "-3")
+			end	if
+		end	if
+
+		Select Case Trim(listInfo[i+3])
+			Case "매수"	Form.SetCtlProp(szButton, "btnimage"	, "btn_etc10.9")
+						Form.SetCtlProp(szButton, "fgcolor"	, "62")
+			Case "매도"	Form.SetCtlProp(szButton, "btnimage"	, "btn_etc11.9")
+						Form.SetCtlProp(szButton, "fgcolor"	, "62")
+			Case "정정"	Form.SetCtlProp(szButton, "btnimage"	, "btn_etc17.9")
+						Form.SetCtlProp(szButton, "fgcolor"	, "62")
+			Case "취소"	Form.SetCtlProp(szButton, "btnimage"	, "btn_etc18.9")
+						Form.SetCtlProp(szButton, "fgcolor"	, "62")
+			Case	"추가매수"	Form.SetCtlProp(szButton, "btnimage"	, "btn_etc10.9")
+							Form.SetCtlProp(szButton, "fgcolor"	, "62")
+			Case	"신규가입"	Form.SetCtlProp(szButton, "btnimage"	, "btn_etc10.9")
+							Form.SetCtlProp(szButton, "fgcolor"	, "62")
+			Case Else	Form.SetCtlProp(szButton, "btnimage"	, "btn_etc16.9")
+						Form.SetCtlProp(szButton, "fgcolor"	, "4")
+		End Select
+	Next
+	
+	DATAMANAGER.RequestTranData("obtrd_comm_500r")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	f_Clear()
+	
+	if szTranID = "obtrd_comm_500r" then
+		DATAMANAGER.SetDataValue( false, "obtrd_comm_500r", "InBlock1", "FISCD" , 0 , g_szItemCode)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "obtrd_comm_500r" then
+		Dim szTICK_UNIT, szTICK_WRTH_FAMT, szFMARG, szMNTN_FMARG
+		
+		szTICK_UNIT = DATAMANAGER.GetDataValue( false, "obtrd_comm_500r", "OutBlock1", "TICK_UNIT" , 0 )
+		szTICK_WRTH_FAMT = DATAMANAGER.GetDataValue( false, "obtrd_comm_500r", "OutBlock1", "TICK_WRTH_FAMT" , 0 )
+		szFMARG = DATAMANAGER.GetDataValue( false, "obtrd_comm_500r", "OutBlock1", "FMARG" , 0 )
+		szMNTN_FMARG = DATAMANAGER.GetDataValue( false, "obtrd_comm_500r", "OutBlock1", "MNTN_FMARG" , 0 )
+		
+		if szTICK_UNIT <> "" or szTICK_UNIT <> null then
+			Container0.tblData.SetCellString(2, 1, f_SetTickSize(szTICK_UNIT))
+		end if
+		
+		if szTICK_WRTH_FAMT <> "" or szTICK_WRTH_FAMT <> null then
+			Container0.tblData.SetCellString(2, 3, f_SetTickSize(szTICK_WRTH_FAMT))
+		end if
+		
+		if szFMARG <> "" or szFMARG <> null then
+			Container0.tblData.SetCellString(3, 1, f_SetTickSize(szFMARG))
+		end if
+		
+		if szMNTN_FMARG <> "" or szMNTN_FMARG<> null then
+			Container0.tblData.SetCellString(3, 3, f_SetTickSize(szMNTN_FMARG))
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	 szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+  
+	 if Trim(szSubMsg) <> "" then
+		 Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+	 else
+		 Form.ShowAlert("알림", szErrMsg)
+	 end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	g_szItemCode = sParam
+	
+	DATAMANAGER.RequestTranData("obtrd_comm_500r")
+End Sub 
+
+'============================================================================
+Function f_Clear()
+	Container0.tblData.SetCellString(0, 1, "")
+	Container0.tblData.SetCellString(0, 3, "")
+	Container0.tblData.SetCellString(1, 1, "")
+	Container0.tblData.SetCellString(1, 3, "")
+	Container0.tblData.SetCellString(2, 1, "")
+	Container0.tblData.SetCellString(2, 3, "")
+	Container0.tblData.SetCellString(3, 1, "")
+	Container0.tblData.SetCellString(3, 3, "")
+	Container0.tblData.SetCellString(4, 1, "")
+	Container0.tblData.SetCellString(4, 3, "")
+End Function 
+
+'============================================================================
+Function f_SetTickSize(szData)
+	Dim szTickSize, tData
+	szTickSize = szData
+	
+	if szData <> nil and szData <> "" then
+		tData = Split(szData, ".")
+		szTickSize = tData(0)
+		
+		if UBound(tData) > 0 then
+			if tData(1) <> "" then
+				szTickSize = szTickSize & "." & tData(1)
+			end if
+			
+			while right(szTickSize,1) = "0"
+				szTickSize = left(szTickSize,Len(szTickSize)-1)
+			wend
+		end if
+	end if
+	
+	return szTickSize
+End Function
+
+
+'============================================================================
+
+
+'============================================================================
+Sub Container0_Button0_OnClick()
+	Form.OpenScreen("43100" , g_szItemCode)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container0_Button1_OnClick()
+	Form.OpenScreen("43300" , g_szItemCode)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container0_Button2_OnClick()
+	Form.OpenScreen("44300", "주요종목" & "★" & "0" & "★" & g_szItemCode)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container0_Button3_OnClick()
+	Form.OpenScreen("44300", "주요종목" & "★" & "1" & "★" & g_szItemCode)
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container0_Button4_OnClick()
+	Form.OpenPopup( "mhtrd43110_p4" , g_szItemCode, "" )
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Label1_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrd_comm_500r" trcode="obtrd_comm_500r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrd_comm_500r" title="해외파생 HTS종목(상세)정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="47" _ulen="35" >
+
+FISCD^해외종목코드^32^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1922" _ulen="1418" >
+
+FISCD^해외종목코드^32^0^0^0^0^0^0
+ISNM^종목명^100^0^0^0^0^0^0
+MTIT_CODE^품목코드^10^0^0^0^0^0^0
+FUTS_OPTN_CLCD^선물옵션구분코드^1^0^0^0^0^0^0
+LSTN_DATE^상장일자^8^0^0^0^0^0^0
+MTRT_DATE^만기일자^8^0^0^0^0^0^0
+FRST_INFR_DATE^최초통보일자^8^0^0^0^0^0^0
+EXER_FPRC^행사해외가격^26^9^7^0^0^0^0
+PSNT_FPRC^현재해외가격^26^9^7^0^0^0^0
+EXCL_FPRC^정산해외가격^26^9^7^0^0^0^0
+UNAS_FUTS_MTIT_CODE^기초자산선물품목코드^10^0^0^0^0^0^0
+BLBG_FISCD^블룸버그해외종목코드^32^0^0^0^0^0^0
+RMNN_DYNU^잔존일수^9^0^7^0^0^0^0
+FMARG^해외증거금^26^6^7^0^0^0^0
+MNTN_FMARG^유지해외증거금^26^6^7^0^0^0^0
+OVDV_EXCH_CODE^해외파생거래소코드^10^0^0^0^0^0^0
+FTOT_TPCD^선물옵션유형코드^1^0^0^0^0^0^0
+EXCL_CLCD^정산구분코드^1^0^0^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+PRC_EXRS_CLCD^가격표시구분코드^1^0^0^0^0^0^0
+TICK_UNIT^틱단위^26^9^7^0^0^0^0
+TICK_WRTH_FAMT^틱가치해외금액^26^6^7^0^0^0^0
+OVDV_PRC_ADFC^해외파생가격조정계수^26^9^7^0^0^0^0
+PCNT_FAMT^계약당해외금액^26^6^7^0^0^0^0
+UI_STLM_FORM_TYPE_NAME^UI결제방식유형명^40^0^0^0^0^0^0
+MTIT_CLCD^품목구분코드^3^0^0^0^0^0^0
+MINI_YN^미니여부^1^0^0^0^0^0^0
+CMTN_MKT_STA_HOUR^전산장시작시간^6^0^0^0^0^0^0
+CMTN_MKT_FIN_HOUR^전산장종료시간^6^0^0^0^0^0^0
+SHDN_DAY_APLY_YN^휴장일적용여부^1^0^0^0^0^0^0
+TR_DATE^거래일자^8^0^0^0^0^0^0
+TR_ABLE_YN^거래가능여부^1^0^0^0^0^0^0
+STA_HOUR^시작시간^6^0^0^0^0^0^0
+FIN_HOUR^종료시간^6^0^0^0^0^0^0
+UI_INSS_MTIT_CLCD_NAME^UI정보계품목구분코드명^40^0^0^0^0^0^0
+REUTER_FISCD^로이터해외종목코드^32^0^0^0^0^0^0
+EXRS_YYMM^표시년월^6^0^0^0^0^0^0
+ABRG_DATE^폐지일자^8^0^0^0^0^0^0
+ISCD^종목코드^12^0^0^0^0^0^0
+TRTH_EXER_FPRC^실제행사해외가격^26^9^7^0^0^0^0
+TRHT_DATE^거래정지일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

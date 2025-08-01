@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_메인" version="2" writer="이호철" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<ITEMCODE name="ItemCode0" itemtype="11" marketcodelist="" ly_vert="555,86,209,39,1" />
+		<FORMTAB name="FormTab0" tabcount="7" tabheadwidth="75" tabheadheight="40" autosave="1" ly_vert="0,100,375,463,1" >
+			<PAGE name="page000333" caption="종목정보" linkfile="mhtro16000_t10" loadingtype="1" />
+			<PAGE name="page0" caption="호가" linkfile="mhtro16000_t01" loadingtype="1" />
+			<PAGE name="page1" caption="체결추이" linkfile="mhtro16000_t07" loadingtype="1" />
+			<PAGE name="page2" caption="차트" linkfile="mhtro16000_t03" loadingtype="1" />
+			<PAGE name="page3" caption="기업개요" linkfile="mhtro16000_t04" loadingtype="1" />
+			<PAGE name="page4" caption="뉴스" linkfile="mhtro16000_t09" loadingtype="1" />
+			<PAGE name="page5" caption="상세정보" linkfile="mhtro16000_t08" loadingtype="1" />
+		</FORMTAB>
+		<LINKFORM name="LinkForm2" linkfile="mhtro16000_p5" ly_vert="0,0,375,76,1" />
+		<IMAGE name="Image0" imgpath="pop_btn_drop.png" ly_vert="172,76,30,25,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="18788" _ulen="17214" >
+Dim g_ItemInfoPage
+Dim sOsType
+g_ItemInfoPage = "page3" '기업정보 페이지 정보
+
+'20240503_01 HWG START : MTS ETF 고도화 대응
+Dim g_nETF_Link_Tab
+g_nETF_Link_Tab = ""
+
+Dim g_nETF_Link_SubTab
+g_nETF_Link_SubTab = ""
+
+Dim g_szTabChange
+g_szTabChange = ""
+
+Function RequestTran_021r(szData)
+	DATAMANAGER.ClearInputData(0, "ohhts_metf_021r")
+	
+	if instr(szData, "@") > 0 then
+		arrData = split(szData, "@")
+		
+		DATAMANAGER.SetDataValue(0, "ohhts_metf_021r", "InBlock1", "FID_INPUT_OVRS_ISCD" , 0 , arrData(1))
+		DATAMANAGER.SetDataValue(0,  "ohhts_metf_021r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0 , arrData(0))
+	end if
+	
+	DATAMANAGER.RequestTranData("ohhts_metf_021r")
+End Function
+
+Function ResponseTran_021r()
+	' CFD현재가 예외처리
+	If g_szScreenNo <> "16100" then
+		FormTab0.hidepage = "page5"
+		
+		'szMorning_YN 	 = DATAMANAGER.GetDataValue(0, "ohhts_metf_021r", "OutBlock1", "FID_APLY_YN" , 0)
+		szETF_YN		 = Form.GetItemCodeInfo(ItemCode0.code, "etfyn")
+		'Form.SetSharedData("IsMorningStar" , szMorning_YN)
+		'if szMorning_YN = "Y" and szETF_YN = "Y" then
+		if szETF_YN = "Y" then
+			
+			g_ItemInfoPage = "page000333"
+			FormTab0.hidepage = "page3"
+			FormTab0.showpage = "page000333"
+			
+			if g_nETF_Link_Tab <> "" then
+				' 연동화면 정보가 있는 경우
+				if g_nETF_Link_Tab = "1" then
+					'현재가 연동
+					FormTab0.currenttabpageid = "page0"
+				elseif g_nETF_Link_Tab = "0" then
+					'종목정보 연동
+					FormTab0.currenttabpageid = "page000333"
+				end if
+				
+				if g_nETF_Link_SubTab <> "" then
+					Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "ETF_SUB_TAB", g_nETF_Link_SubTab)	' 탭화면에 종목코드 던지기
+				end if
+				
+				g_nETF_Link_Tab = ""
+				g_nETF_Link_SubTab = ""
+			else
+				'20240613_01 HWG START : 탭순서변경 및 연동기능 개선
+				' 연동화면 정보가 없는 경우
+				if FormTab0.currenttabpageid = "page3" or FormTab0.currenttabpageid = "page5" then
+					FormTab0.currenttabpageid = "page0"
+				end if
+			end if
+			
+			'Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "IsMorningStar", szMorning_YN )
+			Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "RequestData", ItemCode0.code )
+			Form.triggerEvent( "LinkForm2", "RequestData", ItemCode0.code)
+			
+			Exit Function
+		end if
+	else
+		FormTab0.showpage = "page5"	'20240613_01 HWG START : 탭순서변경 및 연동기능 개선
+	end if
+		
+	'========================================================
+	' 모닝스타에 없는 종목이거나 ETF 종목이 아닌경우
+	'========================================================
+	
+	' 상장기업분석 연동 탭ID 설정
+	g_ItemInfoPage = "page3"
+	
+	' 기업개요 탭 활성화 / 종목정보 탭 비활성화
+	FormTab0.showpage = "page3"
+	FormTab0.hidepage = "page000333"
+	
+	if g_nETF_Link_Tab <> "" then
+		' 연동화면 정보가 있는 경우
+		if g_nETF_Link_Tab = "1" then
+			'현재가 연동
+			FormTab0.currenttabpageid = "page0"
+		elseif g_nETF_Link_Tab = "0" then
+			'기업개요 연동
+			FormTab0.currenttabpageid = "page3"
+		end if
+		
+		if g_nETF_Link_SubTab <> "" then
+			Form.triggerEvent("FormTab0." & FormTab0.currenttabpageid, "ETF_SUB_TAB", g_nETF_Link_SubTab)	' 탭화면에 종목코드 던지기
+		end if
+		
+		g_nETF_Link_Tab = ""
+		g_nETF_Link_SubTab = ""
+	else
+		' 연동화면 정보가 없는 경우
+		if FormTab0.currenttabpageid = "page000333" then
+			FormTab0.currenttabpageid = "page0"
+		end if
+	end if
+	
+	Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "RequestData", ItemCode0.code)
+	Form.triggerEvent( "LinkForm2", "RequestData", ItemCode0.code)
+
+End Function
+
+Function Change_Tab()
+	' CFD현재가 예외처리
+	If g_szScreenNo <> "16100" then
+		FormTab0.hidepage = "page5"
+		
+		szETF_YN		 = Form.GetItemCodeInfo(ItemCode0.code, "etfyn")
+		if szETF_YN = "Y" then
+			
+			g_ItemInfoPage = "page000333"
+			FormTab0.hidepage = "page3"
+			FormTab0.showpage = "page000333"
+			
+			Form.SetTimerEvent2(1,1,0.5)
+
+			Exit Function
+		end if
+	else
+		FormTab0.showpage = "page5"	'20240613_01 HWG START : 탭순서변경 및 연동기능 개선
+	end if
+		
+	'========================================================
+	' 모닝스타에 없는 종목이거나 ETF 종목이 아닌경우
+	'========================================================
+	' 상장기업분석 연동 탭ID 설정
+	g_ItemInfoPage = "page3"
+	
+	' 기업개요 탭 활성화 / 종목정보 탭 비활성화
+	FormTab0.showpage = "page3"
+	FormTab0.hidepage = "page000333"
+	
+	Form.SetTimerEvent2(2,1,0.5)
+End Function
+'20240503_01 HWG END
+
+'============================================================================
+'[[ 폼 초기화 ]]
+'============================================================================
+Sub Form_OnFormInit()
+'	20211203 HSZ START : 해외CFD 
+	g_szScreenNo 		 = Form.GetSharedData( "&SCREEN_NO" , false )			' 화면번호 20211203 HSZ 해외CFD
+	If g_szScreenNo = "16100" then
+'		ItemCode0.itemtype = "26"
+		Form.setSearchType("26")
+	else
+'		ItemCode0.itemtype = "19"
+		Form.setSearchType("19")
+	end if
+'	20211203 HSZ END
+	f_EventPopup()
+	
+	'20240503_01 HWG START : MTS ETF 고도화 대응
+	szSelTabPage = Form.getEnvData("16000_SELECT_TABPAGE_ID") 'Form.GetSharedData("16000_SELECT_TABPAGE_ID" , false)
+	
+	'20240613_01 HWG START : 탭순서변경 및 연동기능 개선
+	FormTab0.showpage = "page3"
+	FormTab0.showpage = "page5"
+	FormTab0.showpage = "page000333"
+	
+	if szSelTabPage = "" then
+		FormTab0.currenttabpageid = "page0"
+		Form.SetEnvData(1, "16000_SELECT_TABPAGE_ID" , "page0")
+	else
+		if g_szScreenNo <> "16100" and szSelTabPage == "page5" then
+			FormTab0.currenttabpageid = "page0"
+			Form.SetEnvData(1, "16000_SELECT_TABPAGE_ID" , "page0")
+		else
+			FormTab0.currenttabpageid = szSelTabPage
+		end if
+	end if
+	'20240613_01 HWG END
+	
+	'20240503_01 HWG END
+	
+	if Form.GetOpenLinkData( ) == "GMP_CURRENT"	then
+		ItemCode0.code = Form.GetSharedData("&ITEM_CODE", false)
+	elseif Form.GetOpenLinkData( ) == "ITEMINFO_POP_CLOSE"	then
+		FormTab0.currenttabpageid = g_ItemInfoPage
+	else
+		szData = Form.GetOpenLinkData()
+		
+		Form.SetInterestTitle("N")		'비활성화로 기본 세팅 20230722 HSZ
+		
+		'20240503_01 HWG START : MTS ETF 고도화 대응
+		'========================================================
+		' ETF 관련화면 연동 처리 로직
+		'========================================================
+		' 종목코드★ETF/INCOME★1(호가) / 0(종목정보/기업개요)★하위탭 인덱스
+		if instr(szData, "★ETF★") > 0 or instr(szData, "★INCOME★") > 0 then
+			arrData = Split(szData, "★")
+			
+			g_nETF_Link_Tab = ""
+			g_nETF_Link_SubTab = ""
+			
+			if #arrData > 2 then
+				g_nETF_Link_Tab = arrData(2)
+			
+				if #arrData > 3 then
+					g_nETF_Link_SubTab = arrData(3) 
+				end if
+			end if
+			
+			Exit Sub
+		end if
+		'20240503_01 HWG END
+		
+		arrData = Split(szData, "♥")
+
+		if arrData(0) <> "" then
+			'20220510 LES START
+			arrLinkCode = Split(arrData(0),"★")
+			szLinkCode = arrLinkCode(0)
+			
+			if CheckMasterFile(szLinkCode) then
+				
+			else
+				Form.ShowAlert("안내", "MTS에서 조회가 불가능한 종목입니다")
+				Exit Sub
+			end if
+			'20220510 LES END 
+			Form.setOverStockItemCode(arrData(0))
+		end if
+		
+
+		'20211203 HSZ START : 해외CFD 잔고화면 차트 버튼
+		if UBOUND(arrData) > 0 then
+			if int(arrData(1)) == 2 then
+				FormTab0.currenttab = 2
+				call FormTab0_OnTabChanged(2)
+			end if
+		end if
+		'20211203 HSZ END
+		'Form.SetInterestTitle("N")		'비활성화로 기본 세팅 20230722 HSZ
+	end if	
+end Sub
+
+'============================================================================
+'[[ 폼탭 변경시 ]]
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	'20240503_01 HWG START : MTS ETF 고도화 대응
+	if g_szTabChange = "1" then
+		g_szTabChange = ""
+		Change_Tab()
+	end if
+	
+	Form.SetEnvData( 1, "SelectStockTabPageID", FormTab0.currenttabpageid )
+	
+	Form.SetEnvData(1, "16000_SELECT_TABPAGE_ID" , FormTab0.currenttabpageid)
+	Form.SetSharedData("16000_SELECT_TABPAGE_ID" , FormTab0.currenttabpageid)
+	'20240503_01 HWG END
+	
+	if Len(ItemCode0.code) > 0 then
+		Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "RequestData", ItemCode0.code )
+		
+	end if
+end Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	ItemCode0_OnEditComplete(ItemCode0.code)
+end Sub
+ 
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH" then
+		ItemCode0_OnEditComplete(ItemCode0.code)
+		
+	' 상단바 클릭 시
+	'20220922 SWJ START : 상단 바 클릭 시, 종목선택창 팝업 추가
+	elseif "TITLE_CLICK" == sEventName then
+		If g_szScreenNo = "16100" then
+			Form.OpenCommonDialog("SEARCH", "26", "")
+		else
+			Form.OpenCommonDialog("SEARCH", "19", "")
+		end if
+	'20220922 SWJ END
+	
+	' 상반바 우측 관심추가 버튼 클릭 시 
+	elseif "REG_INTR" == sEventName then
+		Form.OpenPopup( "mhtro16010_p5" , ItemCode0.code, "" )
+	' 상단 화면회전 버튼 클릭시 
+	elseIf "CHANGE_ORIENTATION" == sEventName  Then
+		Form.OpenPopup( "mhtro16000_h0" , ItemCode0.code , "" )
+	
+'	elseif sEventName == "PhoneOrientation" then		' 가로모드
+'		OrientationSetting(sParam)					' 가로모드 세팅
+	ElseIf sEventName = "SCREEN_MENU" Then			' 연결정보(상단 ...)
+		If sParam == "SET_SCREEN" Then				' 화면설정
+			Form.OpenFramePopup("mhtro16000_pc" , "" , "")
+		elseif sParam == "REG_INTR" Then				' 화면설정
+			Form.OpenPopup("mhtro16010_p5" , ItemCode0.code , "")
+		end if
+	ElseIf sEventName = "HOGA_SETUP" Then			' 폼탭 초기화
+		If FormTab0.currenttab = "0" or  FormTab0.currenttab =  0 Then
+			Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "HOGA_SETUP", "" )
+		End If
+		'Form.SetItemCode(ItemCode0.code)	'종목스타일 변경시 종목을 던져서 재조회
+	ElseIf sEventName = "FORMTAB_INIT" Then							' 폼탭 초기화
+		FormTab0.SetDefaultHeader()
+	ElseIf sEventName = "FORMTAB_SET" Then							' 폼탭 셋팅
+		FormTab0.showconfig("탭표시 순서 변경")
+	End if
+end Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	'Form.ShowAlert(sKey, sValue)
+	
+	if "&ITEM_CODE" == sKey then
+		ItemCode0_OnEditComplete(sValue)
+	end if
+End Sub
+
+'============================================================================
+Sub ItemCode0_OnEditComplete(sCode)
+	ItemCode0.code = sCode
+	arrLinkCode = Split(sCode,"★")
+	
+	'20240503_01 HWG START : MTS ETF 고도화 대응
+	szCheckData = Form.GetItemCodeInfo(arrLinkCode(0), "name")
+	if szCheckData = null or szCheckData = "" then
+		Exit Sub
+	end if
+
+	ItemCode0.code = arrLinkCode(0) 
+	
+	'RequestTran_021r(ItemCode0.code)
+	ResponseTran_021r()
+	'모닝스타 포함 종목인지 판단 후 트리거 이벤트 전송
+'	Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "RequestData", ItemCode0.code )
+'	Form.triggerEvent( "LinkForm2", "RequestData", ItemCode0.code)
+	'20240503_01 HWG END
+End Sub
+
+'============================================================================
+' 종목검색창 호출 명령 들어올 경우
+
+'============================================================================
+'Sub Form_OnOpenSearchDialog()
+	'Form.ShowAlert("test", "test")
+	'Form.OpenPopup( "ItemSearchOverStock" , "" , "I" )
+'End Sub
+
+
+'============================================================================
+' 해외주식 공지팝업
+'============================================================================
+function f_EventPopup()
+    Dim szEndDate
+    Dim szToday
+    Dim szDate
+    Dim nDiffDay
+    
+	'20200526 SWJ START : MTS 해외주식 실시간 서비스 비용 변동 안내 팝업
+    szMediaCode = Form.GetSharedData("&MEDIA_CODE", false )
+    if szMediaCode = "156" or szMediaCode = "157" then
+	    szEndDate = "20200612"                            	' 팝업노출일
+	    szToday = Form.GetSharedData("&HOST_DATE", false )    ' 현재일
+	    szDate = Form.GetEnvData("EVENT_DATE_YH")            ' 일주일간 열지 않기 체크한 날짜
+    
+	    if tonumber(Form.DiffDate(szToday, szEndDate)) >= 0 then
+			if szDate == null or szDate == "" then
+			    Form.OpenPopup("popup_noti", "" , "")
+			else
+			    nDiffDay =  tonumber(Form.DiffDate(szDate, szToday))
+			    if nDiffDay > 7 then
+					Form.SetEnvData(0, "EVENT_DATE_YH", "")
+					Form.OpenPopup("popup_noti", "" , "")
+			    end if
+			end if
+	    end if
+	end if
+	'20200526 SWJ END
+
+end function
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.OpenPopup( "mhtro16000_p0" , ItemCode0.code & "^" , "" )
+	Image0.visible = false
+
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)	
+	If sKeyName == "HOGA_SETUP" Then			' 폼탭 초기화
+		If FormTab0.currenttab == "0" or  FormTab0.currenttab ==  0 Then
+			Form.TriggerEvent( "FormTab0." .. FormTab0.currenttabpageid, "HOGA_SETUP", "" )
+		End If
+		
+	Elseif sKeyName = "FORMTAB_INIT" Then		' 폼탭 초기화
+		FormTab0.SetDefaultHeader()
+		
+		szOsType 	= Form.GetSharedData("&OS_TYPE", False)
+		if szOsType = "2" then
+			Change_Tab()
+		end if
+		
+	Elseif sKeyName = "FORMTAB_SET" Then			' 폼탭 셋팅
+		'20240613_01 HWG START : 탭순서변경 및 연동기능 개선
+		szOsType 	= Form.GetSharedData("&OS_TYPE", False)
+		if szOsType = "2" then
+			szAppVer 	= Form.GetSharedData("&APP_VERSION", False)
+			arrAppVer	= split(szAppVer, ".")
+			
+			if #arrAppVer > 2 then
+				nAppVer = Cint(arrAppVer(0)) * 1000 + Cint(arrAppVer(1)) * 100 + Cint(arrAppVer(2))
+				
+				if nAppVer < 2546 then
+					Form.ShowAlert("안내", "업데이트 후 이용이 가능해요.\n앱스토어에서 업데이트를 진행해주세요.")
+				else
+					g_szTabChange = "1"
+					FormTab0.showconfig("탭표시 순서 변경")
+				end if
+			else
+				Form.ShowAlert("안내", "업데이트 후 이용이 가능해요.\n앱스토어에서 업데이트를 진행해주세요.")
+			end if
+		else
+			g_szTabChange = "1"
+			FormTab0.showconfig("탭표시 순서 변경")
+		end if
+		'20240613_01 HWG END
+		
+	Elseif sKeyName == "ITEMINFO_POP_CLOSE" then
+		Image0.visible = true
+		if sRet == "btnReport" then
+			sOsType = Form.GetSharedData("&OS_TYPE", false ) '1.안드로이드 / 2.IOS
+			if sOsType = "2" then
+				FormTab0.currenttabpageid = g_ItemInfoPage
+				Form.triggerEvent("FormTab0." .. g_ItemInfoPage, "RequestData", ItemCode0.code)
+			else
+				FormTab0.currenttabpageid = g_ItemInfoPage
+			end if
+		end if
+	'20211222 HSZ START : 해외CFD 종목검색 화면 리턴
+	elseif sKeyName == "MBTRE10000_ITEMCODE" then
+		'20220510 LES START
+		
+		arrLinkCode = Split(sRet,"★")
+		szLinkCode = arrLinkCode(0)
+		
+		if CheckMasterFile(szLinkCode) then
+			
+		else
+			Form.ShowAlert("안내", "MTS에서 조회가 불가능한 종목입니다")
+			Exit Sub
+		end if
+		'20220510 LES END 
+		Form.setOverStockItemCode(sRet)
+'		ItemCode0.code = sRet
+		ItemCode0_OnEditComplete(sRet)
+	END IF
+	'20211222 HSZ END
+End Sub
+'20211222 HSZ START : 해외CFD
+'============================================================================
+' 종목검색창 호출 명령 들어올 경우
+'============================================================================
+Sub Form_OnOpenSearchDialog()
+	
+	'LES START => 20220826
+	'ORGNSRC
+	'Form.OpenFramePopup("mbtre10000_p2", "000", "") '국가전체로 세팅
+	
+	Form.OpenCommonDialog("SEARCH", "19", "")
+	'LES END => 20220826
+	
+	
+End Sub
+'20211222 HSZ END
+'============================================================================
+'20220510 LES START : 마스터파일에 있는 종목인지 체크
+'============================================================================
+Function Transform_Exid(szExid)
+
+	if szExid = "HKS" then
+		Transform_Exid = "HK"
+		exit Function
+	elseif szExid = "SHS" then
+		Transform_Exid = "SH"
+		exit Function
+	elseif szExid = "SZS" then
+		Transform_Exid = "SZ"
+		exit Function
+	elseif szExid = "NYS" then
+		Transform_Exid = "NY"
+		exit Function
+	elseif szExid = "AMX" then
+		Transform_Exid = "AX"
+		exit Function
+	elseif szExid = "NAS" then
+		Transform_Exid = "OQ"
+		exit Function
+	elseif szExid = "TSE" then
+		Transform_Exid = "JP"
+		exit Function
+	else
+		Transform_Exid = szExid
+	end if
+
+End Function
+
+'============================================================================
+'20220510 LES START : 마스터파일에 있는 종목인지 체크
+'============================================================================
+Function CheckMasterFile(szCode)
+	'Form.ShowAlert("szCode", szCode)
+	arrCode = Split(szCode,"@")
+	'Form.ShowAlert("arrCode0", arrCode(0))
+	'Form.ShowAlert("arrCode1", arrCode(1))
+	szTransExidCode = Transform_Exid(arrCode(0))
+	
+	szTransItemCode = szTransExidCode .. "@" .. arrCode(1)
+	'Form.ShowAlert("szTransItemCode", szTransItemCode)
+
+	szCheckData = Form.GetItemCodeInfo(szTransItemCode, "exchid")
+	'Form.ShowAlert("szCheckData", szCheckData)
+	
+	if szCheckData = "" or szCheckData = null then
+		CheckMasterFile = false
+		Exit Function
+	end if
+	
+	CheckMasterFile = true
+	
+End Function
+'============================================================================
+'LES START => 20220826
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)		
+	
+	'sReturn1 = 거래소코드★종목코드
+	'name = 종목명 
+	name = Form.GetItemCodeInfo(sReturn1, "name")
+	Form.setOverStockItemCode(sReturn1.."★"..name)
+	ItemCode0_OnEditComplete(sReturn1.."★"..name)
+	
+End Sub
+'============================================================================
+'LES END => 20220826
+'============================================================================
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+'	if szTranID = "ohhts_metf_021r" then
+'		 ResponseTran_021r()
+'	end if
+End Sub
+
+'20240503_01 HWG START : MTS ETF 고도화 대응
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID,0,0)
+	
+	if Cint(sTimerID) = 1 then
+		'20240613_01 HWG START : 탭순서변경 및 연동기능 개선
+		if FormTab0.currenttabpageid = "page3" or FormTab0.currenttabpageid = "page5" then
+			FormTab0.currenttabpageid = "page0"
+		end if
+	elseif Cint(sTimerID) = 2 then
+		if FormTab0.currenttabpageid = "page000333" then
+			FormTab0.currenttabpageid = "page0"
+		end if
+	end if
+End Sub
+'20240503_01 HWG END
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_metf_021r" trcode="ohhts_metf_021r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_metf_021r" title="ETF 모닝스타 테이터 제공여부 ?" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" inout="in" _len="148" _ulen="112" >
+
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^0^0^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="49" _ulen="41" >
+
+FID_APLY_YN^FID적용여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

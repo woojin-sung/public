@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_종목토론" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,523,1" />
+	<CONTROL_INFO>
+		<ITEMCODE name="ItemCode0" itemtype="11" marketcodelist="" ly_vert="555,86,209,39,1" />
+		<WEBVIEW name="webNews" urlpath="about:blank" ly_vert="0,0,375,423,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2761" _ulen="2687" >
+'----------------------------------------------------------------------------
+' 01. 화 면 명 : 해외주식현재가
+' 02. 화면설명 : 해외주식현재가의 종목정보 탭
+' 03. 작    성 : 2024.05.13 HWG
+'----------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szItemCode, g_szExidCd, g_szOnlyCd
+
+Dim g_szOsType
+g_szOsType = ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+Function Transform_Exid(szExid)
+
+	if szExid = "HK" then
+		if left(g_szItemCode, 1)="0" then
+			g_szItemCode = right(g_szItemCode, 4)
+		end if
+		Transform_Exid = "HK"
+		exit Function
+	elseif szExid = "SH" then
+		Transform_Exid = "SS"
+		exit Function
+	elseif szExid = "SZ" then
+		Transform_Exid = "SZ"
+		exit Function
+	elseif szExid = "OQ" then
+		Transform_Exid = "O"
+		exit Function
+	elseif szExid = "JP" then
+		Transform_Exid = "T"
+		exit Function
+	else
+		Transform_Exid = ""
+	end if
+
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInit()
+	g_szOsType = Form.GetSharedData("&OS_TYPE", false )
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if (sEventName == "RequestData") then
+		g_szItemCode = sParam
+		If sParam = "" Then
+			Exit Sub
+		End If
+		
+		if g_szOsType == "1" then
+			webNews.height = 423
+		else
+			webNews.height = 523
+		end if
+		
+		sTemp = split(g_szItemCode, "@")
+		g_szExidCd = sTemp[0] '시장구분
+		g_szOnlyCd = sTemp[1] '종목코드 
+		
+		Dim szExidCd_Naver
+		szExidCd_Naver = Transform_Exid(g_szExidCd)
+		
+		Dim szData
+		szData = ""
+		
+		if szExidCd_Naver == "" then
+			szData = g_szOnlyCd
+		else
+			szData = g_szOnlyCd & "." & szExidCd_Naver 
+		end if
+		webNews.urlpath = "https://m.stock.naver.com/"
+		
+		szUrl = "https://m.stock.naver.com/worldstock/stock/" & szData & "/discuss"
+		webNews.urlpath = szUrl
+	elseif sEventName == "CONTMAIN_SCROLLING" then
+		webNews.height = 523
+		
+	elseif sEventName == "CONTMAIN_SCROLL_POS" then
+		if g_szOsType == "1" then
+			webNews.height = 423 + Cint(sParam)
+		end if
+	end if	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

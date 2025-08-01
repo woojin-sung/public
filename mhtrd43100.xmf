@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="43100" scrname="해외파생현재가" version="2" writer="김철중" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="lkForm" linkfile="mhtrd43100_s1" ly_vert="0,0,375,75,1" />
+		<FORMTAB name="fmtab" tabcount="5" tabheadwidth="75" tabheadheight="40" autosave="1" ly_vert="0,75,375,487,1" >
+			<PAGE name="page01" caption="호가" linkfile="mhtrd43100_t1" loadingtype="1" />
+			<PAGE name="page02" caption="정보" linkfile="mhtrd43100_t2" loadingtype="1" />
+			<PAGE name="page03" caption="체결" linkfile="mhtrd43100_t3" loadingtype="1" />
+			<PAGE name="page04" caption="일별" linkfile="mhtrd43100_t4" loadingtype="1" />
+			<PAGE name="page05" caption="차트" linkfile="mhtrd43100_t5" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5466" _ulen="4962" >
+--===========================================================================
+--===========================================================================
+
+Dim g_szItemCode '종목코드
+Dim g_nSNSType '1 카카오톡 , 2 카카오톡 화면 공유 , 3 트위터 , 4페이스북
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Form.SetSearchType ("16") '해외파생 종목검색 타입셋팅
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szItemCode = Form.GetOpenLinkData( ) '관심에서 넘어옴
+	
+	if g_szItemCode = nil or g_szItemCode = "" then
+		g_szItemCode = Form.GetSharedData("&ITEM_GLOBAL_FUTOPT", 0)	 ' 최근조회종목
+	end if
+	
+	if g_szItemCode <> "" then
+		Dim szExchName
+		szExchName = Form.GetItemCodeInfo( g_szItemCode , "exchname")
+		
+		if szExchName <> "" then
+			Form.SetItemCode(g_szItemCode) '상단헤더에 종목코드 셋팅
+		end if
+	end if
+	Form.SetInterestTitle("N")		'비활성화로 기본 세팅 20230722 HSZ
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if sKey = "ITEMCODE" then '종목 변경
+		if sValue <> "" then
+			g_szItemCode = sValue
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "ITEMCODE" then '차트 불러오기 종목 변경
+		if sParam <> "" then
+			g_szItemCode = sParam
+			
+			Dim szExchName
+			szExchName = Form.GetItemCodeInfo( g_szItemCode , "exchname")
+			
+			if szExchName <> "" then
+				Form.SetItemCode(g_szItemCode) '상단헤더에 종목코드 셋팅
+			end if
+			
+			Form.triggerEvent("lkForm", "ITEMCODE", g_szItemCode)
+		end if
+		
+	elseif sEventName = "FORMTAB_SET" then '폼탭 셋팅
+		fmtab.showconfig("탭표시 순서 변경")
+		
+	elseif sEventName = "FORMTAB_INIT" then '폼탭 초기화
+		fmtab.SetDefaultHeader()
+		
+	elseif sEventName = "HOGA_SETUP" then '폼탭 초기화
+		if g_szItemCode <> nil and g_szItemCode <> "" then
+			Dim szExchName
+			szExchName = Form.GetItemCodeInfo( g_szItemCode , "exchname")
+			
+			if szExchName <> "" then
+				if fmtab.currenttab = "0" or fmtab.currenttab = 0 then
+					Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "HOGA_SETUP", "" )
+				end if
+				Form.SetItemCode(g_szItemCode)	'종목스타일 변경시 종목을 던져서 재조회
+			end if
+		end if
+		
+	elseif sEventName = "SCREEN_MENU" then '연결정보(상단 ...)
+		if sParam = "SET_SCREEN" then '화면설정
+			Form.OpenFramePopup("mhtrd43100_p1" , "" , "")
+		elseif sParam = "SHA_SNS" then 'SNS공유
+			Form.OpenDialog("sharesns" , "1", "")
+		'20230405 HSZ START
+		elseif sParam = "HK_POPUP" then '홍콩 Disclaimer
+			Form.OpenPopupAnimation("mhtrd43100_p2", "", "", "2")
+		'20230405 HSZ END
+		end if
+		
+	elseif sEventName = "sharedata" Then
+		Form.SendSNSLinkage(g_nSNSType, "메리츠 증권", sParam)
+		
+	elseif sEventName = "REG_INTR" then '관심별표
+		if g_szItemCode <> nil and g_szItemCode <> "" then
+			Form.OpenPopup("mhtrd43110_p4" , g_szItemCode , "")
+		else
+			Form.ShowAlert("알림", "종목코드를 입력하십시요.")
+		end if
+		
+	' 상단바 클릭 시
+	'20220922 SWJ START : 상단 바 클릭 시, 종목선택창 팝업 추가
+	ElseIf sEventName = "TITLE_CLICK" Then
+		Form.OpenCommonDialog("SEARCH", "16" , "")
+	'20220922 SWJ END	
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "FORMTAB_SET" then '폼탭 셋팅
+		fmtab.showconfig("탭표시 순서 변경")
+		
+	elseif sKeyName = "FORMTAB_INIT" then '폼탭 초기화
+		fmtab.SetDefaultHeader()
+		
+	elseif sKeyName = "HOGA_SETUP" then '폼탭 초기화
+		if g_szItemCode <> nil and g_szItemCode <> "" then
+			Dim szExchName
+			szExchName = Form.GetItemCodeInfo( g_szItemCode , "exchname")
+			
+			if szExchName <> "" then
+				if fmtab.currenttab = "0" or fmtab.currenttab = 0 then
+					Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "HOGA_SETUP", "" )
+				end if
+				
+				Form.SetItemCode(g_szItemCode) '종목스타일 변경시 종목을 던져서 재조회
+			end if
+		end if
+		
+	elseif sKeyName = "snsshare" then 'SNS공유
+		g_nSNSType = Cint(sRet)
+		
+		if g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+		else
+			Form.triggerEvent("lkForm", "sharedata", "")
+		end if
+
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	if g_szItemCode <> nil and g_szItemCode <> "" then
+		Form.triggerEvent("lkForm", "ITEMCODE", g_szItemCode)
+		Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "ITEMCODE", g_szItemCode)
+	end if
+End Sub
+
+'============================================================================
+'20220922 SWJ START : 상단 바 클릭 시, 종목선택창 팝업 추가
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	' 종목컨트롤에서 리턴
+	if sDlgName == "SEARCH" then
+		if Trim(sReturn1) <> "" then
+			Form.SetItemCode(sReturn1)
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_가로_메인" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" lyinfo="1" ly_horz="0,0,667,355,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" bgcolor="097:255255255" transmode="0" ly_horz="0,0,667,355,1" />
+		<TABLE name="tblHoga" insidelinecolor="102:255255255" colcount="8" rowcount="2" outline="0001" designorder="1" ly_horz="0,0,667,40,1" >
+			<COL_INFO ly_horz_width="49,66,153,166,21,81,81,50" />
+			<ROW_INFO ly_horz_height="20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" fontsize="-3" impidxs="" />
+				<CELL cell_ly="1,0,1,0" import="0,1,0" fgcolor="129:027137222" line="0,0" fontsize="-3" impidxs="" />
+				<CELL cell_ly="2,0,2,1" import="0,1,28" halign="0" line="0,0" fontsize="6" mask="1,0,,,1,,-1,1,1,0,0" impidxs="" />
+				<CELL cell_ly="3,0,3,1" import="0,1,1" realrec="0,1,10" halign="2" line="0,0" fontsize="6" mask="0,0,,,0,,-1,1,0,0,0" impidxs="" />
+				<CELL cell_ly="4,0,4,1" import="0,1,3" realrec="0,1,11" usesign="1" line="0,0" mask="0,0,,,0,,0,1,0,0,0" impidxs="" />
+				<CELL cell_ly="5,0,5,1" import="0,1,16" realrec="0,1,12" halign="2" line="0,0" fontsize="5" mask="0,0,,,0,,-1,0,1,0,0" plusminuscolor="1" impidxs="" />
+				<CELL cell_ly="6,0,6,1" import="0,1,17" realrec="0,1,13" halign="2" line="0,0" fontsize="3" mask="0,0,,%,0,,2,1,0,0,0" plusminuscolor="1" impidxs="" />
+				<CELL cell_ly="7,0,7,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,1,1,1" halign="0" line="0,0" fontsize="-3" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<FORMTAB name="frmtab" tabcount="3" tabwidthtype="1" tabheadheight="0" usepg="1" pgbarheight="15" ly_horz="0,40,667,315,1" >
+			<PAGE name="page0" caption="호가" linkfile="mhtro16000_h1.xmf" loadingtype="1" />
+			<PAGE name="page1" caption="시간별" linkfile="mhtro16000_h2.xmf" loadingtype="1" />
+			<PAGE name="page2" caption="일별" linkfile="mhtro16000_h3.xmf" loadingtype="1" />
+		</FORMTAB>
+		<BUTTON name="btnClose" caption="X" fgcolor="004:000000000" bgcolor="028:255255255" fontsize="4" btnimage="alpha" ly_horz="632,0,40,34,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_sub_07.png" ly_horz="637,8,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5770" _ulen="5320" >
+'----------------------------------------------------------------------------
+' 01. 화 면 명 : 해외주식현재가 - 가로
+' 02. 화면설명 : 해외주식현재가 가로화면
+' 03. 작    성 : 2021.03.15
+'----------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szItemCode, g_szItemMarket, g_szIndexName
+Dim g_szType 									' 13: 시간외, 그외는 현재가
+Dim g_nfmTab
+	g_nfmTab = 0
+	
+Dim g_sCode
+Dim g_nNat
+Dim g_sRealCode
+Dim g_sExid
+Dim g_szCode '종목코드
+Dim g_rtChk
+
+'[Form Init]
+'============================================================================
+Sub Form_OnFormInit()
+
+	DATAMANAGER.RequestTranData("ohhts_open_001r") '20220523 HSZ : 가로화면 화면집계 서비스호출 추가
+	g_szItemCode = Form.GetOpenLinkData()
+	'szData = Form.GetSharedData( "&ITEM_OVERSTOCK", false )
+	g_sCode = g_szItemCode
+	g_nNat = Form.GetItemCodeInfo(g_szItemCode, "ovsnation") '국가구분코드
+
+	Dim sTemp
+	'Form.GetItemCodeInfo(sItemCode, "exchid") '0321 거래소 ID 코드
+	nExid = Form.GetItemCodeInfo(g_szItemCode, "exchcode3") '거래소 구분코드
+			
+	sTemp = split(g_szItemCode, "@")
+	g_sExid = sTemp[0] '시장구분
+	g_szCode = sTemp[1] '종목코드 
+	g_rtChk = Form.GetSharedData( "REALTIME_"..g_sExid, false )
+
+	DATAMANAGER.CancelRealData("ohhts_exst_cntg")
+	if Len(g_szItemCode) > 0	then
+		DATAMANAGER.RequestTranData( "ohhts_6000_001r" )
+	end if
+	Form.triggerEvent("frmtab.page0", "INIT_CODE", g_szItemCode)
+End Sub
+
+'[[ DATAMANAGER 조회 BEFORE ]]
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)	
+
+	'Table Clear
+	tblHoga.SetCellClear()
+	
+	if szTranID == "ohhts_6000_001r" then		
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" , 0 , "OV" )
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_INPUT_OVRS_ISCD" , 0 , g_szCode )
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_COND_MRKT_CLS_CODE" , 0 , g_sExid)
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk) '실시간구분코드
+	'20220523 HSZ START : 가로화면 화면집계 서비스호출 추가
+	elseif szTranID = "ohhts_open_001r" then
+		szID = Form.GetSharedData("&USER_ID", false )
+		szOSType = Form.GetSharedData("&OS_TYPE", false)'1.안드로이드 2.iOS
+		if szOSType <> "" then
+			szOSType = szOSType + 2
+		end if
+			
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SORT_CLS" , 0 , szOSType) 'OS_TYPE 3:MTS(안드로이드) 4:MTS(iOS)
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SCR_NO" , 0 , "16011") '하드코딩(미사용 화면번호)
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SCR_NAME" , 0 , "해외주식 현재가(가로)") '하드코딩
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "USER_ID" , 0 , szID) '최근 로그인 아이디
+	'20220523 HSZ END
+	end if
+	
+End Sub
+
+
+'[[ DATAMANAGER 조회 Complete ]]
+'============================================================================
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	If szTranID = "ohhts_6000_001r" Then
+		Dim sExid
+		sExid = Transform_Exid(nExid)
+		tblHoga.SetCellString("0", "0", sExid)
+		if g_rtChk == "0" then
+			tblHoga.SetCellString("1", "0", "실시간")
+		else		
+			if g_sExid = "JP" then
+				tblHoga.SetCellString("1", "0", "20분지연")
+			else
+				tblHoga.SetCellString("1", "0", "15분지연")
+			end if
+		end if 
+	End If
+	
+	DATAMANAGER.SetDataValue( 1, "ohhts_exst_cntg", "InBlock1", "FIDXR_ISCD" , 0 , g_szItemCode )
+	DATAMANAGER.RequestRealData( "ohhts_exst_cntg" )
+	
+End Sub
+
+
+
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub imgClose_OnClick()
+	btnClose_OnClick()
+End Sub
+
+'============================================================================
+Sub frmtab_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("frmtab." & frmtab.currenttabpageid, "INIT_CODE", g_szItemCode)
+End Sub
+
+'============================================================================
+' 거래소 ID 이름으로 변환
+'============================================================================
+Function Transform_Exid(sValue)
+	if sValue == "HKS" then	' 104
+		return "홍콩"
+	elseif sValue == "HSI" then ' 529
+		return "항셍 지수"
+'		return "중국"
+	elseif sValue == "SHS" then ' 215
+		return "상해"
+'		return "중국"
+	elseif sValue == "SZS" then ' 214
+		return "심천"
+'		return "중국"
+	elseif sValue == "NYS" then ' 321
+		return "뉴욕"
+'		return "미국"
+	elseif sValue == "AMX" then ' 66
+		return "아멕스"
+'		return "미국"
+	elseif sValue == "NAS" then ' 537
+		return "나스닥"
+'		return "미국"
+	elseif sValue == "NAO" then ' 130
+		return "미국"
+	elseif sValue == "SPI" then ' 625
+		return "S&P"
+	elseif sValue == "DJI" then ' 310
+		return "다우존스"
+	elseif sValue == "TSE" then ' 106
+		return "도쿄"
+	elseif sValue == "OSE" then ' 107
+		return "오사카"
+	elseif sValue == "JSD" then ' 112
+		return "자스닥"
+	elseif sValue == "NII" then ' 889
+		return "니케이"
+	elseif sValue == "NAI" then ' 538
+		return "나스닥"
+	elseif sValue == "HSX" then ' 770
+		return "호치민"
+	elseif sValue == "HNX" then ' 771
+		return "하노이"
+	end if
+end Function
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_exst_cntg" trcode="ohhts_exst_cntg" />
+			<TRAN tranid="ohhts_6000_001r" trcode="ohhts_6000_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_open_001r" trcode="ohhts_open_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_exst_cntg" title="해외주식체결 자동갱신" realdata="1" dessvr="4" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="51" _ulen="43" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1241" _ulen="1031" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+FIDXR_DELY_YN^FIDXR지연여부^1^0^0^0^0^0^0
+FIDXR_ACPL_BSOP_DATE^FIDXR현지영업일자^8^0^0^0^0^0^0
+FIDXR_ACPL_DATE^FIDXR현지일자^8^0^0^0^0^0^0
+FIDXR_ACPL_HOUR^FIDXR현지시간^6^0^0^0^0^0^0
+FIDXR_KOREA_DATE^FIDXR한국일자^8^0^0^0^0^0^0
+FIDXR_KOREA_HOUR^FIDXR한국시간^6^0^0^0^0^0^0
+FIDXR_OPRC^FIDXR시가^18^4^7^0^0^1^0
+FIDXR_HPRC^FIDXR고가^18^4^7^0^0^1^0
+FIDXR_LPRC^FIDXR저가^18^4^7^0^0^1^0
+FIDXR_PRPR^FIDXR현재가^18^4^7^0^0^1^0
+FIDXR_VRSS_SIGN^FIDXR대비부호^1^0^0^0^0^0^0
+FIDXR_PRDY_VRSS^FIDXR전일대비^18^4^7^0^0^1^0
+FIDXR_RSFL_RT^FIDXR등락율^10^2^7^0^0^1^0
+FIDXR_BIDP^FIDXR매수호가^18^4^7^0^0^1^0
+FIDXR_SHNU_ASPR_RSQN^FIDXR매수호가잔량^13^0^7^0^0^0^0
+FIDXR_ASKP^FIDXR매도호가^18^4^7^0^0^1^0
+FIDXR_SELN_ASPR_RSQN^FIDXR매도호가잔량^13^0^7^0^0^0^0
+FIDXR_CNQN^FIDXR체결량^13^0^7^0^0^1^0
+FIDXR_ACML_VOL^FIDXR누적거래량^19^0^7^0^0^0^0
+FIDXR_ACML_TR_PBMN^FIDXR누적거래대금^19^0^7^0^0^0^0
+FIDXR_MKT_CLS^FIDXR장구분^1^0^0^0^0^0^0
+FIDXR_SHNU_ACML_CNQN^FIDXR매수누적체결량^19^0^7^0^0^0^0
+FIDXR_SELN_ACML_CNQN^FIDXR매도누적체결량^19^0^7^0^0^0^0
+FIDXR_RLTV^FIDXR체결강도^10^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_001r" title="해외주식 현재가 조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2686" _ulen="2294" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_52_WEEK_HGPR^FIDX52주최고가^14^4^7^32^1000^0^0
+FIDX_52_WEEK_LWPR^FIDX52주최저가^14^4^7^35^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_EPS^FIDXEPS^11^4^7^210^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_BSTP_CLS_CODE^FIDX업종구분코드^4^0^0^335^1000^0^0
+FIDX_BSTP_LRDV_NAME^FIDX업종대분류명^80^0^0^5133^1000^0^0
+FIDX_BSTP_MDDV_NAME^FIDX업종중분류명^80^0^0^5134^1000^0^0
+FIDX_BSTP_SMDV_NAME^FIDX업종소분류명^80^0^0^5135^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_SHNU_ASPR_UNIT^FIDX매수호가단위^14^4^7^5125^1000^0^0
+FIDX_SELN_ASPR_UNIT^FIDX매도호가단위^14^4^7^5126^1000^0^0
+FIDX_SHNU_ODER_QTY_UNIT^FIDX매수주문수량단위^9^0^7^5127^1000^0^0
+FIDX_SELN_ODER_QTY_UNIT^FIDX매도주문수량단위^9^0^7^5128^1000^0^0
+FIDX_CRNC_CODE^FIDX통화코드^4^0^0^5114^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_TICK_CLS^FIDX틱구분^4^0^0^5136^1000^0^0
+FID_PBR^FIDPBR^9^2^7^43^1000^0^0
+FIDX_PER^FIDXPER^9^2^7^42^1000^0^0
+BSTP_KOR_ISNM^업종한글종목명^100^0^0^822^1000^0^0
+FIDX_CAS_TRGT_ISSU_YN^FIDXCAS대상종목여부^1^0^0^5181^1000^0^0
+FIDX_VCM_STAT_CLS_CODE^FIDXVCM상태구분코드^1^0^0^5166^1000^0^0
+FIDX_ENG_ISNM^FIDX영문종목명^65^0^0^5112^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_VCM_STA_HOUR^FIDXVCM시작시간^6^0^0^5167^1000^0^0
+FIDX_VCM_FIN_HOUR^FIDXVCM종료시간^6^0^0^5168^1000^0^0
+FIDX_SELL_ONLY^FIDXSELLONLY^2^0^7^5173^1000^0^0
+FIDX_ISSU_STAT_CLS_CODE^FIDX종목상태구분코드^1^0^0^6016^1000^0^0
+FIDX_CAS_IEP^FIDXCASIEP^11^4^7^5215^1000^0^0
+FIDX_CAS_IEV^FIDXCASIEV^11^4^7^5216^1000^0^0
+FIDX_ETF_YN^FIDXETF여부^1^0^0^5159^1000^0^0
+FID_LVRG^FID레버리지^14^6^7^81^1000^0^0
+FIDX_CAS_TRGT_ISSU^FIDXCAS대상종목^1^0^0^5221^1000^0^0
+FIDX_CAS_STAT^FIDXCAS상태^2^0^0^5222^1000^0^0
+FIDX_CAS_SDPR^FIDXCAS기준가^14^4^7^5223^1000^0^0
+FIDX_CAS_MXPR^FIDXCAS상한가^14^4^7^5224^1000^0^0
+FIDX_CAS_LLAM^FIDXCAS하한가^14^4^7^5225^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_open_001r" title="화면조회 횟수 입력" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="171" _ulen="143" >
+
+FID_SORT_CLS^FID정렬구분^1^0^0^0^0^0^0
+FID_SCR_NO^FID화면번호^5^0^0^0^0^0^0
+FID_SCR_NAME^FID화면명^100^0^0^0^0^0^0
+USER_ID^사용자ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

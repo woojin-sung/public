@@ -1,0 +1,830 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16021" scrname="비교차트_가로" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" lyinfo="1" ly_horz="0,0,667,355,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" bgcolor="097:255255255" transmode="0" ly_horz="0,0,667,355,1" />
+		<RADIOGROUP name="RadioGroup0" buttonshape="1" buttonsnumber="4" initselectionuse="1" initselection="0" ly_horz="3,3,180,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="일" position="0,0,45,39" />
+				<RADIO no="1" text="주" position="45,0,45,39" />
+				<RADIO no="2" text="월" position="90,0,45,39" />
+				<RADIO no="3" text="1분" position="135,0,45,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<IMAGE name="Image1" autosize="1" imgpath="icon_util_03" ly_horz="173,31,10,11,1" />
+		<CHARTEX name="ChartEx0" ly_horz="0,45,667,310,1" >
+			<DATASETTING>
+				<DATAITEM name="chart" date="0,3,0;1,3,0;2,3,0;3,3,0" time="3,3,1" open="0,3,2;1,3,2;2,3,2;3,3,3" high="0,3,3;1,3,3;2,3,3;3,3,4" low="0,3,4;1,3,4;2,3,4;3,3,5" close="0,3,1;1,3,1;2,3,1;3,3,2" volume="0,3,5;1,3,5;2,3,5;3,3,6" current="0,2,2;1,2,2;2,2,2;3,2,2" chgbit="0,2,4;1,2,4;2,2,4;3,2,4" chg="3,2,3;0,2,3;1,2,3;2,2,3" perchg="3,2,5;0,2,5;1,2,5;2,2,5" curvol="3,2,8;0,2,8;1,2,8;2,2,8" base="0,2,14;1,2,14;2,2,14;3,2,14" uplimit="0,2,15;1,2,15;2,2,15;3,2,15" dnlimit="0,2,16;1,2,16;2,2,16;3,2,16" dayopen="0,2,11;1,2,11;2,2,11;3,2,11" dayhigh="0,2,12;1,2,12;2,2,12;3,2,12" daylow="0,2,13;1,2,13;2,2,13;3,2,13" cursellvol="0,2,0;1,2,0;2,2,0;3,2,0" curbuyvol="0,2,1;1,2,1;2,2,1;3,2,1" realtime="0,1,2" reallast="0,1,10" realopen="0,1,7" realhigh="0,1,8" reallow="0,1,9" realdayvol="0,1,19" realtickbuy="0,1,12" realticksell="0,1,11" realbid="0,1,0" >
+					<ADJDATAITEM/>
+				</DATAITEM>
+			</DATASETTING>
+		</CHARTEX>
+		<BUTTON name="btnClose" caption="X" fgcolor="004:000000000" bgcolor="028:255255255" fontsize="4" btnimage="alpha" ly_horz="625,0,40,40,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_sub_07.png" ly_horz="637,8,24,24,1" />
+		<BUTTON name="BtnSearch" caption="종목검색" fgcolor="012:000000000" btnimage="btn_02.9" ly_horz="509,3,70,39,1" />
+		<BUTTON name="BtnOption" resize="0011" btnimage="btn_chart03.9.png" ly_horz="585,7,35,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="16346" _ulen="15930" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szItemCode, g_szItemMarket
+Dim g_szChrtType
+Dim g_szToday
+Dim g_szMinType
+Dim g_nItemCnt
+Dim g_arrItem 
+Dim g_flagMin
+Dim gCurInd
+Dim g_flagInit
+Dim g_rtChk
+
+g_flagMin = false
+gCurInd = 0
+g_flagInit = true
+g_szChrtType = "D" '일
+g_arrItem = {"","","","",""}
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ChartEx0.SetChartType("compare")
+	ChartEx0.SetMarketCategory("7")
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	DATAMANAGER.RequestTranData("ohhts_open_001r") '20220523 HSZ : 가로화면 화면집계 서비스호출 추가
+	g_intItemCnt = Form.GetEnvData( "mhtro16021_comp_itemCnt" )
+	tmpItem =  Form.GetEnvData( "mhtro16021_comp_itemList" )
+	tmpCheck = Form.GetEnvData("mhtro16021_comp_itmeCheck")
+	g_szToday = Form.GetSharedData("&HOST_DATE", 0 )
+	
+	tmpPeriod = Form.GetOpenLinkData( )
+
+	if g_intItemCnt = "" then
+		Exit Sub		
+	end if
+	if tmpPeriod = "" then
+		Exit Sub
+	end if
+
+	szMin0 = Form.GetEnvData( "mhtro16021_chart_min0" )
+	if szMin0 = "" or szMin0 = 0 then
+		szMin0 = "1"
+	end if
+	
+	RadioGroup0.SetRadioCaption( 3, szMin0.."분" )	
+	
+	if g_intItemCnt = "" then
+		if g_szItemCode = "" or g_szItemCode = null then
+			g_szItemCode = tmpPeriod
+		end if
+		
+		Form.SetEnvData( 1, "mhtro16021_comp_itemCnt", "1" )
+		Form.SetEnvData( 1, "mhtro16021_comp_itemList", g_szItemCode.."^" )
+		Form.SetEnvData( 1, "mhtro16021_comp_itmeCheck", "".."^")
+		
+		'g_szItemMarket = Form.GetItemCodeInfo( g_szItemCode , "market") 
+		
+		outStrName = Form.GetItemCodeInfo( g_szItemCode , "name")
+		sCodeData = split(g_szItemCode, "@")
+		sExid = sCodeData[0] '시장구분
+		sCode = sCodeData[1] '종목코드 
+		ChartEx0.SetCurCodeName(sExid..";"..g_szItemCode..";"..outStrName)
+		ChartEx0.SetCompareData("^"..g_szItemCode.."^"..outStrName.."^"..sExid)
+			
+	else
+		g_arrItem = split(tmpItem , "^")
+		arrCheck = split(tmpCheck , "^")
+		arrPeriod = split(tmpPeriod , "^")
+	'	ChartEx0.SetDataClear("1")
+	
+		for i = 0 to g_intItemCnt - 1
+			if arrCheck[i] = "1" or arrCheck[i] = "" then
+				
+				g_szItemCode = g_arrItem[i]
+				outStrName = Form.GetItemCodeInfo( g_szItemCode , "name")
+				sCodeData = split(g_szItemCode, "@")
+				sExid = sCodeData[0] '시장구분
+				sCode = sCodeData[1] '종목코드 
+				ChartEx0.SetCurCodeName(sExid..";"..g_szItemCode..";"..outStrName)
+				ChartEx0.SetCompareData("^"..g_szItemCode.."^"..outStrName.."^"..sExid)
+			end if
+		next
+		
+		if arrPeriod[0] = "3" then
+			RadioGroup0.SetRadioCaption( arrPeriod[0], arrPeriod[1] )
+		end if
+		RadioGroup0.currentindex = CInt(arrPeriod[0])
+	
+	end if
+	ChartEx0.setRequestCompareData("1")
+End Sub
+
+'============================================================================
+Function RequestData()
+
+	DATAMANAGER.CancelRealData("ohhts_exst_cntg")
+	
+	szStockMode = "0"
+	if g_sStockMode = "0" then
+		szStockMode = "1"
+	end if
+	g_rtChk = Form.GetSharedData( "REALTIME_"..g_szItemMarket, false )
+	
+	if g_szChrtType == "A" then		'분
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 	0, "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock1", "FID_COND_MRKT_CLS_CODE", 			0, g_szItemMarket )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock1", "FID_INPUT_OVRS_ISCD", 			0, g_szItemCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE", 			0, g_rtChk )
+		
+
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 	0, "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock2", "FID_COND_MRKT_CLS_CODE", 			0, g_szItemMarket )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock2", "FID_INPUT_OVRS_ISCD", 			0, g_szItemCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock2", "FIDX_INPUT_DELY_RLTM_CLS_CODE", 0, g_rtChk)
+		
+		sMin = Split(g_szMinType, "분", -1, 1)
+		sTemp = sMin[0] * 60
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock2", "FID_INPUT_HOUR_CLS_CODE", 0, sTemp )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock2", "FID_INPUT_DATE1" ,0,g_szToday)	
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_005r", "InBlock2", "FID_INPUT_PAST_DATA_INCU_YN" , 0,"Y")
+		
+		DATAMANAGER.RequestTranData("ohhts_5041_005r")
+	elseif g_szChrtType == "D" then	'일
+	
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 	0, "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock1", "FID_COND_MRKT_CLS_CODE", 			0, g_szItemMarket )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock1", "FID_INPUT_OVRS_ISCD", 			0, g_szItemCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk )
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 	0, "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock2", "FID_COND_MRKT_CLS_CODE", 			0, g_szItemMarket )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock2", "FID_INPUT_OVRS_ISCD", 			0, g_szItemCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock2", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk )
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock2", "FID_INPUT_MOD_STPR_CLS_CODE", 0, szStockMode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_001r", "InBlock2", "FID_INPUT_DATE1" ,0, g_szToday)	
+		
+		DATAMANAGER.RequestTranData("ohhts_5041_001r")
+	elseif g_szChrtType == "M" then	'월
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 	0, "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock1", "FID_COND_MRKT_CLS_CODE", 			0, g_szItemMarket )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock1", "FID_INPUT_OVRS_ISCD", 			0, g_szItemCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk )
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 	0, "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock2", "FID_COND_MRKT_CLS_CODE", 			0, g_szItemMarket )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock2", "FID_INPUT_OVRS_ISCD", 			0, g_szItemCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock2", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk )
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_003r", "InBlock2", "FID_INPUT_DATE1" ,0, g_szToday)	
+		
+		DATAMANAGER.RequestTranData("ohhts_5041_003r")
+	elseif  g_szChrtType == "W" then'주
+
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 	0, "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock1", "FID_COND_MRKT_CLS_CODE", 			0, g_szItemMarket )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock1", "FID_INPUT_OVRS_ISCD", 			0, g_szItemCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk )
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE", 	0, "OV" )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock2", "FID_COND_MRKT_CLS_CODE", 			0, g_szItemMarket )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock2", "FID_INPUT_OVRS_ISCD", 			0, g_szItemCode )
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock2", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk )
+		
+		DATAMANAGER.SetDataValue( 0, "ohhts_5041_002r", "InBlock2", "FID_INPUT_DATE1" ,0, g_szToday)	
+		
+		DATAMANAGER.RequestTranData("ohhts_5041_002r")
+	End If
+	
+end Function
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	if nIndex == 0 then  '일
+		g_szChrtType = "D"	
+		PeriodSet(g_szChrtType)
+	elseif nIndex == 1 then  '주
+		g_flagMin = false
+		g_szChrtType = "W"
+		PeriodSet(g_szChrtType)
+	elseif nIndex == 2 then  '월
+		g_flagMin = false
+		g_szChrtType = "M"
+		PeriodSet(g_szChrtType)
+	elseif nIndex == 3 then   '분
+		g_szChrtType = "A"
+		tmpMin = Split(RadioGroup0.GetRadioCaption( nIndex ), "분")
+		g_szMinType = tmpMin[0]
+		if g_flagMin == false then
+			g_flagMin = true
+			PeriodSet(g_szChrtType)
+		else
+			g_flagMin = false		
+			Form.OpenPopup( "mhtro16020_p3.xmf" , g_szMinType , "" )
+		end if
+			
+	end if
+	
+End Sub
+
+'============================================================================
+
+Sub BtnSave_OnClick()
+	ChartEx0.SetOpenDlg("save;BtnSave")
+End Sub
+
+'============================================================================
+Sub BtnIndi_OnClick()
+	ChartEx0.SetOpenDlg("indicatormini;BtnIndi")
+End Sub
+
+'============================================================================
+Sub BtnTool_OnClick()
+	ChartEx0.SetOpenDlg("tools;BtnTool")
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "Chart_Min" then
+		sMin = Split(sRet,"분")
+		RadioGroup0.SetRadioCaption( 3, sRet)
+		g_szMinType = sMin[0]
+		PeriodSet(g_szChrtType)
+	elseif sKeyName == "CompOption" then
+		
+		g_intItemCnt = Form.GetEnvData( "mhtro16021_comp_itemCnt" )
+		tmpItem =  Form.GetEnvData( "mhtro16021_comp_itemList" )
+		tmpCheck = Form.GetEnvData("mhtro16021_comp_itmeCheck")
+		
+		if g_intItemCnt = "" then
+			Exit Sub		
+		end if
+		g_arrItem = split(tmpItem , "^")
+		arrCheck = split(tmpCheck , "^")
+
+		ChartEx0.SetDataClear("1")
+		for i = 0 to g_intItemCnt - 1
+			if arrCheck[i] = "1" then
+				g_szItemCode = g_arrItem[i]
+				outStrName = Form.GetItemCodeInfo( g_szItemCode , "name")
+				sCodeData = split(g_szItemCode, "@")
+				sExid = sCodeData[0] '시장구분
+				sCode = sCodeData[1] '종목코드 
+				ChartEx0.SetCurCodeName(sExid..";"..g_szItemCode..";"..outStrName)
+				ChartEx0.SetCompareData("^"..g_szItemCode.."^"..outStrName.."^"..sExid)
+			end if
+
+		next
+		ChartEx0.setRequestCompareData("1")
+
+	end if
+End Sub
+	
+'============================================================================
+'Chart 불러오기(기간)
+' 설정창 닫을때 분,틱 주기 넘겨줌.
+'============================================================================
+
+function ChartEx0_OnGetPeriodInfo()
+	Dim sPeriodType
+	sPeriodType = ""
+	Dim sMin, sTic
+   ' 차트 설정창에서 주기 값 넘어온 경우
+   ' 분주기#틱주기 => 1;3;5;.../1;3;5;...
+	for i = 0 to 8
+		sMin = Form.GetEnvData( "mhtro16021_chart_min"..i )	'분차트
+		if sMin <> "" then
+			if i == 7 then
+				sPeriodType = sPeriodType&sMin&"/"
+			else
+				sPeriodType = sPeriodType&sMin&";"
+			end if
+		end if
+	next
+
+	if sPeriodType <> "" then
+		ChartEx0.setSyncPeriodValueToChart(sPeriodType)
+	end if
+end function
+
+function ChartEx0_OnChangePeriod(sPeriodType)
+	sMinArr = {}
+	sTicArr = {}
+	sDataArr = {}
+	
+	g_sIsRequestChartEvent = "1"
+
+   ' 차트 설정창에서 주기 값 넘어온 경우
+   ' 분주기#틱주기 => 1;3;5;.../1;3;5;...
+   if InStr(sPeriodType, "/") > 0 then
+	   sTemp = split(sPeriodType, "/")
+	   sMinArr = split(sTemp[0], ";")
+	   sTicArr = split(sTemp[1], ";")
+	   Form.Log("sPeriodType",sPeriodType)
+	   
+	   for i = 0 to 7 step 1
+		Form.SetEnvData( 1, "mhtro16021_chart_min"..i, sMinArr[i] )
+		
+		Form.SetEnvData( 1, "mhtro16021_chart_tic"..i, sTicArr[i] )
+
+	   next
+   end if
+end function
+
+
+'============================================================================
+' 차트 설정 개수 변경시
+'============================================================================
+function ChartEx0_OnByNumber(Count)
+
+   if #Count == 1 then
+	   Count = "000"..Count
+   elseif #Count == 2 then
+	   Count = "00"..Count
+   elseif #Count == 3 then
+	   Count = "0"..Count
+   end if
+
+	g_sChartCnt = Count
+	
+	RequestData()
+end function
+
+
+'============================================================================
+' 일,분,틱 주기별 차트 설정
+' 0(틱),1(분) ,2(일), 3(주), 4(월), 5(년)
+'============================================================================
+function PeriodSet(sPeriodType)
+
+
+'	Form.ShowAlert("", sIndex..":"..sPeriod)
+	
+	if sPeriodType= "A" then
+	   g_sPeriod = CInt(g_szMinType)
+	   g_sPeriodType = "1"
+	elseif sPeriodType= "D" then 
+	   g_sPeriodType = "2"
+	   g_sPeriod ="1"
+	elseif sPeriodType= "W" then 
+	   g_sPeriodType = "3"
+	    g_sPeriod ="1"
+	elseif sPeriodType= "M" then 
+	   g_sPeriodType = "4"
+	    g_sPeriod ="1"
+	end if
+   sPeriod = CInt( g_sPeriod)
+   if Len( sPeriod )= 1 then
+	   g_sPeriod = "00"..g_sPeriod
+	elseif Len( sPeriod )= 2 then
+	   g_sPeriod = "0"..g_sPeriod
+	end if
+   ChartEx0.SetPeriodType(g_sPeriodType)
+   ChartEx0.SetPeriodTime(g_sPeriod)
+
+'   
+	' 조회TR 보내기
+	ChartEx0.setRequestCompareData("0")
+end function
+
+
+'============================================================================
+Sub BtnSearch_OnClick()
+	Form.OpenPopup("mhtro16021_p2","","")
+End Sub
+
+'============================================================================
+Sub BtnOption_OnClick()
+	ChartEx0.SetOpenDlg("comparePopup;BtnOption")
+End Sub
+
+
+'============================================================================
+Sub ChartEx0_OnRequestData(nIndex, sData)
+
+	Data = split(sData, ";")
+	
+	sCodeData = split(tostring(Trim(Data[0]))    , "@")
+	sExid = sCodeData[0] '시장구분
+	sCode = sCodeData[1] '종목코드 
+	
+	g_szItemCode      = tostring(Trim(sCode))             
+	g_szItemMarket    = tostring(Trim(Data[3]))             
+	nIndex = tonumber(nIndex)
+
+	RequestData()
+end Sub  
+
+
+
+'============================================================================
+Sub Form_OnFormClose()
+	sData = RadioGroup0.currentindex.."^"..RadioGroup0.GetRadioCaption( RadioGroup0.currentindex)
+	Form.SendReturnToParent("OrientaitonClose" , sData)
+End Sub
+
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	ChartEx0.setRequestCompareData("0")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	for i = 0 to 4 
+		if g_arrItem[i] = "" then
+			Exit Sub
+		else
+			tmpItem = g_arrItem[i]
+		end if
+		
+		DATAMANAGER.SetDataValue( 1, "ohhts_exst_cntg", "InBlock1", "FIDXR_ISCD", 0, tmpItem )
+		DATAMANAGER.RequestRealData( "ohhts_exst_cntg" )
+	next
+	
+End Sub
+
+		
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	Dim nDecimal
+	nDecimal = CInt(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "FIDX_DCPN_CNT" , 0))
+	ChartEx0.SetDecimal(nDecimal)
+	
+	
+	tmpItem =  Form.GetEnvData( "mhtro16021_comp_itemList" )
+	arrItem = split(tmpItem , "^")
+	arrCnt = CInt(#arrItem) -1 
+
+	for i = 0 to arrCnt-1
+		
+		if arrItem[i] <> "" then			
+			itemCode = arrItem[i]
+			itemCode = split(itemCode,"@")
+			if itemCode[1] == g_szItemCode then
+				szValue = itemCode[0].."@"..g_szItemCode
+
+				DATAMANAGER.SetDataValue(0, szTranID , "OutBlock1", "FIDX_ISCD" , 0 , szValue)
+			end if
+		end if 
+	next
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'20220523 HSZ 가로화면 화면집계 서비스호출 추가
+	if szTranID = "ohhts_open_001r" then
+		szID = Form.GetSharedData("&USER_ID", false )
+		szOSType = Form.GetSharedData("&OS_TYPE", false)'1.안드로이드 2.iOS
+		if szOSType <> "" then
+			szOSType = szOSType + 2
+		end if
+			
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SORT_CLS" , 0 , szOSType) 'OS_TYPE 3:MTS(안드로이드) 4:MTS(iOS)
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SCR_NO" , 0 , "16023") '하드코딩(미사용 화면번호)
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SCR_NAME" , 0 , "비교차트(가로)") '하드코딩
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "USER_ID" , 0 , szID) '최근 로그인 아이디
+	end if
+	'20220523 HSZ END
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_exst_cntg" trcode="ohhts_exst_cntg" />
+			<TRAN tranid="ohhts_5041_001r" trcode="ohhts_5041_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_5041_002r" trcode="ohhts_5041_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_5041_003r" trcode="ohhts_5041_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_5041_005r" trcode="ohhts_5041_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_open_001r" trcode="ohhts_open_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_exst_cntg" title="해외주식체결 자동갱신" realdata="1" dessvr="4" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="51" _ulen="43" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1241" _ulen="1031" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+FIDXR_DELY_YN^FIDXR지연여부^1^0^0^0^0^0^0
+FIDXR_ACPL_BSOP_DATE^FIDXR현지영업일자^8^0^0^0^0^0^0
+FIDXR_ACPL_DATE^FIDXR현지일자^8^0^0^0^0^0^0
+FIDXR_ACPL_HOUR^FIDXR현지시간^6^0^0^0^0^0^0
+FIDXR_KOREA_DATE^FIDXR한국일자^8^0^0^0^0^0^0
+FIDXR_KOREA_HOUR^FIDXR한국시간^6^0^0^0^0^0^0
+FIDXR_OPRC^FIDXR시가^18^4^7^0^0^1^0
+FIDXR_HPRC^FIDXR고가^18^4^7^0^0^1^0
+FIDXR_LPRC^FIDXR저가^18^4^7^0^0^1^0
+FIDXR_PRPR^FIDXR현재가^18^4^7^0^0^1^0
+FIDXR_VRSS_SIGN^FIDXR대비부호^1^0^0^0^0^0^0
+FIDXR_PRDY_VRSS^FIDXR전일대비^18^4^7^0^0^1^0
+FIDXR_RSFL_RT^FIDXR등락율^10^2^7^0^0^1^0
+FIDXR_BIDP^FIDXR매수호가^18^4^7^0^0^1^0
+FIDXR_SHNU_ASPR_RSQN^FIDXR매수호가잔량^13^0^7^0^0^0^0
+FIDXR_ASKP^FIDXR매도호가^18^4^7^0^0^1^0
+FIDXR_SELN_ASPR_RSQN^FIDXR매도호가잔량^13^0^7^0^0^0^0
+FIDXR_CNQN^FIDXR체결량^13^0^7^0^0^1^0
+FIDXR_ACML_VOL^FIDXR누적거래량^19^0^7^0^0^0^0
+FIDXR_ACML_TR_PBMN^FIDXR누적거래대금^19^0^7^0^0^0^0
+FIDXR_MKT_CLS^FIDXR장구분^1^0^0^0^0^0^0
+FIDXR_SHNU_ACML_CNQN^FIDXR매수누적체결량^19^0^7^0^0^0^0
+FIDXR_SELN_ACML_CNQN^FIDXR매도누적체결량^19^0^7^0^0^0^0
+FIDXR_RLTV^FIDXR체결강도^10^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5041_001r" title="해외주식 종합차트(차트[일])" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="512" toutblk="OutBlock2" _ulen="402" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_INPUT_MOD_STPR_CLS_CODE^FID입력수정주가구분코드^3^0^7^9105^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_DATE2^FID입력일자2^9^0^7^9111^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1645" _ulen="1381" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_HOUR^FIDX시간^6^0^0^12^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_VOL_RATE^FIDX전일대비거래량비율^11^2^7^15^1000^0^0
+FIDX_ACML_TR_PBMN^FIDX누적거래대금^19^0^7^16^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_DATE^FIDX일자^8^0^0^67^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_PSNT_HOUR^FIDX현재시간^6^0^0^189^1000^0^0
+FIDX_ASKP1^FIDX매도호가1^14^4^7^500^1000^0^0
+FIDX_BIDP1^FIDX매수호가1^14^4^7^510^1000^0^0
+FIDX_MKOP_CLCD^FIDX장운영구분코드^1^0^0^5109^1000^0^0
+FIDX_MKT_STA_HOUR^FIDX장시작시간^6^0^0^5122^1000^0^0
+FIDX_MKT_FIN_HOUR^FIDX장종료시간^6^0^0^5123^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_ACPL_HOUR^FIDX현지시간^6^0^0^5161^1000^0^0
+FIDX_PRDY_OPRC^FIDX전일시가^14^4^7^6607^1000^0^0
+FIDX_PRDY_HPRC^FIDX전일고가^14^4^7^6608^1000^0^0
+FIDX_PRDY_LPRC^FIDX전일저가^14^4^7^6609^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="300" inout="out" _len="385" _ulen="331" >
+
+FIDX_DATE^FIDX일자^8^0^0^67^1003^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1003^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1003^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1003^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1003^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1003^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1003^0^0
+FID_FLNG_CLS_CODE^FID락구분코드^1^0^0^1905^1003^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5041_002r" title="해외주식 종합차트(차트[주])" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="512" toutblk="OutBlock2" _ulen="402" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_INPUT_MOD_STPR_CLS_CODE^FID입력수정주가구분코드^3^0^7^9105^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_DATE2^FID입력일자2^9^0^7^9111^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1645" _ulen="1381" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_HOUR^FIDX시간^6^0^0^12^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_VOL_RATE^FIDX전일대비거래량비율^11^2^7^15^1000^0^0
+FIDX_ACML_TR_PBMN^FIDX누적거래대금^19^0^7^16^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_DATE^FIDX일자^8^0^0^67^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_PSNT_HOUR^FIDX현재시간^6^0^0^189^1000^0^0
+FIDX_ASKP1^FIDX매도호가1^14^4^7^500^1000^0^0
+FIDX_BIDP1^FIDX매수호가1^14^4^7^510^1000^0^0
+FIDX_MKOP_CLCD^FIDX장운영구분코드^1^0^0^5109^1000^0^0
+FIDX_MKT_STA_HOUR^FIDX장시작시간^6^0^0^5122^1000^0^0
+FIDX_MKT_FIN_HOUR^FIDX장종료시간^6^0^0^5123^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_ACPL_HOUR^FIDX현지시간^6^0^0^5161^1000^0^0
+FIDX_PRDY_OPRC^FIDX전일시가^14^4^7^6607^1000^0^0
+FIDX_PRDY_HPRC^FIDX전일고가^14^4^7^6608^1000^0^0
+FIDX_PRDY_LPRC^FIDX전일저가^14^4^7^6609^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="300" inout="out" _len="266" _ulen="234" >
+
+FIDX_DATE^FIDX일자^8^0^0^67^5007^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^5007^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^5007^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^5007^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^5007^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^5007^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5041_003r" title="해외주식 종합차트(차트[월])" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="512" toutblk="OutBlock2" _ulen="402" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_INPUT_MOD_STPR_CLS_CODE^FID입력수정주가구분코드^3^0^7^9105^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_DATE2^FID입력일자2^9^0^7^9111^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1645" _ulen="1381" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_HOUR^FIDX시간^6^0^0^12^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_VOL_RATE^FIDX전일대비거래량비율^11^2^7^15^1000^0^0
+FIDX_ACML_TR_PBMN^FIDX누적거래대금^19^0^7^16^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_DATE^FIDX일자^8^0^0^67^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_PSNT_HOUR^FIDX현재시간^6^0^0^189^1000^0^0
+FIDX_ASKP1^FIDX매도호가1^14^4^7^500^1000^0^0
+FIDX_BIDP1^FIDX매수호가1^14^4^7^510^1000^0^0
+FIDX_MKOP_CLCD^FIDX장운영구분코드^1^0^0^5109^1000^0^0
+FIDX_MKT_STA_HOUR^FIDX장시작시간^6^0^0^5122^1000^0^0
+FIDX_MKT_FIN_HOUR^FIDX장종료시간^6^0^0^5123^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_ACPL_HOUR^FIDX현지시간^6^0^0^5161^1000^0^0
+FIDX_PRDY_OPRC^FIDX전일시가^14^4^7^6607^1000^0^0
+FIDX_PRDY_HPRC^FIDX전일고가^14^4^7^6608^1000^0^0
+FIDX_PRDY_LPRC^FIDX전일저가^14^4^7^6609^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="266" _ulen="234" >
+
+FIDX_DATE^FIDX일자^8^0^0^67^5008^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^5008^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^5008^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^5008^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^5008^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^5008^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_5041_005r" title="해외주식 종합차트(차트[분])" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="671" toutblk="OutBlock2" _ulen="523" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+FID_INPUT_MOD_STPR_CLS_CODE^FID입력수정주가구분코드^3^0^7^9105^9999^0^0
+FID_INPUT_HOUR_CLS_CODE^FID입력시간구분코드^7^0^7^9002^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_DATE2^FID입력일자2^9^0^7^9111^9999^0^0
+FID_INPUT_PAST_DATA_INCU_YN^FID입력과거데이터포함여부^2^0^0^9133^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1645" _ulen="1381" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_HOUR^FIDX시간^6^0^0^12^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_VOL_RATE^FIDX전일대비거래량비율^11^2^7^15^1000^0^0
+FIDX_ACML_TR_PBMN^FIDX누적거래대금^19^0^7^16^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_DATE^FIDX일자^8^0^0^67^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_PSNT_HOUR^FIDX현재시간^6^0^0^189^1000^0^0
+FIDX_ASKP1^FIDX매도호가1^14^4^7^500^1000^0^0
+FIDX_BIDP1^FIDX매수호가1^14^4^7^510^1000^0^0
+FIDX_MKOP_CLCD^FIDX장운영구분코드^1^0^0^5109^1000^0^0
+FIDX_MKT_STA_HOUR^FIDX장시작시간^6^0^0^5122^1000^0^0
+FIDX_MKT_FIN_HOUR^FIDX장종료시간^6^0^0^5123^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_ACPL_HOUR^FIDX현지시간^6^0^0^5161^1000^0^0
+FIDX_PRDY_OPRC^FIDX전일시가^14^4^7^6607^1000^0^0
+FIDX_PRDY_HPRC^FIDX전일고가^14^4^7^6608^1000^0^0
+FIDX_PRDY_LPRC^FIDX전일저가^14^4^7^6609^1000^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="360" inout="out" _len="320" _ulen="280" >
+
+FIDX_DATE^FIDX일자^8^0^0^67^1005^0^0
+FIDX_KOREA_HOUR^FIDX한국시간^6^0^0^5130^1005^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1005^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1005^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1005^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1005^0^0
+FIDX_CNTG_VOL^FIDX체결거래량^13^0^7^68^1005^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_open_001r" title="화면조회 횟수 입력" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="171" _ulen="143" >
+
+FID_SORT_CLS^FID정렬구분^1^0^0^0^0^0^0
+FID_SCR_NO^FID화면번호^5^0^0^0^0^0^0
+FID_SCR_NAME^FID화면명^100^0^0^0^0^0^0
+USER_ID^사용자ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

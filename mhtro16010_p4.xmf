@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16010" scrname="관심종목_서브팝업" version="2" writer="이재원" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha" ly_vert="0,0,375,647,1" />
+		<CONTAINER name="Container0" containerimage="alpha.png" scroll_pos="0,0" ly_vert="0,34,375,64,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" imgpath="btn_link_bg.9" ly_vert="0,0,375,64,1" />
+				<BUTTON name="Button0" caption="현재가" fgcolor="004:000000000" btnimage="btn_etc24.9" ly_vert="0,10,75,49,1" />
+				<BUTTON name="Button1" caption="차트" fgcolor="004:000000000" btnimage="btn_etc24.9" ly_vert="75,10,75,49,1" />
+				<BUTTON name="Button2" caption="뉴스" fgcolor="004:000000000" btnimage="btn_etc24.9" ly_vert="150,10,105,49,1" />
+				<BUTTON name="Button3" caption="매수" fontsize="2" btnimage="btn_etc10.9" ly_vert="253,10,62,50,1" />
+				<BUTTON name="Button4" caption="매도" fontsize="2" btnimage="btn_etc11.9" ly_vert="314,10,61,50,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4393" _ulen="4261" >
+Dim arrData
+arrData = {}
+
+' 화면번호 20211203 HSZ 해외CFD
+Dim g_szScreenNo
+'============================================================================
+Sub Form_OnFormInit()
+	g_szScreenNo 		 = Form.GetSharedData( "&SCREEN_NO" , false )			' 화면번호 20211203 HSZ 해외CFD
+	Dim nContHeight, nFormheight
+	if Form.GetOpenLinkData( ) <> null and Form.GetOpenLinkData( ) <> ""	then
+		arrData = split(Form.GetOpenLinkData( ), "^")
+		nContHeight = 64
+		nFormheight = 647
+		
+		if nContHeight + arrData[2] + 35 > 647	then
+			Container0.Image0.imgpath = "btn_link_bg2.9"
+			Container0.top = arrData[2] - 65
+			Container0.Button0.top = 5
+			Container0.Button1.top = 5
+			Container0.Button2.top = 5
+			Container0.Button3.top = 5
+			Container0.Button4.top = 5
+		else
+			Container0.top = arrData[2] + 35
+		end if
+	else
+		Form.CloseForm( )
+	end if
+	
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Container0_Button0_OnClick()
+	if arrData[0] <> "" and arrData[1]	then
+	
+		Form.SetSharedData( "&ITEM_CODE" , arrData[0] )
+		Form.SetSharedData( "&ITEM_KORNAME" , arrData[1] )	
+		
+		Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", arrData[0].."★"..arrData[1].."★".."", "" )
+		'20211203 HSZ START : 해외CFD 
+		If g_szScreenNo = "16110" then
+			Form.OpenScreen("16100", "")
+		else
+			Form.OpenScreen("16000", "")
+		end if
+		'20211203 HSZ END
+		Form.CloseForm( )
+	else
+		Form.ShowAlert("알림", "종목이 없습니다")
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_Button1_OnClick()
+	if arrData[0] <> "" and arrData[1] then
+	
+		Form.SetSharedData( "&ITEM_CODE" , arrData[0] )
+		Form.SetSharedData( "&ITEM_KORNAME" , arrData[1] )	
+		
+		Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", arrData[0].."★"..arrData[1].."★".."", "" )
+		Form.OpenScreen("16020", "")
+		Form.CloseForm( )
+	else
+		Form.ShowAlert("알림", "종목이 없습니다")	
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_Button2_OnClick()
+	Form.OpenScreen("16040", "")
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Container0_Button3_OnClick()
+	if arrData[0] <> "" and arrData[1] then
+	
+		Form.SetSharedData( "&ITEM_CODE" , arrData[0] )
+		Form.SetSharedData( "&ITEM_KORNAME" , arrData[1] )	
+		
+		Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", arrData[0].."★"..arrData[1].."★".."", "" )
+		'20200331 HWG START : 고유MTS
+		szMediaCode = Form.GetSharedData("&MEDIA_CODE", false)
+		
+		
+		if szMediaCode = "412" or szMediaCode = "413" then
+			Form.OpenScreen("16060", "0")
+		elseif szMediaCode = "156" or szMediaCode = "157" then
+			'20211203 HSZ START : 해외CFD 
+			If g_szScreenNo = "16110" then
+				Form.OpenScreen("16200", "0")
+			else
+				Form.OpenScreen("16060", "0")
+			end if
+			'20211203 HSZ END
+		elseif szMediaCode = "158" or szMediaCode = "159" then
+			Form.OpenScreen("02000", "0")
+		end if
+		'20200331 HWG END
+		
+		Form.CloseForm( )
+	else
+		Form.ShowAlert("알림", "종목이 없습니다")	
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_Button4_OnClick()
+	if arrData[0] <> "" and arrData[1] then
+	
+		Form.SetSharedData( "&ITEM_CODE" , arrData[0] )
+		Form.SetSharedData( "&ITEM_KORNAME" , arrData[1] )	
+		
+		Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", arrData[0].."★"..arrData[1].."★".."", "" )
+		
+		'20200331 HWG START : 고유MTS
+		szMediaCode = Form.GetSharedData("&MEDIA_CODE", false)
+		
+		
+		if szMediaCode = "412" or szMediaCode = "413" then
+			Form.OpenScreen("16060", "1")
+		elseif szMediaCode = "156" or szMediaCode = "157" then
+			'20211203 HSZ START : 해외CFD 
+			If g_szScreenNo = "16110" then
+				Form.OpenScreen("16200", "1")
+			else
+				Form.OpenScreen("16060", "1")
+			end if
+			'20211203 HSZ END
+		elseif szMediaCode = "158" or szMediaCode = "159" then
+			Form.OpenScreen("02000", "1")
+		end if
+		'20200331 HWG END
+
+		Form.CloseForm( )
+	else
+		Form.ShowAlert("알림", "종목이 없습니다")	
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

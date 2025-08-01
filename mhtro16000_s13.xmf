@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_종목정보_뉴스" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,280,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" ly_vert="0,0,375,250,1" scroll_ly_vert="0,0,375,250,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblSubTitle0" fontstyle="01" caption="뉴스" bgcolor="029:255212175" ly_vert="20,0,260,20,1" />
+				<LABEL name="lblExpand" fontsize="-4" caption="<![CDATA[더보기 >]]>" halign="2" click="1" ly_vert="255,0,100,20,1" />
+				<PANNEL name="Pannel0" ly_vert="0,20,375,210,1" >
+					<CONTROL_INFO>
+						<LABEL name="lblNewsTitle" fontsize="-1" bgcolor="029:255212175" multiline="1" ly_vert="20,7,335,40,1" />
+						<LABEL name="lblDateTime" fontsize="-4" bgcolor="029:255212175" ly_vert="20,39,335,20,1" />
+						<BUTTON name="btnOrder0" caption="매수" fontsize="-2" btnimage="btn_30.9" ly_vert="238,155,53,40,1" />
+						<LABEL name="lblLine2" transmode="0" ly_vert="20,1,335,1,1" />
+						<LABEL name="lblHideData0" visible="0" ly_vert="20,70,100,32,0" />
+						<LABEL name="lblHideData1" visible="0" ly_vert="20,100,100,32,0" />
+						<LABEL name="lblHideData2" visible="0" ly_vert="20,130,100,32,0" />
+						<LABEL name="lblHideData3" visible="0" ly_vert="120,70,100,32,0" />
+						<LABEL name="lblHideData4" visible="0" ly_vert="120,100,100,32,0" />
+					</CONTROL_INFO>
+					<CARD_INFO cardheight="70" >
+						<CELL name="lblNewsTitle" />
+						<CELL name="lblDateTime" />
+						<CELL name="btnOrder0" />
+						<CELL name="lblLine2" />
+						<CELL name="lblHideData0" />
+						<CELL name="lblHideData1" />
+						<CELL name="lblHideData2" />
+						<CELL name="lblHideData3" />
+						<CELL name="lblHideData4" />
+					</CARD_INFO>
+				</PANNEL>
+				<LABEL name="lblDiv" transmode="0" ly_vert="0,245,375,5,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9113" _ulen="8827" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+
+'==============================================
+' 컬러코드
+'==============================================
+' 기본 텍스트 컬러 (검정색)
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal 	= "334"
+
+' 기본 텍스트 컬러 (회색)
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey 	= "333"
+
+' 기본 텍스트 컬러 (흰색)
+Dim g_szTxtColor_White 
+g_szTxtColor_White 	= "338"
+
+' 빨강
+Dim g_szTxtColor_Red 
+g_szTxtColor_Red = "290"
+
+' 파랑
+Dim g_szTxtColor_Blue 
+g_szTxtColor_Blue = "291"
+
+' 기본 배경색상
+Dim g_szContBgColor
+g_szContBgColor = "320"
+
+' 기본 구분선 색상
+' 진한색
+Dim g_szLineColor
+g_szLineColor = "347"
+' 중간색
+Dim g_szLineColor2
+g_szLineColor2 = "256"
+' 연한색
+Dim g_szLineColor3
+g_szLineColor3 = "320"
+
+
+' 빨강
+Dim g_szBadgeBgColor_Red
+g_szBadgeBgColor_Red = "339"
+
+' 파랑
+Dim g_szBadgeBgColor_Blue
+g_szBadgeBgColor_Blue = "340"
+
+'==============================================
+' 기타 전역변수
+'==============================================
+Dim g_szItemCd 
+Dim g_szExidCd
+Dim g_szOnlyCd
+Dim g_sExid3
+Dim g_szItemName
+Dim g_rtChk
+
+Dim g_szType
+g_szType = "하드웨어 및 장비"
+
+Dim g_szTypeCd
+g_szTypeCd = ""
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	contMain.setEnableScroll(false)
+	
+	contMain.lblSubTitle0.paddinginfo = "0,0,0,0"
+	contMain.lblSubTitle0.fgcolor = g_szTxtColor_Normal
+	contMain.lblExpand.paddinginfo = "0,0,0,0"
+	contMain.lblExpand.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblDiv.bgcolor = g_szLineColor3
+'	
+
+'	
+'	contMain.imgNotice.maintainratio = "1"
+'	
+'	contMain.lblInfo1.paddinginfo = "0,0,0,0"
+'	contMain.lblInfo1.maxlinecnt = "1"
+'	contMain.lblInfo1.fgcolor = g_szTxtColor_Red
+'	contMain.lblInfo1.visible = true
+	
+	
+End Function
+
+Function Request_Tran_ohhts_news_001r()
+	contMain.Pannel0.rowcount = "0"
+	DATAMANAGER.ClearInputData(false, "ohhts_news_001r")
+	
+	szDate =  Form.GetSharedData("&HOST_DATE", false)
+'	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_NEWS_ITN_EXCP_CLCD"	, 0 , "00" )
+'	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_DATE"				, 0 , szDate )
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_NEWS_ITN_EXCP_CLCD"	, 0 , "Y" )
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock2", "FID_NEW_INPUT_ISCD"			, 0 , g_sExid3 & g_szOnlyCd )
+	
+	DATAMANAGER.RequestTranData("ohhts_news_001r")
+End Function
+
+Function Process_Tran_ohhts_news_001r()
+	nDataCnt = DATAMANAGER.GetDataCount(false, "ohhts_news_001r", "OutBlock1")
+	
+	if nDataCnt == "" or Cint(nDataCnt) == 0 then
+		Exit Function
+	end if
+	
+	if Cint(nDataCnt) > 3 then
+		nDataCnt = 3
+	end if
+	
+	if nDataCnt > 0 then
+		nReduce = (3-nDataCnt) * 70
+		contMain.lblDiv.top = 245 - nReduce
+		
+		Form.triggerEvent("#", "CHANGE_LAYOUT_S13", 280 - nReduce)
+	else
+		Form.triggerEvent("#", "CHANGE_LAYOUT_S13", 0)
+	end if
+	
+	for i = 0 to nDataCnt-1
+		szData0 = DATAMANAGER.GetDataValue(false, "ohhts_news_001r", "OutBlock1", "FID_DATE" , i)				'뉴스일자
+		szData1 = DATAMANAGER.GetDataValue(false, "ohhts_news_001r", "OutBlock1", "FID_CNTG_HOUR" , i)			'뉴스시간
+		szData2 = DATAMANAGER.GetDataValue(false, "ohhts_news_001r", "OutBlock1", "FID_TITL", i)				'뉴스제목
+		szData3 = DATAMANAGER.GetDataValue(false, "ohhts_news_001r", "OutBlock1", "FID_NEWS_KEY", i)			'뉴스키
+		szData4 = DATAMANAGER.GetDataValue(false, "ohhts_news_001r", "OutBlock1", "FID_KOR_ISNM" , i)			'한글종목명
+		szData5 = DATAMANAGER.GetDataValue(false, "ohhts_news_001r", "OutBlock1", "FID_NEWS_OFER_ENTP_CODE" , i)	'뉴스제공업체코드
+		
+		nIdx = contMain.Pannel0.addRow()
+		
+		DisplaySetting_Pannel(nIdx, szData0, szData1, szData2, szData3, szData4, szData5) 
+	next
+End Function
+
+
+Function DisplaySetting_Pannel(nIdx, szDate, szTime, szTitle, szNewsKey, szKorNm, szEntpCd) 
+	'상단 라인표시
+	if nIdx = 0 then
+		contMain.Pannel0.setPropCardCell("bgcolor","lblLine2", nIdx , g_szTxtColor_White)
+	else
+		contMain.Pannel0.setPropCardCell("bgcolor","lblLine2", nIdx , g_szLineColor2)
+	end if
+
+
+	contMain.Pannel0.setPropCardCell("paddinginfo","lblNewsTitle",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","lblNewsTitle",nIdx, g_szTxtColor_Normal)
+	contMain.Pannel0.setPropCardCell("maxlinecnt","lblNewsTitle",nIdx, "1^-1")
+	contMain.Pannel0.setPropCardCell("caption","lblNewsTitle",nIdx, szTitle)
+	
+	
+	szDateTime = ""
+	
+	if szDate <> "" then
+		szDateTime = szDateTime & mid(szDate, 3, 2) & "." & mid(szDate, 5, 2) & "." & right(szDate, 2) & " "
+	end if
+	
+	if szTime <> "" then
+		szDateTime = szDateTime & left(szTime, 2) & ":" & mid(szTime, 2, 2) & ":" & right(szTime, 2) 
+	end if
+	
+	contMain.Pannel0.setPropCardCell("paddinginfo","lblDateTime",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","lblDateTime",nIdx, g_szTxtColor_Grey)
+	contMain.Pannel0.setPropCardCell("caption","lblDateTime",nIdx, szDateTime)
+	
+	
+	contMain.Pannel0.setPropCardCell("caption","lblHideData0",nIdx, szDate)
+	contMain.Pannel0.setPropCardCell("caption","lblHideData1",nIdx, szTime)
+	contMain.Pannel0.setPropCardCell("caption","lblHideData2",nIdx, szNewsKey)
+	contMain.Pannel0.setPropCardCell("caption","lblHideData3",nIdx, szKorNm)
+	contMain.Pannel0.setPropCardCell("caption","lblHideData4",nIdx, szEntpCd)
+	
+End Function
+Function Convert_NatCd(szExidCd)
+	szResult = ""
+	
+	Select Case szExidCd
+'		Case "NY", "AX", "OQ" 
+'			szResult = "US"
+		Case "SH", "SZ"
+			szResult = "CN"
+		Case "JP", "HK"
+			szResult = szExidCd
+'		Case Else
+'			szResult = ""
+	End Select
+	
+	return szResult
+	
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'===============================================
+' Form_OnTriggerEvent(종목코드 연동)
+'===============================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "INIT_CODE" then
+		if instr(sParam, "@") > 0 then
+			g_szItemCd = sParam
+			g_szExidCd = ""
+			sTemp = split(g_szItemCd, "@")
+			g_szExidCd = sTemp[0] '시장구분
+			g_szOnlyCd = sTemp[1] '종목코드 
+			g_sExid3 	= Form.GetItemCodeInfo(g_szItemCd, "exchcode3") '거래소 구분코드
+			g_szItemName = Form.GetItemCodeInfo( sParam , "name")
+					
+			g_rtChk = Form.GetSharedData( "REALTIME_"..g_szExidCd, false )
+			
+			Request_Tran_ohhts_news_001r()
+		end if
+	end if
+End Sub
+
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Init_Control()
+End Sub
+
+'===============================================
+' DATAMANAGER_OnReceiveTranComplete
+'===============================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "ohhts_news_001r" then
+		Process_Tran_ohhts_news_001r()
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Form.triggerEvent("#", "CHANGE_LAYOUT_S13", 0)
+End Sub
+
+'============================================================================
+Sub contMain_Pannel0_OnClick(nIndex, sCellID)
+	szTitle 			= contMain.Pannel0.getPropCardCell("caption", "lblNewsTitle", nIndex)
+	szDate 			= contMain.Pannel0.getPropCardCell("caption", "lblHideData0", nIndex)
+	szTime 			= contMain.Pannel0.getPropCardCell("caption", "lblHideData1", nIndex)
+	szNewCorpName 	= contMain.Pannel0.getPropCardCell("caption", "lblHideData3", nIndex)
+	szNewKey 		= contMain.Pannel0.getPropCardCell("caption", "lblHideData2", nIndex)
+	szNewsCorpCode 	= contMain.Pannel0.getPropCardCell("caption", "lblHideData4", nIndex)
+
+	if szTitle <> "" and szDate <> "" and szTime <> "" and szTitle <> "" and szNewCorpName <> "" and szNewKey <> "" and szNewsCorpCode <> "" then
+		szMsg = szTitle & "|" & szDate & "|" & szTime & "|" & szNewCorpName & "|" & szNewKey & "|" & szNewsCorpCode & "|" & g_szItemName
+		Form.OpenPopup( "mhprc11000_p6" , "mhtro16000_t09"& "★" &szMsg, "" )
+	end if
+End Sub
+
+'============================================================================
+Sub contMain_lblExpand_OnClick()
+	Form.triggerEvent("#", "RETURN_LAYOUT", "뉴스")
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_news_001r" trcode="ohhts_news_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_news_001r" title="종합뉴스/시황(제목)" realdata="0" dessvr="N" >
+				<TRBLOCK name="InBlock1" inout="in" _len="474" _ulen="372" >
+
+FID_INPUT_NEWS_OFER_ENTP_CODE^FID입력뉴스제공업체코드^5^0^0^0^0^0^0
+FID_NEWS_MDDV_CODE^FID뉴스중분류코드^8^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+FID_INPUT_TITL^FID입력제목^265^0^0^0^0^0^0
+FID_INPUT_DATE^FID입력일자^8^0^0^0^0^0^0
+FID_INPUT_HOUR^FID입력시간^6^0^0^0^0^0^0
+FID_NEWS_KEY^FID뉴스키^25^0^0^0^0^0^0
+FID_INPUT_NEWS_ITN_EXCP_CLCD^FID입력뉴스대내외구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="1" inout="in" _len="69" _ulen="53" >
+
+FID_NEW_INPUT_ISCD^FID신규입력종목코드^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="803" _ulen="643" >
+
+FID_SRNO2^FID일련번호2^20^0^0^0^0^0^0
+FID_DATE^FID일자^8^0^0^0^0^0^0
+FID_CNTG_HOUR^FID체결시간^6^0^0^0^0^0^0
+FID_1_CTGR^FID1카테고리^8^0^0^0^0^0^0
+FID_2_CTGR^FID2카테고리^8^0^0^0^0^0^0
+FID_3_CTGR^FID3카테고리^8^0^0^0^0^0^0
+FID_4_CTGR^FID4카테고리^8^0^0^0^0^0^0
+FID_NEWS_SMAL_1_CLCD^FID뉴스소1구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_2_CLCD^FID뉴스소2구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_3_CLCD^FID뉴스소3구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_4_CLCD^FID뉴스소4구분코드^8^0^0^0^0^0^0
+FID_NEWS_OFER_ENTP_CODE^FID뉴스제공업체코드^5^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_NEWS_KEY^FID뉴스키^25^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_NEW_SHRN_ISCD^FID신규단축종목코드^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

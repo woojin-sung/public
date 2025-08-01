@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_종목정보_시세정보_설명" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" autosize="1" imgpath="alpha128" ly_vert="0,0,375,674,1" />
+		<CONTAINER name="contMain" containerimage="alpha" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0,375,647,1" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" imgpath="popup_bg.9" ly_vert="0,0,375,647,1" />
+				<LABEL name="lblTitle" fontsize="3" fontstyle="01" multiline="1" ly_vert="20,10,335,47,1" />
+				<IMAGE name="imgBack" visible="0" autosize="1" ly_vert="320,26,39,15,0" />
+				<CONTAINER name="contCont" vscroll="1" ly_vert="20,67,335,500,1" scroll_ly_vert="20,67,335,500,1" >
+					<CONTROL_INFO>
+						<LABEL name="lblContent" fontsize="-1" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="0,0,335,500,1" />
+					</CONTROL_INFO>
+				</CONTAINER>
+				<BUTTON name="Button0" caption="확인" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3738" _ulen="3724" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_42_n.9"
+
+Dim g_szBtnImg_Close
+g_szBtnImg_Close = "icon_close"
+
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_szItemCd, g_szExidCd, g_szOnlyCd
+g_szItemCd = ""
+g_szExidCd = ""
+g_szOnlyCd = ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기화
+'===============================================
+Function Init_Control()
+	contMain.lblTitle.fgcolor = g_szTxtColor_Normal
+	contMain.lblTitle.paddinginfo = "0,0,0,0"
+	
+	contMain.imgBack.maintainratio = "3"
+	contMain.imgBack.imgpath = g_szBtnImg_Close
+	
+	contMain.contCont.lblContent.maxlinecnt = 400
+	contMain.contCont.lblContent.paddinginfo = "0,0,0,0"
+	
+	contMain.setEnableScroll(false)
+	contMain.setExceptInvisibleCtl(true)
+	contMain.contCont.setExceptInvisibleCtl(true)
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+	contMain.contCont.lblContent.sizeAutoFit()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Init_Control()
+	
+	Dim szLinkData
+	szLinkData = Form.GetOpenLinkData()
+	
+	if szLinkData = "" then
+		exit Sub
+	end if
+	arrLinkData = split(szLinkData, "★")
+	
+	contMain.lblTitle.maxlinecnt = "1"
+	contMain.lblTitle.setAutoScrollText(arrLinkData(0))
+
+	contMain.lblTitle.setUseAutoScroll(true, 30, true)
+	contMain.contCont.lblContent.caption = arrLinkData(1)
+	
+	contMain.contCont.lblContent.sizeAutoFit()
+End Sub
+
+'===============================================
+' contMain_imgBack_OnClick
+'===============================================
+Sub contMain_imgBack_OnClick()
+	Form.CloseForm()
+End Sub
+
+'===============================================
+' contMain_lblContent_OnSizeAutoFit
+'===============================================
+Sub contMain_contCont_lblContent_OnSizeAutoFit()
+
+	contMain.visible = true
+	nHeight = contMain.contCont.lblContent.height
+	
+	szOsType = Form.GetSharedData("&OS_TYPE", false ) 
+	
+	if szOsType = "1" then
+		nHeight = Form.calcUnResize(nHeight, "1")
+	end if
+	
+	nResultHeight = nHeight + 67 + 32 + 60
+	nResultHeight2 = nHeight + 32
+	
+	if nResultHeight > 500 then
+		nResultHeight = 500
+		nResultHeight2 = 500 - 87 - 60
+	end if
+
+	contMain.height = nResultHeight
+	contMain.Image0.height = nResultHeight
+	contMain.top =  647 -  nResultHeight
+	contMain.Button0.top = nResultHeight - 60
+	
+	contMain.contCont.height = nResultHeight2
+	contMain.contCont.setScrollAutoSize()
+End Sub
+
+'===============================================
+' imgBg_OnClick
+'===============================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub contMain_Button0_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

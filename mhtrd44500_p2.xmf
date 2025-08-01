@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44500" scrname="해외파생_시세신청_신청자정보" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,250,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="신청자 정보입력" ly_vert="10,15,147,32,1" />
+		<LABEL name="Label1" bgcolor="095:000000000" transmode="0" ly_vert="10,51,355,1,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="2" rowcount="2" designorder="1" ly_vert="10,72,355,120,1" >
+			<COL_INFO ly_vert_width="80,275" />
+			<ROW_INFO ly_vert_height="50,70" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" bgcolor="066:238239240" caption="영문명" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,0,1,0" impidxs="" />
+				<CELL cell_ly="0,1,0,1" bgcolor="066:238239240" caption="영문주소" fontsize="-1" impidxs="" />
+				<CELL cell_ly="1,1,1,1" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnSubmit" caption="확인" fgcolor="095:000000000" ly_vert="129,202,120,39,1" />
+		<EDIT name="edtName" imetype="2" ly_vert="92,73,271,47,1" />
+		<EDIT name="edtAddr" imetype="2" ly_vert="92,123,271,67,1" />
+		<IMAGE name="Image0" imgpath="ic_pop_close" ly_vert="337,17,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1289" _ulen="1205" >
+--===========================================================================
+--===========================================================================
+
+Dim g_szEngName		'구독자 영문이름
+Dim g_szEngAddress	'구독자 영문주소
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szOpenData, szSplitData
+	
+	szOpenData = Form.GetOpenLinkData()
+	
+	if szOpenData <> "" then
+		szSplitData = Split(szOpenData, "★")
+		
+		g_szEngName = szSplitData[0]
+		g_szEngAddress = szSplitData[1]
+		
+		edtName.caption = g_szEngName
+		edtAddr.caption = g_szEngAddress
+	end if
+End Sub
+
+'============================================================================
+Sub btnSubmit_OnClick()
+	Dim szSendData
+
+	if Trim(edtName.caption) = "" then
+		Form.ShowAlert("알림", "영문이름을 입력해주세요.")
+		
+		Exit Sub
+	end if
+	
+	if Trim(edtAddr.caption) = "" then
+		Form.ShowAlert("알림", "영문주소를 입력해주세요.")
+		
+		Exit Sub
+	end if
+	
+	szSendData = edtName.caption & "★" & edtAddr.caption
+	
+	Form.SendReturnToParent("INFO_RETURN" , szSendData)
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44510" scrname="해외파생_계좌변경_계좌유형변경" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,460,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="현재상태" halign="1" ly_vert="10,8,100,32,1" />
+		<LABEL name="lblType" fontsize="-1" border="1" paddinginfo="8,0,0,0" ly_vert="108,8,120,32,1" />
+		<LABEL name="Label2" caption="변경신청" halign="1" ly_vert="10,48,100,32,1" />
+		<RADIOGROUP name="RadioGroup1" fontsize="-2" ly_vert="108,48,200,32,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="Net" position="0,0,100,32" />
+				<RADIO no="1" text="Hedge" position="100,0,100,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="lblCaution" fgcolor="062:255255255" multiline="1" border="1" ly_vert="25,90,325,246,1" />
+		<CHKBUTTON name="chkAgree" ly_vert="25,350,24,24,1" />
+		<LABEL name="Label3" fontsize="-2" caption="위의 해외파생계좌의 속성(Net/Hedge)관련
+유의사항을 충분히 이해하고 이에 동의합니다." valign="0" multiline="1" ly_vert="47,351,293,48,1" />
+		<BUTTON name="btnChange" caption="변경" fgcolor="095:000000000" ly_vert="10,404,355,46,1" />
+		<BUTTON name="btnDetail" caption="상세 유의사항" fgcolor="095:000000000" fontsize="-1" ly_vert="111,295,152,29,1" />
+		<LABEL name="Label1" fontsize="-3" caption="1. 일반(Net)계좌와 Hedge계좌간 속성전환은 '당일 주문체결', '미체결주문' 및 '미결제약정'이 없을 경우 가능합니다." valign="0" multiline="1" ly_vert="31,104,311,47,1" />
+		<LABEL name="Label4" fontsize="-3" caption="2. Hedge 계좌는 동일종목에 대하여 매수/매도 미결제약정을 동시에 보유가능하며, 신규주문과 청산주문을 구분하여 주문하여야 합니다." valign="0" multiline="1" ly_vert="31,153,311,52,1" />
+		<LABEL name="Label5" fontsize="-3" caption="3. Hedge 계좌의 주문은 Hedge 계좌 전용화면에서만 가능하며, 일반주문화면 및 MTS에서는 주문이 불가능합니다.
+
+※ 자세한 사항은 '상세 유의사항' 에서 확인하시기 바랍니다." valign="0" multiline="1" ly_vert="31,206,311,89,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5480" _ulen="5040" >
+--===========================================================================
+' 2020.09.17 - MTS메모리평문 적용유무 추가 
+--===========================================================================
+
+'Dim g_szAcno		'계좌번호
+'Dim g_szAsno		'계좌일련번호
+'Dim g_szPwd		'비밀번호
+Dim g_szAcntType	'변경할 계좌유형 (1:net, 2:hedge)
+Dim g_szMargType	'증거금유형
+Dim g_bPwdFlag	'비밀번호 입력여부
+Dim g_bAgree		'유의사항 동의여부
+
+g_bAgree = false
+g_bPwdFlag = false
+g_szPlainRm = ""		'MTS메모리평문 적용여부
+
+'============================================================================
+Sub Form_OnFormInit()
+	btnChange.enable = false
+	
+	if Trim(Form.GetCtlProp("#acnt0", "total")) <> "" then
+		DATAMANAGER.RequestTranData( "obtrd_acnt_005r" )
+	end if
+	
+	'MTS메모리평문 적용유무 (0:미적용 / 1:적용) - 2020.09.17
+	g_szPlainRm = Form.GetSharedData("&PLAIN_RM", false)
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "CLEAR" then
+		lblType.caption = ""
+		RadioGroup1.currentindex = "-1"
+		chkAgree.checkstate = "0"
+		
+		g_bAgree = false
+		g_bPwdFlag = false
+		
+	elseif sEventName = "REQUEST" then
+		DATAMANAGER.RequestTranData( "obtrd_acnt_005r" )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "obtrd_acnt_005r" then
+		DATAMANAGER.SetDataValue( false, "obtrd_acnt_005r", "InBlock1", "ACNO" , 0 , Form.GetCtlProp("#acnt0", "total") )
+		DATAMANAGER.SetDataValue( false, "obtrd_acnt_005r", "InBlock1", "ASNO" , 0 , Form.GetCtlProp("#acnt0", "sequence") )
+		
+	elseif szTranID = "obtrd_acnt_006a" then
+		DATAMANAGER.SetDataValue( false, "obtrd_acnt_006a", "InBlock1", "ACNO" , 0 , Form.GetCtlProp("#acnt0", "total") )
+		DATAMANAGER.SetDataValue( false, "obtrd_acnt_006a", "InBlock1", "ASNO" , 0 , Form.GetCtlProp("#acnt0", "sequence") )
+		DATAMANAGER.SetDataValue( false, "obtrd_acnt_006a", "InBlock1", "OVDV_HEDG_CLCD" , 0 , g_szAcntType)
+		DATAMANAGER.SetDataValue( false, "obtrd_acnt_006a", "InBlock1", "MARG_TPCD" , 0 , g_szMargType)
+		'MTS메모리평문여부 - 2020.09.17
+		If g_szPlainRm = "1" Then		'적용상태
+			DATAMANAGER.SetDataValue( false, "obtrd_acnt_006a", "InBlock1", "PWD" , 0 , Form.GetCtlProp("#edtPwd", "caption") )
+		else							'미적용상태
+			DATAMANAGER.SetDataValue( false, "obtrd_acnt_006a", "InBlock1", "PWD" , 0 , Form.GetCtlProp("#edtPwd", "encdata") )
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "obtrd_acnt_005r" then
+		Dim szOVDV_HEDG_CLCD, szMARG_TPCD
+		
+		szOVDV_HEDG_CLCD = DATAMANAGER.GetDataValue( false, "obtrd_acnt_005r", "OutBlock1", "OVDV_HEDG_CLCD" , 0)
+		szMARG_TPCD = DATAMANAGER.GetDataValue( false, "obtrd_acnt_005r", "OutBlock1", "MARG_TPCD" , 0)
+		
+		g_szMargType = szMARG_TPCD
+		
+		if szOVDV_HEDG_CLCD = "1" then	'현재 계좌유형 Net
+			lblType.caption = "Net"
+		else							'현재 계좌유형 Hedge
+			lblType.caption = "Hedge"
+		end if
+		
+	elseif szTranID = "obtrd_acnt_006a" then
+		if g_szAcntType = "1" then
+			Form.ShowAlert("알림" , "Net 계좌로 변경 완료")
+		else
+			Form.ShowAlert("알림" , "Hedge 계좌로 변경 완료")
+		end if
+		
+		Form.triggerEvent("#", "ACNT_CHANGE", g_szAcntType)
+		
+		DATAMANAGER.RequestTranData("obtrd_acnt_005r") '변경 완료 후 계좌유형 재조회
+		
+		RadioGroup1.currentindex = "-1"
+		chkAgree.checkstate = "0"
+		btnChange.enable = false
+		g_bAgree = false
+	end if	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubMsg
+	 szSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+  
+	 if Trim(szSubMsg) <> "" then
+		 Form.ShowAlert("알림", szErrMsg & "(" & szSubMsg & ")")
+	 else
+		 Form.ShowAlert("알림", szErrMsg)
+	 end if
+End Sub 
+
+'============================================================================
+Sub RadioGroup1_OnClick(nIndex)
+	if nIndex = 0 then
+		g_szAcntType = "1" 'Net 계좌로 변경할시 
+	else
+		g_szAcntType = "2" 'Hedge 계좌로 변경할시
+	end if
+End Sub
+
+'============================================================================
+Sub chkAgree_OnChange(sCheckState)
+	if sCheckState = "0" then
+'		g_bAgree = false
+		btnChange.enable = false
+	else
+'		g_bAgree = true
+		btnChange.enable = true
+	end if
+End Sub
+
+'============================================================================
+Sub btnChange_OnClick()
+	if Form.GetCtlProp("#edtPwd", "caption") = "" then
+		Form.ShowAlert("알림", "비밀번호 확인 후 진행해주세요.")
+		
+		Exit Sub
+		
+	elseif g_bAgree = false then
+		Form.ShowAlert("알림", "계좌유형변경에 대한 상세 유의사항 확인 후 진행해주세요.")
+		
+		Exit Sub
+		
+	elseif Form.GetCtlProp("#edtPwd", "caption") <> "" and g_bAgree = true then '비밀번호 입력 및 유의사항 동의 했을시 변경 서비스 호출
+			DATAMANAGER.RequestTranData("obtrd_acnt_006a") 
+	end if
+End Sub
+
+'============================================================================
+Sub btnDetail_OnClick()
+	Form.OpenPdfViewer( "http://home.imeritz.com/include/resource/htsdown/PDF/htsdown_25.pdf", "유의사항")
+	g_bAgree = true
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrd_acnt_005r" trcode="obtrd_acnt_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtrd_acnt_006a" trcode="obtrd_acnt_006a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrd_acnt_005r" title="해외파생 양건계좌정보 관리(개?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="186" _ulen="132" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+OVDV_HEDG_CLCD^해외파생헷지구분코드^1^0^0^0^0^0^0
+MARG_TPCD^증거금유형코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrd_acnt_006a" title="계좌유형 변경신청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="219" _ulen="157" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+OVDV_HEDG_CLCD^해외파생헷지구분코드^1^0^0^0^0^0^0
+MARG_TPCD^증거금유형코드^1^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

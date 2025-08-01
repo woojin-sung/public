@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_종목정보_시세정보_설명" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" ly_vert="0,47,375,600,1" scroll_ly_vert="0,47,375,600,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblSubTitle" fontstyle="01" caption="구성종목 비중" ly_vert="20,10,320,32,1" />
+				<LABEL name="lblLine0" bgcolor="271:236236236" transmode="0" ly_vert="20,50,335,40,1" />
+				<PANNEL name="Pannel0" ly_vert="20,90,335,490,1" >
+					<CONTROL_INFO>
+						<IMAGE name="imgIcon" autosize="1" ly_vert="0,10,20,18,1" />
+						<LABEL name="lblLine2" bgcolor="271:236236236" transmode="0" ly_vert="0,39,335,1,1" />
+						<LABEL name="lblItemCd" fontsize="-2" multiline="1" click="1" ly_vert="20,0,150,40,1" />
+						<LABEL name="lblRate0" fontsize="-2" halign="2" autofontsize="1" ly_vert="170,0,80,40,1" />
+						<LABEL name="lblRate1" fontsize="-2" halign="1" ly_vert="258,0,70,40,1" />
+						<LABEL name="Label0" ly_vert="20,50,100,32,1" />
+						<LABEL name="Label1" ly_vert="20,80,100,32,1" />
+					</CONTROL_INFO>
+					<CARD_INFO cardheight="40" >
+						<CELL name="imgIcon" />
+						<CELL name="lblItemCd" />
+						<CELL name="lblRate0" />
+						<CELL name="lblRate1" />
+						<CELL name="lblLine2" />
+						<CELL name="Label0" />
+						<CELL name="Label1" />
+					</CARD_INFO>
+				</PANNEL>
+				<LABEL name="lblItemCd0" fontsize="-3" caption="종목명" ly_vert="40,50,90,40,1" />
+				<LABEL name="lblRate2" fontsize="-3" caption="수익률(1Y)" halign="1" ly_vert="190,50,90,40,1" />
+				<LABEL name="lblRate3" fontsize="-3" caption="비중" halign="1" ly_vert="278,50,70,40,1" />
+				<LABEL name="lblLine1" bgcolor="271:236236236" transmode="0" ly_vert="20,90,335,1,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" ly_vert="20,0,290,47,1" />
+		<IMAGE name="imgBack" autosize="1" ly_vert="320,16,39,15,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7131" _ulen="7037" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_42_n.9"
+
+Dim g_szBtnImg_Close
+g_szBtnImg_Close = "icon_close"
+
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_szItemCd, g_szExidCd, g_szOnlyCd
+g_szItemCd = ""
+g_szExidCd = ""
+g_szOnlyCd = ""
+
+Dim g_szItemNm
+g_szItemNm = ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기화
+'===============================================
+Function Init_Control()
+	lblTitle.fgcolor = g_szTxtColor_Normal
+	lblTitle.paddinginfo = "0,0,0,0"
+	
+	imgBack.maintainratio = "3"
+	imgBack.imgpath = g_szBtnImg_Close
+	
+	contMain.lblSubTitle.paddinginfo = "0,0,0,0"
+	
+	contMain.lblLine0.bgcolor = "245246247"
+	
+	contMain.lblItemCd0.fgcolor = g_szTxtColor_Grey
+	contMain.lblRate2.fgcolor = g_szTxtColor_Grey
+	contMain.lblRate3.fgcolor = g_szTxtColor_Grey
+End Function
+
+Function RequestTranData_006r(szData0, szData1)
+	DATAMANAGER.ClearInputData(0, "ohhts_metf_006r")
+	
+	DATAMANAGER.SetDataValue(0, "ohhts_metf_006r", "InBlock1", "FID_INPUT_OVRS_ISCD"			, 0 ,szData0)
+	DATAMANAGER.SetDataValue(0, "ohhts_metf_006r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE"	, 0 ,szData1)
+	
+	DATAMANAGER.RequestTranData("ohhts_metf_006r")
+End Function
+
+Function ResponseTranData_006r()
+	nDataCnt = DATAMANAGER.GetDataCount(0, "ohhts_metf_006r", "OutBlock1")
+	if Cint(nDataCnt) > 25 then
+		nDataCnt = 25
+	end if
+	
+	for i = 0 to nDataCnt-1
+		szItem0 = DATAMANAGER.GetDataValue(0,"ohhts_metf_006r", "OutBlock1", "FID_OVRS_ISCD" , i)
+		szItem1 = DATAMANAGER.GetDataValue(0, "ohhts_metf_006r", "OutBlock1", "FIDX_KOR_ISNM", i)
+		szItem2 = DATAMANAGER.GetDataValue(0, "ohhts_metf_006r", "OutBlock1", "FID_RLIM", i)
+		szItem3 = DATAMANAGER.GetDataValue(0, "ohhts_metf_006r", "OutBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", i)
+		szItem4 = DATAMANAGER.GetDataValue(0,"ohhts_metf_006r", "OutBlock1", "FID_Y1_ERT" , i)
+		szItem5 = DATAMANAGER.GetDataValue(0, "ohhts_metf_006r", "OutBlock1", "FID_LSTN_NTNL_CODE", i)
+
+		nIdx = contMain.Pannel0.AddRow()
+		
+		sGroupID = ""
+		if szItem3 = "AX" or szItem3 = "NY" or szItem3 = "OQ" then
+			sGroupID = "CI_USD"
+		elseif szItem3 = "JP" then
+			sGroupID = "CI_JPN"
+		elseif szItem3 = "SH" or szItem3 = "SZ" then
+			sGroupID = "CI_CHN"
+		elseif szItem3 = "HK" then
+			sGroupID = "CI_HKG"
+		else
+			sGroupID = "CI_KOR"
+		end if
+		
+		szImgNm = Form.getIconImg(sGroupID, szItem0)
+		
+		if szImgNm = "" then
+			szImgNm = Form.getIconImg("FLAG", szItem5)
+			
+			if szImgNm = "" then
+				szImgNm = "flag_general"
+			end if
+		end if
+		
+		DisplaySetting_Pannel(nIdx, szImgNm, szItem1, szItem4, szItem2, szItem0, szItem3)
+	next
+End Function
+
+Function DisplaySetting_Pannel(nIdx, szImgNm, szItemCd, szRate0, szRate1, szHideData0, szHideData1 ) 
+	contMain.Pannel0.setPropCardCell("maintainratio", "imgIcon",	nIdx,	"3")
+	contMain.Pannel0.setPropCardCell("imgpath", "imgIcon",			nIdx,	szImgNm)
+	
+	contMain.Pannel0.setPropCardCell("maxlinecnt", "lblItemCd",		nIdx,	"1^-6")
+	contMain.Pannel0.setPropCardCell("caption", "lblItemCd",		nIdx,	szItemCd)
+	
+	if trim(szRate0) = "" then
+		contMain.Pannel0.setPropCardCell("caption", "lblRate0",	nIdx,	"-")
+	else
+		contMain.Pannel0.setPropCardCell("caption", "lblRate0",	nIdx,	FormatNumber(szRate0,2)&"%")
+	end if
+	
+	if trim(szRate1) = "" then
+		contMain.Pannel0.setPropCardCell("caption", "lblRate1",		nIdx,	"-")
+	else
+		contMain.Pannel0.setPropCardCell("caption", "lblRate1",		nIdx,	szRate1&"%")
+	end if
+	
+	contMain.Pannel0.setPropCardCell("caption", "Label0",		nIdx,	szHideData0)
+	contMain.Pannel0.setPropCardCell("caption", "Label1",		nIdx,	szHideData1)
+End Function
+
+Function MoveScreen(nIdx) 
+	szItemCd = contMain.Pannel0.getPropCardCell("caption", "Label0", nIdx)
+	szMktCd = contMain.Pannel0.getPropCardCell("caption", "Label1", nIdx)
+
+	Select Case szMktCd
+		Case "OQ", "AX", "NY", "SH", "SZ", "HK", "JP"
+			szItemCd = szMktCd & "@" & szItemCd
+			
+			szItemNm = Form.GetItemCodeInfo(szItemCd, "name")
+			if szItemNm = "" or szItemNm = null then
+				Form.Toast(2, "주식(국내/해외)만 현재가 연동이 가능합니다.", 0)
+				exit Function
+			end if
+			
+			Form.SetSharedData( "&ITEM_CODE" , szItemCd )
+			Form.SetSharedData( "&ITEM_KORNAME" , szItemNm )
+			Form.SetSharedData( "&ITEM_OVERSTOCK", szItemCd.."★"..szItemNm.."★".."", "" )					
+			Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", szItemCd.."★"..szItemNm.."★".."", "" )
+			
+			Form.CloseForm()
+			g_szScreenNo 		 = Form.GetSharedData( "&SCREEN_NO" , false )
+			if g_szScreenNo <> "16000" then
+				Form.OpenScreen("16000","")	
+			end if
+		Case Else
+			szItemNm = Form.GetItemCodeInfo(szItemCd, "name")
+			if szItemNm = "" or szItemNm = null then
+				Form.Toast(2, "주식(국내/해외)만 현재가 연동이 가능합니다.", 0)
+				exit Function
+			end if
+			Form.CloseForm()
+			Form.OpenScreen("11000", szItemCd)
+	End Select
+
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Init_Control()
+	
+	Dim szLinkData
+	szLinkData = Form.GetOpenLinkData()
+
+	if szLinkData = "" then
+		exit Sub
+	end if
+	arrLinkData = split(szLinkData, "★")
+	
+	lblTitle.caption = arrLinkData(0)
+	
+	lblTitle.setUseAutoScroll(true, 50, true)
+	g_szItemNm = arrLinkData(0)
+	
+	Form.SetTimerEvent2(1, 1, 0.1)
+	RequestTranData_006r(arrLinkData(1), arrLinkData(2))
+End Sub
+'============================================================================
+Sub imgBack_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "ohhts_metf_006r" then
+		ResponseTranData_006r()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID, 0, 0)
+	
+	if CInt(sTimerID) = 1 then
+		lblTitle.setAutoScrollText(g_szItemNm)
+	end if
+End Sub
+
+'============================================================================
+Sub contMain_Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "lblItemCd" then
+		MoveScreen(nIndex)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_metf_006r" trcode="ohhts_metf_006r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_metf_006r" title="ETF 구성종목 조회" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" inout="in" _len="148" _ulen="112" >
+
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^0^0^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="1" inout="out" _len="364" _ulen="290" >
+
+FID_OVRS_ISCD^FID해외종목코드^16^0^0^0^0^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^0^0^0^0
+FID_RLIM^FID비중^9^2^7^0^0^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^0^0^0^0
+FID_Y1_ERT^FID1년수익률^9^2^7^0^0^0^0
+FID_STND_DATE^FID기준일자^8^0^0^0^0^0^0
+FID_LSTN_NTNL_CODE^FID상장국가코드^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

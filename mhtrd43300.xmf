@@ -1,0 +1,988 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="43300" scrname="해외파생_종합차트" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LINKFORM name="lkform" linkfile="mhtrd43100_s1" border="0001" bordercolor="017:216216216" ly_vert="0,0,375,76,1" />
+		<RADIOGROUP name="RadioGroup0" buttonshape="1" buttonsnumber="5" initselectionuse="1" initselection="0" ly_vert="10,85,241,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="일" position="0,0,45,39" />
+				<RADIO no="1" text="주" position="45,0,45,39" />
+				<RADIO no="2" text="월" position="90,0,45,39" />
+				<RADIO no="3" text="1분" position="135,0,45,39" />
+				<RADIO no="4" text="1틱" position="180,0,45,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<BUTTON name="BtnIndi" btnimage="btn_chart03.9" ly_vert="286,85,39,39,1" />
+		<BUTTON name="BtnTool" btnimage="btn_chart04.9" ly_vert="328,85,39,39,1" />
+		<BUTTON name="btnLink" caption="개별" fgcolor="012:000000000" ly_vert="244,85,39,39,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_util_03" ly_vert="180,113,10,11,1" />
+		<IMAGE name="Image3" autosize="1" imgpath="icon_util_03" ly_vert="273,113,10,11,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_util_03" ly_vert="225,113,10,11,1" />
+		<CHARTEX name="ChartEx0" ly_vert="0,134,375,428,1" >
+			<DATASETTING>
+				<DATAITEM name="chart" date="0,2,0" time="0,2,1" open="0,2,3" high="0,2,4" low="0,2,5" close="0,2,2" volume="0,2,6" opentime="0,1,21" current="0,1,5" chgbit="0,1,6" chg="0,1,7" perchg="0,1,8" curvol="0,1,13" dayhigh="0,1,3" preopen="0,1,14" prehigh="0,1,15" prelow="0,1,16" preclose="0,1,12" cursellvol="0,1,0" curbuyvol="0,1,1" realtime="0,1,2;1,1,2" reallast="0,1,6;1,1,6" realopen="0,1,3;1,1,3" realhigh="0,1,4;1,1,4" reallow="0,1,5;1,1,5" realdayvol="0,1,11;1,1,11" realtickvol="0,1,10;1,1,10" realtickbuy="0,1,7;1,1,7" realticksell="0,1,8;1,1,8" realbid="0,1,0;1,1,0" >
+					<ADJDATAITEM/>
+				</DATAITEM>
+			</DATASETTING>
+		</CHARTEX>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="22184" _ulen="21124" >
+'===========================================================================
+'===========================================================================
+
+Dim g_szItemCode 		'종목코드 (보여지고있는 종목)
+Dim g_szLinkItemCode 	'종목코드 (개별,연결 위한 종목)
+Dim g_szExchName 		'거래소명
+Dim g_szChrtType
+Dim g_szToday
+Dim g_szMinType
+Dim g_szTicType
+Dim g_flagMin
+Dim g_flagTic
+Dim g_bLoadFlag
+Dim g_nSNSType 		'1 카카오톡 , 2 카카오톡 화면 공유 , 3 트위터 , 4 페이스북
+
+g_szChrtType = "D" 	'일
+g_bLoadFlag = false
+
+'============================================================================
+Function SetChart()
+	Dim szValue, szValueMinTick
+
+     szValue 			= Form.GetEnvData( "17000_CHARTSET" )
+     szValueMinTick 	= Form.GetEnvData( "17000_CHARTSETMINTICK" )    
+     
+	if szValue = "" then
+		Form.SetEnvData( "17000_CHARTSETMINTICK", "2^001" )
+		g_sPeriod 	= "001"
+		g_sPeriodType	= "2"
+		
+	else
+		temp = split(szValue, "^")
+		
+	     g_sPeriodType = temp[0]
+	     g_sPeriod 	 = temp[1]
+	     
+	end if
+	
+	if szValueMinTick <> "" then
+		temp1 = split(szValueMinTick, "^")
+		g_szMinType = temp1[0]
+		g_szTicType = temp1[1]
+
+	else
+		' 20190404 HWG START
+		' 차트 분,틱 설정값 세팅 오류 수정
+		szMin0 = Form.GetEnvData( "chart_min0" )
+		szTic0 = Form.GetEnvData( "chart_tic0" )
+	
+		if szMin0 <> "" and szMin0 <> 0 then
+			g_szMinType = szMin0
+		else
+			g_szMinType = "1"
+		end if
+		
+		if szTic0 <> "" and szTic0 <> 0 then
+			g_szTicType = szTic0
+		else 
+			g_szTicType = "1"
+		end if
+		' 20190404 HWG END 
+	     
+	end if
+	
+	'분틱 셋팅
+	if g_sPeriodType = "0" or g_sPeriodType ="1" then
+		if g_sPeriodType = "0" then
+			g_TempIndex = 4
+			g_szChrtType = "T"
+			
+		else
+			g_TempIndex = 3
+			g_szChrtType = "A"
+			
+		end if
+	else
+		if g_sPeriodType = "2" then
+			g_TempIndex = 0
+			g_szChrtType = "D"		'PENTA13 START => 2023.08.08(차트성능개선)
+			
+		elseif g_sPeriodType = "3" then
+			g_TempIndex = 1
+			g_szChrtType = "W"
+			
+		else
+			g_TempIndex = 2
+			g_szChrtType = "M"
+			
+		end if
+	end if
+	
+	RadioGroup0.SetRadioCaption( 4, g_szTicType.."틱" )
+	RadioGroup0.SetRadioCaption( 3, g_szMinType.."분" )
+	 
+	RadioGroup0.currentindex = g_TempIndex
+End Function
+
+'============================================================================
+Sub Form_OnFormInit()
+	ChartEx0.SetForeignFuture("1")
+	ChartEx0.SetMarketCategory("6")
+	
+	Form.SetInterestTitle("N")		'비활성화로 기본 세팅 20230722 HSZ
+	
+	g_szToday = Form.GetSharedData( "&HOST_DATE", 0 )
+
+	g_flagInit = true
+	g_flagMin = false
+	g_flagTic = false
+	
+	Dim szItemCode, szChartLinkData
+	szItemCode = Form.GetSharedData("&ITEM_GLOBAL_FUTOPT", 0)	'최근조회종목
+	
+	szChartLinkData = Form.GetEnvData("GLOBAL_CHART_LINK")		'차트 개별,연결
+	g_szLinkItemCode = ""
+	
+	if Form.GetOpenLinkData() <> "" then
+		szItemCode = Form.GetOpenLinkData()
+	end if
+	
+	if szItemCode = nil then
+		szItemCode = ""
+	end if
+	
+	if szItemCode <> "" then
+		if Form.getSiseEnable(szItemCode) then	'PENTA13 START => 2019.11.22	해외파생시세제어
+			g_szItemCode = szItemCode
+			g_szExchName = Form.GetItemCodeInfo( g_szItemCode , "exchname")
+		end if
+	end if
+	
+	if f_FindMarket(g_szItemCode) <> "F" then
+		BtnLink.enable = false
+	else
+		g_szLinkItemCode = g_szItemCode
+	end if
+	
+	if szChartLinkData = nil or szChartLinkData = "" or szChartLinkData = "개별" then
+		BtnLink.caption = "개별"
+	else
+		BtnLink.caption = "연결"
+	end if
+	
+	Form.SetItemCode(g_szItemCode)
+	Form.triggerEvent("lkform", "ITEMCODE", g_szItemCode)
+	
+	SetChart()
+	PeriodSet(g_szChrtType)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Form.SetSearchType ("16")
+	ChartEx0.SetLoadChart("foreignfuture")
+	
+	' 20190404 HWG START
+	' 차트 분,틱 설정값 세팅 오류 수정
+	szMin0 = Form.GetEnvData( "chart_min0" )
+	szTic0 = Form.GetEnvData( "chart_tic0" )
+
+	if szMin0 = "" or szMin0 = 0 then
+		szMin0 = "1"
+	end if
+	
+	if szTic0 = "" or szTic0 = 0 then
+		szTic0 = "1"
+	end if
+	
+	RadioGroup0.SetRadioCaption( 3, szMin0.."분" )
+	RadioGroup0.SetRadioCaption( 4, szTic0.."틱" )
+	' 20190404 HWG END'
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName = "SCREEN_MENU" Then							' 연결정보(상단 ...)
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns" , "1", "")
+		End If
+	
+	elseif sEventName = "REG_INTR" then
+		if g_szItemCode <> "" or g_szItemCode <> null then
+			Form.OpenPopup( "mhtrd43110_p4" , g_szItemCode, "" )
+		end if
+		
+	elseif sEventName = "sharedata" Then
+		Form.SendSNSLinkage(g_nSNSType, "메리츠 증권", sParam)
+		
+	' 상단바 클릭 시
+	'20220922 SWJ START : 상단 바 클릭 시, 종목선택창 팝업 추가
+	ElseIf sEventName = "TITLE_CLICK" Then
+		Form.OpenCommonDialog("SEARCH", "16" , "")
+	'20220922 SWJ END		
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if sKey = "ITEMCODE" then
+		if g_szItemCode = sValue and g_flagInit = false then
+			exit Sub
+		end if
+		
+		if sValue <> "" then
+			g_szItemCode = sValue
+			g_szLinkItemCode = g_szItemCode
+			g_szExchName = Form.GetItemCodeInfo( g_szItemCode , "exchname")
+			
+			if f_FindMarket(g_szItemCode) <> "F" then
+				BtnLink.enable = false
+			else
+				BtnLink.enable = true
+			end if
+			
+			f_ChangeCode()
+			RequestData()
+		end if
+	end	if	
+End Sub
+
+'============================================================================
+Function f_FindMarket(szCode)
+	Dim szMarketCode
+	
+	if cint(InStr( szCode , " " )) > 0 then '옵션
+		szMarketCode = "O"
+'	elseif cint(InStr( szCode , "-" )) > 0 then '스프레드
+'		szMarketCode = "SP"
+	else
+		szMarketCode = "F" '선물
+	end if
+	
+	return szMarketCode
+End Function
+
+'============================================================================
+Function RequestData()
+	DATAMANAGER.ClearInputData( false, "ohhts_6509_001r" )
+	DATAMANAGER.ClearOutputData( false, "ohhts_6509_001r" )
+	DATAMANAGER.CancelRealData( "ohhts_ovdv_cntf" )
+	DATAMANAGER.ClearInputData( 1, "ohhts_ovdv_cntf" )
+	DATAMANAGER.ClearOutputData( 1, "ohhts_ovdv_cntf" )
+	
+	'ChartEx0.SetDataClear()	'PENTA13 START => 2023.07.25(차트성능개선)
+	
+	if g_szItemCode = nil or g_szItemCode = "" then
+		exit Function
+	end if
+	
+	PeriodSetChart(g_szChrtType)  '20230905 한국금융IT : 일주월분 차트 주기 설정
+	
+	Dim disp, dec
+	disp = Form.GetItemCodeInfo( g_szItemCode, "dispscale" )
+	dec = Form.GetItemCodeInfo( g_szItemCode, "dispdecimal" )
+	ChartEx0.SetScaleInfo(disp..";"..dec) '차트 스케일 세팅
+
+	Dim szChrtType	'주기타입
+	Dim szJoogiType	'N
+	
+	if g_szChrtType = "T" then		'틱		'PENTA13 START => 2023.08.08(차트성능개선)
+	'if g_szChrtType = "0" then
+		szChrtType = "0"
+		sTic = Split(g_szTicType, "틱", -1, 1)
+		szJoogiType = sTic[0]
+	
+	elseif g_szChrtType = "A" then	'분		'PENTA13 START => 2023.08.08(차트성능개선)
+	'elseif g_szChrtType = "1" then
+		szChrtType = "1"
+		sMin = Split(g_szMinType, "분", -1, 1)
+		szJoogiType = sMin[0]
+		
+	else							'D/W/M/Y 일/주/월/년
+		if g_szChrtType = "D" then
+			szChrtType = "2"
+			
+		elseif g_szChrtType = "W" then
+			szChrtType = "3"
+			
+		elseif g_szChrtType = "M" then
+			szChrtType = "4"
+			
+		end if
+
+		szJoogiType = "1"
+	end if
+	
+	g_bLoadFlag = false
+	
+	Dim szItemCode
+	szItemCode = g_szItemCode
+	
+	if BtnLink.caption = "연결" and f_FindMarket(szItemCode) = "F" then 		'연결선물인경우
+		szItemCode = Form.GetItemCodeInfo( szItemCode , "commodity" ) & ".1"
+		ChartEx0.SetContiueFuture("1;" & g_szItemCode)
+	else
+		ChartEx0.SetContiueFuture("0;" & g_szItemCode)
+	end if
+	
+	DATAMANAGER.SetDataValue( false, "ohhts_6509_001r", "InBlock1", "FID_OVDV_QTTN_EXCH_NAME" , 0 , g_szExchName )	'거래소명
+	DATAMANAGER.SetDataValue( false, "ohhts_6509_001r", "InBlock1", "FID_OVDV_ISCD" , 0 , szItemCode ) 			 	'종목코드
+'	DATAMANAGER.SetDataValue( false, "ohhts_6509_001r", "InBlock1", "FID_DATE" , 0 , Form.GetSharedData("&HOST_DATE", false ) ) '조회날짜
+	DATAMANAGER.SetDataValue( false, "ohhts_6509_001r", "InBlock1", "FID_JOB_CLS_CODE" , 0 , szChrtType )		 	'주기타입 0:틱, 1:분, 2:일, 3:주, 4:월
+	DATAMANAGER.SetDataValue( false, "ohhts_6509_001r", "InBlock1", "FID_INPUT_CNT" , 0 , "300" ) 				 	'조회개수
+	DATAMANAGER.SetDataValue( false, "ohhts_6509_001r", "InBlock1", "FID_INPUT_HOUR_CLS_CODE" , 0 , szJoogiType )	 	'N분, N틱 ~~ 
+	DATAMANAGER.SetDataValue( false, "ohhts_6509_001r", "InBlock1", "FID_INPUT_PAST_DATA_INCU_YN" , 0 , "0" )	 	'당일조회여부 1:당일
+	DATAMANAGER.SetDataValue( false, "ohhts_6509_001r", "InBlock1", "FID_INPUT_PRC_CLS_CODE" , 0 , "0" )			 	'가격구분 0:정산가, 1:종가
+	
+	DATAMANAGER.RequestTranData("ohhts_6509_001r")
+end Function
+
+'============================================================================
+Function f_ChangeCode()
+	if BtnLink.caption = "연결" and f_FindMarket(g_szItemCode) = "F" then
+		g_szItemCode = Form.GetActiveMonth(g_szItemCode)
+		g_szExchName = Form.GetItemCodeInfo( g_szItemCode , "exchname")
+		ChartEx0.SetContiueFuture("1;" & g_szItemCode)
+		g_flagInit = false
+		
+		if g_szItemCode <> g_szLinkItemCode then
+			Form.triggerEvent("lkform", "ITEMCODE", g_szItemCode)
+			Form.SetItemCode(g_szItemCode)
+		end if
+		
+	elseif g_szLinkItemCode <> "" then
+		if g_szItemCode <> g_szLinkItemCode then
+			g_szItemCode = g_szLinkItemCode
+			g_szExchName = Form.GetItemCodeInfo( g_szItemCode , "exchname")
+			ChartEx0.SetContiueFuture("0;" & g_szItemCode)
+			Form.triggerEvent("lkform", "ITEMCODE", g_szItemCode)
+			Form.SetItemCode(g_szItemCode)
+		end if
+	end if
+
+End Function
+
+'============================================================================
+Sub BtnIndi_OnClick()
+	ChartEx0.SetOpenDlg("indicatormini;BtnIndi")
+End Sub
+
+'============================================================================
+Sub BtnTool_OnClick()
+	ChartEx0.SetOpenDlg("tools;BtnTool")
+End Sub
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+	if nIndex = 0 then		'일
+		g_flagMin = false
+		g_flagTic = false	
+		g_szChrtType = "D"
+		
+		PeriodSet(g_szChrtType)
+		
+	elseif nIndex = 1 then		'주
+		g_flagMin = false
+		g_flagTic = false
+		g_szChrtType = "W"
+		
+		PeriodSet(g_szChrtType)
+		
+	elseif nIndex = 2 then		'월
+		g_flagMin = false
+		g_flagTic = false
+		g_szChrtType = "M"
+		
+		PeriodSet(g_szChrtType)
+	
+	elseif nIndex = 3 then		'분
+		g_flagTic = false
+		g_szChrtType = "A"	'PENTA13 START => 2023.08.08(차트성능개선)
+		'g_szChrtType = "1"
+		
+		if g_flagMin = false then
+			g_flagMin = true
+			tmpMin = split(RadioGroup0.GetRadioCaption(3),"분")
+			g_szMinType = tmpMin[0]
+			
+			PeriodSet(g_szChrtType)
+			
+		else
+			If g_flagInit = true Then
+				PeriodSet(g_szChrtType)
+			Else
+				Form.OpenPopup( "mhcht13000_p1.xmf", g_szMinType, "" )
+			End If
+
+		end if
+		
+	elseif nIndex = 4 then		'틱
+		g_flagMin = false
+		g_szChrtType = "T"	'PENTA13 START => 2023.08.08(차트성능개선)
+		'g_szChrtType = "0"
+		
+		if g_flagTic = false then
+			g_flagTic = true
+			tmpTic = split(RadioGroup0.GetRadioCaption(4),"틱")
+			g_szTicType = tmpTic[0]
+			
+			PeriodSet(g_szChrtType)
+			
+		else
+			If g_flagInit = true Then
+				PeriodSet(g_szChrtType)
+				
+			Else
+				Form.OpenPopup( "mhcht13000_p2.xmf", g_szTicType, "" )
+				
+			End If
+		end if
+	end if
+End Sub
+
+'============================================================================
+function ChartEx0_OnGetPeriodInfo()
+	Dim sPeriodType
+	sPeriodType = ""
+	
+	Dim sMin, sTic
+   ' 차트 설정창에서 주기 값 넘어온 경우
+   ' 분주기#틱주기 => 1;3;5;.../1;3;5;...
+	for i = 0 to 8
+		sMin = Form.GetEnvData( "chart_min"..i )	'분차트
+		if sMin <> "" then
+			if i = 7 then
+				sPeriodType = sPeriodType&sMin&"/"
+			else
+				sPeriodType = sPeriodType&sMin&";"
+			end if
+		end if
+	next
+	for i = 0 to 8
+		sTic = Form.GetEnvData( "chart_tic"..i )	'분차트
+		if sTic <> "" then
+			if i = 7 then
+				sPeriodType = sPeriodType&sTic&"/"
+			else
+				sPeriodType = sPeriodType&sTic&";"
+			end if
+		end if
+	next
+
+	if sPeriodType <> "" then
+		ChartEx0.setSyncPeriodValueToChart(sPeriodType)
+	end if
+	
+end function
+'============================================================================
+function ChartEx0_OnChangePeriod(sPeriodType)
+	sMinArr = {}
+	sTicArr = {}
+	sDataArr = {}
+	
+	g_sIsRequestChartEvent = "1"
+
+   ' 차트 설정창에서 주기 값 넘어온 경우
+   ' 분주기#틱주기 => 1;3;5;.../1;3;5;...
+   if InStr(sPeriodType, "/") > 0 then
+	   sTemp = split(sPeriodType, "/")
+	   sMinArr = split(sTemp[0], ";")
+	   sTicArr = split(sTemp[1], ";")
+	   Form.Log("sPeriodType",sPeriodType)
+	   
+	   for i = 0 to 7 step 1
+		Form.SetEnvData( 1, "chart_min"..i, sMinArr[i] )
+		
+		Form.SetEnvData( 1, "chart_tic"..i, sTicArr[i] )
+
+	   next
+   end if
+end function
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "Chart_Min" then
+		g_szMinType = sRet
+		RadioGroup0.SetRadioCaption( 3, g_szMinType )
+		tmpMin = split(RadioGroup0.GetRadioCaption(3),"분")
+		g_szMinType = tmpMin[0]
+		
+		PeriodSet(g_szChrtType)
+		
+	elseif sKeyName = "Chart_Tic" then
+		g_szTicType = sRet		
+		RadioGroup0.SetRadioCaption( 4, g_szTicType)
+		tmpTic = split(RadioGroup0.GetRadioCaption(4),"틱")
+		g_szTicType = tmpTic[0]
+		
+		PeriodSet(g_szChrtType)
+	
+	elseif sKeyName = "snsshare" then 'SNS공유
+		g_nSNSType = Cint(sRet)
+		
+		if g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+		else
+			Form.triggerEvent("lkform", "sharedata", "")
+		end if
+
+	end if
+End Sub
+
+'============================================================================
+' 일,분,틱 주기별 차트 설정
+' 0(틱),1(분) ,2(일), 3(주), 4(월), 5(년)
+'============================================================================
+function PeriodSet(sPeriodType)
+	if sPeriodType = "T" then			'PENTA13 START => 2023.08.08(차트성능개선)
+	'if sPeriodType = "0" then
+	   g_sPeriod = g_szTicType
+	   g_sPeriodType = "0"
+	
+	elseif sPeriodType = "A" then		'PENTA13 START => 2023.08.08(차트성능개선)
+	'elseif sPeriodType = "1" then
+	   g_sPeriod = CInt(g_szMinType)
+	   g_sPeriodType = "1"
+	   
+	elseif sPeriodType = "D" then 
+	   g_sPeriodType = "2"
+	   g_sPeriod = "1"
+	   
+	elseif sPeriodType = "W" then 
+	   g_sPeriodType = "3"
+	    g_sPeriod = "1"
+	    
+	elseif sPeriodType = "M" then 
+	   g_sPeriodType = "4"
+	    g_sPeriod = "1"
+	end if
+	
+	sPeriod = CInt( g_sPeriod)
+  
+	if Len(sPeriod) = 1 then
+		g_sPeriod = "00"..g_sPeriod
+		
+	elseif Len( sPeriod )= 2 then
+		g_sPeriod = "0"..g_sPeriod
+		
+	end if
+
+	ChartEx0.SetPeriodType(g_sPeriodType)
+	ChartEx0.SetPeriodTime(g_sPeriod)
+
+	' 조회TR 보내기
+	if g_bLoadFlag = false then
+		RequestData()
+	end if
+end function
+'============================================================================
+'20230905 한국금융IT START : 일주월분 차트 주기 설정
+function PeriodSetChart(sPeriodType)
+	if sPeriodType = "T" then
+	'if sPeriodType = "0" then
+	   g_sPeriod = g_szTicType
+	   g_sPeriodType = "0"
+	
+	elseif sPeriodType = "A" then
+	'elseif sPeriodType = "1" then
+	   g_sPeriod = CInt(g_szMinType)
+	   g_sPeriodType = "1"
+	   
+	elseif sPeriodType = "D" then 
+	   g_sPeriodType = "2"
+	   g_sPeriod = "1"
+	   
+	elseif sPeriodType = "W" then 
+	   g_sPeriodType = "3"
+	   g_sPeriod = "1"
+	    
+	elseif sPeriodType = "M" then 
+	   g_sPeriodType = "4"
+	   g_sPeriod = "1"
+	end if
+	
+	sPeriod = CInt( g_sPeriod)
+  
+	if Len(sPeriod) = 1 then
+		g_sPeriod = "00"..g_sPeriod
+		
+	elseif Len( sPeriod )= 2 then
+		g_sPeriod = "0"..g_sPeriod
+		
+	end if
+
+	ChartEx0.SetPeriodType(g_sPeriodType)
+	ChartEx0.SetPeriodTime(g_sPeriod)
+end function
+'20230905 한국금융IT END : 일주월분 차트 주기 설정
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "ohhts_6509_001r" then '차트 조회
+		DATAMANAGER.RequestRealData( "ohhts_ovdv_cntf" ) '차트 실시간 조회
+	end if
+	
+	g_flagInit = false
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendRealBefore(szTranID)
+	if szTranID = "ohhts_ovdv_cntf" then '차트 실시간 조회
+		DATAMANAGER.SetDataValue( 1, "ohhts_ovdv_cntf", "InBlock1", "FID_OVDV_ISCD" , 0 , g_szItemCode ) '종목코드
+	end if
+End Sub
+
+'============================================================================
+function ChartEx0_OnRequestData(nIndex, sData)
+	if sData = "" or sData = null then
+		exit function
+	end if
+	
+	Data = split(sData, ";")
+	
+   '현재가내의 차트에서는 종목코드를 변경하지 않는다.
+	g_szItemCode  = Cstr(Trim(Data[0]))             '코드
+	g_sPeriodType = Cstr(Trim(Data[1]))             '일주월년분틱
+	g_sPeriod     = Cstr(Trim(Data[2]))             '주기(1,5,...)
+	sRefresh 	= Cstr(Trim(Data[3]))
+	
+	if InStr(g_szItemCode , "." ) <> 0 then
+		codeTemp = split(g_szItemCode, ".")
+		g_szItemCode = codeTemp[0]
+		
+		g_szItemCode = Form.GetFirstMonth(g_szItemCode)
+		g_szItemCode = Form.GetActiveMonth(g_szItemCode)
+	end if
+	
+	radioIndex = ""
+
+	if sRefresh = 1 or sRefresh = "1" or sRefresh = true then 
+		g_sPeriodType = "2"
+		g_sPeriod = "1"
+		radioIndex = 0
+		g_szChrtType = "D"
+		
+		sTic = Form.GetEnvData( "chart_tic0" )
+		sMin = Form.GetEnvData( "chart_min0" )
+		
+		if sTic = "" then
+			sTic = "1"
+		end if
+		if sMin = "" then
+			sMin = "1"
+		end if
+		
+		RadioGroup0.SetRadioCaption( 4, sTic.."틱" )
+		RadioGroup0.SetRadioCaption( 3, sMin.."분" )
+	else
+		'PENTA13 START => 2023.07.04(차트성능개선)
+		Select case g_sPeriodType
+			case "0"
+				g_szChrtType = "T"
+				radioIndex = 4
+				RadioGroup0.SetRadioCaption( radioIndex, g_sPeriod.."틱")
+				
+			case "1"
+				g_szChrtType = "A"
+				radioIndex = 3
+				RadioGroup0.SetRadioCaption( radioIndex, g_sPeriod.."분")
+				g_szMinType = g_sPeriod	'PENTA13 START => 2023.08.08(차트성능개선)
+			
+			case "2"
+				g_szChrtType = "D"
+				radioIndex = 0
+			
+			case "3"
+				g_szChrtType = "W"
+				radioIndex = 1
+			
+			case "4"
+				g_szChrtType = "M"
+				radioIndex = 2
+		
+		end Select
+		'PENTA13 END
+	end if
+	
+	g_bLoadFlag = true
+	
+	'PENTA13 START => 2023.07.13(차트성능개선)
+	if ChartEx0.GetDivideNum() == 1 then
+		RadioGroup0.currentindex = radioIndex
+	else
+		RadioGroup0.setCurIndexSilent(radioIndex)
+	end if
+	
+	Dim sDwmm
+	sDwmm = ChartEx0.GetStateDWMM()
+	if sDwmm == "0" then
+		RadioGroup0.enable = 1
+	end if
+	'PENTA13 END
+	
+	ChartEx0.SetPeriodType(g_sPeriodType)
+	ChartEx0.SetPeriodTime(g_sPeriod)
+	
+	if f_FindMarket(g_szItemCode) = "F" then
+		BtnLink.enable = true
+		g_szLinkItemCode = g_szItemCode
+	else
+		BtnLink.enable = false
+		g_szLinkItemCode = ""
+	end if
+
+	Form.triggerEvent( "lkform", "ITEMCODE", g_szItemCode )
+	g_szExchName = Form.GetItemCodeInfo( g_szItemCode, "exchname" )
+	
+	f_ChangeCode()
+	RequestData()	
+end function
+
+'============================================================================
+'PENTA13 START => 2023.07.25(차트성능개선)
+function ChartEx0_OnSelectedChart(nIndex, sData)
+	if sData == "" then
+		Exit function
+	end if
+
+	if nIndex < 1 then
+		Exit function
+	end if
+	
+	Data = split(sData, ";")
+	
+	g_sPeriodType   = Cstr(Trim(Data[2]))
+	g_sPeriod       = Cstr(Trim(Data[3]))
+	
+	if g_sPeriodType == "0" or g_sPeriodType == "1" then
+		if g_sPeriodType == "0" then		'틱
+			g_TempIndex = 4
+			g_szChrtType = "T"
+			g_szTicType = g_sPeriod
+			
+			RadioGroup0.SetRadioCaption( g_TempIndex, g_szTicType.."틱" )
+			
+		else								'분
+			g_TempIndex = 3
+			g_szChrtType = "A"
+			g_szMinType = g_sPeriod
+			
+			RadioGroup0.SetRadioCaption( g_TempIndex, g_szMinType.."분" )
+			
+		end if
+		
+	else
+		g_sPeriod = "1"
+		
+		if g_sPeriodType == "2" then		'일
+			g_TempIndex = 0
+			g_szChrtType = "D"			'PENTA13 START => 2023.08.08(차트성능개선)
+			
+		elseif g_sPeriodType == "3" then	'주
+			g_TempIndex = 1
+			g_szChrtType = "W"
+			
+		else								'월
+			g_TempIndex = 2
+			g_szChrtType = "M"
+		
+		end if
+		
+	end if
+	
+	RadioGroup0.setCurIndexSilent(g_TempIndex)
+	
+	Dim sDwmm
+	sDwmm = ChartEx0.GetStateDWMM()
+	if sDwmm == "1" then
+		RadioGroup0.enable = 0
+	end if
+	
+end function
+'PENTA13 END
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetEnvData( 1,"17000_CHARTSET" 			, g_sPeriodType.."^"..g_sPeriod )
+	Form.SetEnvData( 1,"17000_CHARTSETMINTICK" 	, g_szMinType.."^"..g_szTicType )
+
+	ChartEx0.SetSaveChart("1")	
+End Sub
+
+'============================================================================
+Sub BtnLink_OnClick()
+	if BtnLink.caption = "개별" then
+		BtnLink.caption = "연결"
+		
+	elseif BtnLink.caption = "연결" then
+		BtnLink.caption = "개별"
+		
+	end if
+	
+	Form.SetEnvData(1, "GLOBAL_CHART_LINK", BtnLink.caption)
+	
+	f_ChangeCode()
+	RequestData()
+End Sub
+
+'============================================================================
+Sub ChartEx0_OnScrollEnd()
+	' Chart Next Data
+	if DATAMANAGER.IsMoreNextData( "ohhts_6509_001r" ) then
+		DATAMANAGER.RequestNextData("ohhts_6509_001r")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	f_ChangeCode()
+	RequestData()
+End Sub
+'============================================================================
+'20220922 SWJ START : 상단 바 클릭 시, 종목선택창 팝업 추가
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	' 종목컨트롤에서 리턴
+	if sDlgName == "SEARCH" then
+		if Trim(sReturn1) <> "" then
+			Form.SetItemCode(sReturn1)
+		end if
+	end if
+End Sub
+'============================================================================
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_ovdv_cntg" trcode="ohhts_ovdv_cntg" />
+			<TRAN tranid="ohhts_ovdv_cntf" trcode="ohhts_ovdv_cntf" />
+			<TRAN tranid="ohhts_6509_001r" trcode="ohhts_6509_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_ovdv_cntg" title="해외파생 체결 자동갱신" realdata="1" dessvr="D" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="64" _ulen="48" >
+
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1028" _ulen="798" >
+
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FIDR_CNTG_DATE^FIDR체결일자^8^0^0^0^0^0^0
+FID_CNTG_HOUR^FID체결시간^6^0^0^0^0^0^0
+FID_OVDV_OPRC^FID해외파생시가^20^0^0^0^0^1^0
+FID_OVDV_HPRC^FID해외파생고가^20^0^0^0^0^1^0
+FID_OVDV_LPRC^FID해외파생저가^20^0^0^0^0^1^0
+FID_OVDV_PRPR^FID해외파생현재가^20^0^0^0^0^1^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^1^0^0^0^0^0^0
+FID_OVDV_PRDY_VRSS^FID해외파생전일대비^20^0^0^0^0^1^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^0^0^1^0
+FID_VOL^FID거래량^7^0^7^0^0^1^0
+FID_ACML_VOL^FID누적거래량^12^0^7^0^0^0^0
+BSOP_DATE^영업일자^8^0^0^0^0^0^0
+FID_OVDV_BIDP1^FID해외파생매수호가1^20^0^0^0^0^1^0
+FID_OVDV_ASKP1^FID해외파생매도호가1^20^0^0^0^0^1^0
+FID_BIDP_RSQN1^FID매수호가잔량1^12^0^7^0^0^0^0
+FID_ASKP_RSQN1^FID매도호가잔량1^12^0^7^0^0^0^0
+FID_OPRC_CTRT^FID시가대비율^7^2^7^0^0^1^0
+FID_HPRC_CTRT^FID고가대비율^7^2^7^0^0^1^0
+FID_LPRC_CTRT^FID저가대비율^7^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_ovdv_cntf" title="해외파생 체결 자동갱신(MTS 필?" realdata="1" dessvr="D" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="64" _ulen="48" >
+
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1028" _ulen="798" >
+
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FIDR_CNTG_DATE^FIDR체결일자^8^0^0^0^0^0^0
+FID_CNTG_HOUR^FID체결시간^6^0^0^0^0^0^0
+FID_OVDV_OPRC^FID해외파생시가^20^0^0^0^0^1^0
+FID_OVDV_HPRC^FID해외파생고가^20^0^0^0^0^1^0
+FID_OVDV_LPRC^FID해외파생저가^20^0^0^0^0^1^0
+FID_OVDV_PRPR^FID해외파생현재가^20^0^0^0^0^1^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^1^0^0^0^0^0^0
+FID_OVDV_PRDY_VRSS^FID해외파생전일대비^20^0^0^0^0^1^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^0^0^1^0
+FID_VOL^FID거래량^7^0^7^0^0^1^0
+FID_ACML_VOL^FID누적거래량^12^0^7^0^0^0^0
+BSOP_DATE^영업일자^8^0^0^0^0^0^0
+FID_OVDV_ASKP1^FID해외파생매도호가1^20^0^0^0^0^1^0
+FID_OVDV_BIDP1^FID해외파생매수호가1^20^0^0^0^0^1^0
+FID_ASKP_RSQN1^FID매도호가잔량1^12^0^7^0^0^0^0
+FID_BIDP_RSQN1^FID매수호가잔량1^12^0^7^0^0^0^0
+FID_OPRC_CTRT^FID시가대비율^7^2^7^0^0^1^0
+FID_HPRC_CTRT^FID고가대비율^7^2^7^0^0^1^0
+FID_LPRC_CTRT^FID저가대비율^7^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6509_001r" title="해외파생 차트 조회" realdata="0" dessvr="D" >
+				<TRBLOCK name="InBlock1" inout="in" _len="533" _ulen="409" >
+
+FID_OVDV_QTTN_EXCH_NAME^FID해외파생시세거래소명^8^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_DATE^FID일자^8^0^0^0^0^0^0
+FID_JOB_CLS_CODE^FID작업구분코드^1^0^0^0^0^0^0
+NXET_IQRY_KEY_VAL^다음조회키값^32^0^0^0^0^0^0
+FID_INPUT_CNT^FID입력수^4^0^0^0^0^0^0
+FID_INPUT_HOUR_CLS_CODE^FID입력시간구분코드^4^0^0^0^0^0^0
+FID_INPUT_PAST_DATA_INCU_YN^FID입력과거데이터포함여부^1^0^0^0^0^0^0
+FID_INPUT_PRC_CLS_CODE^FID입력가격구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1366" _ulen="1050" >
+
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_OVDV_OPRC^FID해외파생시가^20^0^0^0^0^0^0
+FID_OVDV_HPRC^FID해외파생고가^20^0^0^0^0^0^0
+FID_OVDV_LPRC^FID해외파생저가^20^0^0^0^0^0^0
+FID_OVDV_PRPR^FID해외파생현재가^20^0^0^0^0^0^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^0^0^0^0
+FID_OVDV_PRDY_VRSS^FID해외파생전일대비^20^0^0^0^0^0^0
+FID_PRDY_CTRT^FID전일대비율^7^2^7^0^0^0^0
+FID_PRDY_VOL^FID전일거래량^12^0^7^0^0^0^0
+FID_OVDV_ASKP^FID해외파생매도호가^20^0^0^0^0^0^0
+FID_OVDV_BIDP^FID해외파생매수호가^20^0^0^0^0^0^0
+FID_OVDV_PRDY_CLPR^FID해외파생전일종가^20^0^0^0^0^0^0
+FID_ACML_VOL^FID누적거래량^12^0^7^0^0^0^0
+FID_OVDV_PRDY_OPRC^FID해외파생전일시가^20^0^0^0^0^0^0
+FID_OVDV_PRDY_HPRC^FID해외파생전일고가^20^0^0^0^0^0^0
+FID_OVDV_PRDY_LPRC^FID해외파생전일저가^20^0^0^0^0^0^0
+FID_CNTG_HOUR^FID체결시간^6^0^0^0^0^0^0
+UI_BSOP_DATE^UI영업일자^8^0^0^0^0^0^0
+FID_DCPN_LOEQ_CIPH^FID소수점이하자릿수^2^0^0^0^0^0^0
+UI_PRC_EXRS_INFO^UI가격정보^4^0^0^0^0^0^0
+FID_MKT_STA_HOUR^FID장시작시간^6^0^0^0^0^0^0
+FID_MKT_CLSN_HOUR^FID장마감시간^6^0^0^0^0^0^0
+FID_EXCH_CNTG_HOUR^FID거래소체결시간^6^0^0^0^0^0^0
+NXET_IQRY_KEY_VAL^다음조회키값^32^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="30" inout="out" _len="406" _ulen="328" >
+
+FID_DATE^FID일자^8^0^0^0^0^0^0
+FID_HOUR^FID시간^6^0^0^0^0^0^0
+FID_OVDV_CLPR^FID해외파생종가^20^0^0^0^0^0^0
+FID_OVDV_OPRC^FID해외파생시가^20^0^0^0^0^0^0
+FID_OVDV_HPRC^FID해외파생고가^20^0^0^0^0^0^0
+FID_OVDV_LPRC^FID해외파생저가^20^0^0^0^0^0^0
+FID_VOL^FID거래량^12^0^7^0^0^0^0
+BSOP_DATE^영업일자^8^0^0^0^0^0^0
+FID_SCTN_TICK_CNT^FID구간틱수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

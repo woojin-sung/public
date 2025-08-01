@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="43110" scrname="해외선옵-관심-종목추가" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,422,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="15,352,134,45,1" />
+		<BUTTON name="btnSave" caption="등록" btnimage="btn_01.9" ly_vert="159,352,135,45,1" />
+		<GRID name="grdList" colcount="2" bgcolor="038:255255255" ly_vert="15,70,279,267,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="grop" halign="1" />
+				<LABEL name="gnam" />
+				<LABEL name="bd_mk" halign="2" ly_vert="0,0,100,20,1" />
+				<IMAGE name="bd_mod" autosize="1" imgpath="icon_sub_04.9.png" />
+				<IMAGE name="bd_cancel" autosize="1" imgpath="icon_sub_03.9.png" />
+				<LABEL name="bd_count" halign="2" ly_vert="0,0,100,20,1" />
+				<IMAGE name="bd_move" autosize="1" imgpath="icon_sub_02.9.png" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" nexteventtr="ohhts_intr_006r" cursorstyle="1" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="70,279" ly_vert_visible="2,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<BODY rowcount="1" impblkcnt="2" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="grop" cell_ly="0,0,0,0" line="0,1" import="-1,-1,-1;0,2,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="279" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="2" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="gnam" cell_ly="0,0,0,0" line="0,1" import="-1,-1,-1;0,2,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="grop" rangecellid="grop" hlcolorcellid="grop" />
+		</GRID>
+		<LABEL name="lblMemo" fontsize="2" fontstyle="01" caption="관심종목 등록" bgcolor="092:185046046" halign="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" imgpath="ic_pop_close.png" ly_vert="275,15,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9734" _ulen="9224" >
+'============================================================================
+' 해외선물옵션 관심종목 종목추가 화면
+'============================================================================
+
+'****************************************************************************
+'  V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim m_szData
+Dim m_szUserID
+Dim g_tblDefine
+
+
+
+'****************************************************************************
+'  F  O  R  M
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormInit( )
+	m_szUserID = Form.GetSharedData("&USER_ID", false)
+	
+	g_tblDefine = { }
+	g_tblDefine.nItemCount = 0
+	g_tblDefine.szVrsnID = ""
+	g_tblDefine.tLinkData = { }
+	g_tblDefine.tGrpList = { }
+	g_tblDefine.tItemList = { }
+	
+	initDefault( )
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	'종목 중복 결과
+	If sKeyName == "DUPLICATE_ITEMS" And sRet == "ok" Then
+		table.insert( g_tblDefine.tItemList, 1, g_tblDefine.tLinkData )
+		
+		reqIntrGroupUpdate( )
+	End If
+End Sub
+
+
+
+'****************************************************************************
+'  T  R  A  N     D  A  T  A  M  A  N  A  G  E  R
+'****************************************************************************
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim tValue, nCount
+	
+	' 관심그룹 리스트 수신
+	If szTranID = "ohhts_intr_026r" Then
+		g_tblDefine.tGrpList = { }
+		
+		g_tblDefine.szVrsnID = DATAMANAGER.GetDataValue( 0 , szTranID , "OutBlock2" , "FID_VRSN_ID" , 0 )
+		nCount = CInt( DATAMANAGER.GetDataCount( 0 , szTranID , "OutBlock1" ) )
+		
+		For i = 0 To nCount-1
+			tValue = { }
+			tValue.szGrpKey  = DATAMANAGER.GetDataValue( 0 , szTranID , "OutBlock1" , "FID_CNCN_ISSU_GRP_ID" , i )
+			tValue.szGrpName = DATAMANAGER.GetDataValue( 0 , szTranID , "OutBlock1" , "FID_CNCN_GRP_NAME"    , i )
+			
+			If Not isNull( tValue.szGrpKey ) Then
+				table.insert( g_tblDefine.tGrpList, tValue )
+			End If
+		Next
+		
+		grdList.selectrow = 0
+		grdList_OnClickUp( 0 , "gnam" )
+					
+	' 관심종목 리스트 수신
+	ElseIf szTranID == "ohhts_intr_027r" Then
+		g_tblDefine.tItemList = { }
+		
+		nCount = CInt( DATAMANAGER.GetDataCount( 0 , szTranID , "OutBlock1" ) )
+		g_tblDefine.nItemCount = nCount
+		
+		For i = 0 To nCount
+			tValue = { }
+			tValue.clscode = DATAMANAGER.GetDataValue( 0 , szTranID , "OutBlock1" , "FID_CODE_CLS_CODE" , i )
+			tValue.symbol  = DATAMANAGER.GetDataValue( 0 , szTranID , "OutBlock1" , "FID_OVDV_ISCD" , i )
+			tValue.memo    = DATAMANAGER.GetDataValue( 0 , szTranID , "OutBlock1" , "FID_MEMO_CNTT" , i )
+			tValue.exch    = Form.GetItemCodeInfo( tValue.symbol , "exchname" )
+			tValue.korName = Form.GetItemCodeInfo( tValue.symbol , "name" )
+			
+			If Not isNull( tValue.symbol ) Then
+				table.insert( g_tblDefine.tItemList, tValue )
+			End If
+		Next
+			
+	' 관심그룹 업데이트
+	elseif szTranID == "ohhts_intr_029r" then
+		if not isNull( g_tblDefine.tLinkData.symbol ) then
+			Form.Toast( 0, "[" & g_tblDefine.tLinkData.symbol & "] 종목이 [" & grdList.GetCellData( "gnam", grdList.selectrow ) & "]에 등록되었습니다." , 0 )
+		end if
+		
+		Form.CloseForm( )
+			
+	end if
+End Sub
+
+
+
+'****************************************************************************
+'  C  O  N  T  R  O  L  L
+'****************************************************************************
+'============================================================================
+Sub imgClose_OnClick( )
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub btnCancel_OnClick( )
+	imgClose_OnClick( )
+End Sub
+
+'============================================================================
+Sub btnSave_OnClick( )
+	If Not isDuplicate( ) Then
+		reqIntrGroupUpdate( )
+	End If
+End Sub
+
+'============================================================================
+Sub grdList_OnClickUp(lRow, szCellID)
+	Dim szGrpKey
+	szGrpKey = grdList.GetCellData( "grop", lRow )
+	
+	DATAMANAGER.SetDataValue( 0 , "ohhts_intr_027r" , "InBlock1" , "FID_USER_ID"          , 0 , m_szUserID )
+	DATAMANAGER.SetDataValue( 0 , "ohhts_intr_027r" , "InBlock1" , "FID_CNCN_ISSU_GRP_ID" , 0 , szGrpKey )
+	DATAMANAGER.RequestTranData( "ohhts_intr_027r" )
+End Sub
+
+
+
+'****************************************************************************
+'  P  E  R  S  O  N  A  L
+'****************************************************************************
+'============================================================================
+' 기본 정보 및 컨트롤 설정
+'============================================================================
+Sub initDefault( )
+	m_szData = Form.GetOpenLinkData( )
+	
+	If not isNull( m_szData ) Then
+		g_tblDefine.tLinkData.clscode = "1"
+		g_tblDefine.tLinkData.symbol  = m_szData
+		g_tblDefine.tLinkData.memo    = ""
+		g_tblDefine.tLinkData.exch    = Form.GetItemCodeInfo( m_szData , "exchname" )
+		g_tblDefine.tLinkData.korName = Form.GetItemCodeInfo( m_szData , "name" )
+	End If
+	
+	' 관심그룹 리스트 조회
+	DATAMANAGER.SetDataValue( 0 , "ohhts_intr_026r" , "InBlock1" , "FID_USER_ID" , 0 , m_szUserID )
+	DATAMANAGER.RequestTranData( "ohhts_intr_026r" )
+End Sub
+
+'============================================================================
+' 중복종목 체크
+'============================================================================
+Function isDuplicate( )
+	If #g_tblDefine.tItemList > 0 Then
+		For _, val in pairs( g_tblDefine.tItemList )
+			If "table" == type(val) Then
+				If ( val.symbol == g_tblDefine.tLinkData.symbol ) Then
+					Form.MsgBox( "알림", "[" & g_tblDefine.tLinkData.symbol & "] 은(는) 이미 등록되어 있습니다.\r\n\n중복해서 등록하시겠습니까?", "DUPLICATE_ITEMS", 1)
+					return true
+				End If
+			End If
+		Next
+	End If
+	
+	table.insert( g_tblDefine.tItemList, 1, g_tblDefine.tLinkData )
+	return false
+End Function
+
+'============================================================================
+' 관심그룹 추가 : ohhts_intr_029r
+'============================================================================
+Sub reqIntrGroupUpdate( )
+	Dim szTranID
+	szTranID = "ohhts_intr_029r"
+	
+	If g_tblDefine.nItemCount < 100	Then
+		Dim szGrpKey, szGrpName, nSelIndex
+		nSelIndex = grdList.selectrow
+		
+		szGrpKey = grdList.GetCellData( "grop", nSelIndex )
+		szGrpName = grdList.GetCellData( "gnam", nSelIndex )
+		
+		If isNull( szGrpKey ) Then
+			Form.ShowAlert( "알림", "관심그룹을 선택하세요." )
+			Exit Sub
+		End If
+		
+		DATAMANAGER.ClearInputData( 0 , szTranID )
+		
+		DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock1" , "FID_USER_ID"     , 0 , m_szUserID )	' FID사용자ID
+		DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock1" , "FID_VRSN_ID"     , 0 , g_tblDefine.szVrsnID ) ' FID버전ID	
+		DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock1" , "FID_MOD_YN"      , 0 , "0" ) ' FID수정여부				
+		DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock1" , "FID_ISSU_MOD_YN" , 0 , "0" ) ' FID종목수정여부
+		
+		DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock2" , "FID_CNCN_ISSU_GRP_ID" , 0 , szGrpKey ) ' FID관심종목그룹ID
+		DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock2" , "FID_CNCN_GRP_NAME"    , 0 , szGrpName ) ' FID관심그룹명	
+		DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock2" , "FID_ISSU_MOD_YN"      , 0 , "1" ) ' FID종목수정여부
+		
+		If Null <> g_tblDefine.tItemList And table.getn( g_tblDefine.tItemList ) > 0 Then
+			For i = 0 To table.getn( g_tblDefine.tItemList ) - 1
+				DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock3" , "FID_CNCN_ISSU_GRP_ID"    , i , szGrpKey ) ' FID관심종목그룹
+				DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock3" , "FID_CNCN_ISSU_ID2"       , i , Change_Len(i) ) ' FID관심종목
+				DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock3" , "FID_CODE_CLS_CODE"       , i , g_tblDefine.tItemList[i].clscode ) ' 종목 / FID코드구분코드
+				DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock3" , "FID_OVDV_ISCD"           , i , g_tblDefine.tItemList[i].symbol ) ' FID관심종목코드
+				DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock3" , "FID_MEMO_CNTT"           , i , g_tblDefine.tItemList[i].memo ) ' FID메모내용
+				DATAMANAGER.SetDataValue( 0 , szTranID , "InBlock3" , "FID_INPUT_MRKT_CLS_CODE" , i , g_tblDefine.tItemList[i].exch ) ' FID입력시장구분코드
+			Next
+		End If
+		
+		DATAMANAGER.RequestTranData( szTranID )
+	Else
+		Form.ShowAlert( "알림", "1개의 관심그룹에는 최대 100개의 종목만 등록하실 수 있습니다. 추가하시려면 이전 종목을 삭제하거나 또는 새 그룹으로 등록하여 주십시오.")
+	End If
+End Sub
+
+'============================================================================
+' null 체크
+'============================================================================
+Function isNull(str)
+	if null == str or "" == str or Len(Trim(str)) <= 0 then
+		return true
+	end if
+	
+	return false
+End Function
+
+'============================================================================
+Function _tonumber(str)
+	return tonumber(str) or 0
+End Function
+
+'============================================================================
+' Change_Len
+'============================================================================
+Function Change_Len(szData)
+	if Len(szData) == 1 then
+		Change_Len = "0" & CStr(szData)
+	else
+		Change_Len = CStr(szData)
+	end if 
+End Function
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_intr_026r" trcode="ohhts_intr_026r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_intr_027r" trcode="ohhts_intr_027r" compress="1" encryption="1" inputcheck="1" />
+			<TRAN tranid="ohhts_intr_029r" trcode="ohhts_intr_029r" compress="1" encryption="1" inputcheck="1" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_intr_026r" title="MTS관심그룹 및 종목 조회(해외?" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="49" _ulen="43" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="46" _ulen="42" >
+
+FID_VRSN_ID^FID버전ID^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="160" _ulen="132" >
+
+FID_CNCN_ISSU_GRP_ID^FID관심종목그룹ID^2^0^0^0^0^0^0
+FID_CNCN_GRP_NAME^FID관심그룹명^40^0^0^0^0^0^0
+FID_ISSU_CNT^FID종목수^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="100" inout="out" _len="349" _ulen="277" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_APLY_YN^FID적용여부^1^0^0^0^0^0^0
+FID_SELN_SHNU_CLS^FID매도매수구분^1^0^0^0^0^0^0
+FID_INPUT_SLCT_YN^FID입력선택여부^2^0^0^0^0^0^0
+FID_COND_PRC^FID조건가격^9^0^0^0^0^0^0
+FID_ABNR_LOEQ_CLS^FID이상이하구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" occurs="100" inout="out" _len="243" _ulen="195" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_HLDN_QTY^FID보유수량^18^0^0^0^0^0^0
+FID_CNTG_UNPR^FID체결단가^18^0^0^0^0^0^0
+FID_SELN_SHNU_CLS^FID매도매수구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_intr_027r" title="MTS 관심그룹별 종목조회 (해외?" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="109" _ulen="91" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+FID_CNCN_ISSU_GRP_ID^FID관심종목그룹ID^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="66" _ulen="54" >
+
+FID_CNCN_ISSU_GRP_ID^FID관심종목그룹ID^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="324" _ulen="258" >
+
+FID_CNCN_ISSU_ID^FID관심종목ID^2^0^0^0^0^0^0
+FID_CODE_CLS_CODE^FID코드구분코드^1^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_MEMO_CNTT^FID메모내용^128^0^0^0^0^0^0
+FID_COL_NAME^FID색상명^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_intr_029r" title="MTS 관심그룹 및 종목수정 (해외" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="184" _ulen="154" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+FID_VRSN_ID^FID버전ID^12^0^0^0^0^0^0
+FID_MOD_YN^FID수정여부^2^0^0^0^0^0^0
+FID_ISSU_MOD_YN^FID종목수정여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="172" _ulen="138" >
+
+FID_CNCN_ISSU_GRP_ID^FID관심종목그룹ID^2^0^0^0^0^0^0
+FID_CNCN_GRP_NAME^FID관심그룹명^40^0^0^0^0^0^0
+FID_ISSU_MOD_YN^FID종목수정여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" occurs="6" inout="in" _len="386" _ulen="308" >
+
+FID_CNCN_ISSU_GRP_ID^FID관심종목그룹ID^2^0^0^0^0^0^0
+FID_CNCN_ISSU_ID2^FID관심종목ID2^2^0^0^0^0^0^0
+FID_CODE_CLS_CODE^FID코드구분코드^1^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_MEMO_CNTT^FID메모내용^128^0^0^0^0^0^0
+FID_COL_NAME^FID색상명^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="46" _ulen="42" >
+
+FID_VRSN_ID^FID버전ID^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_팝업_뉴스연동" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="webNews" urlpath="about:blank" ly_vert="0,0,375,606,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1929" _ulen="1891" >
+'----------------------------------------------------------------------------
+' 01. 화 면 명 : 팝업_뉴스연동
+' 02. 화면설명 : 
+' 03. 작    성 : 2022.07.26 HSZ
+'----------------------------------------------------------------------------
+
+'****************************************************************************
+'           GROBAL VARIABLE
+'****************************************************************************
+Dim 	g_szItemCode, g_szExid
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Dim szData, arrData, szItemName
+
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData,"|")
+	
+	if UBOUND(arrData) < 1 then
+	    Exit sub
+	End if	
+	g_szItemCode	= arrData(0)
+	g_szExid		= Transform_Exid(arrData(1))
+	
+	Form.SetScreenName( "종목 토론" )
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	If Trim(g_szItemCode) = "" Then
+		Exit Sub
+	End If
+	if len(g_szExid) < 1 then 
+		szExid = ""
+	else
+		szExid = "."&g_szExid
+	end if
+'	Form.ShowAlert("g_szItemCode & szExid", g_szItemCode & szExid)
+	szUrl = "http://m.stock.naver.com/worldstock/stock/" & g_szItemCode & szExid & "/discuss"
+	webNews.urlpath = szUrl
+
+End Sub
+'============================================================================
+Function Transform_Exid(szExid)
+
+	if szExid = "HK" then
+		if left(g_szItemCode, 1)="0" then
+			g_szItemCode = right(g_szItemCode, 4)
+		end if
+		Transform_Exid = "HK"
+		exit Function
+	elseif szExid = "SH" then
+		Transform_Exid = "SS"
+		exit Function
+	elseif szExid = "SZ" then
+		Transform_Exid = "SZ"
+		exit Function
+	elseif szExid = "OQ" then
+		Transform_Exid = "O"
+		exit Function
+	elseif szExid = "JP" then
+		Transform_Exid = "T"
+		exit Function
+	else
+		Transform_Exid = ""
+	end if
+
+End Function
+'============================================================================
+	</SCRIPT_INFO>
+</ROOT>

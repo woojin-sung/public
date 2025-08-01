@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44510" scrname="해외파생_계좌변경" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<EDIT name="edtPwd" halign="1" password="2" imetype="1" hintcaption="비밀번호" ly_vert="262,9,100,39,1" />
+		<ACCOUNT name="acnt0" bgcolor="052:255255255" itemcodetype="135" etcfunctions="" accpwdctl="edtPwd" delegate="1" hedgeacc="1" ly_vert="10,9,246,39,1" />
+		<RADIOGROUP name="rdoType" fontsize="-2" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="10,58,352,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="계좌속성변경" position="0,0,176,39" />
+				<RADIO no="1" text="증거금유형 변경" position="176,0,176,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LINKFORM name="lkform" ly_vert="0,102,375,460,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1125" _ulen="1097" >
+--===========================================================================
+--===========================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	lkform.linkfile = "mhtrd44510_t1"
+End Sub
+
+'============================================================================
+Sub rdoType_OnClick(nIndex)
+	if nIndex = 0 then
+		lkform.linkfile = "mhtrd44510_t1"
+	else
+		lkform.linkfile = "mhtrd44510_t2"
+	end if
+End Sub
+
+'============================================================================
+Sub acnt0_ChangeAccount()
+	Form.triggerEvent("lkform", "REQUEST", "")
+	Form.triggerEvent("lkform", "CLEAR", "")
+	
+	if Form.GetCtlProp("edtPwd", "caption") <> "" then
+		Form.triggerEvent("lkform", "PWD_CONFIRM", "")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "ACNT_CHANGE" then
+		acnt0.SetAccountInfoByAttr("nethedge", sParam) '변경 처리 후 계좌변경속성값 처리
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrd_acnt_005r" trcode="obtrd_acnt_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtrd_acnt_006a" trcode="obtrd_acnt_006a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrd_acnt_005r" title="해외파생 양건계좌정보 관리(개?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="78" _ulen="58" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="186" _ulen="132" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+OVDV_HEDG_CLCD^해외파생헷지구분코드^1^0^0^0^0^0^0
+MARG_TPCD^증거금유형코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrd_acnt_006a" title="계좌유형 변경신청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="219" _ulen="157" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+OVDV_HEDG_CLCD^해외파생헷지구분코드^1^0^0^0^0^0^0
+MARG_TPCD^증거금유형코드^1^0^0^0^0^0^0
+PWD^비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

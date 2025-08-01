@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_배당" version="2" writer="이호철" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,523,1" />
+	<CONTROL_INFO>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="0,0,375,423,1" />
+		<LABEL name="Label0" bgcolor="178:138138138" ly_vert="0,733,540,65,1" />
+		<LABEL name="lblTmp1" bgcolor="178:138138138" border="1" bordercolor="073:211211211" ly_vert="5,758,70,25,1" />
+		<IMAGE name="Image2" imgpath="icon_webview_home" ly_vert="28,763,25,16,1" />
+		<LABEL name="lblTmp0" bgcolor="178:138138138" border="1" bordercolor="073:211211211" ly_vert="85,758,70,25,1" />
+		<LABEL name="lblTmp2" bgcolor="178:138138138" border="1" bordercolor="073:211211211" ly_vert="165,758,70,25,1" />
+		<LABEL name="lblTmp3" bgcolor="178:138138138" border="1" bordercolor="073:211211211" ly_vert="245,758,70,25,1" />
+		<IMAGE name="Image3" imgpath="icon_webview_home_reload" ly_vert="270,763,22,15,1" />
+		<IMAGE name="Image1" imgpath="icon_webview_home_next" ly_vert="193,763,18,16,1" />
+		<IMAGE name="Image0" imgpath="icon_webview_home_back" ly_vert="110,763,18,16,1" />
+		<BUTTON name="btnBack" fgalpha="50" btnimage="alpha" ly_vert="140,738,125,45,1" />
+		<BUTTON name="btnForward" btnimage="alpha" ly_vert="275,738,125,45,1" />
+		<BUTTON name="btnRefresh" fgalpha="50" btnimage="alpha" ly_vert="410,738,125,45,1" />
+		<BUTTON name="btnHome" fgalpha="50" btnimage="alpha" ly_vert="5,10,125,45,1" />
+		<LABEL name="lblLine1B" bgcolor="148:068068068" ly_vert="5,782,70,2,1" />
+		<LABEL name="lblLine2B" bgcolor="148:068068068" ly_vert="85,782,70,2,1" />
+		<LABEL name="lblLine3B" bgcolor="148:068068068" ly_vert="165,782,70,2,1" />
+		<LABEL name="lblLine4B" bgcolor="148:068068068" ly_vert="245,782,70,2,1" />
+		<LABEL name="lblLine1L" bgcolor="082:121121121" ly_vert="5,759,1,24,1" />
+		<LABEL name="lblLine1L1" bgcolor="082:121121121" ly_vert="85,759,1,24,1" />
+		<LABEL name="lblLine1L2" bgcolor="082:121121121" ly_vert="154,759,1,24,1" />
+		<LABEL name="lblLine1L3" bgcolor="082:121121121" ly_vert="165,759,1,24,1" />
+		<LABEL name="lblLine1L4" bgcolor="082:121121121" ly_vert="234,759,1,24,1" />
+		<LABEL name="lblLine1L5" bgcolor="082:121121121" ly_vert="245,759,1,24,1" />
+		<LABEL name="lblLine1L6" bgcolor="082:121121121" ly_vert="314,759,1,24,1" />
+		<LABEL name="lblLine1L0" bgcolor="082:121121121" ly_vert="74,759,1,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4256" _ulen="4072" >
+'===========================================================================
+' 01. 업무구분 : 해외주식현재가_기업정보
+' 02. 화면 : 
+' 03. 화면설명 : 
+' 04. 작성자 : 이재원
+' 05. 작성일 : 2017.10.10
+' 06. 수정이력 :
+'===========================================================================
+Dim g_sCode
+Dim g_sExid
+Dim g_sNat
+Dim g_sMarket
+Dim g_rtChk
+Dim g_sEtfType
+
+Dim g_sEtfSubTab 
+g_sEtfSubTab = ""
+
+Dim g_szOsType
+g_szOsType = ""
+'============================================================================
+Sub Form_OnFormInit()
+	WebView0.viewtype = "0"
+	g_szOsType = Form.GetSharedData("&OS_TYPE", false )
+end Sub
+
+'============================================================================
+'[[ 트리거 이벤트 ]]
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if (sEventName == "RequestData") then
+		
+		if g_szOsType == "1" then
+			WebView0.height = 423
+		else
+			WebView0.height = 523
+		end if
+		
+		g_sCode = sParam
+		g_sNat = Form.GetItemCodeInfo(sParam, "ovsnation") '국가 구분코드
+		g_sExid = Form.GetItemCodeInfo(sParam, "exchcode3") 'URL 거래소 코드
+		g_sMarket = Form.GetItemCodeInfo(sParam , "exchid") ' 거래소 ID
+		g_sEtfType = Form.GetItemCodeInfo(sParam , "etftype") 'ETF Type 0 : ETF 아님 / 1: ETF 
+		Dim tmp
+		tmp = {}
+		tmp = (Split(sParam, "@"))
+		
+		if (sParam <> "") then		
+			Dim sUrlPath  
+			
+'			if g_sEtfSubTab = "" then
+'				if g_sEtfType == "1" then	
+'					sUrlPath = "http://dev_globalmonitor.einfomax.co.kr/meritz_mobile_index.html#/"..tmp[1]
+'				else
+'					' 거래소 구분코드로 변환하여 분기 
+'					if (g_sExid == "TSE" or g_sExid == "OSE") then
+'					'if (g_sNat == "JPY") then
+'						sUrlPath = "http://realtimeweb.einfomax.co.kr/financial_mobile.html#/main/MZS/"..tmp[1].."/"..g_sExid
+'					else
+'						sUrlPath = "https://globalmonitor.einfomax.co.kr/meritz_mobile_index.html#/"..g_sExid..":"..tmp[1]
+'					end if	
+'				end if 
+'			else
+'				
+'				if g_sEtfType == "1" then	
+'					sUrlPath = "http://dev_globalmonitor.einfomax.co.kr/meritz_mobile_index.html#/"..g_sExid..":"..tmp[1].."/5"
+'				else
+'					' 거래소 구분코드로 변환하여 분기 
+'					if (g_sExid == "TSE" or g_sExid == "OSE") then
+'					'if (g_sNat == "JPY") then
+'						sUrlPath = "http://realtimeweb.einfomax.co.kr/financial_mobile.html#/main/MZS/"..tmp[1].."/"..g_sExid.."/tab4"
+'					else
+'						sUrlPath = "https://globalmonitor.einfomax.co.kr/meritz_mobile_index.html#/"..g_sExid..":"..tmp[1].."/3"
+'					end if	
+'				end if 
+'				
+'			end if
+
+			sUrlPath = "https://gmm.einfomax.co.kr/mobile/MERITZ/mini/" & g_sExid & ":" & tmp[1] & "/04"
+			WebView0.urlpath = "https://gmm.einfomax.co.kr"
+			WebView0.urlpath = sUrlPath
+			
+			DATAMANAGER.CancelRealData("ohhts_exst_cntg")
+			DATAMANAGER.RequestTranData( "ohhts_6000_001r" )
+		end if
+		
+	elseif sEventName = "ETF_SUB_TAB" then
+		g_sEtfSubTab = sParam
+	elseif sEventName == "CONTMAIN_SCROLLING" then
+		WebView0.height = 523
+		
+	elseif sEventName == "CONTMAIN_SCROLL_POS" then
+		if g_szOsType == "1" then
+			WebView0.height = 423 + Cint(sParam)
+		end if
+	end if
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)	
+	Dim sExid , sCode , sTemp
+	sTemp = split(g_sCode, "@")
+	sExid = sTemp[0] '시장구분
+	sCode = sTemp[1] '종목코드 
+	g_rtChk = Form.GetSharedData( "REALTIME_"..sExid, false )
+	
+	if szTranID == "ohhts_6000_001r" then		
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" , 0 , "OV" )
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_INPUT_OVRS_ISCD" , 0 , sExid )
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_COND_MRKT_CLS_CODE" , 0 , sCode)
+		DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk)
+		
+	end if
+end Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "ohhts_6000_001r" then
+		DATAMANAGER.SetDataValue( 1, "ohhts_exst_cntg", "InBlock1", "FIDXR_ISCD" , 0 , g_sCode )
+		DATAMANAGER.RequestRealData( "ohhts_exst_cntg" )
+	end if
+end Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_exst_cntg" trcode="ohhts_exst_cntg" />
+			<TRAN tranid="ohhts_6000_001r" trcode="ohhts_6000_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_exst_cntg" title="해외주식체결 자동갱신" realdata="1" dessvr="4" datamode=".Func" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="51" _ulen="43" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1241" _ulen="1031" >
+
+FIDXR_ISCD^FIDXR종목코드^19^0^0^0^0^0^0
+FIDXR_DELY_YN^FIDXR지연여부^1^0^0^0^0^0^0
+FIDXR_ACPL_BSOP_DATE^FIDXR현지영업일자^8^0^0^0^0^0^0
+FIDXR_ACPL_DATE^FIDXR현지일자^8^0^0^0^0^0^0
+FIDXR_ACPL_HOUR^FIDXR현지시간^6^0^0^0^0^0^0
+FIDXR_KOREA_DATE^FIDXR한국일자^8^0^0^0^0^0^0
+FIDXR_KOREA_HOUR^FIDXR한국시간^6^0^0^0^0^0^0
+FIDXR_OPRC^FIDXR시가^18^4^7^0^0^1^0
+FIDXR_HPRC^FIDXR고가^18^4^7^0^0^1^0
+FIDXR_LPRC^FIDXR저가^18^4^7^0^0^1^0
+FIDXR_PRPR^FIDXR현재가^18^4^7^0^0^1^0
+FIDXR_VRSS_SIGN^FIDXR대비부호^1^0^0^0^0^0^0
+FIDXR_PRDY_VRSS^FIDXR전일대비^18^4^7^0^0^1^0
+FIDXR_RSFL_RT^FIDXR등락율^10^2^7^0^0^1^0
+FIDXR_BIDP^FIDXR매수호가^18^4^7^0^0^1^0
+FIDXR_SHNU_ASPR_RSQN^FIDXR매수호가잔량^13^0^7^0^0^0^0
+FIDXR_ASKP^FIDXR매도호가^18^4^7^0^0^1^0
+FIDXR_SELN_ASPR_RSQN^FIDXR매도호가잔량^13^0^7^0^0^0^0
+FIDXR_CNQN^FIDXR체결량^13^0^7^0^0^1^0
+FIDXR_ACML_VOL^FIDXR누적거래량^19^0^7^0^0^0^0
+FIDXR_ACML_TR_PBMN^FIDXR누적거래대금^19^0^7^0^0^0^0
+FIDXR_MKT_CLS^FIDXR장구분^1^0^0^0^0^0^0
+FIDXR_SHNU_ACML_CNQN^FIDXR매수누적체결량^19^0^7^0^0^0^0
+FIDXR_SELN_ACML_CNQN^FIDXR매도누적체결량^19^0^7^0^0^0^0
+FIDXR_RLTV^FIDXR체결강도^10^2^7^0^0^1^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_001r" title="해외주식 현재가 조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2686" _ulen="2294" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_52_WEEK_HGPR^FIDX52주최고가^14^4^7^32^1000^0^0
+FIDX_52_WEEK_LWPR^FIDX52주최저가^14^4^7^35^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_EPS^FIDXEPS^11^4^7^210^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_BSTP_CLS_CODE^FIDX업종구분코드^4^0^0^335^1000^0^0
+FIDX_BSTP_LRDV_NAME^FIDX업종대분류명^80^0^0^5133^1000^0^0
+FIDX_BSTP_MDDV_NAME^FIDX업종중분류명^80^0^0^5134^1000^0^0
+FIDX_BSTP_SMDV_NAME^FIDX업종소분류명^80^0^0^5135^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_SHNU_ASPR_UNIT^FIDX매수호가단위^14^4^7^5125^1000^0^0
+FIDX_SELN_ASPR_UNIT^FIDX매도호가단위^14^4^7^5126^1000^0^0
+FIDX_SHNU_ODER_QTY_UNIT^FIDX매수주문수량단위^9^0^7^5127^1000^0^0
+FIDX_SELN_ODER_QTY_UNIT^FIDX매도주문수량단위^9^0^7^5128^1000^0^0
+FIDX_CRNC_CODE^FIDX통화코드^4^0^0^5114^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_TICK_CLS^FIDX틱구분^4^0^0^5136^1000^0^0
+FID_PBR^FIDPBR^9^2^7^43^1000^0^0
+FIDX_PER^FIDXPER^9^2^7^42^1000^0^0
+BSTP_KOR_ISNM^업종한글종목명^100^0^0^822^1000^0^0
+FIDX_CAS_TRGT_ISSU_YN^FIDXCAS대상종목여부^1^0^0^5181^1000^0^0
+FIDX_VCM_STAT_CLS_CODE^FIDXVCM상태구분코드^1^0^0^5166^1000^0^0
+FIDX_ENG_ISNM^FIDX영문종목명^65^0^0^5112^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_VCM_STA_HOUR^FIDXVCM시작시간^6^0^0^5167^1000^0^0
+FIDX_VCM_FIN_HOUR^FIDXVCM종료시간^6^0^0^5168^1000^0^0
+FIDX_SELL_ONLY^FIDXSELLONLY^2^0^7^5173^1000^0^0
+FIDX_ISSU_STAT_CLS_CODE^FIDX종목상태구분코드^1^0^0^6016^1000^0^0
+FIDX_CAS_IEP^FIDXCASIEP^11^4^7^5215^1000^0^0
+FIDX_CAS_IEV^FIDXCASIEV^11^4^7^5216^1000^0^0
+FIDX_ETF_YN^FIDXETF여부^1^0^0^5159^1000^0^0
+FID_LVRG^FID레버리지^14^6^7^81^1000^0^0
+FIDX_CAS_TRGT_ISSU^FIDXCAS대상종목^1^0^0^5221^1000^0^0
+FIDX_CAS_STAT^FIDXCAS상태^2^0^0^5222^1000^0^0
+FIDX_CAS_SDPR^FIDXCAS기준가^14^4^7^5223^1000^0^0
+FIDX_CAS_MXPR^FIDXCAS상한가^14^4^7^5224^1000^0^0
+FIDX_CAS_LLAM^FIDXCAS하한가^14^4^7^5225^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

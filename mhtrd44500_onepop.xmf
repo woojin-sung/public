@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="0" scrname="해외파생 개인정보처리 팝업" version="2" writer="이현우" />
+	<FORM_INFO name="Form" ly_vert="0,0,376,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="해외파생 실시간시세 서비스 이용에 대한" ly_vert="43,18,287,21,1" />
+		<LABEL name="Label1" caption="개인(신용)정보 처리 동의 안내" ly_vert="78,46,219,21,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="10" designorder="1" ly_vert="5,83,366,220,1" >
+			<COL_INFO ly_vert_width="366" />
+			<ROW_INFO ly_vert_height="20,20,25,20,25,25,25,20,20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" halign="0" line="1,0" caption="개인(신용)정보법 개정으로 인하여 해외파생 실시간시세 신청" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,1,0,1" halign="0" line="1,0" caption="시 개인신용정보처리를 동의해주셔야 시세신청이 가능하오니" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,2,0,2" halign="0" line="1,0" caption="내용을 확인하신 후에 동의해 주시기 바랍니다." fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,3,0,3" halign="0" line="1,0" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,4,0,4" halign="0" line="1,0" caption="기존 이용 고객님께서도 동의가 필요하며, 미동의 선택 시에는" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,5,0,5" halign="0" line="1,0" caption="실시간시세 이용이 불가합니다." fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,6,0,6" halign="0" line="1,0" caption="(시행일 2021. 6. 1, 전 금융권 공통사항)" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,7,0,7" line="1,0" impidxs="" />
+				<CELL cell_ly="0,8,0,8" halign="0" line="1,0" caption="※ 2021. 6. 30 까지 미동의하신 경우, 시세신청은 자동해지" fontsize="-2" impidxs="" />
+				<CELL cell_ly="0,9,0,9" halign="0" caption="    됩니다." fontsize="-2" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<CHKBUTTON name="ChkButton0" ly_vert="15,305,21,32,1" />
+		<LABEL name="Label2" caption="개인(신용)정보 처리 동의" ly_vert="40,307,189,32,1" />
+		<BUTTON name="BtnConfirm" caption="확인" btnimage="btn_01.9" ly_vert="199,346,70,32,1" />
+		<BUTTON name="BtnCancel" caption="취소" btnimage="btn_01.9" ly_vert="286,346,70,32,1" />
+		<LABEL name="LblEmpYn" ly_vert="407,71,100,32,1" />
+		<LABEL name="LblEmpNo" ly_vert="405,98,100,32,1" />
+		<ACCOUNT name="Account1" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135" etcfunctions="0" ly_vert="407,33,150,32,1" />
+		<LABEL name="LblAgrmClcd" ly_vert="407,130,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4283" _ulen="3809" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 해외파생 개인정보동의 상세
+' 02. 화면설명 : 해외파생 개인정보동의 상세
+' 03. 작    성 : 2021.05.27 이현우
+'-------------------------------------------------------------------------------------------
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim AgreeYN
+AgreeYN = "N"
+
+Dim g_AllYn		'개인정보동의 전체동의여부
+g_AllYn = "N"
+
+Dim g_CloseCnt
+g_CloseCnt = 0
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sURL
+	
+	BtnConfirm.enable = False
+	
+	'메모리 받아오기
+	Account1.caption    = Form.GetSharedData("MHETC90021POP_ACNO"       , TRUE)  '계좌번호(TOTAL)
+	LblEmpYn.caption    = Form.GetSharedData("MHETC90021POP_EMPL_YN"    , TRUE)  '직원여부
+	LblEmpNo.caption    = Form.GetSharedData("MHETC90021POP_EMPNO"      , TRUE)  '직원번호
+	LblAgrmClcd.caption = Form.GetSharedData("MHETC90021POP_AGRM_CLCD"  , TRUE)  '동의구분 (05:해주, 07:해파)
+	
+	'직원여부가 없으면 고객으로 처리
+	If len(LblEmpYn.caption) = 0 Then
+	    LblEmpYn.caption = "N"
+	End If
+	
+	'동의구분이 없으면 07:해파로 처리
+	If len(LblAgrmClcd.caption) = 0 Then
+	    LblAgrmClcd.caption = "07"
+	End If
+End Sub
+'============================================================================
+' 폼 종료
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("mhtrd44500_onepop" , "Y")
+	if g_AllYn = "N" Then
+		Form.ShowAlert("알림", "미동의 선택 시, 해외파생 시세신청이 불가합니다.")
+	end if
+	
+	
+End Sub
+'============================================================================
+' 개인신용정보 체크
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	if sCheckState = "1" Then
+	    AgreeYN = "Y"
+	    BtnConfirm.enable = True
+	else
+	    sCheckState = "N"
+	    BtnConfirm.enable = False
+	End If	
+End Sub
+'============================================================================
+' 확인버튼
+'============================================================================
+Sub BtnConfirm_OnClick()
+	if AgreeYN = "N" Then
+	    Form.ShowAlert("알림", "개인(신용)정보 처리 동의에 체크해주세요")
+	else
+		Dim sURL 
+		sURL = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm6.pdf"
+	    Form.SetSharedData ("ACNO"    , Account1.caption ) 'TOTAL계좌번호
+	    Form.SetSharedData ("EMPLYN"  , LblEmpYn.caption) '직원여부
+	    Form.SetSharedData ("OPEN_URL", sURL )	'PDF링크
+	    Form.OpenFramePopup("mhtrd44500_pop" , "해외파생 개인정보처리 요약동의서" , "")
+	end if
+End Sub
+'============================================================================
+' 취소버튼
+'============================================================================
+Sub BtnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' 팝업리턴
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	'전체동의 키
+	if sKeyName = "ALL_YN" then
+		if sRet <> "" then
+			g_AllYn = sRet
+			'전체동의가 Y이면, 개인신용정보동의 체크처리
+			if g_AllYn = "Y" Then
+				Form.CloseForm()
+			else
+				Form.ShowAlert("알림", "미동의 선택 시, 해외파생 시세신청이 불가합니다.")
+				exit Sub
+			end if
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtrd_acnt_901a" trcode="obtrd_acnt_901a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtrd_acnt_901a" title="해외파생 개인정보동의이력관리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="554" _ulen="410" >
+
+AGRM_DATE^동의일자^8^0^0^0^0^0^0
+AGRM_PROD_CLCD^동의상품구분코드^2^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+EMPL_YN^직원여부^1^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+UNIQ_IDNT_INFO_AGRM_YN^고유식별정보동의여부^1^0^0^0^0^0^0
+CRIN_AGRM_YN^신용정보동의여부^1^0^0^0^0^0^0
+UNIQ_IDNT_INFO_AGRM_YN2^고유식별정보동의여부^1^0^0^0^0^0^0
+CRIN_AGRM_YN2^신용정보동의여부^1^0^0^0^0^0^0
+FLNM^성명^40^0^0^0^0^0^0
+PXPR_NAME^대리인명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

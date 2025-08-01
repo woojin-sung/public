@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_체결추이" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,523,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="FormTab1" tabcount="2" tabwidthtype="1" tabheadheight="0" autosave="1" ly_vert="0,40,375,483,1" >
+			<PAGE name="page0" caption="시간별" linkfile="mhtro16000_t05" loadingtype="1" />
+			<PAGE name="page1" caption="일별" linkfile="mhtro16000_t06" loadingtype="1" />
+		</FORMTAB>
+		<RADIOGROUP name="rdo0" fontstyle="01" fontsize="-2" buttonshape="1" initselectionuse="1" initselection="0" autosave="1" eventtr="ohhts_1146_001r" ly_vert="20,3,335,33,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="시간별" forecolor="100:102102102" selforecolor="095:000000000" position="0,0,167,33" />
+				<RADIO no="1" text="일자별" forecolor="100:102102102" selforecolor="095:000000000" position="167,0,168,33" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1822" _ulen="1724" >
+ '===========================================================================
+' 01. 업무구분 : 해외주식현재가_체결추이
+' 02. 화면 : 
+' 03. 화면설명 : 
+' 04. 작성자 : 이명구
+' 05. 작성일 : 2021.02.15
+' 06. 수정이력 :
+'===========================================================================
+'[[ 전역변수 ]]
+Dim g_sItemCode
+Dim g_szMktOp
+g_szMktOp = ""
+'============================================================================
+'[[ 트리거 이벤트 ]]
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "RequestData" then
+		g_sItemCode = sParam
+
+		FormTab1.currenttabpageid = "page"&rdo0.currentindex
+		Form.TriggerEvent( "FormTab1." .. FormTab1.currenttabpageid, "RequestData", sParam)
+		
+	elseif sEventName == "CHANGE_MKTOP" then
+		g_szMktOp = sParam
+		FormTab1.currenttabpageid = "page"&rdo0.currentindex
+		Form.TriggerEvent( "FormTab1." .. FormTab1.currenttabpageid, "CHANGE_MKTOP", sParam)
+		
+	elseif sEventName == "CHANGE_RDO" then
+		rdo0.currentindex = sParam
+		rdo0_OnClick(sParam)
+	end if
+End Sub
+
+'[[ 폼탭 변경시 ]]
+'============================================================================
+Sub FormTab1_OnTabChanged(nCurrentTab)
+	Form.TriggerEvent( "FormTab1." .. FormTab1.currenttabpageid, "RequestData", g_sItemCode)
+	Form.TriggerEvent( "FormTab1." .. FormTab1.currenttabpageid, "CHANGE_MKTOP", g_szMktOp)
+End Sub
+
+'============================================================================
+Sub rdo0_OnClick(nIndex)
+	
+	FormTab1.currenttabpageid = "page"&nIndex
+	Form.TriggerEvent( "FormTab1." .. FormTab1.currenttabpageid, "RequestData", g_sItemCode)
+	Form.TriggerEvent( "FormTab1." .. FormTab1.currenttabpageid, "CHANGE_MKTOP", g_szMktOp)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

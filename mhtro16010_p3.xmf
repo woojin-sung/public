@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16010" scrname="해외주식 관심편집_등록/수정" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" acecnt="0" ly_vert="0,0,309,208,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" imgpath="pop_header.9.png" ly_vert="0,0,309,55,1" />
+		<BUTTON name="btnAdd" caption="추가" btnimage="btn_01.9.png" ly_vert="157,144,127,39,1" />
+		<BUTTON name="btnCancel" caption="취소" fgcolor="004:000000000" bgcolor="028:255255255" bgcolor2="028:255255255" btnimage="btn_03.9.png" ly_vert="25,144,127,39,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" bgcolor="064:197070070" halign="1" ly_vert="0,0,309,55,1" />
+		<GRID name="grdGroup" visible="0" colcount="3" ly_vert="1000,181,311,233,0" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_code" halign="1" />
+				<LABEL name="bd_name" />
+				<LABEL name="bd_move" halign="1" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_mk" halign="2" ly_vert="0,0,100,20,1" />
+				<IMAGE name="bd_mod" />
+				<IMAGE name="bd_cancel" imgpath="pop_btn_no_n.9.png" />
+				<LABEL name="bd_count" halign="2" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" border="0100" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="80,150,70" ly_vert_visible="0,0,0" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="80" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_code" cell_ly="0,0,0,0" line="0,1" import="0,2,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="150" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_name" cell_ly="0,0,0,0" line="0,1" import="0,2,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="0" />
+					<BODY rowcount="1" impblkcnt="1" >
+						<ROWINFO ly_vert_height="47" />
+						<CELLINFO>
+							<CELL name="bd_count" cell_ly="0,0,0,0" line="0,1" import="0,2,2" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_code" rangecellid="bd_code" hlcolorcellid="bd_code" />
+		</GRID>
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="265,15,24,24,1" />
+		<EDIT name="edtBlank" imetype="0" ly_vert="25,80,259,39,1" />
+		<BUTTON name="btnClose" btnimage="alpha" ly_vert="254,5,45,45,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8026" _ulen="7034" >
+'============================================================================
+' 화 면 명 : 관심종목_관심종목편집_빈칸삽입
+' 화면설명 : 관심종목편집창에서 종목리스트에 빈칸 삽입하는 팝업
+' 작    성 : 2015.12.16 ~ 2015.12.17 ssang
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_szCloud		' 관심동기화(0:미사용(로컬), 1:사용(서버))
+Dim g_szChk
+Dim g_szGCode
+g_szGCode = ""
+
+Dim g_szTitle
+g_szTitle = "알림"
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' Load_GWGroup :  로컬에 저장된 관심그룹 가져오기
+'============================================================================
+Function Load_GWGroup()
+	Dim tGroup, tList
+	
+	grdGroup.rowcount = 0	
+	szGroup = Form.LoadConfigData("GWANSIM", "GROUP")
+	
+	if Trim(szGroup ) <> "" then
+		tGroup = Split(szGroup, "♣")
+		
+		For i = 0 to #tGroup-1
+			tList = Split(tGroup(i), "★")
+			
+			grdGroup.insertrow = i
+	
+			grdGroup.SetCellData("bd_code",  i, tList(0))
+			grdGroup.SetCellData("bd_name",  i, tList(1))
+			grdGroup.SetCellData("bd_count", i, tList(2))
+		Next
+	end if
+End Function	
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	' 관심 동기화 //////////////////////////////////////////////////////////
+	g_szCloud = Form.GetEnvData("common.interest_cloud")
+	
+	if Trim(g_szCloud) == "" then	' 초기값 : 1(동기화 사용)
+		g_szCloud = "1"
+	end if
+	' //////////////////////////////////////////////////////////////////////
+	
+	szData = Form.GetOpenLinkData()
+	
+	if szData <> "" then
+		tData = Split(szData, "★")
+		g_szChk = tData(0)
+			
+		if tData(0) == "BLANK_ADD" then
+			btnAdd.caption = "추가"
+			lblTitle.caption = "빈칸메모 입력"
+			edtBlank.hintcaption = "빈칸메모를 입력하세요"
+		elseif tData(0) == "BLANK_MOD" then
+			btnAdd.caption = "수정"
+			lblTitle.caption = "빈칸메모 수정"
+			edtBlank.hintcaption = "빈칸메모를 입력하세요"			
+			
+			edtBlank.caption = tData(1)
+		elseif tData(0) == "GROUP_ADD" then
+			btnAdd.caption = "등록"
+			lblTitle.caption = "관심그룹 추가"
+			
+			g_szGCode = tData(1)
+			edtBlank.hintcaption = "관심그룹명을 입력하세요"
+			
+			if g_szCloud == "1" then		' Server 저장시
+				' 관심그룹조회 : 조회수 관심그룹 그룹콤보에 넣는다.
+				DATAMANAGER.RequestTranData("ohhts_intr_036r")
+			else							' Local 저장시
+				' 로컬 저장된 관심그룹 가져오기	
+				Load_GWGroup()
+			end if
+			
+'			if grdGroup.rowcount <= 0 then
+				edtBlank.caption = "관심종목" & g_szGCode
+'			else		
+'				szChk = ""
+'				
+'				For i = 0 to grdGroup.rowcount-1
+'					szCd = grdGroup.GetCellData("bd_code", i)
+'					
+'					if Len(i) == 1 then
+'						szChk = "0" & i
+'					else
+'						szChk = i
+'					end if
+'					
+'					if szCd <> szChk then
+'						edtBlank.caption = "관심그룹" & szChk
+'						Exit For
+'					end if				
+'				Next
+'			end if
+		elseif tData(0) == "GROUP_MOD" then
+			btnAdd.caption = "수정"
+			lblTitle.caption = "관심그룹 명칭 수정"
+			edtBlank.hintcaption = "관심그룹명을 입력하세요"
+			
+			g_szGCode = tData(1)
+			edtBlank.caption = tData(2)
+			
+			if g_szCloud == "1" then		' Server 저장시
+				' 관심그룹조회 : 조회수 관심그룹 그룹콤보에 넣는다.
+				DATAMANAGER.RequestTranData("ohhts_intr_036r")
+			else							' Local 저장시
+				' 로컬 저장된 관심그룹 가져오기	
+				Load_GWGroup()
+			end if
+		end if
+	end if
+End Sub
+
+'============================================================================
+' btnAdd_OnClick : Add버튼 클릭
+'============================================================================
+Sub btnAdd_OnClick()
+	Dim nGCode
+	
+	if g_szChk == "GROUP_ADD" or g_szChk == "GROUP_MOD" then
+		if g_szChk == "GROUP_ADD" then
+			For i = 0 to grdGroup.rowcount - 1 
+				if Trim(edtBlank.caption) == grdGroup.GetCellData("bd_name", i) then
+					'Form.ShowAlert("관심그룹 추가", "동일한 관심그룹 이름으로는 등록하실 수 없습니다.")
+					Form.ShowAlert(g_szTitle, "동일한 관심그룹 이름으로는 등록하실 수 없습니다.")
+					Exit Sub					
+				end if
+			Next
+
+			if Trim(edtBlank.caption) == "" or edtBlank.caption = null then
+				'Form.ShowAlert("관심그룹", "관심그룹 이름이 없습니다. 관심그룹 이름을 지정해 주세요.")
+				Form.ShowAlert(g_szTitle, "관심그룹 이름이 없습니다. 관심그룹 이름을 지정해 주세요.")
+				Exit Sub
+			end if
+			
+'			if g_szGCode == null or g_szGCode == "" then
+'				nGCode = 0
+'			else
+'				nGCode = Int(g_szGCode)
+'				nGCode = nGCode + 1
+'			end if
+'			
+'			if Len(nGCode) == 1 then
+'				g_szGCode = "0" & CStr(nGCode)
+'			else
+'				g_szGCode = CStr(nGCode)
+'			end if 			
+		elseif g_szChk == "GROUP_MOD" then
+			if Trim(edtBlank.caption) == "" or edtBlank.caption = null then
+				'Form.ShowAlert("관심그룹", "관심그룹 이름이 없습니다. 관심그룹 이름을 지정해 주세요.")
+				Form.ShowAlert(g_szTitle, "관심그룹 이름이 없습니다. 관심그룹 이름을 지정해 주세요.")
+				Exit Sub
+			end if
+
+			For i = 0 to grdGroup.rowcount - 1 
+				if Trim(edtBlank.caption) == grdGroup.GetCellData("bd_name", i) then
+					'Form.ShowAlert("관심그룹 명칭 수정", "동일한 관심그룹 이름으로는 수정하실 수 없습니다.")
+					Form.ShowAlert(g_szTitle, "동일한 관심그룹 이름으로는 수정하실 수 없습니다.")
+					Exit Sub
+					
+				end if
+			Next
+		end if
+		
+		szData = g_szGCode & "★" & edtBlank.caption
+		Form.SendReturnToParent(g_szChk , szData)
+		'Form.SendReturnToParent(g_szChk , g_szGCode & "★" & edtBlank.caption)
+	else
+		Form.SendReturnToParent(g_szChk , edtBlank.caption)
+	end if
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnCancel_OnClick : 취소버튼 클릭
+'============================================================================
+Sub btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' imgClose_OnClick : 닫기
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' btnClose_OnClick : 닫기
+'============================================================================
+Sub btnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	' ----------------------------------------------------------------------
+	' 관심그룹 조회
+	' ----------------------------------------------------------------------
+	if szTranID == "ohhts_intr_036r" then
+		DATAMANAGER.SetDataValue(0, "ohhts_intr_036r", "InBlock1", "FID_USER_ID", 0, Form.GetSharedData("&USER_ID", false))	' USER ID
+		DATAMANAGER.SetDataValue(0, "ohhts_intr_036r", "InBlock1", "FID_KIND_CODE", 0, "1")	' 통합구분 (0:국내해외통합, 1:해외주식전용)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_intr_036r" trcode="ohhts_intr_036r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_intr_036r" title="MTS관심그룹 및 종목 조회(해외?" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="94" _ulen="80" >
+
+FID_USER_ID^FID사용자ID^20^0^0^0^0^0^0
+FID_KIND_CODE^FID종류코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="46" _ulen="42" >
+
+FID_VRSN_ID^FID버전ID^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="160" _ulen="132" >
+
+FID_CNCN_ISSU_GRP_ID^FID관심종목그룹ID^2^0^0^0^0^0^0
+FID_CNCN_GRP_NAME^FID관심그룹명^40^0^0^0^0^0^0
+FID_ISSU_CNT^FID종목수^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" occurs="100" inout="out" _len="416" _ulen="328" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_APLY_YN^FID적용여부^1^0^0^0^0^0^0
+FID_SELN_SHNU_CLS^FID매도매수구분^1^0^0^0^0^0^0
+FID_INPUT_SLCT_YN^FID입력선택여부^2^0^0^0^0^0^0
+FID_COND_PRC^FID조건가격^9^0^0^0^0^0^0
+FID_ABNR_LOEQ_CLS^FID이상이하구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" occurs="100" inout="out" _len="310" _ulen="246" >
+
+FID_CLS^FID구분^2^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_HLDN_QTY^FID보유수량^18^0^0^0^0^0^0
+FID_CNTG_UNPR^FID체결단가^18^0^0^0^0^0^0
+FID_SELN_SHNU_CLS^FID매도매수구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

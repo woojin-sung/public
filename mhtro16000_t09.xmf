@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_뉴스" version="2" writer="이재원" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,523,1" />
+	<CONTROL_INFO>
+		<ITEMCODE name="ItemCode0" itemtype="11" marketcodelist="" ly_vert="555,86,209,39,1" />
+		<GRID name="grdNews" colcount="2" ly_vert="0,0,375,523,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-1" fonttype="3" />
+				<LABEL name="bd_cell1" fontsize="-3" mask="1,0,,,1,####/##/##,0,1,1,0,0" valign="0" />
+				<LABEL name="bd_cell2" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell3" fontsize="-3" mask="1,0,,,1,##:##:##,0,1,1,0,0" halign="2" valign="0" />
+				<LABEL name="bd_cell6" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell8" halign="2" autofontsize="1" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell5" fontsize="-1" halign="2" valign="0" autofontsize="1" />
+				<LABEL name="bd_cell7" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell10" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell9" fontsize="-3" valign="0" />
+				<LABEL name="bd_cell4" halign="2" autofontsize="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" nexteventtr="ohhts_news_001r" border="0100" inlinecolor="194:222222222" />
+			<COLINFO ly_vert_width="369,70" ly_vert_visible="0,1" >
+				<COLUMN colcount="3" >
+					<SUBCOLINFO ly_vert_width="99,55,215" ly_vert_visible="0,0,0" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="37,23" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,2,0" line="0,0" import="0,2,14" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell1" cell_ly="0,1,0,1" line="0,1" fgcolor="100:102102102" import="0,2,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell3" cell_ly="1,1,1,1" line="0,1" fgcolor="100:102102102" import="0,2,2" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell9" cell_ly="2,1,2,1" line="0,1" fgcolor="100:102102102" import="0,2,12" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="1" />
+					<BODY rowcount="2" impblkcnt="1" >
+						<ROWINFO ly_vert_height="37,23" />
+						<CELLINFO>
+							<CELL name="bd_cell4" cell_ly="0,0,0,0" line="0,0" import="0,2,13" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell5" cell_ly="0,1,0,1" line="0,0" fgcolor="100:102102102" import="0,2,11" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4236" _ulen="4132" >
+'----------------------------------------------------------------------------
+' 01. 화 면 명 : 해외주식현재가
+' 02. 화면설명 : 해외주식현재가의 뉴스탭
+' 03. 작    성 : 2022.07.06 HSZ
+'----------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szItemCode, g_szItemName
+Dim g_szIteminfo
+Dim g_szExid
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if (sEventName == "RequestData") then
+		g_szItemCode = sParam
+		If sParam = "" Then
+			Exit Sub
+		End If
+		
+		grdNews.SetClear()
+		g_szItemName = Form.GetItemCodeInfo( sParam , "name")
+		g_sCode = Split(g_szItemCode, "@")
+		g_szIteminfo = g_sCode(0)
+		g_szExid = Transform_Exid2(g_szIteminfo)
+		g_szItemCode = g_sCode(1)
+
+		DATAMANAGER.RequestTranData( "ohhts_news_001r" )
+		
+	 end if	
+End Sub
+'============================================================================
+Function Transform_Exid2(sValue)
+	if sValue = "HK" then
+		Transform_Exid2 = "HKS"
+		exit Function
+	elseif sValue = "SH" then
+		Transform_Exid2 = "SHS"
+		exit Function
+	elseif sValue = "SZ" then
+		Transform_Exid2 = "SZS"
+		exit Function
+	elseif sValue = "NY" then
+		Transform_Exid2 = "NYS"
+		exit Function
+	elseif sValue = "AX" then
+		Transform_Exid2 = "AMX"
+		exit Function
+	elseif sValue = "OQ" then
+		Transform_Exid2 = "NAS"
+		exit Function
+	elseif sValue = "JP" then
+		Transform_Exid2 = "TSE"
+		exit Function		
+	end if
+End Function
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	szDate =  Form.GetSharedData("&HOST_DATE", false)
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock1", "FID_INPUT_NEWS_ITN_EXCP_CLCD"	, 0 , "00" )
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock2", "FID_INPUT_DATE"				, 0 , szDate )
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock2", "FID_INPUT_NEWS_ITN_EXCP_CLCD"	, 0 , "Y" )
+	DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "InBlock2", "FID_NEW_INPUT_ISCD"			, 0 , g_szExid&g_szItemCode )
+End Sub
+
+'============================================================================
+Sub grdNews_OnClickUp(lRow, szCellID)
+	Dim szTitle, szDate, szTime, szNewCorpName, szNewKey, szNewsCorpCode, szMsg
+
+	szTitle			= grdNews.GetCellData( "bd_cell0", lRow )	' 제목
+	szDate			= grdNews.GetCellData( "bd_cell1", lRow )	' 날짜
+	szTime			= grdNews.GetCellData( "bd_cell3", lRow )	' 시간
+	szNewCorpName		= grdNews.GetCellData( "bd_cell9", lRow )	' 뉴스제공업체명
+	szNewKey			= grdNews.GetCellData( "bd_cell4", lRow )	' 뉴스키
+	szNewsCorpCode	= grdNews.GetCellData( "bd_cell5", lRow )	' 뉴스제공업체코드
+
+	szMsg = szTitle & "|" & szDate & "|" & szTime & "|" & szNewCorpName & "|" & szNewKey & "|" & szNewsCorpCode & "|" & g_szItemName
+
+	Form.OpenPopup( "mhprc11000_p6" , "mhtro16000_t09"& "★" &szMsg, "" )
+
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)	
+
+	If szTranID = "ohhts_news_001r" Then
+		Dim nCnt, szTime
+		
+		nCnt = DATAMANAGER.GetDataCount( 0, "ohhts_news_001r", "OutBlock1" )
+		
+		For i = 0 To nCnt - 1
+			szTime = DATAMANAGER.GetDataValue( 0, "ohhts_news_001r", "OutBlock1", "FID_CNTG_HOUR" , i )
+			
+			DATAMANAGER.SetDataValue( 0, "ohhts_news_001r", "OutBlock1", "FID_CNTG_HOUR" , i , Left(szTime, 4) )
+		Next
+	End If
+End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_news_001r" trcode="ohhts_news_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_news_001r" title="종합뉴스/시황(제목)" realdata="0" dessvr="N" >
+				<TRBLOCK name="InBlock1" inout="in" _len="474" _ulen="372" >
+
+FID_INPUT_NEWS_OFER_ENTP_CODE^FID입력뉴스제공업체코드^5^0^0^0^0^0^0
+FID_NEWS_MDDV_CODE^FID뉴스중분류코드^8^0^0^0^0^0^0
+FID_INPUT_MRKT_CLS_CODE^FID입력시장구분코드^2^0^0^0^0^0^0
+FID_INPUT_TITL^FID입력제목^265^0^0^0^0^0^0
+FID_INPUT_DATE^FID입력일자^8^0^0^0^0^0^0
+FID_INPUT_HOUR^FID입력시간^6^0^0^0^0^0^0
+FID_NEWS_KEY^FID뉴스키^25^0^0^0^0^0^0
+FID_INPUT_NEWS_ITN_EXCP_CLCD^FID입력뉴스대내외구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="1" inout="in" _len="69" _ulen="53" >
+
+FID_NEW_INPUT_ISCD^FID신규입력종목코드^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="40" inout="out" _len="803" _ulen="643" >
+
+FID_SRNO2^FID일련번호2^20^0^0^0^0^0^0
+FID_DATE^FID일자^8^0^0^0^0^0^0
+FID_CNTG_HOUR^FID체결시간^6^0^0^0^0^0^0
+FID_1_CTGR^FID1카테고리^8^0^0^0^0^0^0
+FID_2_CTGR^FID2카테고리^8^0^0^0^0^0^0
+FID_3_CTGR^FID3카테고리^8^0^0^0^0^0^0
+FID_4_CTGR^FID4카테고리^8^0^0^0^0^0^0
+FID_NEWS_SMAL_1_CLCD^FID뉴스소1구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_2_CLCD^FID뉴스소2구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_3_CLCD^FID뉴스소3구분코드^8^0^0^0^0^0^0
+FID_NEWS_SMAL_4_CLCD^FID뉴스소4구분코드^8^0^0^0^0^0^0
+FID_NEWS_OFER_ENTP_CODE^FID뉴스제공업체코드^5^0^0^0^0^0^0
+FID_KOR_ISNM^FID한글종목명^40^0^0^0^0^0^0
+FID_NEWS_KEY^FID뉴스키^25^0^0^0^0^0^0
+FID_TITL^FID제목^265^0^0^0^0^0^0
+FID_NEW_SHRN_ISCD^FID신규단축종목코드^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

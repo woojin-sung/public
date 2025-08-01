@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="43110" scrname="해외선옵-관심-편집" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<RADIOGROUP name="rdoChange" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="6,9,363,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="종목편집" forecolor="100:102102102" position="0,0,182,39" />
+				<RADIO no="1" text="그룹편집" forecolor="100:102102102" position="182,0,181,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LINKFORM name="link" ly_vert="0,54,375,554,1" />
+		<EDIT name="edtChange" enable="0" visible="0" imetype="0" ly_vert="411,4,41,50,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2018" _ulen="1882" >
+'============================================================================
+' 화 면 명 : 관심종목_관심종목편집
+' 화면설명 : 관심종목화면의 종목과 그룹을 편집하는 화면
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim m_tScreen '편집화면파일
+m_tScreen = { "mhtrd43110_t2" , "mhtrd43110_t3" }
+
+
+
+'****************************************************************************
+'                       F  O  R  M         E  V  E  N  T                      
+'****************************************************************************
+'============================================================================
+Sub Form_OnFormClose( )
+	' 종목편집이나 그룹편집을 작업했는지 여부판단
+	If Trim(edtChange.caption) <> "" Then
+		Form.SendReturnToParent("GLOBAL_INTR_MODIFY", edtChange.caption)
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Form.SetScreenName( "관심종목편집" )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit( )
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData( )
+	
+	If szOpenData = "GLOBAL_INTR_GROUP_ADD" Then
+		Form.SetCtlProp("rdoChange", "currentindex", "1")
+	Else
+		link.linkfile = m_tScreen[0]
+	End If
+End Sub
+
+
+
+'****************************************************************************
+'            C  O  N  T  R  O  L  L        F  U  N  C  T  I  O  N            
+'****************************************************************************
+'============================================================================
+Sub rdoChange_OnClick(nIndex)
+	nIndex = CInt( nIndex )
+	link.linkfile = m_tScreen[nIndex]
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

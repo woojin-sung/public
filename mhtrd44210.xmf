@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44210" scrname="상품정보_메인" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab" tabcount="4" tabwidthtype="1" tabheadheight="36" ly_vert="0,0,375,562,1" >
+			<PAGE name="page0" caption="품목정보" linkfile="mhtrd44210_t1" loadingtype="1" />
+			<PAGE name="page1" caption="증거금" linkfile="mhtrd44211" loadingtype="1" />
+			<PAGE name="page2" caption="장운영시간" linkfile="mhtrd44212" loadingtype="1" />
+			<PAGE name="page3" caption="정산가" linkfile="mhtrd44213" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1429" _ulen="1403" >
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szScreenNo
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+
+	If szScreenNo = "44210" Then
+		fmtab.currenttab = "0"
+	elseif szScreenNo = "44211" Then
+		fmtab.currenttab = "1"
+	elseif szScreenNo = "44212" Then
+		fmtab.currenttab = "2"
+	elseif szScreenNo = "44213" Then
+		fmtab.currenttab = "3"
+	end if
+	
+End Sub
+
+'============================================================================
+Sub fmtab_OnTabChanged(nCurrentTab)
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName = "SCREEN_MENU" Then							' 연결정보(상단 ...)
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns1" , "0", "")
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "snsshare" Then			' 폼탭 초기화
+		g_nSNSType = Cint(sRet)
+		
+		If g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+		Else
+			Form.triggerEvent("linkfmHoga", "sharedata", "")
+		End If
+
+	End If
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

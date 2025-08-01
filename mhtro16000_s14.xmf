@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_종목정보_동일업종순위" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,365,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" ly_vert="0,0,375,295,1" scroll_ly_vert="0,0,375,295,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblSubTitle0" fontstyle="01" caption="동일업종 순위" bgcolor="029:255212175" ly_vert="20,0,260,20,1" />
+				<LABEL name="lblExpand" fontsize="-4" caption="<![CDATA[더보기 >]]>" halign="2" click="1" ly_vert="255,0,100,20,1" />
+				<PANNEL name="Pannel0" ly_vert="0,52,375,228,1" >
+					<CONTROL_INFO>
+						<IMAGE name="imgFlag" autosize="1" ly_vert="45,16,20,14,1" />
+						<LABEL name="lblItemName" fontsize="-1" bgcolor="029:255212175" multiline="1" ly_vert="71,12,285,22,1" />
+						<LABEL name="lblItemCode" fontsize="-2" bgcolor="029:255212175" ly_vert="45,38,128,20,1" />
+						<LABEL name="lblItemPrc" fontsize="-2" fontstyle="01" bgcolor="029:255212175" halign="2" autofontsize="1" ly_vert="190,38,165,20,1" />
+						<LABEL name="lblNum" fontsize="-2" fontstyle="01" ly_vert="20,13,20,20,1" />
+						<IMAGE name="Image0" autosize="1" imgpath="btn_link_bg.9" ly_vert="20,70,335,60,1" />
+						<BUTTON name="btnOrder1" caption="매도" fontsize="-2" btnimage="btn_31.9" ly_vert="298,85,52,35,1" />
+						<BUTTON name="btnOrder0" caption="매수" fontsize="-2" btnimage="btn_30.9" ly_vert="238,85,53,35,1" />
+						<BUTTON name="btnInfo" caption="종목정보" fontsize="-2" btnimage="btn_etc24.9" ly_vert="160,85,70,35,1" />
+						<BUTTON name="btnChart" caption="차트" fontsize="-2" btnimage="btn_etc24.9" ly_vert="90,85,70,35,1" />
+						<BUTTON name="btnHyun" caption="현재가" fontsize="-2" btnimage="btn_etc24.9" ly_vert="20,85,70,35,1" />
+						<LABEL name="lblLine2" transmode="0" ly_vert="20,69,335,1,1" />
+						<LABEL name="lblHideData0" visible="0" ly_vert="20,140,100,32,0" />
+						<LABEL name="lblHideData1" visible="0" ly_vert="20,170,100,32,0" />
+						<LABEL name="lblHideData2" visible="0" ly_vert="20,200,100,32,0" />
+					</CONTROL_INFO>
+					<CARD_INFO cardheight="70" >
+						<CELL name="imgFlag" />
+						<CELL name="lblItemName" />
+						<CELL name="lblItemCode" />
+						<CELL name="lblItemPrc" />
+						<CELL name="lblNum" />
+						<CELL name="Image0" />
+						<CELL name="btnOrder1" />
+						<CELL name="btnOrder0" />
+						<CELL name="btnInfo" />
+						<CELL name="btnChart" />
+						<CELL name="btnHyun" />
+						<CELL name="lblLine2" />
+						<CELL name="lblHideData0" />
+						<CELL name="lblHideData1" />
+						<CELL name="lblHideData2" />
+					</CARD_INFO>
+				</PANNEL>
+				<LABEL name="lblTypeInfo" fontsize="-2" autofontsize="1" ly_vert="20,20,190,32,1" />
+				<LABEL name="lblSortInfo" fontsize="-2" caption="거래량 많은순ㆍ당일" halign="2" ly_vert="210,20,140,32,1" />
+				<LABEL name="lblEmpty" visible="0" fontsize="-2" caption="동일업종 순위 정보가 없어요." halign="1" ly_vert="20,20,335,32,0" />
+				<LABEL name="lblDiv0" visible="0" transmode="0" ly_vert="0,290,375,5,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="17352" _ulen="16936" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+
+'==============================================
+' 컬러코드
+'==============================================
+' 기본 텍스트 컬러 (검정색)
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal 	= "334"
+
+' 기본 텍스트 컬러 (회색)
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey 	= "333"
+
+' 기본 텍스트 컬러 (흰색)
+Dim g_szTxtColor_White 
+g_szTxtColor_White 	= "338"
+
+' 빨강
+Dim g_szTxtColor_Red 
+g_szTxtColor_Red = "290"
+
+' 파랑
+Dim g_szTxtColor_Blue 
+g_szTxtColor_Blue = "291"
+
+' 기본 배경색상
+Dim g_szContBgColor
+g_szContBgColor = "320"
+
+' 기본 구분선 색상
+' 진한색
+Dim g_szLineColor
+g_szLineColor = "347"
+' 중간색
+Dim g_szLineColor2
+g_szLineColor2 = "256"
+' 연한색
+Dim g_szLineColor3
+g_szLineColor3 = "320"
+
+' 빨강
+Dim g_szBadgeBgColor_Red
+g_szBadgeBgColor_Red = "339"
+
+' 파랑
+Dim g_szBadgeBgColor_Blue
+g_szBadgeBgColor_Blue = "340"
+
+'==============================================
+' 기타 전역변수
+'==============================================
+Dim g_szItemCd 
+Dim g_szExidCd
+Dim g_szOnlyCd
+Dim g_rtChk
+
+Dim g_szType
+g_szType = "하드웨어 및 장비"
+
+Dim g_szTypeCd
+g_szTypeCd = ""
+
+Dim g_nExpandHeight 
+g_nExpandHeight = 130	
+
+Dim g_nFoldHeight
+g_nFoldHeight = 70
+
+Dim g_nPrev_Expand_Idx
+g_nPrev_Expand_Idx = -1
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	contMain.setEnableScroll(false)
+
+	contMain.lblSubTitle0.paddinginfo = "0,0,0,0"
+	contMain.lblSubTitle0.fgcolor = g_szTxtColor_Normal
+	
+	contMain.lblExpand.paddinginfo = "0,0,0,0"
+	contMain.lblExpand.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblTypeInfo.paddinginfo = "0,0,0,0"
+	contMain.lblTypeInfo.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblEmpty.paddinginfo = "0,0,0,0"
+	contMain.lblEmpty.fgcolor = g_szTxtColor_Grey
+	contMain.lblEmpty.visible = false
+	
+	contMain.lblSortInfo.paddinginfo = "0,0,0,0"
+	contMain.lblSortInfo.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblDiv0.bgcolor = g_szLineColor3
+End Function
+
+'==============================================
+' 해외주식 현재가(프리/정규) 조회
+'==============================================
+Function Request_Tran_ohhts_6000_001r()
+	
+	DATAMANAGER.ClearInputData(false, "ohhts_6000_001r")
+	
+	DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" 	, 0 , "OV" )		'시장구분			
+	DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_COND_MRKT_CLS_CODE" 		, 0 , g_szExidCd )	'마켓구분
+	DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FID_INPUT_OVRS_ISCD" 			, 0 , g_szOnlyCd )	'종목코드
+	DATAMANAGER.SetDataValue( false, "ohhts_6000_001r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , 0 , g_rtChk )	'실시간 여부
+	
+	DATAMANAGER.RequestTranData("ohhts_6000_001r")
+End Function
+
+Function Process_Tran_ohhts_6000_001r()
+	g_szTypeCd = DATAMANAGER.GetDataValue(false,"ohhts_6000_001r", "OutBlock1", "FIDX_BSTP_CLS_CODE", 0) 
+	szTypeNm = DATAMANAGER.GetDataValue(false,"ohhts_6000_001r", "OutBlock1", "FIDX_BSTP_MDDV_NAME", 0) 
+	contMain.lblTypeInfo.caption = "업종 : " & szTypeNm
+	
+	Request_Tran_ohhts_6230_002r()
+End Function
+
+Function Request_Tran_ohhts_6230_001r()
+	
+	DATAMANAGER.ClearInputData(false, "ohhts_6230_001r")
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_001r", "InBlock1", "FID_CLCD"	, 0 , "1")
+	DATAMANAGER.RequestTranData("ohhts_6230_001r")
+End Function
+
+Function Process_Tran_ohhts_6230_001r()
+	nDataCnt = DATAMANAGER.GetDataCount(false, "ohhts_6230_001r", "OutBlock1")
+	
+	if nDataCnt == "" or Cint(nDataCnt) == 0 then
+		
+		Exit Function
+	end if
+	
+	for i = 0 to nDataCnt-1
+		szTypeCd = DATAMANAGER.GetDataValue(false,"ohhts_6230_001r", "OutBlock1", "FIDX_BSTP_CLS_CODE"  , i)
+		szTypeNm = DATAMANAGER.GetDataValue(false,"ohhts_6230_001r", "OutBlock1", "FIDX_BSTP_DIV_NAME"  , i)
+		
+		if g_szType == szTypeCd then
+			g_szTypeCd = szTypeCd
+			Exit for
+		end if
+	next
+	
+	if g_szTypeCd == "" and DATAMANAGER.IsMoreNextData("ohhts_6230_001r") == true then
+		
+		DATAMANAGER.RequestNextData("ohhts_6230_001r")
+	else
+		if g_szTypeCd == "" then 
+			Exit Function
+		end if
+	
+		Request_Tran_ohhts_6230_002r()
+	end if
+End Function
+
+Function Request_Tran_ohhts_6230_002r()
+	contMain.Pannel0.rowcount = 0
+	
+	DATAMANAGER.ClearInputData(false, "ohhts_6230_002r")
+
+	
+	sNtns = ""
+	szExidCd = ""
+	If g_szExidCd = "NY" Or g_szExidCd = "AX" Or g_szExidCd = "OQ" Then 			'미국 각 시장
+	    sNtns = "US"
+	ElseIf g_szExidCd = "SH" Or g_szExidCd = "SZ" Then 								'상해, 심천
+	    sNtns = "CN"
+	    szExidCd = g_szExidCd
+	Else																			'일본, 홍콩 
+	    sNtns = g_szExidCd
+	    szExidCd = g_szExidCd
+	End If
+
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE"	, 0 , "OV")
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FID_INPUT_COND_SCR_DIV_CODE"		, 0 , "62300")
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FIDX_INPUT_DELY_RLTM_CLS_CODE"	, 0 , g_rtChk)
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FIDX_INPUT_NTNL_CODE"			, 0 , sNtns)
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FID_COND_MRKT_CLS_CODE"			, 0 , szExidCd)
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FIDX_INPUT_BSTP_CODE"			, 0 , g_szTypeCd)
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FID_INPUT_DATE1"				, 0 , "1")
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FID_INPUT_RANK_SORT_CLS_CODE"	, 0 , "2")
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FID_INPUT_RANK_SORT_CLS_CODE4"	, 0 , "0")
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FID_INPUT_VOL1"				, 0 , "0")
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FIDX_INPUT_TR_PBMN"			, 0 , "0")
+	DATAMANAGER.SetDataValue(false,"ohhts_6230_002r", "InBlock1", "FID_INPUT_PRC1"				, 0 , "0")
+	
+	DATAMANAGER.RequestTranData("ohhts_6230_002r")
+	
+End Function
+
+Function Process_Tran_ohhts_6230_002r()
+	nDataCnt = DATAMANAGER.GetDataCount(false, "ohhts_6230_002r", "OutBlock1")
+
+	if nDataCnt == "" or Cint(nDataCnt) == 0 then
+		
+		contMain.lblEmpty.visible = true
+		contMain.lblTypeInfo.visible = false
+		contMain.lblSortInfo.visible = false
+		contMain.lblDiv0.top = 72
+		
+		Form.triggerEvent("#", "CHANGE_LAYOUT_S14", 147)
+		Exit Function
+	end if
+	
+	if Cint(nDataCnt) > 3 then
+		nDataCnt = 3
+	end if
+	
+	nReduce = (3-nDataCnt) * 70
+	
+	'contMain.Pannel0.height = 228 - nReduce
+	contMain.lblDiv0.top = 290 
+	Form.triggerEvent("#", "CHANGE_LAYOUT_S14", 345)
+
+	contMain.lblEmpty.visible = false
+	contMain.lblTypeInfo.visible = true
+	contMain.lblSortInfo.visible = true
+		
+	for i = 0 to nDataCnt-1
+		szData0 = DATAMANAGER.GetDataValue(false, "ohhts_6230_002r", "OutBlock1", "FID_COND_MRKT_CLS_CODE"  , i)
+		szData1 = DATAMANAGER.GetDataValue(false, "ohhts_6230_002r", "OutBlock1", "FIDX_ISCD" , i)
+		szData2 = DATAMANAGER.GetDataValue(false, "ohhts_6230_002r", "OutBlock1", "FIDX_KOR_ISNM" , i)
+		szData3 = DATAMANAGER.GetDataValue(false, "ohhts_6230_002r", "OutBlock1", "FIDX_PRPR" , i)
+		szData4 = DATAMANAGER.GetDataValue(false, "ohhts_6230_002r", "OutBlock1", "FIDX_PRDY_CTRT", i)
+		
+		'msgbox szData0 .. "|" ..szData1 .. "|" ..szData2 .. "|" ..szData3 .. "|" ..szData4
+		
+		nIdx = contMain.Pannel0.addRow()
+		
+		szPrc = ""
+		if szData3 <> "" then
+			if szData0 = "AX" or szData0 = "NY" or szData0 = "OQ" then
+				szPrc = FormatNumber(szData3,4)
+			elseif szData0 = "JP" then
+				szPrc = FormatNumber(szData3,1)
+			elseif szData0 = "SH" or szData0 = "SZ" then
+				szPrc = FormatNumber(szData3,3)
+			elseif szData0 = "HK" then
+				szPrc = FormatNumber(szData3,3)
+			end if
+		end if
+		
+		'현재가 & 수익률
+		szPrcRate = szPrc & " | " & FormatNumber(szData4,2) & "%"
+		
+		szPrcRateAttr = "0"
+	
+		if Cdbl(szData4) > 0 then
+			szPrcRateAttr = "43"
+		elseif Cdbl(szData4) < 0 then
+			szPrcRateAttr = "45"
+		end if
+		
+		sGroupID = ""
+		sFlagID = ""
+		
+		if szData0 = "AX" or szData0 = "NY" or szData0 = "OQ" then
+			sGroupID = "CI_USD"
+			sFlagID = "USA"
+		elseif szData0 = "JP" then
+			sGroupID = "CI_JPN"
+			sFlagID = "JPN"
+		elseif szData0 = "SH" or szData0 = "SZ" then
+			sGroupID = "CI_CHN"
+			sFlagID = "CHN"
+		elseif szData0 = "HK" then
+			sGroupID = "CI_HKG"
+			sFlagID = "HKG"
+		else
+			sGroupID = "CI_KOR"
+			sFlagID = "KOR"
+		end if
+		
+		szImgNm = Form.getIconImg(sGroupID, szData1)
+		
+		if szImgNm = "" then
+			szImgNm = Form.getIconImg("FLAG", sFlagID)
+			
+			if szImgNm = "" then
+				szImgNm = "flag_general"
+			end if
+		end if
+
+		DisplaySetting_Pannel(nIdx, szData1, szData0, szData2, szPrcRate, szPrcRateAttr, szImgNm) 
+	next
+End Function
+
+Function DisplaySetting_Pannel(nIdx, szItemCd, szMktCd, szItemNm, szPrcRate, szPrcRateAttr, szImgNm) 
+	'상단 라인표시
+	if nIdx = 2 then
+		contMain.Pannel0.setPropCardCell("bgcolor","lblLine2", nIdx , g_szTxtColor_White)
+	else
+		contMain.Pannel0.setPropCardCell("bgcolor","lblLine2", nIdx , g_szLineColor2)
+	end if
+	
+	
+	'종목 국가 국기이미지 
+	contMain.Pannel0.setPropCardCell("maintainratio", "imgFlag", nIdx, "2")
+	contMain.Pannel0.setPropCardCell("imgpath","imgFlag", nIdx, szImgNm)
+	
+	contMain.Pannel0.setPropCardCell("paddinginfo","lblNum",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","lblNum",nIdx, g_szTxtColor_Normal)
+	contMain.Pannel0.setPropCardCell("maxlinecnt","lblNum",nIdx, "1^-2")
+	contMain.Pannel0.setPropCardCell("caption","lblNum",nIdx, nIdx+1&".")
+	
+	'종목명
+	contMain.Pannel0.setPropCardCell("paddinginfo","lblItemName",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","lblItemName",nIdx, g_szTxtColor_Normal)
+	contMain.Pannel0.setPropCardCell("maxlinecnt","lblItemName",nIdx, "1^-4")
+	contMain.Pannel0.setPropCardCell("caption","lblItemName",nIdx, szItemNm)
+	
+	'종목코드(시장조치)
+	contMain.Pannel0.setPropCardCell("paddinginfo","lblItemCode",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","lblItemCode",nIdx, g_szTxtColor_Grey)
+	contMain.Pannel0.setPropCardCell("caption","lblItemCode",nIdx, szItemCd)
+	
+	'현재가(전일대비)
+	contMain.Pannel0.setPropCardCell("paddinginfo","lblItemPrc",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","lblItemPrc",nIdx, g_szTxtColor_Grey)
+	contMain.Pannel0.setPropCardCell("caption","lblItemPrc",nIdx, szPrcRate)
+	
+	if szPrcRateAttr = "43" then
+		contMain.Pannel0.setPropCardCell("fgcolor","lblItemPrc",nIdx, g_szTxtColor_Red)
+	elseif szPrcRateAttr = "45" then
+		contMain.Pannel0.setPropCardCell("fgcolor","lblItemPrc",nIdx, g_szTxtColor_Blue)
+	else
+		contMain.Pannel0.setPropCardCell("fgcolor","lblItemPrc",nIdx, g_szTxtColor_Grey)
+	end if
+
+
+'	'(숨김)종목코드
+	contMain.Pannel0.setPropCardCell("caption","lblHideData0",nIdx, szMktCd)
+	contMain.Pannel0.setPropCardCell("caption","lblHideData1",nIdx, szItemCd)
+	contMain.Pannel0.setPropCardCell("caption","lblHideData2",nIdx, szItemNm)
+'
+	contMain.Pannel0.setPropCardCell("paddinginfo","btnHyun",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","btnHyun",nIdx, g_szTxtColor_Grey)
+	
+	contMain.Pannel0.setPropCardCell("paddinginfo","btnChart",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","btnChart",nIdx, g_szTxtColor_Grey)
+	
+	contMain.Pannel0.setPropCardCell("paddinginfo","btnInfo",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","btnInfo",nIdx, g_szTxtColor_Grey)
+	
+	contMain.Pannel0.setPropCardCell("paddinginfo","btnOrder0",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","btnOrder0",nIdx, g_szTxtColor_White)
+	
+	contMain.Pannel0.setPropCardCell("paddinginfo","btnOrder1",nIdx, "0,0,0,0")
+	contMain.Pannel0.setPropCardCell("fgcolor","btnOrder1",nIdx, g_szTxtColor_White)
+
+	
+End Function
+Function Convert_NatCd(szExidCd)
+	szResult = ""
+	
+	Select Case szExidCd
+		Case "NY", "AX", "OQ" 
+			szResult = "US"
+		Case "SH", "SZ"
+			szResult = "CN"
+		Case "JP", "HK"
+			szResult = szExidCd
+'		Case Else
+'			szResult = ""
+	End Select
+	
+	return szResult
+	
+End Function
+
+Function MovePopup(nidx, nGbn)
+	
+	szMktCd = contMain.Pannel0.getPropCardCell("caption","lblHideData0",nidx)
+	szItemCd = contMain.Pannel0.getPropCardCell("caption","lblHideData1",nidx)
+	szItemNm = contMain.Pannel0.getPropCardCell("caption","lblHideData2",nidx)
+	szItemCd = szMktCd & "@" & szItemCd
+	
+	Form.SetSharedData( "&ITEM_CODE" , szItemCd )
+	Form.SetSharedData( "&ITEM_KORNAME" , szItemNm )
+	Form.SetSharedData( "&ITEM_OVERSTOCK", szItemCd.."★"..szItemNm.."★".."", "" )					
+	Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", szItemCd.."★"..szItemNm.."★".."", "" )
+			
+	Select Case szMktCd
+		Case "OQ", "AX", "NY", "SH", "SZ", "HK", "JP"
+			if nGbn == 0 then						' 현재가
+				Form.triggerEvent("#", "RETURN_LAYOUT", "호가")				
+			elseif nGbn == 1 then					' 차트
+				Form.OpenScreen("16020", "")
+			elseif nGbn == 2 then				
+				Form.triggerEvent("#", "RETURN_LAYOUT", "종목정보")
+			elseif nGbn == 3 then					' 매수
+				Form.OpenScreen("16060", "0")
+			elseif nGbn == 4 then					' 매도
+				Form.OpenScreen("16060", "1")
+			end if
+	End Select
+
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'===============================================
+' Form_OnTriggerEvent(종목코드 연동)
+'===============================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "INIT_CODE" then
+		if instr(sParam, "@") > 0 then
+			g_szItemCd = sParam
+			g_szExidCd = ""
+			sTemp = split(g_szItemCd, "@")
+			g_szExidCd = sTemp[0] '시장구분
+			g_szOnlyCd = sTemp[1] '종목코드 
+			
+			g_rtChk = Form.GetSharedData( "REALTIME_"..g_szExidCd, false )
+			
+			Request_Tran_ohhts_6000_001r()
+		end if
+	
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "RETURN_LAYOUT" then
+		Form.triggerEvent("#", "RETURN_LAYOUT", sRet)
+	end if
+End Sub
+
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Init_Control()
+	
+End Sub
+
+'===============================================
+' DATAMANAGER_OnReceiveTranComplete
+'===============================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID == "ohhts_6230_001r" then
+		Process_Tran_ohhts_6230_001r()
+	
+	elseif szTranID == "ohhts_6230_002r" then
+		Process_Tran_ohhts_6230_002r()
+		
+		
+	elseif szTranID == "ohhts_6000_001r" then
+		Process_Tran_ohhts_6000_001r()
+	end if
+	
+End Sub
+
+
+'============================================================================
+Sub contMain_lblExpand_OnClick()
+	Form.OpenPopup("mhtro16000_p15" , g_szExidCd & "`" & g_szTypeCd  , "")
+End Sub
+
+'============================================================================
+Sub contMain_Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "btnHyun" then
+		MovePopup(nIndex, 0)
+	elseif sCellID = "btnChart" then
+		MovePopup(nIndex, 1)
+	elseif sCellID = "btnInfo" then
+		MovePopup(nIndex, 2)
+	elseif sCellID = "btnOrder0" then
+		MovePopup(nIndex, 3)
+	elseif sCellID = "btnOrder1" then
+		MovePopup(nIndex, 4)	
+	else
+		nTopRow = Cint(contMain.Pannel0.toprow)
+		nGap = Cint(nIndex) - nTopRow
+		
+		nCurHeight = contMain.Pannel0.GetCardWHAt(nIndex)
+
+		if g_nFoldHeight = nCurHeight then
+			contMain.Pannel0.setPropCardCell("top","lblLine2", nIndex , g_nExpandHeight-1)
+			contMain.Pannel0.SetCardWHAt(nIndex, g_nExpandHeight)
+			
+			if g_nPrev_Expand_Idx > -1 then
+				if g_nPrev_Expand_Idx <> nIndex then
+					contMain.Pannel0.setPropCardCell("top","lblLine2", g_nPrev_Expand_Idx , g_nFoldHeight-1)
+					contMain.Pannel0.SetCardWHAt(g_nPrev_Expand_Idx, g_nFoldHeight)
+				end if
+			end if
+			
+			g_nPrev_Expand_Idx = nIndex
+			
+		
+			if nGap > 2 then
+				contMain.Pannel0.toprow = nTopRow + 2
+			elseif nGap > 1 then
+				contMain.Pannel0.toprow = nTopRow + 1
+			end if
+			
+		else
+			contMain.Pannel0.setPropCardCell("top","lblLine2", nIndex , g_nFoldHeight-1)
+			contMain.Pannel0.SetCardWHAt(nIndex, g_nFoldHeight)
+		end if
+	end if
+End Sub
+
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	'Form.triggerEvent("#", "CHANGE_LAYOUT_S14", 52)
+'	if szTranID == "ohhts_6230_001r" then
+'		
+'	
+'	elseif szTranID == "ohhts_6230_002r" then
+'	
+'		
+'	elseif szTranID == "ohhts_6000_001r" then
+'	
+'	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_6230_002r" trcode="ohhts_6230_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_6230_001r" trcode="ohhts_6230_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_6000_001r" trcode="ohhts_6000_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_6230_002r" title="해외주식 주요지표순위" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="863" toutblk="OutBlock1" _ulen="683" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_COND_SCR_DIV_CODE^FID입력조건화면분류코드^6^0^0^9101^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+FIDX_INPUT_NTNL_CODE^FIDX입력국가코드^8^0^0^9153^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_BSTP_CODE^FIDX입력업종코드^8^0^0^9156^9999^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^9110^9999^0^0
+FID_INPUT_RANK_SORT_CLS_CODE^FID입력순위정렬구분코드^3^0^7^9003^9999^0^0
+FID_INPUT_RANK_SORT_CLS_CODE4^FID입력순위정렬구분코드4^3^0^7^9143^9999^0^0
+FID_INPUT_VOL1^FID입력거래량1^19^0^7^9058^9999^0^0
+FIDX_INPUT_TR_PBMN^FIDX입력거래대금^19^0^7^9043^9999^0^0
+FID_INPUT_PRC1^FID입력가격1^13^0^7^9112^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="50" inout="out" _len="880" _ulen="710" >
+
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^778^1012^0^0
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1012^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1012^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1012^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1012^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1012^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1012^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1012^0^0
+FIDX_COND_SDPR^FIDX조건기준가^14^4^7^5182^1012^0^0
+FIDX_SDPR_VRSS_PRPR_SIGN^FIDX기준가대비현재가부호^1^0^0^5103^1012^0^0
+FIDX_SDPR_VRSS_PRPR^FIDX기준가대비현재가^14^4^7^184^1012^0^0
+FIDX_SDPR_VRSS_PRPR_RATE^FIDX기준가대비현재가비율^11^2^7^186^1012^0^0
+FIDX_ASKP1^FIDX매도호가1^14^4^7^500^1012^0^0
+FIDX_BIDP1^FIDX매수호가1^14^4^7^510^1012^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1012^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6230_001r" title="업종명 조회" realdata="0" dessvr="5" >
+				<TRBLOCK name="InBlock1" inout="in" _len="46" _ulen="38" >
+
+FID_CLCD^FID구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="100" inout="out" _len="118" _ulen="96" >
+
+FIDX_BSTP_CLS_CODE^FIDX업종구분코드^4^0^0^0^0^0^0
+FIDX_BSTP_DIV_NAME^FIDX업종분류명^80^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6000_001r" title="해외주식 현재가 조회" realdata="0" attribute="1" dessvr="4" datamode=".SFID" >
+				<TRBLOCK name="InBlock1" inout="in" _len="321" toutblk="OutBlock1" _ulen="247" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^9100^9999^0^0
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^9030^9999^0^0
+FID_COND_MRKT_CLS_CODE^FID조건시장구분코드^2^0^0^9103^9999^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^9152^9999^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="2746" _ulen="2346" >
+
+FIDX_ISCD^FIDX종목코드^16^0^0^1^1000^0^0
+FIDX_PRPR^FIDX현재가^14^4^7^4^1000^0^0
+FIDX_ACML_VOL^FIDX누적거래량^19^0^7^14^1000^0^0
+FIDX_PRDY_VRSS_SIGN^FIDX전일대비부호^1^0^0^6^1000^0^0
+FIDX_PRDY_CLPR^FIDX전일종가^14^4^7^13^1000^0^0
+FIDX_PRDY_VOL^FIDX전일거래량^19^0^7^133^1000^0^0
+FIDX_52_WEEK_HGPR^FIDX52주최고가^14^4^7^32^1000^0^0
+FIDX_52_WEEK_LWPR^FIDX52주최저가^14^4^7^35^1000^0^0
+FIDX_LSTN_STCN^FIDX상장주수^19^0^7^30^1000^0^0
+FIDX_OPRC^FIDX시가^14^4^7^17^1000^0^0
+FIDX_HPRC^FIDX고가^14^4^7^18^1000^0^0
+FIDX_LPRC^FIDX저가^14^4^7^19^1000^0^0
+FIDX_MXPR^FIDX상한가^14^4^7^26^1000^0^0
+FIDX_LLAM^FIDX하한가^14^4^7^27^1000^0^0
+FIDX_AVLS^FIDX시가총액^19^0^7^28^1000^0^0
+FIDX_EPS^FIDXEPS^11^4^7^210^1000^0^0
+FIDX_PRDY_VRSS^FIDX전일대비^14^4^7^5^1000^0^0
+FIDX_PRDY_CTRT^FIDX전일대비율^11^2^7^7^1000^0^0
+FIDX_BSTP_CLS_CODE^FIDX업종구분코드^4^0^0^335^1000^0^0
+FIDX_BSTP_LRDV_NAME^FIDX업종대분류명^80^0^0^5133^1000^0^0
+FIDX_BSTP_MDDV_NAME^FIDX업종중분류명^80^0^0^5134^1000^0^0
+FIDX_BSTP_SMDV_NAME^FIDX업종소분류명^80^0^0^5135^1000^0^0
+FIDX_DCPN_CNT^FIDX소수점수^2^0^7^5132^1000^0^0
+FIDX_SHNU_ASPR_UNIT^FIDX매수호가단위^14^4^7^5125^1000^0^0
+FIDX_SELN_ASPR_UNIT^FIDX매도호가단위^14^4^7^5126^1000^0^0
+FIDX_SHNU_ODER_QTY_UNIT^FIDX매수주문수량단위^9^0^7^5127^1000^0^0
+FIDX_SELN_ODER_QTY_UNIT^FIDX매도주문수량단위^9^0^7^5128^1000^0^0
+FIDX_CRNC_CODE^FIDX통화코드^4^0^0^5114^1000^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^2^1000^0^0
+FIDX_TICK_CLS^FIDX틱구분^4^0^0^5136^1000^0^0
+FID_PBR^FIDPBR^9^2^7^43^1000^0^0
+FIDX_PER^FIDXPER^9^2^7^42^1000^0^0
+BSTP_KOR_ISNM^업종한글종목명^100^0^0^822^1000^0^0
+FIDX_CAS_TRGT_ISSU_YN^FIDXCAS대상종목여부^1^0^0^5181^1000^0^0
+FIDX_VCM_STAT_CLS_CODE^FIDXVCM상태구분코드^1^0^0^5166^1000^0^0
+FIDX_ENG_ISNM^FIDX영문종목명^65^0^0^5112^1000^0^0
+FIDX_SDPR^FIDX기준가^14^4^7^24^1000^0^0
+FIDX_VCM_STA_HOUR^FIDXVCM시작시간^6^0^0^5167^1000^0^0
+FIDX_VCM_FIN_HOUR^FIDXVCM종료시간^6^0^0^5168^1000^0^0
+FIDX_SELL_ONLY^FIDXSELLONLY^2^0^7^5173^1000^0^0
+FIDX_ISSU_STAT_CLS_CODE^FIDX종목상태구분코드^1^0^0^6016^1000^0^0
+FIDX_CAS_IEP^FIDXCASIEP^11^4^7^5215^1000^0^0
+FIDX_CAS_IEV^FIDXCASIEV^11^4^7^5216^1000^0^0
+FIDX_ETF_YN^FIDXETF여부^1^0^0^5159^1000^0^0
+FID_LVRG^FID레버리지^14^6^7^81^1000^0^0
+FIDX_CAS_TRGT_ISSU^FIDXCAS대상종목^1^0^0^5221^1000^0^0
+FIDX_CAS_STAT^FIDXCAS상태^2^0^0^5222^1000^0^0
+FIDX_CAS_SDPR^FIDXCAS기준가^14^4^7^5223^1000^0^0
+FIDX_CAS_MXPR^FIDXCAS상한가^14^4^7^5224^1000^0^0
+FIDX_CAS_LLAM^FIDXCAS하한가^14^4^7^5225^1000^0^0
+FIDX_ETF_TYPE_CODE^FIDXETF유형코드^3^0^0^5210^1000^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

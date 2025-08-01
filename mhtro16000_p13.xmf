@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_종목정보_배당상세" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" ly_vert="0,47,375,600,1" scroll_ly_vert="0,47,375,600,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblSubTitle" fontstyle="01" caption="최근 배당 내역" ly_vert="20,10,320,32,1" />
+				<LABEL name="lblLine0" bgcolor="271:236236236" transmode="0" ly_vert="20,50,335,40,1" />
+				<PANNEL name="Pannel0" ly_vert="20,90,335,490,1" >
+					<CONTROL_INFO>
+						<LABEL name="lblLine2" bgcolor="271:236236236" transmode="0" ly_vert="0,39,335,1,1" />
+						<LABEL name="lblData0" fontsize="-2" mask="1,0,,,1,####.##.##,0,1,1,0,0" ly_vert="0,0,130,40,1" />
+						<LABEL name="lblData1" fontsize="-2" mask="1,0,,,1,####.##.##,0,1,1,0,0" halign="1" ly_vert="100,0,130,40,1" />
+						<LABEL name="lblData2" fontsize="-2" halign="2" ly_vert="240,0,85,40,1" />
+						<LABEL name="lblData3" fontsize="-2" fontstyle="01" ly_vert="0,0,70,40,1" />
+						<LABEL name="lblData4" fontsize="-2" mask="1,0,,,1,####.##.##,0,1,1,0,0" halign="1" ly_vert="-10,0,260,40,1" />
+					</CONTROL_INFO>
+					<CARD_INFO cardheight="40" >
+						<CELL name="lblData0" />
+						<CELL name="lblData1" />
+						<CELL name="lblData2" />
+						<CELL name="lblLine2" />
+						<CELL name="lblData3" />
+						<CELL name="lblData4" />
+					</CARD_INFO>
+				</PANNEL>
+				<LABEL name="lblTitle0" fontsize="-4" caption="배당락일" ly_vert="20,50,130,40,1" />
+				<LABEL name="lblTitle1" fontsize="-4" caption="지급예정일" halign="1" ly_vert="120,50,130,40,1" />
+				<LABEL name="lblTitle2" fontsize="-4" caption="1주당 배당금" halign="1" autofontsize="1" ly_vert="260,50,85,40,1" />
+				<LABEL name="lblLine1" bgcolor="271:236236236" transmode="0" ly_vert="20,90,335,1,1" />
+				<LABEL name="lblCrnc" fontsize="-4" caption="지급기준일" halign="2" ly_vert="250,11,100,30,1" />
+				<LABEL name="lblTitle3" visible="0" fontsize="-4" caption="배당락일" halign="1" ly_vert="10,50,260,40,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" ly_vert="20,0,290,47,1" />
+		<IMAGE name="imgBack" autosize="1" ly_vert="320,16,39,15,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7305" _ulen="7285" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_42_n.9"
+
+Dim g_szBtnImg_Close
+g_szBtnImg_Close = "icon_close"
+
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_szItemCd, g_szExidCd, g_szOnlyCd
+g_szItemCd = ""
+g_szExidCd = ""
+g_szOnlyCd = ""
+
+Dim g_szItemNm
+g_szItemNm = ""
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기화
+'===============================================
+Function Init_Control()
+	lblTitle.fgcolor = g_szTxtColor_Normal
+	lblTitle.paddinginfo = "0,0,0,0"
+	
+	imgBack.maintainratio = "3"
+	imgBack.imgpath = g_szBtnImg_Close
+	
+	contMain.lblSubTitle.paddinginfo = "0,0,0,0"
+	
+	contMain.lblCrnc.paddinginfo  = "0,0,0,0"
+	contMain.lblCrnc.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblTitle0.paddinginfo = "25,0,0,0"
+	contMain.lblTitle0.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblTitle1.paddinginfo = "0,0,0,0"
+	contMain.lblTitle1.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblTitle2.paddinginfo = "0,0,0,0"
+	contMain.lblTitle2.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblTitle3.paddinginfo = "0,0,0,0"
+	contMain.lblTitle3.fgcolor = g_szTxtColor_Grey
+	
+	
+	contMain.lblLine0.bgcolor = "245246247"
+End Function
+
+Function RequestTranData_016r(szItemCd, szMktCd)
+	contMain.Pannel0.rowcount = 0
+	DATAMANAGER.ClearInputData(0, "ohhts_metf_016r")
+	
+	DATAMANAGER.SetDataValue(0, "ohhts_metf_016r", "InBlock1", "FID_INPUT_OVRS_ISCD"			, 0 , szItemCd)
+	DATAMANAGER.SetDataValue(0, "ohhts_metf_016r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE"	, 0 , szMktCd)
+	
+	DATAMANAGER.RequestTranData("ohhts_metf_016r")
+End Function
+
+Function ResponseTranData_016r()
+	
+	szData0 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock1", "FID_ANTC_DVDN_ERT" , 0)
+	szData1 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock1", "FIDX_ANTC_DVMN" , 0)
+	szData2 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock1", "FID_DVDN_ERT" , 0)
+	szData3 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock1", "FID_DVMN_PRVS_FORM" , 0)
+	szData7 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock1", "FIDX_CRNC_CODE" , 0)
+	
+	if trim(szData7) = "KRW" then
+		szData7 = "원"
+	end if
+	contMain.lblCrnc.caption = "단위 : " & szData7
+
+	nDataCnt = DATAMANAGER.GetDataCount(0, "ohhts_metf_016r", "OutBlock2")
+	szYear = ""
+	if g_szExidCd = "AX" or g_szExidCd = "OQ" or g_szExidCd = "NY" then
+		contMain.lblTitle3.visible = false
+		contMain.lblRate1.visible = true
+		contMain.lblTitle1.visible = true
+		
+		for i = 0 to nDataCnt-1
+			nIdx = contMain.Pannel0.AddRow()
+			szData4 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock2", "FID_EXDV_DAY" , i)
+'			szData4 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock2", "FID_DVDN_RCDT" , i)
+			szData5 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock2", "FID_DVDN_PRVS_DAY" , i)
+			szData6 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock2", "FIDX_DVMN" , i)
+			
+			szData6_Result = FormatNumber(szData6, 2)
+			
+			contMain.Pannel0.setPropCardCell("visible", "lblData0", nIdx, true)
+			contMain.Pannel0.setPropCardCell("visible", "lblData1", nIdx, true)
+			contMain.Pannel0.setPropCardCell("visible", "lblData2", nIdx, true)
+			contMain.Pannel0.setPropCardCell("visible", "lblData3", nIdx, false)
+			contMain.Pannel0.setPropCardCell("visible", "lblData4", nIdx, false)
+				
+			if szData4 = "19000101" then
+				szData4 = "-"
+			end if
+			
+			if szData5 = "19000101" then
+				szData5 = "-"
+			end if
+			
+			contMain.Pannel0.setPropCardCell("caption","lblData0",nIdx,szData4)
+			contMain.Pannel0.setPropCardCell("caption","lblData1",nIdx,szData5)
+			contMain.Pannel0.setPropCardCell("caption","lblData2",nIdx,szData6_Result)
+		next
+	elseif g_szExidCd = "HK" or g_szExidCd = "JP" or g_szExidCd = "J" then
+		contMain.lblTitle3.visible = true
+		contMain.lblTitle0.visible = false
+		contMain.lblTitle1.visible = false
+	
+		for i = 0 to nDataCnt-1
+			nIdx = contMain.Pannel0.AddRow()
+			
+			szData4 = DATAMANAGER.GetDataValue(0,  "ohhts_metf_016r", "OutBlock2", "FID_EXDV_DAY", i)
+			szData5 = DATAMANAGER.GetDataValue(0, "ohhts_metf_016r", "OutBlock2", "FIDX_DVMN" , i)
+			
+			szData5_Result = ""
+			if g_szExidCd = "J" then
+				szData5_Result = FormatNumber(szData5, 0)
+			else
+				szData5_Result = FormatNumber(szData5, 2)
+			end if
+			
+			contMain.Pannel0.setPropCardCell("visible", "lblData0", nIdx, false)
+			contMain.Pannel0.setPropCardCell("visible", "lblData1", nIdx, false)
+			contMain.Pannel0.setPropCardCell("visible", "lblData2", nIdx, true)
+			contMain.Pannel0.setPropCardCell("visible", "lblData3", nIdx, false)
+			contMain.Pannel0.setPropCardCell("visible", "lblData4", nIdx, true)
+			
+			if szData4 = "19000101" then
+				szData4 = "-"
+			end if
+			
+			contMain.Pannel0.setPropCardCell("caption","lblData4",nIdx,szData4)
+			contMain.Pannel0.setPropCardCell("caption","lblData2",nIdx,szData5_Result)
+		next
+	end if
+End Function
+
+Function DisplaySetting_Pannel(nIdx, szImgNm, szItemCd, szRate0, szRate1) 
+	
+	contMain.Pannel0.setPropCardCell("caption", "lblItemCd",		nIdx,	szItemCd)
+	contMain.Pannel0.setPropCardCell("caption", "lblTitle3",		nIdx,	szRate0&"%")
+	contMain.Pannel0.setPropCardCell("caption", "lblRate1",		nIdx,	szRate1&"%")
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Init_Control()
+	
+	Dim szLinkData
+	szLinkData = Form.GetOpenLinkData()
+
+	if szLinkData = "" then
+		exit Sub
+	end if
+	arrLinkData = split(szLinkData, "★")
+	
+	lblTitle.caption = arrLinkData(0)
+	
+	lblTitle.setUseAutoScroll(true, 50, true)
+	g_szItemNm = arrLinkData(0)
+	
+	Form.SetTimerEvent2(1, 1, 0.1)
+	
+	g_szExidCd = arrLinkData(2)
+	RequestTranData_016r(arrLinkData(1), arrLinkData(2))
+End Sub
+'============================================================================
+Sub imgBack_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "ohhts_metf_016r" then
+		ResponseTranData_016r()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+
+	Form.SetTimerEvent2(sTimerID, 0, 0)
+	
+	if CInt(sTimerID) = 1 then
+		lblTitle.setAutoScrollText(g_szItemNm)
+	end if
+End Sub
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_metf_016r" trcode="ohhts_metf_016r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_metf_016r" title="ETF 종복정보 배당 조회" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" inout="in" _len="148" _ulen="112" >
+
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^0^0^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="315" _ulen="251" >
+
+FID_ANTC_DVDN_ERT^FID예상배당수익률^9^2^7^0^0^0^0
+FIDX_ANTC_DVMN^FIDX예상배당금^20^0^0^0^0^0^0
+FID_DVDN_ERT^FID배당수익률^9^2^7^0^0^0^0
+FID_DVMN_PRVS_FORM^FID배당금지급방식^10^0^0^0^0^0^0
+FIDX_CRNC_CODE^FIDX통화코드^4^0^0^0^0^0^0
+FID_DVDN_CYCL^FID배당주기^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" occurs="1" inout="out" _len="190" _ulen="156" >
+
+FID_DVDN_RCDT^FID배당기산일^8^0^0^0^0^0^0
+FID_DVDN_PRVS_DAY^FID배당지급일^8^0^0^0^0^0^0
+FID_EXDV_DAY^FID배당락일^8^0^0^0^0^0^0
+FIDX_DVMN^FIDX배당금^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

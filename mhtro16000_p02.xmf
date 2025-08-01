@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="차트" version="2" writer="이호철" />
+	<FORM_INFO name="Form" ly_vert="0,0,320,386,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image3" autosize="1" imgpath="btn_common_type8_d.9.png" ly_vert="265,0,55,39,1" />
+		<IMAGE name="Image2" autosize="1" imgpath="btn_common_type8_d.9.png" ly_vert="209,0,56,39,1" />
+		<ITEMCODE name="ItemCode0" itemtype="11" marketcodelist="" ly_vert="0,0,209,39,1" />
+		<LABEL name="Label4" mask="0,0,,%,0,,2,1,1" ly_vert="237,60,80,15,1" />
+		<LABEL name="Label5" fontsize="5" usesign="1" ly_vert="127,42,17,35,1" import="0,1,16" realrec="0,1,10" />
+		<LABEL name="Label0" fontsize="20" mask="0,0,,,0,,-1,1,0" ly_vert="4,43,121,35,1" import="0,1,17" realrec="0,1,9" />
+		<LABEL name="Label6" mask="0,0,,,0,,-1,1,0" halign="2" ly_vert="150,43,63,18,1" import="0,1,15" realrec="0,1,11" />
+		<LABEL name="Label7" mask="0,0,,%,0,,2,1,1" halign="2" ly_vert="150,60,63,18,1" import="0,1,14" realrec="0,1,12" />
+		<LABEL name="Label8" fgcolor="146:124124124" fontsize="-1" halign="2" ly_vert="225,42,39,18,1" />
+		<LABEL name="Label9" fgcolor="146:124124124" fontsize="-1" halign="2" ly_vert="277,42,41,18,1" import="0,1,5" />
+		<LABEL name="Label10" fontsize="-1" mask="0,0,, 주,0,,0,1,0" halign="2" ly_vert="225,60,93,18,1" import="0,1,13" realrec="0,1,18" />
+		<IMAGE name="Image0" autosize="1" imgpath="ic_add_interest.png" ly_vert="215,12,14,14,1" />
+		<LABEL name="Label11" fgcolor="062:255255255" fontsize="-2" caption="추가" ly_vert="231,11,26,16,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="icon_exchange.png" ly_vert="270,12,12,14,1" />
+		<LABEL name="Label12" fgcolor="062:255255255" fontsize="-2" caption="환전" ly_vert="284,11,27,16,1" />
+		<BUTTON name="BtnAdd" btnimage="alpha.9" ly_vert="212,0,53,40,1" />
+		<BUTTON name="BtnTrans" btnimage="alpha.9" ly_vert="268,0,50,40,1" />
+		<EDIT name="Edit0" caption="TSE@6758" imetype="0" ly_vert="328,24,100,32,1" />
+		<LINKFORM name="LinkForm0" linkfile="mhtro16000_p03" border="0100" ly_vert="0,80,320,306,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6078" _ulen="5880" >
+Dim g_sCode
+Dim g_sDecimalLen
+
+'============================================================================
+function Tonum(sValue)
+	return tonumber( sValue ) or 0
+end functino
+
+'============================================================================
+' 현재가, 전일대비, 등락률 색상 세팅
+'============================================================================
+function Data_Color_Setting()
+	Dim sDiff 
+	sDiff = Tonum( Label6.caption )
+	Dim sColor
+	sColor = "4"
+	
+	if sDiff > 0 then
+		sColor = "1"
+	elseif sDiff < 0 then
+		sColor = "2"
+	elseif sDiff == 0 then
+		sColor = "3"
+	end if
+	
+	Label0.fgcolor = sColor
+	Label6.fgcolor = sColor
+	Label7.fgcolor = sColor
+end function
+
+'============================================================================
+' 거래소 ID 시장명으로 변환
+'============================================================================
+function Transform_Market(sValue)
+	if sValue == "HK" then
+		return "홍콩"
+	elseif sValue == "CN" then
+		return "중국"
+	elseif sValue == "JP" then
+		return "일본"
+	elseif sValue == "US" then
+		return "미국"
+	end if
+end function
+
+'============================================================================
+'[[ 폼 초기화 ]]
+'============================================================================
+Sub Form_OnFormInit()
+	Form.TriggerEvent( "LinkForm0", "ChartLarge", "ok" )
+
+	g_sCode = ItemCode0.code	' ItemCode0.code 로 변경하기
+	
+	if g_sCode <> nil and g_sCode <> "" then
+		Form.TriggerEvent( "LinkForm0", "RequestData", g_sCode )
+		DATAMANAGER.RequestTranData( "getGtsHogaDetail" )
+	end if
+end Sub
+
+'============================================================================
+'[[ 폼탭 변경시 ]]
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Form.TriggerEvent( "LinkForm0", "RequestData", g_sCode )
+end Sub
+
+'============================================================================
+Sub ItemCode0_OnEditComplete(sCode)
+	g_sCode = sCode	' sCode 로 변경하기
+	if g_sCode <> nil and g_sCode <> "" then
+		Form.TriggerEvent( "LinkForm0", "RequestData", g_sCode )
+		DATAMANAGER.RequestTranData( "getGtsHogaDetail" )
+	end if
+end Sub
+
+'============================================================================
+'[[ DATAMANAGER 조회 BEFORE ]]
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "getGtsHogaDetail" then
+		DATAMANAGER.CancelRealData( "TRD" )
+		Label0.mask = "0,0,,,0,,-1,1,0"
+		Label6.mask = "0,0,,,0,,-1,1,0"
+		DATAMANAGER.SetDataValue( false, "getGtsHogaDetail", "inblock", "code" , 0 , g_sCode )
+	end if
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+	Dim sTemp
+	sTemp = {}
+	Dim sMarketNm 
+	sMarketNm = ""
+	if szTranID == "getGtsHogaDetail" then
+		sTemp = Trim( DATAMANAGER.GetDataValue( 0, "getGtsHogaDetail", "price", "natcode" , 0 ) )
+		
+		sMarketNm = Transform_Market( sTemp ) ' 거래소 ID 시장명으로 변환
+		
+		Label8.caption = sMarketNm
+	end if
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	Dim sTemp
+	if szTranID == "getGtsHogaDetail" then
+		
+		Data_Color_Setting()		' 현재가, 전일대비, 등락률 색상 세팅
+		
+		sTemp = Label0.caption
+		if sTemp <> nil and sTemp <> "" then
+			g_sDecimalLen = Split( sTemp , "." )
+			
+			if g_sDecimalLen[2] <> nil and g_sDecimalLen[2] <> "" then
+				Label0.mask = "0,0,,,0,,".. Len(g_sDecimalLen[2]) ..",1,0"
+				Label6.mask = "0,0,,,0,,".. Len(g_sDecimalLen[2]) ..",1,0"
+			end
+			
+			Dim szRealCode
+			szRealCode = ""
+			szRealCode = DATAMANAGER.GetDataValue( false, "getGtsHogaDetail", "price", "trdcode" , 0 )
+			
+			DATAMANAGER.SetDataValue( 1, "TRD", "inblock", "codelist" , 0 , szRealCode )
+			DATAMANAGER.RequestRealData( "TRD" )
+		end if
+	end if
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveRealComplete(szTranID)
+	if szTranID == "TRD" then
+		Data_Color_Setting()		' 현재가, 전일대비, 등락률 색상 세팅
+	end if
+end Sub
+
+'============================================================================
+'[[ 추가 버튼 ]]
+'============================================================================
+Sub BtnAdd_OnClick()
+	Dim sCode
+	Dim sSymbol
+	Dim sKorname
+	Dim sEngName
+	Dim sOrdersize
+	Dim sExid
+	Dim sSendData
+	
+	sCode = Form.GetSharedData( "&ITEM_CODE" , 0 )
+	sSymbol = Form.GetSharedData( "&ITEM_SYMBOL" , 0 )
+	sKorname  = Form.GetSharedData( "&ITEM_KORNAME" , 0 )
+	sEngName  = Form.GetSharedData( "&ITEM_ENGNAME" , 0 )
+	sOrdersize  = Form.GetSharedData( "&ITEM_ORDERSIZE" , 0 )
+	sExid  = Form.GetSharedData( "&ITEM_EXID" , 0 )
+	sSendData = sCode .."`".. sSymbol .."`".. sKorname .."`".. sEngName .."`".. sOrdersize .."`".. sExid
+
+	Form.PostLinkData( "Item_Add", sSendData )
+end Sub
+
+'============================================================================
+'[[ 환전 버튼 ]]
+'============================================================================
+Sub BtnTrans_OnClick()
+'	Form.OpenPopup( "I111P1" , "EXCHANGE" , "" )
+end Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	g_sCode = ItemCode0.code
+	
+	if g_sCode <> nil and g_sCode <> "" then
+		Form.TriggerEvent( "LinkForm0", "RequestData", g_sCode )
+		DATAMANAGER.RequestTranData( "getGtsHogaDetail" )
+	end if
+end Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "SCREEN_REFRESH" then
+		g_sCode = ItemCode0.code
+	
+		if g_sCode <> nil and g_sCode <> "" then
+			Form.TriggerEvent( "LinkForm0", "RequestData", g_sCode )
+			DATAMANAGER.RequestTranData( "getGtsHogaDetail" )
+		end if
+'	elseif sEventName == "HORIZON" then
+'		Form.TriggerEvent( "LinkForm0", "HORIZON", "OK" )
+	end if
+end Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="TRD" trcode="TRD" />
+			<TRAN tranid="getGtsHogaDetail" trcode="getGtsHogaDetail" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="TRD" title="TRD" realdata="1" dessvr="H" datamode=".WSKJsonFeed" >
+				<TRBLOCK name="inblock" occurs="1" inout="in" _len="32" _ulen="32" >
+
+codelist^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock" inout="out" _len="445" _ulen="445" >
+
+symb^^-1^0^0^0^0^0^0
+tymd^^-1^0^0^0^0^0^0
+xymd^^-1^0^0^0^0^0^0
+xhms^^-1^0^0^0^0^0^0
+kymd^^-1^0^0^0^0^0^0
+khms^^-1^0^0^0^0^0^0
+open^^-1^0^0^0^0^0^0
+high^^-1^0^0^0^0^0^0
+low^^-1^0^0^0^0^0^0
+last^^-1^0^0^0^0^0^0
+sign^^-1^0^0^0^0^0^0
+diff^^-1^0^0^0^0^0^0
+rate^^-1^0^0^0^0^0^0
+pbid^^-1^0^0^0^0^0^0
+vbid^^-1^0^0^0^0^0^0
+pask^^-1^0^0^0^0^0^0
+vask^^-1^0^0^0^0^0^0
+evol^^-1^0^0^0^0^0^0
+tvol^^-1^0^0^0^0^0^0
+tamt^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="getGtsHogaDetail" title="getGtsHogaDetail" realdata="0" dessvr="G" datamode=".WSKJson" >
+				<TRBLOCK name="inblock" inout="in" _len="96" _ulen="96" >
+
+isCb^^4^0^3^0^0^0^0
+code^^-1^0^0^0^0^0^0
+regist^^4^0^3^0^0^0^0
+viewKey^^8^0^6^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="price" inout="out" _len="1983" _ulen="1983" >
+
+code^^-1^0^0^0^0^0^0
+symbol^^-1^0^0^0^0^0^0
+korname^^-1^0^0^0^0^0^0
+engname^^-1^0^0^0^0^0^0
+natcode^^-1^0^0^0^0^0^0
+currency^^-1^0^0^0^0^0^0
+market^^-1^0^0^0^0^0^0
+preclose^^-1^0^0^0^0^0^0
+low52p^^-1^0^0^0^0^0^0
+high52p^^-1^0^0^0^0^0^0
+share^^-1^0^0^0^0^0^0
+decimal^^-1^0^0^0^0^0^0
+accessibility^^-1^0^0^0^0^0^0
+tvol^^-1^0^0^0^0^0^0
+rate^^4^2^4^0^0^0^0
+diff^^-1^0^0^0^0^0^0
+sign^^-1^0^0^0^0^0^0
+last^^-1^0^0^0^0^0^0
+low^^-1^0^0^0^0^0^0
+high^^-1^0^0^0^0^0^0
+open^^-1^0^0^0^0^0^0
+ask1^^-1^0^0^0^0^0^0
+ask2^^-1^0^0^0^0^0^0
+ask3^^-1^0^0^0^0^0^0
+ask4^^-1^0^0^0^0^0^0
+ask5^^-1^0^0^0^0^0^0
+ask6^^-1^0^0^0^0^0^0
+ask7^^-1^0^0^0^0^0^0
+ask8^^-1^0^0^0^0^0^0
+ask9^^-1^0^0^0^0^0^0
+ask10^^-1^0^0^0^0^0^0
+bid1^^-1^0^0^0^0^0^0
+bid2^^-1^0^0^0^0^0^0
+bid3^^-1^0^0^0^0^0^0
+bid4^^-1^0^0^0^0^0^0
+bid5^^-1^0^0^0^0^0^0
+bid6^^-1^0^0^0^0^0^0
+bid7^^-1^0^0^0^0^0^0
+bid8^^-1^0^0^0^0^0^0
+bid9^^-1^0^0^0^0^0^0
+bid10^^-1^0^0^0^0^0^0
+vask1^^-1^0^0^0^0^0^0
+vask2^^-1^0^0^0^0^0^0
+vask3^^-1^0^0^0^0^0^0
+vask4^^-1^0^0^0^0^0^0
+vask5^^-1^0^0^0^0^0^0
+vask6^^-1^0^0^0^0^0^0
+vask7^^-1^0^0^0^0^0^0
+vask8^^-1^0^0^0^0^0^0
+vask9^^-1^0^0^0^0^0^0
+vask10^^-1^0^0^0^0^0^0
+vbid1^^-1^0^0^0^0^0^0
+vbid2^^-1^0^0^0^0^0^0
+vbid3^^-1^0^0^0^0^0^0
+vbid4^^-1^0^0^0^0^0^0
+vbid5^^-1^0^0^0^0^0^0
+vbid6^^-1^0^0^0^0^0^0
+vbid7^^-1^0^0^0^0^0^0
+vbid8^^-1^0^0^0^0^0^0
+vbid9^^-1^0^0^0^0^0^0
+vbid10^^-1^0^0^0^0^0^0
+tbsz^^-1^0^0^0^0^0^0
+tasz^^-1^0^0^0^0^0^0
+isvalid^^4^0^3^0^0^0^0
+isin^^-1^0^0^0^0^0^0
+perv^^-1^0^0^0^0^0^0
+epsv^^-1^0^0^0^0^0^0
+ordersize^^-1^0^0^0^0^0^0
+askunit^^-1^0^0^0^0^0^0
+siga^^8^0^6^0^0^0^0
+stdrate^^4^2^4^0^0^0^0
+fxdiff^^4^2^4^0^0^0^0
+uplimit^^-1^0^0^0^0^0^0
+dnlimit^^-1^0^0^0^0^0^0
+ttyp^^-1^0^0^0^0^0^0
+trdcode^^-1^0^0^0^0^0^0
+hogacode^^-1^0^0^0^0^0^0
+tamt^^8^0^6^0^0^0^0
+pask^^-1^0^0^0^0^0^0
+pbid^^-1^0^0^0^0^0^0
+kofx^^-1^0^0^0^0^0^0
+xymd^^-1^0^0^0^0^0^0
+kymd^^-1^0^0^0^0^0^0
+xhms^^-1^0^0^0^0^0^0
+khms^^-1^0^0^0^0^0^0
+subx^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

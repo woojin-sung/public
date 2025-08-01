@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44200" scrname="주요종목" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab" tabcount="2" tabwidthtype="1" tabheadheight="36" ly_vert="0,0,375,562,1" >
+			<PAGE name="page0" caption="품목별" linkfile="mhtrd44200_t1" loadingtype="1" />
+			<PAGE name="page1" caption="거래소별" linkfile="mhtrd44201" loadingtype="1" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1320" _ulen="1294" >
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szScreenNo, szTab
+	
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO", false )
+	
+	if szScreenNo = "44200" then
+		szTab = "0"
+	elseif szScreenNo = "44201" then
+		szTab = "1"
+	end if
+	
+	fmtab.currenttab = szTab
+End Sub
+
+
+'============================================================================
+Sub fmtab_OnTabChanged(nCurrentTab)
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	If sEventName = "SCREEN_MENU" Then							' 연결정보(상단 ...)
+		If sParam = "SHA_SNS" Then								' SNS공유
+			Form.OpenDialog("sharesns1" , "0", "")
+		End If
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName = "snsshare" Then			' 폼탭 초기화
+		g_nSNSType = Cint(sRet)
+		
+		If g_nSNSType = 2 Then
+			Dim szScreenNo, szFileName
+			szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+			szFileName = szScreenNo & "_ScreenShot.png"
+			
+			Form.SaveScreenShot( szFileName )		
+			Form.SendSNSLinkage(g_nSNSType, "", "", szFileName)
+		Else
+			Form.triggerEvent("linkfmHoga", "sharedata", "")
+		End If
+
+	End If
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_6500_003r" trcode="ohhts_6500_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_6500_009r" trcode="ohhts_6500_009r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_6500_003r" title="해외파생 상품별 시세조회" realdata="0" dessvr="D" >
+				<TRBLOCK name="InBlock1" inout="in" _len="57" _ulen="45" >
+
+FID_PROD_CLCD^FID상품구분코드^3^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="512" _ulen="390" >
+
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_OVDV_PRPR^FID해외파생현재가^20^0^0^0^0^1^0
+FID_OVDV_PRDY_VRSS^FID해외파생전일대비^20^0^0^0^0^1^0
+FID_PRDY_CTRT^FID전일대비율^7^2^7^0^0^1^0
+FID_OVDV_PRDY_OPRC^FID해외파생전일시가^20^0^0^0^0^1^0
+FID_OVDV_PRDY_HPRC^FID해외파생전일고가^20^0^0^0^0^1^0
+FID_OVDV_PRDY_LPRC^FID해외파생전일저가^20^0^0^0^0^1^0
+FID_ACML_VOL^FID누적거래량^12^0^7^0^0^0^0
+FID_EXCH_NAME^FID거래소명^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_6500_009r" title="해외파생 거래소별 시세조회" realdata="0" dessvr="D" >
+				<TRBLOCK name="InBlock1" inout="in" _len="60" _ulen="46" >
+
+FID_EXCH_CLCD^FID거래소구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="527" _ulen="399" >
+
+FID_OVDV_ISCD^FID해외파생종목코드^20^0^0^0^0^0^0
+FID_OVDV_PRPR^FID해외파생현재가^20^0^0^0^0^1^0
+FID_OVDV_PRDY_VRSS^FID해외파생전일대비^20^0^0^0^0^1^0
+FID_PRDY_CTRT^FID전일대비율^7^2^7^0^0^1^0
+FID_OVDV_PRDY_OPRC^FID해외파생전일시가^20^0^0^0^0^1^0
+FID_OVDV_PRDY_HPRC^FID해외파생전일고가^20^0^0^0^0^1^0
+FID_OVDV_PRDY_LPRC^FID해외파생전일저가^20^0^0^0^0^1^0
+FID_ACML_VOL^FID누적거래량^12^0^7^0^0^0^0
+FID_PROD_CLCD_NAME^FID상품구분코드명^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

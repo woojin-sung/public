@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16010" scrname="해외주식 관심편집" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<RADIOGROUP name="rdoChange" buttonshape="1" initselectionuse="1" initselection="0" ly_vert="6,9,363,39,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="종목편집" forecolor="100:102102102" position="0,0,182,39" />
+				<RADIO no="1" text="그룹편집" forecolor="100:102102102" position="182,0,181,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<FORMTAB name="fmTab" tabcount="2" tabheadheight="0" ly_vert="0,54,375,553,1" >
+			<PAGE name="page0" caption="종목편집" linkfile="mhtro16010_p1" loadingtype="1" />
+			<PAGE name="page1" caption="그룹편집" linkfile="mhtro16010_p2" loadingtype="1" />
+		</FORMTAB>
+		<EDIT name="edtChange" enable="0" visible="0" imetype="0" ly_vert="411,4,41,50,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="818" _ulen="774" >
+'============================================================================
+' 2017.10.27 -  LSS
+' 연합인포맥스 관심편집 화면
+'
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Form.SetScreenName( "해외주식 관심종목편집" )
+	
+	Dim sOpenData
+	sOpenData = Form.GetOpenLinkData( )
+	
+	if sOpenData <> "" and sOpenData <> nil then
+		rdoChange.currentindex = sOpenData
+		fmTab.currenttab = sOpenData
+	end if
+End Sub
+
+'============================================================================
+Sub rdoChange_OnClick(nIndex)
+	fmTab.currenttab = nIndex
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent( "INTR_EDIT_COMPLETE" , "1" )
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

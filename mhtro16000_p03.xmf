@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_차트" version="2" writer="이호철" />
+	<FORM_INFO name="Form" ly_vert="0,0,320,307,1" />
+	<CONTROL_INFO>
+		<RADIOGROUP name="RadioDays" buttonshape="1" buttonsnumber="5" initselectionuse="1" initselection="0" ly_vert="5,6,158,30,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="일" position="0,0,30,30" />
+				<RADIO no="1" text="주" position="32,0,30,30" />
+				<RADIO no="2" text="월" position="64,0,30,30" />
+				<RADIO no="3" text="분" position="96,0,30,30" />
+				<RADIO no="4" text="틱" position="128,0,30,30" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<BUTTON name="BtnSetting" btnimage="btn_chart_setting.9.png" ly_vert="285,6,30,30,1" />
+		<CHART name="Chart0" ly_vert="0,40,320,236,1" >
+			<DATASETTING>
+				<DATAITEM name="Current" date="0,2,0" open="0,2,1" high="0,2,2" low="0,2,3" close="0,2,6" volume="0,2,7" tvalue="0,2,8" realopen="0,1,6" realhigh="0,1,7" reallow="0,1,8" >
+					<ADJDATAITEM/>
+				</DATAITEM>
+			</DATASETTING>
+		</CHART>
+		<COMBO name="CmbMinTick" visible="0" ly_vert="218,6,67,30,0" />
+		<LABEL name="LblLinel0" fgcolor="146:124124124" caption="-" bgcolor="017:181181181" ly_vert="0,40,320,2,1" />
+		<ITEMCODE name="ItemCode0" visible="0" marketcodelist="" ly_vert="500,47,150,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10038" _ulen="9464" >
+'===========================================================================
+' 01. 업무구분 : 해외주식현재가_일별
+' 02. 화면 : 
+' 03. 화면설명 : 
+' 04. 작성자 : 이호철
+' 05. 작성일 : 2015.03.30
+' 06. 수정이력 :
+'===========================================================================
+
+'===========================================================================
+' getGtsChartHistory Input 정의
+' type : GPTICK : tick  GPINTR : 분  GPMDAY : 일  GPWEEK: 주  GPMONT:  월
+' market : 거래소 아이디
+' code : 심볼
+' symd : 시작날짜
+' xymd : 끝날짜
+' count : 개수
+' keyc : first:0,  next:1
+' splt : ""
+'===========================================================================
+'[[ 전역변수 ]]
+Dim g_sCode
+Dim g_sKeyc
+Dim g_sKeyv
+Dim g_sType
+Dim g_sDecimal
+Dim g_sNtic
+
+g_sKeyc = "0" 	' NextKey 구분
+g_sKeyv = "" 	' NextKey
+g_sType = "" 	' 일중, 일별 구분
+g_sDecimal = ""
+g_sNtic = ""	' 분, 틱 간격 구분
+
+'[[ 사용자 함수 Start
+'==========================================================================']]
+
+'============================================================================
+' 거래소 ID 숫자로 변환
+'============================================================================
+function Transform_Exid(sValue)
+	if sValue == "HKS" then	' 홍콩
+		return "104"
+	elseif sValue == "HSI" then ' 항셍 지수
+		return "529"
+	elseif sValue == "SHS" then ' 상해
+		return "215"
+	elseif sValue == "SZS" then ' 심천거래소 종목
+		return "214"
+	elseif sValue == "NYS" then ' 뉴욕
+		return "321"
+	elseif sValue == "AMX" then ' 아멕스
+		return "66"
+	elseif sValue == "NAS" then ' 나스닥
+		return "537"
+	elseif sValue == "NAO" then ' 미국 OTCBB
+		return "130"
+	elseif sValue == "SPI" then ' S&P 지수
+		return "625"
+	elseif sValue == "DJI" then ' 다우존스 지수
+		return "310"
+	elseif sValue == "TSE" then ' 도쿄
+		return "106"
+	elseif sValue == "OSE" then ' 오사카거래소 종목
+		return "107"
+	elseif sValue == "JSD" then ' 자스닥거래소 종목
+		return "112"
+	elseif sValue == "NII" then ' 니케이 지수
+		return "889"
+	elseif sValue == "NAI" then ' 미국 나스닥 지수
+		return "538"
+	end if
+end function
+
+'============================================================================
+' 데이터 조회
+'============================================================================
+function RequestData()
+	if g_sCode == nil or g_sCode == "" then
+		return
+	end if
+	g_sKeyc = "0"
+	g_sKeyv = ""
+	
+	if (RadioDays.currentindex == "0") then			' 일
+		g_sType = "GPMDAY"
+		Chart0.period = 0
+		Chart0.periodtype = 0
+	elseif (RadioDays.currentindex == "1") then		' 주
+		g_sType = "GPWEEK"
+		Chart0.period = 0
+		Chart0.periodtype = 1
+	elseif (RadioDays.currentindex == "2") then		' 월
+		g_sType = "GPMONT"
+		Chart0.period = 0
+		Chart0.periodtype = 2
+	elseif (RadioDays.currentindex == "3") then		' 1분
+		g_sType = "GPINTR"
+		Chart0.periodtype = 5
+	elseif (RadioDays.currentindex == "4") then		' 틱
+		g_sType = "GPTICK"
+		Chart0.periodtype = 4
+	end if
+	f_Chart0_Time_Change_Show(0)
+	Chart0.clear = 1
+	DATAMANAGER.RequestTranData( "getGtsChartHistory" )
+end function
+
+'============================================================================
+' 콤보 분, 틱 일 때 세팅	0: 분,   1: 틱
+'============================================================================
+function SetComboCaption(nValue)
+	Dim sCmbCaption
+	CmbMinTick.clear = 1
+	if nValue == 0 then
+		sCmbCaption = "0`1분\r\n".."1`5분\r\n".."2`15분\r\n".."3`30분\r\n".."4`60분\r\n"
+	elseif nValue == 1 then
+		sCmbCaption = "0`1틱\r\n".."1`5틱\r\n".."2`15틱\r\n".."3`30틱\r\n".."4`60틱\r\n"
+	end if
+	CmbMinTick.cbinputdatatext = sCmbCaption
+	CmbMinTick.currentindex = 0
+	CmbMinTick_OnEditComplete()
+end function
+
+'============================================================================
+' 일, 주, 월, 분, 틱 일 때 차트에 보여줘야 하는 시간 필드가 다르다.
+'============================================================================
+function f_Chart0_Time_Change_Show(bReal)
+	Dim sValue
+	Dim sValue2
+	
+	if bReal == true then
+		if RadioDays.currentindex == "3"  or RadioDays.currentindex == "4" then		' 분 선택시, 틱 선택시
+			sValue = "TRD.OutBlock.xhms"
+			sValue2 = "TRD.OutBlock.evol"
+		else
+			sValue = "TRD.OutBlock.xymd"
+			sValue2 = "TRD.OutBlock.tvol"
+		end if
+	else
+		if RadioDays.currentindex == "3"  or RadioDays.currentindex == "4" then		' 분 선택시, 틱 선택시
+			sValue = "getGtsChartHistory.barList.xhms"
+			sValue2 = "getGtsChartHistory.barList.evol"
+		else
+			sValue = "getGtsChartHistory.barList.xymd"
+			sValue2 = "getGtsChartHistory.barList.tvol"
+		end if
+	end if
+
+	Chart0.SetDataItem( bReal, 0, 0, sValue )
+	Chart0.SetDataItem( bReal, 0, 5, sValue2 )
+end function
+'[[ 사용자 함수 End 
+'==========================================================================']]
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+end Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "RequestData" then
+		g_sKeyc = "0"
+		g_sKeyv = "" 
+		g_sCode = sParam
+		RequestData()
+	elseif sEventName == "ChartLarge" then
+		Chart0.height = 267
+	end if
+end Sub
+
+'============================================================================
+' 일, 주, 월, 1분, 틱 버튼
+'============================================================================
+Sub RadioDays_OnClick(nIndex)
+	if nIndex == 3 or nIndex == 4 then
+		CmbMinTick.visible = 1
+		g_sNtic = 1
+		Chart0.period = 1
+		SetComboCaption(nIndex-3)
+	else
+		g_sNtic = ""
+		CmbMinTick.visible = 0
+		RequestData()
+	end if
+	
+	g_sKeyc = "0"
+	g_sKeyv = "" 
+		
+end Sub
+
+'============================================================================
+' 차트 다음 조회 시
+'============================================================================
+Sub Chart0_OnScrollEnd(sDate)
+	if g_sKeyc == "1" then
+		DATAMANAGER.RequestNextData( "getGtsChartHistory" )
+	end if
+end Sub
+
+'============================================================================
+' 설정 버튼
+'============================================================================
+Sub BtnSetting_OnClick()
+	Chart0.OpenConfigDialog( )
+end Sub
+
+'============================================================================
+' 1, 5, 15, 30, 60 분^틱 설정 콤보
+'============================================================================
+Sub CmbMinTick_OnEditComplete(iIndex)
+	if iIndex == 0 then
+		g_sNtic = 1
+		Chart0.period = 1
+	elseif iIndex == 1 then
+		g_sNtic = 5
+		Chart0.period = 5
+	elseif iIndex == 2 then
+		g_sNtic = 15
+		Chart0.period = 15
+	elseif iIndex == 3 then
+		g_sNtic = 30
+		Chart0.period = 30
+	elseif iIndex == 4 then
+		g_sNtic = 60
+		Chart0.period = 60
+	end if
+	RequestData()
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	Dim sMarket
+	Dim sDate
+	Dim sYear
+	
+	sMarket = ""
+	sDate = ""
+	sYear = ""
+	if szTranID == "getGtsChartHistory" then
+		DATAMANAGER.CancelRealData( "TRD" )
+		DATAMANAGER.ClearInputData( 0, "getGtsChartHistory" )
+		
+		sCodeData = Split( g_sCode, "@" )
+		
+		sMarket = Transform_Exid(sCodeData[0])
+		sDate = Form.GetSharedData( "&HOST_DATE", false )
+		sYear = Mid( sDate, 1, 4 )
+		
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "type" , 0 , g_sType )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "market" , 0 , sMarket )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "code" , 0 , sCodeData[1] )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "symd" , 0 , "19000101" )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "xymd" , 0 , sDate )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "count" , 0 , "90" )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "keyc" , 0 , g_sKeyc )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "keyv" , 0 , g_sKeyv )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "splt" , 0 , "" )
+		DATAMANAGER.SetDataValue( 0, "getGtsChartHistory", "inblock", "ntic" , 0 , g_sNtic )
+		
+	end if
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranData(szTranID)
+
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "getGtsChartHistory" then
+	
+		Dim sDecimal
+		sDecimal = DATAMANAGER.GetDataValue( 0, "getGtsChartHistory", "chartMaster", "zdiv" , 0 )
+		g_sKeyc = DATAMANAGER.GetDataValue( false, "getGtsChartHistory", "chartMaster", "keyc" , 0 )
+		
+		Chart0.decimalpoint = sDecimal			' 차트 소숫점 표시 방법
+		
+		if g_sKeyc == "1" then
+			g_sKeyv = DATAMANAGER.GetDataValue( false, "getGtsChartHistory", "chartMaster", "keyv" , 0)
+		else
+			g_sKeyv = ""
+		end if
+		
+		'f_Chart0_Time_Change_Show(0)			' 시간필드 설정
+		
+		Dim szRealCode
+		szRealCode = ""
+		szRealCode = DATAMANAGER.GetDataValue( false, "getGtsChartHistory", "chartMaster", "realcode" , 0 )	
+		DATAMANAGER.SetDataValue( 1, "TRD", "inblock", "codelist" , 0 , szRealCode )
+		DATAMANAGER.RequestRealData( "TRD" )
+		
+		f_Chart0_Time_Change_Show(1)	
+	end if
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveRealData(szTranID)
+	if szTranID == "TRD" then
+		Dim sQtyp
+		sQtyp	 = DATAMANAGER.GetDataValue( 1, "TRD", "OutBlock", "qtyp" , 0 )
+		if sQtyp == "1" then
+			DATAMANAGER.SetDataReject( "TRD" )
+		end if
+	end if
+end Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveRealComplete(szTranID)
+	
+end Sub
+
+
+'[[chartclear
+'periodtype : 분, 일, 주, 틱
+'period : 데이터 개수
+'데이터 스크립트로 입력할 수 있도록
+']]
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="TRD" trcode="TRD" />
+			<TRAN tranid="getGtsChartHistory" trcode="getGtsChartHistory" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="TRD" title="TRD" realdata="1" dessvr="" datamode=".WSKJsonFeed" >
+				<TRBLOCK name="inblock" occurs="1" inout="in" _len="32" _ulen="32" >
+
+codelist^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock" inout="out" _len="445" _ulen="445" >
+
+symb^^-1^0^0^0^0^0^0
+tymd^^-1^0^0^0^0^0^0
+xymd^^-1^0^0^0^0^0^0
+xhms^^-1^0^0^0^0^0^0
+kymd^^-1^0^0^0^0^0^0
+khms^^-1^0^0^0^0^0^0
+open^^-1^0^0^0^0^0^0
+high^^-1^0^0^0^0^0^0
+low^^-1^0^0^0^0^0^0
+last^^-1^0^0^0^0^0^0
+sign^^-1^0^0^0^0^0^0
+diff^^-1^0^0^0^0^0^0
+rate^^-1^0^0^0^0^0^0
+pbid^^-1^0^0^0^0^0^0
+vbid^^-1^0^0^0^0^0^0
+pask^^-1^0^0^0^0^0^0
+vask^^-1^0^0^0^0^0^0
+evol^^-1^0^0^0^0^0^0
+tvol^^-1^0^0^0^0^0^0
+tamt^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="getGtsChartHistory" title="getGtsChartHistory" realdata="0" dessvr="H" datamode=".WSKJson" >
+				<TRBLOCK name="query" inout="in" _len="272" _ulen="272" >
+
+type^^-1^0^0^0^0^0^0
+market^^-1^0^0^0^0^0^0
+code^^-1^0^0^0^0^0^0
+symd^^-1^0^0^0^0^0^0
+xymd^^-1^0^0^0^0^0^0
+count^^8^0^6^0^0^0^0
+keyc^^-1^0^0^0^0^0^0
+keyv^^-1^0^0^0^0^0^0
+splt^^-1^0^0^0^0^0^0
+ntic^^-1^0^0^0^0^0^0
+tday^^-1^0^0^0^0^0^0
+minx^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="chartMaster" inout="out" _len="208" _ulen="208" >
+
+enam^^-1^0^0^0^0^0^0
+knam^^-1^0^0^0^0^0^0
+exid^^-1^0^0^0^0^0^0
+keyc^^-1^0^0^0^0^0^0
+keyv^^-1^0^0^0^0^0^0
+nrec^^-1^0^0^0^0^0^0
+symb^^-1^0^0^0^0^0^0
+zdiv^^-1^0^0^0^0^0^0
+realcode^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="barList" occurs="1" inout="out" _len="358" _ulen="358" >
+
+xymd^^-1^0^0^0^0^0^0
+open^^-1^0^0^0^0^0^0
+high^^-1^0^0^0^0^0^0
+low^^-1^0^0^0^0^0^0
+diff^^-1^0^0^0^0^0^0
+rate^^-1^0^0^0^0^0^0
+close^^-1^0^0^0^0^0^0
+tvol^^-1^0^0^0^0^0^0
+tamt^^-1^0^0^0^0^0^0
+splt^^-1^0^0^0^0^0^0
+jchk^^-1^0^0^0^0^0^0
+xhms^^-1^0^0^0^0^0^0
+kymd^^-1^0^0^0^0^0^0
+khms^^-1^0^0^0^0^0^0
+evol^^-1^0^0^0^0^0^0
+eamt^^-1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,634 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_ETF정보" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,523,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" vscroll="1" ly_vert="0,55,375,355,1" scroll_ly_vert="0,55,375,355,1" >
+			<CONTROL_INFO>
+				<LINKFORM name="lnkfm0" ly_vert="0,0,375,774,1" />
+				<LINKFORM name="lnkfm1" ly_vert="0,698,375,1000,1" />
+				<LINKFORM name="lnkfm2" ly_vert="0,1437,375,631,1" />
+				<LINKFORM name="lnkfm3" bordercolor="144:034034034" ly_vert="0,2068,375,536,1" />
+				<CONTAINER name="contInfo" ly_vert="0,2604,375,51,1" scroll_ly_vert="0,2604,375,51,1" >
+					<CONTROL_INFO>
+						<CONTAINER name="contInfo1" ly_vert="0,0,375,51,1" scroll_ly_vert="0,0,375,51,1" >
+							<CONTROL_INFO/>
+						</CONTAINER>
+					</CONTROL_INFO>
+				</CONTAINER>
+				<LABEL name="lblInfo" fontsize="-6" caption="데이터 출처 : 모닝스타" halign="2" valign="0" ly_vert="0,2604,375,75,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<FORMTAB name="FormTab0" fontsize="-3" tabcount="4" tabheadwidth="78" tabheadheight="27" ly_vert="20,10,335,27,1" >
+			<PAGE name="page009952" caption="시세정보" linkfile="empty" />
+			<PAGE name="page006628" caption="기본정보" linkfile="empty" />
+			<PAGE name="page003489" caption="구성정보" linkfile="empty" />
+			<PAGE name="page001674" caption="배당" linkfile="empty" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="17087" _ulen="16153" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_42_n.9"
+
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_nLinkFm0_Top
+g_nLinkFm0_Top = 0
+
+Dim g_nLinkFm0_Height
+g_nLinkFm0_Height = 774
+
+Dim g_nLinkFm1_Top
+g_nLinkFm1_Top = g_nLinkFm0_Height + g_nLinkFm0_Top
+
+Dim g_nLinkFm1_Height
+g_nLinkFm1_Height = 928
+
+Dim g_nLinkFm2_Top
+g_nLinkFm2_Top = g_nLinkFm1_Height + g_nLinkFm1_Top
+
+Dim g_nLinkFm2_Height
+g_nLinkFm2_Height = 630
+
+Dim g_nLinkFm3_Top
+g_nLinkFm3_Top = g_nLinkFm2_Height + g_nLinkFm2_Top
+
+Dim g_nLinkFm3_Height
+g_nLinkFm3_Height = 536
+
+Dim g_nInfo_Top
+g_nInfo_Top = g_nLinkFm3_Height + g_nLinkFm3_Top
+
+Dim g_nInfo_Height
+g_nInfo_Height = 60
+
+Dim g_isClickRdo
+g_isClickRdo = false
+
+Dim g_szItemCd
+g_szItemCd = ""
+
+Dim g_isMorningStar
+g_isMorningStar = ""
+
+Dim g_isS1
+g_isS1 = false
+Dim g_isS2
+g_isS2 = false
+Dim g_isS3
+g_isS3 = false
+Dim g_isS4
+g_isS4 = false
+
+Dim g_nSubTab
+g_nSubTab  = 0
+
+Dim g_szOSType
+g_szOSType = ""
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기화
+'===============================================
+Function Init_Control()
+	FormTab0.setTabHeaderImage("img_bgcircle_black.9" , "img_bgcircle_line.9" , 5) '활성화/비활성화/여백
+	FormTab0.setTabHeaderFgColor("28" , "321") '활성화/비활성화 폰트색상
+
+	szScrNo = Form.GetSharedData("&SCREEN_NO",false)
+	
+	contMain.setExceptInvisibleCtl(true)
+	
+	contMain.lblSubTitle1.fgcolor = g_szTxtColor_Normal
+	contMain.lblSubTitle1.paddinginfo = "0,0,0,0"
+	
+	if szScrNo = "11000" then
+		contMain.height = 355
+	elseif szScrNo = "16000" or szScrNo = "16100" then
+		contMain.setEnableScroll(false)
+		contMain.height = 400
+	end if
+	
+	contMain.lnkfm0.linkfile = "mhtro16000_s01"
+	contMain.lnkfm1.linkfile = "mhtro16000_s02"
+	contMain.lnkfm2.linkfile = "mhtro16000_s03"
+	contMain.lnkfm3.linkfile = "mhtro16000_s04"
+	
+	g_nLinkFm0_Top = 0
+	g_nLinkFm1_Top = g_nLinkFm0_Top + g_nLinkFm0_Height
+	g_nLinkFm2_Top = g_nLinkFm1_Top + g_nLinkFm1_Height
+	g_nLinkFm3_Top = g_nLinkFm2_Top + g_nLinkFm2_Height
+	
+	g_nInfo_Top = g_nLinkFm3_Top + g_nLinkFm3_Height
+	contMain.setScrollBarVisible("2")
+	contMain.lnkfm0.top  = g_nLinkFm0_Top
+	contMain.lnkfm0.height = g_nLinkFm0_Height
+	
+	contMain.lnkfm1.top  = g_nLinkFm1_Top
+	contMain.lnkfm1.height = g_nLinkFm1_Height
+	
+	contMain.lnkfm2.top  = g_nLinkFm2_Top
+	contMain.lnkfm2.height = g_nLinkFm2_Height
+	
+	contMain.lnkfm3.top  = g_nLinkFm3_Top
+	contMain.lnkfm3.height = g_nLinkFm3_Height
+	
+	contMain.lblInfo.fgcolor = g_szTxtColor_Grey
+	contMain.lblInfo.paddinginfo = "0,0,10,0"
+	contMain.lblInfo.top = g_nInfo_Top
+	contMain.contInfo.top = g_nInfo_Top + 24
+	
+	contMain.contInfo.contInfo1.makeExpandableList("", "", -2, -2, g_szTxtColor_Grey, g_szTxtColor_Grey, 0, 0, False, "")
+	
+	contMain.SetUseScrollingEvent(true)
+	contMain.SetNotifyScrollPos(g_nLinkFm0_Top&":"&g_nLinkFm1_Top-10&":"&g_nLinkFm2_Top-10&":"&g_nLinkFm3_Top-40)
+	
+	szInfo = "본서비스에서 제공되는 데이터에 대한 저작권은 모닝스타 코리아와 메리츠증권에 있으며 복사 또는 배포할 수 없습니다.\n\n"
+	szInfo = szInfo & "정보의 정확성과 신뢰성을 보장하기 위해 최선을 다하지만 이를 보장하지 않으며 손실이나 손상에 대한 법적 책임이 없습니다.\n\n"
+	szInfo = szInfo & "또한 제 3자 데이터 제공업체에서 자료를 제공하므로 수신이 지연되거나 일부 정보가 정확하지 않을 수 있습니다.\n\n"
+	szInfo = szInfo & "ETF는 자산가격 변동, 환율 변동 등에 따라 투자원금의 일부 또는 전액 손실이 발생할 수 있으며, 그 손실은 투자자에게 귀속됩니다.\n\n"
+	szInfo = szInfo & "ETF는 예금자보호법에 따라 보호되지 않습니다."
+	
+	contMain.contInfo.contInfo1.addExpandableList("    유의사항" , szInfo)
+	
+	FormTab0.hidepage = "page003489"
+	FormTab0.hidepage = "page001674"
+End Function
+
+Function RequestTran_021r(szData)
+	FormTab0.hidepage = "page003489"
+	FormTab0.hidepage = "page001674"
+	
+	DATAMANAGER.ClearInputData(0, "ohhts_metf_021r")
+	
+	if instr(szData, "@") > 0 then
+		arrData = split(szData, "@")
+		
+		DATAMANAGER.SetDataValue(0, "ohhts_metf_021r", "InBlock1", "FID_INPUT_OVRS_ISCD" , 0 , arrData(1))
+		DATAMANAGER.SetDataValue(0,  "ohhts_metf_021r", "InBlock1", "FID_INPUT_COND_MRKT_DIV_CODE", 0 , arrData(0))
+	end if
+	
+	DATAMANAGER.RequestTranData("ohhts_metf_021r")
+End Function
+
+Function ResponseTran_021r(isMorningStar)
+	if g_szOSType = "1" then
+		contMain.scroll_pos = "0"
+	else
+		contMain.scroll_pos_noAni = "0"
+	end if
+	
+	contMain.lnkfm0.linkfile = "empty"
+	contMain.lnkfm1.linkfile = "empty"
+	contMain.lnkfm2.linkfile = "empty"
+	contMain.lnkfm3.linkfile = "empty"
+	
+	g_nLinkFm0_Top = 0
+	g_nLinkFm0_Height = 774
+	g_nLinkFm1_Top = g_nLinkFm0_Height + g_nLinkFm0_Top
+	if trim(isMorningStar) = "Y" then
+		g_nLinkFm1_Height = 928
+	else
+		g_nLinkFm1_Height = 270 + 45 
+	end if
+	
+	g_nLinkFm2_Top = g_nLinkFm1_Height + g_nLinkFm1_Top
+	g_nLinkFm2_Height = 737
+	g_nLinkFm3_Top = g_nLinkFm2_Height + g_nLinkFm2_Top
+	g_nLinkFm3_Height = 536
+	g_nInfo_Top = g_nLinkFm3_Height + g_nLinkFm3_Top
+	g_nInfo_Height = 60
+	
+	contMain.lnkfm0.top  = g_nLinkFm0_Top
+	contMain.lnkfm0.height = g_nLinkFm0_Height
+	
+	contMain.lnkfm1.top  = g_nLinkFm1_Top
+	contMain.lnkfm1.height = g_nLinkFm1_Height
+	
+	contMain.lnkfm2.top  = g_nLinkFm2_Top
+	contMain.lnkfm2.height = g_nLinkFm2_Height
+	
+	contMain.lnkfm3.top  = g_nLinkFm3_Top
+	contMain.lnkfm3.height = g_nLinkFm3_Height
+	
+	contMain.lblInfo.top = g_nInfo_Top
+	contMain.contInfo.top = g_nInfo_Top + 24
+	contMain.contInfo.height = 51
+	contMain.contInfo.contInfo1.height = 51
+	contMain.contInfo.contInfo1.clearExpandableList()
+	contMain.contInfo.contInfo1.makeExpandableList("", "", -2, -2, g_szTxtColor_Grey, g_szTxtColor_Grey, 0, 0, False, "")
+	
+	szInfo = "본서비스에서 제공되는 데이터에 대한 저작권은 모닝스타 코리아와 메리츠증권에 있으며 복사 또는 배포할 수 없습니다.\n\n"
+	szInfo = szInfo & "정보의 정확성과 신뢰성을 보장하기 위해 최선을 다하지만 이를 보장하지 않으며 손실이나 손상에 대한 법적 책임이 없습니다.\n\n"
+	szInfo = szInfo & "또한 제 3자 데이터 제공업체에서 자료를 제공하므로 수신이 지연되거나 일부 정보가 정확하지 않을 수 있습니다.\n\n"
+	szInfo = szInfo & "ETF는 자산가격 변동, 환율 변동 등에 따라 투자원금의 일부 또는 전액 손실이 발생할 수 있으며, 그 손실은 투자자에게 귀속됩니다.\n\n"
+	szInfo = szInfo & "ETF는 예금자보호법에 따라 보호되지 않습니다."
+	
+	contMain.contInfo.contInfo1.addExpandableList("    유의사항" , szInfo)
+	
+	contMain.lnkfm0.linkfile = "mhtro16000_s01"
+		
+	if trim(isMorningStar) = "Y" then
+		contMain.lnkfm2.visible = true
+		contMain.lnkfm3.visible = true
+		contMain.contInfo.visible = true
+		contMain.lblInfo.visible = true
+		
+		
+		contMain.lnkfm1.linkfile = "mhtro16000_s02"
+		contMain.lnkfm2.linkfile = "mhtro16000_s03"
+		contMain.lnkfm3.linkfile = "mhtro16000_s04"
+		
+	else
+		contMain.lnkfm2.visible = false
+		contMain.lnkfm3.visible = false
+		contMain.contInfo.visible = false
+		contMain.lblInfo.visible = false
+'		FormTab0.hidepage = "page003489"
+'		FormTab0.hidepage = "page001674"
+		
+		szScrNo = Form.GetSharedData("&SCREEN_NO",false)
+			
+		'if szScrNo = "16000" or szScrNo = "16100" then
+			contMain.height = 510
+		'end if
+		
+		contMain.lnkfm1.linkfile = "mhtro16000_s02"
+		
+		Form.triggerEvent("lnkfm1", "CHANGE_LAYOUT", "Y")
+	end if
+	g_isMorningStar = isMorningStar
+	
+	Form.SetTimerEvent2(1, 1, 0.2)
+	'Form.triggerEvent("lnkfm0", "INIT_CODE", g_szItemCd)
+
+End Function
+
+'===============================================
+' 데이터 초기설정
+'===============================================
+Function Init_Data()
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	g_szOSType = Form.GetSharedData("&OS_TYPE", false )
+	Init_Control()
+End Sub
+
+'============================================================================
+'
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+'	contMain.SetNotifyScrollPos(g_nLinkFm0_Top&":"&g_nLinkFm1_Top-10&":"&g_nLinkFm2_Top-10&":"&g_nLinkFm3_Top-40)
+	if sEventName = "RequestData" then
+		g_szItemCd = sParam
+		g_isS1 = false
+		g_isS2 = false
+		g_isS3 = false
+
+		RequestTran_021r(g_szItemCd)
+	elseif sEventName == "ENABLE_SCROLL" then
+		
+		if sParam == "END" then
+			contMain.setEnableScroll(true)
+		elseif sParam == "TOP" then
+			contMain.setEnableScroll(false)
+		end if
+
+	elseif sEventName = "INIT_CODE" then
+		g_szItemCd = sParam
+		
+		g_isS1 = false
+		g_isS2 = false
+		g_isS3 = false
+		RequestTran_021r("J@"&g_szItemCd)
+
+	elseif sEventName = "ETF_SUB_TAB" then
+		nParam = Cint(sParam)
+		g_nSubTab = nParam
+		
+	elseif sEventName = "CHANGE_LAYOUT_S1" then
+		g_nLinkFm0_Height = Cint(sParam)
+		g_nLinkFm1_Top = g_nLinkFm0_Top + Cint(sParam)
+		g_nLinkFm2_Top = g_nLinkFm1_Top + g_nLinkFm1_Height
+		g_nLinkFm3_Top = g_nLinkFm2_Top + g_nLinkFm2_Height
+		g_nInfo_Top = g_nLinkFm3_Top + g_nLinkFm3_Height
+		
+		contMain.lnkfm0.top  = g_nLinkFm0_Top
+		contMain.lnkfm0.height = g_nLinkFm0_Height
+		
+		contMain.lnkfm1.top  = g_nLinkFm1_Top
+		'contMain.lnkfm1.height = g_nLinkFm1_Height
+		
+		contMain.lnkfm2.top  = g_nLinkFm2_Top
+		'contMain.lnkfm2.height = g_nLinkFm2_Height
+		
+		contMain.lnkfm3.top  = g_nLinkFm3_Top
+		'contMain.lnkfm3.height = g_nLinkFm3_Height
+		
+		contMain.lblInfo.top = g_nInfo_Top
+		contMain.contInfo.top = g_nInfo_Top + 24
+		
+		contMain.setScrollAutoSize()
+
+		if g_isS1 = false then
+			Form.triggerEvent("lnkfm1", "INIT_CODE", g_szItemCd)
+			g_isS1 = true
+		end if
+		
+	elseif sEventName = "CHANGE_LAYOUT_S2" then
+
+		g_nLinkFm1_Height = Cint(sParam)
+		g_nLinkFm2_Top = g_nLinkFm1_Top + Cint(sParam)
+		g_nLinkFm3_Top = g_nLinkFm2_Top + g_nLinkFm2_Height
+		g_nInfo_Top = g_nLinkFm3_Top + g_nLinkFm3_Height
+		
+		contMain.lnkfm0.top  = g_nLinkFm0_Top
+'		contMain.lnkfm0.height = g_nLinkFm0_Height
+		
+		contMain.lnkfm1.top  = g_nLinkFm1_Top
+
+		if g_isMorningStar = "N" then
+			if sParam == "200" then
+				contMain.height = 510
+			else
+				contMain.height = 390
+			end if
+		else
+			szScrNo = Form.GetSharedData("&SCREEN_NO",false)
+	
+			if szScrNo = "11000" then
+				contMain.height = 355
+			elseif szScrNo = "16000" or szScrNo = "16100" then
+				contMain.height = 400
+			end if
+		end if
+		
+		contMain.lnkfm2.top  = g_nLinkFm2_Top
+'		contMain.lnkfm2.height = g_nLinkFm2_Height
+		
+		contMain.lnkfm3.top  = g_nLinkFm3_Top
+'		contMain.lnkfm3.height = g_nLinkFm3_Height
+		
+		contMain.lblInfo.top = g_nInfo_Top
+		contMain.contInfo.top = g_nInfo_Top + 24
+		
+		if g_isMorningStar = "N" then
+			nReduce1 = 0 
+			if g_nLinkFm1_Height <> 0 and g_nLinkFm1_Height < 300 then
+				nReduce1 = 400 - g_nLinkFm1_Height
+			else
+				nReduce1 = 10
+			end if
+
+			contMain.SetNotifyScrollPos(g_nLinkFm0_Top&":"&g_nLinkFm1_Top-nReduce1)'&":"&g_nLinkFm2_Top-10&":"&g_nLinkFm3_Top-40)
+			
+		else
+			if g_isS2 = false then
+				Form.triggerEvent("lnkfm2", "INIT_CODE", g_szItemCd)
+				g_isS2 = true
+			end if
+		end if
+	
+		contMain.setScrollAutoSize()
+		
+	elseif sEventName = "CHANGE_LAYOUT_S3" then
+		
+		g_nLinkFm2_Height = Cint(sParam)
+		g_nLinkFm3_Top = g_nLinkFm2_Top + Cint(sParam)
+		g_nInfo_Top = g_nLinkFm3_Top + g_nLinkFm3_Height
+		
+		contMain.lnkfm0.top  = g_nLinkFm0_Top
+'		contMain.lnkfm0.height = g_nLinkFm0_Height
+		
+		contMain.lnkfm1.top  = g_nLinkFm1_Top
+'		contMain.lnkfm1.height = g_nLinkFm1_Height
+		
+		contMain.lnkfm2.top  = g_nLinkFm2_Top
+		contMain.lnkfm2.height = g_nLinkFm2_Height
+		
+		contMain.lnkfm3.top  = g_nLinkFm3_Top
+'		contMain.lnkfm3.height = g_nLinkFm3_Height
+		
+		contMain.lblInfo.top = g_nInfo_Top
+		contMain.contInfo.top = g_nInfo_Top + 24
+		
+		if g_nLinkFm2_Height = 0 then
+			FormTab0.hidepage = "page003489"
+		else
+			FormTab0.showpage = "page003489"
+		end if
+		
+		contMain.setScrollAutoSize()
+
+		if g_isS3 = false then
+			Form.triggerEvent("lnkfm3", "INIT_CODE", g_szItemCd)
+			g_isS3 = true
+		end if
+		
+	elseif sEventName = "CHANGE_LAYOUT_S4" then
+		g_nLinkFm3_Height = Clng(sParam)
+		
+		contMain.lnkfm0.top  = g_nLinkFm0_Top
+'		contMain.lnkfm0.height = g_nLinkFm0_Height
+		
+		contMain.lnkfm1.top  = g_nLinkFm1_Top
+'		contMain.lnkfm1.height = g_nLinkFm1_Height
+		
+		contMain.lnkfm2.top  = g_nLinkFm2_Top
+'		contMain.lnkfm2.height = g_nLinkFm2_Height
+		
+		contMain.lnkfm3.top  = g_nLinkFm3_Top
+		contMain.lnkfm3.height = g_nLinkFm3_Height
+		
+		g_nInfo_Top = g_nLinkFm3_Top + g_nLinkFm3_Height
+		
+		contMain.lblInfo.top = g_nInfo_Top
+		contMain.contInfo.top = g_nInfo_Top + 24
+		
+		if g_nLinkFm3_Height = 0 then
+			FormTab0.hidepage = "page001674"
+		else
+			FormTab0.showpage = "page001674"
+		end if
+		
+		nReduce1 = 0 
+		if g_nLinkFm2_Height <> 0 and g_nLinkFm2_Height < 300 then
+			nReduce1 = 300 - g_nLinkFm2_Height
+		else
+			nReduce1 = 10
+		end if
+		
+		nReduce2 = 0 
+		if g_nLinkFm3_Height <> 0 and g_nLinkFm3_Height < 350 then
+			nReduce2 = 350 - g_nLinkFm3_Height
+		else
+			nReduce2 = 40
+		end if
+		
+		if g_nSubTab > 0 then
+			FormTab0.currenttab = g_nSubTab
+			FormTab0_OnTabChanged(g_nSubTab)
+		end if
+		
+		contMain.SetNotifyScrollPos(g_nLinkFm0_Top&":"&g_nLinkFm1_Top-10&":"&g_nLinkFm2_Top-nReduce1&":"&g_nLinkFm3_Top-nReduce2)
+		
+		contMain.setScrollAutoSize()
+	elseif sEventName = "RETURN_LAYOUT" then
+		Form.triggerEvent("#", "RETURN_LAYOUT_T11", sParam)
+	end if
+End Sub
+
+Sub contMain_contInfo_contInfo1_OnExpandableClick(nIdx, nStatus)
+	contMain.contInfo.contInfo1.height = 1000
+
+	if nStatus = "1" then
+		if g_szOSType = "1" then
+			contMain.scroll_pos = g_nInfo_Top
+		else
+			contMain.scroll_pos_noAni = g_nInfo_Top
+		end if
+	else
+		if g_szOSType = "1" then
+			contMain.scroll_pos = g_nInfo_Top
+		else
+			contMain.scroll_pos_noAni = "end"
+		end if
+	end if
+End Sub
+
+Sub contMain_contInfo_contInfo1_OnExpandableSize(nHeight)	
+	contMain.contInfo.height = nHeight
+	contMain.contInfo.contInfo1.height = nHeight
+	
+	contMain.setScrollAutoSize()
+	if g_szOSType = "1" then
+		contMain.scroll_pos = g_nInfo_Top
+	end if
+End Sub
+
+
+Sub contMain_OnNotifyScrolling(nIndex)
+	if g_isClickRdo = true then
+		g_isClickRdo = false
+		Exit Sub
+	end if
+	
+	FormTab0.currenttab = nIndex
+End Sub
+
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	g_isClickRdo = true
+	if nCurrentTab = 0 then
+		
+		if g_szOSType = "1" then
+			contMain.scroll_pos = g_nLinkFm0_Top
+		else
+			contMain.scroll_pos_noAni = g_nLinkFm0_Top
+		end if
+	elseif nCurrentTab = 1 then
+		if g_isMorningStar = "N" then
+			if g_szOSType = "1" then
+				contMain.scroll_pos = "end"
+			else
+				contMain.scroll_pos_noAni = "end"
+			end if
+
+		else
+			if g_szOSType = "1" then
+				contMain.scroll_pos = g_nLinkFm1_Top
+			else
+				contMain.scroll_pos_noAni = g_nLinkFm1_Top
+			end if
+		end if
+	elseif nCurrentTab = 2 then
+		if g_szOSType = "1" then
+			contMain.scroll_pos = g_nLinkFm2_Top
+		else
+			contMain.scroll_pos_noAni = g_nLinkFm2_Top
+		end if
+	elseif nCurrentTab = 3 then
+		if g_szOSType = "1" then
+			contMain.scroll_pos = g_nLinkFm3_Top
+		else
+			contMain.scroll_pos_noAni = g_nLinkFm3_Top
+		end if
+	end if
+
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "ohhts_metf_021r" then
+		szMorning_YN 	 = DATAMANAGER.GetDataValue(0, "ohhts_metf_021r", "OutBlock1", "FID_APLY_YN" , 0)
+		ResponseTran_021r(szMorning_YN)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID = "ohhts_metf_021r" then
+		ResponseTran_021r("N")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID,0,0)
+	if Cint(sTimerID) == 1 then
+		Form.triggerEvent("lnkfm0", "INIT_CODE", g_szItemCd)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_metf_021r" trcode="ohhts_metf_021r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_metf_021r" title="ETF 모닝스타 테이터 제공여부 ?" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" inout="in" _len="148" _ulen="112" >
+
+FID_INPUT_OVRS_ISCD^FID입력해외종목코드^16^0^0^0^0^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="49" _ulen="41" >
+
+FID_APLY_YN^FID적용여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
