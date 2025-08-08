@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="02010" scrname="해외주식 고유 체결내역" version="2" writer="이학록" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,9,39,39,1" />
+		<FORMTAB name="fmtab0" tabcount="2" tabwidthtype="1" tabheadheight="40" autosave="1" ly_vert="0,54,375,509,1" >
+			<PAGE name="page1" caption="주문체결" linkfile="nbnts02010_t1.xmf" loadingtype="1" />
+			<PAGE name="page2" caption="일별체결" linkfile="nbnts02010_t2.xmf" loadingtype="1" />
+		</FORMTAB>
+		<EDIT name="edtFundCd" halign="1" imetype="1" maxlength="4" minlength="0" ly_vert="5,8,58,39,1" />
+		<BUTTON name="btnFncd" btnimage="btn_etc20.9" ly_vert="66,8,39,39,1" />
+		<LABEL name="lblFundNm" border="1" ly_vert="110,8,204,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2430" _ulen="2334" >
+'===========================================================================
+Dim g_szFncd
+'============================================================================
+' 펀드코드 컨트롤 초기화
+'============================================================================
+Sub Form_OnFormInitBefore()
+	edtFundCd.setFundCd()
+	edtFundCd.setFundNmCtl("lblFundNm")
+	g_szFncd = edtFundCd.caption
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	g_szFncd = edtFundCd.caption
+	
+	if len(trim(g_szFncd)) > 0 Then
+		Call_Tran()
+	End if
+End Sub
+
+'===========================================================================
+Sub Call_Tran()
+
+	if Cint(fmtab0.currenttab) = 0 or Cint(fmtab0.currenttab) = 1 then
+		Form.triggerEvent("fmtab0." & fmtab0.currenttabpageid, "REQUEST", g_szFncd)
+	else
+		Form.ShowAlert("Error", "유효하지않은 탭입니다.")
+		exit sub
+	end if
+End Sub
+
+
+'============================================================================
+Sub btnSearch_OnClick()
+	g_szFncd = edtFundCd.caption
+	Call_Tran()
+End Sub
+
+'============================================================================
+Sub fmtab0_OnTabChanged(nCurrentTab)
+	Select Case nCurrentTab
+		Case 0
+			Form.SetTitleCaption("주문체결내역")
+		Case 1
+			Form.SetTitleCaption("일별체결내역")
+	End Select
+	
+	if len(trim(g_szFncd)) > 0 Then
+		Call_Tran()
+	End if
+End Sub
+
+'============================================================================
+' 펀드코드 변경시 
+'============================================================================
+Sub edtFundCd_OnEditComplete()
+	
+	If Len(edtFundCd.caption) < 1 Then
+		g_szFncd = ""
+	End if
+	
+	g_szFncd = edtFundCd.caption
+	Call_Tran()
+End Sub
+
+'============================================================================
+' 돋보기 리턴
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	
+	if sKeyName = "FUNDINFO" then
+		szFundData = Split(sRet, "★")
+		
+		if UBOUND(szFundData) > 0 then
+			edtFundCd.caption = szFundData(0)
+			edtFundCd_OnEditComplete()
+		end if 
+	end if
+End Sub
+'============================================================================
+' 돋보기
+'============================================================================
+Sub btnFncd_OnClick()
+	Form.OpenFramePopup("nhnts00001_p1" , "", "")
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

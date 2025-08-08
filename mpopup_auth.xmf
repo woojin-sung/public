@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="90190" scrname="간편인증_재등록안내팝업" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBack" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBg" imgpath="popup_bg_common.9" ly_vert="32,207,312,231,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="안내" halign="1" ly_vert="33,231,310,32,1" />
+		<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="1" rowcount="5" outline="0000" designorder="1" ly_vert="33,275,310,80,1" >
+			<COL_INFO ly_vert_width="310" />
+			<ROW_INFO ly_vert_height="10,10,20,20,20" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<BUTTON name="btnQuit" caption="취소" fgcolor="004:000000000" fontsize="2" btnimage="btn_25.9" ly_vert="32,360,157,60,1" />
+		<BUTTON name="btnOk" caption="재등록" fontsize="2" btnimage="btn_26.9" ly_vert="189,360,156,60,1" />
+		<BUTTON name="btnOk1" visible="0" fontsize="2" btnimage="btn_01.9" ly_vert="32,360,312,60,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9979" _ulen="8735" >
+Dim g_szOpenData
+Dim g_LoginType
+Dim g_closeflag
+'============================================================================
+Sub btnOk_OnClick()
+	g_closeflag = g_szOpenData
+	
+	if g_szOpenData == "IDConnect" then
+		Form.SendReturnToParent("mpopup_auth" , "IDConnect")
+	elseif g_szOpenData == "NoIDState" then 
+		Form.SendReturnToParent("mpopup_auth" , "NoIDState")
+	elseif g_szOpenData == "OnlineID" then 
+		Form.SendReturnToParent("mpopup_auth" , "OnlineID")
+	elseif g_szOpenData == "ProhibitSvc" then 
+		Form.SendReturnToParent("mpopup_auth" , "ProhibitSvc")
+	elseif g_szOpenData == "BioRegister" then
+		Form.CloseForm()
+'	elseif g_szOpenData == "BioFaceComplete" then
+'		Form.SendReturnToParent("mpopup_auth" , "BioComplete")
+'	elseif g_szOpenData == "BioFingerComplete" then
+'		Form.SendReturnToParent("mpopup_auth" , "BioComplete")
+	elseif g_szOpenData == "AuthCancel" then
+		Form.SendReturnToParent("mpopup_auth" , "AuthCancel")
+		Form.CloseForm()
+	elseif  g_szOpenData == "AuthRenew" then
+		Form.CloseForm()
+	elseif g_szOpenData == "BioInfoChanged" then
+		Form.SendReturnToParent("mpopup_auth" , "BioInfoChanged")
+	elseif g_szOpenData == "AuthCenter" then
+		Form.SendReturnToParent("mpopup_auth" , "register")
+		Form.CloseForm()
+	elseif g_szOpenData == "ExpiredNotice" then
+		Form.OpenFramePopup("mhetc90060_py","mpopupAuth_Login","")
+	else
+		Form.SendReturnToParent("mpopup_auth" , "register")
+	end if
+	
+	'iOS는 부모화면이 닫히면 자식화면도 같이 닫혀서 자식도 FormClose하면 창이 다 꺼짐
+	if Form.GetSharedData("&OS_TYPE", false) == "1" then
+		Form.CloseForm()
+	end if
+End Sub
+'============================================================================
+Sub btnOk1_OnClick()
+	g_closeflag = g_szOpenData
+	
+	if g_szOpenData == "BioFingerComplete"  then
+		'Form.SetEnvData(1, "login.input.atonathntchncode", "100") 
+		'Form.SendReturnToParent("mpopup_auth" , "BioFingerComplete")
+		Form.CloseForm()
+		
+	elseif g_szOpenData == "BioFaceComplete" then
+		'Form.SetEnvData(1, "login.input.atonathntchncode", "200") 
+		
+		Form.CloseForm()
+		'Form.SendReturnToParent("mpopup_auth" , "BioFaceComplete")
+		
+	elseif g_szOpenData == "AuthCancel2" or g_szOpenData == "AuthCancel3" then
+		
+		Form.CloseForm()
+	end if
+	
+	'iOS는 부모화면이 닫히면 자식화면도 같이 닫혀서 자식도 FormClose하면 창이 다 꺼짐
+	if Form.GetSharedData("&OS_TYPE", false) == "1" then
+		Form.CloseForm()
+	end if
+End Sub
+'============================================================================
+Sub btnQuit_OnClick()
+	
+	if g_szOpenData == "CommonAuthPopup" then
+		'리턴 보낼 필요 없음
+		Form.CloseForm()
+		exit sub
+	end if
+	
+	Form.SendReturnToParent("mpopup_auth" , "cancel")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_szOpenData = Form.GetOpenLinkData()
+	sBioType = Form.getBiometryType()						'생체/지문 기기 및 사용가능여부 판단 : 0.사용불가 1.TOUCH ID 2.FACE ID
+	g_LoginType = Form.GetSharedData("&LOGIN_TYPE", False)
+	
+	if Form.GetSharedData("&OS_TYPE", false) == "2" then
+		imgBack.visible = True
+	else
+		imgBack.visible = False
+	end if
+	'g_szOpenData = "ExpiredNotice"
+	'Face ID
+	if sBioType == "2" then
+		sBioName = "Face ID가"
+	'지문
+	else
+		sBioName = "지문이"
+	end if
+	 
+	If g_szOpenData <> "" And g_szOpenData <> null And g_szOpenData == "AuthCenter" Then
+		'btnQuit.visible = false
+		btnOk.visible = true
+		
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(0, 0, "이미 등록된 간편인증이 있습니다.")
+		tblInfo.SetCellString(1, 0, "기존 등록된 인증을 해지하고")
+		tblInfo.SetCellString(2, 0, "재등록하시겠어요?")
+		
+	elseif g_szOpenData == "Login" then
+		btnOk.visible = true
+		
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(0, 0, "이미 같은 기기에서 간편인증을")
+		tblInfo.SetCellString(1, 0, "등록한 이력이 있습니다.")
+		tblInfo.SetCellString(3, 0, "지금 접속한 앱에서도 이용하시겠어요?")
+	
+	elseif g_szOpenData == "PinError5" then
+		btnOk.visible = true
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(0, 0, "간편비밀번호 5회 오류로")
+		tblInfo.SetCellString(1, 0, "이용이 제한되었습니다.")
+		tblInfo.SetCellString(2, 0, "재등록 후 이용해주세요.")
+	
+	elseif g_szOpenData == "AuthError" then
+		btnOk.visible = true
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(0, 0, "이용 가능한 인증이 아닙니다.")
+		tblInfo.SetCellString(1, 0, "재등록 후 이용해주세요.")
+	
+	elseif g_szOpenData == "AuthExpired" then
+		btnOk.visible = true
+		imgBg.height = 190
+		btnOk.caption = "간편인증 재등록"
+		
+		tblInfo.SetCellString(0, 0, "간편 인증 유효기간이 만료되었습니다.")
+		tblInfo.SetCellString(1, 0, "재등록 후 이용해주세요.")
+	
+	elseif g_szOpenData == "BioInfoChanged" then
+		btnOk.visible = true
+		imgBg.height = 190
+		btnOk.caption = "생체인증 추가 등록"
+		btnOk.fontsize = "0"
+		btnQuit.fontsize = "0"
+		
+		tblInfo.SetCellString(0, 0, "기기 내 생체 정보가 변경되어")
+		tblInfo.SetCellString(1, 0, "인증을 진행할 수 없습니다.")
+		tblInfo.SetCellString(2, 0, "생체인증 추가 등록 후 다시 이용해주세요.")
+		
+	elseif g_szOpenData == "IDConnect" Then
+		btnOk.visible = true
+		btnOk.caption = "ID계좌연결"
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(0, 0, "계좌에 연결된 ID가 없습니다.")
+		tblInfo.SetCellString(1, 0, "사용중인 ID에 계좌연결 후")
+		tblInfo.SetCellString(2, 0, "이용 가능합니다.")
+	
+	elseif g_szOpenData == "NoIDState" then
+		btnQuit.caption = "확인"
+		btnOk.visible = true
+		btnOk.caption = "ID등록"
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(1, 0, "ID등록 후 이용 가능합니다.")
+	
+	elseif g_szOpenData == "OnlineID" then
+		
+		btnQuit.caption = "확인"
+		btnOk.visible = true
+		btnOk.caption = "서비스 신청"
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(0, 0, "온라인 서비스 신청 및 ID등록 후")
+		tblInfo.SetCellString(1, 0, "이용 가능합니다.")
+	
+	elseif g_szOpenData == "ProhibitSvc" then
+		
+		btnQuit.caption = "확인"
+		btnOk.visible = true
+		btnOk.caption = "고객지원센터"
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(0, 0, "서비스가 제한된 고객입니다.")
+		tblInfo.SetCellString(1, 0, "고객지원센터로 문의해주세요.")
+		
+	elseif g_szOpenData == "BioRegister" Then
+		btnOk.visible = true
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(0, 0, "이미 등록된 " & sBioName & " 있습니다.")
+		tblInfo.SetCellString(1, 0, "재등록하시겠어요?")
+		
+	elseif g_szOpenData == "BioFaceComplete" Then
+		btnOk.visible = false
+		btnOk1.visible = true
+		btnQuit.visible = false
+		btnOk1.caption = "로그인"
+		
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(1, 0, "Face ID 인증이 등록되었습니다.")
+		
+	elseif g_szOpenData == "BioFingerComplete" Then
+		btnOk.visible = false
+		btnOk1.visible = true
+		btnQuit.visible = false
+		
+		btnOk1.caption = "로그인"
+		
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(1, 0, "지문 인증이 등록되었습니다.")
+		
+	elseif g_szOpenData == "AuthCancel2" Then
+		btnOk.visible = false
+		btnOk1.visible = true
+		btnOk1.caption = "확인"
+		
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(1, 0, "간편인증이 해지되었습니다.")
+		
+	elseif g_szOpenData == "AuthCancel3" Then
+		btnOk.visible = false
+		btnOk1.visible = true
+		btnOk1.caption = "확인"
+		
+		imgBg.height = 190
+		
+		tblInfo.SetCellString(1, 0, "간편인증이 해지되었습니다.(알리미서비스 오류).")
+		
+	elseif g_szOpenData == "AuthCancel" Then
+		btnOk.visible = true
+		imgBg.height = 190
+		btnOk.caption = "인증해지"
+		
+		tblInfo.SetCellString(0, 0, "등록된 간편인증을 해지하시겠습니까?")
+		tblInfo.SetCellString(1, 0, "앱 이용 시 재등록이 필요하며")
+		tblInfo.SetCellString(2, 0, "자동 로그아웃 됩니다.")
+	
+	elseif g_szOpenData == "AuthRenew" Then
+		
+		szEndYMD = Form.GetSharedData("MerithAuth_EndYMD", false)
+	
+		btnOk.visible = true
+		imgBg.height = 190
+		btnOk.caption = "인증갱신"
+		
+		tblInfo.SetCellString(0, 0, szEndYMD & " 만료 예정입니다.")
+		tblInfo.SetCellString(1, 0, "등록된 간편인증을 갱신하시겠어요?")
+
+	elseif g_szOpenData == "CommonAuthPopup" then
+		btnOk.visible = true
+		imgBg.height = 190
+		btnOk.caption = "신규등록"
+		
+		tblInfo.SetCellString(0, 0, "간편비밀번호를 분실한 경우")
+		tblInfo.SetCellString(1, 0, "신규 등록 후 이용해주세요.")
+	
+	elseif g_szOpenData == "ExpiredNotice" then
+		
+		szData = Form.GetSharedData("ExpiredNotice", True)
+		
+		szDate = Split(szData, "★")
+		
+		if #szDate < 2 then
+			Form.CloseForm()
+			exit sub
+		end if
+		
+		lblTitle.caption = "메리츠 간편인증 만료 안내"
+		
+		btnOk.visible = true
+		imgBg.height = 190
+		lblTitle.top = 222
+		tblInfo.top = 264
+		btnOk.caption = "인증갱신"
+		
+		tblInfo.SetCellString(0, 0, "유효기간이 " & szDate(0) & "일 "& "남았습니다.")
+		tblInfo.SetCellString(1, 0, "(만료일 : " & szDate(1) & ")")
+		tblInfo.SetCellString(3, 0, "등록된 간편인증을 갱신하시겠어요?")
+		
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	if g_closeflag == "BioFingerComplete" or g_closeflag == "BioFaceComplete" or g_closeflag == "AuthCancel2"  then
+		Form.SendReturnToParent("mpopup_auth" , g_closeflag)
+	elseif g_closeflag == "BioRegister" then
+		Form.SendReturnToParent("mpopup_auth" , "BioRegister")
+	elseif g_closeflag == "AuthRenew" then	
+		Form.SendReturnToParent("mpopup_auth" , "AuthRenew")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "mhetc90060_py" then
+		if g_szOpenData == "ExpiredNotice" then
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

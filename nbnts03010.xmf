@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="44400" scrname="체결/거래내역_메인" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,376,563,1" />
+	<CONTROL_INFO>
+		<FORMTAB name="fmtab" tabcount="4" tabwidthtype="1" tabheadheight="36" ly_vert="0,55,375,508,1" >
+			<PAGE name="page0" caption="주문체결내역" linkfile="nbnts03010_t1" loadingtype="1" />
+			<PAGE name="page1" caption="청산내역" linkfile="nbnts03020" loadingtype="1" />
+			<PAGE name="page2" caption="기간별손익" linkfile="nbnts03040" loadingtype="1" />
+			<PAGE name="page3" caption="거래내역" linkfile="nbnts03030" loadingtype="1" />
+		</FORMTAB>
+		<BUTTON name="btnSearch" btnimage="btn_refresh.9" ly_vert="326,8,39,39,1" />
+		<EDIT name="edtFundCd" halign="1" imetype="1" maxlength="4" minlength="0" ly_vert="5,8,58,39,1" />
+		<LABEL name="lblFundNm" border="1" ly_vert="110,8,204,39,1" />
+		<BUTTON name="btnFncd" btnimage="btn_etc20.9" ly_vert="66,8,39,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2600" _ulen="2536" >
+'============================================================================
+Dim g_szFncd
+Dim g_bFlag
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	edtFundCd.setFundCd()
+	edtFundCd.setFundNmCtl("lblFundNm")
+	g_szFncd = edtFundCd.caption
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szScreenNo, szTab
+		
+	g_bFlag = false
+	szScreenNo = Form.GetSharedData( "&SCREEN_NO", false )
+	
+	if szScreenNo = "03010" then
+		szTab = "0"
+	elseif szScreenNo = "03020" then
+		szTab = "1"
+	elseif szScreenNo = "03040" then
+		szTab = "2"
+	elseif szScreenNo = "03030" then
+		szTab = "3"
+	end if
+	
+	fmtab.currenttab = szTab
+	g_szFncd = edtFundCd.caption
+	
+	if len(trim(g_szFncd)) > 0 Then
+		Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szFncd)
+	end if
+End Sub
+
+'============================================================================
+Sub fmtab_OnTabChanged(nCurrentTab)
+	Select Case nCurrentTab
+		Case 0
+			Form.SetTitleCaption("주문체결내역")
+		Case 1
+			Form.SetTitleCaption("청산내역")
+		Case 2
+			Form.SetTitleCaption("기간별손익")
+		Case 3
+			Form.SetTitleCaption("거래내역")
+	End Select
+	g_szFncd = edtFundCd.caption
+	
+	if len(trim(g_szFncd)) > 0 Then
+		Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szFncd)
+	End if
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	g_szFncd = edtFundCd.caption
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szFncd)
+End Sub
+'============================================================================
+Sub btnFncd_OnClick()
+	Form.OpenFramePopup("nhnts00001_p1" , "", "")
+End Sub
+'============================================================================
+' 펀드코드 변경시 
+'============================================================================
+Sub edtFundCd_OnEditComplete()
+	
+	If Len(edtFundCd.caption) < 1 Then
+		g_szFncd = ""
+	End if
+	
+	g_szFncd = edtFundCd.caption
+	Form.triggerEvent("fmtab." & fmtab.currenttabpageid, "REQUEST", g_szFncd)
+End Sub
+
+'============================================================================
+' 돋보기 리턴
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	
+	if sKeyName = "FUNDINFO" then
+		szFundData = Split(sRet, "★")
+		
+		if UBOUND(szFundData) > 0 then
+			edtFundCd.caption = szFundData(0)
+			edtFundCd_OnEditComplete()
+		end if 
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

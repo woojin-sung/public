@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="(공통)통합종목선택창_필터" version="2" writer="박성민" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,170,1" />
+	<CONTROL_INFO>
+		<PANNEL name="Pannel0" ly_vert="0,10,375,150,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblFilterLeft" fgcolor="321:115118124" fontsize="-2" halign="1" click="1" ly_vert="14,0,166,29,1" />
+				<LABEL name="lblFilterRight" fgcolor="321:115118124" fontsize="-2" halign="1" click="1" ly_vert="194,0,166,29,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="30" gap="10" >
+				<CELL name="lblFilterLeft" />
+				<CELL name="lblFilterRight" />
+			</CARD_INFO>
+		</PANNEL>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6627" _ulen="6533" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_line2_o.9"
+
+'==============================================
+' 컬러코드
+'==============================================
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+'==============================================
+' 전역변수
+'==============================================
+Dim g_szSharedData
+g_szSharedData = ""
+
+Dim g_szSharedKey
+'g_szSharedKey = "SEARCH_DLG_FILTER"
+
+Dim g_tblFilter
+Dim g_tblFilterCheck
+
+Dim g_curSelectIdx
+g_curSelectIdx = 0
+'===============================================
+Sub initData()
+	g_tblFilter = {}
+	g_tblFilterCheck = {}
+	
+	Pannel0.rowcount = 0
+End Sub
+
+'===============================================
+' 배열 -> 문자열 변환
+'===============================================
+Function Convert_ArrToString(arrData, szSeperator)
+	szResult = ""
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if i <> 0 then
+			szResult = szResult & szSeperator 
+		end if
+		
+		szResult = szResult & arrData(i) 
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환(체크항목)
+'===============================================
+Function Convert_ChkArrToString(arrData, arrChkData, szSeperator)
+	szResult = ""
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if arrChkData(i) = "1" then
+			if szResult <> "" then
+				szResult = szResult & szSeperator 
+			end if
+			szResult = szResult & arrData(i) 
+		end if
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 문자열 -> 배열 변환
+'===============================================
+Function Convert_StringToArr(szData, szSeperator)
+	szTableData = ""
+	
+	if szData <> null and szData <> "" then
+		szTableData = split(szData, szSeperator)
+	end if
+	
+	return szTableData
+End Function
+
+'============================================================================
+Sub Form_OnFormInit()
+	initData()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "FILTER" then
+		Dim szKeyData, szKeyCheck
+		Dim szFilterData, szFilterCheck
+		
+		g_szSharedKey = sEventName & "_" & sParam
+		szKey = sEventName & "_DATA"
+		szKeyCheck = sEventName & "_CHECK"
+		
+		szFilterData = Form.GetSharedData(szKey, false)
+		szFilterCheck = Form.GetSharedData(szKeyCheck, false)
+	
+		if szFilterData <> null and szFilterData <> "" and szFilterCheck <> null and szFilterCheck <> "" then
+			initData()
+		
+			g_tblFilter		= Convert_StringToArr(szFilterData, "`")
+			g_tblFilterCheck 	= Convert_StringToArr(szFilterCheck, "`")
+	
+			if #g_tblFilter > 0 and #g_tblFilterCheck > 0 then
+				initPanel()
+				
+			end if
+
+		end if
+	end if
+End Sub
+'============================================================================
+Sub initPanel()
+	nArrCnt = #g_tblFilter
+	
+	nPannelRowCnt = Cint(nArrCnt / 2)
+	if (nArrCnt mod 2) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if
+
+	Pannel0.rowcount = nPannelRowCnt
+	
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		
+		Pannel0.SetCellValue( "lblFilterLeft", i, g_tblFilter(nArrIdx))
+
+		if g_tblFilterCheck(nArrIdx) = "0" then
+			Pannel0.SetPropCardCell("imagefilepth", "lblFilterLeft", i, g_szBtnImg_Normal)
+			Pannel0.SetPropCardCell("fontbold", "lblFilterLeft", i, "0")
+			Pannel0.SetPropCardCell("fgcolor", "lblFilterLeft", i, "321")
+			
+		else
+			Pannel0.SetPropCardCell("imagefilepth", "lblFilterLeft", i, g_szBtnImg_Select)
+			Pannel0.SetPropCardCell("fontbold", "lblFilterLeft", i, "1")
+			Pannel0.SetPropCardCell("fgcolor", "lblFilterLeft", i, "4")
+			
+			g_curSelectIdx = nArrIdx
+		end if
+		
+		nArrIdx = nArrIdx + 1
+
+		if nArrIdx > nArrCnt - 1 then
+			Pannel0.SetCellVisible("lblFilterRight", i, false)
+			Exit for
+		end if
+		
+		Pannel0.SetCellValue( "lblFilterRight", i, g_tblFilter(nArrIdx))
+
+		if g_tblFilterCheck(nArrIdx) = "0" then
+			Pannel0.SetPropCardCell("imagefilepth", "lblFilterRight", i, g_szBtnImg_Normal)
+			Pannel0.SetPropCardCell("fontbold", "lblFilterRight", i, "0")
+			Pannel0.SetPropCardCell("fgcolor", "lblFilterRight", i, "321")
+			
+		else 
+			Pannel0.SetPropCardCell("imagefilepth", "lblFilterRight", i, g_szBtnImg_Select)
+			Pannel0.SetPropCardCell("fontbold", "lblFilterRight", i, "1")
+			Pannel0.SetPropCardCell("fgcolor", "lblFilterRight", i, "4")
+			
+			g_curSelectIdx = nArrIdx
+
+		end if
+		
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next	
+
+End Sub
+
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "" then
+		Exit Sub
+	end if
+	
+	DisplaySetting_PannelBtn(nIndex, sCellID)
+	
+	Form.SetSharedData(g_szSharedKey , Convert_ArrToString(g_tblFilterCheck, "`"))
+	Form.triggerEvent("#", g_szSharedKey, g_curSelectIdx)
+End Sub
+
+'===============================================
+' 패널버튼 클릭 이벤트 처리
+'===============================================
+Function DisplaySetting_PannelBtn(nIndex, szCtlName)
+	Dim nOldRow, nOldCol, sLabelName
+
+	nOldRow = g_curSelectIdx / 2
+	nOldCol = g_curSelectIdx % 2
+	
+	g_tblFilterCheck(g_curSelectIdx) = "0"
+	if nOldCol == 1 then
+		sLabelName = "lblFilterRight"
+		
+	else
+		sLabelName = "lblFilterLeft"
+	
+	end if
+	
+	Pannel0.SetPropCardCell("imagefilepth", sLabelName, nOldRow, g_szBtnImg_Normal)
+
+	nCnt = nIndex * 2
+	
+	if szCtlName = "lblFilterLeft" then
+		
+	elseif szCtlName = "lblFilterRight" then
+		nCnt = Cint(nCnt) + 1
+		
+	end if
+	
+	if #g_tblFilterCheck < nCnt+1 then
+		Exit Function
+	end if
+	
+	if g_tblFilterCheck(nCnt) = "0" then
+		g_tblFilterCheck(nCnt) = "1"
+		Pannel0.SetPropCardCell("imagefilepth", szCtlName, nIndex, g_szBtnImg_Select)
+		Pannel0.SetPropCardCell("fontbold", szCtlName, nIndex, "1")
+		Pannel0.SetPropCardCell("fgcolor", szCtlName, nIndex, "4")
+		
+		g_curSelectIdx = nCnt
+		
+	else 
+		g_tblFilterCheck(nCnt) = "0"
+		Pannel0.SetPropCardCell("imagefilepth", szCtlName, nIndex, g_szBtnImg_Normal)
+		Pannel0.SetPropCardCell("fontbold", szCtlName, nIndex, "0")
+		Pannel0.SetPropCardCell("fgcolor", szCtlName, nIndex, "321")
+		
+	end if
+	
+End Function
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,918 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO formclass="LoginScreenView" scrno="91006" scrname="로그인" version="2" writer="아이티젠 관리자" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="ContainerID" containerimage="popup_bg.9" scroll_pos="0,0" ly_vert="0,70,375,435,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<EDIT name="edtID" imetype="2" maxlength="10" hintcaption="사번" imagefilepth="login_input.9" ly_vert="24,50,262,50,1" />
+				<EDIT name="edtPass" password="1" imetype="0" hintcaption="접속비밀번호" imagefilepth="login_input.9" ly_vert="24,111,262,50,1" />
+				<EDIT name="edtCertPass" password="1" imetype="0" hintcaption="공인인증서 비밀번호" imagefilepth="login_input.9" ly_vert="24,237,262,50,1" />
+				<CHKBUTTON name="chkSaveID" fgcolor="071:107107107" fontstyle="01" chkcaption="저장" unchkcaption="저장" checkstate="1" chkbtnimage="login_check_o" unchkbtnimage="login_check_n" ly_vert="295,56,55,39,1" />
+				<BUTTON name="btnLogin" caption="로그인" fontsize="1" fontstyle="01" btnimage="btn_11.9" ly_vert="32,331,312,60,1" />
+				<LABEL name="Label2" visible="0" fgcolor="071:107107107" caption="사번" ly_vert="20,38,205,18,0" />
+				<LABEL name="Label3" visible="0" fgcolor="071:107107107" caption="접속비밀번호" ly_vert="20,102,205,19,0" />
+				<LABEL name="Label7" visible="0" fgcolor="071:107107107" caption="공인인증서 비밀번호" ly_vert="20,227,205,19,0" />
+				<EDIT name="edtBsnsPass" password="1" imetype="0" hintcaption="업무비밀번호" imagefilepth="login_input.9" ly_vert="24,173,262,50,1" />
+				<LABEL name="Label8" visible="0" fgcolor="071:107107107" caption="업무비밀번호" ly_vert="20,164,205,19,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="Label1" fgcolor="100:102102102" fontsize="-3" caption="Ver 01.00" valign="2" ly_vert="254,18,81,20,1" />
+		<LABEL name="Label5" visible="0" bgcolor="017:216216216" transmode="0" ly_vert="0,593,375,1,0" />
+		<IMAGE name="Image5" imgpath="icon_main_15" ly_vert="323,17,30,28,1" />
+		<LABEL name="lblCertCenter" fgcolor="071:107107107" fontsize="-1" fontstyle="01" caption="인증관리센터" halign="1" click="1" ly_vert="45,561,89,28,1" />
+		<LABEL name="Label0" visible="0" caption="'로그인 사이즈 375 X 647" ly_vert="15,8,205,19,0" />
+		<LABEL name="LabelTitleCert" fontsize="10" fontstyle="01" caption="직원인증" multiline="1" ly_vert="17,29,145,64,1" />
+		<EDIT name="Edit0" imetype="0" ly_vert="1010,580,1,1,1" />
+		<LABEL name="lblBottomLogo0" fgcolor="071:107107107" fontsize="-2" fontstyle="01" caption="MERITZ Securities co.,LTD." halign="1" click="1" ly_vert="72,603,221,28,1" />
+		<LABEL name="Label6" bgcolor="017:216216216" transmode="0" ly_vert="139,568,1,12,1" />
+		<LABEL name="lblDeviceID" fgcolor="071:107107107" fontsize="-1" fontstyle="01" caption="단말ID확인" halign="1" click="1" ly_vert="145,561,74,28,1" />
+		<LABEL name="lblMts" fgcolor="071:107107107" fontsize="-1" fontstyle="01" caption="메리츠SMART" halign="1" click="1" ly_vert="231,561,99,28,1" />
+		<LABEL name="Label4" bgcolor="017:216216216" transmode="0" ly_vert="224,568,1,12,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="22420" _ulen="18716" >
+'============================================================================
+' 2020.02.14 : 길병철 
+'              고유MTS 직원로그인 개발
+'============================================================================
+
+Dim g_sID
+Dim g_sPass
+Dim g_sBsnsPass
+Dim g_sCertPass
+Dim g_sDeviceID
+Dim g_sBIOTermOS
+Dim g_bExpiredChecked		'공인인증서 만료일자 안내 팝업
+
+Dim g_sDplcPrms			'중복접속허용여부
+Dim g_sRCNO
+Dim g_sUserName
+Dim g_sCSNO
+Dim g_sDN
+Dim g_SSTM_Date
+
+'============================================================================
+Sub Form_OnFormInit()
+	ContainerID.edtID.imagefilepth			= "login_input.9.png"
+	ContainerID.edtPass.imagefilepth 		= "login_input.9.png"
+	ContainerID.edtBsnsPass.imagefilepth 	= "login_input.9.png"
+	ContainerID.edtCertPass.imagefilepth 	= "login_input.9.png"
+	
+	g_sID 				= ""
+	g_sPass 				= ""
+	g_sBsnsPass 			= ""
+	g_sCertPass 			= ""
+	
+	g_sBIOTermOS 			= Form.GetSharedData("&OS_TYPE", False) '1.안드로이드 2.iOS
+
+	sVersion				= Form.GetSharedData("&APP_VERSION", 0)
+	Label1.caption		= "Ver " & sVersion
+	
+	bSaveId				= Form.GetEnvData("login.input.saveid")
+	
+	'------------------------------------------------------------------
+	'ID, ID저장체크박스 
+	if bSaveId <> null and bSaveId <> "" then
+		if bSaveId == "1" then
+			Form.SetCtlProp("ContainerID.chkSaveID"		, "checkstate", bSaveId)
+			
+			sId = Form.GetEnvData("login.input.userid") 
+
+			if sId <> null and sId <> "" then
+				Form.SetCtlProp("ContainerID.edtID"		, "caption", sId)
+			else
+				Form.SetCtlProp("ContainerID.edtID"		, "caption", "")
+			end if	
+		
+		elseif bSaveId == "0" then
+			Form.SetCtlProp("ContainerID.chkSaveID"		, "checkstate", bSaveId)
+		end if
+		
+	end if
+	
+	g_bExpiredChecked = True	
+	
+	'------------------------------------------------------------------
+	'MTS 위변조방지 스킵 대응
+	szDev 		= Form.GetSharedData("&SERVER_MODE", False)
+	szAppVer 	= Form.GetSharedData("&APP_VERSION_CODE", False)
+	szPrivateKey	= "vjdDoV5kQc7lNK4VARxk0TSWA4k=\n"
+	
+	g_sDeviceID = Trim(Form.GetDeviceID())
+	
+	if szDev <> "1" and g_sBIOTermOS == "1" then
+		szKeyValue = Form.GetSharedData("&KEY_VALUE", False)
+		if trim(szPrivateKey) <> trim(szKeyValue) then
+			Form.Toast(0,"위변조된 앱 입니다. 앱을 재설치 하시기 바랍니다.", 1)
+			Form.SetSharedData("&SGB" , "BBE") 
+			
+			Form.sendItemPrice()			'App 종료API 추가 (네이밍무관)
+			Form.sendMessage()			'App 종료API 추가 (네이밍무관)
+			Form.TerminateApp()
+		end if
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Edit0.caption = "end" '20190702_01 KBC : 이것을넣어야 로그인창이 빨리 닫힘.임시추가 (visible false주면 다시 느림)
+End Sub
+
+'============================================================================
+Sub ContainerID_btnLogin_OnClick()
+
+	g_sID = Form.GetCtlProp("ContainerID.edtID", "caption")
+	
+	if g_sID == null or g_sID == "" then
+		Form.MsgBox("알림", "사번을 입력하세요.", "", 0)
+		exit sub
+	end if	
+
+
+'KBC임시
+if g_sID == "semijoin" then
+	ContainerID.edtPass.caption = "test1357"
+	ContainerID.edtBsnsPass.caption = "1111"
+	ContainerID.edtCertPass.caption = "stock 780 !!"
+elseif g_sID == "5358" then
+	ContainerID.edtPass.caption = "1111"
+	ContainerID.edtBsnsPass.caption = "1111"
+	ContainerID.edtCertPass.caption = "stock 780 !!"	
+end if
+
+
+	g_sPass = Form.GetCtlProp("ContainerID.edtPass", "caption")
+	
+	if g_sPass == null or g_sPass == "" then
+		Form.MsgBox("알림", "접속비밀번호를 입력하세요.", "", 0)
+		exit sub
+	end if	
+	
+	g_sBsnsPass = Form.GetCtlProp("ContainerID.edtBsnsPass", "caption")
+	
+	if g_sBsnsPass == null or g_sBsnsPass == "" then
+		Form.MsgBox("알림", "업무비밀번호를 입력하세요.", "", 0)
+		exit sub
+	end if	
+	
+	g_sCertPass = Form.GetCtlProp("ContainerID.edtCertPass", "caption")
+	
+	if g_sCertPass == null or g_sCertPass == "" then
+		Form.MsgBox("알림", "공인인증 비밀번호를 입력하세요.", "", 0)
+		exit sub
+	end if
+
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_024a", "InBlock1", "USER_ID"			, 0	, g_sID)						'사번
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_024a", "InBlock1", "CONN_PWD"		, 0	, Form.GetEncData(g_sPass))		'접속비밀번호
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_024a", "InBlock1", "ODER_PWD"		, 0	, Form.GetEncData(g_sBsnsPass))	'업무비밀번호
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_024a", "InBlock1", "QTTN_EXUS_LOGN_YN", 0	, "N") 						'시세조회전용여부
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_024a", "InBlock1", "TERM_IDNT_KEY"	, 0	, g_sDeviceID)				'단말식별키
+	
+	DATAMANAGER.RequestTranData("obcpp_logn_024a") '로그인 TR	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	'로그인 TR
+	if szTranID == "obcpp_logn_024a" then	
+		Form.SetSharedData("&CERT_USE_TYPE" , "0") '0.공인인증서(ID로그인,인증서로그인) 1.간편인증(공인인증서) 2.코스콤지문(공인인증서) 3.결제원(FIDO인증서) 4.금투협(공동인증서)
+		
+		sMsg		= DATAMANAGER.GetDataMsgText(szTranID)
+		sSubMsg	= DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+		'접속허용구분 코드
+		sClscode	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CONN_PRMS_CLS_CODE" ,0)
+		
+		'부정접속 관련 대응-로그인 실패시
+		if sClscode <> "0" then
+			Call LoginFailSendHWInfo(g_sID)
+		end if
+
+		Select Case  sClscode
+			Case  "0" '접속허용(정상로그인)
+				Form.SetEnvData(1,"login.input.userid",g_sID)
+			Case  "1" '등록되지 않은 ID
+				Form.ShowAlert("알림", "등록되지 않은 사번입니다. 사번을 확인하시기 바랍니다.")
+				exit sub
+			Case  "2" '접속비밀번호 오류
+				sPassErrCnt		= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PWD_ERR_TMNU" ,0)
+				sPassAbleErrCnt	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PWD_MSTK_ABLE_TMNU" ,0)
+				
+				Form.ShowAlert("알림", "접속비밀번호 " & CInt(sPassErrCnt) & "회 오류입니다.\n연속 " & CInt(sPassAbleErrCnt) & "회 오류 시 접속이 제한됩니다.\n\n접속비밀번호를 모르시는 경우에는 \meritzOne에서 재발급 받을 수 있습니다.")
+				exit sub
+			Case  "3" '접속비밀번호 오류 초과
+				Form.ShowAlert("알림", "접속비밀번호 " & CInt(sPassAbleErrCnt) & "회 초과입니다.\n\nmeritzOne에서 재발급 받으시길 바랍니다.")
+				exit sub
+			Case  "5" '비밀번호를 입력 하지 않았을경우
+				Form.ShowAlert("알림","비밀번호를 입력하세요.")
+				exit sub
+			Case  "8" '미등록 단말
+				Form.ShowAlert("알림" , "[TR] " & sMsg)
+				exit sub
+			Case  "A"
+				Form.MsgBox("알림", "시스템 점검시간 " & sSubMsg & "동안은 \n시세조회 전용으로 로그인 됩니다.\n계좌정보 조회 및 이체서비스는\n시스템 점검시간 이후 재접속하셔야만\n이용 가능합니다.", "CheckSystem", 0)
+				exit sub
+			Case else ' 알 수 없는 오류
+				Form.ShowAlert("알림",  "[TR] " & sMsg)
+				exit sub
+		End Select	
+		
+		'비밀번호 초기화시에는 체크 않함
+		sPassInit = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CONN_PWD_INIT_YN" ,0)
+		
+		if sPassInit == "N" then
+			sWarnCode = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CONN_WARN_CLS_CODE" ,0)
+			
+			if sWarnCode == "1" then
+				Form.ShowAlert("알림","접속비밀번호가 6~8자리가 아닙니다.\n\n타인에게 누출 될 가능성이 있사오니 접속비밀번호를 변경하시기 바랍니다 !")
+			elseif 	sWarnCode == "2" then
+				Form.ShowAlert("알림","접속비밀번호가 주민등록번호와 4자리 이상이 일치합니다.\n\n타인에게 누출 될 가능성이 있사오니 접속비밀번호를 변경하시기 바랍니다 !")
+			elseif 	sWarnCode == "3" then
+				Form.ShowAlert("알림","연속 또는 같은 영문자 혹은 숫자의 접속비밀번호입니다.\n\n타인에게 누출 될 가능성이 있사오니 접속비밀번호를 변경하시기 바랍니다 !")
+			elseif 	sWarnCode == "4" then
+				Form.ShowAlert("알림","사용자ID와 접속비밀번호가 중복되어 사용하고 있습니다.\n\n타인에게 누출 될 가능성이 있사오니 접속비밀번호를 변경하시기 바랍니다 !")
+			elseif 	sWarnCode == "5" then
+				Form.ShowAlert("알림","계좌번호와 접속비밀번호가 중복되어 사용하고 있습니다.\n\n타인에게 누출 될 가능성이 있사오니 접속비밀번호를 변경하시기 바랍니다 !")
+			elseif 	sWarnCode == "6" then
+				Form.ShowAlert("알림","접속비밀번호가 고객의 전화번호와 중복되어 사용되고 있습니다.\n\n타인에게 누출 될 가능성이 있사오니 접속비밀번호를 변경하시기 바랍니다 !")
+			end if
+		end if
+		
+		g_sDplcPrms	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "DPLC_CONN_PRMS_YN" ,0)	'중복접속허용여부
+		g_sRCNO		= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "RCNO" ,0)				'실명확인번호
+		g_sUserName	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "USER_NAME" ,0)			'사용자명
+		g_sCSNO		= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CSNO" ,0)				'고객번호
+		g_sDN		= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "DN_DATA" ,0)			'DN Data
+		g_SSTM_Date	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "SSTM_DATE" ,0)			'시스템일자
+
+		sCheckState = Form.GetCtlProp("ContainerID.chkSaveID", "checkstate")
+		Form.SetEnvData(1, "login.input.saveid",sCheckState)
+		
+		'공인인증 기관 장애 여부
+		sCertSkip = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "AUTH_ATHN_ISTU_DSBL_YN" ,0)
+		
+		if sCertSkip == "Y"  and  g_sSiseCheck == "0" then
+			Form.MsgBox("알림", "현재 공인인증센터 장애로 인해 전자서명을 사용하지 않고 접속합니다.", "certskip", 2)
+		else
+			'공인인증 비밀번호 오류횟수 초과처리
+			nFailCnt = CInt(DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PBCR_PWD_MSTK_TMNU" ,0))
+			
+			if (nFailCnt >= DEF_CERT_PSWD_LIMIT_CNT) then
+				Form.ShowAlert("알림", "공인인증서 비밀번호 \n최대 오류횟수(" & tonumber(DEF_CERT_PSWD_LIMIT_CNT) &"회) 초과로 \n접속이 제한됩니다.")
+			else
+				Form.RequestCertCommand("ReqCheckIsValidPassword", g_sDN, g_sCertPass) '로그인 정상 시 인증서 체크시작
+			end if
+		end if
+		
+	elseif szTranID == "obcpp_pcrt_166a" then
+		'상태구분코드
+		sStatCode =  DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "STAT_CLS_CODE" ,0)
+
+		if sStatCode == "Y" then
+			Form.Toast(0, "로그인 성공" , 0)
+
+			'=======================================
+			'공인인증서 만료기일 도래 안내 팝업 제공
+			'=======================================
+			if CheckCertExpired(g_sDN) == False Then
+				g_bExpiredChecked = False
+			end if
+			
+			Request_obcpp_logn_010a()
+		else 
+			Form.ShowAlert("알림","유효하지 않은 인증서로 인하여 로그인이 취소되었습니다.")
+		end if
+		
+	elseif szTranID == "obcpp_logn_015a" then
+		'공인인증서 비밀번호 오류횟수
+		sMstk =  DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PBCR_PWD_MSTK_TMNU" ,0)
+
+		nCount = CInt(sMstk)
+		
+		if nCount >  0 then
+			Form.ShowAlert("알림", "공인인증서 비밀번호 " & tonumber(sMstk) & "회 오류입니다.\n연속 5회 오류시 접속이 제한됩니다.")	
+		end if
+	
+	'최종접속일
+	elseif szTranID == "obcpp_logn_010a" then
+		sNatnCD =  DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "NTNT_ISO_SHRN_CTCD" ,0)
+		
+		Form.SetSharedData("&NATIONAL_CD" , sNatnCD)	'국가코드
+		
+		Form.RequestCommand("NEW_EMGR_MSG", "", "")	'긴급메시지처리
+		Form.RequestCommand("DEVICE_LOG", "", "") 	'기기정보 로깅추가	
+		Form.SendHWInformation("001", "")			'FDS 로깅추가 (001.로그인, 002.이체/대체, 003.인증서(재)발급, 004.주소/연락처 변경)
+												'!!! FDS 로깅은 국가정보조회 이후에 있어야 한다
+		
+		sDay =  DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "CONN_YMDH" ,0)
+		
+		Form.Toast(0,"최종접속일 : " & sDay , 0)
+
+		
+		call Request_obtrd_acnt_326r( ) 			'해외파생 고객별 시세신청 거래소 조회
+	
+	elseif szTranID == "obtrd_acnt_326r" then 
+		Form.CloseForm()
+	end if		
+		
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+
+
+	'KBC임시 START
+'	if szTranID == "obcpp_logn_024a" then	
+'		Form.SetSharedData("&CERT_USE_TYPE" , "0") '0.공인인증서(ID로그인,인증서로그인) 1.간편인증(공인인증서) 2.코스콤지문(공인인증서) 3.결제원(FIDO인증서) 4.금투협(공동인증서)
+'		
+'		'접속허용구분 코드
+'		sClscode	= "0"
+'		
+'		Select Case  sClscode
+'			Case  "0" '접속허용(정상로그인)
+'				Form.SetEnvData(1,"login.input.userid",g_sID)
+'			Case  "1" '등록되지 않은 ID
+'				Form.ShowAlert("알림", "등록되지 않은 사번입니다. 사번을 확인하시기 바랍니다.")
+'				exit sub
+'			Case  "2" '접속비밀번호 오류
+'				sPassErrCnt		= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PWD_ERR_TMNU" ,0)
+'				sPassAbleErrCnt	= DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "PWD_MSTK_ABLE_TMNU" ,0)
+'				
+'				Form.ShowAlert("알림", "접속비밀번호 " & CInt(sPassErrCnt) & "회 오류입니다.\n연속 " & CInt(sPassAbleErrCnt) & "회 오류 시 접속이 제한됩니다.\n\n접속비밀번호를 모르시는 경우에는 \meritzOne에서 재발급 받을 수 있습니다.")
+'				exit sub
+'			Case  "3" '접속비밀번호 오류 초과
+'				Form.ShowAlert("알림", "접속비밀번호 " & CInt(sPassAbleErrCnt) & "회 초과입니다.\n\nmeritzOne에서 재발급 받으시길 바랍니다.")
+'				exit sub
+'			Case  "5" '비밀번호를 입력 하지 않았을경우
+'				Form.ShowAlert("알림","비밀번호를 입력하세요.")
+'				exit sub
+'			Case  "8" '미등록 단말
+'				Form.ShowAlert("알림" , "[TR] " & sMsg)
+'				exit sub
+'			Case  "A"
+'				Form.MsgBox("알림", "시스템 점검시간 " & sSubMsg & "동안은 \n시세조회 전용으로 로그인 됩니다.\n계좌정보 조회 및 이체서비스는\n시스템 점검시간 이후 재접속하셔야만\n이용 가능합니다.", "CheckSystem", 0)
+'				exit sub
+'			Case else ' 알 수 없는 오류
+'				Form.ShowAlert("알림",  "[TR] " & sMsg)
+'				exit sub
+'		End Select	
+'		
+'		g_sDplcPrms	= "N"
+'		g_sRCNO		= "7601171024923"
+'		g_sUserName	= "길병철"
+'		g_sCSNO		= "1000430763"
+'		g_sDN		= "cn=길병철-1411788,ou=HTS,ou=대우,ou=증권,o=SignKorea,c=KR"			'DN Data
+'		g_SSTM_Date	= "20200302"			'시스템일자
+'
+'		sCheckState = Form.GetCtlProp("ContainerID.chkSaveID", "checkstate")
+'		Form.SetEnvData(1, "login.input.saveid",sCheckState)
+'		
+'		'공인인증 기관 장애 여부
+'		sCertSkip = "N"
+'		
+'		if sCertSkip == "Y"  and  g_sSiseCheck == "0" then
+'			Form.MsgBox("알림", "현재 공인인증센터 장애로 인해 전자서명을 사용하지 않고 접속합니다.", "certskip", 2)
+'		else
+'			'공인인증 비밀번호 오류횟수 초과처리
+'			nFailCnt = 0
+'			
+'			if (nFailCnt >= DEF_CERT_PSWD_LIMIT_CNT) then
+'				Form.ShowAlert("알림", "공인인증서 비밀번호 \n최대 오류횟수(" & tonumber(DEF_CERT_PSWD_LIMIT_CNT) &"회) 초과로 \n접속이 제한됩니다.")
+'			else
+'				Form.RequestCertCommand("ReqCheckIsValidPassword", g_sDN, g_sCertPass) '로그인 정상 시 인증서 체크시작
+'			end if
+'		end if
+'		
+'		
+'		exit sub
+' end if	
+	
+	'KBC임시 END
+
+
+
+
+
+	if szTranID = "obtrd_acnt_009r" then
+		'no action
+
+	elseif szTranID == "obcpp_logn_010a" then
+		Call Request_obtrd_acnt_326r( ) '해외파생 고객별 시세신청 거래소 조회
+	
+	else
+		sSubMsg = DATAMANAGER.GetDataMsgSubText(szTranID)
+	
+		if Len(sSubMsg) > 1 Then
+			Form.MsgBox("알림", "[TR] " & szErrMsg & "\n(" & sSubMsg & ")" , "", 0)
+		else
+			Form.MsgBox("알림", "[TR] " & szErrMsg  , "", 0)
+		end if
+	end if	
+End Sub
+
+'============================================================================
+'해외파생 고객별 시세신청 거래소 조회
+Sub Request_obtrd_acnt_326r( )
+	DATAMANAGER.SetDataValue( 0 , "obtrd_acnt_326r" , "InBlock1" , "ELFN_ID" , 0 , g_sID )	
+	DATAMANAGER.RequestTranData( "obtrd_acnt_326r" )
+End Sub	
+
+
+'============================================================================
+' 부정접속 관련 대응
+Sub LoginFailSendHWInfo(szID)
+	Form.SetSharedData("&NATIONAL_CD" , "no")
+	Form.SendHWInformation("005", szID)	
+End Sub
+
+'============================================================================
+'인증서 만료 기간 체크 로직 추가
+Function CheckCertExpired(s_DN)
+	sExpired = Trim(Form.getCertificateCheckExpired(s_DN)) '0:유효, 1:만료, 2:만료예정
+
+	if sExpired == "0" Then
+		return True
+		
+	elseif sExpired == "1" or sExpired == "2" Then
+		sExDate = Form.getCertificateExpiredDate(s_DN)
+
+		sData = sExpired & "★" & sExDate
+
+		Form.OpenPopup("mhetc90021_p2", sData, "")
+		return False
+	end if	
+End Function
+
+'============================================================================
+Sub Form_OnCertEvent(sType  , sSucces , stext)
+	if sType == "RetIsCertPasswordValid" then
+		if sSucces == "Success" then  '성공
+			Form.SetEnvData(1,"login.input.userid",g_sID)
+			Form.SetCertDNPW(g_sDN, g_sCertPass)
+
+			Request_obcpp_logn_015a("Y")
+			Request_obcpp_pcrt_166a()
+			
+		elseif sSucces == "Failed" then '비밀번호 오류
+			Request_obcpp_logn_015a("N")
+				
+		elseif sSucces == "Error" then ' 인증서 없음
+			Form.OpenDialog("mhetc90020_perr", "", "") '공인인증서 없음 처리
+		end if
+	end if
+End Sub
+
+'============================================================================
+'공인인증서 검증 요청
+Sub Request_obcpp_pcrt_166a()
+	szTranID = "obcpp_pcrt_166a"
+
+	sRValue		= Form.GetRvalue(g_sDN , g_sCertPass)
+	sSignData 	= Form.GetCertSignData(g_sDN , g_sCertPass)
+	sSerialNum	= Form.GetCertSerialNumber(g_sDN)
+
+	DATAMANAGER.SetUserID(g_sID)	
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "USER_ID" 				, 0 , g_sID)			'사용자ID
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "RCNO"					, 0 , g_sRCNO) 		'실명확인번호
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "USER_NAME"				, 0 , g_sUserName)	'사용자명
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "CSNO"					, 0 , g_sCSNO) 		'고객번호
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "UI_R_VAL" 				, 0 , sRValue)		'R 값	
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "UI_ELCT_SGNT_DATA_CNTT" 	, 0 , sSignData)		'전자서명데이타
+	DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "NTAT_SRNO" 				, 0 , sSerialNum)		'인증서 일련번호	
+
+	'공인인증검증 TR
+	DATAMANAGER.RequestTranData(szTranID)
+End Sub
+
+'============================================================================
+' MTS 로그인 공인인증서 접속로그  TR
+Sub Request_obcpp_logn_015a(szSucs_YN)
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_015a", "InBlock1", "USER_ID" , 0 , g_sID) 	'사용자ID
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_015a", "InBlock1", "SUCS_YN" , 0 , szSucs_YN) 	'성공여부
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_015a", "InBlock1", "ATHN_MDIA_TYPE_CODE" , 0 , "  ")
+	
+	DATAMANAGER.RequestTranData("obcpp_logn_015a")
+	
+	'부정접속 관련 대응-로그인 실패시
+	if szSucs_YN <> "Y" then
+		Call LoginFailSendHWInfo(g_sID)
+	end if
+End Sub
+
+'============================================================================
+'최종접속정보 조회   TR
+Sub Request_obcpp_logn_010a()
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_010a", "InBlock1", "USER_ID"	, 0 , g_sID)
+	DATAMANAGER.SetDataValue(0, "obcpp_logn_010a", "InBlock1", "IPAD"	, 0 , Form.GetSharedData("&IP_ADDRESS", 0))
+	DATAMANAGER.RequestTranData("obcpp_logn_010a")
+End Sub	
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)	
+	if sKeyName == "Login_Close" then
+		g_sDN = Form.GetSharedData("CERT_DN", 0)
+		
+		Form.SetEnvData(1,"login.input.userdn",g_sDN)
+		procSelectedCert(g_sDN)
+	
+	'공인인증서 없음 처리
+	elseIf sKeyName == "pError" then
+		If sRet == "Cert" then
+			'KBC : CloseForm 먼저 하지 말아라. 안드로이드에서 null참조오류난다.
+			Form.OpenScreen("90060" , "")
+			Form.CloseForm()
+		End If
+	
+	'=======================================================================================================
+	'공인인증서 만료안내 팝업 제공
+	'=======================================================================================================		
+	elseif sKeyName == "mhetc90021_p2" then
+		g_bExpiredChecked = True
+		
+		if g_bCloseForm And g_bExpiredChecked then '20190522_04 KBC : 팝업분리
+			Form.CloseForm()
+		end if
+	
+	'ElseIf sKeyName == "Login_Cert_Select" Then
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	if sDlgName == "KS" then '인증서로그인(비번리턴됨)
+		g_sCertPass = sReturn2
+		
+		'인증서 특수기호 ">"종료글자 오류회피
+		sCertPass = Form.GetSharedData("CERT_IMSI_PSWD", 1)
+		
+		if sCertPass <> null and sCertPass <> "" then
+			g_sCertPass = sCertPass
+		end if
+		
+		if g_sCertPass <> "" then
+			Form.RequestCertCommand("ReqCheckIsValidPassword", g_sDN, g_sCertPass)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub lblDeviceID_OnClick()
+	Form.OpenPopup("nhetc91006_p1" , g_sDeviceID , "")	
+End Sub
+
+'============================================================================
+Sub lblCertCenter_OnClick()
+	Form.OpenFramePopup("mhetc90060" , "" , "")
+End Sub
+
+'============================================================================
+Sub Image5_OnClick()
+	sLoginID = Form.GetSharedData("&USER_ID", 0)
+	
+	if Trim(sLoginID) == "" then
+		Form.MsgBox("알림", "최초 1회 로그인이 필요합니다.", "", 0)			
+	else
+		Form.CloseForm()
+	end if		
+End Sub
+
+
+'============================================================================
+Sub lblMts_OnClick()
+	Form.runStoreApp("com.imeritz.smartmeritz", "market://details?id=com.imeritz.smartmeritz")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_logn_022a" trcode="obcpp_logn_022a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_015a" trcode="obcpp_logn_015a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_010a" trcode="obcpp_logn_010a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_pcrt_166a" trcode="obcpp_pcrt_166a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_logn_dupt" trcode="ohhts_logn_dupt" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_kick_dupt" trcode="ohhts_kick_dupt" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_bsdy_021r" trcode="obcpp_bsdy_021r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_020a" trcode="obcpp_logn_020a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_efif_005r" trcode="obcsb_efif_005r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtrs_comn_611r" trcode="obtrs_comn_611r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtrd_acnt_009r" trcode="obtrd_acnt_009r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obtrd_acnt_326r" trcode="obtrd_acnt_326r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_logn_dupt_1" trcode="ohhts_logn_dupt" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_kick_dupt_1" trcode="ohhts_kick_dupt" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcmp_uftr_252r" trcode="obcmp_uftr_252r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_logn_024a" trcode="obcpp_logn_024a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_logn_022a" title="Login TR(MTS)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="194" _ulen="148" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+CONN_PWD^접속비밀번호^68^0^0^0^0^0^0
+QTTN_EXUS_LOGN_YN^시세전용로그인여부^1^0^0^0^0^0^0
+TERM_IDNT_KEY^단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1009" _ulen="731" >
+
+CONN_PRMS_CLS_CODE^접속허용구분코드^1^0^0^0^0^0^0
+PWD_ERR_TMNU^비밀번호에러횟수^4^0^7^0^0^0^0
+CONN_PWD_INIT_YN^접속비밀번호초기화여부^1^0^0^0^0^0^0
+CONN_WARN_CLS_CODE^접속경고구분코드^1^0^0^0^0^0^0
+AUTH_ATHN_ISTU_DSBL_YN^공인인증기관장애여부^1^0^0^0^0^0^0
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+BANK_ACNT_FRST_CONN_YN^은행계좌최초접속여부^1^0^0^0^0^0^0
+DPLC_CONN_PRMS_YN^중복접속허용여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+SSTM_DATE^시스템일자^8^0^0^0^0^0^0
+USE_STA_TIME^사용시작시각^9^0^0^0^0^0^0
+PWD_MSTK_ABLE_TMNU^비밀번호오류가능횟수^4^0^7^0^0^0^0
+QTTN_EXUS_LOGN_YN^시세전용로그인여부^1^0^0^0^0^0^0
+DN_DATA^DN데이터^256^0^0^0^0^0^0
+CONN_CUST_INS_IPAD^접속고객내부IP주소^39^0^0^0^0^0^0
+EMPL_YN^직원여부^1^0^0^0^0^0^0
+EMPNO^직원번호^9^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_015a" title="MTS로그인_공인인증서 접속로그" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="138" _ulen="108" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+SUCS_YN^성공여부^1^0^0^0^0^0^0
+ATHN_MDIA_TYPE_CODE^인증매체유형코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="80" _ulen="54" >
+
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_010a" title="Login 완료 및 최종접속정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="72" _ulen="62" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+IPAD^IP주소^39^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="237" _ulen="185" >
+
+CONN_YMDH^접속일시1^19^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+IPAD^IP주소^39^0^0^0^0^0^0
+INS_IPAD^내부IP주소^39^0^0^0^0^0^0
+NTNT_ISO_SHRN_CTCD^국적ISO단축국가코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_pcrt_166a" title="공인인증서검증요청" realdata="0" dessvr="3" >
+				<TRBLOCK name="InBlock1" inout="in" _len="306" _ulen="238" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+UI_R_VAL^UIR값^96^0^0^0^0^0^0
+UI_ELCT_SGNT_DATA_CNTT^UI전자서명데이터내용^4000^0^0^0^0^0^0
+NTAT_SRNO^인증서일련번호^32^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="210" _ulen="164" >
+
+NEW_YN^신규여부^1^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_LNGT^UI공인인증키길이^4^0^0^0^0^0^0
+UI_AUTH_ATHN_KEY_VAL^UI공인인증키값^1024^0^0^0^0^0^0
+STAT_CLS_CODE^상태구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_logn_dupt" title="중복 로그인 체크 TR" realdata="0" dessvr="M" >
+				<TRBLOCK name="OutBlock1" inout="out" _len="43" _ulen="35" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_kick_dupt" title="중복로그인 접속자 접속해제" realdata="0" dessvr="M" >
+				<TRBLOCK name="InBlock1" inout="in" _len="43" _ulen="35" >
+
+PROS_CLS^처리구분^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_bsdy_021r" title="업무공통_영업일조회(당일비영업" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="83" _ulen="63" >
+
+FID_INPUT_COND_SCR_DIV_CODE^FID입력조건화면분류코드^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="329" _ulen="273" >
+
+FID_STND_DATE1^FID기준일자1^8^0^0^0^0^0^0
+FID_STND_DATE2^FID기준일자2^8^0^0^0^0^0^0
+FID_STND_DATE3^FID기준일자3^8^0^0^0^0^0^0
+FID_STND_DATE4^FID기준일자4^8^0^0^0^0^0^0
+FID_STND_DATE5^FID기준일자5^8^0^0^0^0^0^0
+FID_STA_HOUR^FID시작시간^6^0^0^0^0^0^0
+FID_FIN_HOUR^FID종료시간^6^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_020a" title="Logout 처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="101" _ulen="79" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+CONN_STAT_CLS_CODE^접속상태구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_efif_005r" title="HTS정보조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="165" _ulen="125" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="356" _ulen="270" >
+
+CONN_STA_DATE^접속시작일자^8^0^0^0^0^0^0
+CONN_STA_TIME^접속시작시각^9^0^0^0^0^0^0
+CHAN_TYPE_CLS_CODE^채널유형구분코드^3^0^0^0^0^0^0
+CHAN_TYPE_CLS_NAME^채널유형구분명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객등급코드^2^0^0^0^0^0^0
+CUST_GRAD_CODE_NAME^고객등급코드명^40^0^0^0^0^0^0
+CSNM^고객명^40^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="1181" _ulen="897" >
+
+CSNM^고객명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객등급코드^2^0^0^0^0^0^0
+CUST_GRAD_CODE_NAME^고객등급코드명^40^0^0^0^0^0^0
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_BRCD_NAME^관리지점코드명^40^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_CODE^KYC투자성향등급코드^2^0^0^0^0^0^0
+KYC_INVT_INCL_GRAD_NAME^KYC투자성향등급명^40^0^0^0^0^0^0
+KYC_VALD_PRD_MTRT_DATE^KYC유효기간만기일자^8^0^0^0^0^0^0
+KYC_INVT_RCMD_CLS_CODE^KYC투자권유구분코드^1^0^0^0^0^0^0
+ITEM_NAME^항목명^40^0^0^0^0^0^0
+UI_BANK_OPNG_YN^UI은행개설여부^1^0^0^0^0^0^0
+WEAK_YN^취약여부^1^0^0^0^0^0^0
+PROS_DATE^처리일자^8^0^0^0^0^0^0
+APLY_KYC_INVT_INCL_GRAD_CODE^적용KYC투자성향등급코드^2^0^0^0^0^0^0
+APLY_KYC_INVT_INCL_GRAD_NAME^적용KYC투자성향등급명^40^0^0^0^0^0^0
+APLY_KYC_DVPD_EPMD_CODE^적용KYC파생상품유의코드^2^0^0^0^0^0^0
+APLY_KYC_INVT_RCMD_CLS_CODE^적용KYC투자권유구분코드^1^0^0^0^0^0^0
+APLY_KYC_VALD_PRD_MTRT_DATE^적용KYC유효기간만기일자^8^0^0^0^0^0^0
+ETF_ATMT_CANC_TRGT_CLS_CODE^ETF자동해지대상구분코드^2^0^0^0^0^0^0
+ETF_CANC_SCDL_DATE^ETF해지예정일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="41" _ulen="33" >
+
+REG_YN^등록여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock4" inout="out" _len="42" _ulen="34" >
+
+DETH_YN^사망여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock5" inout="out" _len="42" _ulen="34" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock6" occurs="5" inout="out" _len="231" _ulen="175" >
+
+BSWR_TYPE_CODE^업무유형코드^3^0^0^0^0^0^0
+REG_YN^등록여부^1^0^0^0^0^0^0
+APLY_STA_DATE^적용시작일자^8^0^0^0^0^0^0
+APLY_FIN_DATE^적용종료일자^8^0^0^0^0^0^0
+LNKN_ACNO^연결계좌번호^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock7" inout="out" _len="190" _ulen="150" >
+
+PROS_YN^처리여부^1^0^0^0^0^0^0
+PROS_YN1^처리여부^1^0^0^0^0^0^0
+PROS_YN2^처리여부^1^0^0^0^0^0^0
+PROS_YN3^처리여부^1^0^0^0^0^0^0
+PROS_YN4^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock8" inout="out" _len="80" _ulen="64" >
+
+PROS_YN1^처리여부^1^0^0^0^0^0^0
+PROS_YN2^처리여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrs_comn_611r" title="계좌알림정보" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="45" _ulen="37" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="344" _ulen="248" >
+
+TDAY_LQDT_YN^당일반대매매여부^1^0^0^0^0^0^0
+TDAY_UNCL_FRZN_YN^당일미수동결여부^1^0^0^0^0^0^0
+TDAY_UNCL_OCRN_YN^당일미수발생여부^1^0^0^0^0^0^0
+TDAY_RGHT_OCRN_YN^당일권리발생여부^1^0^0^0^0^0^0
+TDAY_DRVT_LQDT_YN^당일파생반대매매여부^1^0^0^0^0^0^0
+MTRT_TRGT_YN^만기대상여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrd_acnt_009r" title="해외파생 계좌헷지구분 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" occurs="300" inout="in" _len="98" _ulen="70" >
+
+REG_ACNO^등록계좌번호^8^0^0^0^0^0^0
+REG_ASNO^등록계좌일련번호^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="300" inout="out" _len="220" _ulen="152" >
+
+REG_ACNO^등록계좌번호^8^0^0^0^0^0^0
+REG_ASNO^등록계좌일련번호^2^0^0^0^0^0^0
+OVDV_HEDG_CLCD^해외파생헷지구분코드^1^0^0^0^0^0^0
+OVDV_ACNT_CLCD^해외파생계좌구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obtrd_acnt_326r" title="해외파생 고객별 시세신청 거래?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="45" _ulen="37" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="182" _ulen="136" >
+
+EXCH_CLCD^거래소구분코드^1^0^0^0^0^0^0
+QTTN_APLT_CLCD^시세신청구분코드^1^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcmp_uftr_252r" title="불공정거래종합HTS팝업여부조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="40" _ulen="32" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="43" _ulen="35" >
+
+PROS_YN^처리 여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_logn_024a" title="Login TR (고유MTS)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="238" _ulen="180" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+CONN_PWD^접속비밀번호^68^0^0^0^0^0^0
+ODER_PWD^주문비밀번호^68^0^0^0^0^0^0
+QTTN_EXUS_LOGN_YN^시세전용로그인여부^1^0^0^0^0^0^0
+TERM_IDNT_KEY^단말식별키^256^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1231" _ulen="899" >
+
+CONN_PRMS_CLS_CODE^접속허용구분코드^1^0^0^0^0^0^0
+QTTN_EXUS_LOGN_YN^시세전용로그인여부^1^0^0^0^0^0^0
+PWD_ERR_TMNU^비밀번호에러횟수^4^0^7^0^0^0^0
+PWD_MSTK_ABLE_TMNU^비밀번호오류가능횟수^4^0^7^0^0^0^0
+CONN_PWD_INIT_YN^접속비밀번호초기화여부^1^0^0^0^0^0^0
+CONN_WARN_CLS_CODE^접속경고구분코드^1^0^0^0^0^0^0
+AUTH_ATHN_ISTU_DSBL_YN^공인인증기관장애여부^1^0^0^0^0^0^0
+PBCR_PWD_MSTK_TMNU^공인인증서비밀번호오류횟수^4^0^7^0^0^0^0
+DPLC_CONN_PRMS_YN^중복접속허용여부^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+RSPS_CODE^직책코드^4^0^0^0^0^0^0
+RSNS_BSWR_CLS_CODE^담당업무구분코드^2^0^0^0^0^0^0
+PART_CODE^파트코드^6^0^0^0^0^0^0
+DEPT_CLS_CODE^부서구분코드^2^0^0^0^0^0^0
+DPNM^부서명^40^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+USER_NAME^사용자명^40^0^0^0^0^0^0
+DN_DATA^DN데이터^256^0^0^0^0^0^0
+CLPH_TELNO^휴대폰전화번호^20^0^0^0^0^0^0
+SSTM_DATE^시스템일자^8^0^0^0^0^0^0
+USE_STA_TIME^사용시작시각^9^0^0^0^0^0^0
+MENU_ATHR_CLS_CODE^메뉴권한구분코드^2^0^0^0^0^0^0
+CONN_CUST_INS_IPAD^접속고객내부IP주소^39^0^0^0^0^0^0
+BSDY_YN^영업일여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrname="로그인_간편인증등록팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="GridBank" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,639,1" />
+		<IMAGE name="Image4" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image3" visible="0" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,0" />
+		<IMAGE name="imgBG" imgpath="popup_bg.9" ly_vert="0,400,375,204,1" />
+		<BUTTON name="BtnNewRegi" caption="신규 등록" fgcolor="334:034034034" fontsize="4" btnimage="btn_27.9" ly_vert="-1,597,188,51,1" />
+		<BUTTON name="BtnReuse" caption="이용 동의" fgcolor="320:246247248" fontsize="4" fontstyle="01" btnimage="btn_20.9" ly_vert="187,597,189,51,1" />
+		<TABLE name="tblInfo" insidelinecolor="102:255255255" colcount="1" rowcount="7" outline="0000" designorder="1" ly_vert="0,432,376,145,1" >
+			<COL_INFO ly_vert_width="376" />
+			<ROW_INFO ly_vert_height="10,10,20,20,35,20,30" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,1" line="0,0" impidxs="" />
+				<CELL cell_ly="0,2,0,2" line="0,0" caption="이미 같은 기기에서 간편인증을" fontsize="1" impidxs="" />
+				<CELL cell_ly="0,3,0,3" line="0,0" caption="등록한 이력이 있습니다." fontsize="1" impidxs="" />
+				<CELL cell_ly="0,4,0,4" line="0,0" fontsize="1" impidxs="" />
+				<CELL cell_ly="0,5,0,5" line="0,0" caption="지금 접속한 앱에서도 이용하시겠어요?" fontsize="1" impidxs="" />
+				<CELL cell_ly="0,6,0,6" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1604" _ulen="1554" >
+'============================================================================
+' 01. 화 면 명 : 로그인_간편인증_등록팝업
+' 02. 화면설명 :
+' 03. 작    성 : 
+'============================================================================
+Dim 	g_Reuse
+Dim g_NewRegi
+'****************************************************************************
+'                       G L O B A L     V A R I A B L E
+'****************************************************************************
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	
+	if sDeviceOS = "2" then
+		Image3.visible = true
+	elseif sDeviceOS = "1" then
+'		
+		Image3.visible = false
+	end if
+	
+End Sub
+'============================================================================
+Sub BtnNewRegi_OnClick() 
+	g_NewRegi = "Y"
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub BtnReuse_OnClick()
+	g_Reuse = "Y"
+	Form.CloseForm()
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+	if g_Reuse == "Y" then
+		Form.SendReturnToParent("mpopup_auth2", "Reuse") 
+	end if
+	
+	if g_NewRegi = "Y" then
+		Form.SendReturnToParent("mpopup_auth2", "NewRegi") 
+	end if
+End Sub
+'============================================================================
+Sub Image4_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

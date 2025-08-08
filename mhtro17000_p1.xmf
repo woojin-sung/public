@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16000" scrname="해외주식현재가_종목정보_시세정보_설명" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" autosize="1" imgpath="alpha128" ly_vert="0,0,375,674,1" />
+		<CONTAINER name="contMain" containerimage="alpha" ly_vert="0,0,375,647,1" scroll_ly_vert="0,0,375,647,1" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" imgpath="popup_bg.9" ly_vert="0,0,375,647,1" />
+				<LABEL name="lblTitle" fontsize="3" fontstyle="01" multiline="1" ly_vert="20,10,335,47,1" />
+				<IMAGE name="imgBack" visible="0" autosize="1" ly_vert="320,26,39,15,0" />
+				<CONTAINER name="contCont" vscroll="1" ly_vert="20,67,335,513,1" scroll_ly_vert="20,67,335,513,1" >
+					<CONTROL_INFO>
+						<LABEL name="lblContent" fontsize="-1" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="0,0,335,500,1" />
+					</CONTROL_INFO>
+				</CONTAINER>
+				<BUTTON name="Button0" caption="확인" btnimage="btn_20.9" ly_vert="0,587,375,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8497" _ulen="7341" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_42_n.9"
+
+Dim g_szBtnImg_Close
+g_szBtnImg_Close = "icon_close"
+
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_szItemCd, g_szExidCd, g_szOnlyCd
+g_szItemCd = ""
+g_szExidCd = ""
+g_szOnlyCd = ""
+
+Dim g_szText_HK
+g_szText_HK = ""
+
+Dim g_szText_SH
+g_szText_SH = ""
+
+Dim g_szText_SZ
+g_szText_SZ = ""
+
+Dim g_szText_OQ
+g_szText_OQ = ""
+
+Dim g_szText_NYAX
+g_szText_NYAX = ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기화
+'===============================================
+Function Init_Control()
+	contMain.lblTitle.fgcolor = g_szTxtColor_Normal
+	contMain.lblTitle.paddinginfo = "0,0,0,0"
+	
+	contMain.imgBack.maintainratio = "3"
+	contMain.imgBack.imgpath = g_szBtnImg_Close
+	
+	contMain.contCont.lblContent.maxlinecnt = 400
+	contMain.contCont.lblContent.paddinginfo = "0,0,0,0"
+	
+	contMain.setEnableScroll(false)
+	contMain.setExceptInvisibleCtl(true)
+	contMain.contCont.setExceptInvisibleCtl(true)
+	
+	g_szText_HK = "HKEX INFORMATION SERVICES LIMITED, ITS HOLDING COMPANIES AND/OR ANY SUBSIDIARIES OF SUCH HOLDING COMPANIES ENDEAVOUR TO ENSURE THE ACCURACY AND RELIABILITY OF THE INFORMATION PROVIDED BUT DO NOT GUARANTEE ITS ACCURACY OR RELIABILITY AND ACCEPT NO LIABILITY (WHETHER IN TORT OR CONTRACT OR OTHERWISE) FOR ANY LOSS OR DAMAGE ARISING FROM ANY INACCURACIES OR OMISSIONS\n\n홍콩 투자 정보 서비스 유한회사, 지주 회사 또는 지주 회사의 자회사는 제공되는 정보의 정확성과 확실성을 보장하기 위해 노력하지만 그 적합성과 정확성을 보장하지 않으며 부정확성 또는 누락으로 인해 발생하는 모든 손실 또는 손해에 대해 어떠한 법적 책임(불법 행위 또는 계약 여부에 관계 없이)을 지지 않습니다."
+	g_szText_SH = "China Investment Information Services Limited, it's holding companies and/or any subsidiary of such holding companies and/or its third party content provider(s) endeavor to ensure the accuracy and reliability of the information provided but do not guarantee its suitability, availability, service level, timelines, accuracy or reliability and accept no liability (whether in tort or contract or otherwise) for any loss or damage arising from any interruption, defect, delay, inaccuracies or omissions.\n\n중국 투자 정보 서비스 유한회사, 지주 회사 또는 지주 회사의 자회사 또는 제 3 자 콘텐츠 제공 업체는 제공되는 정보의 정확성과 확실성을 보장하기 위해 노력하지만 그 적합성, 유효성, 서비스 수준, 일정, 정확성 또는 확실성을 보장하지 않으며, 중단, 장애, 지연, 부정확성 또는 누락으로 인해 발생하는 모든 손실 또는 손해에 대해 어떠한 법적 책임(불법 행위 또는 계약 여부에 관계 없이)을 지지 않습니다."
+	g_szText_SZ = "Although Vendor will use all reasonable endeavors to ensure the accuracy and reliability of its service, neither Vendor nor SSIC will be liable for any loss or damage in connection with the provision of failure to provide the service.\n\n공급 업체는 서비스의 정확성과 신뢰성을 보장하기 위해 모든 합당한 노력을 기울일 것이지만, 공급 업체나 SSIC는 서비스 제공 실패로 인해 발생한 손실이나 손해에 대해 책임을 지지 않습니다."
+	g_szText_OQ = "UTP Quotation Feed: provides best bid and offer(BBO) quotes from UTP participant as well as the consolidated national best bid and offer (NBBO) quotes for securities listed on the NASDAQ Stock Market.® UTP Trade Feed:provides trade data from the UTP participants for securities listed on the NASDAQ Stock Market®.\n\nUTP 시세 피드: UTP 참가자의 최고 매입가/최저 매도가 시세 (우선호가)를 제공하며, NASDAQ 주식 시장에 상장 된 증권에 대한 통합된 최우선 최고 매입가/최저 매도가(최우선호가)시세를 제공합니다.\nUTP 거래 피드 : 나스닥 주식 시장에 상장된 증권에 대한 UTP 참가자의 거래 데이터를 제공합니다."
+	g_szText_NYAX = "CTA Tape A:Last Sale: provides trade data from the CTA participants for securities listed on the New York Stock Exchange\nCTA Tape A:Bid/Ask: provides best bid and offer (BBO) quotes from CTA participants as well as the consolidated national best bid and offer (NBBO) quotes for securities listed on the New York Stock Exchange.\nCTA Tape B:Last Sale: provides trade data from the CTA participants for securities listed on the NYSE American LLC. National best bid and offer (NBBO) quotes for securities listed on the NYSE American LLC.\n\nCTA Tape A : Last Sale : 뉴욕 증권 거래소에 상장 된 증권에 대한 CTA 참가자의 거래 데이터를 제공합니다.\nCTA Tape A : Bid / Ask : CTA 참가자의 BBO(Best bid and Offer) 시세와 뉴욕 증권 거래소에 상장 된 증권에 대한 통합 된 NBBO (National Best bid and Offer) 시세를 제공합니다.\nCTA Tape B : Last Sale : NYSE American LLC에 상장 된 증권에 대한 CTA 참가자의 거래 데이터를 제공합니다. NYSE American LLC에 상장 된 증권에 대한 NBBO (National Best bid and Offer) 시세를 제공합니다."
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+	contMain.contCont.lblContent.sizeAutoFit()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Init_Control()
+	
+	Dim szLinkData
+	szLinkData = Form.GetOpenLinkData()
+	
+'	if szLinkData = "" then
+'		Form.CloseForm()
+'		exit Sub
+'	end if
+	arrLinkData = split(szLinkData, "★")
+	
+	contMain.lblTitle.maxlinecnt = "1"
+	contMain.lblTitle.caption = "Disclaimer"
+'	contMain.lblTitle.setAutoScrollText(arrLinkData(0))
+
+'	contMain.lblTitle.setUseAutoScroll(true, 30, true)
+	
+	szText = ""
+	Select Case szLinkData
+		Case "HK"
+			szText = g_szText_HK
+		Case "SH"
+			szText = g_szText_SH
+		Case "SZ"
+			szText = g_szText_SZ
+		Case "OQ"
+			szText = g_szText_OQ
+		Case "NY", "AX"
+			szText = g_szText_NYAX
+'		Case Else
+'			Form.CloseForm()
+	End Select
+	
+	contMain.contCont.lblContent.caption = szText
+	contMain.contCont.lblContent.sizeAutoFit()
+End Sub
+
+'===============================================
+' contMain_imgBack_OnClick
+'===============================================
+Sub contMain_imgBack_OnClick()
+	Form.CloseForm()
+End Sub
+
+'===============================================
+' contMain_lblContent_OnSizeAutoFit
+'===============================================
+Sub contMain_contCont_lblContent_OnSizeAutoFit()
+
+	contMain.visible = true
+	nHeight = contMain.contCont.lblContent.height
+	
+	szOsType = Form.GetSharedData("&OS_TYPE", false ) 
+	
+	if szOsType = "1" then
+		nHeight = Form.calcUnResize(nHeight, "1")
+	end if
+	
+	nResultHeight = nHeight + 67 + 32 + 60
+	nResultHeight2 = nHeight + 32 
+
+	if nResultHeight > 500 then
+		nResultHeight = 500
+		nResultHeight2 = 500 - 87 - 60
+	end if
+
+	contMain.height = nResultHeight
+	contMain.Image0.height = nResultHeight
+	contMain.top =  647 -  nResultHeight
+	contMain.Button0.top = nResultHeight - 60
+	
+	contMain.contCont.height = nResultHeight2
+	contMain.contCont.setScrollAutoSize()
+End Sub
+
+'===============================================
+' imgBg_OnClick
+'===============================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub contMain_Button0_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
