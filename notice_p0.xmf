@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="공지팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CHKBUTTON name="ChkButton0" fontsize="-2" chkcaption="7일 간 보지 않기" unchkcaption="7일 간 보지 않기" ly_vert="33,782,159,27,1" />
+		<BUTTON name="Btn0" visible="0" btnimage="alpha128.png" ly_vert="0,0,375,647,0" />
+		<IMAGE name="Image3" visible="0" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,0" />
+		<IMAGE name="Image4" visible="0" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,0" />
+		<IMAGE name="ImgPop" visible="0" imgpath="popup_bg.9" ly_vert="0,306,375,345,0" />
+		<IMAGE name="Image11" visible="0" autosize="1" imgpath="notice_open" ly_vert="0,630,375,90,0" />
+		<IMAGE name="Image13" visible="0" autosize="1" imgpath="notice_p17" ly_vert="0,0,375,90,0" />
+		<IMAGE name="Image1" visible="0" autosize="1" imgpath="notice_p5.png" ly_vert="0,90,375,90,0" />
+		<CONTAINER name="Container0" visible="0" bgcolor="338:255255255" vscroll="1" ly_vert="0,321,375,271,0" scroll_ly_vert="0,321,375,271,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image6" autosize="1" imgpath="notice_p1" ly_vert="0,450,375,90,1" />
+				<IMAGE name="Image10" autosize="1" imgpath="notice_p12.png" ly_vert="0,180,375,90,1" />
+				<IMAGE name="Image0" autosize="1" imgpath="notice_p11" ly_vert="0,360,375,90,1" />
+				<IMAGE name="Image7" autosize="1" imgpath="notice_agree" ly_vert="0,540,375,90,1" />
+				<IMAGE name="Image8" autosize="1" imgpath="notice_p16" ly_vert="0,630,375,90,1" />
+				<IMAGE name="Image5" autosize="1" imgpath="notice_p15.png" ly_vert="0,270,375,90,1" />
+				<IMAGE name="Image2" autosize="1" imgpath="notice_p13" ly_vert="0,0,375,90,1" />
+				<IMAGE name="Image12" autosize="1" imgpath="notice_p14.png" ly_vert="0,90,375,90,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<IMAGE name="ImgClose" visible="0" autosize="1" imgpath="btn_menu_new_o" ly_vert="326,609,24,24,0" />
+		<LABEL name="LblClose" visible="0" fgcolor="144:034034034" caption="닫기" halign="2" ly_vert="199,606,130,29,0" />
+		<CHKBUTTON name="Chk7days" visible="0" fgcolor="321:115118124" chkcaption="  7일동안 그만 보기" unchkcaption="  7일동안 그만 보기" chkbtnimage="checkmenu_o" unchkbtnimage="checkmenu_n" ly_vert="20,606,152,27,0" />
+		<BUTTON name="btnClose7" visible="0" fgcolor="334:034034034" fontstyle="01" btnimage="alpha" halign="0" paddinginfo="15,0,0,0" ly_vert="0,591,190,56,0" />
+		<BUTTON name="btnClose" visible="0" fgcolor="144:034034034" btnimage="alpha" halign="0" paddinginfo="0,0,20,0" ly_vert="189,592,188,56,0" />
+		<IMAGE name="Image9" autosize="1" imgpath="alpha" ly_vert="0,0,375,277,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="20675" _ulen="19267" >
+'20200716 제이알 글로벌리츠 팝업 SWJ START
+'20200629 증권대차중개 서비스 팝업 SWJ START
+'20220913 SWJ START : MTS 개인화 팝업
+Dim g_Savekey
+Dim g_sUserID, g_szNm
+Dim g_szData1, g_szData2, g_szData3, g_szData4
+g_szData1 = ""
+g_szData2 = ""
+g_szData3 = ""
+g_szData4 = ""
+Dim g_bCloseFlag
+g_bCloseFlag = false
+
+'20230904 LES START
+Dim g_sAppver 
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgClose.setMaintainingRatio("1")
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+
+	' 20240802_01 HWG START
+	sUserID 	= Form.GetSharedData("&USER_ID" , false)
+	if sUserID == "" then
+		Form_OnPopupReturn("prevnotice", "")
+	else
+		szEnv = Form.GetEnvData("PREV_NOTICE_OPEN")
+		if szEnv == "1" then
+			Form_OnPopupReturn("prevnotice", "")
+		else
+			Form.openPopup("prevnotice", "", "")
+		end if
+	end if
+	' 20240802_01 HWG END
+	
+'	sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+'	
+'	'20211026 SWJ START : 안드로이드 targetSDK verison30 관련 안내 팝업 게시
+'	szAppVer = Form.GetSharedData("&APP_VERSION", False)
+'	szData = Split(szAppVer, ".")
+'	szAppVer = Cint(szData(0) & szData(1) & szData(2))
+'	g_sAppver = szAppVer '20230904 LES
+'	
+'	sOSVrsn		=	Form.GetSharedData("&OS_VERSION", false)
+'	szAppVerCode  = 	Form.GetSharedData("&APP_VERSION_CODE", False)
+'	
+'	'20220913 SWJ START
+'	g_sUserID 	= Form.GetSharedData("&USER_ID" , false)
+'	'20220913 SWJ END
+'	
+'	'20231013 LES START
+'	FloatBanner_ReadCheck(sDeviceOS)
+'	'20231013 LES END
+'	
+'	'20240710 SWJ START
+'	'권리선반영 플래그용으로
+'	'notice_p0에서 만든다.
+'	'앞으로 권리선반영 배포가 있을 경우 notice_p0에서만 하면 된다.
+'	Form.SaveConfigData("NoticeSetting", "AbroadAgreement_StartDate", "20240715")
+'	Form.SaveConfigData("NoticeSetting", "AbroadAgreement_EndDate", "20240717")
+'	Form.SaveConfigData("NoticeSetting", "AbroadAgreement_BswrClcd", "10")
+'	Form.SetSharedData("AbroadAgreement_PopupYN", "Y")
+'	'20240710 SWJ END
+'	
+'	if sDeviceOS = "1" then
+'		
+'		Image3.visible = false
+'
+'	elseif sDeviceOS = "2" then
+''		
+'		'2.5.33 버전부터 다시 그냥 띄워줌
+'		'ios 2.5.8 버전부터 공지팝업 메인에서 애니메이션 처리해줌
+'		if szAppVer >= 2533 then
+'			Image3.visible = false '20230904 LES
+'			
+'		else
+'			Image3.visible = false
+'			Image4.visible = false
+'		end if
+'	end if
+'	'20211026 SWJ END
+'	
+'	'20220509 SWJ START : 고객 이벤트 메뉴에 같은 화면 추가
+'	szScreen = Form.GetSharedData("&SCREEN_NO", false)
+'	
+'	'20230421 SWJ START: 블랙테마 없애기
+'	Form.SetEnvData(1, "common.theme", "white")	
+'	'20230421 SWJ END
+'	
+'	Dim saveDate
+'	Dim calcDate
+'	
+'	g_Savekey = Form.GetOpenLinkData( )
+'	
+'	saveDate = Form.LoadConfigData("NoticeSetting", "notice_20240801") '20210508 HSZ 
+'	todayDate = Form.GetSharedData("&HOST_DATE",0)
+'	
+'	if saveDate <> "" then
+'		
+'		ResaveDate 	= left(saveDate,4)&"-"&mid(saveDate,5,2)&"-"&right(saveDate,2)
+'		RetodayDate 	= left(todayDate,4)&"-"&mid(todayDate,5,2)&"-"&right(todayDate,2)
+'		
+'		calcDate = tonumber(DateDiff("d",ResaveDate, RetodayDate))
+'
+'		if calcDate <= 7 then
+'			
+'			'20220913 SWJ START
+'			if g_sUserID <> "" then
+'				DATAMANAGER.RequestTranData("obcpp_dgtl_003r")
+'			else
+'				Form.CloseForm()
+'			end if
+'			'20220913 SWJ END	
+'		
+'		'20220913 SWJ START
+'		'7일간 보지 않기인데, 개인화팝업을 호출해야하는 경우
+'		'깜빡이면서 화면이 닫히는 현상 개선
+'		else
+'			ControlVisible(True)
+'		end if
+'	else
+'		ControlVisible(True)
+'	end if
+'	
+'	'글자색 진하게
+'	'Container0.Label0.fontbold = 1
+'	Container0.btnClose.fontbold = 1
+'	Container0.btnClose7.fontbold = 1
+'	
+'	LblClose.setNeighborCtlPos("ImgClose","right", 10,"")
+'	Container0.setScrollBarVisible("0")
+End Sub
+
+'============================================================================
+'20210830 SWJ START : 공지사항 3단 배너 형식으로 변경
+'============================================================================
+Sub btnClose_OnClick()
+	
+	'20220913 SWJ START
+	if g_sUserID <> "" then
+		DATAMANAGER.RequestTranData("obcpp_dgtl_003r")
+	else
+		Form.CloseForm()
+	end if
+	'20220913 SWJ END	
+End Sub
+
+'============================================================================
+Sub btnClose7_OnClick()
+	
+	saveDate = Form.GetSharedData("&HOST_DATE",0)
+	Form.SaveConfigData("NoticeSetting", "notice_20240809", saveDate)
+	
+	'20220913 SWJ START
+	if g_sUserID <> "" then
+		DATAMANAGER.RequestTranData("obcpp_dgtl_003r")
+	else
+		Form.CloseForm()
+	end if
+	'20220913 SWJ END	
+End Sub
+'============================================================================
+'Sub Container0_Image0_OnClick()
+'	'Form.OpenPopup("notice_p5","","")
+'	'Form.OpenExternalBrowser("https://etn.imeritz.com/index.html")
+'	'Form.OpenExternalBrowser("http://home.imeritz.com/etn/EtnList.do")
+''	Dim sLOGIN_TYPE  
+''	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+''
+''	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+''		Dim sText
+''		sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+''		Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+''	else
+''		Form.SetSharedData("&SCREEN_AUTH" , "99")
+''		Form.OpenPopup("mbbdm85100" , "" , "")
+''	end if	
+'
+'	Form.OpenExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=help13v&bbsCnttTurnNo=3110&listCnt=5&pageNum=1&searchDiv=&searchText=")
+'End Sub
+'============================================================================
+Sub Container0_Image12_OnClick()
+	Form.OpenExternalBrowser("https://www.meritzevent.com/super365")
+	'Form.OpenPopup("notice_p10","PresentTax","")
+End Sub
+'============================================================================
+Sub Container0_Image2_OnClick()
+	Form.OpenPopup("notice_p10","ImproveOverseaScr","")
+End Sub
+'============================================================================
+Sub Container0_Image0_OnClick()
+	Form.OpenPopup("notice_p11","EtnEvent","")
+End Sub
+'============================================================================
+Sub Container0_Image1_OnClick()
+	'Form.OpenExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=help13nv&bbsCnttTurnNo=2975&listCnt=5&pageNum=1&searchDiv=&searchText=")
+	Form.OpenPopup("notice_p11","Meritz365Event","")
+End Sub
+'============================================================================
+Sub Container0_Image5_OnClick()
+	'Form.OpenPopup("notice_p12","","")
+	'Form.OpenExternalBrowser("https://etn.imeritz.com/index.html")
+	Form.OpenPopup("notice_p10","TradeMoney","")
+	
+'	Form.OpenExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=help13nw&bbsCnttTurnNo=3238&listCnt=10&pageNum=1&searchDiv=&searchText=")
+End Sub
+'============================================================================
+Sub Container0_Image6_OnClick()
+	'Form.OpenPopup("notice_p10","CFDDayTrade","")
+'	Form.CloseForm()
+'	Form.OpenScreen("90102" , "AbroadEvent")
+	Form.OpenPopup("notice_p11","","")
+End Sub
+'============================================================================
+Sub Container0_Image7_OnClick()
+	'Form.OpenPopup("notice_p10","InstantWithDraw","")
+	'Form.OpenPopup("notice_p10","SummerTimeChange","")
+	'Form.OpenPopup("notice_p10","BroadCom","")
+	Form.OpenExternalBrowser("https://www.tigeretf.com/ko/insight/hot-etf-introduce/view.do?listCnt=6&pageIndex=1&detailsKey=481&q=")
+End Sub
+'============================================================================
+Sub Container0_Image8_OnClick()
+'	Form.OpenPopup("notice_p10","Meritz365","")
+	Form.OpenExternalBrowser("https://www.tigeretf.com/ko/insight/hot-etf-introduce/view.do?listCnt=6&pageIndex=1&detailsKey=479&q=")
+	'Form.OpenScreen( "88031" , "")
+	'Form.OpenExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=fstock&bbsCnttTurnNo=344&listCnt=10&pageNum=1&searchDiv=&searchText=")
+End Sub
+'============================================================================
+'Sub Container0_Image10_OnClick()
+'	'Form.OpenPopup("notice_p5","","")
+'	Form.OpenPopup("notice_p5","","")
+'End Sub
+'============================================================================
+Sub Container0_Image11_OnClick()
+	Form.OpenPopup("notice_p13","","")
+End Sub
+'============================================================================
+Sub Container0_Image10_OnClick()
+'	Form.OpenExternalBrowser("https://www.tigeretf.com/ko/main/index.do?gclid=CjwKCAjwvfmoBhAwEiwAG2tqzEeVdsBmQbt6UgUqGSsXswo7Cjsg-DjHpmdcHlWLDjx8B8UxBlTSmxoCmfgQAvD_BwE")
+	'Form.OpenExternalBrowser("https://www.tigeretf.com/ko/insight/hot-etf-introduce/view.do?listCnt=6&pageIndex=1&detailsKey=473&q=")
+	Form.OpenPopup("notice_p10","USANOONMARKET","")
+End Sub
+'============================================================================
+'Sub Container0_Image5_OnClick()
+'	'Form.OpenPopup("notice_p4","","")
+'	Form.OpenPopup("notice_p10","","")
+'End Sub
+''============================================================================
+'Sub Container0_Image6_OnClick()
+''	Form.OpenExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=fstock&bbsCnttTurnNo=329&listCnt=5&pageNum=1&searchDiv=&searchText=")
+'	Form.OpenPopup("notice_p9","","")
+'End Sub
+'============================================================================
+'Sub Container0_Image6_OnClick()
+'	Form.OpenPopup("notice_p9","","")
+'End Sub
+
+'============================================================================
+'Sub Container0_Image8_OnClick()
+'	Form.OpenPopup("notice_p11","","")
+'End Sub
+'============================================================================
+'Sub Container0_Image7_OnClick()
+'	Form.OpenPopup("notice_p10","","")
+'End Sub
+'============================================================================
+'Sub Container0_Image2_OnClick()
+'	Form.OpenExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=help13nv&bbsCnttTurnNo=2728&listCnt=5&pageNum=1&searchDiv=&searchText=")
+'End Sub
+
+'============================================================================
+'20220913 SWJ START
+'============================================================================
+'20220414 SWJ START : 빈공간 눌러도 닫히도록 수정
+Sub Image9_OnClick()
+	if g_sUserID <> "" then
+		DATAMANAGER.RequestTranData("obcpp_dgtl_003r")
+	else
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcpp_dgtl_003r" then 
+		DATAMANAGER.SetDataValue( 0, "obcpp_dgtl_003r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcpp_dgtl_003r" then
+		
+		'sPppID는 개인화 팝업 각각의 ID이다.
+		'OutBlock에 게시 순서에 대한 필드가 있지만,
+		'서비스에서 게시 순서대로 Array로 내려주기로 해서,
+		'화면에서는 순서 판단하지 않아도 된다.
+		'배열 순서대로만 띄워주면 된다.
+		sPppID = Array()
+		sPppWeb = Array()
+		sPppScr = Array()
+		sPppflag = Array()
+		
+		for i = 0 to DATAMANAGER.GetDataCount(0, "obcpp_dgtl_003r", "OutBlock1") - 1
+			sPppID(i)    = DATAMANAGER.GetDataValue( 0, "obcpp_dgtl_003r", "OutBlock1", "PPP_ID"          , i )
+			sPppWeb(i)   = DATAMANAGER.GetDataValue( 0, "obcpp_dgtl_003r", "OutBlock1", "URL_ADDR"        , i )
+			sPppScr(i)   = DATAMANAGER.GetDataValue( 0, "obcpp_dgtl_003r", "OutBlock1", "SCR_NO"   	   , i )
+			sPppflag(i)  = DATAMANAGER.GetDataValue( 0, "obcpp_dgtl_003r", "OutBlock1", "PROS_CLS_CODE"   , i )
+		next
+		
+		
+		for i = DATAMANAGER.GetDataCount(0, "obcpp_dgtl_003r", "OutBlock1") - 1 to 0 step -1
+			g_szData1 = sPppID(i)   & "★" & g_szData1
+			g_szData2 = sPppWeb(i)  & "★" & g_szData2
+			g_szData3 = sPppScr(i)  & "★" & g_szData3
+			g_szData4 = sPppflag(i) & "★" & g_szData4
+		next
+		
+		if Ubound(sPppID) < 0 then
+			Form.CloseForm()
+			exit sub
+		else
+			'Form.SetTimerEvent2("1", 1, 0.1)
+			'20230731 SWJ START: OpenNextPopup으로 열면 iOS에서 웹에서 MTS 계좌개설화면 연동 시 까만 배경만 나오는 현상 수정
+			'(notice_p0 이 7일간 보지 않기일 때 개인화 팝업도 뜰 경우만 재연되었음) 
+			g_bCloseFlag = true
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+
+'============================================================================
+'Sub Form_OnPopupReturn(sKeyName, sRet)
+'	if sKeyName == "NOTICE_CLOSE" then
+'		Form.CloseForm()
+'	end if
+'End Sub
+'============================================================================
+'컨트롤 보임처리 함수
+'============================================================================
+Function ControlVisible(bTrue)
+	Container0.visible = bTrue
+	btnClose.visible = bTrue
+	btnClose7.visible = bTrue
+	Btn0.visible = bTrue
+	ImgPop.visible = bTrue
+	LblClose.visible = bTrue
+	ImgClose.visible = bTrue
+	Chk7days.visible = bTrue
+	'Label0.visible = bTrue
+	'Label1.visible = bTrue
+	'Label2.visible = bTrue
+	
+	'20230904 LES START
+	sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	if sDeviceOS == "2" then
+		if g_sAppver <> "" and g_sAppver >= 2533 then
+			Image3.visible = bTrue
+		end if
+	end if
+	'20230904 LES END
+	
+	
+End Function
+'============================================================================
+'Sub Form_OnTimerEvent(sTimerID)
+'	
+'	if sTimerID == "1" or sTimerID == 1 then
+'		Form.SetTimerEvent2(sTimerID, 0, 0.1)
+'		Form.OpenNextPopup("notice_event" , g_szData1 & "♥" & g_szData2 & "♥" & g_szData3 & "♥" & g_szData4, "")
+'	end if
+'	
+'End Sub
+'============================================================================
+Sub DATAMANAGER_OnRequestTranTimeout(szTranID)
+	if szTranID == "obcpp_dgtl_003r" then
+		Form.CloseForm()
+	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID == "obcpp_dgtl_003r" then
+		Form.CloseForm()
+	end if
+End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOGOUT_MSG" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenPopup("mbbdm85100" , "" , "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	if g_bCloseFlag then
+		Form.OpenPopup("notice_event" , g_szData1 & "♥" & g_szData2 & "♥" & g_szData3 & "♥" & g_szData4, "")
+	end if
+End Sub
+
+'============================================================================
+' 20231013 LES START - 플로팅배너 읽음처리 초기화(임시추가로직)
+'============================================================================
+Function FloatBanner_ReadCheck(sDeviceOS)
+
+	'20231012_6 : MY업무 > MY자산 플로팅배너 키값
+	szFloatBannerKey = "20231012_6"
+
+	'-----------------------------------------
+	'안드로이드
+	'-----------------------------------------
+	if sDeviceOS == "1" then
+		
+		szReadCheck = Form.GetEnvData(szFloatBannerKey)
+		
+		if szReadCheck == "1" then
+			
+			szReadCheckDate = Form.LoadConfigData("FloatBanner", szFloatBannerKey.. "_readCheckDate")
+			
+			'읽은날짜가 있으면 
+			if szReadCheckDate <> "" then
+			
+				szToday = Form.GetSharedData("&HOST_DATE", false)
+				
+				'읽은날짜가 당일이 아니면 
+				if szReadCheckDate <> szToday then
+					
+					'읽음처리/읽은날짜 클리어
+					Form.SetEnvData(1,szFloatBannerKey, "0")
+					Form.SaveConfigData("FloatBanner", szFloatBannerKey.. "_readCheckDate", "")
+					
+				end if
+			
+			else
+			
+				'읽은날짜가 없으면 오늘날짜로 세팅
+				szToday = Form.GetSharedData("&HOST_DATE", false)
+				Form.SaveConfigData("FloatBanner", szFloatBannerKey.. "_readCheckDate", szToday)
+			
+			end if
+		
+		end if
+		
+	'-----------------------------------------
+	'iOS
+	'-----------------------------------------
+	elseif sDeviceOS == "2" then
+		
+		
+		szReadCheck = Form.LoadConfigData("FloatBanner", szFloatBannerKey)
+		
+		if szReadCheck == "1" then
+			
+			szReadCheckDate = Form.LoadConfigData("FloatBanner", szFloatBannerKey.."_readCheckDate")
+			
+			'읽은날짜가 있으면 
+			if szReadCheckDate <> "" then
+			
+				szToday = Form.GetSharedData("&HOST_DATE", false)
+				
+				'읽은날짜가 당일이 아니면 
+				if szReadCheckDate <> szToday then
+					
+					'읽음처리/읽은날짜 클리어
+					Form.SaveConfigData("FloatBanner", szFloatBannerKey, "0")
+					Form.SaveConfigData("FloatBanner", szFloatBannerKey.. "_readCheckDate", "")
+					
+				end if
+			
+			else
+			
+				'읽은날짜가 없으면 오늘날짜로 세팅
+				szToday = Form.GetSharedData("&HOST_DATE", false)
+				Form.SaveConfigData("FloatBanner", szFloatBannerKey.."_readCheckDate", szToday)
+				
+			end if
+		
+		end if
+		
+		
+	end if
+	
+End Function
+
+'============================================================================
+' 20231013 LES END 
+'============================================================================
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	' 20240802_01 HWG START
+	if sKeyName == "prevnotice" then
+		sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+		
+		'20211026 SWJ START : 안드로이드 targetSDK verison30 관련 안내 팝업 게시
+		szAppVer = Form.GetSharedData("&APP_VERSION", False)
+		szData = Split(szAppVer, ".")
+		szAppVer = Cint(szData(0) & szData(1) & szData(2))
+		g_sAppver = szAppVer '20230904 LES
+		
+		sOSVrsn		=	Form.GetSharedData("&OS_VERSION", false)
+		szAppVerCode  = 	Form.GetSharedData("&APP_VERSION_CODE", False)
+		
+		'20220913 SWJ START
+		g_sUserID 	= Form.GetSharedData("&USER_ID" , false)
+		'20220913 SWJ END
+		
+		'20231013 LES START
+		FloatBanner_ReadCheck(sDeviceOS)
+		'20231013 LES END
+		
+		'20240710 SWJ START
+		'권리선반영 플래그용으로
+		'notice_p0에서 만든다.
+		'앞으로 권리선반영 배포가 있을 경우 notice_p0에서만 하면 된다.
+		Form.SaveConfigData("NoticeSetting", "AbroadAgreement_StartDate", "20240715")
+		Form.SaveConfigData("NoticeSetting", "AbroadAgreement_EndDate", "20240717")
+		Form.SaveConfigData("NoticeSetting", "AbroadAgreement_BswrClcd", "10")
+		Form.SetSharedData("AbroadAgreement_PopupYN", "Y")
+		'20240710 SWJ END
+		
+		if sDeviceOS = "1" then
+			
+			Image3.visible = false
+	
+		elseif sDeviceOS = "2" then
+	'		
+			'2.5.33 버전부터 다시 그냥 띄워줌
+			'ios 2.5.8 버전부터 공지팝업 메인에서 애니메이션 처리해줌
+			if szAppVer >= 2533 then
+				Image3.visible = false '20230904 LES
+				
+			else
+				Image3.visible = false
+				Image4.visible = false
+			end if
+		end if
+		'20211026 SWJ END
+		
+		'20220509 SWJ START : 고객 이벤트 메뉴에 같은 화면 추가
+		szScreen = Form.GetSharedData("&SCREEN_NO", false)
+		
+		'20230421 SWJ START: 블랙테마 없애기
+		Form.SetEnvData(1, "common.theme", "white")	
+		'20230421 SWJ END
+		
+		Dim saveDate
+		Dim calcDate
+		
+		g_Savekey = Form.GetOpenLinkData( )
+		
+		saveDate = Form.LoadConfigData("NoticeSetting", "notice_20240809") '20210508 HSZ 
+		todayDate = Form.GetSharedData("&HOST_DATE",0)
+		
+		if saveDate <> "" then
+			
+			ResaveDate 	= left(saveDate,4)&"-"&mid(saveDate,5,2)&"-"&right(saveDate,2)
+			RetodayDate 	= left(todayDate,4)&"-"&mid(todayDate,5,2)&"-"&right(todayDate,2)
+			
+			calcDate = tonumber(DateDiff("d",ResaveDate, RetodayDate))
+	
+			if calcDate <= 7 then
+				
+				'20220913 SWJ START
+				if g_sUserID <> "" then
+					DATAMANAGER.RequestTranData("obcpp_dgtl_003r")
+				else
+					Form.CloseForm()
+				end if
+				'20220913 SWJ END	
+			
+			'20220913 SWJ START
+			'7일간 보지 않기인데, 개인화팝업을 호출해야하는 경우
+			'깜빡이면서 화면이 닫히는 현상 개선
+			else
+				ControlVisible(True)
+			end if
+		else
+			ControlVisible(True)
+		end if
+		
+		'글자색 진하게
+		'Container0.Label0.fontbold = 1
+		Container0.btnClose.fontbold = 1
+		Container0.btnClose7.fontbold = 1
+		
+		LblClose.setNeighborCtlPos("ImgClose","right", 10,"")
+		Container0.setScrollBarVisible("0")
+	end if
+	' 20240802_01 HWG END
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_dgtl_003r" trcode="obcpp_dgtl_003r" compress="1" encryption="1" timeout="3" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_dgtl_003r" title="MTS 개인화 팝업 ID별 세그먼트" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="45" _ulen="37" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="434" _ulen="344" >
+
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+PPP_ID^팝업ID^36^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+SEQ^순서^6^0^7^0^0^0^0
+PPP_STAT_CLS_CODE^팝업상태구분코드^2^0^0^0^0^0^0
+IMG_ID^이미지ID^36^0^0^0^0^0^0
+RPRS_ACNO^대표계좌번호^8^0^0^0^0^0^0
+SCR_NO^화면번호^15^0^0^0^0^0^0
+URL_ADDR^URL주소^200^0^0^0^0^0^0
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

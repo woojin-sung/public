@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="공지팝업_3" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" vscroll="1" scroll_pos="0,0" ly_vert="0,0,375,600,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" imgpath="notice_mobile_new.png" ly_vert="0,0,375,1400,1" />
+				<BUTTON name="Button1" btnimage="alpha" ly_vert="10,990,350,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="Button0" caption="닫기" fgcolor="004:000000000" fontsize="-2" ly_vert="293,611,77,25,1" />
+		<CHKBUTTON name="ChkButton0" fontsize="-2" chkcaption="다시 보지 않기" unchkcaption="다시 보지 않기" ly_vert="6,609,159,27,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="893" _ulen="867" >
+dim g_Savekey
+
+'============================================================================
+Sub Button0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	g_Savekey = Form.GetOpenLinkData( )
+	
+End Sub
+
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	Form.SetEnvData(1, g_Savekey, sCheckState )
+End Sub
+
+'============================================================================
+Sub Container0_Button1_OnClick()
+
+	sVer = Form.GetSharedData("&APP_VERSION")
+	
+	if sVer == "1.0.49" then 'Open 시 최초 버전 1.0.49
+		Form.openExternalBrowser("https://play.google.com/store/apps/details?id=com.imeritz.smartmeritzact" ) 
+	else
+		'1.0.50이후부터 지원되는 API
+		Form.RunSmartMeritzAct()
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

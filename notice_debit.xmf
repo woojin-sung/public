@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="공지팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CHKBUTTON name="ChkButton0" fontsize="-2" chkcaption="하루동안 보지 않기" unchkcaption="하루동안 보지 않기" ly_vert="6,616,159,27,1" />
+		<BUTTON name="Button0" caption="닫기" fgcolor="004:000000000" fontsize="-2" ly_vert="288,615,77,25,1" />
+		<FORMTAB name="FormTab0" tabcount="1" tabheadheight="0" usepg="1" pgbarheight="15" ly_vert="0,0,375,614,1" >
+			<PAGE name="page007047" caption="대차주식서비스" linkfile="notice_d.xmf" loadingtype="1" />
+		</FORMTAB>
+		<IMAGE name="Image5" imgpath="icon_main_11" ly_vert="5,7,30,28,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1139" _ulen="1117" >
+'20200629 증권대차중개 서비스 팝업 SWJ START
+Dim g_Savekey
+'============================================================================
+Sub Button0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	g_Savekey = Form.GetOpenLinkData( )
+		
+	saveDate = Form.LoadConfigData("NoticeSetting", "notice_debit")
+	todayDate = Form.GetSharedData("&HOST_DATE",0)
+	
+	if saveDate == todayDate then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	
+	if sCheckState = 1 or sCheckState = "1" then
+		saveDate = Form.GetSharedData("&HOST_DATE",0)
+		Form.SaveConfigData("NoticeSetting", "notice_debit", saveDate)
+	end if
+	
+	Form.SetEnvData(1, g_Savekey, sCheckState )
+	
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+
+End Sub
+
+'============================================================================
+Sub Image5_OnClick()
+	Form.CloseForm()
+End Sub
+'20200629 SWJ END
+	</SCRIPT_INFO>
+</ROOT>

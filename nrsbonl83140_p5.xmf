@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="83140" scrname="반대의사/매수청구 신청_비밀번호" version="2" writer="홍수지" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" imgpath="bg_dim40.9.png" ly_vert="0,0,375,755,1" />
+		<CONTAINER name="cont0" containerimage="popup_bg.9" ly_vert="0,432,375,323,1" scroll_ly_vert="0,432,375,323,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblText" fontsize="5" fontstyle="01" caption="계좌 비밀번호" fonttype="3" ly_vert="9,0,336,32,1" />
+				<EDIT name="edtPassword" halign="1" password="2" imetype="1" maxlength="8" minlength="4" ly_vert="20,55,336,39,1" />
+				<LABEL name="lblScrollPos" ly_vert="400,0,100,10,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3279" _ulen="3121" >
+--===========================================================================
+--===========================================================================
+dim g_szAcno, g_szAsno
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_OSType = Form.GetSharedData( "&OS_TYPE", False )'1.안드로이드 2.iOS
+	'암호화 버전
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", FALSE ) 'v005
+	'오픈데이터
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		dim tAcntInfo
+		tAcntInfo = Split(szOpenData, "★")
+		
+		g_szAcno = tAcntInfo[0]
+		g_szAsno = tAcntInfo[1]
+		
+		if g_szAcno == "" or g_szAcno == null then
+			Form.ShowAlert("알림", "계좌정보가 없습니다.")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+'	Form.SetSharedData("&BACK_PRESS_ENABLE" , "N")
+	'0.5초 후 보안키패드 띄움
+	Form.SetTimerEvent2(1, 1, 0.5)
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID, 0, 0.5)
+	
+	if Cint(sTimerID) = 1 then
+		if g_szAcno = "" then
+			Form.MsgBox("알림", "계좌번호가 입력되지 않았습니다.", "pwdcheck", 0)
+		else
+			cont0.edtPassword.setShowKeypad(True)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obacp_opop_066r" then
+		'패스워드 암호화여부
+		If g_PlainRm = "1" Then
+			szPwd = cont0.edtPassword.caption
+		Else
+			szPwd = Form.GetEncData(cont0.edtPassword.caption)
+		End If
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNT_PWD" 			, 0 , szPwd)			'계좌비밀번호
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ACNO" 				, 0 , g_szAcno)		'계좌번호
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "ASNO" 				, 0 , g_szAsno)		'계좌일련번호
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obacp_opop_066r" then
+		Form.SendReturnToParent("nrsbonl83140_p5", cont0.edtPassword.caption)
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID == "obacp_opop_066r" then
+		Form.ShowAlert("알림", szErrMsg)
+	end if
+End Sub
+
+'============================================================================
+Sub imgBg_OnClick()
+'	g_bRegFlag = false
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub cont0_edtPassword_OnEditComplete()
+	if g_szAcno == "" or g_szAcno == null then
+		Exit Sub
+	else
+		if CInt(cont0.edtPassword.pwdlen) < 4 or cont0.edtPassword.caption == "" or cont0.edtPassword.caption == null then
+			Exit Sub
+		else
+			DATAMANAGER.RequestTranData( "obacp_opop_066r" )
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+'	Form.SetSharedData("&BACK_PRESS_ENABLE", "Y")
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obacp_opop_066r" trcode="obacp_opop_066r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obacp_opop_066r" title="계좌Control 비밀번호 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="123" _ulen="91" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="196" _ulen="150" >
+
+MANG_BRCD^관리지점코드^4^0^0^0^0^0^0
+MANG_EMPNO^관리 직원번호^9^0^0^0^0^0^0
+MANG_EMPL_NAME^관리 직원 명^40^0^0^0^0^0^0
+CUST_GRAD_CODE^고객 등급 코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

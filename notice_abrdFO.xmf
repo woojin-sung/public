@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="공지팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CHKBUTTON name="ChkButton0" fontsize="-2" chkcaption="위 내용을 확인하였습니다" unchkcaption="위 내용을 확인하였습니다" ly_vert="115,618,173,27,1" />
+		<BUTTON name="Button0" caption="확인" fgcolor="004:000000000" fontsize="-2" ly_vert="298,618,65,25,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="unfair_abrd.png" ly_vert="0,1,375,610,1" />
+		<IMAGE name="Image5" imgpath="icon_main_11" ly_vert="2,2,30,28,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1284" _ulen="1248" >
+'============================================================================
+'20210113 SWJ START : 해외파생 불공정거래 팝업게시 (매달 18~22일 주기)
+'============================================================================
+
+'============================================================================
+Sub Button0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	Dim todayDate
+	Dim DayDate
+	Dim ntcCheck
+	
+	todayDate   = Form.GetSharedData("&HOST_DATE",0)
+	DayDate     = tonumber(right(todayDate,2))
+	noticeCheck = Form.LoadConfigData("NoticeAbroadFO", "NoticeCheck")
+	
+	if DayDate < 18 or DayDate > 22 then
+		Form.SaveConfigData("NoticeAbroadFO", "NoticeCheck", "0")
+		Form.CloseForm()
+	else
+		if noticeCheck = "1" or noticeCheck = 1 then
+			Form.CloseForm()
+		end if
+	end if
+	
+End Sub
+
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	if sCheckState = "1" or sCheckState = 1 then
+		Form.SaveConfigData("NoticeAbroadFO", "NoticeCheck", "1")
+	end if
+End Sub
+'============================================================================
+Sub Image5_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

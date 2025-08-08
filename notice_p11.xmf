@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="제이알리츠 공모주청약" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" ly_vert="0,0,375,600,1" scroll_ly_vert="0,0,375,600,1" >
+			<CONTROL_INFO/>
+		</CONTAINER>
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="0,30,375,616,1" />
+		<LABEL name="Label0" visible="0" fontsize="-4" caption="※ 본 이벤트는 Apple의 후원을 받지 않으며, 일체의 관련이 없습니다." ly_vert="0,610,375,32,0" />
+		<IMAGE name="Image2" imgpath="icon_main_11" ly_vert="337,8,30,28,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5792" _ulen="5350" >
+Dim g_LoginType
+Dim g_btnflag
+Dim g_sCloseflag
+g_sCloseflag = ""
+'============================================================================
+
+'============================================================================
+
+'============================================================================
+'
+'============================================================================
+'
+'============================================================================
+'
+''============================================================================
+'
+''============================================================================
+'
+''============================================================================
+'
+''============================================================================
+'
+''============================================================================
+'
+'============================================================================
+'20201123 SWJ START : 미국 주식시장 개장 전 거래 프리마켓 오픈안내
+'Sub Button0_OnClick()
+'	'Form.openExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=help13nv&bbsCnttTurnNo=2603&listCnt=5&pageNum=1&searchDiv=null&searchText=")
+'	'Form.OpenExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=help13nv&bbsCnttTurnNo=2728&listCnt=5&pageNum=1&searchDiv=&searchText=")
+'	Form.OpenExternalBrowser("https://home.imeritz.com/bbs/BbsRead.go?bbsGrpId=bascGrp&bbsId=help13nv&bbsCnttTurnNo=2749&listCnt=5&pageNum=1&searchDiv=&searchText=")
+'End Sub
+'20201123 SWJ END
+'============================================================================
+'Sub Image0_OnClick()
+	'Form.OpenExternalBrowser("https://www.tigeretf.com/npc/home.do")
+'End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOG_FORCE" then
+		if sRet == "ok" then
+			Form.SetSharedData("BDM_CORPORATE", "Y")
+			Form.OpenNextPopup("mhetc90021" , "" , "")
+		else
+			Form.CloseForm()			
+		end if	
+	end if
+	
+	if sKeyName == "LOGOUT_MSG" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenPopup("mbbdm85100" , "" , "")
+		end if
+	end if
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	g_LoginType = Form.GetSharedData("&LOGIN_TYPE", 0 )
+	sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	
+	g_serverMode = Form.GetSharedData("&SERVER_MODE", false)
+	
+	'웹 캐시삭제
+	WebView0.RemoveCache()
+	
+	If g_serverMode == "1" Then	'개발기
+		sPreUrl = "https://testhome.imeritz.com/mobile/sub/m_eventDtl.html?file="
+	else
+		sPreUrl = "https://home.imeritz.com/mobile/sub/m_eventDtl.html?file="
+	end if
+	
+	'20240423 SWJ START : ETN 이벤트
+	sScrPoint = Form.GetOpenLinkData()
+	
+	if sScrPoint == "EtnEvent" then
+		sSuffUrl = "2024041701"
+	elseif sScrPoint == "Meritz365Event" then
+		sSuffUrl = "2024060501"
+	else
+		sSuffUrl = "20220513"
+	end if
+	
+	WebView0.urlpath = sPreUrl..sSuffUrl
+	'20240423 SWJ END
+	
+	'20220615 SWJ START
+	'모바일 웹에서 어떤 OS인지 판단할 수 있음
+	if sDeviceOS == "1" then
+		WebView0.SetUserAgent("meritz_android")
+	elseif sDeviceOS == "2" then
+		WebView0.SetUseJavaScript("1")
+		WebView0.SetUserAgent("meritz_ios")
+	else
+	end if
+	'20220615 SWJ END
+	
+	'20220927 LES START iOS 심사대응
+	if sDeviceOS == "2" then
+		WebView0.height = 580
+		Container0.height = 580
+		Label0.visible = true
+	end if
+	
+	
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+	'20240610 SWJ START
+	if g_sCloseflag = "99999" then
+		Form.OpenScreen("99999", "Meritz365" ,"")
+	end if
+	'20240610 SWJ END
+End Sub
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "WebViewReturn" then
+		sData = Split(sParam,"@")
+		
+		'1: 맵파일 바로 호출, 2: 웹, 3: 맵파일 호출 전 파라미터 받는 경우
+		if Ubound(sData) > 0 then
+			if sData(0) == "3" then
+				'비대면 계좌개설
+				if sData(1) == "85100" then
+					if CInt(g_LoginType) > 1 then '로그인상태
+						Dim sText
+						sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+						Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+					else 
+						Form.SetSharedData("&SCREEN_AUTH" , "99")
+						Form.OpenPopup("mbbdm85100" , "" , "")
+					end if
+				
+				'20240610 SWJ START
+				elseif sData(1) == "99999" then
+					g_sCloseflag = "99999"
+					Form.CloseForm()
+				'20240610 SWJ END
+				
+				'개인전문투자자 이벤트 신청하기 (화면번호 90180)
+				else
+					'개인전문투자자 구분값
+					Form.SetSharedData("DIGITAL_EVENT","INDIV")
+						
+					if Cint(g_LoginType) > 1 then '로그인상태
+						Form.OpenNextPopup("banner_p0","", "")
+					else
+						Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+					end if
+				end if
+			elseif sData(0) == "1" then
+				Form.OpenScreen(sData(1) , "")
+			elseif sData(0) == "2" then
+				
+				If g_serverMode == "1" Then	'개발기
+					szWebUrl = Replace(sData(1),"home.imeritz.com","testhome.imeritz.com")
+				else
+					szWebUrl = sData(1)
+				end if
+				
+				Form.OpenExternalBrowser(szWebUrl)
+			end if
+		end if			
+	end if
+End Sub
+'============================================================================
+Sub Image2_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

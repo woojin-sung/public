@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="91005" scrname="환경설정_주문_수량자동입력" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,323,371,1" />
+	<CONTROL_INFO>
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="19,283,138,39,1" />
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,323,55,1" />
+		<BUTTON name="ButtonOK" caption="확인" btnimage="btn_01.9" ly_vert="163,283,138,39,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="2" outline="0000" designorder="1" ly_vert="17,63,289,203,1" >
+			<COL_INFO ly_vert_width="289" />
+			<ROW_INFO ly_vert_height="35,168" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" fgcolor="018:102102102" bgcolor="066:238239240" halign="0" fontsize="-2" fontstyle="01" impidxs="" />
+				<CELL cell_ly="0,1,0,1" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="LabelTitle" fontsize="2" fontstyle="01" bgcolor="064:188030030" halign="1" ly_vert="0,0,323,55,1" />
+		<IMAGE name="ImageClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="284,15,24,24,1" />
+		<RADIOGROUP name="RadioStockBuy" visible="0" buttonsnumber="4" ly_vert="23,96,277,156,0" >
+			<RADIO_INFO>
+				<RADIO no="0" text="미사용" selforecolor="004:000000000" position="0,0,277,39" />
+				<RADIO no="1" text="현금가능수량" selforecolor="004:000000000" position="0,39,277,39" />
+				<RADIO no="2" text="최대가능수량(미수포함)" selforecolor="004:000000000" position="0,78,277,39" />
+				<RADIO no="3" text="수량입력" selforecolor="004:000000000" position="0,117,277,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<RADIOGROUP name="RadioStockSel" visible="0" buttonsnumber="3" ly_vert="23,96,277,156,0" >
+			<RADIO_INFO>
+				<RADIO no="0" text="미사용" selforecolor="004:000000000" position="0,0,277,39" />
+				<RADIO no="1" text="보유잔고수량" selforecolor="004:000000000" position="0,39,277,39" />
+				<RADIO no="2" text="수량입력" selforecolor="004:000000000" position="0,78,277,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<EDIT name="EditStock" enable="0" visible="0" autofontsize="1" mask="0,0,,주,0,,0,1,1,0,0" halign="2" imetype="1" ly_vert="150,213,150,39,0" />
+		<RADIOGROUP name="RadioFutOpt" visible="0" buttonsnumber="4" ly_vert="23,106,277,156,0" >
+			<RADIO_INFO>
+				<RADIO no="0" text="미사용" selforecolor="004:000000000" position="0,0,277,39" />
+				<RADIO no="1" text="신규가능수량" selforecolor="004:000000000" position="0,39,277,39" />
+				<RADIO no="2" text="청산가능수량" selforecolor="004:000000000" position="0,78,277,39" />
+				<RADIO no="3" text="수량입력" selforecolor="004:000000000" position="0,117,277,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<EDIT name="EditFutOpt" enable="0" visible="0" autofontsize="1" mask="0,0,,계약,0,,0,1,1,0,0" halign="2" imetype="1" maxlength="0" ly_vert="150,223,150,39,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7991" _ulen="7407" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 환경설정
+' 02. 화면설명 : 환경설정_주문_수량자동입력
+' 03. 작    성 : 2016.02.16 김보라
+'-------------------------------------------------------------------------------------------
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sFileName '파일명
+Dim g_sKey '수량자동입력키
+Dim g_sStockBuyQtyKey '매수수량자동입력-주식키
+Dim g_sStockSelQtyKey '매도수량자동입력-주식키
+Dim g_sFutOptBuyQtyKey '매수수량자동입력-선물옵션키
+Dim g_sFutOptSelQtyKey '매도수량자동입력-선물옵션키
+Dim g_sStockBuyQtyCntKey '매수수량자동입력수량-주식키
+Dim g_sStockSelQtyCntKey '매도수량자동입력수량-주식키
+Dim g_sFutOptBuyQtyCntKey '매수수량자동입력수량-선물옵션키
+Dim g_sFutOptSelQtyCntKey '매도수량자동입력수량-선물옵션키
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' 환경설정값리턴함수
+'============================================================================
+Function GetConfigData(sFileName, sKey, sCtlName, sPropName)
+	Dim sValue
+	sValue = Form.LoadConfigData(sFileName, sKey)
+
+	if sValue == null or Trim(sValue) == "" then
+		sValue = "0" '기본값 사용하지않음
+	end if
+	
+	Form.SetCtlProp( sCtlName, sPropName, sValue )
+	
+	if sValue == "3" then
+		if sKey == g_sStockBuyQtyKey then
+			EditStock.enable = true
+			
+			EditStock.caption = Form.LoadConfigData(sFileName, g_sStockBuyQtyCntKey)
+		elseif sKey == g_sFutOptBuyQtyKey or sKey == g_sFutOptSelQtyKey then
+			EditFutOpt.enable = true
+			
+			if sKey == g_sFutOptBuyQtyKey then
+				EditFutOpt.caption = Form.LoadConfigData( sFileName, g_sFutOptBuyQtyCntKey )
+			elseif sKey == g_sFutOptSelQtyKey then
+				EditFutOpt.caption = Form.LoadConfigData( sFileName, g_sFutOptSelQtyCntKey )
+			end if
+		end if
+	elseif sValue == "2" then
+		if sKey == g_sStockSelQtyKey then
+			EditStock.enable = true
+			
+			EditStock.caption = Form.LoadConfigData(sFileName, g_sStockSelQtyCntKey)
+		end if
+	end if
+End Function 
+
+'============================================================================
+' 환경설정값세팅함수
+'============================================================================
+Function SetConfigData(sFileName, sKey, sCtlName, sPropName)
+	Dim sValue
+	sValue = Form.GetCtlProp( sCtlName, sPropName )
+	
+	if sValue == "3" then
+		if sKey == g_sStockBuyQtyKey then
+			if EditStock.caption == "" or EditStock.caption == "0" then
+				Form.MsgBox( "알림", "수량을 입력해주세요.", "", 6 )	
+				Exit Function
+			end if
+			
+			Form.SaveConfigData( sFileName, g_sStockBuyQtyCntKey, EditStock.caption )
+		elseif sKey == g_sFutOptBuyQtyKey or sKey == g_sFutOptSelQtyKey then
+			if EditFutOpt.caption == "" or EditFutOpt.caption == "0" then
+				Form.MsgBox( "알림", "수량을 입력해주세요.", "", 6 )	
+				Exit Function
+			end if
+			
+			if sKey == g_sFutOptBuyQtyKey then
+				Form.SaveConfigData( sFileName, g_sFutOptBuyQtyCntKey, EditFutOpt.caption )
+			elseif sKey == g_sFutOptSelQtyKey then
+				Form.SaveConfigData( sFileName, g_sFutOptSelQtyCntKey, EditFutOpt.caption )
+			end if
+		end if
+	elseif sValue == "2" then
+		if sKey == g_sStockSelQtyKey then
+			if EditStock.caption == "" or EditStock.caption == "0" then
+				Form.MsgBox( "알림", "수량을 입력해주세요.", "", 6 )	
+				Exit Function
+			end if
+			
+			Form.SaveConfigData( sFileName, g_sStockSelQtyCntKey, EditStock.caption )
+		end if
+	end if
+	
+	Form.SaveConfigData( sFileName, sKey, sValue )
+	
+	Form.SendReturnToParent("nhnts91005_p1" , sKey)
+	Form.CloseForm()
+End Function 
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sRevData, sText, sText1
+	sRevData = Form.GetOpenLinkData()
+	
+	if sRevData == null or Trim(sRevData) == "" then
+		Exit Sub
+	end if
+	
+	g_sFileName = "SET_ORDER" 
+	g_sKey = sRevData
+	g_sStockBuyQtyKey = "AUTO_STOCK_BUYQTY" 
+	g_sStockSelQtyKey = "AUTO_STOCK_SELQTY" 
+	g_sFutOptBuyQtyKey = "AUTO_FUTOPT_BUYQTY" 
+	g_sFutOptSelQtyKey = "AUTO_FUTOPT_SELQTY" 
+	g_sStockBuyQtyCntKey = "AUTO_STOCK_BUYQTYCNT" 
+	g_sStockSelQtyCntKey = "AUTO_STOCK_SELQTYCNT" 
+	g_sFutOptBuyQtyCntKey = "AUTO_FUTOPT_BUYQTYCNT" 
+	g_sFutOptSelQtyCntKey = "AUTO_FUTOPT_SELQTYCNT" 
+	
+	if g_sKey == g_sStockBuyQtyKey then
+		sText = "매수수량 자동입력"
+		sText1 = "매수수량설정"
+		
+		RadioStockBuy.visible = true
+		EditStock.visible = true
+		
+		GetConfigData(g_sFileName, g_sKey, "RadioStockBuy", "currentindex")
+	elseif g_sKey == g_sStockSelQtyKey then
+		sText = "매도수량 자동입력"
+		sText1 = "매도수량설정"
+		
+		RadioStockSel.visible = true
+		EditStock.top = "174"
+		EditStock.visible = true
+		
+		GetConfigData(g_sFileName, g_sKey, "RadioStockSel", "currentindex")
+	elseif g_sKey == g_sFutOptBuyQtyKey then
+		sText = "매수수량 자동입력"
+		sText1 = "매수수량설정"
+		
+		RadioFutOpt.visible = true
+		EditFutOpt.visible = true
+		
+		GetConfigData(g_sFileName, g_sKey, "RadioFutOpt", "currentindex")
+	elseif g_sKey == g_sFutOptSelQtyKey then
+		sText = "매도수량 자동입력"
+		sText1 = "매도수량설정"
+		
+		RadioFutOpt.visible = true
+		EditFutOpt.visible = true
+		
+		GetConfigData(g_sFileName, g_sKey, "RadioFutOpt", "currentindex")
+	end if
+	
+	LabelTitle.caption = sText
+	Table0.SetCellString(0, 0, sText1)
+End Sub
+
+'============================================================================
+'매수수량자동입력-주식
+'============================================================================
+Sub RadioStockBuy_OnClick(nIndex)
+	if nIndex == 3 then
+		EditStock.enable = true
+	else
+		EditStock.enable = false
+		EditStock.caption = ""
+	end if
+End Sub
+
+'============================================================================
+'매도수량자동입력-주식
+'============================================================================
+Sub RadioStockSel_OnClick(nIndex)
+	if nIndex == 2 then
+		EditStock.enable = true
+	else
+		EditStock.enable = false
+		EditStock.caption = ""
+	end if
+End Sub
+
+'============================================================================
+'매수/매도수량자동입력-선물옵션
+'============================================================================
+Sub RadioFutOpt_OnClick(nIndex)
+	if nIndex == 3 then
+		EditFutOpt.enable = true
+	else
+		EditFutOpt.enable = false
+		EditFutOpt.caption = ""
+	end if
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	if g_sKey == g_sStockBuyQtyKey then
+		SetConfigData(g_sFileName, g_sKey, "RadioStockBuy", "currentindex")
+	elseif g_sKey == g_sStockSelQtyKey then
+		SetConfigData(g_sFileName, g_sKey, "RadioStockSel", "currentindex")
+	elseif g_sKey == g_sFutOptBuyQtyKey then
+		SetConfigData(g_sFileName, g_sKey, "RadioFutOpt", "currentindex")
+	elseif g_sKey == g_sFutOptSelQtyKey then
+		SetConfigData(g_sFileName, g_sKey, "RadioFutOpt", "currentindex")
+	end if
+End Sub
+
+'============================================================================
+Sub ImageClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

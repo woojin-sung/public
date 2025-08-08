@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="긴급메세지팝업" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,440,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<LABEL name="LabelTitle" fontsize="2" fontstyle="01" caption="긴급메세지" bgcolor="092:185046046" halign="1" autofontsize="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="269,15,24,24,1" />
+		<BUTTON name="ButtonOK" caption="내용확인" btnimage="btn_01.9" ly_vert="25,387,259,39,1" />
+		<GRID name="Grid0" colcount="4" ly_vert="1,54,309,320,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_msg" fontsize="-2" fontstyle="01" caption="긴급메세지 입니다." multiline="1" paddinginfo="0,10,0,10" />
+				<LABEL name="bd_addmsg" fontsize="-2" caption="※ 앱 재실행이 필요 합니다." valign="0" autofontsize="1" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_date" fontsize="-1" mask="1,0,발급일 : ,,1,####-##-##,0,1,1,0,0" autofontsize="1" ly_vert="0,0,100,20,1" />
+				<IMAGE name="bd_icon" autosize="1" imgpath="ic_notice2.png" margin="14,30,12,30" />
+				<IMAGE name="bd_cell4" />
+				<LABEL name="bd_Edate" fontsize="-1" mask="1,0,만료일 : ,,1,####-##-##,0,1,1,0,0" valign="0" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_dn" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell2" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell5" halign="2" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_arrow" fontstyle="01" halign="1" />
+				<IMAGE name="bd_srno" />
+				<IMAGE name="bd_cell1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" usetopheader="0" initrowcount="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="45,264,70,50" ly_vert_visible="0,0,2,2" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="45" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="57,23" />
+						<CELLINFO>
+							<CELL name="bd_icon" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="3" >
+					<SUBCOLINFO ly_vert_width="158,36,70" ly_vert_visible="0,0,2" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="57,23" />
+						<CELLINFO>
+							<CELL name="bd_msg" cell_ly="0,0,2,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="57,23" />
+						<CELLINFO>
+							<CELL name="bd_srno" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell1" cell_ly="0,1,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="50" ly_vert_visible="2" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="57,23" />
+						<CELLINFO>
+							<CELL name="bd_arrow" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_icon" rangecellid="bd_icon" hlcolorcellid="bd_icon" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8016" _ulen="7192" >
+'민트모바일 전용
+'============================================================================
+
+Dim g_UserID,g_OStype,g_UserClcd,g_rowIdx
+Dim g_prosClcd
+
+'실시간 메세지 수신시 사용하는 변수
+Dim g_PopupGb, g_Msg , g_mClcd, g_msgSrno
+
+Dim g_Data
+
+
+
+'============================================================================
+Sub imgClose_OnClick()
+
+	if g_prosClcd = 2 or g_prosClcd = "2" then
+		ButtonOK_OnClick()
+		
+	else
+		Form.CloseForm()
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+
+	if g_PopupGb = "01" then	'실시간 메시지 수신시
+	
+
+		setRealMsg()
+
+	else
+		'재실행 구분코드 (0 : 재실행 필요x  1: 선택종료 2: 필수종료 //3:업데아트)
+		g_prosClcd = "0"
+	
+		'사용자 아이디 획득
+		g_UserID = Form.GetSharedData("&USER_ID" , false)
+		g_OStype = Form.GetSharedData("&OS_TYPE", false)   '(1: Android 2:IOS)
+	
+		if g_OStype = "1" then
+			g_UserClcd = "32" '고유MTS(변경) KBC
+		else
+			g_UserClcd = "33" '고유MTS(변경) KBC
+		end if
+		
+			
+		DATAMANAGER.SetDataValue(0, "obcpp_msga_102r", "InBlock1", "USER_ID" , 0 , g_UserID)
+		DATAMANAGER.RequestTranData("obcpp_msga_102r")
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+
+	if szTranID = "obcpp_msga_102r" then
+
+		cnt = DATAMANAGER.GetDataCount(0, "obcpp_msga_102r" ,"OutBlock1")
+	
+		g_rowIdx = 0
+	
+	
+		for i = 0 to cnt -1 
+	
+			mClcd = DATAMANAGER.GetDataValue(0, "obcpp_msga_102r", "OutBlock1", "MSG_TRNM_MDIA_CLCD" , i)
+		
+			'MTS를 포함하는 매체구분 코드 값을 가지는 메세지만 보여준다.
+			'g_UserClcd => OS 타입에 따른 매체구분 코드 값 ( Android = 32 / IOS = 33)
+			if mClcd ="10" or mClcd = "12" or mClcd = "22" or mClcd = "23" or mClcd = g_UserClcd then '고유MTS(변경) KBC
+			
+				Grid0.AddRow()
+	
+				msg = DATAMANAGER.GetDataValue(0,"obcpp_msga_102r", "OutBlock1", "MSG_CNTT", i)
+				srno = DATAMANAGER.GetDataValue(0, "obcpp_msga_102r", "OutBlock1", "MSG_SRNO" , i)
+				proc_clcd = DATAMANAGER.GetDataValue(0,"obcpp_msga_102r", "OutBlock1", "MSG_PROS_CLCD", i)
+			
+				Grid0.SetCellData("bd_arrow", g_rowIdx, ">")
+				Grid0.SetCellData("bd_msg", g_rowIdx, msg)
+				Grid0.SetCellData("bd_srno", g_rowIdx, srno)
+				
+				
+				'메세지
+				if proc_clcd = "0" then
+				'단순히 메세지만 보여줌
+				
+				'메세지+선택종료
+				elseif proc_clcd = "1" then
+					Grid0.SetCellData("bd_addmsg", g_rowIdx, "※ 앱 재실행이 필요합니다. (선택)")
+					
+					if Cint(g_prosClcd) < 1 then
+						g_prosClcd = "1"
+					end if
+					
+				'메세지+필수종료
+				elseif proc_clcd = "2" then
+					Grid0.SetCellData("bd_addmsg", g_rowIdx, "※ 앱 재실행이 필요합니다. (필수)")
+					
+					if Cint(g_prosClcd) < 2 then
+						g_prosClcd = "2"
+					end if
+				
+				
+				
+				end if
+				
+				g_rowIdx = g_rowIdx + 1 
+				
+			end if
+		
+		next
+	
+	elseif szTranID = "obcpp_msga_102a" then
+
+		Form.CloseForm()
+	
+	end if
+
+
+	
+End Sub
+
+'============================================================================
+' 재실행 여부 팝업 호출
+'============================================================================
+Sub ButtonOK_OnClick()
+	
+	if g_prosClcd = 0 or g_prosClcd ="0" then
+		setRead()
+		Form.CloseForm()
+	
+	elseif g_prosClcd = 1 or g_prosClcd = "1" then
+		Form.MsgBox("알림", "앱 종료후 재실행이 필요합니다. 지금 재실행 하시겠습니까?", "CLCD1", 2)
+		
+	elseif g_prosClcd = 2 or g_prosClcd = "2" then
+		Form.MsgBox("알림", "앱 종료후 재실행이 필요합니다. (필수)", "CLCD2", 6)
+	end if
+	
+	
+End Sub
+
+
+
+'=============================================================================
+' 호출팝업 close 이벤트
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	
+	if sKeyName = "CLCD1" then'선택종료일떄
+	
+		if sRet = "ok" then ' 예 선택시 재실행
+			setRead()
+			Form.restartApp()
+			
+		
+		else				  ' 아니오 선택시 그냥 종료
+			setRead()
+			Form.CloseForm()
+		
+		end if
+	
+	
+	elseif sKeyName = "CLCD2" then'필수종료
+		
+		if sRet = "close" then
+			setRead()
+			Form.restartApp()
+		end if
+	
+	
+	end if
+
+	
+End Sub
+
+
+'========================================================================================
+'긴급메세지 읽음 처리
+'========================================================================================
+Sub setRead()
+	'Form.ShowAlert(g_UserID, g_rowIdx)
+	for i = 0 to g_rowIdx -1
+	
+		srno = Grid0.GetCellData("bd_srno", i )
+	
+		DATAMANAGER.SetDataValue(0, "obcpp_msga_102a", "InBlock1", "USER_ID" , i , g_UserID)
+		DATAMANAGER.SetDataValue(0, "obcpp_msga_102a", "InBlock1", "MSG_SRNO" , i , srno)
+	
+	next
+	
+	DATAMANAGER.SetDataValue(0, "obcpp_msga_102a", "InBlock2", "PROS_CLS_CODE" , 0 , "I")
+	DATAMANAGER.SetEventFlag("obcpp_msga_102a", "A")
+	DATAMANAGER.RequestTranData("obcpp_msga_102a")
+
+
+End Sub
+
+'==========================================================================================
+Sub Form_OnFormClose()
+
+'	if g_prosClcd = 2 or g_prosClcd = "2" then
+'	
+'		ButtonOK_OnClick()
+'		
+'	end if
+'	
+	
+'	if g_prosClcd = 0 then
+'	
+'		for i = 0 to g_rowIdx -1
+'	
+'			srno = Grid0.GetCellData("bd_srno", i )
+'	
+'			DATAMANAGER.SetDataValue(0, "obcpp_msga_102a", "InBlock1", "USER_ID" , i , g_UserID)
+'			DATAMANAGER.SetDataValue(0, "obcpp_msga_102a", "InBlock1", "MSG_SRNO" , i , srno)
+'	
+'		next
+'	
+'	DATAMANAGER.SetDataValue(0, "obcpp_msga_102a", "InBlock2", "PROS_CLS_CODE" , 0 , "I")
+'	DATAMANAGER.SetEventFlag("obcpp_msga_102a", "A")
+'	DATAMANAGER.RequestTranData("obcpp_msga_102a")
+'	
+'	
+'	
+'	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+     g_Data = Form.GetOpenLinkData()
+	realMsg = Split(g_Data,"|")
+	
+	g_PopupGb = realMsg(0)	'팝업구분
+	
+	if g_PopupGb = "01" then
+		
+		
+		g_mClcd  = realMsg(1)	'매체구분
+		g_msgSrno = realMsg(2) '메시지일련번호
+		g_UserID  = realMsg(4) '사용자아이디
+		g_prosClcd = realMsg(6) '처리구분코드
+		g_Msg = realMsg(7)	'메시지
+		
+	
+	end if
+	
+	
+	
+	
+	
+End Sub
+
+'============================================================================
+Sub setRealMsg()
+
+	g_OStype = Form.GetSharedData("&OS_TYPE", false)   '(1: Android 2:IOS)
+	g_rowIdx = 0 
+	
+	if g_OStype = "1" then
+		g_UserClcd = "32" '고유MTS(변경) KBC
+	else
+		g_UserClcd = "33" '고유MTS(변경) KBC
+	end if
+
+	mClcd = g_mClcd
+	
+	'MTS를 포함하는 매체구분 코드 값을 가지는 메세지만 보여준다.
+	'g_UserClcd => OS 타입에 따른 매체구분 코드 값 ( Android = 32 / IOS = 33)
+	if mClcd ="10" or mClcd = "12" or mClcd = "22" or mClcd = "23" or mClcd = g_UserClcd then '고유MTS(변경) KBC
+		Grid0.AddRow()
+	
+		msg = g_Msg
+		srno = g_msgSrno
+		proc_clcd = g_prosClcd
+			
+		Grid0.SetCellData("bd_arrow", g_rowIdx, ">")
+		Grid0.SetCellData("bd_msg", g_rowIdx, msg)
+		Grid0.SetCellData("bd_srno", g_rowIdx, srno)
+				
+				
+		'메세지
+		if proc_clcd = "0" then
+		'단순히 메세지만 보여줌
+				
+		'메세지+선택종료
+		elseif proc_clcd = "1" then
+			Grid0.SetCellData("bd_addmsg", g_rowIdx, "※ 앱 재실행이 필요합니다. (선택)")
+					
+			if Cint(g_prosClcd) < 1 then
+					g_prosClcd = "1"
+			end if
+					
+		'메세지+필수종료
+		elseif proc_clcd = "2" then
+			Grid0.SetCellData("bd_addmsg", g_rowIdx, "※ 앱 재실행이 필요합니다. (필수)")
+					
+			if Cint(g_prosClcd) < 2 then
+				g_prosClcd = "2"
+			end if
+			
+				
+		end if
+		
+		g_rowIdx = g_rowIdx + 1 
+		
+	end if
+
+	
+
+
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+
+	'필수종료일 경우 백버튼을 누르면 팝업창이 다시 팝업
+	if g_prosClcd = 2 or g_prosClcd ="2" then
+		Form.OpenPopup("nhnts91006_p2" , g_Data , "")
+		
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcpp_msga_102r" trcode="obcpp_msga_102r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcpp_msga_102a" trcode="obcpp_msga_102a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcpp_msga_102r" title="긴급메시지 사용자용 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="42" _ulen="36" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="326" _ulen="244" >
+
+MSG_SRNO^메시지일련번호^12^0^7^0^0^0^0
+MSG_CNTT^메시지내용^2048^0^0^0^0^0^0
+MSG_PROS_CLCD^메시지처리구분코드^1^0^0^0^0^0^0
+APLY_YN^적용여부^1^0^0^0^0^0^0
+USER_ID^사용자ID^20^0^0^0^0^0^0
+VRSN_ID^버전ID^12^0^0^0^0^0^0
+MSG_TRNM_MDIA_CLCD^메시지전송매체구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="53" _ulen="39" >
+
+MSG_SRNO^메시지일련번호^12^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcpp_msga_102a" title="긴급 메시지 읽음 처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" occurs="30" inout="in" _len="89" _ulen="69" >
+
+USER_ID^사용자ID^20^0^0^0^0^0^0
+MSG_SRNO^메시지일련번호^12^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" inout="in" _len="54" _ulen="42" >
+
+PROS_CLS_CODE^처리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

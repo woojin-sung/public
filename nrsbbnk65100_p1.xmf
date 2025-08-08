@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="65100" scrname="환전조회_통화선택창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,1,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,440,375,316,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="통화 선택" bgcolor="092:185046046" halign="1" ly_vert="0,440,375,70,1" />
+		<RADIOGROUP name="RadioGroup0" buttonsnumber="9" focusbgcolor="075:244244244" ly_vert="35,502,347,235,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="   미국 USD" transfervalue="USD" position="5,2,119,32" />
+				<RADIO no="1" text="   중국 CNY" transfervalue=" CNY" position="200,2,119,32" />
+				<RADIO no="2" text="   홍콩 HKD" transfervalue="HKD" position="5,52,119,32" />
+				<RADIO no="3" text="   일본 JPY   " transfervalue="JPY " position="200,52,146,32" />
+				<RADIO no="4" text="   호주 AUD" transfervalue="AUD" position="5,102,119,32" />
+				<RADIO no="5" text="   캐나다 CAD" transfervalue=" CAD" position="200,102,137,32" />
+				<RADIO no="6" text="   스위스 CHF" transfervalue="CHF" position="5,152,137,32" />
+				<RADIO no="7" text="   유로화 EUR" transfervalue="EUR" position="200,152,137,32" />
+				<RADIO no="8" text="   싱가포르 SGD " transfervalue="SGD" position="5,202,164,32" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<IMAGE name="ImgUS" autosize="1" imgpath="flag_us2.png" ly_vert="39,510,20,20,1" />
+		<IMAGE name="ImgCNY" autosize="1" imgpath="flag_chn.png" ly_vert="234,510,20,20,1" />
+		<IMAGE name="ImgCAD" autosize="1" imgpath="flag_can.png" ly_vert="234,610,20,20,1" />
+		<IMAGE name="ImgCHF" autosize="1" imgpath="flag_swi.png" ly_vert="39,660,20,20,1" />
+		<IMAGE name="ImgHKD" autosize="1" imgpath="flag_hk.png" ly_vert="39,560,20,20,1" />
+		<IMAGE name="ImgJPY" autosize="1" imgpath="flag_jp2.png" ly_vert="234,560,20,20,1" />
+		<IMAGE name="ImgSGD" autosize="1" imgpath="flag_sgp.png" ly_vert="39,710,20,20,1" />
+		<IMAGE name="ImgAUD" autosize="1" imgpath="flag_aus.png" ly_vert="39,610,20,20,1" />
+		<IMAGE name="ImgEUR" autosize="1" imgpath="flag_eu.png" ly_vert="234,660,20,20,1" />
+		<BUTTON name="btnOK" caption="적용" fontsize="1" btnimage="btn_20.9" ly_vert="500,696,375,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3331" _ulen="3315" >
+'환율조회_통화선택
+
+Dim g_szCRCD
+g_szCRCD = ""
+
+Dim g_bFirst
+g_bFirst = true
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()
+	if szData <> "" then
+		Select Case szData
+			Case "USD"		
+				RadioGroup0.currentindex = 0
+			Case "CNY"				
+				RadioGroup0.currentindex = 1
+			Case "HKD"				
+				RadioGroup0.currentindex = 2
+			Case "JPY"		
+				RadioGroup0.currentindex = 3
+			Case "AUD"		
+				RadioGroup0.currentindex = 4
+			Case "CAD"
+				RadioGroup0.currentindex = 5
+			Case "CHF"	
+				RadioGroup0.currentindex = 6
+			Case "EUR"	
+				RadioGroup0.currentindex = 7
+			Case "SGD"	
+				RadioGroup0.currentindex = 8
+		End Select
+	end if
+	
+	g_bFirst = false
+
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub RadioGroup0_OnClick(nIndex)
+
+	Select Case nIndex
+		Case 0		
+			ImgUS_OnClick()
+		Case 1				
+			ImgCNY_OnClick()
+		Case 2				
+			ImgHKD_OnClick()
+		Case 3		
+			ImgJPY_OnClick()
+		Case 4		
+			ImgAUD_OnClick()
+		Case 5	
+			ImgCAD_OnClick()
+		Case 6		
+			ImgCHF_OnClick()
+		Case 7	
+			ImgEUR_OnClick()
+		Case 8	
+			ImgSGD_OnClick()
+	End Select
+	
+	if g_bFirst == false then
+		btnOK_OnClick()
+	end if 
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+	Form.SendReturnToParent("CDRD_SET" , g_szCRCD)
+	Form.CloseForm()		
+End Sub
+
+'============================================================================
+Sub ImgUS_OnClick()
+	g_szCRCD = "USD"
+	RadioGroup0.currentindex = 0
+End Sub
+
+'============================================================================
+Sub ImgCNY_OnClick()
+	g_szCRCD = "CNY"
+	RadioGroup0.currentindex = 1
+End Sub
+
+'============================================================================
+Sub ImgHKD_OnClick()
+	g_szCRCD = "HKD"	
+	RadioGroup0.currentindex = 2
+End Sub
+
+'============================================================================
+Sub ImgJPY_OnClick()
+	g_szCRCD = "JPY"
+	RadioGroup0.currentindex = 3
+End Sub
+
+'============================================================================
+Sub ImgAUD_OnClick()
+	g_szCRCD = "AUD"	
+	RadioGroup0.currentindex = 4
+End Sub
+
+'============================================================================
+Sub ImgCAD_OnClick()
+	g_szCRCD = "CAD"	
+	RadioGroup0.currentindex = 5
+End Sub
+
+'============================================================================
+Sub ImgCHF_OnClick()
+	g_szCRCD = "CHF"	
+	RadioGroup0.currentindex = 6
+End Sub
+
+'============================================================================
+Sub ImgEUR_OnClick()
+	g_szCRCD = "EUR"	
+	RadioGroup0.currentindex = 7
+End Sub
+
+'============================================================================
+Sub ImgSGD_OnClick()
+	g_szCRCD = "SGD"	
+	RadioGroup0.currentindex = 8
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

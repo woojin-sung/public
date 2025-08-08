@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="공지팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CHKBUTTON name="ChkButton0" fontsize="-2" chkcaption="7일 간 보지 않기" unchkcaption="7일 간 보지 않기" ly_vert="33,782,159,27,1" />
+		<BUTTON name="Btn0" btnimage="alpha128.png" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image3" visible="0" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,0" />
+		<IMAGE name="Image4" visible="0" autosize="1" imgpath="alpha128.png" ly_vert="0,0,375,647,0" />
+		<IMAGE name="Image9" autosize="1" imgpath="alpha" ly_vert="0,0,375,277,1" />
+		<CONTAINER name="Container0" containerimage="alpha" ly_vert="0,307,375,286,1" scroll_ly_vert="0,307,375,286,1" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" ly_vert="0,15,375,270,1" />
+				<BUTTON name="BtnBond" visible="0" btnimage="alpha" ly_vert="188,242,186,39,0" />
+				<BUTTON name="BtnSuper" visible="0" btnimage="alpha" ly_vert="188,242,186,39,0" />
+				<BUTTON name="BtnSuper2" visible="0" btnimage="alpha" ly_vert="20,224,335,43,0" />
+				<BUTTON name="BtnContact1" visible="0" btnimage="alpha" ly_vert="23,224,160,43,0" />
+				<BUTTON name="BtnContact2" visible="0" btnimage="alpha" ly_vert="192,224,160,43,0" />
+				<BUTTON name="BtnBond2" visible="0" btnimage="alpha" ly_vert="20,224,335,43,0" />
+				<BUTTON name="BtnHOME" visible="0" btnimage="alpha" ly_vert="20,224,335,43,0" />
+				<BUTTON name="BtnBondurl" visible="0" btnimage="alpha" ly_vert="23,224,160,43,0" />
+				<BUTTON name="BtnMeritz365" visible="0" btnimage="alpha" ly_vert="192,234,160,43,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="Label2" fgcolor="062:255255255" fontsize="-1" fontstyle="01" transmode="0" halign="1" ly_vert="189,591,188,58,1" />
+		<LABEL name="Label1" fontsize="-1" fontstyle="01" transmode="0" halign="1" ly_vert="0,591,190,58,1" />
+		<IMAGE name="ImgPop" visible="0" imgpath="popup_bg.9" ly_vert="0,277,375,45,0" />
+		<LABEL name="Label0" visible="0" fontsize="3" fontstyle="01" caption="공지사항" bgcolor="272:246246246" halign="1" ly_vert="0,277,375,45,0" />
+		<CHKBUTTON name="Chk7days" fgcolor="321:115118124" chkcaption="  3일동안 그만 보기" unchkcaption="  3일동안 그만 보기" chkbtnimage="checkmenu_o" unchkbtnimage="checkmenu_n" ly_vert="20,606,152,27,1" />
+		<LABEL name="LblClose" fgcolor="144:034034034" caption="닫기" halign="2" ly_vert="199,606,130,29,1" />
+		<IMAGE name="ImgClose" imgpath="btn_menu_new_o" ly_vert="326,609,24,24,1" />
+		<BUTTON name="btnClose7" fgcolor="004:000000000" fontsize="-1" fontstyle="01" btnimage="alpha" halign="0" ly_vert="0,593,190,60,1" />
+		<BUTTON name="btnClose" fgcolor="004:000000000" fontsize="-1" fontstyle="01" btnimage="alpha" paddinginfo="0,0,20,0" ly_vert="189,593,188,60,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="14975" _ulen="13787" >
+'============================================================================
+'20220913 SWJ START : MTS 개인화 팝업
+'============================================================================
+Dim g_Savekey
+Dim g_sUserID, g_szNm
+Dim g_szGbn, g_nIndex
+g_nIndex = 0
+Dim g_szGbnPop, g_szGbnWeb, g_szGbnScr
+g_szGbnPop = Array()
+g_szGbnWeb = Array()
+g_szGbnScr = Array()
+g_szGbnFlg = Array()
+'============================================================================
+Sub Form_OnFormInit()
+	sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	
+	'20211026 SWJ START : 안드로이드 targetSDK verison30 관련 안내 팝업 게시
+	szAppVer = Form.GetSharedData("&APP_VERSION", False)
+	szData = Split(szAppVer, ".")
+	szAppVer = Cint(szData(0) & szData(1) & szData(2))
+	
+	sOSVrsn		=	Form.GetSharedData("&OS_VERSION", false)
+	szAppVerCode  = 	Form.GetSharedData("&APP_VERSION_CODE", False)
+	
+	g_sUserID = Form.GetSharedData("&USER_ID" , false)
+	g_szNm = Form.GetSharedData("&USER_NAME", false)
+	
+	if sDeviceOS = "1" then
+		Image3.visible = false
+	elseif sDeviceOS = "2" then
+'		
+		Image3.visible = true
+	end if
+	'20211026 SWJ END
+
+	if g_szNm <> "" then
+		'20230116 SWJ START : 안드로이드만 고객명 넣기
+		if sDeviceOS = "1" then
+			Label0.caption = g_szNm & "님을 위한 안내"
+		else
+			Label0.caption = "고객님을 위한 안내"
+		end if
+		'20230116 SWJ END
+	else
+		Form.CloseForm()
+	end if
+
+	szPopData = Form.GetOpenLinkData()
+	szIDWebScr = Split(szPopData, "♥")
+	
+	if UBound(szIDWebScr) > 0 then
+		'팝업 ID
+		g_szGbnPop = Split(szIDWebScr(0), "★")
+		
+		'Web링크
+		g_szGbnWeb = Split(szIDWebScr(1), "★")
+		
+		'화면번호
+		g_szGbnScr = Split(szIDWebScr(2), "★")
+		
+		'웹/화면 구분 여부(0. 둘다 입력 1.URL 2.화면번호 3. 그 외) 
+		g_szGbnFlg = Split(szIDWebScr(3), "★")
+		
+	end if
+	
+	if Ubound(g_szGbnPop) > 0 then
+		PopupChange(0)
+	end if
+	
+	'글자색 진하게
+	Container0.Label0.fontbold = 1
+	Container0.btnClose.fontbold = 1
+	Container0.btnClose7.fontbold = 1
+	
+End Sub
+
+'============================================================================
+'20210830 SWJ START : 공지사항 3단 배너 형식으로 변경
+'============================================================================
+Sub btnClose_OnClick()
+	if Ubound(g_szGbnPop) <= g_nIndex + 1 then
+		Form.CloseForm()
+		exit Sub
+	else
+		PopupChange(g_nIndex+1)
+	end if
+	
+End Sub
+
+'============================================================================
+Sub btnClose7_OnClick()
+	
+	saveDate = Form.GetSharedData("&HOST_DATE",0)
+	
+	'20230722 LES START
+	Form.SaveConfigData("NoticeSetting", g_sUserID & g_szGbn & "notice_20240808" , saveDate)
+	
+	if Ubound(g_szGbnPop) <= g_nIndex + 1 then
+		Form.CloseForm()
+		exit Sub
+	else
+		PopupChange(g_nIndex+1)
+	end if
+End Sub
+
+'============================================================================
+'20220414 SWJ START : 빈공간 눌러도 닫히도록 수정
+'============================================================================
+Sub Image9_OnClick()
+	if Ubound(g_szGbnPop) <= g_nIndex + 1 then
+		Form.CloseForm()
+		exit Sub
+	else
+		PopupChange(g_nIndex+1)
+	end if
+End Sub
+
+'==============================================================================================
+'닫기 버튼일 때마다 개인화 팝업 이미지 바꿔주기(사실상 닫는 것은 아니고 이미지만 교체해주는..)
+'==============================================================================================
+Function PopupChange(nIndex)
+	Container0.BtnSuper.visible = false
+	Container0.BtnBond.visible = false		'메리츠증권 탭
+	Container0.BtnBond2.visible = false		'자산유동화 탭
+	Container0.BtnHOME.visible = false
+	Container0.BtnSuper2.visible = false
+	Container0.BtnContact1.visible = false
+	Container0.BtnContact2.visible = false
+	Container0.BtnBondurl.visible = false
+	Container0.BtnMeritz365.visible = false
+	'슈퍼365
+	if g_szGbnPop(nIndex) == "PPP00016" then			'20240220 HSZ
+		Container0.Image0.imgpath = "apply_popup.png"
+	'슈퍼365_신용
+	elseif g_szGbnPop(nIndex) == "PPP00017" then			'20240220 HSZ
+		Container0.Image0.imgpath = "apply_popup7.png"
+	'Super365 채권패키지
+	elseif g_szGbnPop(nIndex) == "PPP00024" then			'20230512 HSZ
+		Container0.Image0.imgpath = "apply_popup12.png"
+		Container0.BtnSuper.visible = True
+	'Super365 빨강
+	elseif g_szGbnPop(nIndex) == "PPP00029" then			'20230629 HSZ
+		Container0.Image0.imgpath = "apply_popup16.png"
+		Container0.BtnSuper2.visible = True
+	'Bond365 빨강
+	elseif g_szGbnPop(nIndex) == "PPP00030" then			'20230728 HSZ	
+		Container0.Image0.imgpath = "apply_popup8.png"
+		Container0.BtnBond.left = 192
+		Container0.BtnBond.width = 160
+		Container0.BtnBond.height = 43
+		Container0.BtnBond.top = 224
+		Container0.BtnBond.visible = True
+		Container0.BtnBondurl.visible = True
+		
+	'단기사채_유동화
+	elseif g_szGbnPop(nIndex) == "PPP00034" then			'20240220 HSZ
+		Container0.Image0.imgpath = "apply_popup9.png"
+		Container0.BtnBond2.left = 192
+		Container0.BtnBond2.width = 160
+		Container0.BtnBond2.visible = True
+		Container0.BtnBondurl.visible = True
+		
+	elseif g_szGbnPop(nIndex) == "PPP00035" then
+		Container0.Image0.imgpath = "apply_popup17.png"
+		Container0.BtnSuper2.left = 192
+		Container0.BtnSuper2.width = 160
+		Container0.BtnSuper2.visible = True
+		
+	elseif g_szGbnPop(nIndex) == "PPP00036" then			
+		Container0.Image0.imgpath = "apply_popup4.png"
+
+	'통합증거금
+	elseif g_szGbnPop(nIndex) == "PPP00041" then
+		Container0.Image0.imgpath = "apply_popup14.png"
+		Container0.BtnSuper2.left = 192
+		Container0.BtnSuper2.width = 160
+		Container0.BtnSuper2.visible = True
+	'미국패키지
+	elseif g_szGbnPop(nIndex) == "PPP00042" then
+		Container0.Image0.imgpath = "apply_popup15.png"
+
+	elseif g_szGbnPop(nIndex) == "PPP00047" then			'20240502
+		Container0.Image0.imgpath = "apply_popup20.png"
+		Container0.BtnContact1.visible = True
+		Container0.BtnContact2.visible = True
+	'HOME_NEW
+	elseif g_szGbnPop(nIndex) == "PPP00046" then
+		Container0.Image0.imgpath = "apply_popup10.png"
+		Container0.BtnHOME.visible = True
+
+	'ETF 순위
+	elseif g_szGbnPop(nIndex) == "PPP00049" then
+		Container0.Image0.imgpath = "apply_popup3.png"
+		Container0.BtnMeritz365.visible = true
+	'타사대체
+	elseif g_szGbnPop(nIndex) == "PPP00050" then
+		Container0.Image0.imgpath = "apply_popup19.png"
+		
+	'바로출금
+	elseif g_szGbnPop(nIndex) == "PPP00052" then
+		Container0.Image0.imgpath = "apply_popup11.png"
+		
+	'Super365
+	elseif g_szGbnPop(nIndex) == "PPP00053" then
+		Container0.Image0.imgpath = "apply_popup2.png"
+		
+	elseif g_szGbnPop(nIndex) == "PPP00054" then
+		Container0.Image0.imgpath = "apply_popup13.png"
+		
+	'단기다수계좌
+	elseif g_szGbnPop(nIndex) == "PPP00055" then
+		Container0.Image0.imgpath = "apply_popup5.png"
+		
+	'코덱스 대만테크
+	elseif g_szGbnPop(nIndex) == "PPP00056" then
+		Container0.Image0.imgpath = "apply_popup6.png"
+		
+	'USD환전우대
+	elseif g_szGbnPop(nIndex) == "PPP00057" then
+		Container0.Image0.imgpath = "apply_popup18.png"
+		
+	else
+		Form.CloseForm()
+		exit function
+	end if
+	
+	'임시 처리(POPUP ID 생성될 때마다 화면 운영반영 해야 함)
+'	if g_szGbnPop(nIndex) <> "" then
+'		Form.CloseForm()
+'		exit function
+'	end if
+	
+	g_szGbn = g_szGbnPop(nIndex)
+	g_nIndex = nIndex
+	
+	'3일간 보지 않기에 대한 각 이벤트 이미지에 대한 처리
+	Dim saveDate
+	Dim calcDate
+	
+	'20230722 LES START
+	saveDate = Form.LoadConfigData("NoticeSetting", g_sUserID & g_szGbn & "notice_20240808")
+	todayDate = Form.GetSharedData("&HOST_DATE",0)
+	
+	if saveDate <> "" then
+		
+		ResaveDate 	= left(saveDate,4)&"-"&mid(saveDate,5,2)&"-"&right(saveDate,2)
+		RetodayDate 	= left(todayDate,4)&"-"&mid(todayDate,5,2)&"-"&right(todayDate,2)
+		
+		calcDate = tonumber(DateDiff("d",ResaveDate, RetodayDate))
+
+		if calcDate <= 3 then	'20230822 HSZ 3일간으로 수정	
+			if Ubound(g_szGbnPop) <= g_nIndex + 1 then
+				Form.CloseForm()
+				exit Function
+			else
+				PopupChange(g_nIndex+1)
+			end if
+		end if	
+	end if
+End Function
+
+'============================================================================
+Sub Container0_Image0_OnClick()
+	'둘 다 입력 FLAG(실 수로 둘 다 입력됐을 때 WEB으로 연결되도록)
+	if g_szGbnFlg(g_nIndex) = "0" or g_szGbnFlg(g_nIndex) = 0 then
+		if g_szGbnWeb(g_nIndex) <> "" then
+			Form.OpenExternalBrowser(g_szGbnWeb(g_nIndex))
+		end if
+	'WEB URL FLAG
+	elseif g_szGbnFlg(g_nIndex) = "1" or g_szGbnFlg(g_nIndex) = 1 then
+		if g_szGbnWeb(g_nIndex) <> "" then
+			Form.OpenExternalBrowser(g_szGbnWeb(g_nIndex))
+		end if
+		
+	'화면번호(MTS 내부화면 연동 시) FLAG
+	elseif g_szGbnFlg(g_nIndex) = "2" or g_szGbnFlg(g_nIndex) = 2 then
+		'비대면 신규고객_해외주식 20221122 HSZ
+		if g_szGbnPop(g_nIndex) == "PPP00005" then
+			Form.OpenPopup("notice_p10" , "" , "")
+		'단기사채
+		elseif g_szGbnPop(g_nIndex) == "PPP00011" then		'20230302 SWJ
+			Form.OpenScreen("88061" , "")
+			Form.CloseForm()
+		'개인신용제공동의
+		elseif g_szGbnPop(g_nIndex) == "PPP00014" then		'20230309 SWJ	
+			Form.OpenNextPopup("notice_p4" , "" , "")
+		'슈퍼365
+		elseif g_szGbnPop(g_nIndex) == "PPP00016" or g_szGbnPop(g_nIndex) == "PPP00024" or g_szGbnPop(g_nIndex) == "PPP00029" or g_szGbnPop(g_nIndex) == "PPP00042" or g_szGbnPop(g_nIndex) == "PPP00053" then
+			Form.OpenPopup("mbonl88031" , "" , "")
+		'바로출금
+		elseif g_szGbnPop(g_nIndex) == "PPP00039" or g_szGbnPop(g_nIndex) == "PPP00052" then
+			Form.OpenScreen("88032" , "")
+			Form.CloseForm()
+		'슈퍼365 수익금 확인
+		elseif g_szGbnPop(g_nIndex) == "PPP00031" then
+			Form.OpenScreen("88029" , "")
+			Form.CloseForm()
+		'슈퍼365 - RP	
+		elseif g_szGbnPop(g_nIndex) == "PPP00036" then
+			Form.OpenPopup("mbonl88031" , "기타★RP" , "")
+		'슈퍼365 - RP	
+		elseif g_szGbnPop(g_nIndex) == "PPP00017" or g_szGbnPop(g_nIndex) == "PPP00043" then
+			Form.OpenPopup("mbonl88031" , "기타★SIN" , "")	
+		'슈퍼365 - 수수료
+		elseif g_szGbnPop(g_nIndex) == "PPP00057" then
+			Form.OpenPopup("mbonl88031" , "기타★FEE" , "")	
+		'통합증거금 신청
+		elseif g_szGbnPop(g_nIndex) == "PPP00041" then
+			Form.OpenScreen("87054" , "")
+			Form.CloseForm()
+		'ETF 순위
+		elseif g_szGbnPop(g_nIndex) == "PPP00049" or g_szGbnPop(g_nIndex) == "PPP00035" then
+			Form.OpenScreen("50511" , "")
+			Form.CloseForm()
+		'슈퍼365 - 타사대체
+		elseif g_szGbnPop(g_nIndex) == "PPP00050" then
+			Form.OpenPopup("mbonl88031" , "기타★OTHER" , "")
+			
+		elseif g_szGbnPop(g_nIndex) == "PPP00054" then
+			Form.OpenScreen("81021" , "")
+			Form.CloseForm()
+		'단기다수개설	
+		elseif g_szGbnPop(g_nIndex) == "PPP00055" then
+			Dim sLOGIN_TYPE  
+			sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+				
+			if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+				Dim sText
+				sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+				Form.MsgBox( "알림", sText, "LOGOUT_MSG_85249", 1 )
+			else
+				Form.SetSharedData("&SCREEN_AUTH" , "99")
+				Form.OpenScreen("85249" , "")
+			end if
+			
+		end if
+	end if
+End Sub
+
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOGOUT_MSG" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenPopup("mbbdm85100" , "" , "")
+		end if
+		
+	elseif sKeyName == "LOGOUT_MSG_85249" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenScreen("85249" , "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_BtnSuper_OnClick()
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+		
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+		Dim sText
+		sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+		Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+	else
+		Form.SetSharedData("&SCREEN_AUTH" , "99")
+		Form.OpenPopup("mbbdm85100" , "" , "")
+	end if
+End Sub
+'============================================================================
+Sub Container0_BtnSuper2_OnClick()
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+		
+	if CInt(sLOGIN_TYPE) > 1 then '로그인상태
+		Dim sText
+		sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+		Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+	else
+		Form.SetSharedData("&SCREEN_AUTH" , "99")
+		Form.OpenPopup("mbbdm85100" , "" , "")
+	end if
+End Sub
+'============================================================================
+Sub Container0_BtnBond_OnClick()
+	Form.OpenScreen("88061" , "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container0_BtnBond2_OnClick()
+	Form.OpenScreen("88062" , "88062")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgClose.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Container0_BtnContact1_OnClick()
+	if g_szGbnPop(g_nIndex) == "PPP00047" then
+		Form.OpenScreen("50900" , "TAXSTORY")	'TAX365 > 세금이야기 탭
+		Form.CloseForm()
+	else
+		Form.OpenScreen("81000" , "")
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_BtnContact2_OnClick()
+	if g_szGbnPop(g_nIndex) == "PPP00047" then
+		Form.OpenScreen("99999" , "Meritz365")	'HOME > Meritz365 탭
+		Form.CloseForm()
+	else
+		Form.OpenScreen("81021" , "")
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Container0_BtnHOME_OnClick()
+	g_sScreenKey = "common.start_screen"		'환경설정>앱 실행 시 첫화면 설정값
+	sValue = Form.GetEnvData(g_sScreenKey)	
+
+	if CInt(sValue) <> 0 then				'0:시장종합 아닌 경우에만, HOME화면 띄워주기(부하방지)
+		Form.OpenScreen("99999" , "")
+	end if
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Container0_BtnBondurl_OnClick()
+	Form.OpenExternalBrowser("https://home.imeritz.com/mobile/content/bond365/bond365_guide.html#stBond")
+End Sub
+
+'============================================================================
+Sub Container0_BtnMeritz365_OnClick()
+	Form.OpenScreen("99999" , "Meritz365")
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

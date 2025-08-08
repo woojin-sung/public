@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="91005" scrname="환경설정_공통_지수티커" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,309,411,1" />
+	<CONTROL_INFO>
+		<BUTTON name="ButtonCancel" caption="취소" fgcolor="004:000000000" btnimage="btn_02.9" ly_vert="17,352,132,39,1" />
+		<IMAGE name="Image0" imgpath="pop_header.9" ly_vert="0,0,309,55,1" />
+		<BUTTON name="ButtonOK" caption="확인" btnimage="btn_01.9" ly_vert="156,352,132,39,1" />
+		<TABLE name="Table0" insidelinecolor="102:255255255" colcount="1" rowcount="1" outline="0000" designorder="1" ly_vert="10,57,289,285,1" >
+			<COL_INFO ly_vert_width="289" />
+			<ROW_INFO ly_vert_height="285" />
+			<CELL_INFO>
+				<CELL cell_ly="0,0,0,0" line="0,0" impidxs="" />
+			</CELL_INFO>
+		</TABLE>
+		<LABEL name="LabelTitle" fontsize="2" fontstyle="01" caption="지수티커" bgcolor="064:188030030" halign="1" autofontsize="1" ly_vert="0,0,309,55,1" />
+		<IMAGE name="ImageClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="270,15,24,24,1" />
+		<RADIOGROUP name="RadioTicker" ly_vert="16,63,277,234,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="미사용" selforecolor="004:000000000" position="0,0,277,39" />
+				<RADIO no="1" text="사용" selforecolor="004:000000000" position="0,39,277,39" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<CHKBUTTON name="ChkButton0" chkcaption="KOSPI" unchkcaption="KOSPI" ly_vert="16,141,138,39,1" />
+		<CHKBUTTON name="ChkButton1" chkcaption="KOSDAQ" unchkcaption="KOSDAQ" ly_vert="154,141,138,39,1" />
+		<CHKBUTTON name="ChkButton2" chkcaption="KOSPI200" unchkcaption="KOSPI200" ly_vert="16,180,138,39,1" />
+		<CHKBUTTON name="ChkButton3" chkcaption="선물최근월물" unchkcaption="선물최근월물" ly_vert="154,180,138,39,1" />
+		<CHKBUTTON name="ChkButton4" chkcaption="상해종합" unchkcaption="상해종합" ly_vert="16,219,138,39,1" />
+		<CHKBUTTON name="ChkButton5" chkcaption="홍콩항셍H" unchkcaption="홍콩항셍H" ly_vert="16,258,138,39,1" />
+		<CHKBUTTON name="ChkButton6" chkcaption="홍콩항셍" unchkcaption="홍콩항셍" ly_vert="154,219,138,39,1" />
+		<CHKBUTTON name="ChkButton7" chkcaption="니케이225" unchkcaption="니케이225" ly_vert="154,258,138,39,1" />
+		<CHKBUTTON name="ChkButton8" chkcaption="대만가권" unchkcaption="대만가권" ly_vert="16,297,138,39,1" />
+		<CHKBUTTON name="ChkButton9" chkcaption="원/달러환율" unchkcaption="원/달러환율" ly_vert="154,297,138,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9140" _ulen="8846" >
+'-------------------------------------------------------------------------------------------
+' 01. 화 면 명 : 환경설정
+' 02. 화면설명 : 환경설정_공통_지수티커
+' 03. 작    성 : 2016.02.16 김보라
+'-------------------------------------------------------------------------------------------
+'============================================================================
+'지수티커("alrim.ticker.use")boolean형
+'사용하지않음(false),사용(true) - 초기값 false
+'KOSPI("alrim.ticker.jisu.kospi") - 초기값 true
+'KOSDAQ("alrim.ticker.jisu.kosdaq") - 초기값 true
+'KOSPI200("alrim.ticker.jisu.kospi200") - 초기값 false
+'선물최근월물("alrim.ticker.jisu.futures") - 초기값 false
+'상해종합("alrim.ticker.jisu.sanghae") - 초기값 false
+'홍콩항셍("alrim.ticker.jisu.hangseng") - 초기값 false
+'홍콩항셍H("alrim.ticker.jisu.hongkongh") - 초기값 false
+'니케이225("alrim.ticker.jisu.nikkei") - 초기값 false
+'대만가권("alrim.ticker.jisu.daeman") - 초기값 false
+'원/달러환율("alrim.ticker.jisu.wondollar") - 초기값 false
+'============================================================================
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_sKey '전달받은키
+Dim g_sTickerKey '지수티커
+Dim g_sKOSPIKey 
+Dim g_sKOSDAQKey 
+Dim g_sKOSPI200Key 
+Dim g_sFUTUREKey 
+Dim g_sSANGHAEKey 
+Dim g_sHANGSENGKey 
+Dim g_sHONGKONGHKey 
+Dim g_sNIKKEIKey 
+Dim g_sDAEMANKey 
+Dim g_sDOLLARKey 
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+'============================================================================
+' 환경설정값리턴함수
+'============================================================================
+Function GetConfigData(sKey, sCtlName, sPropName)
+	Dim sValue
+	sValue = Form.GetEnvData(sKey)
+	
+	if sValue == null or Trim(sValue) == "" then
+		sValue = false '기본값 false
+	end if
+
+	if sValue == true or sValue == "1" or sValue == 1 then
+		sValue = "1"
+		
+		Dim sJisu1, sJisu2, sJisu3, sJisu4, sJisu5, sJisu6, sJisu7, sJisu8, sJisu9, sJisu10
+		sJisu1 = Form.GetEnvData(g_sKOSPIKey)
+		sJisu2 = Form.GetEnvData(g_sKOSDAQKey)
+		sJisu3 = Form.GetEnvData(g_sKOSPI200Key)
+		sJisu4 = Form.GetEnvData(g_sFUTUREKey)
+		sJisu5 = Form.GetEnvData(g_sSANGHAEKey)
+		sJisu6 = Form.GetEnvData(g_sHANGSENGKey)
+		sJisu7 = Form.GetEnvData(g_sHONGKONGHKey)
+		sJisu8 = Form.GetEnvData(g_sNIKKEIKey)
+		sJisu9 = Form.GetEnvData(g_sDAEMANKey)
+		sJisu10 = Form.GetEnvData(g_sDOLLARKey)
+		
+		if sJisu1 == null or Trim(sJisu1) == "" and 
+			sJisu2 == null or Trim(sJisu2) == "" and 
+			sJisu3 == null or Trim(sJisu3) == "" and 
+			sJisu4 == null or Trim(sJisu4) == "" and 
+			sJisu5 == null or Trim(sJisu5) == "" and 
+			sJisu6 == null or Trim(sJisu6) == "" and 
+			sJisu7 == null or Trim(sJisu7) == "" and 
+			sJisu8 == null or Trim(sJisu8) == "" and 
+			sJisu9 == null or Trim(sJisu9) == "" and 
+			sJisu10 == null or Trim(sJisu10) == "" then
+			
+			sJisu1 = true
+			sJisu2 = true
+			sJisu3 = false
+			sJisu4 = false
+			sJisu5 = false
+			sJisu6 = false
+			sJisu7 = false
+			sJisu8 = false
+			sJisu9 = false
+			sJisu10 = false
+		end if
+		
+		if sJisu1 == true or sJisu1 == "1" or sJisu1 == 1 then
+			ChkButton0.chksilence = "1"
+		else
+			ChkButton0.chksilence = "0"
+		end if
+		if sJisu2 == true or sJisu2 == "1" or sJisu2 == 1 then
+			ChkButton1.chksilence = "1"
+		else
+			ChkButton1.chksilence = "0"
+		end if
+		if sJisu3 == true or sJisu3 == "1" or sJisu3 == 1 then
+			ChkButton2.chksilence = "1"
+		else
+			ChkButton2.chksilence = "0"
+		end if
+		if sJisu4 == true or sJisu4 == "1" or sJisu4 == 1 then
+			ChkButton3.chksilence = "1"
+		else
+			ChkButton3.chksilence = "0"
+		end if
+		if sJisu5 == true or sJisu5 == "1" or sJisu5 == 1 then
+			ChkButton4.chksilence = "1"
+		else
+			ChkButton4.chksilence = "0"
+		end if
+		if sJisu6 == true or sJisu6 == "1" or sJisu6 == 1 then
+			ChkButton5.chksilence = "1"
+		else
+			ChkButton5.chksilence = "0"
+		end if
+		if sJisu7 == true or sJisu7 == "1" or sJisu7 == 1 then
+			ChkButton6.chksilence = "1"
+		else
+			ChkButton6.chksilence = "0"
+		end if
+		if sJisu8 == true or sJisu8 == "1" or sJisu8 == 1 then
+			ChkButton7.chksilence = "1"
+		else
+			ChkButton7.chksilence = "0"
+		end if
+		if sJisu9 == true or sJisu9 == "1" or sJisu9 == 1 then
+			ChkButton8.chksilence = "1"
+		else
+			ChkButton8.chksilence = "0"
+		end if
+		if sJisu10 == true or sJisu10 == "1" or sJisu10 == 1 then
+			ChkButton9.chksilence = "1"
+		else
+			ChkButton9.chksilence = "0"
+		end if
+	else
+		sValue = "0"
+
+		for i = 0 to 9 
+			Form.SetCtlProp( "ChkButton"..i, "enable", "0" )
+		next
+	end if
+
+	Form.SetCtlProp( sCtlName, sPropName, sValue )
+End Function 
+
+'============================================================================
+' 환경설정값세팅함수
+'============================================================================
+Function SetConfigData(sKey, sCtlName, sPropName)
+	Dim sValue
+	sValue = Form.GetCtlProp( sCtlName, sPropName )
+	
+	if sValue == "0" then
+		sValue = false
+	else
+		sValue = true
+		
+		Dim nCnt, sCheck
+		nCnt = 0
+		for i = 0 to 9 
+			sCheck = Form.GetCtlProp( "ChkButton"..i, "checkstate" )
+			
+			if sCheck == "1" then
+				nCnt = nCnt+1
+			end if
+		next
+		
+		if nCnt == 0 then
+			Form.MsgBox( "알림", "지수를 선택해주세요.", "", 6 )	
+			Exit Function
+		end if
+		
+		if ChkButton0.chksilence == "1" then
+			Form.SetEnvData(0, g_sKOSPIKey, true)
+		else
+			Form.SetEnvData(0, g_sKOSPIKey, false)
+		end if
+		if ChkButton1.chksilence == "1" then
+			Form.SetEnvData(0, g_sKOSDAQKey, true)
+		else
+			Form.SetEnvData(0, g_sKOSDAQKey, false)
+		end if
+		if ChkButton2.chksilence == "1" then
+			Form.SetEnvData(0, g_sKOSPI200Key, true)
+		else
+			Form.SetEnvData(0, g_sKOSPI200Key, false)
+		end if
+		if ChkButton3.chksilence == "1" then
+			Form.SetEnvData(0, g_sFUTUREKey, true)
+		else
+			Form.SetEnvData(0, g_sFUTUREKey, false)
+		end if
+		if ChkButton4.chksilence == "1" then
+			Form.SetEnvData(0, g_sSANGHAEKey, true)
+		else
+			Form.SetEnvData(0, g_sSANGHAEKey, false)
+		end if
+		if ChkButton5.chksilence == "1" then
+			Form.SetEnvData(0, g_sHANGSENGKey, true)
+		else
+			Form.SetEnvData(0, g_sHANGSENGKey, false)
+		end if
+		if ChkButton6.chksilence == "1" then
+			Form.SetEnvData(0, g_sHONGKONGHKey, true)
+		else
+			Form.SetEnvData(0, g_sHONGKONGHKey, false)
+		end if
+		if ChkButton7.chksilence == "1" then
+			Form.SetEnvData(0, g_sNIKKEIKey, true)
+		else
+			Form.SetEnvData(0, g_sNIKKEIKey, false)
+		end if
+		if ChkButton8.chksilence == "1" then
+			Form.SetEnvData(0, g_sDAEMANKey, true)
+		else
+			Form.SetEnvData(0, g_sDAEMANKey, false)
+		end if
+		if ChkButton9.chksilence == "1" then
+			Form.SetEnvData(0, g_sDOLLARKey, true)
+		else
+			Form.SetEnvData(0, g_sDOLLARKey, false)
+		end if
+	end if
+		
+	Form.SetEnvData(0, sKey, sValue)
+
+	Form.SendReturnToParent("nhetc91005_p4" , sKey)
+	Form.CloseForm()
+End Function 
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim sRevData, sText
+	sRevData = Form.GetOpenLinkData()
+	
+	if sRevData == null or Trim(sRevData) == "" then
+		Exit Sub
+	end if
+	
+	g_sKey = sRevData
+	g_sTickerKey = "alrim.ticker.use"
+	g_sKOSPIKey = "alrim.ticker.jisu.kospi"
+	g_sKOSDAQKey = "alrim.ticker.jisu.kosdaq"
+	g_sKOSPI200Key = "alrim.ticker.jisu.kospi200"
+	g_sFUTUREKey = "alrim.ticker.jisu.futures"
+	g_sSANGHAEKey = "alrim.ticker.jisu.sanghae"
+	g_sHANGSENGKey = "alrim.ticker.jisu.hangseng"
+	g_sHONGKONGHKey = "alrim.ticker.jisu.hongkongh"
+	g_sNIKKEIKey = "alrim.ticker.jisu.nikkei"
+	g_sDAEMANKey = "alrim.ticker.jisu.daeman"
+	g_sDOLLARKey = "alrim.ticker.jisu.wondollar"
+
+	GetConfigData(g_sKey, "RadioTicker", "currentindex")
+End Sub
+
+'============================================================================
+' 지수티커
+'============================================================================
+Sub RadioTicker_OnClick(nIndex)
+	if nIndex == 0 then
+		for i = 0 to 9 
+			Form.SetCtlProp( "ChkButton"..i, "enable", "0" )
+			Form.SetCtlProp( "ChkButton"..i, "chksilence", "0" )
+		next
+	else
+		for i = 0 to 9 
+			Form.SetCtlProp( "ChkButton"..i, "enable", "1" )
+		next
+	end if
+End Sub
+
+'============================================================================
+Sub ButtonOK_OnClick()
+	SetConfigData(g_sKey, "RadioTicker", "currentindex")
+End Sub
+
+'============================================================================
+Sub ImageClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ButtonCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

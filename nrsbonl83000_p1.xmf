@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="83000" scrname="권리유형선택창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,381,375,366,1" />
+		<BUTTON name="btnSave" caption="적용" fontsize="1" btnimage="btn_20.9" ly_vert="0,696,375,60,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="권리유형을 선택해 주세요." bgcolor="092:185046046" halign="1" ly_vert="0,386,375,70,1" />
+		<RADIOGROUP name="RgStyle" fontsize="-2" buttonshape="1" buttonsnumber="12" ly_vert="20,456,337,207,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" radioimage="input_06.9.png" transfervalue="%" position="0,0,105,44" />
+				<RADIO no="1" text="유상" radioimage="input_06.9.png" transfervalue="01" position="115,0,105,44" />
+				<RADIO no="2" text="무상" radioimage="input_06.9.png" transfervalue="02" position="230,0,105,44" />
+				<RADIO no="3" text="배당" radioimage="input_06.9.png" transfervalue="03" position="0,54,105,44" />
+				<RADIO no="4" text="매수청구" radioimage="input_06.9.png" transfervalue="04" position="115,54,105,44" />
+				<RADIO no="5" text="분배금" radioimage="input_06.9.png" transfervalue="17" position="230,54,105,44" />
+				<RADIO no="6" text="합병" radioimage="input_06.9.png" transfervalue="07" position="0,108,105,44" />
+				<RADIO no="7" text="감자" radioimage="input_06.9.png" transfervalue="08" position="115,108,105,44" />
+				<RADIO no="8" text="기업분할" radioimage="input_06.9.png" transfervalue="12" position="230,108,105,44" />
+				<RADIO no="9" text="액면분할" radioimage="input_06.9.png" transfervalue="10" position="0,162,105,44" />
+				<RADIO no="10" text="액면병합" radioimage="input_06.9.png" transfervalue="11" position="115,162,105,44" />
+				<RADIO no="11" text="주식교환/이전" radioimage="input_06.9.png" transfervalue="15" position="230,162,105,44" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<RADIOGROUP name="RgStyle1" fontsize="-2" buttonshape="1" buttonsnumber="10" initselectionuse="1" initselection="0" ly_vert="402,456,337,207,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" radioimage="input_06.9.png" transfervalue="%" position="0,0,105,44" />
+				<RADIO no="1" text="유상" radioimage="input_06.9.png" transfervalue="01" position="115,0,105,44" />
+				<RADIO no="2" text="무상" radioimage="input_06.9.png" transfervalue="02" position="230,0,105,44" />
+				<RADIO no="3" text="배당" radioimage="input_06.9.png" transfervalue="03" position="0,54,105,44" />
+				<RADIO no="4" text="합병" radioimage="input_06.9.png" transfervalue="04" position="115,54,105,44" />
+				<RADIO no="5" text="감자" radioimage="input_06.9.png" transfervalue="05" position="230,54,105,44" />
+				<RADIO no="6" text="액면분할" radioimage="input_06.9.png" transfervalue="06" position="0,108,105,44" />
+				<RADIO no="7" text="액면병합" radioimage="input_06.9.png" transfervalue="07" position="115,108,105,44" />
+				<RADIO no="8" text="코드변경" radioimage="input_06.9.png" transfervalue="08" position="230,108,105,44" />
+				<RADIO no="9" text="회사분할" radioimage="input_06.9.png" transfervalue="09" position="0,162,105,44" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="Label0" fgcolor="146:124124124" fontsize="-2" caption="· 분배금 선택 시 ETF/ETN/펀드분배금 조회가 가능합니다." ly_vert="9,664,400,28,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5266" _ulen="4820" >
+'============================================================================
+' 화 면 명 : 권리화면_권리유형
+' 화면설명 : 권리화면의 권리유형선택 팝업창
+' 작    성 : 2023.09.12 KKM
+'============================================================================
+
+Dim g_szRghtCd, g_szGubun
+g_szRghtCd = "%"
+g_szGubun = "0" '국내
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()	
+	if szData <> "" then
+		tData = Split(szData, "★")
+		g_szRghtCd = tData(0)	
+		g_szGubun = tData(1)
+		if g_szGubun == "1" then '해외
+			if g_szRghtCd == "01" then      '01	유상
+				RgStyle1.currentindex = 1
+			elseif g_szRghtCd == "02" then  '02	 무상
+				RgStyle1.currentindex = 2
+			elseif g_szRghtCd == "03" then  '03	 배당(현금, 주식, 동시배당)
+				RgStyle1.currentindex = 3
+			elseif g_szRghtCd == "04" then  '04  합병
+				RgStyle1.currentindex = 4
+			elseif g_szRghtCd == "05" then  '05	감자
+				RgStyle1.currentindex = 5
+			elseif g_szRghtCd == "06" then  '06	액면분할
+				RgStyle1.currentindex = 6
+			elseif g_szRghtCd == "07" then  '07	액면병합 
+				RgStyle1.currentindex = 7			
+			elseif g_szRghtCd == "09" then  '08	코드변경
+				RgStyle1.currentindex = 8
+			elseif g_szRghtCd == "08" then  '09	회사분할
+				RgStyle1.currentindex = 9
+			else
+				RgStyle1.currentindex = 0
+			end if 
+			RgStyle1.left = 20
+			RgStyle.left = 402
+			Label0.left = 500
+		else '국내
+			if g_szRghtCd == "01" then      '01	유상
+				RgStyle.currentindex = 1
+			elseif g_szRghtCd == "02" then  '02	 무상
+				RgStyle.currentindex = 2
+			elseif g_szRghtCd == "03" then  '03	 배당(현금, 주식, 동시배당)
+				RgStyle.currentindex = 3
+			elseif g_szRghtCd == "04" then  '04 매수청구
+				RgStyle.currentindex = 4
+			elseif g_szRghtCd == "17" then  '17	ETF분배금
+				RgStyle.currentindex = 5
+			elseif g_szRghtCd == "07" then  '07	합병
+				RgStyle.currentindex = 6
+			elseif g_szRghtCd == "08" then  '08	무상감자 
+				RgStyle.currentindex = 7
+			elseif g_szRghtCd == "09" then  '09	유상감자
+				RgStyle.currentindex = 7			
+			elseif g_szRghtCd == "10" then  '10	액면분할
+				RgStyle.currentindex = 9
+			elseif g_szRghtCd == "11" then  '11	액면병합
+				RgStyle.currentindex = 10
+			elseif g_szRghtCd == "12" then  '12	기업분할
+				RgStyle.currentindex = 8
+			elseif g_szRghtCd == "15" then  '15	주식교환
+				RgStyle.currentindex = 11
+			elseif g_szRghtCd == "16" then  '16	주식이전
+				RgStyle.currentindex = 11
+			else
+				RgStyle.currentindex = 0
+			end if 		
+			RgStyle1.left = 402
+			RgStyle.left = 20
+		end if 
+		
+	else
+		'디폴트 전체
+		RgStyle.currentindex = 0
+		RgStyle1.currentindex = 0
+	end if 
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+	'Form.SendReturnToParent("RIGHT_SET", g_szRghtCd)
+End Sub
+
+'============================================================================
+Sub RgStyle1_OnClick(nIndex)
+	if nIndex == 1 then      '01	유상
+		g_szRghtCd = "01" 
+	elseif nIndex == 2 then  '02	무상
+		g_szRghtCd = "02" 	
+	elseif nIndex == 3 then  '03	배당(현금, 주식, 동시배당)
+		g_szRghtCd = "03" 	
+	elseif nIndex == 4 then  '04    합병
+		g_szRghtCd = "04" 	
+	elseif nIndex == 5 then  '05	감자
+		g_szRghtCd = "05" 	
+	elseif nIndex == 6 then  '06	액면분할
+		g_szRghtCd = "06" 	
+	elseif nIndex ==  7 then  '07	액변병합
+		g_szRghtCd = "07" 	
+	elseif nIndex == 8 then   '08	코드변경
+		g_szRghtCd = "09" 	
+	elseif nIndex == 9 then  '09	회사분할
+		g_szRghtCd = "08" 	
+	else
+		g_szRghtCd = "%" 	
+	end if
+End Sub
+
+
+'============================================================================
+Sub RgStyle_OnClick(nIndex)
+
+	if nIndex == 1 then      '01	유상
+		g_szRghtCd = "01" 
+	elseif nIndex == 2 then  '02	 무상
+		g_szRghtCd = "02" 	
+	elseif nIndex == 3 then  '03	 배당(현금, 주식, 동시배당)
+		g_szRghtCd = "03" 	
+	elseif nIndex == 4 then  '04     매수청구
+		g_szRghtCd = "04" 	
+	elseif nIndex == 5 then  '17	ETF분배금
+		g_szRghtCd = "17" 	
+	elseif nIndex == 6 then  '07	합병
+		g_szRghtCd = "07" 	
+	elseif nIndex ==  7 then  '08	무상감자, 09	유상감자 
+		g_szRghtCd = "08" 	
+	elseif nIndex == 9 then   '10	액면분할
+		g_szRghtCd = "10" 	
+	elseif nIndex == 10 then  '11	액면병합
+		g_szRghtCd = "11" 	
+	elseif nIndex == 8 then  '12	기업분할
+		g_szRghtCd = "12" 	
+	elseif nIndex == 11 then  '15	주식교환, 16	주식이전
+		g_szRghtCd = "15" 	
+	else
+		g_szRghtCd = "%" 	
+	end if
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnSave_OnClick()
+	'권리유형 선택 알림
+	if g_szGubun == "1" then '해외
+		Form.SendReturnToParent("RIGHT_SET1", g_szRghtCd)
+	else
+		Form.SendReturnToParent("RIGHT_SET", g_szRghtCd)
+	end if 
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

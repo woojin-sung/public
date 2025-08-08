@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="13402" scrname="보유CFD권리_유형선택" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,538,375,200,1" />
+		<BUTTON name="btnSave" caption="적용" fontsize="1" btnimage="btn_20.9" ly_vert="0,696,375,60,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="권리유형을 선택해 주세요." bgcolor="092:185046046" halign="1" ly_vert="0,543,375,70,1" />
+		<RADIOGROUP name="RgStyle" fontsize="-2" buttonshape="1" buttonsnumber="5" ly_vert="20,612,337,45,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" radioimage="input_06.9.png" transfervalue="%" position="0,0,62,44" />
+				<RADIO no="1" text="유상" radioimage="input_06.9.png" transfervalue="01" position="67,0,62,44" />
+				<RADIO no="2" text="무상" radioimage="input_06.9.png" transfervalue="02" position="134,0,62,44" />
+				<RADIO no="3" text="배당" radioimage="input_06.9.png" transfervalue="03" position="201,0,62,44" />
+				<RADIO no="4" text="분배금" radioimage="input_06.9.png" transfervalue="17" position="268,0,62,44" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<RADIOGROUP name="RgStyle1" fontsize="-2" buttonshape="1" buttonsnumber="4" ly_vert="381,612,337,45,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" radioimage="input_06.9.png" transfervalue="%" position="0,0,80,44" />
+				<RADIO no="1" text="유상" radioimage="input_06.9.png" transfervalue="01" position="85,0,80,44" />
+				<RADIO no="2" text="무상" radioimage="input_06.9.png" transfervalue="02" position="170,0,80,44" />
+				<RADIO no="3" text="배당" radioimage="input_06.9.png" transfervalue="03" position="255,0,80,44" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3239" _ulen="2977" >
+'============================================================================
+' 화 면 명 : CFD권리화면_권리유형
+' 화면설명 : CFD권리화면의 권리유형선택 팝업창
+' 작    성 : 2023.09.12 KKM
+'============================================================================
+
+Dim g_szRghtCd, g_szGubun
+g_szRghtCd = "%"
+g_szGubun = "0" '국내
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()	
+	if szData <> "" then
+		tData = Split(szData, "★")
+		g_szRghtCd = tData(0)	
+		g_szGubun = tData(1)
+	
+		if g_szGubun == "1" then '해외
+			if g_szRghtCd == "01" then      '01	유상
+				RgStyle1.currentindex = 1
+			elseif g_szRghtCd == "02" then  '02	 무상
+				RgStyle1.currentindex = 2
+			elseif g_szRghtCd == "03" then  '03	 배당(현금, 주식, 동시배당)
+				RgStyle1.currentindex = 3
+			else
+				RgStyle1.currentindex = 0
+			end if 
+			
+			RgStyle1.left = 20
+			RgStyle.left = 402
+		else '국내
+			if g_szRghtCd == "01" then      '01	유상
+				RgStyle.currentindex = 1
+			elseif g_szRghtCd == "02" then  '02	 무상
+				RgStyle.currentindex = 2
+			elseif g_szRghtCd == "03" then  '03	 배당(현금, 주식, 동시배당)
+				RgStyle.currentindex = 3
+			elseif g_szRghtCd == "17" then  '17	ETF분배금 28	ETN분배금,  30 펀드분배금
+				RgStyle.currentindex = 4
+			else
+				RgStyle.currentindex = 0
+			end if 		
+			RgStyle1.left = 402
+			RgStyle.left = 20
+		end if 
+		
+	else
+		'디폴트 전체
+		RgStyle.currentindex = 0
+		RgStyle1.currentindex = 0
+	end if 
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+	'Form.SendReturnToParent("RIGHT_SET", g_szRghtCd)
+End Sub
+
+'============================================================================
+Sub RgStyle_OnClick(nIndex)
+
+	if nIndex == 1 then      '01	유상
+		g_szRghtCd = "01" 
+	elseif nIndex == 2 then  '02	 무상
+		g_szRghtCd = "02" 	
+	elseif nIndex == 3 then  '03	 배당(현금, 주식, 동시배당)
+		g_szRghtCd = "03" 
+	elseif nIndex == 4 then  '17	ETF분배금 28	ETN분배금,  30 펀드분배금
+		g_szRghtCd = "17" 
+	else
+		g_szRghtCd = "%" 	
+	end if
+End Sub
+
+'============================================================================
+Sub RgStyle1_OnClick(nIndex)
+
+	if nIndex == 1 then      '01	유상
+		g_szRghtCd = "01" 
+	elseif nIndex == 2 then  '02	 무상
+		g_szRghtCd = "02" 	
+	elseif nIndex == 3 then  '03	 배당(현금, 주식, 동시배당)
+		g_szRghtCd = "03" 
+	else
+		g_szRghtCd = "%" 	
+	end if
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnSave_OnClick()
+	'권리유형 선택 알림
+	if g_szGubun == "1" then '해외
+		Form.SendReturnToParent("RIGHT_SET1", g_szRghtCd)
+	else
+		Form.SendReturnToParent("RIGHT_SET", g_szRghtCd)
+	end if 
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

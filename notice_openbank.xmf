@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="공지팝업_3" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="Container0" vscroll="1" scroll_pos="0,0" ly_vert="0,0,375,608,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="Image5" imgpath="icon_main_15" ly_vert="344,0,30,28,1" />
+				<BUTTON name="Button2" btnimage="alpha" ly_vert="25,555,320,45,1" />
+				<BUTTON name="Button3" btnimage="alpha" ly_vert="25,1045,320,40,1" />
+				<BUTTON name="Button7" btnimage="alpha" ly_vert="25,900,320,50,1" />
+				<BUTTON name="Button8" fontsize="-4" btnimage="alpha" ly_vert="32,690,310,195,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<BUTTON name="Button1" btnimage="alpha" ly_vert="25,865,320,30,1" />
+		<BUTTON name="Button6" btnimage="alpha" ly_vert="22,1285,160,40,1" />
+		<BUTTON name="Button5" btnimage="alpha" ly_vert="190,1285,160,40,1" />
+		<BUTTON name="Button4" btnimage="alpha" ly_vert="190,2607,160,40,1" />
+		<BUTTON name="Button0" caption="닫기" fgcolor="004:000000000" fontsize="-2" ly_vert="288,615,77,25,1" />
+		<WEBVIEW name="WebView0" urlpath="about:blank" ly_vert="0,0,375,600,1" />
+		<LABEL name="Label0" visible="0" fontsize="-4" caption="※ 본 이벤트는 Apple의 후원을 받지 않으며, 일체의 관련이 없습니다." ly_vert="0,571,375,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6321" _ulen="5661" >
+Dim g_LoginType
+Dim g_btnflag
+Dim g_sDate
+'============================================================================
+Sub Container0_Image5_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+'20210629 SWJ START : CFD 안내 배너 게시
+'============================================================================
+'Sub Container0_Button2_OnClick()
+'	Form.OpenPopup( "banner_applypop" , "" , "")
+'End Sub
+''============================================================================
+'Sub Container0_Button3_OnClick()
+'	if CInt(g_LoginType) > 1 then '로그인상태
+'		Dim sText
+'		sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+'		Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+'	else
+'		Form.SetSharedData("&SCREEN_AUTH" , "99")
+'		Form.OpenPopup("mbbdm85100" , "" , "")
+'	end if	
+'End Sub
+'============================================================================
+'Sub Container0_Button4_OnClick()
+'	'CFD 구분값
+'	Form.SetSharedData("DIGITAL_EVENT","CFD")
+'	
+'	if Cint(g_LoginType) > 1 then '로그인상태
+'		Form.OpenNextPopup("banner_p0","", "")
+'	else
+'		Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+'	end if
+'End Sub
+''============================================================================
+'Sub Container0_Button5_OnClick()
+'	'CFD 구분값
+'	Form.SetSharedData("DIGITAL_EVENT","CFD")
+'	
+'	if Cint(g_LoginType) > 1 then '로그인상태
+'		Form.OpenNextPopup("banner_p0","", "")
+'	else
+'		Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+'	end if
+'End Sub
+'============================================================================
+''Sub Container0_Button6_OnClick()
+''	if CInt(g_LoginType) > 1 then 로그인상태
+''		Dim sText
+''		sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+''		Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+''	else
+''		Form.SetSharedData("&SCREEN_AUTH" , "99")
+''		Form.OpenPopup("mbbdm85100" , "" , "")
+''	end if	
+''End Sub
+'============================================================================
+Sub Container0_Button1_OnClick()
+	'Form.openExternalBrowser("https://home.imeritz.com/cfd/ContractForDiff01.do")
+End Sub
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "LOG_FORCE" then
+		if sRet == "ok" then
+			Form.SetSharedData("BDM_CORPORATE", "Y")
+			Form.OpenNextPopup("mhetc90021" , "" , "")
+		else
+			Form.CloseForm()			
+		end if	
+	end if
+	
+	if sKeyName == "LOGOUT_MSG" then
+		if sRet == "ok" then
+			'로그아웃실행
+			'(1param(0:문구없음,1문구있음), 
+			'2param(0:권한상관없이 로그아웃만 함, 1:화면권한에 따라 닫을 화면 닫고 로그아웃 함)
+			Form.LogOut(0, 1) 		
+			Form.SetSharedData("&SCREEN_AUTH" , "99")
+			Form.OpenPopup("mbbdm85100" , "" , "")
+		end if
+	end if
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+	g_LoginType = Form.GetSharedData("&LOGIN_TYPE", 0 )
+	sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	g_sDate 	   = Form.GetSharedData("&HOST_DATE"  , false )
+	
+	'20220615 SWJ START
+	'모바일 웹에서 어떤 OS인지 판단할 수 있음
+	if sDeviceOS == "1" then
+		WebView0.SetUserAgent("meritz_android")
+	elseif sDeviceOS == "2" then
+		WebView0.SetUseJavaScript("1")
+		WebView0.SetUserAgent("meritz_ios")
+	else
+	end if
+	
+	g_serverMode = Form.GetSharedData("&SERVER_MODE", false)
+	
+	If g_serverMode == "1" Then	'개발기
+		WebView0.urlpath = "https://testhome.imeritz.com/mobile/sub/m_eventDtl.html?file=2023041401"
+	else
+		WebView0.urlpath = "https://home.imeritz.com/mobile/sub/m_eventDtl.html?file=2023041401"
+	end if
+	'20220615 SWJ END
+	
+	'20220927 LES START iOS 심사대응
+	if sDeviceOS == "2" then
+		Container0.height = 558
+		WebView0.height = 558
+		Label0.visible = true
+	end if
+	
+End Sub
+'============================================================================
+Sub Form_OnFormClose()
+End Sub
+'============================================================================
+'Sub Container0_Button7_OnClick()
+'	Form.openExternalBrowser("https://youtu.be/wV09EnWYimw")
+'End Sub
+''============================================================================
+'Sub Container0_Button8_OnClick()
+'	Form.openExternalBrowser("https://youtu.be/wV09EnWYimw")
+'End Sub
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "WebViewReturn" then
+		sData = Split(sParam,"@")
+
+		'1: 맵파일 바로 호출, 2: 웹, 3: 맵파일 호출 전 파라미터 받는 경우
+		if Ubound(sData) > 0 then
+			if sData(0) == "3" then
+				'비대면 계좌개설
+				if sData(1) == "85100" then
+					if CInt(g_LoginType) > 1 then '로그인상태
+						Dim sText
+						sText = "로그아웃이 필요한 메뉴입니다. 로그아웃하시겠습니까?"	
+						Form.MsgBox( "알림", sText, "LOGOUT_MSG", 1 )
+					else 
+						Form.SetSharedData("&SCREEN_AUTH" , "99")
+						Form.OpenPopup("mbbdm85100" , "" , "")
+					end if
+				elseif sData(1) == "90180" then
+					if Cint(g_sDate) < 20230417 then
+						Form.MsgBox( "알림", "이벤트 신청은 4월 17일부터 가능합니다.", "", 6 )
+						exit sub
+					elseif Cint(g_sDate) > 20230623 then
+						Form.MsgBox("알림", "종료된 이벤트 입니다.", "", 6)
+						exit sub
+					end if
+				
+					'ETF이벤트
+					Form.SetSharedData("DIGITAL_EVENT","AceEtf")
+					
+					if Cint(g_LoginType) > 1 then '로그인상태
+						Form.OpenNextPopup("banner_p0","", "")
+					else
+						Form.MsgBox("알림", "ID인증 또는 로그인이\n필요한 메뉴입니다.\n로그인하시겠습니까?", "LOG_FORCE", 1)
+					end if
+				end if
+			elseif sData(0) == "2" then
+				Form.OpenExternalBrowser(sData(1))
+			elseif sData(0) == "1" then
+				Form.OpenPopup(sData(2) , "" , "")
+			end if
+		end if			
+	end if
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

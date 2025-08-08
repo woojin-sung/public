@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="공지팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<CHKBUTTON name="ChkButton0" fontsize="-2" chkcaption="하루동안 보지 않기" unchkcaption="하루동안 보지 않기" ly_vert="6,616,159,27,1" />
+		<BUTTON name="Button0" caption="닫기" fgcolor="004:000000000" fontsize="-2" ly_vert="288,615,77,25,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="sp_popup2.png" ly_vert="0,0,375,605,1" />
+		<IMAGE name="Image5" imgpath="icon_main_11" ly_vert="5,7,30,28,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1365" _ulen="1329" >
+'============================================================================
+'20210113 SWJ START : 해외파생 불공정거래 팝업게시 (매달 18~22일 주기)
+'============================================================================
+Sub Button0_OnClick()
+	Form.CloseForm( )
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	Dim saveDate
+	Dim calcDate
+	
+	saveDate = Form.LoadConfigData("NoticeSetting", "notice_abroadFO")
+	todayDate = Form.GetSharedData("&HOST_DATE",0)
+	
+	ResaveDate 	= left(saveDate,4)&"-"&mid(saveDate,5,2)&"-"&right(saveDate,2)
+	RetodayDate 	= left(todayDate,4)&"-"&mid(todayDate,5,2)&"-"&right(todayDate,2)
+		
+	calcDate = tonumber(DateDiff("d",ResaveDate, RetodayDate))
+	DayDate = right(todayDate,2)
+		
+	if DayDate < 18 and DayDate > 22 then
+		Form.CloseForm()
+	elseif calcDate > 4 then
+		Form.CloseForm()
+	end if
+	
+	
+End Sub
+
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	
+	if sCheckState = 1 or sCheckState = "1" then
+		saveDate = Form.GetSharedData("&HOST_DATE",0)
+		Form.SaveConfigData("NoticeSetting", "notice_abroadFO", saveDate)
+	end if
+	
+End Sub
+'============================================================================
+Sub Image5_OnClick()
+	Form.CloseForm()
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

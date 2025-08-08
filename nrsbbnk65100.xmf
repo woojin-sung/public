@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="65100" scrname="환율조회" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" caption="환율조회" paddinginfo="1,0,0,0" click="1" ly_vert="47,0,283,47,1" />
+		<FORMTAB name="fmtab01" tabcount="2" tabwidthtype="1" tabheadheight="45" ly_vert="1,53,375,649,1" >
+			<PAGE name="page004044" caption="환전환율" linkfile="nrsbbnk65100_t1" />
+			<PAGE name="page000701" caption="통화별환율" linkfile="nrsbbnk65100_t2" />
+		</FORMTAB>
+		<IMAGE name="imgTitleArrow" autosize="1" ly_vert="200,16,39,15,1" />
+		<COMBO name="Combo0" visible="0" cbinputdatatext="환율조회
+환전신청
+목표환율환전신청
+환전내역" popuptitle="메뉴를 선택해 주세요." ly_vert="505,117,111,40,0" />
+		<IMAGE name="imgBack" autosize="1" ly_vert="6,11,39,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2329" _ulen="2247" >
+'환율조회
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+'	ImgBackPress.setMaintainingRatio("1")
+'	imgTitleArrow.setMaintainingRatio("1")	
+'	imgInfo.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()	
+	'-----------------------------------------------
+	' 타이틀 초기화
+	'-----------------------------------------------
+	Dim nWidth
+	lblTitle.paddinginfo = "0,0,0,0"
+	
+	nWidth = Form.GetTextWidth(lblTitle.caption, 3, false, false)
+	
+	imgTitleArrow.maintainratio = "2" 
+	imgTitleArrow.imgpath = "icon_arrow_down2"
+	imgTitleArrow.visible = true
+	imgTitleArrow.left = 47 + nWidth + 10	
+	
+	'-----------------------------------------------
+	' 뒤로가기 버튼 초기화
+	'-----------------------------------------------
+	imgBack.SetMaintainingRatio("2")
+	imgBack.imgpath = "icon_main_01"	
+End Sub
+
+
+'============================================================================
+Sub imgBack_OnClick()
+	Form.OpenPrevScreen()	
+End Sub
+
+'============================================================================
+Sub imgTitle_OnClick()
+	'Form.OpenFramePopup("mbonl87056_p9", "", "")	
+End Sub
+
+'============================================================================
+Sub lblTitle_OnClick()
+	imgTitleArrow_OnClick()
+End Sub
+
+'메뉴
+'============================================================================
+Sub imgTitleArrow_OnClick()
+	'imgTitleArrow.imgpath = "icon_arrow_up2.png"
+	Combo0.currentindex = 0
+	Combo0.OpenList()	
+End Sub
+
+'============================================================================
+Sub Combo0_OnEditComplete(iIndex)
+	if iIndex == 1 then  '환전신청
+		Form.CloseForm()
+		Form.OpenScreen("65000" , "") 
+	elseif iIndex == 2 then '목표환율환전신청
+		Form.CloseForm()
+		Form.OpenScreen("65010" , "")  
+	elseif iIndex == 3 then '환전내역
+		Form.CloseForm()
+		Form.OpenScreen("65020" , "") 
+	else '환율조회
+		imgTitleArrow.imgpath = "icon_arrow_down2.png"
+	end if 
+End Sub
+
+'============================================================================
+Sub fmtab01_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "INFO_REFRESH", "")
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

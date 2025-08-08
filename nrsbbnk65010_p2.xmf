@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="65010" scrname="목표환율환전신청_기간선택" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnBackGround" btnimage="alpha.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,475,375,280,1" />
+		<LABEL name="LabelTitle" fontsize="2" caption="기간을 선택해주세요" halign="1" ly_vert="20,505,335,30,1" />
+		<IMAGE name="imgClose" visible="0" imgpath="icon_close" margin="5,7,5,7" ly_vert="330,505,30,30,0" />
+		<BUTTON name="btnOk" caption="확인" btnimage="btn_20.9" ly_vert="0,695,375,60,1" />
+		<CONTAINER name="contPeriod" ly_vert="0,565,375,100,1" scroll_ly_vert="0,565,375,100,1" >
+			<CONTROL_INFO>
+				<RADIOGROUP name="RgDateType" fontsize="-2" buttonshape="1" buttonsnumber="4" ly_vert="18,1,335,44,1" >
+					<RADIO_INFO>
+						<RADIO no="0" text="1일" radioimage="input_06.9.png" transfervalue="01" position="0,0,80,44" />
+						<RADIO no="1" text="1주일" radioimage="input_06.9.png" transfervalue="02" position="85,0,80,44" />
+						<RADIO no="2" text="1개월" radioimage="input_06.9.png" transfervalue="03" position="170,0,80,44" />
+						<RADIO no="3" text="직접입력" radioimage="input_06.9.png" transfervalue="04" position="255,0,80,44" />
+					</RADIO_INFO>
+				</RADIOGROUP>
+				<CALENDAR name="cldFromDate" fontsize="-2" dispmode="65537" eventtr="ohhts_1081_002r" ly_vert="18,55,150,44,1" />
+				<CALENDAR name="cldToDate" fontsize="-2" dispmode="1398757700" eventtr="ohhts_1081_002r" ly_vert="203,55,150,44,1" />
+				<LABEL name="Label8" fontsize="-2" caption="~" halign="1" ly_vert="179,55,16,44,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8343" _ulen="7401" >
+Dim optionPeriodIndex,optionFromDate,optionToDate
+Dim optionPeriodDirect
+
+Dim g_szCrcd_Target
+g_szCrcd_Target = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	'디폴트값(전체/전일날짜/당일날짜)
+	'optionPeriodIndex =  0
+	'optionFromDate	=  Left(Form.calcDateTime( nYear, nMonth, nDay, nHour, nMinute, nSecond ), 8)
+	'optionToDate 		=  Left(Form.calcDateTime( nYear, nMonth, 7, nHour, nMinute, nSecond ), 8)
+	optionPeriodDirect = false
+
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+
+	
+	szLinkData = Form.GetOpenLinkData()
+	
+	if szLinkData <> "" then
+		arrData = Split(szLinkData,"@")
+		
+		'기간구분/From일자/To일자
+		'From일자는 익영업일로 고정
+		'To일자는 익영업일 ~ 익영업일 + 3개월 이내 
+		optionPeriodIndex = arrData(0)
+		optionFromDate = arrData(1)
+		optionToDate = arrData(2)
+		g_szCrcd_Target = arrData(3)
+		
+		'설정된 디폴트 값으로 조회구분 세팅(기간)
+		SelectPeriodOption()
+	
+	else
+		
+		'화면링크데이터가 없으면 디폴트 데이터값 설정
+		SetDefaultOption()
+		
+		'설정된 디폴트 값으로 조회구분 세팅(기간)
+		SelectPeriodOption()
+	
+	end if
+	
+
+End Sub
+'============================================================================
+'
+'============================================================================
+Sub BtnBackGround_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+'
+'============================================================================
+Sub contPeriod_RgDateType_OnClick(nIndex)
+
+	Change_optionPeriod(nIndex)	
+	
+End Sub
+
+'============================================================================
+' 조회기간(From 날짜) 직접입력 시
+'============================================================================
+Sub contPeriod_cldFromDate_OnEditComplete()
+	optionFromDate = contPeriod.cldFromDate.caption
+End Sub
+
+'============================================================================
+' 조회기간(To 날짜) 직접 입력 시
+'============================================================================
+Sub contPeriod_cldToDate_OnEditComplete()
+
+	'From일자
+	sFromDate = contPeriod.cldFromDate.caption
+	
+	'조회일+ 1영업일 3개월 이후
+	sMaxDate = CalcDate("m",1)
+	
+	'사용자 선택일자
+	sSelectDate = contPeriod.cldToDate.caption
+	
+	'사용자 선택일자가 [조회일+ 1영업일 3개월 이후] 이거나 [From일자] 이전 인경우
+	if sSelectDate < sFromDate then
+		
+		contPeriod.cldToDate.caption = sFromDate
+		optionToDate = sFromDate
+			
+		Form.ShowAlert("알림", "종료일이 시작일 이전입니다.")
+	
+	elseif sSelectDate > sMaxDate then
+		contPeriod.cldToDate.caption = sMaxDate
+		optionToDate = sMaxDate
+		
+		Form.ShowAlert("알림", "기간은 최대 1개월까지만 설정 가능합니다.")
+		
+	else
+		optionToDate = contPeriod.cldToDate.caption
+	end if
+	
+		
+End Sub
+
+
+'============================================================================
+' 검색버튼 클릭이벤트(조회조건 설정 리턴)
+'============================================================================
+Sub btnOk_OnClick()
+	
+	sReturnData = optionPeriodIndex.."@"..optionFromDate.."@"..optionToDate
+	Form.SendReturnToParent("PERIOD_SET" , sReturnData)
+	Form.CloseForm()
+	
+End Sub
+'============================================================================
+' 닫기버튼 클릭이벤트
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+'============================================================================
+' 조회조건(기간) 디폴트값 설정
+'============================================================================
+Function SetDefaultOption()
+	
+	'조회기간 디폴트값 설정(전일)
+	optionPeriodIndex = 0
+	
+	'From:익영업일/To:익영업일 + 7일
+	optionFromDate = Form.GetSharedData("&BIZ_NXT_DT", false) '익영업일
+	contPeriod.cldFromDate.caption = optionFromDate
+	contPeriod.cldToDate.caption = optionFromDate
+	contPeriod.cldToDate.addday = 7
+	optionToDate = contPeriod.cldToDate.caption
+	
+	
+End Function
+
+'============================================================================
+' 조회조건(기간)에 따라 선택/미선택 표시
+'============================================================================
+Function SelectPeriodOption()
+
+	'직접입력인 경우 사용자가 입력했던 To일자를 사용하기 위해 플래그 변경
+	if optionPeriodIndex == "3" then
+		optionPeriodDirect = true
+	else
+		optionPeriodDirect = false
+	end if
+
+	contPeriod.RgDateType.currentindex = optionPeriodIndex
+	
+End Function
+
+'============================================================================
+' 조회조건(기간) 변경 처리
+'============================================================================
+Function Change_optionPeriod(nIndex)
+	optionPeriodIndex = nIndex
+
+	'-------------------------------------------------------------
+	'From : 익영업일 / To : 익영업일 + 7일
+	'-------------------------------------------------------------
+	if nIndex == 0 then '1일
+		contPeriod.cldFromDate.enable = "0"
+		contPeriod.cldToDate.enable = "0"
+		
+		'달력컨트롤 숨김처리
+		contPeriod.cldFromDate.visible = true
+		contPeriod.Label8.visible = true
+		contPeriod.cldToDate.visible = true
+	
+		contPeriod.cldFromDate.caption = optionFromDate
+'		if g_szCrcd_Target == "USD" then
+'			
+'			contPeriod.cldToDate.caption = CalcDate("d",1)
+'		else
+			contPeriod.cldToDate.caption = CalcDate("d",0)
+'		end if
+		
+		optionToDate = contPeriod.cldToDate.caption
+	
+	'-------------------------------------------------------------
+	'From : 익영업일 / To : 익영업일 + 1개월
+	'-------------------------------------------------------------
+	elseif nIndex == 1 then '1주일
+		contPeriod.cldFromDate.enable = "0"
+		contPeriod.cldToDate.enable = "0"
+		
+		'달력컨트롤 숨김처리
+		contPeriod.cldFromDate.visible = true
+		contPeriod.Label8.visible = true
+		contPeriod.cldToDate.visible = true
+
+		
+		contPeriod.cldFromDate.caption = optionFromDate
+		contPeriod.cldToDate.caption = CalcDate("d",7)
+		optionToDate = contPeriod.cldToDate.caption
+		
+	'-------------------------------------------------------------
+	'From : 익영업일 / To : 익영업일 + 3개월
+	'-------------------------------------------------------------
+	elseif nIndex == 2 then  '1개월
+		
+		contPeriod.cldFromDate.enable = "0"
+		contPeriod.cldToDate.enable = "0"
+		
+		'달력컨트롤 숨김처리
+		contPeriod.cldFromDate.visible = true
+		contPeriod.Label8.visible = true
+		contPeriod.cldToDate.visible = true
+
+
+		contPeriod.cldFromDate.caption = optionFromDate
+		contPeriod.cldToDate.caption = CalcDate("m",1)
+		optionToDate = contPeriod.cldToDate.caption
+		
+	'-------------------------------------------------------------
+	'From : 익영업일 / To : 익영업일 ~ 익영업일 + 3개월 내
+	'-------------------------------------------------------------
+	elseif nIndex == 3 then  '직접입력
+		
+		contPeriod.cldFromDate.enable = "0"
+		contPeriod.cldToDate.enable = "1"
+		contPeriod.cldFromDate.caption = optionFromDate
+		
+		'달력컨트롤 보임처리
+		contPeriod.cldFromDate.visible = true
+		contPeriod.Label8.visible = true
+		contPeriod.cldToDate.visible = true
+		
+
+		
+		'직접입력으로 설정 후 다시 돌아온 경우에는 사용자가 입력했던
+		'To일자 사용함. 그렇지 않은 경우에는 From일자와 동일한 일자 사용
+		if optionPeriodDirect then
+			contPeriod.cldToDate.caption = optionToDate
+		else
+			contPeriod.cldToDate.caption = optionFromDate
+			optionToDate = optionFromDate
+		end if
+		
+		
+	end if
+	
+End Function
+
+'============================================================================
+' From일로부터 + @일/개월 가져오기
+'============================================================================
+Function CalcDate(sType,nDiff)
+
+	sYear = contPeriod.cldFromDate.calyear
+	sMonth = contPeriod.cldFromDate.calmonth
+	sDay = contPeriod.cldFromDate.calday
+	
+	sRsltDate = Replace(DateAdd (sType, nDiff,  sYear&"-"& sMonth &"-"& sDay), "-", "")
+	return sRsltDate
+	
+	
+End Function
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

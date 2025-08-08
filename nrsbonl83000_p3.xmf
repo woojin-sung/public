@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="83000" scrname="권리처리상태선택창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,459,375,296,1" />
+		<BUTTON name="btnSave" caption="적용" fontsize="1" btnimage="btn_20.9" ly_vert="0,696,375,60,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="예정/지급을 선택해 주세요." bgcolor="092:185046046" halign="1" ly_vert="0,459,375,70,1" />
+		<RADIOGROUP name="RgProcState" fontsize="-2" buttonshape="1" buttonsnumber="3" initselectionuse="1" initselection="0" ly_vert="20,529,337,44,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" radioimage="input_06.9.png" transfervalue="%" position="0,0,105,44" />
+				<RADIO no="1" text="예정" radioimage="input_06.9.png" transfervalue="2" position="115,0,105,44" />
+				<RADIO no="2" text="지급" radioimage="input_06.9.png" transfervalue="1" position="230,0,105,44" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="Label0" fontsize="-2" caption="[예정]" ly_vert="12,583,100,32,1" />
+		<LABEL name="Label1" fontsize="-2" caption="[지급]" ly_vert="12,629,100,32,1" />
+		<LABEL name="Label2" fgcolor="146:124124124" fontsize="-2" caption="발생된 권리내역을 조회 할 수 있어요." autofontsize="1" ly_vert="12,602,350,32,1" />
+		<LABEL name="Label3" fgcolor="146:124124124" fontsize="-2" caption="지급된 권리내역을 조회 할 수 있어요." autofontsize="1" ly_vert="12,648,350,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1807" _ulen="1703" >
+'============================================================================
+' 화 면 명 : 권리화면_처리상태
+' 화면설명 : 권리화면의 처리상태선택 팝업창
+' 작    성 : 2023.09.12 KKM
+'============================================================================
+
+Dim g_szProcStateCd
+g_szProcState = "%"
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()
+	if szData <> "" then
+		g_szProcState = szData	
+		if g_szProcState == "2" then      '2	 예정
+			RgProcState.currentindex = 1
+		elseif g_szProcState == "1" then  '1 지급
+			RgProcState.currentindex = 2
+		else
+			RgProcState.currentindex = 0
+		end if 		
+	else
+		'디폴트 전체
+		RgProcState.currentindex = 0
+	end if 
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+	'Form.SendReturnToParent("PROC_SET", g_szBuySellCd)
+End Sub
+
+'============================================================================
+Sub RgProcState_OnClick(nIndex)
+
+	if nIndex == 1 then      '2	 예정
+		g_szProcState = "2" 
+	elseif nIndex == 2 then  '1 지급
+		g_szProcState = "1" 	
+	else
+		g_szProcState = "%" 	
+	end if
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnSave_OnClick()
+	'매매유형선택 알림
+	Form.SendReturnToParent("PROC_SET", g_szProcState)
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

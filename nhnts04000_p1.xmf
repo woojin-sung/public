@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="04000" scrname="고유MTS_시장종합_설정팝업" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,607,1" />
+	<CONTROL_INFO>
+		<BUTTON name="btnAddMrkt" caption="시장정보 추가" fgcolor="004:000000000" fontsize="-1" fontstyle="01" ly_vert="54,554,114,39,1" />
+		<BUTTON name="btnInit00" caption="설정초기화" fgcolor="004:000000000" fontsize="-1" fontstyle="01" ly_vert="208,554,114,39,1" />
+		<GRID name="grdMain00" colcount="4" ly_vert="1,1,375,550,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell1" fontsize="2" fontstyle="01" />
+				<LABEL name="bd_cell4" ly_vert="0,0,100,20,1" />
+				<LABEL name="bd_cell3" halign="2" />
+				<LABEL name="bd_cell5" halign="2" />
+				<IMAGE name="bd_cell0" imgpath="icon_sub_03.9" />
+				<IMAGE name="bd_cell2" imgpath="icon_sub_02.9" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" userowdrag="1" usetopheader="0" border="0000" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="50,275,50,120" ly_vert_visible="0,0,0,1" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="50" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="275" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="50" ly_vert_visible="0" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell2" cell_ly="0,0,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="120" ly_vert_visible="1" />
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell3" cell_ly="0,0,0,0" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell5" cell_ly="0,1,0,1" line="0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8359" _ulen="7885" >
+'============================================================================
+' 01.화면명 	: 시장종합
+' 02.화면설명	: 시장종합_설정팝업
+' 03.작성	: 2016.01.04
+'============================================================================
+
+
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+dim g_szInputFile	'읽어들일세팅파일
+dim g_szFileName	'시장항목세팅파일
+dim g_szKeys		'키값		
+dim g_szValues		'읽어들인세팅값
+dim g_szNames 		'한글로 출력할 이름
+'g_szKeys=Array(	"41000P2_TILE", "41000P2_TILE6ROW" , "41000P2_INVR", "41000P2_PROG", "41000P2_CHNG", 
+'			"41000P2_PROD", "41000P2_RATE") 				'7개	
+g_szKeys		=	Array(	"04000P2_TILE6ROW", "04000P2_GLOB"	)	'20200331 HWG : 고유MTS
+
+'g_szNames=Array( "지수타일",  "지수타일2줄", "투자자별매매동향", "프로그램매매동향", "환율", 
+'			 "상품", "금리")									'7개
+ g_szNames=Array( "지수타일2줄",  "주요종목")	'20200331 HWG : 고유MTS
+				
+				
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N             	
+'****************************************************************************
+
+
+'============================================================================
+'해당하는 값의 아이템을 리턴
+'============================================================================
+Function getListItem(szInput, nIdx)
+	dim szList
+	
+	if szInput = "" then
+		return 
+	else
+		szList = split(szInput, "★")
+		if szList <> "" then
+			return szList(nIdx)
+		else
+			return
+		end if 
+	end if 
+	
+end function
+
+
+'============================================================================
+'LoadSettings() : 파일에서 세팅값을 읽어들임
+'============================================================================
+Function LoadSettings()
+	dim szVal
+
+	g_szValues = Array()
+	
+	For i = 0 to UBound(g_szKeys)
+		szVal = Form.LoadConfigData(g_szInputFile, g_szKeys(i))
+'		Form.ShowAlert("output",g_szKeys(i) & "=" & szVal & ",," & i)
+		g_szValues(i) = szVal
+	Next
+	
+	'TEST 출력용 
+'	For j = 0 to UBound(g_szKeys)
+'		Form.ShowAlert("output22",g_szKeys(j) & "=" & g_szValues(j)  & ",," & j )
+'	Next
+	
+End Function
+
+
+'============================================================================
+'ShowSettings() : 파일에서 세팅값을 읽어들여서 화면 세팅
+'============================================================================
+Function ShowSettings()
+	dim nGridIdx
+	dim szOutputData
+	
+	nGridIdx = 0 
+	call LoadSettings()
+	
+	grdMain00.SetClear()
+	grdMain00.rowcount = 1
+	
+	for i = 0 to UBound(g_szKeys) 
+		szOutputData = g_szValues (i)
+		
+		if szOutputData = "1" then
+			'grdMain00.SetCellData("bd_cell0", nGridIdx, "DEL")
+			grdMain00.SetCellData("bd_cell1", nGridIdx, g_szNames(i))
+			grdMain00.SetCellData("bd_cell3", nGridIdx, g_szKeys(i))
+			grdMain00.SetCellData("bd_cell5", nGridIdx, g_szValues(i))
+			nGridIdx = nGridIdx + 1
+			grdMain00.AddRow()
+		end if 
+	next 
+	
+	grdMain00.SetDeleteRow(nGridIdx)
+	
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+'Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'20200331 HWG START : 고유MTS
+	g_szInputFile	= "04000P2ITEMS.ini"	
+	g_szFileName	= "04000ITEMS.ini"
+	'20200331 HWG END
+	
+	Form.SetScreenName("설정")
+	grdMain00.rowmove = "1"			
+	ShowSettings()
+
+End Sub
+
+
+'============================================================================
+'btnInit00_OnClick
+'============================================================================
+Sub btnInit00_OnClick()
+
+	'TODO : 클리어하고 기본 값만 세팅하는 기능 
+
+	'전체 아이템 세팅
+'	Form.SaveConfigData(g_szInputFile, "41000P2_TILE"		, "0")
+'	Form.SaveConfigData(g_szInputFile, "41000P2_INVR"		, "1")
+'	Form.SaveConfigData(g_szInputFile, "41000P2_PROG"		, "0")
+'	Form.SaveConfigData(g_szInputFile, "41000P2_CHNG"		, "1")
+'	Form.SaveConfigData(g_szInputFile, "41000P2_PROD"		, "1")
+'	Form.SaveConfigData(g_szInputFile, "41000P2_RATE"		, "0")
+'	Form.SaveConfigData(g_szInputFile, "41000P2_TILE6ROW"  	, "1")
+	
+	'20200331 HWG START : 고유MTS
+	Form.SaveConfigData(g_szInputFile, "04000P2_TILE6ROW"  	, "1")
+	Form.SaveConfigData(g_szInputFile, "04000P2_GLOB"  	, "1")
+	'20200331 HWG END
+	
+	'지수 항목 세팅
+	'20200331 HWG START : 고유MTS
+	Form.SaveConfigData(g_szFileName, "04000_KOSPI"		, "0")
+	Form.SaveConfigData(g_szFileName, "04000_KOSDAQ"		, "0")
+	Form.SaveConfigData(g_szFileName, "04000_KOSPI200"	, "0")
+	Form.SaveConfigData(g_szFileName, "04000_FUTURE"		, "0")
+	Form.SaveConfigData(g_szFileName, "04000_DOW"			, "1")
+	Form.SaveConfigData(g_szFileName, "04000_NASDAQ"		, "1")
+	Form.SaveConfigData(g_szFileName, "04000_SP500"		, "1")
+	Form.SaveConfigData(g_szFileName, "04000_SHANGHAI"	, "1")
+	Form.SaveConfigData(g_szFileName, "04000_HONGKONG"	, "1")
+	Form.SaveConfigData(g_szFileName, "04000_NIKKEI"		, "1")
+	'20200331 HWG END
+	
+'	Form.SaveConfigData(g_szFileName, "41000_WONDOLLAR"	, "1")
+'	Form.SaveConfigData(g_szFileName, "41000_WONYEN"		, "1")
+'	Form.SaveConfigData(g_szFileName, "41000_WONWIAN"		, "1")
+'	'Form.SaveConfigData(g_szFileName, "41000_DOLLAREURO"	, "0")
+'	Form.SaveConfigData(g_szFileName, "41000_YENDOLLAR"	, "0")
+'	Form.SaveConfigData(g_szFileName, "41000_YENEURO"		, "0")
+'	'Form.SaveConfigData(g_szFileName, "41000_DOLLARPOUND" , "0")
+'	
+'	' 20160728 전요셉과장 default 조정 요청
+'	Form.SaveConfigData(g_szFileName, "41000_GOLD"	, "1")
+'	Form.SaveConfigData(g_szFileName, "41000_WTI"		, "1")
+'	Form.SaveConfigData(g_szFileName, "41000_DUBAI"	, "0")
+'	Form.SaveConfigData(g_szFileName, "41000_BRENT"	, "1")
+'	
+'	Form.SaveConfigData(g_szFileName, "41000_CD"		, "1")
+'	Form.SaveConfigData(g_szFileName, "41000_COMBOND"	, "1")
+'	Form.SaveConfigData(g_szFileName, "41000_CNTBOND"	, "1")
+'	
+'	Form.SaveConfigData(g_szInputFile, "41000P2_TILECNT"	, "1")
+
+	Form.ShowAlert("알림", "설정이 초기화 되었습니다.")
+	ShowSettings()
+End Sub
+
+
+'============================================================================
+'grdMain00_OnClickUp
+'============================================================================
+Sub grdMain00_OnClickUp(lRow, szCellID)
+	dim szCnt
+	dim szItemName			'선택된 ITEM의 이름 
+
+	szCnt = grdMain00.rowcount
+	
+	if szCellID = "bd_cell0" then					' 삭제 기능 
+		'20200331 HWG START : 고유MTS
+		if szCnt <= "1" then	
+			Form.ShowAlert("알림", "최소1개이상유지해야합니다.")
+		'20200331 HWG END
+		else
+			szItemName = grdMain00.GetCellData("bd_cell3", lRow)
+			Form.SaveConfigData(g_szInputFile, szItemName, "0★-1")
+			grdMain00.SetDeleteRow(lRow)
+		end if 
+	end if 
+End Sub
+
+
+'============================================================================
+'btnAddMrkt_OnClick
+'============================================================================
+Sub btnAddMrkt_OnClick()
+	Form.OpenFramePopup("nhnts04000_p2" , sOpenData , sPosInfo)	'20200331 HWG : 고유MTS
+End Sub
+
+
+'============================================================================
+'Form_OnPopupReturn
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	ShowSettings()
+End Sub
+
+
+'============================================================================
+'Form_OnFormClose
+'============================================================================
+Sub Form_OnFormClose()
+	dim szGridCnt
+	dim szLinkData
+	
+	szGridCnt = grdMain00.rowcount
+	
+	szLinkData = szGridCnt & "★"
+	
+	for i = 0 to  szGridCnt - 1
+		szLinkData = szLinkData & grdMain00.GetCellData("bd_cell3", i) & "★" & grdMain00.GetCellData("bd_cell5", i) &  "★"
+	next 
+	
+	Form.SaveConfigData(g_szInputFile, "04000P2_LISTITEMS", szLinkData)	'20200331 HWG : 고유MTS
+	Form.SendReturnToParent("REFRESH_MAIN" , szLinkData)
+
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

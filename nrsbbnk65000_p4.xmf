@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="65000" scrname="환전신청_환전예정내역" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" autosize="1" imgpath="alpha128" ly_vert="0,0,375,755,1" />
+		<CONTAINER name="contBg" containerimage="alpha" ly_vert="0,287,375,469,1" scroll_ly_vert="0,287,375,469,1" >
+			<CONTROL_INFO>
+				<IMAGE name="imgContBg" autosize="1" imgpath="popup_bg.9" ly_vert="0,0,375,469,1" />
+				<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="예상 환전 확인" halign="1" ly_vert="0,23,375,32,1" />
+				<IMAGE name="imgFlag00" autosize="1" ly_vert="69,81,20,20,1" />
+				<LABEL name="lblCrcd00" fontstyle="01" bgcolor="029:255212175" multiline="1" ly_vert="94,75,45,32,1" />
+				<IMAGE name="imgFlag01" autosize="1" ly_vert="243,81,20,20,1" />
+				<LABEL name="lblCrcd01" fontstyle="01" bgcolor="035:237246255" multiline="1" ly_vert="268,75,45,32,1" />
+				<LABEL name="lblBg" ly_vert="20,163,335,85,1" />
+				<LABEL name="lblSellAmt" fontsize="4" fontstyle="01" bgcolor="029:255212175" halign="1" multiline="1" ly_vert="35,107,135,32,1" />
+				<LABEL name="lblBuyAmt" fontsize="4" fontstyle="01" halign="1" multiline="1" ly_vert="207,107,135,32,1" />
+				<LABEL name="lblSubTitle" fontsize="-2" caption="예상 적용환율" ly_vert="40,174,170,32,1" />
+				<LABEL name="lblExchangeInfo00" multiline="1" ly_vert="40,205,80,32,1" />
+				<LABEL name="lblExchangeInfo10" multiline="1" ly_vert="40,233,80,32,1" />
+				<LABEL name="lblExchange00" fontstyle="01" halign="2" multiline="1" ly_vert="205,205,129,32,1" />
+				<LABEL name="lblExchange10" fontstyle="01" halign="2" multiline="1" ly_vert="205,233,129,32,1" />
+				<BUTTON name="btnOk" caption="환전하기" fontstyle="01" btnimage="btn_20.9" ly_vert="187,408,188,60,1" />
+				<LABEL name="lblInfo0" fontsize="-3" valign="0" multiline="1" ly_vert="20,265,335,64,1" />
+				<LABEL name="lblInfo1" fontstyle="01" halign="1" valign="0" multiline="1" ly_vert="20,335,335,64,1" />
+				<LABEL name="lblArrow" halign="1" ly_vert="177,90,20,32,1" />
+				<BUTTON name="btnCancel" caption="취소" fontstyle="01" btnimage="btn_40.9" ly_vert="0,408,187,60,1" />
+				<LABEL name="lblSubTitle0" fontsize="-2" fontstyle="01" ly_vert="125,205,77,32,1" />
+				<LABEL name="lblGuide0" fontsize="-2" fontstyle="01" caption="ㆍ" halign="1" valign="0" multiline="1" ly_vert="20,263,10,50,1" />
+				<LABEL name="lblInfo4" fontsize="-3" valign="0" multiline="1" ly_vert="30,265,325,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10098" _ulen="9556" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+
+'==============================================
+' 컬러코드
+'==============================================
+' 기본 텍스트 컬러 (검정색)
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal 	= "334"
+
+' 기본 텍스트 컬러 (회색)
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey 	= "333"
+
+' 기본 텍스트 컬러 (흰색)
+Dim g_szTxtColor_White 
+g_szTxtColor_White 	= "338"
+
+' 빨강
+Dim g_szTxtColor_Red 
+g_szTxtColor_Red = "290"
+
+' 파랑
+Dim g_szTxtColor_Blue 
+g_szTxtColor_Blue = "291"
+
+' 기본 배경색상
+Dim g_szContBgColor
+g_szContBgColor = "320"
+
+' 기본 구분선 색상
+Dim g_szLineColor
+g_szLineColor = "256"
+
+' 빨강
+Dim g_szBadgeBgColor_Red
+g_szBadgeBgColor_Red = "339"
+
+' 파랑
+Dim g_szBadgeBgColor_Blue
+g_szBadgeBgColor_Blue = "340"
+
+'==============================================
+' 기타 전역변수
+'==============================================
+' 계좌번호
+Dim g_szAcno
+g_szAcno = ""
+
+Dim g_szAsno
+g_szAsno = ""
+
+' 계좌 비밀번호
+Dim g_szPwd
+g_szPwd = ""
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	contBg.setEnableScroll(false)
+	
+	contBg.lblTitle.paddinginfo = "0,0,0,0"
+	contBg.lblTitle.fgcolor = g_szTxtColor_Normal
+	
+	contBg.lblCrcd00.paddinginfo = "0,0,0,0"
+	contBg.lblCrcd00.maxlinecnt = "1"
+	contBg.lblCrcd00.fgcolor = g_szTxtColor_Normal
+	
+	contBg.imgFlag00.maintainratio = "3"
+	
+	contBg.lblCrcd01.paddinginfo = "0,0,0,0"
+	contBg.lblCrcd01.maxlinecnt = "1"
+	contBg.lblCrcd01.fgcolor = g_szTxtColor_Normal
+	
+	contBg.imgFlag01.maintainratio = "3"
+	
+	contBg.lblArrow.paddinginfo = "0,0,0,0"
+	contBg.lblArrow.maxlinecnt = "1"
+	contBg.lblArrow.fgcolor = g_szTxtColor_Normal
+	contBg.lblArrow.caption = "→"
+	
+	contBg.lblSellAmt.paddinginfo = "0,0,0,0"
+	contBg.lblSellAmt.maxlinecnt = "1"
+	contBg.lblSellAmt.fgcolor = g_szTxtColor_Normal
+	
+	contBg.lblBuyAmt.paddinginfo = "0,0,0,0"
+	contBg.lblBuyAmt.maxlinecnt = "1"
+	contBg.lblBuyAmt.fgcolor = g_szTxtColor_Normal
+	
+	'contBg.lblBg.bgcolor = g_szContBgColor
+	contBg.lblBg.imagefilepth = "roundbox_4r_gray.9"
+	
+	contBg.lblSubTitle.paddinginfo = "0,0,0,0"
+	contBg.lblSubTitle.maxlinecnt = "1"
+	contBg.lblSubTitle.fgcolor = g_szTxtColor_Grey
+	
+	contBg.lblSubTitle0.paddinginfo = "0,0,0,0"
+	contBg.lblSubTitle0.maxlinecnt = "1"
+	contBg.lblSubTitle0.fgcolor = g_szTxtColor_Red
+	
+	contBg.lblExchangeInfo00.paddinginfo = "0,0,0,0"
+	contBg.lblExchangeInfo00.maxlinecnt = "1"
+	contBg.lblExchangeInfo00.fgcolor = g_szTxtColor_Normal
+	
+	contBg.lblExchange00.paddinginfo = "0,0,0,0"
+	contBg.lblExchange00.maxlinecnt = "1"
+	contBg.lblExchange00.fgcolor = g_szTxtColor_Normal
+	
+	contBg.lblExchangeInfo10.paddinginfo = "0,0,0,0"
+	contBg.lblExchangeInfo10.maxlinecnt = "1"
+	contBg.lblExchangeInfo10.fgcolor = g_szTxtColor_Normal
+	
+	contBg.lblExchange10.paddinginfo = "0,0,0,0"
+	contBg.lblExchange10.maxlinecnt = "1"
+	contBg.lblExchange10.fgcolor = g_szTxtColor_Normal
+	
+	contBg.lblInfo0.paddinginfo = "0,0,0,0"
+	contBg.lblInfo0.maxlinecnt = "2"
+	contBg.lblInfo0.fgcolor = g_szTxtColor_Red
+	contBg.lblInfo0.caption = "실시간 환율 적용으로 실제 환전 시점에 환율로 변동 될 수 있습니다."
+
+	contBg.lblInfo1.paddinginfo = "0,0,0,0"
+	contBg.lblInfo1.maxlinecnt = "2"
+	contBg.lblInfo1.fgcolor = g_szTxtColor_Normal
+	contBg.lblInfo1.caption = "환전 신청 후 취소가 불가합니다.\n환전을 하시겠습니까?"
+	
+	contBg.lblInfo4.paddinginfo = "0,0,0,0"
+	contBg.lblInfo4.maxlinecnt = "4"
+	contBg.lblInfo4.fgcolor = g_szTxtColor_Grey
+	contBg.lblInfo4.caption = "시간외 환전은 당일 마감 환율로 산정된 원화금액 +5% 추가금액으로 환전 처리 후 익영업일 9시경 실시간 환율로 정산 처리됩니다."
+	contBg.lblInfo4.visible = false
+
+	contBg.lblGuide0.paddinginfo = "0,0,0,0"
+	contBg.lblGuide0.fgcolor = g_szTxtColor_Grey
+	contBg.lblGuide0.visible = false
+	
+	contBg.btnCancel.fgcolor = g_szTxtColor_Normal
+	contBg.btnOk.fgcolor = g_szTxtColor_White
+End Function
+
+'===============================================
+' 배경 컨테이너 크기 조정
+'===============================================
+Function DisplaySetting_ContBg(szGbn)
+	if szGbn == "0" then
+		contBg.lblExchangeInfo10.visible = false
+		contBg.lblExchange10.visible = false
+		
+	'이종통화(실시간)
+	elseif szGbn == "1" then
+		contBg.lblExchangeInfo10.visible = true
+		contBg.lblExchange10.visible = true
+		
+		contBg.top = 287 - 24
+		contBg.height = 469 + 25
+		
+		contBg.imgContBg.height = 469 + 25
+		
+		contBg.lblBg.height = 85 + 25
+		contBg.lblInfo0.top = 265 + 25
+		contBg.lblInfo4.top = 265 + 25
+		contBg.lblInfo1.top = 335 + 25
+		
+		contBg.btnOk.top = 408 + 25
+		contBg.btnCancel.top = 408 + 25
+	
+	'이종통화(시간외)
+	elseif szGbn == "1_1" then
+		contBg.lblInfo4.visible = true
+		contBg.lblGuide0.visible = true
+		
+		contBg.lblInfo0.visible = true
+					
+		contBg.lblExchangeInfo10.visible = true
+		contBg.lblExchange10.visible = true
+		
+		contBg.top = 287 - 24 - 45
+		contBg.height = 469 + 25 + 45
+		
+		contBg.imgContBg.height = 469 + 25 + 45
+		
+		contBg.lblBg.height = 85 + 25
+		contBg.lblInfo0.top = 265 + 25
+		contBg.lblInfo4.top = 265 + 25 + 45
+		contBg.lblGuide0.top = 263 + 25 + 45
+		
+		contBg.lblInfo1.top = 335 + 25 + 45
+		
+		contBg.btnOk.top = 408 + 25 + 45
+		contBg.btnCancel.top = 408 + 25 + 45
+		
+	elseif szGbn == "2" then
+		contBg.lblExchangeInfo10.visible = false
+		contBg.lblExchange10.visible = false
+		
+		contBg.lblExchange00.caption = "미정"
+		contBg.lblInfo4.caption = "베트남(VND) 환전은 신청일 기준 1~2영업일이 소요됩니다."
+		
+		contBg.lblInfo1.caption = "당일 오전 신청 건은 11시 이후 취소 불가합니다.\n환전을 하시겠습니까?"
+	end if
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Dim szLinkData
+	szLinkData = ""
+	szLinkData = Form.GetOpenLinkData()
+
+	if szLinkData == "" then
+		Form.CloseForm()
+		Exit Sub
+	end if 
+	
+	Init_Control()
+	
+	arrLinkData = split(szLinkData, "★")
+	
+	if #arrLinkData < 1 then
+		Form.CloseForm()
+		Exit Sub
+	else
+		if #arrLinkData > 2 then
+			arrLinkData_1 = split(arrLinkData(0), "`")
+			arrLinkData_2 = split(arrLinkData(1), "`")
+			
+			arrLinkData_3 = split(arrLinkData(2), "`")
+			arrLinkData_4 = split(arrLinkData(3), "`")
+			
+			contBg.lblCrcd00.caption = arrLinkData_1(0)
+			contBg.lblSellAmt.caption = arrLinkData_1(1)
+			
+			szFlag1 = Form.getIconImg("CRCD", arrLinkData_1(0))
+			if szFlag1 = "" then
+				szFlag1 = "flag_general"
+			end if
+			
+			contBg.imgFlag00.imgpath = szFlag1
+			
+			
+			contBg.lblCrcd01.caption = arrLinkData_2(0)
+			contBg.lblBuyAmt.caption = arrLinkData_2(1)
+			
+			szFlag2 = Form.getIconImg("CRCD", arrLinkData_2(0))
+			if szFlag2 = "" then
+				szFlag2 = "flag_general"
+			end if
+			
+			contBg.imgFlag01.imgpath = szFlag2
+			
+			if arrLinkData_1(0) == "KRW" or arrLinkData_2(0) == "KRW" then 
+				
+				contBg.lblExchangeInfo00.caption = arrLinkData_1(0) &  " → " & arrLinkData_2(0)
+				contBg.lblExchange00.caption = FormatNumber(arrLinkData_3(0), 2) & "원"
+				
+				DisplaySetting_ContBg("0")
+				
+				if arrLinkData_4(0) == "002" or arrLinkData_4(1) == "002" then
+					contBg.lblSubTitle0.caption = "시간외환전"
+					
+					contBg.lblInfo4.visible = true
+					contBg.lblGuide0.visible = true
+					
+					contBg.lblInfo0.visible = false
+				end if
+				
+			elseif arrLinkData_1(0) == "VND" or arrLinkData_2(0) == "VND"then
+				contBg.lblExchangeInfo00.caption = arrLinkData_1(0) &  " → " & arrLinkData_2(0)
+				contBg.lblExchange00.caption = FormatNumber(arrLinkData_3(0), 2) & "원"
+				
+				DisplaySetting_ContBg("2")
+				
+				contBg.lblInfo4.visible = true
+				contBg.lblGuide0.visible = true
+				
+				contBg.lblInfo0.visible = false
+			else
+				contBg.lblExchangeInfo00.caption = arrLinkData_1(0) &  " → KRW"
+				contBg.lblExchange00.caption = FormatNumber(arrLinkData_3(0), 2) & "원"
+				
+				contBg.lblExchangeInfo10.caption = "KRW → " & arrLinkData_2(0)
+				contBg.lblExchange10.caption = FormatNumber(arrLinkData_3(1), 2) & "원"
+				
+			
+				if arrLinkData_4(0) == "002" or arrLinkData_4(1) == "002" then
+					contBg.lblSubTitle0.caption = "시간외환전"
+					
+					if arrLinkData_4(0) == "002" then
+						contBg.lblSubTitle0.top = 205
+					else
+						contBg.lblSubTitle0.top = 233
+					end if
+				
+					DisplaySetting_ContBg("1_1")
+				else
+					DisplaySetting_ContBg("1")
+				end if
+			end if
+		else
+		
+		end if
+	end if 
+
+End Sub
+
+'===============================================
+' imgBg_OnClick
+'===============================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+'===============================================
+' contBg_btnCancel_OnClick
+'===============================================
+Sub contBg_btnCancel_OnClick()
+	Form.CloseForm()
+End Sub
+
+'===============================================
+' contBg_btnOk_OnClick
+'===============================================
+Sub contBg_btnOk_OnClick()
+	Form.SendReturnToParent("EXCHANGE_STEP0" , "OK")
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>
