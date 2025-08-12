@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50110" scrname="ETF_공통_키패드" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,285,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" autosize="1" imgpath="img_bg_keypad" ly_vert="0,0,375,255,1" />
+		<BUTTON name="btnNum0" caption="0" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="106,171,76,40,1" />
+		<BUTTON name="btnNum1" caption="1" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="20,26,76,40,1" />
+		<BUTTON name="btnNum2" caption="2" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="106,26,76,40,1" />
+		<BUTTON name="btnNum3" caption="3" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="192,26,76,40,1" />
+		<BUTTON name="btnNum4" caption="4" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="20,76,76,40,1" />
+		<BUTTON name="btnNum5" caption="5" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="106,76,76,40,1" />
+		<BUTTON name="btnNum6" caption="6" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="192,76,76,40,1" />
+		<BUTTON name="btnNum7" caption="7" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="20,126,76,40,1" />
+		<BUTTON name="btnNum8" caption="8" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="106,126,76,40,1" />
+		<BUTTON name="btnNum9" caption="9" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="192,126,76,40,1" />
+		<BUTTON name="btnNum00" caption="00" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="20,171,76,40,1" />
+		<BUTTON name="btnBack" caption="←" fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad6.9" ly_vert="192,171,76,40,1" />
+		<BUTTON name="btnClear" caption="C" fgcolor="004:000000000" fontsize="7" fontstyle="01" btnimage="btn_keypad7.9" ly_vert="278,26,76,40,1" />
+		<BUTTON name="btnMinus" caption="-" fgcolor="004:000000000" fontsize="7" fontstyle="01" btnimage="btn_keypad7.9" ly_vert="278,76,76,40,1" />
+		<BUTTON name="btnDot" caption="." fgcolor="004:000000000" fontsize="10" fontstyle="01" btnimage="btn_keypad7.9" ly_vert="278,126,76,40,1" />
+		<BUTTON name="btnOk" caption="확인" fontstyle="01" btnimage="btn_20.9" ly_vert="0,225,375,60,1" />
+		<LABEL name="lblTempText" visible="0" ly_vert="0,0,100,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7734" _ulen="7686" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim g_nMin, g_nMax ,g_nPoint
+g_nPoint = 0
+g_nMin = 0
+g_nMax = 100
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+End Function
+
+'===============================================
+' 키패드 입력 
+'===============================================
+Function Input_Btn(szKeyIdx)
+	szTempText = lblTempText.caption
+
+	if szKeyIdx = "Back" then
+		nLen = Form.getLen(szTempText)
+		
+		if nLen = 2 and left(szTempText, 1) = "-" then 
+			szTempText = left(szTempText, nLen - 2)
+		else
+			szTempText = left(szTempText, nLen - 1)
+			
+			if right(szTempText, 1) = "." then
+				nLen = Form.getLen(szTempText)
+				szTempText = left(szTempText, nLen - 1)
+			end if
+		end if
+	elseif szKeyIdx = "Clear" then
+		szTempText = ""
+	
+	elseif szKeyIdx = "Minus" then
+		if g_nMin < 0 then
+			if szTempText = "" or left(szTempText, 1) <> "-" then 'and cdbl(szTempText) <> 0 then
+				szTempText = "-" & szTempText
+			end if
+		end if
+	
+	elseif szKeyIdx = "Dot" then
+		nLen = Form.getLen(szTempText)
+		if g_nPoint > 0 then
+			if Instr(szTempText, ".") = 0 then
+			
+				if left(szTempText, 1) <> "-" then
+					if nLen > 0 then
+						szTempText = szTempText & "."
+					end if
+				else	
+					if nLen > 1 then
+						szTempText = szTempText & "."
+					end if
+				end if
+			end if
+		end if
+	else
+	
+		if szKeyIdx = "0" then
+			if Instr(szTempText, ".") = 0 then
+				if szTempText = "" then
+					szTempText = "0"
+				elseif szTempText = "-" or szTempText = "-0" then
+					szTempText = "-0"
+				elseif cdbl(szTempText) = 0 then
+					szTempText = "0"
+				else
+					szTempText = szTempText & szKeyIdx
+				end if
+			else
+				arrTemp = split(szTempText, ".")
+				nLen = Form.getLen(arrTemp(1))
+				
+				if nLen < g_nPoint then
+					szTempText = szTempText & szKeyIdx
+				end if
+			end if
+		elseif szKeyIdx = "00" then
+			if Instr(szTempText, ".") = 0 then
+				if szTempText = "" then
+					szTempText = "0"
+				elseif szTempText = "-" or szTempText = "-0" then
+					szTempText = "-0"
+				elseif cdbl(szTempText) = 0 then
+					szTempText = "0"
+				else
+					szTempText = szTempText & szKeyIdx
+				end if
+			else
+				arrTemp = split(szTempText, ".")
+				nLen = Form.getLen(arrTemp(1))
+				
+				if nLen < g_nPoint-1 then
+					szTempText = szTempText & szKeyIdx
+				end if
+			end if
+		else
+			if Instr(szTempText, ".") = 0 then
+			
+				if cdbl(szTempText) = 0 and szTempText <> "-" then
+					szTempText = szKeyIdx
+				else
+					szTempText = szTempText & szKeyIdx
+				end if
+			else
+				arrTemp = split(szTempText, ".")
+				nLen = Form.getLen(arrTemp(1))
+				
+				if nLen < g_nPoint then
+					szTempText = szTempText & szKeyIdx
+				end if
+			end if
+		
+		end if
+		
+	end if
+	
+	if g_nMin <= Cdbl(szTempText) and Cdbl(szTempText) <= g_nMax then
+		Form.triggerEvent("#", "KEYPAD", szTempText)
+		lblTempText.caption = szTempText
+		
+	elseif szTempText = "-" then
+		Form.triggerEvent("#", "KEYPAD", szTempText)
+		lblTempText.caption = szTempText
+	else
+		Form.ShowAlert("안내", g_nMin&"% ~ "& g_nMax & "% 까지만 입력 가능합니다." )
+	end if
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+End Sub
+
+'===============================================
+' Form_OnLinkData
+'===============================================
+Sub Form_OnLinkData(sKey, sValue)
+End Sub
+
+'===============================================
+' btnBack_OnClick
+'===============================================
+Sub btnBack_OnClick()
+	Input_Btn("Back")
+End Sub
+
+'===============================================
+' btnClear_OnClick
+'===============================================
+Sub btnClear_OnClick()
+	Input_Btn("Clear")
+End Sub
+
+'===============================================
+' btnDot_OnClick
+'===============================================
+Sub btnDot_OnClick()
+	Input_Btn("Dot")
+End Sub
+
+'===============================================
+' btnMinus_OnClick
+'===============================================
+Sub btnMinus_OnClick()
+	Input_Btn("Minus")
+End Sub
+
+'===============================================
+' btnNum0_OnClick
+'===============================================
+Sub btnNum0_OnClick()
+	Input_Btn("0")
+End Sub
+
+'===============================================
+' btnNum00_OnClick
+'===============================================
+Sub btnNum00_OnClick()
+	Input_Btn("00")
+End Sub
+
+'===============================================
+' btnNum1_OnClick
+'===============================================
+Sub btnNum1_OnClick()
+	Input_Btn("1")
+End Sub
+
+'===============================================
+' btnNum2_OnClick
+'===============================================
+Sub btnNum2_OnClick()
+	Input_Btn("2")
+End Sub
+
+'===============================================
+' btnNum3_OnClick
+'===============================================
+Sub btnNum3_OnClick()
+	Input_Btn("3")
+End Sub
+
+'===============================================
+' btnNum4_OnClick
+'===============================================
+Sub btnNum4_OnClick()
+	Input_Btn("4")
+End Sub
+
+'===============================================
+' btnNum5_OnClick
+'===============================================
+Sub btnNum5_OnClick()
+	Input_Btn("5")
+End Sub
+
+'===============================================
+' btnNum6_OnClick
+'===============================================
+Sub btnNum6_OnClick()
+	Input_Btn("6")
+End Sub
+
+'===============================================
+' btnNum7_OnClick
+'===============================================
+Sub btnNum7_OnClick()
+	Input_Btn("7")
+End Sub
+
+'===============================================
+' btnNum8_OnClick
+'===============================================
+Sub btnNum8_OnClick()
+	Input_Btn("8")
+End Sub
+
+'===============================================
+' btnNum9_OnClick
+'===============================================
+Sub btnNum9_OnClick()
+	Input_Btn("9")
+End Sub
+
+'============================================================================
+Sub btnOk_OnClick()
+	Form.triggerEvent("#", "KEYPAD_END", lblTempText.caption)
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "INIT_KEYPAD" then
+		Dim szData, arrData
+		szData = sParam
+		arrData = split(szData, "`")
+		
+		if #arrData > 3 then
+			g_nMin = Cdbl(arrData(0))
+			g_nMax = Cdbl(arrData(1))
+			
+			g_nPoint = Cdbl(arrData(2))
+			
+			lblTempText.caption = arrData(3)
+			
+			if g_nMin >= 0 then
+				btnMinus.visible = false
+			else
+				btnMinus.visible = true
+			end if
+			
+			if g_nMax < 100 then
+				
+				btnNum00.visible = false
+			else
+				btnNum00.visible = true
+			end if
+			
+			if g_nPoint = 0 then
+				btnDot.visible = false
+			else
+				btnDot.visible = true
+			end if
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

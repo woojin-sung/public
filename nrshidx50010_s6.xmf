@@ -1,0 +1,906 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50010" scrname="ETF(HOME)_순위" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,474,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" fontsize="2" fontstyle="01" caption="시장에서 관심 받는 ETF" bgcolor="029:255212175" ly_vert="10,30,290,23,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_arrow" ly_vert="346,36,8,10,1" />
+		<LABEL name="lbl1" fgcolor="321:115118124" fontsize="-2" caption="더보기" bgcolor="035:237246255" halign="2" click="1" ly_vert="263,30,84,23,1" />
+		<FORMTAB name="FormTab0" fontsize="-3" tabcount="0" tabwidthtype="2" tabheadheight="30" ly_vert="20,73,335,30,1" />
+		<PANNEL name="Pannel0" ly_vert="20,123,335,321,1" >
+			<CONTROL_INFO>
+				<LABEL name="LabelNo" fontsize="-2" fontstyle="01" caption="1." bgcolor="029:255212175" halign="1" autofontsize="1" ly_vert="0,10,18,18,1" />
+				<IMAGE name="ImageFlag" autosize="1" imgpath="flag_us" ly_vert="23,10,18,18,1" />
+				<LABEL name="LabelName" fontsize="-2" caption="종목명" bgcolor="035:237246255" multiline="1" ly_vert="46,10,284,20,1" />
+				<LABEL name="LabelHyun" fgcolor="333:115118124" fontsize="-3" fontstyle="01" caption="현재가" bgcolor="029:255212175" halign="2" autofontsize="1" ly_vert="212,32,124,20,1" />
+				<LABEL name="LabelDebi" visible="0" fontsize="-3" fontstyle="01" plusminuscolor="1" caption="등락률" mask="0,0,,%,0,,2,1,1,0,0" bgcolor="085:205216147" halign="2" autofontsize="1" ly_vert="278,32,56,20,0" />
+				<LABEL name="LabelSeperator" bgcolor="256:238239240" transmode="0" ly_vert="0,59,335,1,1" />
+				<LABEL name="LabelGubun" visible="0" fontsize="-3" caption="카테고리" bgcolor="033:240245213" halign="2" autofontsize="1" ly_vert="74,32,50,20,0" />
+				<LABEL name="LabelGubunData" visible="0" fontsize="-3" caption="카테고리 데이터" mask="0,0,,,0,,0,1,0,0,0" bgcolor="156:255249195" autofontsize="1" ly_vert="129,32,85,20,0" />
+				<LABEL name="LabelCode" fontsize="-3" caption="티커" bgcolor="044:255247245" autofontsize="1" ly_vert="23,32,173,20,1" />
+				<IMAGE name="ImageBottomLinkBG" imgpath="btn_link_bg.9" ly_vert="0,62,335,64,1" />
+				<BUTTON name="ButtonLink0" caption="현재가" fgcolor="333:115118124" fontsize="-2" btnimage="btn_etc24.9" ly_vert="0,76,59,40,1" />
+				<BUTTON name="ButtonLink1" caption="차트" fgcolor="333:115118124" fontsize="-2" btnimage="btn_etc24.9" ly_vert="59,76,80,40,1" />
+				<BUTTON name="ButtonLink2" caption="종목정보" fgcolor="333:115118124" fontsize="-2" btnimage="btn_etc24.9" ly_vert="139,76,80,40,1" />
+				<BUTTON name="ButtonLink3" caption="매수" fontsize="-2" btnimage="btn_30.9" ly_vert="230,76,45,40,1" />
+				<BUTTON name="ButtonLink4" caption="매도" fontsize="-2" btnimage="btn_31.9" ly_vert="280,76,45,40,1" />
+				<LABEL name="LabelBodyTicker" fontsize="-2" caption="티커" bgcolor="367:224155021" transmode="0" ly_vert="10,150,90,32,1" />
+				<LABEL name="LabelBodyMarket" fontsize="-2" caption="거래소" bgcolor="367:224155021" transmode="0" ly_vert="110,150,90,32,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="200" >
+				<CELL name="LabelNo" />
+				<CELL name="ImageFlag" />
+				<CELL name="LabelName" />
+				<CELL name="LabelCode" />
+				<CELL name="LabelHyun" />
+				<CELL name="LabelDebi" />
+				<CELL name="LabelSeperator" />
+				<CELL name="LabelGubun" />
+				<CELL name="LabelGubunData" />
+				<CELL name="ImageBottomLinkBG" />
+				<CELL name="ButtonLink0" />
+				<CELL name="ButtonLink1" />
+				<CELL name="ButtonLink2" />
+				<CELL name="ButtonLink3" />
+				<CELL name="ButtonLink4" />
+				<CELL name="LabelBodyTicker" />
+				<CELL name="LabelBodyMarket" />
+			</CARD_INFO>
+		</PANNEL>
+		<IMAGE name="imgNotice" visible="0" autosize="1" imgpath="icon_notice_3" ly_vert="160,210,50,50,0" />
+		<LABEL name="LabelGuideText" visible="0" fgcolor="333:115118124" caption="검색된 종목이 없어요." halign="1" ly_vert="0,260,375,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="26550" _ulen="24620" >
+Dim g_OsType
+Dim gFoldPannelHeight		'펼쳐보기 시 판넬 행높이
+Dim gUnFoldPannelHeight	'평상 시 판넬 행높이
+
+Dim gETF_SUPER_HIS_KEY
+gETF_SUPER_HIS_KEY = "ETF_SUPER_HISTORY"
+
+Dim gOvrsMarketList()
+gOvrsMarketList = {"AX","NY","OQ","SZ","SH","HK","JP"}
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	g_OsType = Form.GetSharedData("&OS_TYPE", false)
+	Image0.setMaintainingRatio("1")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	'행 펼쳤을때/접혔을때 높이값 설정
+	if gOsType == "1" then
+		gFoldPannelHeight = 131
+		gUnFoldPannelHeight = 60
+	else
+		gFoldPannelHeight = 132
+		gUnFoldPannelHeight = 60
+	end if
+	
+	gWidePannelIndex = -1
+
+	FormTab0.SetUseOnlyHeader(true)
+	InsertFormTabPage()
+
+	
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	
+	DATAMANAGER.RequestTranData("ohhts_metf_018r")
+	
+End Sub
+
+'============================================================================
+' UI설정
+'============================================================================
+Sub SettingUI(nRowCnt)
+	
+	
+	
+	if nRowCnt == 0 then
+	
+		imgNotice.visible = true
+		LabelGuideText.visible = true
+		Pannel0.visible = false
+	
+	else
+	
+		imgNotice.visible = false
+		LabelGuideText.visible = false
+		Pannel0.visible = true
+		
+	end if
+
+
+
+	'------------------------------
+	'공통
+	'------------------------------
+	'행개수 설정
+	Pannel0.rowcount = nRowCnt 
+		
+	'글자색상/최대라인/패딩값 조정
+	for i = 0 to nRowCnt -1
+		Pannel0.setPropCardCell("fgcolor","LabelCode"	,		i,"333")	'회색
+		Pannel0.setPropCardCell("fgcolor","LabelGubun",		i,"333")	'회색
+		Pannel0.setPropCardCell("fgcolor","LabelGubunData",	i,"333")	'회색
+		
+		Pannel0.setPropCardCell("maxlinecnt","LabelName",i,"1^-4") '컨트롤 속성에 멀티라인이 체크되있어야 적용됨.
+		
+		Pannel0.setPropCardCell("paddinginfo","LabelNo",i,"0,0,0,0") 
+		Pannel0.setPropCardCell("paddinginfo","LabelCode",i,"0,0,0,0")
+		Pannel0.setPropCardCell("paddinginfo","LabelName",i,"0,0,0,0") 
+		Pannel0.setPropCardCell("paddinginfo","LabelGubun",i,"0,0,0,0") 
+		Pannel0.setPropCardCell("paddinginfo","LabelGubunData",i,"0,0,0,0") 
+		Pannel0.setPropCardCell("paddinginfo","LabelHyun",i,"0,0,0,0") 
+		Pannel0.setPropCardCell("paddinginfo","LabelDebi",i,"0,0,0,0") 
+	next
+
+	'------------------------------
+	'OS별
+	'------------------------------
+	if g_OsType == "1" then
+		
+		'폼탭/판넬 위치 조정
+		FormTab0.left = 10
+		FormTab0.width = 345
+		
+		Pannel0.left = 10
+		Pannel0.width = 345
+		
+		for i = 0 to nRowCnt -1
+			if i == nRowCnt -1 then
+				Pannel0.setPropCardCell("width","LabelSeperator",4, "0" ) '마지막행구분선은 숨김처리
+			else
+				Pannel0.setPropCardCell("width","LabelSeperator",i,"345")
+			end if	
+		next
+		
+	else
+		
+		Pannel0.setPropCardCell("width","LabelSeperator",nRowCnt -1, "0" )	'마지막행구분선은 숨김처리
+		
+	end if
+	
+	
+
+End Sub
+
+'============================================================================
+' 상단 폼탭 페이지 생성
+'============================================================================
+Sub InsertFormTabPage()
+	
+	'활성화/비활성화/여백
+	FormTab0.setTabHeaderImage("img_bgcircle_black.9" , "img_bgcircle_line.9" , 5)   
+	
+	'활성화/비활성화 폰트색상
+	FormTab0.setTabHeaderFgColor("28" , "321") 								   
+
+	'페이지생성
+	if g_OsType == "1" then
+		FormTab0.insertPage( 0, "page0", "page0", "nrsempty", "0", "상승")
+		FormTab0.insertPage( 1, "page1", "page1", "nrsempty", "0", "하락")
+		FormTab0.insertPage( 2, "page2", "page2", "nrsempty", "0", "거래량")	
+		FormTab0.insertPage( 3, "page3", "page3", "nrsempty", "0", "시가총액")
+		FormTab0.insertPage( 4, "page4", "page4", "nrsempty", "0", "배당률")	
+		FormTab0.insertPage( 5, "page5", "page5", "nrsempty", "0", "신규상장")
+		FormTab0.insertPage( 6, "page6", "page6", "nrsempty", "0", "순매수")
+		FormTab0.insertPage( 7, "page7", "page7", "nrsempty", "0", "순매도")
+	else
+		FormTab0.insertPage( 0, "page0", "page0", "nrsempty", "0", " 상승 ")
+		FormTab0.insertPage( 1, "page1", "page1", "nrsempty", "0", " 하락 ")
+		FormTab0.insertPage( 2, "page2", "page2", "nrsempty", "0", " 거래량 ")	
+		FormTab0.insertPage( 3, "page3", "page3", "nrsempty", "0", " 시가총액 ")
+		FormTab0.insertPage( 4, "page4", "page4", "nrsempty", "0", "  배당률  ")	
+		FormTab0.insertPage( 5, "page5", "page5", "nrsempty", "0", "신규상장")
+		FormTab0.insertPage( 6, "page6", "page6", "nrsempty", "0", " 순매수 ")
+		FormTab0.insertPage( 7, "page7", "page7", "nrsempty", "0", " 순매도 ")
+	end if
+	
+	'초기페이지 지정
+	FormTab0.currenttab = 0
+	FormTab0_OnTabChanged(0)
+	
+End Sub
+
+'============================================================================
+' 선택 카테고리 한글명 가져오기
+'============================================================================
+Function GetCategoryName()
+
+	'상승,하락,신규상장인 경우에는 추가로 보여주는 데이터 없음.
+	nTab = Cint(FormTab0.currenttab)
+	
+	Select Case nTab
+		Case 0
+			return "" '상승
+		Case 1
+			return "" '하락
+		Case 2
+			return "거래량"
+		Case 3
+			return "시가총액"
+		Case 4
+			return "배당률"
+		Case 5
+			return "" '신규상장
+		Case 6
+			return "순매수"
+		Case 7
+			return "순매도"
+	End Select
+
+End Function
+
+'============================================================================
+' 선택 카테고리 데이터가져오기
+'============================================================================
+Function GetCategoryData(nIndex)
+
+	'상승,하락,신규상장인 경우에는 추가로 보여주는 데이터 없음.
+	nTab = Cint(FormTab0.currenttab)
+	szData = ""
+	
+	Select Case nTab
+		Case 0 '상승
+		
+		Case 1 '하락
+		
+		Case 2 '거래량
+			Pannel0.setPropCardCell("mask","LabelGubunData",nIndex,"0,0,,,0,,0,1,0")
+			szData = Cint(DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_VOL" , nIndex))
+		
+		Case 3 '시가총액
+			Pannel0.setPropCardCell("mask","LabelGubunData",nIndex,"0,0,,,0,,0,1,0")
+			szData = CDbl(DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_AVLS" , nIndex))
+		
+		Case 4 '배당률
+			Pannel0.setPropCardCell("mask","LabelGubunData",nIndex,"1,0,,,0,,2,1,0")
+			szData = Cdbl(DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_DVDN_ERT" , nIndex)) .."%"
+		
+		Case 5 '신규상장
+		
+		Case 6 '순매수
+			Pannel0.setPropCardCell("mask","LabelGubunData",nIndex,"0,0,,,0,,0,1,0")
+			szData = Cint(DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_TOTAL_SHNU_QTY" , nIndex))
+		
+		Case 7 '순매도
+			Pannel0.setPropCardCell("mask","LabelGubunData",nIndex,"0,0,,,0,,0,1,0")
+			szData = Cint(DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_TOTAL_SELN_QTY" , nIndex))
+			
+	End Select
+	
+	return szData
+
+End Function
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+
+	if szTranID == "ohhts_metf_018r" then
+	
+		nTab = CInt(FormTab0.currenttab)
+		
+		DATAMANAGER.SetDataValue(0, "ohhts_metf_018r", "InBlock1", "FID_INPUT_CLS_CODE" , 0 , nTab)
+		DATAMANAGER.SetDataValue(0, "ohhts_metf_018r", "InBlock1", "FIDX_INPUT_NTNL_CODE", 0 , "YNNNNN")
+		
+		for i = 0 to #gOvrsMarketList - 1 
+			
+			'0:지연 / 1:실시간
+			sRealSiseYN = GetRealTimeSiseYN(gOvrsMarketList[i])
+			
+			if sRealSiseYN == "" then
+				sRealSiseYN = "0"
+			end if
+			
+			DATAMANAGER.SetDataValue(0, "ohhts_metf_018r", "InBlock2", "FID_INPUT_COND_MRKT_DIV_CODE" , i , gOvrsMarketList[i])
+			DATAMANAGER.SetDataValue(0, "ohhts_metf_018r", "InBlock2", "FIDX_INPUT_DELY_RLTM_CLS_CODE" , i , sRealSiseYN)
+			
+		next
+		
+	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID == "ohhts_metf_018r" then
+		
+		'nCnt = 조회데이터 수(최대 5개까지만 보여주므로 5개이상일 경우 상위 5개까지만 보여줌)
+		nCnt = DATAMANAGER.GetDataCount(0, "ohhts_metf_018r", "OutBlock1")
+		
+		if nCnt > 5 then
+			nCnt = 5
+		end if
+		
+		'데이터개수에 따라 UI설정
+		SettingUI(nCnt)
+				
+		'판넬에 데이터 삽입
+		for nIndex = 0 to nCnt -1
+		
+			'sFlag = 국가구분
+			'sName = 종목명
+			'sCode = 종목코드(티커)
+			'sHyun = 현재가
+			'sDebi = 등락률
+			
+			sName 	= DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FIDX_KOR_ISNM"					, nIndex)
+			sCode 	= DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_OVRS_ISCD" 				, nIndex)
+			sHyun 	= DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_PRPR" 					, nIndex)
+			sDebi 	= DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_PRDY_CTRT" 				, nIndex)
+			sNation 	= DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_LSTN_NTNL_CODE" 			, nIndex)
+			sMarket  = DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_INPUT_COND_MRKT_DIV_CODE" 	, nIndex)
+			
+			sNew		= DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_NEW_LSTN_YN" 				, nIndex)
+			sTrht	= DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_TRHT_YN"					, nIndex)
+			sSign 	= DATAMANAGER.GetDataValue(0, "ohhts_metf_018r", "OutBlock1", "FID_PRDY_VRSS_SIGN" 			, nIndex)
+						
+			ChangeControlPosAndRowHeight(1,nIndex)
+			
+			sNationFlagName = GetNationFlagName(sNation)
+			Pannel0.setPropCardCell("maintainratio","ImageFlag",nIndex,"1")
+			Pannel0.setPropCardCell("imgpath","ImageFlag",nIndex,sNationFlagName)
+			
+			sGubun = GetCategoryName()
+			sGubunData = GetCategoryData(nIndex)
+			
+			Pannel0.SetCellValue("LabelNo"	,		nIndex,	nIndex+1 .. ".")
+			Pannel0.SetCellValue("LabelName",		nIndex,	sName)
+			Pannel0.SetCellValue("LabelCode",		nIndex,	sCode)
+			
+			'--------------------------
+			'현재가
+			'--------------------------
+			nDecimalLen = GetNationDecimalLen(sNation)
+			sHyun = FormatNumber(sHyun,nDecimalLen)
+			Pannel0.SetCellValue("LabelHyun",nIndex,sHyun.." | "..sDebi.."%")
+			
+			
+			'등락률(현재가 라벨과 통합)
+			'Pannel0.SetCellValue("LabelDebi",		nIndex,	sDebi)
+			
+			Pannel0.SetCellValue("LabelGubun",		nIndex,	sGubun)
+			Pannel0.SetCellValue("LabelGubunData",	nIndex,	sGubunData)
+			Pannel0.SetCellValue("LabelBodyTicker",  nIndex,	sCode)
+			Pannel0.SetCellValue("LabelBodyMarket",	nIndex,	sMarket)
+
+			'--------------------------
+			'현재가/등락률 색상표시
+			'--------------------------
+			if sSign == "2" then '상승
+				Pannel0.setPropCardCell("fgcolor","LabelHyun",nIndex,"290")
+				Pannel0.setPropCardCell("fgcolor","LabelDebi",nIndex,"290")
+			elseif sSign == "5" then '하락
+				Pannel0.setPropCardCell("fgcolor","LabelHyun",nIndex,"291")
+				Pannel0.setPropCardCell("fgcolor","LabelDebi",nIndex,"291")
+			else '보합
+				Pannel0.setPropCardCell("fgcolor","LabelHyun",nIndex,"333")
+				Pannel0.setPropCardCell("fgcolor","LabelDebi",nIndex,"333")
+			end if
+			
+			'--------------------------
+			'거래정지
+			'--------------------------
+			if sTrht == "Y" then
+				sText = Pannel0.GetCellValue("LabelCode",nIndex)
+				sText = sText .. " | " .. "거래정지"
+				Pannel0.SetCellValue("LabelCode",nIndex,sText)
+			end if
+			
+			'--------------------------
+			'신규상장 여부
+			'--------------------------
+			if sNew == "Y" then
+				sText = Pannel0.GetCellValue("LabelCode",nIndex)
+				sText = sText .. " | " .. "신규상장"
+				Pannel0.SetCellValue("LabelCode",nIndex,sText)
+			end if
+			
+			
+			
+		next
+		
+
+	end if
+	
+End Sub
+
+'============================================================================
+Sub lbl1_OnClick()
+	
+	'----------------------------------------------------------------------------
+	'순위화면 > 링크화면 이동 후 되돌아 왔을때 사용하는 값인데
+	'여기서 진입할때는 모두 클리어하고 진입한다. 
+	'----------------------------------------------------------------------------
+	'Form.SetSharedData("ETF_RANKING_GUBUN" 			, "")
+	'Form.SetSharedData("ETF_RANKING_FILTER_NATION" 	, "")
+	'Form.SetSharedData("ETF_RANKING_FILTER_INDEX" 	, "")
+	'Form.SetSharedData("ETF_RANKING_FILTER_FROM" 		, "")
+	'Form.SetSharedData("ETF_RANKING_FILTER_TO" 		, "")
+	'Form.SetSharedData("ETF_RANKING_SELECT_INDEX" 	, "")
+	'
+	'Form.OpenScreen("50511" , FormTab0.currenttab)
+	
+	MoveScreen("more","")
+	
+End Sub
+
+'============================================================================
+' 국가코드별 국기이미지 명
+'============================================================================
+Function GetNationFlagName(sNation)
+	
+	if sNation == "USA" then
+		return "flag_us2"
+	elseif sNation =="KOR" then
+		return "flag_kor_round"
+	elseif sNation =="HKG" then
+		return "flag_hk"
+	elseif sNation =="CHN" then
+		return "flag_chn"
+	elseif sNation =="JPN" then
+		return "flag_jp2"
+	else
+		return "flag_general"
+	end if
+
+End Function
+
+'============================================================================
+' 선택행 링크영역 펼치기
+'============================================================================
+Function foldBottomLinkArea(nIndex,nHeight)
+	
+	'판넬 높이 조정
+	Pannel0.SetCardWHAt(nIndex,nHeight)
+	
+	'링크영역 컨트롤 조정
+	Pannel0.setPropCardCell("top","ImageBottomLinkBG",nIndex,"62") 
+	Pannel0.setPropCardCell("top","ButtonLink0",nIndex,"76")
+	Pannel0.setPropCardCell("top","ButtonLink1",nIndex,"76")
+	Pannel0.setPropCardCell("top","ButtonLink2",nIndex,"76")
+	Pannel0.setPropCardCell("top","ButtonLink3",nIndex,"76")
+	Pannel0.setPropCardCell("top","ButtonLink4",nIndex,"76")
+	Pannel0.setPropCardCell("top","LabelSeperator",nIndex,"131")
+	
+	Pannel0.setPropCardCell("visible","ImageBottomLinkBG",nIndex,"1")
+	Pannel0.setPropCardCell("visible","ButtonLink0",nIndex,"1")
+	Pannel0.setPropCardCell("visible","ButtonLink1",nIndex,"1")
+	Pannel0.setPropCardCell("visible","ButtonLink2",nIndex,"1")
+	Pannel0.setPropCardCell("visible","ButtonLink3",nIndex,"1")
+	Pannel0.setPropCardCell("visible","ButtonLink4",nIndex,"1")
+		
+
+End Function
+
+'============================================================================
+' 선택행 링크영역 접기
+'============================================================================
+Function unfoldBottomLinkArea(nIndex,nHeight)
+
+	'판넬 높이 조정
+	Pannel0.SetCardWHAt(nIndex,nHeight)
+	
+	'링크영역 컨트롤 조정
+	Pannel0.setPropCardCell("top","LabelSeperator",nIndex,"59")
+	
+	Pannel0.setPropCardCell("visible","ImageBottomLinkBG",nIndex,"0")
+	Pannel0.setPropCardCell("visible","ButtonLink0",nIndex,"0")
+	Pannel0.setPropCardCell("visible","ButtonLink1",nIndex,"0")
+	Pannel0.setPropCardCell("visible","ButtonLink2",nIndex,"0")
+	Pannel0.setPropCardCell("visible","ButtonLink3",nIndex,"0")
+	Pannel0.setPropCardCell("visible","ButtonLink4",nIndex,"0")
+	
+End Function
+
+'============================================================================
+' 판넬클릭 시, 링크버튼 + 관심종목 버튼 클릭 여부 확인
+'============================================================================
+Function isLinkButton(sCellID)
+	
+	if sCellID == "ButtonLink0" or sCellID == "ButtonLink1" or sCellID == "ButtonLink2" or sCellID == "ButtonLink3" or sCellID == "ButtonLink4" then
+		return true
+	else
+		return false
+	end if
+
+End Function
+
+'============================================================================
+' 데이터행 높이 및 컨트롤 위치 조정
+' sType 1:(기본)접힌상태 2:펼침상태
+'============================================================================
+Function ChangeControlPosAndRowHeight(nType,nIndex)
+
+	if nType == 1 then
+	
+		'종목명
+		Pannel0.setPropCardCell("paddinginfo","LabelName",nIndex,"0,0,0,0")
+		Pannel0.setPropCardCell("fontsize","LabelName",nIndex,"-2")
+		Pannel0.setPropCardCell("maxlinecnt","LabelName",nIndex,"1^-4")
+		
+		'종목코드(티커)
+		Pannel0.setPropCardCell("paddinginfo","LabelCode",nIndex,"0,0,0,0")
+		
+		'현재가
+		Pannel0.setPropCardCell("paddinginfo","LabelHyun",nIndex,"0,0,0,0")
+			
+		'등락률
+		Pannel0.setPropCardCell("paddinginfo","LabelDebi",nIndex,"0,0,0,0")
+		
+		'카테고리 구분
+		Pannel0.setPropCardCell("paddinginfo","LabelGubun",nIndex,"0,0,0,0")
+		
+		'카테고리 데이터
+		Pannel0.setPropCardCell("paddinginfo","LabelGubunData",nIndex,"0,0,0,0")
+		
+		'구분선
+		Pannel0.setPropCardCell("top","LabelSeperator",nIndex,"59")	
+		Pannel0.SetCardWHAt(nIndex,gUnFoldPannelHeight)
+		
+'		'큰글씨 사용모드일때 폰트크기 대응
+'		if gbLargeFont then
+'		
+'			'기본폰트크기(-3) - (큰글씨 설정값 * 2)
+'			'큰글씨 설정값 = 1:조금 크게 / 2 : 크게
+'			sTransFontsize = Cstr( -3 - (Cint(gsLargeFontsize) * 2))
+'					
+'			'보수
+'			Pannel0.setPropCardCell("fontsize","LabelBosuTitle",nIndex,sTransFontsize)
+'			Pannel0.setPropCardCell("fontsize","LabelBosuData",nIndex,sTransFontsize)
+'			
+'			'NAV
+'			Pannel0.setPropCardCell("fontsize","LabelNAVTitle",nIndex,sTransFontsize)
+'			Pannel0.setPropCardCell("fontsize","LabelNAVData",nIndex,sTransFontsize)
+'			
+'			'거래량
+'			Pannel0.setPropCardCell("fontsize","LabelVolTitle",nIndex,sTransFontsize)
+'			Pannel0.setPropCardCell("fontsize","LabelVolData",nIndex,sTransFontsize)
+'			
+'		end if
+		
+		
+	else
+		Pannel0.SetCardWHAt(nIndex,gFoldPannelHeight)
+	end if
+
+End Function
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+
+		'-------------------------------------------------------
+		'펼쳐진 행이 없을 경우
+		'-------------------------------------------------------
+		if gWidePannelIndex < 0 then
+		
+			gWidePannelIndex = nIndex
+			foldBottomLinkArea(nIndex,gFoldPannelHeight)
+			
+			'마지막행 클릭 시 스크롤 자동 이동
+			if nIndex == 4 then
+				Pannel0.toprow = nIndex
+			end if
+				
+		'-------------------------------------------------------
+		'펼쳐진 행이 있을 경우
+		'-------------------------------------------------------
+		else
+		
+			if isLinkButton(sCellID) then
+				
+				'화면링크버튼 클릭 시, 히스토리 리스트에 쌓는다.
+				if sCellID == "ButtonLink0" then '현재가
+					
+					SetHistory("set",nIndex)
+					MoveScreen("hyun",nIndex)
+				
+				elseif sCellID == "ButtonLink1" then '차트
+				
+					SetHistory("set",nIndex)
+					MoveScreen("chart",nIndex)
+				
+				elseif sCellID == "ButtonLink2" then '종목정보
+				
+					SetHistory("set",nIndex)
+					MoveScreen("info",nIndex)
+				
+				elseif sCellID == "ButtonLink3" then '매수
+				
+					SetHistory("set",nIndex)
+					MoveScreen("mesu",nIndex)
+				
+				elseif sCellID == "ButtonLink4" then '매도
+				
+					SetHistory("set",nIndex)
+					MoveScreen("medo",nIndex)
+					
+				end if
+				
+				
+			'링크버튼 외 영역 클릭 시(접혀도 되는 경우임)
+			else
+			
+				'이미 펼쳐진 행을 다시 선택했을때는 접음
+				if gWidePannelIndex == nIndex then
+					gWidePannelIndex = -1
+					unfoldBottomLinkArea(nIndex,gUnFoldPannelHeight)
+			
+				'이미 펼쳐진 행과 다른행을 선택한 경우
+				'기존 펼쳐진 행을 접고 선택한 행을 펼침
+				else
+					unfoldBottomLinkArea(gWidePannelIndex,gUnFoldPannelHeight)
+					gWidePannelIndex = nIndex
+					foldBottomLinkArea(nIndex,gFoldPannelHeight)
+					
+					'마지막행 클릭 시 스크롤 자동 이동
+					if nIndex == 4 then
+						Pannel0.toprow = nIndex
+					end if
+				
+				end if
+			
+			
+			end if
+			
+		end if
+		
+		
+	
+End Sub
+
+'============================================================================
+Function SetHistory(sGubun,nIndex)
+
+	szItemCode = Pannel0.GetCellValue("LabelBodyTicker",nIndex)
+	szMk = Pannel0.GetCellValue("LabelBodyMarket",nIndex)
+	sData = szMk .. "@" .. szItemCode
+	
+	Form.manageTotalSearch(gETF_SUPER_HIS_KEY, sGubun, sData)
+	
+	'테스트확인용
+	'test = Form.manageTotalSearch(gETF_SUPER_HIS_KEY, "get", "")
+	'Form.ShowAlert("test", test)
+
+End Function
+
+'============================================================================
+' 링크버튼 화면이동 이벤트
+'============================================================================
+Function MoveScreen(sType,nIndex)
+
+	'화면이동 전 현재설정 값 저장
+	'SaveCurCondData(nIndex)
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	
+	'---------------------------------------------------------
+	'현재가 > 호가
+	'---------------------------------------------------------
+	if sType == "hyun" then
+		
+		szMk = Pannel0.GetCellValue("LabelBodyMarket",nIndex)
+		szItemCode = Pannel0.GetCellValue("LabelBodyTicker",nIndex)
+		szName = Pannel0.GetCellValue("LabelName",nIndex)
+		
+		if szMk == "J" then
+			Form.OpenScreen("11000" , szItemCode.."★".."ETF".."★".."1")
+		else
+			
+			if szMk <> "" and szItemCode <> "" then
+				Form.SetSharedData( "&ITEM_CODE" , szMk.."@"..szItemCode)
+				Form.SetSharedData( "&ITEM_KORNAME" , szName  )	
+				Form.SetSharedData( "&ITEM_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )			
+				Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )
+				Form.OpenScreen("16000" , szMk.."@"..szItemCode.."★".."ETF".."★".."1")
+			end if
+			
+		end if
+	
+	'---------------------------------------------------------
+	'차트
+	'---------------------------------------------------------
+	elseif sType == "chart" then
+		
+		szMk = Pannel0.GetCellValue("LabelBodyMarket",nIndex)
+		szItemCode = Pannel0.GetCellValue("LabelBodyTicker",nIndex)
+		szName = Pannel0.GetCellValue("LabelName",nIndex)
+		
+		if szMk == "J" then
+			Form.OpenScreen("13000" , szItemCode)
+		else
+		
+			if szMk <> "" and szItemCode <> "" then
+				Form.SetSharedData( "&ITEM_CODE" , szMk.."@"..szItemCode)
+				Form.SetSharedData( "&ITEM_KORNAME" , szName  )	
+				Form.SetSharedData( "&ITEM_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )			
+				Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )
+				Form.OpenScreen("16020", "")	
+			end if
+			
+		end if
+	
+	'---------------------------------------------------------
+	' 현재가 > 종목정보
+	'---------------------------------------------------------
+	elseif sType == "info" then
+		
+		szMk = Pannel0.GetCellValue("LabelBodyMarket",nIndex)
+		szItemCode = Pannel0.GetCellValue("LabelBodyTicker",nIndex)
+		szName = Pannel0.GetCellValue("LabelName",nIndex)
+		
+		if szMk == "J" then
+			Form.OpenScreen("11000" , szItemCode.."★".."ETF".."★".."0")
+		else
+			
+			if szMk <> "" and szItemCode <> "" then
+				Form.SetSharedData( "&ITEM_CODE" , szMk.."@"..szItemCode)
+				Form.SetSharedData( "&ITEM_KORNAME" , szName  )	
+				Form.SetSharedData( "&ITEM_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )			
+				Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )
+				Form.OpenScreen("16000" , szMk.."@"..szItemCode.."★".."ETF".."★".."0")
+			end if
+		
+		end if
+	
+	'---------------------------------------------------------
+	' 주문(매수)
+	'---------------------------------------------------------
+	elseif sType == "mesu" then
+		
+		szMk = Pannel0.GetCellValue("LabelBodyMarket",nIndex)
+		szItemCode = Pannel0.GetCellValue("LabelBodyTicker",nIndex)
+		szName = Pannel0.GetCellValue("LabelName",nIndex)
+		
+		if szMk == "J" then
+			
+			Form.OpenScreen("12000" , "기타".."★".."0".."★"..szItemCode)
+			
+		else
+			
+			if szMk <> "" and szItemCode <> "" then
+				Form.SetSharedData( "&ITEM_CODE" , szMk.."@"..szItemCode)
+				Form.SetSharedData( "&ITEM_KORNAME" , szName  )	
+				Form.SetSharedData( "&ITEM_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )			
+				Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )
+				Form.OpenScreen("16060", "0") '매수	
+			end if
+			
+		
+		end if
+	
+	'---------------------------------------------------------
+	' 주문(매도)
+	'---------------------------------------------------------
+	elseif sType == "medo" then
+		
+		szMk = Pannel0.GetCellValue("LabelBodyMarket",nIndex)
+		szItemCode = Pannel0.GetCellValue("LabelBodyTicker",nIndex)
+		szName = Pannel0.GetCellValue("LabelName",nIndex)
+		
+		if szMk == "J" then
+		
+			Form.OpenScreen("12000" , "기타".."★".."1".."★"..szItemCode)
+			
+		else
+			
+			if szMk <> "" and szItemCode <> "" then
+				Form.SetSharedData( "&ITEM_CODE" , szMk.."@"..szItemCode)
+				Form.SetSharedData( "&ITEM_KORNAME" , szName  )	
+				Form.SetSharedData( "&ITEM_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )			
+				Form.SendMessageToMain( "CHANGE_ITEMCODE_OVERSTOCK", szMk.."@"..szItemCode.."★"..szName.."★".."", "" )
+				Form.OpenScreen("16060", "1") '매도	
+			end if
+		
+		end if
+		
+	
+	'---------------------------------------------------------
+	' 더보기
+	'---------------------------------------------------------
+	elseif sType == "more" then
+	
+		'----------------------------------------------------------------------------
+		'순위화면 > 링크화면 이동 후 되돌아 왔을때 사용하는 값인데
+		'여기서 진입할때는 모두 클리어하고 진입한다. 
+		'----------------------------------------------------------------------------
+		Form.SetSharedData("ETF_RANKING_GUBUN" 			, "")
+		Form.SetSharedData("ETF_RANKING_FILTER_NATION" 	, "")
+		Form.SetSharedData("ETF_RANKING_FILTER_INDEX" 	, "")
+		Form.SetSharedData("ETF_RANKING_FILTER_FROM" 		, "")
+		Form.SetSharedData("ETF_RANKING_FILTER_TO" 		, "")
+		Form.SetSharedData("ETF_RANKING_SELECT_INDEX" 	, "")
+		
+		Form.OpenScreen("50511" , FormTab0.currenttab)
+	
+	end if
+
+End Function
+
+'============================================================================
+'
+'============================================================================
+Function GetRealTimeSiseYN(sMarketCode)
+	
+	szRealAble = Form.GetSharedData( "REALTIME_"&sMarketCode, false )
+	return szRealAble
+	
+End Function
+'============================================================================
+' 국가코드별 소수점자리 수
+'============================================================================
+Function GetNationDecimalLen(sNation)
+	
+	if sNation == "USA" then
+		return 4
+	elseif sNation =="KOR" then
+		return 0
+	elseif sNation =="HKG" then
+		return 3
+	elseif sNation =="CHN" then
+		return 3
+	elseif sNation =="JPN" then
+		return 1
+	else
+		return 4
+	end if
+	
+End Function
+
+
+
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_metf_018r" trcode="ohhts_metf_018r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_metf_018r" title="ETF 순위 조회" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" inout="in" _len="217" _ulen="177" >
+
+FID_INPUT_CLS_CODE^FID입력구분코드^2^0^0^0^0^0^0
+FIDX_INPUT_NTNL_CODE^FIDX입력국가코드^8^0^0^0^0^0^0
+FID_INPUT_DATE1^FID입력일자1^9^0^7^0^0^0^0
+FID_INPUT_DATE2^FID입력일자2^9^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="1" inout="in" _len="167" _ulen="125" >
+
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^0^0^0^0
+FIDX_INPUT_DELY_RLTM_CLS_CODE^FIDX입력지연실시간구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="818" _ulen="650" >
+
+FID_OVRS_ISCD^FID해외종목코드^16^0^0^0^0^0^0
+FIDX_KOR_ISNM^FIDX한글종목명^65^0^0^0^0^0^0
+FID_PRPR^FID현재가^14^4^7^0^0^1^0
+FID_PRDY_VRSS_SIGN^FID전일대비부호^2^0^0^0^0^0^0
+FID_PRDY_CLPR_VRSS^FID전일대비^12^4^7^0^0^1^0
+FID_PRDY_CTRT^FID전일대비율^9^2^7^0^0^1^0
+FID_VOL^FID거래량^19^0^7^0^0^0^0
+FID_AVLS^FID시가총액^19^0^7^0^0^0^0
+FID_DVDN_ERT^FID배당수익률^9^2^7^0^0^0^0
+FID_TOTAL_SHNU_QTY^FID총매수수량^19^0^7^0^0^0^0
+FID_TOTAL_SELN_QTY^FID총매도수량^19^0^7^0^0^0^0
+FID_NEW_LSTN_YN^FID신규상장여부^1^0^0^0^0^0^0
+FID_LSTN_NTNL_CODE^FID상장국가코드^5^0^0^0^0^0^0
+FID_INPUT_COND_MRKT_DIV_CODE^FID입력조건시장분류코드^2^0^0^0^0^0^0
+FID_DATA_RANK^FID데이터순위^6^0^7^0^0^0^0
+FID_TRHT_YN^FID거래정지여부^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

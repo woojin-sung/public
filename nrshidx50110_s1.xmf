@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50110" scrname="ETF Super검색_스크리너_투자지역" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,444,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblSubTitle" fontstyle="01" caption="투자지역" bgcolor="029:255212175" ly_vert="20,17,200,22,1" />
+		<PANNEL name="Pannel0" ly_vert="0,50,375,394,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblNation0" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="20,0,105,36,1" />
+				<LABEL name="lblNation1" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="135,0,105,36,1" />
+				<LABEL name="lblNation2" fontsize="-4" halign="1" multiline="1" click="1" ly_vert="250,0,105,36,1" />
+				<IMAGE name="imgFlag0" autosize="1" ly_vert="32,9,25,18,1" />
+				<IMAGE name="imgFlag1" autosize="1" ly_vert="147,9,25,18,1" />
+				<IMAGE name="imgFlag2" autosize="1" ly_vert="262,9,25,18,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="36" gap="10" >
+				<CELL name="imgFlag0" />
+				<CELL name="imgFlag1" />
+				<CELL name="imgFlag2" />
+				<CELL name="lblNation0" />
+				<CELL name="lblNation1" />
+				<CELL name="lblNation2" />
+			</CARD_INFO>
+		</PANNEL>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12253" _ulen="11979" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_line2_o.9"
+
+'==============================================
+' 컬러코드
+'==============================================
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+'==============================================
+' 전역변수
+'==============================================
+Dim g_szSharedKey
+g_szSharedKey = "50110_S1_CHECK"
+
+Dim g_szSharedData
+g_szSharedData = ""
+
+Dim g_arrNation
+Dim g_arrNation_Check
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기화
+'===============================================
+Function Init_Control()
+	lblSubTitle.fgcolor = g_szTxtColor_Normal
+	lblSubTitle.paddinginfo = "0,0,0,0"
+End Function
+
+'===============================================
+' 데이터 초기설정
+'===============================================
+Function Init_Data()
+	g_arrNation = {}
+	g_arrNation_Check = {}
+End Function
+
+'===============================================
+' 패널 초기화
+'===============================================
+Function Init_Pannel()
+	nArrCnt = #g_arrNation
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+
+	Pannel0.rowcount = nPannelRowCnt
+	
+	nArrIdx = 0
+	
+	g_szSharedData = Form.GetSharedData(g_szSharedKey, false)
+	
+	for i = 0 to nPannelRowCnt - 1
+		
+		Init_PannelImg(i, "imgFlag0", "lblNation0", g_arrNation(nArrIdx))
+		
+		Pannel0.SetCellValue( "lblNation0", i, g_arrNation(nArrIdx))
+
+		if g_arrNation_Check(nArrIdx) = "0" then
+			Pannel0.SetPropCardCell("imagefilepth", "lblNation0", i, g_szBtnImg_Normal)	
+		else
+			Pannel0.SetPropCardCell("imagefilepth", "lblNation0", i, g_szBtnImg_Select)
+		end if
+		
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Pannel0.SetCellVisible("lblNation1",i,false)
+			Pannel0.SetCellVisible("lblNation2",i,false)
+			Exit for
+		end if
+		
+		Init_PannelImg(i, "imgFlag1", "lblNation1", g_arrNation(nArrIdx))
+		
+		Pannel0.SetCellValue( "lblNation1", i, g_arrNation(nArrIdx))
+
+		if g_arrNation_Check(nArrIdx) = "0" then
+			Pannel0.SetPropCardCell("imagefilepth", "lblNation1", i, g_szBtnImg_Normal)	
+		else 
+			Pannel0.SetPropCardCell("imagefilepth", "lblNation1", i, g_szBtnImg_Select)
+		end if
+		
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Pannel0.SetCellVisible("lblNation2",i,false)
+			Exit for
+		end if
+		
+		Init_PannelImg(i, "imgFlag2", "lblNation2", g_arrNation(nArrIdx))
+		
+		Pannel0.SetCellValue( "lblNation2", i, g_arrNation(nArrIdx))
+		
+		if g_arrNation(nArrIdx) = "중국(홍콩 포함)" then
+			Pannel0.SetPropCardCell("fontsize", "lblNation2", i, "-4")
+			Pannel0.SetPropCardCell("caption", "lblNation2", i, "중국\n(홍콩포함)")	
+			Pannel0.SetCellValue( "lblNation2", i, "중국\n(홍콩포함)")	
+			
+			'Pannel0.SetPropCardCell("textattr", "lblNation2", i, "0^2^334^-10^false^중국\n(홍콩포함)^0")
+			Pannel0.SetPropCardCell("textattr", "lblNation2", i, "3^6^333^-10^false^중국\n(홍콩포함)^0")	
+		else
+			Pannel0.SetPropCardCell("fontsize", "lblNation2", i, "-2")	
+		end if
+		
+		if g_arrNation_Check(nArrIdx) = "0" then
+			Pannel0.SetPropCardCell("imagefilepth", "lblNation2", i, g_szBtnImg_Normal)	
+		else 
+			Pannel0.SetPropCardCell("imagefilepth", "lblNation2", i, g_szBtnImg_Select)
+		end if
+		
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+	
+End Function
+
+'===============================================
+' 패널 국기이미지 적용처리
+'===============================================
+Function Init_PannelImg(nRowIdx, szCtlName, szBgCtlName, szData)
+	Pannel0.SetPropCardCell("maintainratio", szCtlName, nRowIdx, "4")
+	
+	if szData = "한국" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_kor_round")
+		
+	elseif szData = "미국" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_us2")
+		
+	elseif szData = "중국(홍콩 포함)" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_chn")
+		
+	elseif szData = "일본" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_jp2")
+		
+	elseif szData = "영국" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_uk")
+		
+	elseif szData = "프랑스" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_fra_round")
+		
+	elseif szData = "독일" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_ger_round")
+		
+	elseif szData = "베트남" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_vie_round")
+		
+	elseif szData = "인도" then
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_ind_round")
+		
+	else
+		Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "1")
+		Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "0,0,0,0")
+		Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, false)
+	end if
+
+End Function
+
+'===============================================
+' 패널버튼 클릭 이벤트 처리
+'===============================================
+Function DisplaySetting_PannelBtn(nRowIdx, szCtlName)
+	nCnt = nRowIdx * 3
+	if szCtlName = "imgFlag0" then
+		szCtlName = "lblNation0"
+	elseif szCtlName = "imgFlag1" then
+		szCtlName = "lblNation1"
+	elseif szCtlName = "imgFlag2" then
+		szCtlName = "lblNation2"
+	end if
+	
+	if szCtlName = "lblNation0" then
+		
+	elseif szCtlName = "lblNation1" then
+		nCnt = Cint(nCnt) + 1
+	elseif szCtlName = "lblNation2" then
+		nCnt = Cint(nCnt) + 2
+	end if
+	
+	if #g_arrNation_Check < nCnt+1 then
+		Exit Function
+	end if
+	
+	if g_arrNation_Check(nCnt) = "0" then
+		g_arrNation_Check(nCnt) = "1"
+		Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Select)
+	else 
+		g_arrNation_Check(nCnt) = "0"
+		Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Normal)
+	end if
+	
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환
+'===============================================
+Function Convert_ArrToString(arrData, szSeperator)
+	szResult = ""
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if i <> 0 then
+			szResult = szResult & szSeperator 
+		end if
+		
+		szResult = szResult & arrData(i) 
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환(체크항목)
+'===============================================
+Function Convert_ChkArrToString(arrData, arrChkData, szSeperator)
+	szResult = ""
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if arrChkData(i) = "1" then
+			if szResult <> "" then
+				szResult = szResult & szSeperator 
+			end if
+			szResult = szResult & arrData(i) 
+		end if
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 문자열 -> 배열 변환
+'===============================================
+Function Convert_StringToArr(szData, szSeperator)
+	szArrData = ""
+	
+	if szData <> null and szData <> "" then
+		szArrData = split(szData, szSeperator)
+	end if
+	
+	return szArrData
+End Function
+
+'===============================================
+' 배열 데이터 확인
+'===============================================
+Function Contains_Array(arrData, szData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		szArrData = arrData(i)
+		
+		if szArrData = szData then
+			return true
+		end if
+	next 
+	
+	return false
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Init_Control()
+	Init_Data()
+	
+	szData = Form.GetSharedData("ETF_Step2_0_0", false)
+	g_arrNation = Convert_StringToArr(szData, "`")
+	
+	for i = 0 to #g_arrNation-1
+		szChkData = Form.GetSharedData(g_szSharedKey, false)
+		nArrChkData = Convert_StringToArr(szChkData, "`")
+		
+		isContain = false
+		for j = 0 to #nArrChkData-1
+			szChk = nArrChkData(j)
+			if szChk = g_arrNation(i) then
+				isContain = true
+				exit for
+			end if
+		next
+		
+		if isContain = true then
+			g_arrNation_Check[i] = "1"
+		else
+			g_arrNation_Check[i] = "0"
+		end if
+	next
+	
+	Init_Pannel()
+End Sub
+
+'===============================================
+' Pannel0_OnClick
+'===============================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "" then
+		Exit Sub
+	end if
+	
+	DisplaySetting_PannelBtn(nIndex, sCellID)
+	Form.SetSharedData(g_szSharedKey , Convert_ChkArrToString(g_arrNation, g_arrNation_Check, "`"))
+	Form.triggerEvent("#", g_szSharedKey, "")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = g_szSharedKey then
+		for i = 0 to #g_arrNation-1
+			szChkData = Form.GetSharedData(g_szSharedKey, false)
+			nArrChkData = Convert_StringToArr(szChkData, "`")
+			
+			isContain = false
+			for j = 0 to #nArrChkData-1
+				szChk = nArrChkData(j)
+				if szChk = g_arrNation(i) then
+					isContain = true
+					exit for
+				end if
+			next
+			
+			if isContain = true then
+				g_arrNation_Check[i] = "1"
+			else
+				g_arrNation_Check[i] = "0"
+			end if
+		next
+		
+		Init_Pannel()
+	elseif sEventName = "50110_COND_STAT" then
+		if sParam = "N" then
+			Pannel0.height = 398
+		elseif sParam = "Y" then
+			Pannel0.height = 288
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obsim_stsv_104r" trcode="obsim_stsv_104r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obsim_stsv_104r" title="ETF 카테고리 관리 투자지역 조?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="54" _ulen="44" >
+
+INVT_REGN_NAME^투자지역명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="50" inout="out" _len="104" _ulen="82" >
+
+INVT_REGN_CODE^투자지역코드^20^0^0^0^0^0^0
+INVT_REGN_NAME^투자지역명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="40" _ulen="32" >
+
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

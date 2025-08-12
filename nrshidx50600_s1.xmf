@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50600" scrname="배당주찾기(유의사항)" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,362,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" transmode="0" ly_vert="0,30,375,10,1" />
+		<LABEL name="LabelText2" fgcolor="333:115118124" fontsize="-4" caption="ⓘ" bgcolor="038:255255255" halign="1" multiline="1" click="1" ly_vert="14,70,25,20,1" />
+		<LABEL name="LabelText0" fgcolor="333:115118124" fontsize="-4" caption="공시 내용이 변경될 수 있으므로, 참고용으로만 사용해주세요." bgcolor="038:255255255" click="1" ly_vert="40,60,315,40,1" />
+		<LABEL name="LabelText1" fgcolor="333:115118124" fontsize="-4" caption="최초 공시 이후 최종 공시가 수정되어 해당 내용이 업데이트 되거나 삭제 될 수 있습니다. 또한 본 정보는 해당기업의 공시정보를 벤더사가 수기 처리한 내용으로 언제든지 상이하거나, 누락 및 오류의 가능성이 있습니다. 현재 주가 대비 배당금이 과한 종목은 반드시 배당종목의 배당추이를 확인하시기 바랍니다." bgcolor="339:255238238" valign="0" multiline="1" click="1" ly_vert="40,110,315,240,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2230" _ulen="1768" >
+Dim gOsType
+Dim gbLargeFont			'큰글씨 사용여부
+Dim gsLargeFontsize		'큰글씨 폰트크기(1:조금크게 2:크게)
+
+gbLargeFont = false
+gsLargeFontsize = 0
+'============================================================================
+Sub Form_OnFormInitBefore()
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+End Sub
+'============================================================================
+Sub Form_OnFormInit()
+
+	Label0.bgcolor = 66
+	LabelText0.fgcolor = 321
+	LabelText1.fgcolor = 321
+	LabelText2.fgcolor = 321
+	
+	LabelText0.paddinginfo = "0,0,0,0"
+	LabelText1.paddinginfo = "0,0,0,0"
+	LabelText2.paddinginfo = "0,0,0,0"
+	
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSize = Form.GetEnvData("common.textsize")
+	if CInt(szTextSize) > 0 then
+		gbLargeFont = true
+		gsLargeFontsize = szTextSize
+		
+		if gOsType == "1" then
+			LabelText0.fontsize = -2 - Cint((gsLargeFontsize * 2))
+			LabelText1.fontsize = -2 - Cint((gsLargeFontsize * 2))
+			LabelText2.fontsize = -2 - Cint((gsLargeFontsize * 2))
+		else
+			LabelText0.fontsize = -4 - Cint((gsLargeFontsize * 2))
+			LabelText1.fontsize = -4 - Cint((gsLargeFontsize * 2))
+			LabelText2.fontsize = -4 - Cint((gsLargeFontsize * 2))
+		end if
+		
+	end if
+	
+	LabelText1.setTextBreakPolicy()
+	LabelText1.caption = "배당 일정은 모두 미국 현지 기준이므로 실제 지급일과 차이가 ".. 
+					   "있을 수 있으며, 최초 공시 이후 최종 공시가 수정되어 해당 내용이 "..
+					   "업데이트 되거나 삭제 될 수 있습니다.\n\n"..
+   
+					   "공시 정보를 제공하는 벤더사의 수기 처리로 상이하거나 누락 및 "..
+					   "오류의 가능성이 있으므로, 현재 주가 대비 배당금이 과한 종목은 "..
+					   "반드시 배당 종목의 배당추이를 확인하시기 바랍니다.\n\n"..
+
+					   "본 서비스는 투자 판단 참고용으로만 사용하실 수 있으며, "..
+					   "모든 투자 판단은 투자자 본인의 책임으로 당사는 어떠한 경우에도"..
+					   "일체의 법적 책임을 지지 않습니다."
+
+	
+End Sub
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

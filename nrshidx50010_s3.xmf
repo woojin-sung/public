@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50010" scrname="ETF(HOME)_매거진" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,303,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelScreenTitle" fontsize="2" fontstyle="01" caption="ETF 매거진" bgcolor="029:255212175" ly_vert="20,30,250,23,1" />
+		<IMAGE name="Image0" autosize="1" imgpath="icon_arrow" ly_vert="346,36,8,10,1" />
+		<LABEL name="lbl1" fgcolor="321:115118124" fontsize="-2" caption="더보기" bgcolor="035:237246255" halign="2" click="1" ly_vert="263,30,84,23,1" />
+		<IMAGE name="ImageThum0" visible="0" autosize="1" ly_vert="20,83,50,50,0" />
+		<LABEL name="LabelTitle0" visible="0" fontsize="-2" caption="고금리 시대 현금 짧게 굴려보는 방법" bgcolor="035:237246255" click="1" ly_vert="80,93,270,30,0" />
+		<LABEL name="separator0" visible="0" bgcolor="256:238239240" transmode="0" ly_vert="20,143,335,1,0" />
+		<IMAGE name="ImageThum1" visible="0" autosize="1" ly_vert="20,154,50,50,0" />
+		<LABEL name="LabelTitle1" visible="0" fontsize="-2" caption="ETF 절세하는 방법, 있다? 없다?" bgcolor="035:237246255" click="1" ly_vert="80,164,270,30,0" />
+		<LABEL name="separator1" visible="0" bgcolor="256:238239240" transmode="0" ly_vert="20,214,335,1,0" />
+		<IMAGE name="ImageThum2" visible="0" autosize="1" ly_vert="20,225,50,50,0" />
+		<LABEL name="LabelTitle2" visible="0" fontsize="-2" caption="바이오주를 액티브하게 투자하는 법" bgcolor="035:237246255" click="1" ly_vert="80,235,270,30,0" />
+		<LABEL name="LabelGuideText" visible="0" fgcolor="333:115118124" caption="조회된 데이터가 없어요." halign="1" ly_vert="0,190,375,32,0" />
+		<IMAGE name="imgNotice" visible="0" autosize="1" imgpath="icon_notice_3" ly_vert="160,130,50,50,0" />
+		<LABEL name="LabelUrl0" visible="0" bgcolor="035:237246255" transmode="0" autofontsize="1" ly_vert="80,120,270,32,0" />
+		<LABEL name="LabelUrl1" visible="0" bgcolor="035:237246255" transmode="0" autofontsize="1" ly_vert="80,190,270,32,0" />
+		<LABEL name="LabelUrl2" visible="0" bgcolor="035:237246255" transmode="0" autofontsize="1" ly_vert="80,260,270,32,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8149" _ulen="7827" >
+Dim gOsType
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+
+	Image0.setMaintainingRatio("1")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	LabelScreenTitle.paddinginfo = "0,0,0,0"
+	LabelTitle0.paddinginfo = "0,0,0,0"
+	LabelTitle1.paddinginfo = "0,0,0,0"
+	LabelTitle2.paddinginfo = "0,0,0,0"
+	
+	DATAMANAGER.RequestTranData("ooopc_rprt_002r")
+
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	if szTranID == "ooopc_rprt_002r"  then
+		
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_GRP_ID" 				, 0 , "bascGrp")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_ID" 					, 0 , "EtfMgz")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_CNTT_DIV_CODE" 		, 0 , "%")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_CNTT_WRTR_NAME" 		, 0 , "%")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_CNTT_TITL_NAME" 		, 0 , "%")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "STA_DATE" 				, 0 , "00000000")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "FIN_DATE" 				, 0 , "99999999")
+	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+
+	if szTranID == "ooopc_rprt_002r"  then
+		
+		nCnt = DATAMANAGER.GetDataCount(0, "ooopc_rprt_002r", "OutBlock1")
+		
+		if nCnt == 0 then
+			
+			LabelGuideText.visible = true
+			imgNotice.visible = true
+			Exit Sub
+			
+		elseif nCnt > 3 then
+		
+			nCnt = 3
+			LabelGuideText.visible = false
+			imgNotice.visible = false
+			
+		end if
+		
+		for i = 0 to nCnt - 1
+		
+			sTitle 	= DATAMANAGER.GetDataValue(0, "ooopc_rprt_002r", "OutBlock1", "BBS_CNTT_TITL_NAME" , i)
+			sThumPath = DATAMANAGER.GetDataValue(0, "ooopc_rprt_002r", "OutBlock1", "BBS_CNTT_SPLM_ITEM_VAL13" , i)
+			sContentsUrl = DATAMANAGER.GetDataValue(0, "ooopc_rprt_002r", "OutBlock1", "BBS_CNTT_TURN_NO" , i)
+			
+			if sContentsUrl <> "" then
+				sContentsUrl = GetTotalUrlPath("contents",sContentsUrl)
+			else
+				sContentsUrl = ""
+			end if
+			
+			
+			if sThumPath <> "" then
+				sThumPath = GetTotalUrlPath("image",sThumPath)
+			else
+				sThumPath = ""
+			end if
+			
+			
+			if i == 0 then
+			
+				LabelTitle0.visible = true
+				ImageThum0.visible = true
+				
+				LabelTitle0.SetMaxLineCount(1)
+				LabelTitle0.caption = sTitle
+				
+				LabelUrl0.caption = sContentsUrl
+				
+				if gOsType == "1" then
+					ImageThum0.SetImageUrl(sThumPath)
+				else
+					ImageThum0.imagetarget = 2
+					ImageThum0.imgpath = sThumPath
+				end if
+				
+				
+			elseif i == 1 then
+			
+				separator0.visible = true
+				LabelTitle1.visible = true
+				ImageThum1.visible = true
+			
+				LabelTitle1.SetMaxLineCount(1)
+				LabelTitle1.caption = sTitle
+				
+				LabelUrl1.caption = sContentsUrl
+				
+				if gOsType == "1" then
+					ImageThum1.SetImageUrl(sThumPath)
+				else
+					ImageThum1.imagetarget = 2
+					ImageThum1.imgpath = sThumPath
+				end if
+			
+			elseif i == 2 then
+				
+				separator1.visible = true
+				LabelTitle2.visible = true
+				ImageThum2.visible = true
+			
+				LabelTitle2.SetMaxLineCount(1)
+				LabelTitle2.caption = sTitle
+				
+				LabelUrl2.caption = sContentsUrl
+				
+				if gOsType == "1" then
+					ImageThum2.SetImageUrl(sThumPath)
+				else
+					ImageThum2.imagetarget = 2
+					ImageThum2.imgpath = sThumPath
+				end if
+			
+			end if
+		
+		next
+		
+		'이전에 열었던 매거진 URL 존재 시, 자동으로 열어줌.
+		OpenPrevMgz()
+		
+	end if
+	
+End Sub
+
+
+'============================================================================
+Sub lbl1_OnClick()
+	
+	MoveScreen("more")
+	
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+
+	MoveScreen("more")
+	
+End Sub
+
+'============================================================================
+Function MoveScreen(sGubun)
+	
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	
+	if sGubun == "more" then
+	
+		Form.OpenScreen("50300" , "")
+	
+	end if
+
+End Function
+
+'============================================================================
+' 썸네일 및 본문 URL 가져오기
+'============================================================================
+Function GetTotalUrlPath(sGubun,sPath)
+
+	szMode = Form.GetSharedData( "&SERVER_MODE", false )	'0 : 운영계, 1 : 테스트계
+	
+	'-------------------------
+	' 본문 링크주소
+	'-------------------------
+	if sGubun = "contents" then
+		
+		if CInt(szMode) == 0 then
+			'szUrl = "https://home.imeritz.com/mobile/mts/etfMgz.html?bbsCnttTurnNo="..Cint(sPath)			'운영계 주소
+			szUrl = "https://home.imeritz.com/bbs/mwCtn1.do?bbsId=EtfMgz&bbsCnttTurnNo="..Cint(sPath)		'운영계 주소
+		elseif CInt(szMode) == 1 then
+			'szUrl = "https://testhome.imeritz.com/mobile/mts/etfMgz.html?bbsCnttTurnNo="..Cint(sPath)		'테스트계주소
+			szUrl = "https://testhome.imeritz.com/bbs/mwCtn1.do?bbsId=EtfMgz&bbsCnttTurnNo="..Cint(sPath)	'테스트계주소
+		end if
+	
+	'-------------------------
+	' 썸네일 링크주소
+	'-------------------------
+	else
+		if CInt(szMode) == 0 then
+			szUrl = "https://home.imeritz.com"..sPath		'운영계 주소
+		elseif CInt(szMode) == 1 then
+			szUrl = "https://testhome.imeritz.com"..sPath		'테스트계주소
+		end if
+	end if
+	
+	return szUrl
+	
+End Function
+
+'============================================================================
+' 첫번째 항목 클릭
+'============================================================================
+Sub LabelTitle0_OnClick()
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	'Form.SetSharedData("ETF_HOME_MGZ_URL" , LabelUrl0.caption)
+	Form.OpenPopup("nrshidx50310" , LabelUrl0.caption , "")
+End Sub
+'============================================================================
+Sub ImageThum0_OnClick()
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	'Form.SetSharedData("ETF_HOME_MGZ_URL" , LabelUrl0.caption)
+	Form.OpenPopup("nrshidx50310" , LabelUrl0.caption , "")
+End Sub
+
+'============================================================================
+' 두번째 항목 클릭
+'============================================================================
+Sub LabelTitle1_OnClick()
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	'Form.SetSharedData("ETF_HOME_MGZ_URL" , LabelUrl1.caption)
+	Form.OpenPopup("nrshidx50310" , LabelUrl1.caption , "")
+End Sub
+'============================================================================
+Sub ImageThum1_OnClick()
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	'Form.SetSharedData("ETF_HOME_MGZ_URL" , LabelUrl1.caption)
+	Form.OpenPopup("nrshidx50310" , LabelUrl1.caption , "")
+End Sub
+
+'============================================================================
+' 세번째 항목 클릭
+'============================================================================
+Sub LabelTitle2_OnClick()
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	'Form.SetSharedData("ETF_HOME_MGZ_URL" , LabelUrl2.caption)
+	Form.OpenPopup("nrshidx50310" , LabelUrl2.caption , "")
+End Sub
+'============================================================================
+Sub ImageThum2_OnClick()
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	'Form.SetSharedData("ETF_HOME_MGZ_URL" , LabelUrl2.caption)
+	Form.OpenPopup("nrshidx50310" , LabelUrl2.caption , "")
+End Sub
+'============================================================================
+' 50300_SELECT_URL : 매거진 본문에서 링크화면으로 이동 시, 보고있던 매거진 URL 저장
+'============================================================================
+Function OpenPrevMgz()
+
+	'링크화면에서 이동하여 보고있던 매거진URL이 저장되어 있으면 자동으로 열어준다.
+	sPrevMgzUrl = Form.GetSharedData("50300_SELECT_URL", true)
+
+	if sPrevMgzUrl <> "" then
+		Form.OpenPopup("nrshidx50310" , sPrevMgzUrl , "")
+	end if
+
+End Function
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ooopc_rprt_002r" trcode="ooopc_rprt_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ooopc_rprt_002r" title="(홈페이지)ETF매거진 컨텐츠 목?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="345" _ulen="261" >
+
+BBS_GRP_ID^게시판그룹ID^36^0^0^0^0^0^0
+BBS_ID^게시판ID^36^0^0^0^0^0^0
+BBS_CNTT_DIV_CODE^게시판내용분류코드^2^0^0^0^0^0^0
+BBS_CNTT_WRTR_NAME^게시판내용작성자명^40^0^0^0^0^0^0
+BBS_CNTT_TITL_NAME^게시판내용제목명^200^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="1047" _ulen="761" >
+
+BBS_GRP_ID^게시판그룹ID^36^0^0^0^0^0^0
+BBS_ID^게시판ID^36^0^0^0^0^0^0
+BBS_CNTT_TURN_NO^게시판내용순차번호^11^0^7^0^0^0^0
+BBS_ATCH_TURN_NO^게시판첨부순차번호^16^0^7^0^0^0^0
+BBS_CNTT_WRTN_YMDH^게시판내용작성일시^19^0^0^0^0^0^0
+BBS_CNTT_MOD_YMDH^게시판내용수정일시^19^0^0^0^0^0^0
+BBS_CNTT_WRTR_ID^게시판내용작성자ID^36^0^0^0^0^0^0
+BBS_CNTT_WRTR_NAME^게시판내용작성자명^40^0^0^0^0^0^0
+BBS_CNTT_TITL_NAME^게시판내용제목명^200^0^0^0^0^0^0
+BBS_CNTT_ATCH_FILE_CNT^게시판내용첨부파일수^13^0^7^0^0^0^0
+BBS_ATCH_ORTX_FILE_PATH_NAME^게시판첨부원본파일경로명^256^0^0^0^0^0^0
+BBS_ATCH_ORTX_FILE_NAME^게시판첨부원본파일명^200^0^0^0^0^0^0
+BBS_ATCH_SRVR_FILE_PATH_NAME^게시판첨부서버파일경로명^256^0^0^0^0^0^0
+BBS_ATCH_SRVR_FILE_NAME^게시판첨부서버파일명^200^0^0^0^0^0^0
+BBS_CNTT_SPLM_ITEM_VAL13^게시판내용추가항목값13^200^0^0^0^0^0^0
+BBS_CNTT_SPLM_ITEM_VAL14^게시판내용추가항목값14^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="208" _ulen="156" >
+
+BBS_GRP_ID^게시판그룹ID^36^0^0^0^0^0^0
+BBS_ID^게시판ID^36^0^0^0^0^0^0
+BBS_CNTT_TURN_NO^게시판내용순차번호^11^0^7^0^0^0^0
+BBS_ATCH_TURN_NO^게시판첨부순차번호^16^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

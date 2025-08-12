@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50000" scrname="홈_메인" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<TAB name="tabMenu" fontsize="4" tabheadheight="47" tabwidthtype="2" tabcount="3" ly_vert="0,0,330,47,1" >
+			<PAGE name="0" caption="Market" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="1" caption="Meritz365" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="2" caption="MY자산" >
+				<CONTROL_INFO/>
+			</PAGE>
+		</TAB>
+		<IMAGE name="imgSearch" autosize="1" imgpath="icon_search" ly_vert="343,12,22,22,1" />
+		<LINKFORM name="lkformScreen" ly_vert="0,47,375,655,1" />
+		<LABEL name="Label0" transmode="0" ly_vert="0,46,330,1,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1792" _ulen="1710" >
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgSearch.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szSavedTab
+	szSavedTab = Form.GetSharedData("HOME_TAB", true)
+	if szSavedTab <> "" and szSavedTab <> null then
+		if szSavedTab == "MYASSET" then
+			tabMenu.currenttab = "2"
+			tabMenu_OnTabChanged(2)
+		end if
+	else
+'		if tabMenu.currenttab == "0" or tabMenu.currenttab == 0 then
+			tabMenu.currenttab = "0"
+			tabMenu_OnTabChanged(0)
+'			lkformScreen.linkfile = "mhidx41000"
+'		end if
+	end if
+	
+	'20210514 LES START : iOS 2.5.2버전 이후 해당문제 메인수정, 
+	'20210508 SWJ START : 앱 미실행 상태 푸시 화면 안뜨는 현상 임시 수정
+	szAppVer 	= Form.GetSharedData("&APP_VERSION", False)
+	szAppVer 	= replace(szAppVer , "." , "")
+	
+	sDeviceOS = Form.GetSharedData("&OS_TYPE", false)
+	if Cint(szAppver) < 252 then
+	
+		if sDeviceOS == "2" then
+			sOpenMOTP = Form.GetSharedData("&IS_OPEN_MOTP" , True)
+		
+			if sOpenMOTP == "YES" then
+				Form.OpenPopup("mhetc90060_motp" , "" , "")
+			end if
+		end if
+		
+	end if
+	'20210508 SWJ END
+End Sub
+
+'============================================================================
+Sub tabMenu_OnTabChanged(nCurrentTab)
+	if nCurrentTab == 0 then		'market
+		lkformScreen.linkfile = "mhidx41000"
+	elseif nCurrentTab == 1 then	'meritz365
+		lkformScreen.linkfile = "nrshidx50001"
+	else							'my자산
+		lkformScreen.linkfile = "nrshidx50030"
+	end if
+End Sub
+
+'============================================================================
+Sub imgSearch_OnClick()
+	Form.OpenPopup("mhidx41000_p5" , "" , "")	'20230818 HSZ : 통합검색 팝업 추가
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

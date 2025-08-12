@@ -1,0 +1,924 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50100" scrname="ETF Super검색_유의사항" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" halign="1" ly_vert="47,0,283,47,1" />
+		<IMAGE name="imgClose" autosize="1" ly_vert="320,14,39,18,1" />
+		<LABEL name="lblInfo0" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="440,470,325,393,1" />
+		<LABEL name="lblGuide0" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="550,470,10,50,1" />
+		<LABEL name="lblInfo1" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="570,490,325,75,1" />
+		<LABEL name="lblGuide1" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="550,531,10,50,1" />
+		<LABEL name="lblGuide2" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="550,594,10,50,1" />
+		<LABEL name="lblInfo2" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="570,567,325,75,1" />
+		<LABEL name="lblGuide3" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="550,655,10,50,1" />
+		<LABEL name="lblInfo3" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="570,643,325,75,1" />
+		<PANNEL name="Pannel0" ly_vert="0,60,375,690,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblGuide" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="20,0,10,50,1" />
+				<LABEL name="lblInfo" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="35,0,310,630,1" />
+				<IMAGE name="imgGuide0" autosize="1" ly_vert="0,0,375,100,1" />
+				<LABEL name="lblDiv" transmode="0" ly_vert="7,0,375,10,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="70" gap="5" >
+				<CELL name="lblGuide" />
+				<CELL name="lblInfo" />
+				<CELL name="imgGuide0" />
+				<CELL name="lblDiv" />
+			</CARD_INFO>
+		</PANNEL>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="36357" _ulen="34317" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'-----------------------------------------------
+' 이미지
+'-----------------------------------------------
+Dim g_szCloseImg  
+g_szCloseImg = "icon_close"
+
+'-----------------------------------------------
+' 컬러코드
+'-----------------------------------------------
+' 기본 텍스트 컬러 (검정색)
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal 	= "334"
+
+' 기본 텍스트 컬러 (회색)
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey 	= "333"
+
+' 기본 텍스트 컬러 (흰색)
+Dim g_szTxtColor_White 
+g_szTxtColor_White 	= "338"
+
+' 기본 텍스트 컬러 (흰색)
+Dim g_szLineColor_Grey 
+g_szLineColor_Grey 	= "320"
+
+' 기본 텍스트 컬러 (빨강)
+Dim g_szTxtColor_Red 
+g_szTxtColor_Red = "326"
+
+'-----------------------------------------------
+' 기타 전역변수
+'-----------------------------------------------
+Dim g_szTitle
+g_szTitle = "ETF 종목 검색 및 유의사항 안내"
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	'-----------------------------------------------
+	' 뒤로가기 버튼 초기화
+	'-----------------------------------------------
+	lblTitle.paddinginfo = "0,0,0,0"
+	lblTitle.caption = g_szTitle
+	
+	'-----------------------------------------------
+	' 유의사항 버튼 초기화
+	'-----------------------------------------------
+	imgClose.SetMaintainingRatio("3")
+	imgClose.imgpath = g_szCloseImg
+	
+	'-----------------------------------------------
+	' 유의사항 본문내용 초기화
+	'-----------------------------------------------
+	szTextSize = Form.getEnvData("common.textsize")
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Normal)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	
+	szText = "스크리너 검색"
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Normal)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,20)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"1")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"0")
+
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,30)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,15)
+	else
+		Pannel0.SetCardWHAt(nIdx,25)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"-")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "원하는 카테고리를 선택하여 맞춤 ETF 검색이 가능합니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,20)
+	else
+		Pannel0.SetCardWHAt(nIdx,40)
+	end if
+
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"-")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "카테고리 선택 후 상세조건 선택 시 관련 ETF가 검색되며, 카테고리는 중복 선택이 가능합니다."
+
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,40)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "예) 만기 10년 이상의 미국 장기채 종목 검색 시, ①투자지역:미국 ②기초자산:채권>장기를 선택하여 검색합니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,45)
+	else
+		Pannel0.SetCardWHAt(nIdx,60)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,"")
+	Pannel0.SetCellValue("lblInfo",nIdx,"")
+	
+	Pannel0.setPropCardCell("height" ,"imgGuide0",nIdx, "275")
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "etf_search_info_img01")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	Pannel0.SetCardWHAt(nIdx, 275)
+
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"-")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "투자지역은 특정 국가에 집중하여 투자하는 ETF 종목을 검색 시 선택합니다."
+	'szText = "투자지역은 특정 국가에 집중하여 투자하는 ETF 종목을 검색 시 선택합니다.\n예) 한국에 상장된 종목이지만, 미국에 투자하는 종목을 검색 시, ①투자지역:미국 ②상장국가:한국을 선택하여 검색합니다."
+	
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,55)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,40)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "예) 한국에 상장된 종목이지만, 미국에 투자하는 종목을 검색 시, ①투자지역:미국 ②상장국가:한국을 선택하여 검색합니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,85)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,45)
+	else
+		Pannel0.SetCardWHAt(nIdx,65)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"-")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "기초자산은 주식, 채권, 원자재, 혼합, 대체, 머니마켓 종목을 검색 시 선택합니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,40)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"-")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "상장국가는 특정 국가에 상장된 ETF 종목을 검색 시 선택합니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,55)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,30)
+	else
+		Pannel0.SetCardWHAt(nIdx,40)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "예) 미국에 상장된 종목을 찾는다면, 상장국가:미국상장을 선택하여 검색합니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	else
+		Pannel0.SetCardWHAt(nIdx,60)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,"")
+	Pannel0.SetCellValue("lblInfo",nIdx,"")
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "0")
+	
+	Pannel0.SetCardWHAt(nIdx,30)
+	
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Normal)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	
+	szText = "직접검색"
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Normal)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,20)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"1")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"0")
+	
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,15)
+	else
+		Pannel0.SetCardWHAt(nIdx,25)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"-")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "검색란에 검색할 워딩을 입력하거나, 관련 지수/섹터 등을 빠르게 검색할 수 있는 퀵버튼을 클릭하여 ETF 종목을 검색합니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	else
+		Pannel0.SetCardWHAt(nIdx,60)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"-")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "직접검색에서는 연관종목 검색, 국내/해외 통합검색, 브랜드명으로 검색, 편입종목 검색 기능이 제공됩니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,40)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "*편입종목 검색이란?\n주식종목 입력 시, 해당종목이 편입된 ETF 종목검색"
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,30)
+	else
+		Pannel0.SetCardWHAt(nIdx,40)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,"")
+	Pannel0.SetCellValue("lblInfo",nIdx,"")
+	
+	Pannel0.setPropCardCell("height" ,"imgGuide0",nIdx, "275")
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "etf_search_info_img02")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	Pannel0.SetCardWHAt(nIdx,290)
+	
+
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,"")
+	Pannel0.SetCellValue("lblInfo",nIdx,"")
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "0")
+	
+	Pannel0.SetCardWHAt(nIdx,30)
+	
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Normal)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	
+	szText = "비교검색"
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Normal)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"1")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"20")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,30)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,15)
+	else
+		Pannel0.SetCardWHAt(nIdx,25)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"-")
+	Pannel0.setPropCardCell("left" ,"lblGuide",nIdx,"20")
+	
+	szText = "종목을 비교 검색 하고자 하는 경우 검색결과 우측의 '종목비교' 버튼을 클릭하여 비교검색이 가능합니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("left" ,"lblInfo",nIdx,"35")
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,40)
+	end if
+
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,"")
+	Pannel0.SetCellValue("lblInfo",nIdx,"")
+	
+	Pannel0.setPropCardCell("height" ,"imgGuide0",nIdx, "275")
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "etf_search_info_img03")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	Pannel0.SetCardWHAt(nIdx,290)
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,"")
+	Pannel0.SetCellValue("lblInfo",nIdx,"")
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "0")
+	
+	Pannel0.SetCardWHAt(nIdx,30)
+
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "ETF 검색 시 제공되는 시세정보는 정규장 기준으로 제공되어 조회됩니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,45)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "미국 ETF의 경우 주간거래 시세는 미적용 되며, 정규장 시세(Pre Market 포함)로만 조회 됩니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,45)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "해외 ETF 시세는 '실시간 시세 신청' 기준으로(실시간 시세 또는 지연 시세) 조회됩니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,75)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,45)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "적용 환율은 당일 최초 고시환율로 적용되며 기본 통화가 아닌 다른 통화로 환산된 값은 고객님들의 편의를 위한 참고용 정보입니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,95)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	else
+		Pannel0.SetCardWHAt(nIdx,60)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "NAV, 자금흐름, 기간수익률 정보는 전 영업일 기준으로 제공됩니다.\n(단, 운용사별 제공되는 시점이 상이하므로 최종 기준일은 상이할 수 있습니다.)"
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,100)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,65)
+	else
+		Pannel0.SetCardWHAt(nIdx,75)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "스크리너 및 테마 검색 시에는 거래량 많은순으로 종목이 검색됩니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,45)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "본 서비스에서 제공되는 데이터에 대한 저작권은 모닝스타코리아와 메리츠증권에 있으며 복사 또는 배포할 수 없습니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,80)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	else
+		Pannel0.SetCardWHAt(nIdx,60)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "정보의 정확성과 신뢰성을 보장하기 위해 최선을 다하지만 이를 보장하지 않으며 손실이나 손상에 대한 법적 책임이 없습니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,80)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	else
+		Pannel0.SetCardWHAt(nIdx,60)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "또한 제3자 데이터 제공업체에서 자료를 제공하므로 수신이 지연되거나 일부 정보가 정확하지 않을 수 있습니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,80)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	else
+		Pannel0.SetCardWHAt(nIdx,60)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblGuide",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "ETF는 예금자보호법에 따라 보호되지 않습니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor" ,"lblInfo",nIdx,g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("fontbold" ,"lblInfo",nIdx,"0")
+	Pannel0.setPropCardCell("fontsize" ,"lblInfo",nIdx,"-2")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	
+	Pannel0.setPropCardCell("maintainratio" ,"imgGuide0",nIdx, "1")
+	Pannel0.setPropCardCell("imgpath" ,"imgGuide0",nIdx, "alpha")
+	
+	Pannel0.setPropCardCell("bgcolor" ,"lblDiv",nIdx,g_szLineColor_Grey)
+	Pannel0.setPropCardCell("left" ,"lblDiv",nIdx, "500")
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,45)
+	end if
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+   Init_Control()
+End Sub
+
+'===============================================
+' imgInfo_OnClick
+'===============================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormBeforeChangeScreen(sScreenNo, sOpenData)
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()
+	
+End Sub
+
+'============================================================================
+Sub Form_OnEnvChanged()
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

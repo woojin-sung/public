@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50030" scrname="Home 화면 My자산" version="2" writer="김인섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelBg" transmode="0" ly_vert="0,0,380,710,1" />
+		<LINKFORM name="LinkFormMyAst" ly_vert="0,0,375,309,1" />
+		<LINKFORM name="LinkFormRBnr" ly_vert="0,308,375,129,1" />
+		<LINKFORM name="LinkFormPrft" ly_vert="0,450,375,197,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2125" _ulen="2039" >
+'============================================================================
+' 화 면 명 : Home 화면 My자산
+' 화면설명 : Home 화면내 My자산 메인화면
+' 작    성 : 2024.01.24 KIS
+'============================================================================
+Dim szLoginType
+Dim strSwitchIndex      '자산숨김 토글 인덱스'
+
+Sub Form_OnFormInitBefore()
+    
+     LabelBg.bgcolor = "066"
+    
+     szLoginType = Form.GetSharedData("&LOGIN_TYPE", False)
+    
+     '비로그인상태
+     If CInt(szLoginType) <= 1 Then '비로그인상태
+     
+ 	    LinkFormMyAst.linkfile = "nrshidx50030_s4"
+	
+	 Else
+     
+         LinkFormMyAst.linkfile = "nrshidx50030_s1"
+	
+	 End If	
+	 
+      LinkFormRBnr.linkfile = "nrshidx50030_s2"
+      LinkFormPrft.linkfile = "nrshidx50030_s3"
+
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+    
+   	     LinkFormMyAst.height = 309
+	     LinkFormRBnr.top = 308
+	     LinkFormPrft.top = 450
+End Sub
+
+'============================================================================
+
+Sub Form_OnLinkData(sKey, sValue)
+	
+	If sKey = "&LOGIN_AUTH" Then
+	   
+	   If CInt(sValue) <= 1 Then
+
+          LinkFormMyAst.linkfile = "nrshidx50030_s4"
+	     
+	     LinkFormMyAst.height = 309
+	     LinkFormRBnr.top = 308
+	     LinkFormPrft.top = 450
+	
+	   Else
+     
+          LinkFormMyAst.linkfile = "nrshidx50030_s1"
+	  
+	     LinkFormMyAst.height = 309
+	     LinkFormRBnr.top = 308
+	     LinkFormPrft.top = 450	
+	   End if
+	
+	End if
+
+	
+End Sub
+
+
+
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	If sEventName == "SWID" Then
+	
+	  
+	   If sParam = "1" Then  'Switch ON
+	   
+	     LinkFormMyAst.height = 243
+	     LinkFormRBnr.top = 242
+	     LinkFormPrft.top = 384
+	     
+	   
+	   Else   'Switch OFF
+	   
+	     LinkFormMyAst.height = 309
+	     LinkFormRBnr.top = 308
+	     LinkFormPrft.top = 450
+	    ' Form.ShowAlert(LinkFormRBnr.top.."/"..LinkFormPrft.top, LinkFormMyAst.height)
+	   
+	   End If
+	   
+	End If   
+	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,1065 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50110" scrname="ETF Super검색_스크리너_자산규모" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,444,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" vscroll="1" ly_vert="0,0,375,444,1" scroll_ly_vert="0,0,375,444,1" >
+			<CONTROL_INFO>
+				<CONTAINER name="contDomestic" vscroll="1" ly_vert="0,0,375,200,1" scroll_ly_vert="0,0,375,200,1" >
+					<CONTROL_INFO>
+						<LABEL name="lblSubTitle" fontstyle="01" caption="국내ETF 규모" bgcolor="035:237246255" ly_vert="20,17,200,22,1" />
+						<PANNEL name="Pannel0" ly_vert="20,50,335,54,1" >
+							<CONTROL_INFO>
+								<LABEL name="lblDomestic0" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="0,0,105,54,1" />
+								<LABEL name="lblDomestic1" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="115,0,105,54,1" />
+								<LABEL name="lblDomestic2" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="230,0,105,54,1" />
+							</CONTROL_INFO>
+							<CARD_INFO cardheight="54" gap="10" >
+								<CELL name="lblDomestic0" />
+								<CELL name="lblDomestic1" />
+								<CELL name="lblDomestic2" />
+							</CARD_INFO>
+						</PANNEL>
+						<LABEL name="lblChk" fontsize="-2" caption="전체" bgcolor="029:255212175" halign="2" ly_vert="300,18,55,20,1" />
+						<IMAGE name="imgChk" autosize="1" ly_vert="294,19,28,18,1" />
+						<BUTTON name="btnChk" btnimage="alpha" ly_vert="290,18,65,22,1" />
+					</CONTROL_INFO>
+				</CONTAINER>
+				<CONTAINER name="contOversea" vscroll="1" ly_vert="0,200,386,200,1" scroll_ly_vert="0,200,386,200,1" >
+					<CONTROL_INFO>
+						<LABEL name="lblSubTitle" fontstyle="01" caption="해외ETF 규모" ly_vert="20,17,200,22,1" />
+						<PANNEL name="Pannel1" ly_vert="20,50,335,54,1" >
+							<CONTROL_INFO>
+								<LABEL name="lblOversea0" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="0,0,105,54,1" />
+								<LABEL name="lblOversea1" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="115,0,105,54,1" />
+								<LABEL name="lblOversea2" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="230,0,105,54,1" />
+							</CONTROL_INFO>
+							<CARD_INFO cardheight="54" gap="10" >
+								<CELL name="lblOversea0" />
+								<CELL name="lblOversea1" />
+								<CELL name="lblOversea2" />
+							</CARD_INFO>
+						</PANNEL>
+						<IMAGE name="imgTooltip" autosize="1" ly_vert="120,19,24,18,1" />
+						<LABEL name="lblChk" fontsize="-2" caption="전체" bgcolor="029:255212175" halign="2" ly_vert="300,18,55,20,1" />
+						<IMAGE name="imgChk" autosize="1" ly_vert="294,19,28,18,1" />
+						<BUTTON name="btnChk" btnimage="alpha" ly_vert="290,18,65,22,1" />
+					</CONTROL_INFO>
+				</CONTAINER>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="28000" _ulen="27392" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+Dim g_szCmbImg_Normal
+g_szCmbImg_Normal = "combo_04.9"
+
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_line2_o.9"
+
+Dim g_szChkImg_Normal
+g_szChkImg_Normal = "checkmenu_n"
+
+Dim g_szChkImg_Select
+g_szChkImg_Select = "checkmenu_o"
+
+Dim g_szToolTipImg
+g_szToolTipImg = "icon_question"
+
+
+'==============================================
+' 컬러코드
+'==============================================
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+'==============================================
+' 전역변수
+'==============================================
+Dim g_szSharedKey_Real
+g_szSharedKey_Real = "50110_S4_CHECK"
+
+Dim g_szSharedKey_Domestic
+g_szSharedKey_Domestic = "50110_S4_CHECK_DOMESTIC"
+
+Dim g_szSharedKey_Oversea
+g_szSharedKey_Oversea = "50110_S4_CHECK_OVERSEA"
+
+Dim g_arrDomestic
+g_arrDomestic = Array("500억 미만", "5백억~\n1천억 미만", "1천억~\n5천억 미만", "5천억 이상")
+
+Dim g_arrDomestic_Check
+g_arrDomestic_Check = Array("0", "0", "0", "0")
+
+Dim g_arrOversea
+g_arrOversea = Array("1천만 달러 미만", "1천만~\n1억 달러 미만", "1억~\n10억 달러 미만", "10억~\n100억달러 미만", "100억 달러 이상")
+
+Dim g_arrOversea_Check
+g_arrOversea_Check = Array("0", "0", "0", "0", "0")
+
+Dim g_szChk_Domestic, g_szChk_Oversea
+
+Dim g_nTop_Oversea
+g_nTop_Oversea = 0
+
+Dim g_nHeight_Oversea
+g_nHeight_Oversea = 0
+
+Dim g_nHeight_Domestic
+g_nHeight_Domestic = 0
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	contMain.contDomestic.lblSubTitle.fgcolor = g_szTxtColor_Normal
+	contMain.contDomestic.lblSubTitle.paddinginfo = "0,0,0,0"
+	
+	contMain.contOversea.lblSubTitle.fgcolor = g_szTxtColor_Normal
+	contMain.contOversea.lblSubTitle.paddinginfo = "0,0,0,0"
+End Function
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Data()
+	'===============================================
+	' 뒤로가기 버튼 초기화
+	'===============================================
+	contMain.contDomestic.lblChk.fgcolor = g_szTxtColor_Grey
+	contMain.contDomestic.lblChk.paddinginfo = "0,0,0,0"
+	
+	contMain.contDomestic.lblChk.setNeighborCtlPos("imgChk", "left", 2, "전체")
+	
+	contMain.contDomestic.imgChk.setMaintainingRatio("3")
+	contMain.contDomestic.imgChk.imgpath = g_szChkImg_Normal
+	
+	nArrCnt = #g_arrDomestic
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+	
+	contMain.contDomestic.Pannel0.rowcount = nPannelRowCnt
+	contMain.contDomestic.Pannel0.height = (55 * nPannelRowCnt) + (10 * (nPannelRowCnt-1))
+
+	contMain.contDomestic.height = 20 + 20 +10 + (55 * nPannelRowCnt) + (10 * (nPannelRowCnt-1))
+	g_nHeight_Domestic = 0 + 20 +10 + (55 * nPannelRowCnt) + (10 * (nPannelRowCnt-1))
+	
+	contMain.contDomestic.setScrollAutoSize()
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		contMain.contDomestic.Pannel0.SetCellValue( "lblDomestic0", i, g_arrDomestic(nArrIdx))	
+		contMain.contDomestic.Pannel0.setPropCardCell("fgcolor", "lblDomestic0", i, g_szTxtColor_Normal)
+		
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic0", i, g_szBtnImg_Normal)
+		g_arrDomestic_Check(nArrIdx) = "0" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			contMain.contDomestic.Pannel0.SetCellVisible("lblDomestic1",i,false)
+			contMain.contDomestic.Pannel0.SetCellVisible("lblDomestic2",i,false)
+			
+			contMain.contDomestic.Pannel0.SetPropCardCell("enable", "lblDomestic1", i, false)
+			contMain.contDomestic.Pannel0.SetPropCardCell("enable", "lblDomestic2", i, false)
+			Exit for
+		end if
+		
+		contMain.contDomestic.Pannel0.SetCellValue( "lblDomestic1", i, g_arrDomestic(nArrIdx))	
+		contMain.contDomestic.Pannel0.setPropCardCell("fgcolor", "lblDomestic1", i, g_szTxtColor_Normal)
+		
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic1", i, g_szBtnImg_Normal)
+		g_arrDomestic_Check(nArrIdx) = "0" 
+	
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			contMain.contDomestic.Pannel0.SetCellVisible("lblDomestic2",i,false)
+			
+			contMain.contDomestic.Pannel0.SetPropCardCell("enable", "lblDomestic2", i, false)
+			Exit for
+		end if
+		
+		contMain.contDomestic.Pannel0.SetCellValue( "lblDomestic2", i, g_arrDomestic(nArrIdx))	
+		contMain.contDomestic.Pannel0.setPropCardCell("fgcolor", "lblDomestic2", i, g_szTxtColor_Normal)
+		
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic2", i, g_szBtnImg_Normal)
+		g_arrDomestic_Check(nArrIdx) = "0" 
+		
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+	
+	
+	contMain.contOversea.lblChk.fgcolor = g_szTxtColor_Grey
+	contMain.contOversea.lblChk.paddinginfo = "0,0,0,0"
+	
+	contMain.contOversea.lblChk.setNeighborCtlPos("imgChk", "left", 2, "전체")
+	
+	contMain.contOversea.imgChk.setMaintainingRatio("3")
+	contMain.contOversea.imgChk.imgpath = g_szChkImg_Normal
+	
+	contMain.contOversea.imgTooltip.setMaintainingRatio("3")
+	contMain.contOversea.imgTooltip.imgpath = g_szToolTipImg
+	
+	nTextWidth = Form.getTextWidth("해외ETF 규모", 0, true, false)
+	contMain.contOversea.imgTooltip.left = 20 + nTextWidth
+	
+	contMain.contOversea.lblSubTitle.setNeighborCtlPos("imgTooltip", "right", -5, "해외ETF 규모")
+	
+	nArrCnt = #g_arrOversea
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+	
+	g_nTop_Oversea = contMain.contDomestic.height + 10
+	contMain.contOversea.top =  g_nTop_Oversea
+	contMain.contOversea.Pannel1.rowcount = nPannelRowCnt
+	contMain.contOversea.Pannel1.height = (55 * nPannelRowCnt) + (10 * (nPannelRowCnt-1))
+	contMain.contOversea.height = 20 + 20 +10 + (55 * nPannelRowCnt) + (10 * (nPannelRowCnt-1)) + 20
+	
+	g_nHeight_Oversea = 20 + 20 +10 + (55 * nPannelRowCnt) + (10 * (nPannelRowCnt-1)) + 20
+	contMain.contOversea.setScrollAutoSize()
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		contMain.contOversea.Pannel1.SetCellValue( "lblOversea0", i, g_arrOversea(nArrIdx))	
+		contMain.contOversea.Pannel1.setPropCardCell("fgcolor", "lblOversea0", i, g_szTxtColor_Normal)
+		
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea0", i, g_szBtnImg_Normal)
+		g_arrOversea_Check(nArrIdx) = "0" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			contMain.contOversea.Pannel1.SetCellVisible("lblOversea1",i,false)
+			contMain.contOversea.Pannel1.SetCellVisible("lblOversea2",i,false)
+			
+			contMain.contOversea.Pannel1.SetPropCardCell("enable", "lblOversea1", i, false)
+			contMain.contOversea.Pannel1.SetPropCardCell("enable", "lblOversea2", i, false)
+			Exit for
+		end if
+		
+		contMain.contOversea.Pannel1.SetCellValue( "lblOversea1", i, g_arrOversea(nArrIdx))	
+		contMain.contOversea.Pannel1.setPropCardCell("fgcolor", "lblOversea1", i, g_szTxtColor_Normal)
+		
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea1", i, g_szBtnImg_Normal)
+		g_arrOversea_Check(nArrIdx) = "0" 
+		
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			contMain.contOversea.Pannel1.SetCellVisible("lblOversea2",i,false)
+			contMain.contOversea.Pannel1.SetPropCardCell("enable", "lblOversea2", i, false)
+			Exit for
+		end if
+		
+		contMain.contOversea.Pannel1.SetCellValue( "lblOversea2", i, g_arrOversea(nArrIdx))	
+		contMain.contOversea.Pannel1.setPropCardCell("fgcolor", "lblOversea2", i, g_szTxtColor_Normal)
+		
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea2", i, g_szBtnImg_Normal)
+		g_arrOversea_Check(nArrIdx) = "0" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+	
+	contMain.setScrollAutoSize()
+	
+End Function
+
+'===============================================
+' 패널버튼 클릭 이벤트 처리
+'===============================================
+Function DisplaySetting_PannelBtn_Domestic(nRowIdx, szCtlName)
+	
+	
+		
+		
+	nCnt = nRowIdx * 3
+	if szCtlName = "lblDomestic0" then
+		
+	elseif szCtlName = "lblDomestic1" then
+		nCnt = Cint(nCnt) + 1
+	elseif szCtlName = "lblDomestic2" then
+		nCnt = Cint(nCnt) + 2
+	end if
+	
+	if #g_arrDomestic_Check < nCnt+1 then
+		Exit Function
+	end if
+	
+	if g_szChk_Domestic = "1" then
+		g_szChk_Domestic = "0"
+		contMain.contDomestic.imgChk.imgpath = g_szChkImg_Normal
+	end if
+	
+	if g_arrDomestic_Check(nCnt) = "0" then
+		g_arrDomestic_Check(nCnt) = "1"
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Select)
+	else 
+		g_arrDomestic_Check(nCnt) = "0"
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Normal)
+	end if
+	
+	szReturn = Return_AllChkYN(g_arrDomestic_Check)
+
+	if szReturn = "Y" then
+		g_szChk_Domestic = "1"
+		contMain.contDomestic.imgChk.imgpath = g_szChkImg_Select
+	end if
+	
+End Function
+
+Function Reload_PannelBtn_Domestic(nArrIdx)
+	nIndex = 0
+	
+	nIndex= nArrIdx / 3
+	nCtlIdx = nArrIdx % 3
+	szCtlNm = ""
+	
+	if nCtlIdx = 0 then
+		szCtlNm = "lblDomestic0"
+	elseif nCtlIdx = 1 then
+		szCtlNm = "lblDomestic1"
+	elseif nCtlIdx = 2 then
+		szCtlNm = "lblDomestic2"
+	end if
+	
+	g_arrDomestic_Check(nArrIdx) = "1"
+	contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", szCtlNm, nIndex, g_szBtnImg_Select)
+End Function
+
+Function DisplaySetting_PannelBtn_Oversea(nRowIdx, szCtlName)
+	
+	
+	
+	nCnt = nRowIdx * 3
+	if szCtlName = "lblOversea0" then
+		
+	elseif szCtlName = "lblOversea1" then
+		nCnt = Cint(nCnt) + 1
+	elseif szCtlName = "lblOversea2" then
+		nCnt = Cint(nCnt) + 2
+	end if
+	
+	if #g_arrOversea_Check < nCnt+1 then
+		Exit Function
+	end if
+	
+	if g_szChk_Oversea = "1" then
+		g_szChk_Oversea = "0"
+		contMain.contOversea.imgChk.imgpath = g_szChkImg_Normal
+	end if
+	
+	if g_arrOversea_Check(nCnt) = "0" then
+		g_arrOversea_Check(nCnt) = "1"
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Select)
+	else 
+		g_arrOversea_Check(nCnt) = "0"
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Normal)
+	end if
+	
+	
+	szReturn = Return_AllChkYN(g_arrOversea_Check)
+
+	if szReturn = "Y" then
+		g_szChk_Oversea = "1"
+		contMain.contOversea.imgChk.imgpath = g_szChkImg_Select
+	end if
+End Function
+
+Function Reload_PannelBtn_Oversea(nArrIdx)
+	nIndex = 0
+	
+	nIndex= nArrIdx / 3
+	nCtlIdx = nArrIdx % 3
+	szCtlNm = ""
+	
+	if nCtlIdx = 0 then
+		szCtlNm = "lblOversea0"
+	elseif nCtlIdx = 1 then
+		szCtlNm = "lblOversea1"
+	elseif nCtlIdx = 2 then
+		szCtlNm = "lblOversea2"
+	end if
+	
+	g_arrOversea_Check(nArrIdx) = "1"
+	contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", szCtlNm, nIndex, g_szBtnImg_Select)
+End Function
+
+Function All_Domestic()
+	nArrCnt = #g_arrDomestic
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic0", i, g_szBtnImg_Select)
+		g_arrDomestic_Check(nArrIdx) = "1" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic1", i, g_szBtnImg_Select)
+		g_arrDomestic_Check(nArrIdx) = "1" 
+
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic2", i, g_szBtnImg_Select)
+		g_arrDomestic_Check(nArrIdx) = "1" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+End Function
+
+Function Clear_Domestic()
+	nArrCnt = #g_arrDomestic
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic0", i, g_szBtnImg_Normal)
+		g_arrDomestic_Check(nArrIdx) = "0" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic1", i, g_szBtnImg_Normal)
+		g_arrDomestic_Check(nArrIdx) = "0" 
+
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		contMain.contDomestic.Pannel0.SetPropCardCell("imagefilepth", "lblDomestic2", i, g_szBtnImg_Normal)
+		g_arrDomestic_Check(nArrIdx) = "0" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+End Function
+
+Function All_Oversea()
+	nArrCnt = #g_arrOversea
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea0", i, g_szBtnImg_Select)
+		g_arrOversea_Check(nArrIdx) = "1" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea1", i, g_szBtnImg_Select)
+		g_arrOversea_Check(nArrIdx) = "1" 
+
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea2", i, g_szBtnImg_Select)
+		g_arrOversea_Check(nArrIdx) = "1" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+End Function
+
+Function Clear_Oversea()
+	nArrCnt = #g_arrOversea
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea0", i, g_szBtnImg_Normal)
+		g_arrOversea_Check(nArrIdx) = "0" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea1", i, g_szBtnImg_Normal)
+		g_arrOversea_Check(nArrIdx) = "0" 
+
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		contMain.contOversea.Pannel1.SetPropCardCell("imagefilepth", "lblOversea2", i, g_szBtnImg_Normal)
+		g_arrOversea_Check(nArrIdx) = "0" 
+		
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환
+'===============================================
+Function Convert_ArrToString(arrData, szSeperator)
+	szResult = ""
+	
+	if arrData = null then
+		return szResult
+	end if
+	
+	if szSeperator = null or szSeperator = "" then
+		return szResult
+	end if 	
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if i <> 0 then
+			szResult = szResult & szSeperator 
+		end if
+		
+		szResult = szResult & arrData(i) 
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환(체크항목)
+'===============================================
+Function Convert_ChkArrToString(arrData, arrChkData, szSeperator)
+	szResult = ""
+	
+	if arrData = null then
+		return szResult
+	end if
+	
+	if arrChkData = null then
+		return szResult
+	end if
+	
+	if szSeperator = null or szSeperator = "" then
+		return szResult
+	end if 	
+	
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if arrChkData(i) = "1" then
+			if szResult <> "" then
+				szResult = szResult & szSeperator 
+			end if
+			szResult = szResult & arrData(i) 
+		end if
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 문자열 -> 배열 변환
+'===============================================
+Function Convert_StringToArr(szData, szSeperator)
+	szArrData = ""
+	
+	if szData <> null and szData <> "" then
+		szArrData = split(szData, szSeperator)
+	end if
+	
+	return szArrData
+End Function
+
+'===============================================
+' 배열 데이터 확인
+'===============================================
+Function Contains_Array(arrData, szData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		szArrData = arrData(i)
+		
+		if szArrData = szData then
+			return true
+		end if
+	next 
+	
+	return false
+End Function
+
+'===============================================
+' 체크배열 초기화
+'===============================================
+Function Clear_ChkArray(arrData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		arrData(i) = "0"	
+	next 
+End Function
+
+'===============================================
+' 체크배열 전체선택
+'===============================================
+Function All_ChkArray(arrData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		arrData(i) = "1"	
+	next 
+End Function
+
+'===============================================
+' 배열 인덱스 추출
+'===============================================
+Function Return_ArrayIndex(arrData, szData)
+	nReturn = -1
+	if arrData = null or arrData = "" then
+		return nReturn
+	end if
+	
+	if szData = null or szData = "" then
+		return nReturn
+	end if
+	
+	nArrCnt = #arrData
+	for i = 0 to nArrCnt-1
+		if arrData(i) = szData then
+			nReturn = i
+			exit for
+		end if	
+	next 
+	
+	return nReturn
+End Function
+
+
+Function Return_AllChkYN(arrData)
+	if arrData = null or arrData = "" then
+		return "N"
+	end if
+	
+	nArrCnt = #arrData
+	for i = 0 to nArrCnt-1
+		if arrData(i) = "0" then
+			return "N"
+		end if	
+	next 
+	
+	return "Y"
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	g_szSharedData0 = Form.GetSharedData(g_szSharedKey_Domestic, false )
+	g_szSharedData1 = Form.GetSharedData(g_szSharedKey_Oversea, false )
+	Init_Control()
+	Init_Data()
+	
+	Dim szData 
+	szData = Form.GetSharedData("50110_S3_CHECK", false )
+	
+	if szData = "" then
+		contMain.contDomestic.top = 0
+		contMain.contDomestic.visible = true
+		
+		contMain.contOversea.top = g_nTop_Oversea
+		contMain.contOversea.visible = true
+	
+	elseif instr(szData, "한국 상장") > 0 then
+		if instr(szData, "미국 상장") > 0 or instr(szData, "중국 상장") > 0 or instr(szData, "일본 상장") > 0 or instr(szData, "홍콩 상장") > 0 then
+			contMain.contDomestic.top = 0
+			contMain.contDomestic.visible = true
+			
+			contMain.contOversea.top = g_nTop_Oversea
+			contMain.contOversea.visible = true
+			
+		else
+			contMain.contDomestic.top = 0
+			contMain.contDomestic.visible = true
+			
+			contMain.contOversea.top = g_nTop_Oversea
+			contMain.contOversea.visible = false
+			
+		end if
+	else
+		if instr(szData, "미국 상장") > 0 or instr(szData, "중국 상장") > 0 or instr(szData, "일본 상장") > 0 or instr(szData, "홍콩 상장") > 0 then
+			contMain.contDomestic.visible = false
+			
+			contMain.contOversea.top = 0
+			contMain.contOversea.visible = true
+			
+		else
+			contMain.contDomestic.top = 0
+			contMain.contDomestic.visible = true
+			
+			contMain.contOversea.top = g_nTop_Oversea
+			contMain.contOversea.visible = true
+		end if
+	end if
+	
+	arrTempData = Convert_StringToArr(g_szSharedData0, "`")
+					
+	for i = 0 to #arrTempData - 1
+		nStep0_Idx = Return_ArrayIndex(g_arrDomestic, arrTempData(i))
+		Reload_PannelBtn_Domestic(nStep0_Idx)
+	next
+	
+	szReturn = Return_AllChkYN(g_arrDomestic_Check)
+
+	if szReturn = "Y" then
+		g_szChk_Domestic = "1"
+		contMain.contDomestic.imgChk.imgpath = g_szChkImg_Select
+	end if
+	
+	arrTempData = Convert_StringToArr(g_szSharedData1, "`")
+					
+	for i = 0 to #arrTempData - 1
+		nStep0_Idx = Return_ArrayIndex(g_arrOversea, arrTempData(i))
+		Reload_PannelBtn_Oversea(nStep0_Idx)
+	next
+	
+	szReturn = Return_AllChkYN(g_arrOversea_Check)
+
+	if szReturn = "Y" then
+		g_szChk_Oversea = "1"
+		contMain.contOversea.imgChk.imgpath = g_szChkImg_Select
+	end if
+End Sub
+
+
+'============================================================================
+Sub contMain_contDomestic_Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "" then
+		Exit Sub
+	end if
+	DisplaySetting_PannelBtn_Domestic(nIndex, sCellID)
+	Form.SetSharedData(g_szSharedKey_Domestic , Convert_ChkArrToString(g_arrDomestic, g_arrDomestic_Check, "`"))
+	Form.triggerEvent("#", g_szSharedKey_Real, "")
+End Sub
+
+'============================================================================
+Sub contMain_contOversea_Pannel1_OnClick(nIndex, sCellID)
+	if sCellID = "" then
+		Exit Sub
+	end if
+	DisplaySetting_PannelBtn_Oversea(nIndex, sCellID)
+	Form.SetSharedData(g_szSharedKey_Oversea , Convert_ChkArrToString(g_arrOversea, g_arrOversea_Check, "`"))
+	Form.triggerEvent("#", g_szSharedKey_Real, "")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "50110_S4_CHECK" then
+		Init_Data()
+
+		g_szSharedData = Form.GetSharedData(g_szSharedKey_Domestic, false )
+		arrTempData = Convert_StringToArr(g_szSharedData, "`")
+						
+		for i = 0 to #arrTempData - 1
+			nStep0_Idx = Return_ArrayIndex(g_arrDomestic, arrTempData(i))
+			Reload_PannelBtn_Domestic(nStep0_Idx)
+		next
+		
+		szReturn = Return_AllChkYN(g_arrDomestic_Check)
+
+		if szReturn = "Y" then
+			g_szChk_Domestic = "1"
+			contMain.contDomestic.imgChk.imgpath = g_szChkImg_Select
+		else
+			g_szChk_Domestic = "0"
+			contMain.contDomestic.imgChk.imgpath = g_szChkImg_Normal
+		end if
+		
+		
+		
+		g_szSharedData = Form.GetSharedData(g_szSharedKey_Oversea, false )
+		arrTempData = Convert_StringToArr(g_szSharedData, "`")
+						
+		for i = 0 to #arrTempData - 1
+			nStep0_Idx = Return_ArrayIndex(g_arrOversea, arrTempData(i))
+			Reload_PannelBtn_Oversea(nStep0_Idx)
+		next
+		
+		szReturn = Return_AllChkYN(g_arrOversea_Check)
+
+		if szReturn = "Y" then
+			g_szChk_Oversea = "1"
+			contMain.contOversea.imgChk.imgpath = g_szChkImg_Select
+		else
+			g_szChk_Oversea = "0"
+			contMain.contOversea.imgChk.imgpath = g_szChkImg_Normal
+		end if
+		
+		Form.SetTimerEvent2(1,1,0.1)
+'		Dim szData
+'		szData = Form.GetSharedData("50110_S3_CHECK", false )
+'
+'		if szData = "" then
+'			contMain.contDomestic.top = 0
+'			contMain.contDomestic.visible = true
+'			
+'			contMain.contOversea.top = g_nTop_Oversea
+'			contMain.contOversea.visible = true
+'		
+'		elseif instr(szData, "한국 상장") > 0 then
+'			if instr(szData, "미국 상장") > 0 or instr(szData, "중국 상장") > 0 or instr(szData, "일본 상장") > 0 or instr(szData, "홍콩 상장") > 0 then
+'				contMain.contDomestic.top = 0
+'				contMain.contDomestic.visible = true
+'				
+'				contMain.contOversea.top = g_nTop_Oversea
+'				contMain.contOversea.visible = true
+'				
+'			else
+'				contMain.contDomestic.top = 0
+'				contMain.contDomestic.visible = true
+'				
+'				contMain.contOversea.top = g_nTop_Oversea
+'				contMain.contOversea.visible = false
+'			end if
+'		else
+'			if instr(szData, "미국 상장") > 0 or instr(szData, "중국 상장") > 0 or instr(szData, "일본 상장") > 0 or instr(szData, "홍콩 상장") > 0 then
+'				contMain.contDomestic.visible = false
+'				
+'				contMain.contOversea.top  = 0
+'				contMain.contOversea.visible = true
+'			
+'			else
+'				contMain.contDomestic.top = 0
+'				contMain.contDomestic.visible = true
+'				
+'				contMain.contOversea.top = g_nTop_Oversea
+'				contMain.contOversea.visible = true
+'			end if
+'		end if
+'
+'		contMain.setScrollAutoSize()
+	elseif sEventName = "50110_COND_STAT" then
+		if sParam = "N" then
+			contMain.height = 444	
+		elseif sParam = "Y" then
+			contMain.height = 334
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub contMain_contDomestic_btnChk_OnClick()
+	if g_szChk_Domestic = "1" then
+		g_szChk_Domestic = "0"
+		contMain.contDomestic.imgChk.imgpath = g_szChkImg_Normal
+		
+		Clear_Domestic()
+	else
+		g_szChk_Domestic = "1"
+		contMain.contDomestic.imgChk.imgpath = g_szChkImg_Select
+		
+		All_Domestic()
+	end if
+	
+	Form.SetSharedData(g_szSharedKey_Domestic , Convert_ChkArrToString(g_arrDomestic, g_arrDomestic_Check, "`"))
+	Form.triggerEvent("#", g_szSharedKey_Real, "")
+End Sub
+
+'============================================================================
+Sub contMain_contOversea_btnChk_OnClick()
+	if g_szChk_Oversea = "1" then
+		g_szChk_Oversea = "0"
+		contMain.contOversea.imgChk.imgpath = g_szChkImg_Normal
+		
+		Clear_Oversea()
+	else
+		g_szChk_Oversea = "1"
+		contMain.contOversea.imgChk.imgpath = g_szChkImg_Select
+		
+		All_Oversea()
+	end if
+	
+	Form.SetSharedData(g_szSharedKey_Oversea , Convert_ChkArrToString(g_arrOversea, g_arrOversea_Check, "`"))
+	Form.triggerEvent("#", g_szSharedKey_Real, "")
+End Sub
+
+
+'============================================================================
+Sub contMain_contOversea_imgTooltip_OnClick()
+	sText = "해외 ETF 상장 자산 규모\n중국,홍콩,일본에 상장된 ETF의 자산규모는 달러로 환산되어 제공됩니다."
+	g_nCommFontSize = Form.getEnvData("common.textsize")
+	
+	if g_nCommFontSize = "1" or g_nCommFontSize = "2" then
+		contMain.contOversea.imgTooltip.openToolTip( sText, 350, 100, 2 )
+	else
+		contMain.contOversea.imgTooltip.openToolTip( sText, 300, 100, 2 )
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	if Cint(sTimerID) = 1 then
+		Form.SetTimerEvent2(sTimerID,0,0)
+		Dim szData
+		szData = Form.GetSharedData("50110_S3_CHECK", false )
+
+		if szData = "" then
+			contMain.contDomestic.top = 0
+			contMain.contDomestic.visible = true
+			
+			contMain.contOversea.top = g_nTop_Oversea
+			contMain.contOversea.visible = true
+		
+		elseif instr(szData, "한국 상장") > 0 then
+			if instr(szData, "미국 상장") > 0 or instr(szData, "중국 상장") > 0 or instr(szData, "일본 상장") > 0 or instr(szData, "홍콩 상장") > 0 then
+				contMain.contDomestic.top = 0
+				contMain.contDomestic.visible = true
+				
+				contMain.contOversea.top = g_nTop_Oversea
+				contMain.contOversea.visible = true
+				
+			else
+				contMain.contDomestic.top = 0
+				contMain.contDomestic.visible = true
+				
+				contMain.contOversea.top = g_nTop_Oversea
+				contMain.contOversea.visible = false
+			end if
+		else
+			if instr(szData, "미국 상장") > 0 or instr(szData, "중국 상장") > 0 or instr(szData, "일본 상장") > 0 or instr(szData, "홍콩 상장") > 0 then
+				contMain.contDomestic.visible = false
+				
+				contMain.contOversea.top  = 0
+				contMain.contOversea.visible = true
+			
+			else
+				contMain.contDomestic.top = 0
+				contMain.contDomestic.visible = true
+				
+				contMain.contOversea.top = g_nTop_Oversea
+				contMain.contOversea.visible = true
+			end if
+		end if
+
+		contMain.setScrollAutoSize()
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

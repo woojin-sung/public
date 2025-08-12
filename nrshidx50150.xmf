@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50150" scrname="ETF검색_종목비교" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnBackGround" btnimage="alpha.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,40,375,715,1" />
+		<LABEL name="LabelTitle" fontsize="2" fontstyle="01" caption="ETF 분석결과" halign="1" ly_vert="20,70,335,30,1" />
+		<FORMTAB name="FormTab0" fontsize="-3" tabcount="0" tabheadwidth="108" tabheadheight="36" ly_vert="20,120,335,36,1" />
+		<IMAGE name="imgClose" autosize="1" imgpath="icon_close" margin="5,7,5,7" ly_vert="325,70,30,30,1" />
+		<CONTAINER name="Container0" vscroll="1" ly_vert="0,176,375,578,1" scroll_ly_vert="0,176,375,578,1" >
+			<CONTROL_INFO>
+				<LINKFORM name="LinkForm0" linkfile="nrshidx50150_t1" ly_vert="0,0,375,748,1" />
+				<LINKFORM name="LinkForm1" linkfile="nrshidx50150_t2" ly_vert="0,748,375,590,1" />
+				<LINKFORM name="LinkForm2" linkfile="nrshidx50150_t3" ly_vert="0,1338,375,1266,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9321" _ulen="8889" >
+Dim gOsType
+Dim gTabIndex
+gTabIndex = 0
+
+Dim gCompareItemName1
+Dim gCompareItemName2
+gCompareItemName1 = ""
+gCompareItemName2 = ""
+
+Dim gFirstAreaScrollPos
+gFirstAreaScrollPos = 0
+
+'20240612 LES START ETF추가개선
+Dim gSecondAreaScrollPos
+gSecondAreaScrollPos = 748
+
+'20240612 LES START ETF추가개선
+Dim gThirdAreaScrollPos
+gThirdAreaScrollPos = 1338
+
+Dim gFirstAreaDataRequest
+gFirstAreaDataRequest = ""
+
+Dim gSecondAreaDataRequest
+gHideAreaDataRequest = ""
+
+Dim gThirdAreaDataRequest
+gThirdAreaDataRequest = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+	imgClose.setMaintainingRatio("1")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'영역별 스크롤 위치값 세팅
+	if gOsType == "1" then
+		nFirstAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm0.top , "1")) 
+		nSecondAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm1.top , "1")) - 10
+		nThirdAreaScrollPosNoti 	= CInt(Form.calcUnResize(Container0.LinkForm2.top , "1")) - 10
+	else
+		nFirstAreaScrollPosNoti 	= Container0.LinkForm0.top 
+		nSecondAreaScrollPosNoti 	= Container0.LinkForm1.top - 10
+		nThirdAreaScrollPosNoti 	= Container0.LinkForm2.top - 10
+	end if
+	
+
+	Container0.SetNotifyScrollPos(nFirstAreaScrollPosNoti..":".. nSecondAreaScrollPosNoti .. ":" .. nThirdAreaScrollPosNoti)
+	
+	'비교종목 정보
+	sCompareItems = Form.GetOpenLinkData()
+	arrData = Split(sCompareItems,"@")
+	
+	if #arrData > 1 then
+		gCompareItemName1 = arrData(0)
+		gCompareItemName2 = arrData(1)
+	end if
+	
+	'링크폼 체스쳐 이벤트 활성화
+	Container0.LinkForm0.gesture = true
+	Container0.LinkForm1.gesture = true
+	Container0.LinkForm2.gesture = true
+	
+	'컨테이너 스크롤링 이벤트 활성화
+	Container0.SetUseScrollingEvent(true)
+	
+	'폼탭 생성
+	InsertFormTabPage()
+
+End Sub
+
+'============================================================================
+'
+'============================================================================
+Sub BtnBackGround_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 상단 폼탭 페이지 생성
+'============================================================================
+Function InsertFormTabPage()
+	
+	'활성화/비활성화/여백
+	if gOsType == "1" then
+		FormTab0.left = 14
+		FormTab0.width = 345
+		
+	end if
+	
+	FormTab0.setTabHeaderImage("img_bgcircle_black.9" , "img_bgcircle_line.9" , 5)   
+	
+	'활성화/비활성화 폰트색상
+	FormTab0.setTabHeaderFgColor("28" , "321") 								   
+
+	'페이지생성
+	if gOsType == "1" then
+		FormTab0.insertPage( 0, "page0", "page0", "nrsempty", "0", "기본정보")
+		FormTab0.insertPage( 1, "page1", "page1", "nrsempty", "0", "수익률")
+		FormTab0.insertPage( 2, "page2", "page2", "nrsempty", "0", "Portfolio")	
+	
+	else
+		FormTab0.insertPage( 0, "page0", "page0", "nrsempty", "0", "기본정보")
+		FormTab0.insertPage( 1, "page1", "page1", "nrsempty", "0", "수익률")
+		FormTab0.insertPage( 2, "page2", "page2", "nrsempty", "0", "Portfolio")	
+		
+	end if
+	
+	'초기페이지 지정
+	FormTab0.currenttab = 0
+	FormTab0_OnTabChanged(0)
+	
+End Function
+
+'============================================================================
+' 스크롤 위치변경 시, 데이터가 모두 조회된 상태이면 애니메이션 효과적용
+' 차트쪽 애니메이션 효과와 겹쳐 비정상동작
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	
+	gTabIndex = nCurrentTab
+
+	if nCurrentTab == 0 or nCurrentTab == "0" then
+		
+		
+		if gOsType == "1" then
+			Container0.uniSetScroll("1",gFirstAreaScrollPos)
+		else
+			Container0.scroll_pos_noAni = gFirstAreaScrollPos
+		end if
+			
+		
+	elseif nCurrentTab == 1 or nCurrentTab == "1" then
+		
+		if gSecondAreaDataRequest == "YES" then
+			
+			if gOsType == "1" then
+				Container0.uniSetScroll("1",gSecondAreaScrollPos)
+			else
+				Container0.scroll_pos_noAni = gSecondAreaScrollPos
+			end if
+			
+		else
+			
+			if gOsType == "1" then
+				Container0.uniSetScroll("0",gSecondAreaScrollPos)
+			else
+				Container0.scroll_pos_noAni = gSecondAreaScrollPos
+			end if
+			
+			
+		end if
+		
+	elseif nCurrentTab == 2 or nCurrentTab == "2" then
+		
+		if gThirdAreaDataRequest == "YES" then
+			
+			if gOsType == "1" then
+				Container0.uniSetScroll("1",gThirdAreaScrollPos)
+			else
+				Container0.scroll_pos_noAni = gThirdAreaScrollPos
+			end if
+			
+		else
+			
+			if gOsType == "1" then
+				Container0.uniSetScroll("0",gThirdAreaScrollPos)
+			else
+				Container0.scroll_pos_noAni = gThirdAreaScrollPos
+			end if
+			
+		end if
+	
+	end if
+	
+	'비교아이템 전달
+	SendItemData(nCurrentTab)
+	
+End Sub
+
+'============================================================================
+' 수익률,포트폴리오 화면 서비스 조회는 스크롤 동작이 있을때 요청(부하방지)
+'============================================================================
+Sub Container0_OnScrolling()
+
+	if gSecondAreaDataRequest <> "YES" then
+		gSecondAreaDataRequest = "YES"
+		Form.triggerEvent( "LinkForm1", "SEND_COMPARE_ITEM", gCompareItemName1.."@"..gCompareItemName2)
+	end if
+	
+	if gThirdAreaDataRequest <> "YES" then
+		gThirdAreaDataRequest = "YES"
+		Form.triggerEvent( "LinkForm2", "SEND_COMPARE_ITEM", gCompareItemName1.."@"..gCompareItemName2)
+	end if
+	
+End Sub
+
+'============================================================================
+' 
+'============================================================================
+Sub Container0_OnNotifyScrolling(nIndex)
+	
+	if nIndex == 0 then
+		FormTab0.currenttab = 0
+	elseif nIndex == 1 then
+		FormTab0.currenttab = 1
+	elseif nIndex == 2 then
+		FormTab0.currenttab = 2
+	end if
+
+End Sub
+
+
+'============================================================================
+Sub Container0_LinkForm0_OnGestureEvent(sEvent)
+	
+	if sEvent == "LtoR" then
+		
+		moveTabIndex = gTabIndex - 1
+		
+		if moveTabIndex >= 0 then
+			FormTab0.currenttab = moveTabIndex
+			FormTab0_OnTabChanged(moveTabIndex)
+		end if
+		
+		
+	elseif sEvent == "RtoL" then
+	
+		moveTabIndex = gTabIndex + 1
+		
+		if moveTabIndex <= 2 then
+			FormTab0.currenttab = moveTabIndex
+			FormTab0_OnTabChanged(moveTabIndex)
+		end if
+	
+	end if
+	
+	'Form.ShowAlert("moveTabIndex", moveTabIndex)
+	
+End Sub
+
+'============================================================================
+Sub Container0_LinkForm1_OnGestureEvent(sEvent)
+	
+	if sEvent == "LtoR" then
+		
+		moveTabIndex = gTabIndex - 1
+		
+		if moveTabIndex >= 0 then
+			FormTab0.currenttab = moveTabIndex
+			FormTab0_OnTabChanged(moveTabIndex)
+		end if
+		
+		
+	elseif sEvent == "RtoL" then
+	
+		moveTabIndex = gTabIndex + 1
+		
+		if moveTabIndex <= 2 then
+			FormTab0.currenttab = moveTabIndex
+			FormTab0_OnTabChanged(moveTabIndex)
+		end if
+	
+	end if
+	
+	'Form.ShowAlert("moveTabIndex", moveTabIndex)
+	
+End Sub
+
+'============================================================================
+Sub Container0_LinkForm2_OnGestureEvent(sEvent)
+	
+	if sEvent == "LtoR" then
+		
+		moveTabIndex = gTabIndex - 1
+		
+		if moveTabIndex >= 0 then
+			FormTab0.currenttab = moveTabIndex
+			FormTab0_OnTabChanged(moveTabIndex)
+		end if
+		
+		
+	elseif sEvent == "RtoL" then
+	
+		moveTabIndex = gTabIndex + 1
+		
+		if moveTabIndex <= 2 then
+			FormTab0.currenttab = moveTabIndex
+			FormTab0_OnTabChanged(moveTabIndex)
+		end if
+	
+	end if
+	
+	'Form.ShowAlert("moveTabIndex", moveTabIndex)
+	
+End Sub
+'============================================================================
+Function SendItemData(nCurrentTab)
+	if gCompareItemName1 <> "" and gCompareItemName2 <> "" then
+		
+		if nCurrentTab == 0 or nCurrentTab == "0" then
+			
+			if gFirstAreaDataRequest <> "YES" then
+				gFirstAreaDataRequest = "YES"
+				Form.triggerEvent( "LinkForm0", "SEND_COMPARE_ITEM", gCompareItemName1.."@"..gCompareItemName2)
+			end if
+		
+		elseif nCurrentTab == 1 or nCurrentTab == "1" then
+		
+			if gSecondAreaDataRequest <> "YES" then
+				gSecondAreaDataRequest = "YES"
+				Form.triggerEvent( "LinkForm1", "SEND_COMPARE_ITEM", gCompareItemName1.."@"..gCompareItemName2)
+			end if
+			
+		elseif nCurrentTab == 2 or nCurrentTab == "2" then
+			
+			if gThirdAreaDataRequest <> "YES" then
+				gThirdAreaDataRequest = "YES"
+				Form.triggerEvent( "LinkForm2", "SEND_COMPARE_ITEM", gCompareItemName1.."@"..gCompareItemName2)
+			end if
+			
+		end if
+		
+	end if
+End Function
+
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	'-----------------------------------------------------
+	' 유의사항 컨테이너(아코디언) 접기/펼치기 후 호출(from 50150_t3)
+	'-----------------------------------------------------
+	if sEventName == "NOTICE_HEIGHT_CHANGE" then
+	
+		if gOsType == "1" then
+			Container0.LinkForm2.height = Cint(sParam)
+			Container0.SetScrollAutoSize()
+			Container0.scroll_pos = "bottom"
+		else
+			Container0.LinkForm2.height = Cint(sParam)
+			Container0.SetScrollAutoSize()
+			Container0.scroll_pos_noAni = "end"
+		end if
+		
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

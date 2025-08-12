@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50010" scrname="ETF(HOME)_선정테마" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,225,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelScreenTitle" fontsize="2" fontstyle="01" caption="메리츠 선정 테마" bgcolor="029:255212175" ly_vert="20,30,160,24,1" />
+		<PANNEL name="Pannel0" carddir="1" ly_vert="20,63,355,132,1" >
+			<CONTROL_INFO>
+				<IMAGE name="ImageBG" imgpath="img_bgbox_blue.9" ly_vert="0,0,140,132,1" />
+				<IMAGE name="ImageIcon" imgpath="icon_tact_caution" ly_vert="40,10,60,60,1" />
+				<LABEL name="LabelName" fontsize="-2" fontstyle="01" caption="ESG" bgcolor="029:255212175" halign="1" autofontsize="1" ly_vert="0,75,140,20,1" />
+				<LABEL name="LabelDes" fgcolor="333:115118124" fontsize="-4" caption="모두의 미래를 위한 투자" bgcolor="033:240245213" halign="1" valign="0" multiline="1" ly_vert="10,95,120,50,1" />
+			</CONTROL_INFO>
+			<CARD_INFO useempmsg="1" empmsg="선정테마 조회 중" cardheight="140" gap="8" >
+				<CELL name="ImageBG" />
+				<CELL name="ImageIcon" />
+				<CELL name="LabelName" />
+				<CELL name="LabelDes" />
+			</CARD_INFO>
+		</PANNEL>
+		<IMAGE name="ImageQuestion" autosize="1" imgpath="icon_question" ly_vert="170,32,20,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6373" _ulen="5949" >
+Dim gOsType
+
+Dim gbLargeFont			'큰글씨 사용여부
+Dim gsLargeFontsize		'큰글씨 폰트크기(1:조금크게 2:크게)
+
+gbLargeFont = false
+gsLargeFontsize = 0
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+	ImageQuestion.setMaintainingRatio("1")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	LabelScreenTitle.paddinginfo = "0,0,0,0"
+	LabelScreenTitle.sizeAutoFit()
+	LabelScreenTitle.caption = "메리츠 선정 테마"
+	
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSize = Form.GetEnvData("common.textsize")
+	if CInt(szTextSize) > 0 then
+		gbLargeFont = true
+		gsLargeFontsize = szTextSize
+		
+	end if	
+	
+	
+	'테마리스트 조회
+	DATAMANAGER.RequestTranData("ohhts_metf_032r")
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	
+	if szTranID == "ohhts_metf_032r" then
+		
+		'1 : 메리츠선정테마 / 그외 : 전체
+		DATAMANAGER.SetDataValue(0, "ohhts_metf_032r", "InBlock1", "FID_INPUT_MANG_CLCD" , 0 , "1")
+	
+	end if
+	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	
+	if szTranID == "ohhts_metf_032r" then
+	
+		'====================================================================
+		'메리츠 선정테마 개수에 따라 판넬영역 설정(최대4개)
+		'====================================================================
+		nCnt = DATAMANAGER.GetDataCount(0, "ohhts_metf_032r", "OutBlock1")
+		
+		'====================================================================
+		'판넬컬럼 생성
+		'====================================================================
+		'안드로이드 메인 수정중으로 잠시 주석처리
+		if nCnt == 0 then
+			Pannel0.SetEmptyMessage("조회된 선정테마가 없습니다.")
+			SetPannelCount(0)
+		else
+			SetPannelCount(nCnt+1)
+		end if
+		
+		'====================================================================
+		'데이터입력
+		'====================================================================
+		for i = 0 to nCnt - 1
+			
+			sThemeCode = DATAMANAGER.GetDataValue(0, "ohhts_metf_032r", "OutBlock1", "FID_ETF_MDDV_SRNO" , i)
+			sThemeName = DATAMANAGER.GetDataValue(0, "ohhts_metf_032r", "OutBlock1", "FID_ETF_MDDV_NAME" , i)
+			sThemeDes  = DATAMANAGER.GetDataValue(0, "ohhts_metf_032r", "OutBlock1", "FID_ETF_BRIF" , i)
+			
+			sThemeImageName = GetThemeImageName(sThemeName)
+			
+			Pannel0.setPropCardCell("maintainratio","ImageIcon",i,"1")
+			Pannel0.setPropCardCell("imgpath","ImageIcon",i,sThemeImageName)
+			Pannel0.setPropCardCell("maxlinecnt","LabelName",i,"2")
+			Pannel0.SetCellValue("LabelName",i,sThemeName)
+			
+			'--------------------------------------------------------------
+			'큰글씨모드 대응
+			'--------------------------------------------------------------
+			if gbLargeFont then
+				if gOsType == "2" then
+					nApplyTextsize = - 2 - Cint((gsLargeFontsize * 2))
+					Pannel0.setPropCardCell("fontsize","LabelDes",i,nApplyTextsize)
+				end if
+			end if
+			
+			Pannel0.SetCellValue("LabelDes",i,sThemeDes)
+			
+			if i% 4 == 0 then
+				
+				Pannel0.setPropCardCell("imgpath","ImageBG",i,"img_bgbox_green.9")
+			
+			elseif i % 4 == 1 then
+				
+				Pannel0.setPropCardCell("imgpath","ImageBG",i,"img_bgbox_yellow.9")
+			
+			elseif i % 4 == 2 then
+			
+				Pannel0.setPropCardCell("imgpath","ImageBG",i,"img_bgbox_blue.9")
+				
+			elseif i % 4 == 3 then
+			
+				Pannel0.setPropCardCell("imgpath","ImageBG",i,"img_bgbox_red.9")
+				
+			end if
+			
+		next
+	
+	end if
+
+	
+End Sub
+
+'============================================================================
+Function SetPannelCount(nCnt)
+	
+	'마지막컬럼은 여백을 주기위한 컬럼임.
+	'기존 카드간격 + 마지막컬럼 너비(12)로 세팅하여 20만큼의 여백 확보
+	'마지막행 안에있는 컨트롤은 모두 숨김처리
+	Pannel0.rowcount = nCnt
+	
+	for i = 0 to nCnt - 1
+	
+		if i == nCnt - 1 then
+			
+			Pannel0.SetCardWHAt(nCnt - 1 ,12)
+			Pannel0.setPropCardCell("visible","ImageBG"	,nCnt - 1,"0")
+			Pannel0.setPropCardCell("visible","ImageIcon"	,nCnt - 1,"0")
+			Pannel0.setPropCardCell("visible","LabelName"	,nCnt - 1,"0")
+			Pannel0.setPropCardCell("visible","LabelDes"	,nCnt - 1,"0")
+		
+		else
+		
+			Pannel0.setPropCardCell("visible","ImageBG"	,i,"1")
+			Pannel0.setPropCardCell("visible","ImageIcon"	,i,"1")
+			Pannel0.setPropCardCell("visible","LabelName"	,i,"1")
+			Pannel0.setPropCardCell("visible","LabelDes"	,i,"1")
+		
+		end if
+	
+	next
+
+End Function
+
+'============================================================================
+Function GetThemeImageName(sItemKey)
+	
+	sName = Form.getIconImg("THEME",sItemKey)
+	
+	if sName == "" then
+		sName = Form.getIconImg("THEME","기타")
+	end if
+	
+	return sName
+	
+End Function
+
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+
+	Form.triggerEvent("#", "SAVE_ETF_HOME_SCROLL", "")
+	sThemeName = Pannel0.GetCellValue("LabelName",nIndex)
+	Form.OpenScreen("50500" , sThemeName)
+	
+End Sub
+
+'============================================================================
+Sub LabelScreenTitle_OnSizeAutoFit()
+	
+	if gOsType == "1" then
+		nLeft = Form.calcUnResize(LabelScreenTitle.left, "2")
+		nWidth = Form.calcUnResize(LabelScreenTitle.width, "2")
+	else
+		nLeft = LabelScreenTitle.left
+		nWidth = LabelScreenTitle.width
+	end if
+	
+	ImageQuestion.left = nLeft + nWidth + 8
+	
+End Sub
+'============================================================================
+Sub ImageQuestion_OnClick()
+
+	ImageQuestion.ToolTipBringFront(true)
+
+	sText = 	"당사 리서치센터에서 정량적 평가와\n정성적 평가를 종합하여 선정합니다."
+			
+	sLen = Form.getLen(sText)
+	
+	if gbLargeFont then
+		nApplyTextsize = - Cint((gsLargeFontsize * 2))
+		ImageQuestion.openToolTip(sText, 280, 90, 0)
+		ImageQuestion.changeToolTipTextAttr(0, sLen, 338, nApplyTextsize, false)
+	else
+		ImageQuestion.openToolTip(sText, 250, 70, 0)
+		ImageQuestion.changeToolTipTextAttr(0, sLen, 338, -2, false)
+	end if
+	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_metf_032r" trcode="ohhts_metf_032r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_metf_032r" title="ETF 카테고리 관리(전체)" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" inout="in" _len="69" _ulen="53" >
+
+FID_INPUT_MANG_CLCD^FID입력관리구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="200" inout="out" _len="679" _ulen="553" >
+
+FID_ETF_CTGR_NO^FIDETF카테고리번호^17^0^7^0^0^0^0
+FID_ETF_UNAS_SRNO^FIDETF기초자산일련번호^5^0^7^0^0^0^0
+FID_ETF_UNAS_NAME^FIDETF기초자산명^100^0^0^0^0^0^0
+FID_ETF_LRDV_SRNO^FIDETF대분류일련번호^5^0^7^0^0^0^0
+FID_ETF_LRDV_NAME^FIDETF대분류명^200^0^0^0^0^0^0
+FID_ETF_MDDV_SRNO^FIDETF중분류일련번호^5^0^7^0^0^0^0
+FID_ETF_MDDV_NAME^FIDETF중분류명^200^0^0^0^0^0^0
+FID_ETF_SMDV_SRNO^FIDETF소분류일련번호^5^0^7^0^0^0^0
+FID_ETF_SMDV_NAME^FIDETF소분류명^200^0^0^0^0^0^0
+FID_ETF_MTZ_TMST_YN^FIDETF메리츠테마여부^1^0^0^0^0^0^0
+FID_ETF_BRIF^FIDETF요약^200^0^0^0^0^0^0
+FID_ETF_EXPL^FIDETF설명^1000^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

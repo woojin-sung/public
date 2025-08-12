@@ -1,0 +1,990 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50110" scrname="ETF_공통_콤보_복수선택" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" autosize="1" imgpath="alpha128" ly_vert="0,0,375,755,1" />
+		<CONTAINER name="contBg" containerimage="alpha" ly_vert="0,190,375,570,1" scroll_ly_vert="0,190,375,570,1" >
+			<CONTROL_INFO>
+				<IMAGE name="imgContBg" autosize="1" imgpath="popup_bg.9" ly_vert="0,0,375,755,1" />
+				<LABEL name="lblTitle" fontstyle="01" caption="선택해주세요" halign="1" valign="0" ly_vert="0,20,375,22,1" />
+				<LABEL name="lblSubTitle" fgcolor="146:124124124" fontsize="-2" caption="(중복선택가능)" halign="1" valign="0" ly_vert="0,46,375,22,1" />
+				<LABEL name="lblGuideLine" transmode="0" ly_vert="20,70,335,1,1" />
+				<BUTTON name="btnCancel" fgcolor="100:102102102" btnimage="btn_21.9" ly_vert="-1,505,189,60,1" />
+				<BUTTON name="btnOk" btnimage="btn_20.9" ly_vert="187,505,188,60,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="contBtn" ly_vert="400,10,375,200,1" scroll_ly_vert="400,10,375,200,1" >
+			<CONTROL_INFO>
+				<PANNEL name="Pannel0" ly_vert="20,0,335,200,1" >
+					<CONTROL_INFO>
+						<LABEL name="lbl0" fontsize="-4" halign="1" multiline="1" click="1" ly_vert="0,0,105,36,1" />
+						<LABEL name="lbl1" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="115,0,105,36,1" />
+						<LABEL name="lbl2" fontsize="-2" halign="1" multiline="1" click="1" ly_vert="230,0,105,36,1" />
+						<IMAGE name="imgFlag0" autosize="1" ly_vert="12,9,25,18,1" />
+						<IMAGE name="imgFlag2" autosize="1" ly_vert="242,9,25,18,1" />
+						<IMAGE name="imgFlag1" autosize="1" ly_vert="127,9,25,18,1" />
+					</CONTROL_INFO>
+					<CARD_INFO cardheight="36" gap="10" >
+						<CELL name="lbl0" />
+						<CELL name="lbl1" />
+						<CELL name="lbl2" />
+						<CELL name="imgFlag0" />
+						<CELL name="imgFlag2" />
+						<CELL name="imgFlag1" />
+					</CARD_INFO>
+				</PANNEL>
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="contList" ly_vert="400,220,376,200,1" scroll_ly_vert="400,220,376,200,1" >
+			<CONTROL_INFO>
+				<PANNEL name="Pannel1" ly_vert="20,0,335,200,1" >
+					<CONTROL_INFO>
+						<LABEL name="lblItem" fontsize="-2" multiline="1" ly_vert="0,6,295,36,1" />
+						<IMAGE name="imgChk" autosize="1" ly_vert="290,15,45,18,1" />
+						<LABEL name="lblLine2" transmode="0" ly_vert="0,45,335,1,1" />
+					</CONTROL_INFO>
+					<CARD_INFO cardheight="46" >
+						<CELL name="lblItem" />
+						<CELL name="imgChk" />
+						<CELL name="lblLine2" />
+					</CARD_INFO>
+				</PANNEL>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="25596" _ulen="25184" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_line2_o.9"
+
+Dim g_szBtnImg_Disable
+g_szBtnImg_Disable = "btn_37_n.9"
+
+Dim g_szBtnImg_Check
+g_szBtnImg_Check = "btn_04.9"
+
+Dim g_szImgChk
+g_szImgChk = "icon_check_on"
+
+'==============================================
+' 컬러코드
+'==============================================
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_szLineColor_Title 
+g_szLineColor_Title = "334"
+
+Dim g_szLineColor
+g_szLineColor = "256"
+
+Dim g_nForm_Height  
+g_nForm_Height = 755
+
+'==============================================
+' 전역변수
+'==============================================
+Dim g_nContBg_Title_Height  
+g_nContBg_Title_Height= 100
+
+Dim g_nBottomBtn_Height 
+g_nBottomBtn_Height= 60
+
+Dim g_nPannel_Row_Height 
+g_nPannel_Row_Height= 36
+
+Dim g_nPannel_Row_Height2 
+g_nPannel_Row_Height2 = 46
+
+Dim g_nPannel_Row_Gap
+g_nPannel_Row_Gap= 10
+
+Dim g_nCommonMargin 
+g_nCommonMargin= 20
+
+Dim g_nContBtn_Height 
+g_nContBtn_Height= 0
+
+Dim g_nContList_Height 
+g_nContList_Height= 0
+
+Dim g_nContBg_Height
+g_nContBg_Height = 0
+
+
+
+
+
+Dim g_arrContent
+Dim g_arrContent_Check
+Dim g_szGbn, g_szLinkGbn, g_szDupSel
+Dim g_nSelMaxCnt
+g_nSelMaxCnt = 0
+
+Dim g_nSelCnt
+g_nSelCnt = 0
+
+
+Dim g_isDisable
+g_isDisable = false
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	contBg.btnCancel.caption = "초기화"
+	contBg.btnOK.caption = "적용"
+	
+	contBg.setEnableScroll(false)
+	contBtn.setEnableScroll(false)
+	contList.setEnableScroll(false)
+	
+	contBg.lblGuideLine.bgcolor = g_szLineColor_Title
+End Function
+
+''===============================================
+' 컨트롤 초기설정
+'===============================================
+Function DisplaySetting_Content(szGbn)
+	contBg.top = g_nForm_Height - g_nContBg_Height 
+	contBg.height = g_nContBg_Height
+	
+	contBg.btnCancel.top = g_nContBg_Height - g_nBottomBtn_Height
+	contBg.btnOK.top = g_nContBg_Height - g_nBottomBtn_Height
+	
+	if szGbn = "0" then
+		contBtn.left = 0
+		contBtn.top = g_nForm_Height - g_nContBg_Height + g_nContBg_Title_Height
+	
+	elseif szGbn = "1" then
+		contList.left = 0
+		contList.top = g_nForm_Height - g_nContBg_Height + 80
+	end if
+End Function
+
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Content(szGbn)
+	
+	if szGbn = "0" then
+		nArrCnt = #g_arrContent
+		
+		nPannelRowCnt = Cint(nArrCnt / 3)
+		if (nArrCnt mod 3) > 0 then
+			nPannelRowCnt = nPannelRowCnt + 1
+		end if 
+		
+		contBtn.Pannel0.rowcount = nPannelRowCnt
+		
+		g_nContBtn_Height = (g_nPannel_Row_Height * nPannelRowCnt) + (g_nPannel_Row_Gap * nPannelRowCnt)
+		
+		if g_nContBtn_Height > 395 then
+			g_nContBtn_Height = 395
+		end if
+		
+		contBtn.Pannel0.height = g_nContBtn_Height
+		contBtn.height = g_nContBtn_Height
+		
+		g_nContBg_Height = g_nContBg_Title_Height + g_nContBtn_Height + g_nCommonMargin + g_nBottomBtn_Height
+		
+		nArrIdx = 0
+		szData = ""
+		
+		for i = 0 to nPannelRowCnt - 1
+			if instr(g_arrContent(nArrIdx), "^") > 0 then
+				arrTempData = Convert_StringToArr(g_arrContent(nArrIdx), "^")
+				szData = arrTempData(1)
+			else
+				szData = g_arrContent(nArrIdx)
+			end if
+			contBtn.Pannel0.SetCellValue( "lbl0", i, szData)	
+			
+			Init_PannelImg(i, "imgFlag0", "lbl0", szData)
+			'contBtn.Pannel0.SetPropCardCell("maxlinecnt", "lbl0", i, "2")	
+			if szData = "중국(홍콩 포함)" then
+				contBtn.Pannel0.SetPropCardCell("fontsize", "lbl0", i, "-4")
+				contBtn.Pannel0.SetPropCardCell("caption", "lbl0", i, "중국\n(홍콩포함)")	
+				contBtn.Pannel0.SetCellValue( "lbl0", i, "중국\n(홍콩포함)")	
+				
+				contBtn.Pannel0.SetPropCardCell("textattr", "lbl0", i, "3^6^333^-10^false^중국\n(홍콩포함)^0")	
+			else
+				contBtn.Pannel0.SetPropCardCell("fontsize", "lbl0", i, "-2")	
+			end if
+			
+			if g_isDisable = true then
+				contBtn.Pannel0.SetPropCardCell("enable", "lbl0", i, false)
+				contBtn.Pannel0.SetPropCardCell("enable", "imgFlag0", i, false)
+			end if 
+			
+			if g_arrContent_Check(nArrIdx) = "0" then
+				if g_isDisable = true then
+					contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl0", i, g_szBtnImg_Disable)
+				else
+					contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl0", i, g_szBtnImg_Normal)
+				end if
+			else 
+				contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl0", i, g_szBtnImg_Select)
+			end if
+		
+			nArrIdx = nArrIdx + 1
+			if nArrIdx > nArrCnt - 1 then
+				contBtn.Pannel0.SetCellVisible("lbl1",i,false)
+				contBtn.Pannel0.SetCellVisible("lbl2",i,false)
+				Exit for
+			end if
+		
+			if instr(g_arrContent(nArrIdx), "^") > 0 then
+				arrTempData = Convert_StringToArr(g_arrContent(nArrIdx), "^")
+				szData = arrTempData(1)
+			else
+				szData = g_arrContent(nArrIdx)
+			end if
+			contBtn.Pannel0.SetCellValue( "lbl1", i, szData)	
+			Init_PannelImg(i, "imgFlag1", "lbl1", szData)
+			contBtn.Pannel0.SetPropCardCell("maxlinecnt", "lbl1", i, "2")	
+			if szData = "중국(홍콩 포함)" then
+				contBtn.Pannel0.SetPropCardCell("caption", "lbl1", i, "중국\n(홍콩포함)")	
+				contBtn.Pannel0.SetCellValue( "lbl1", i, "중국\n(홍콩포함)")	
+				
+				contBtn.Pannel0.SetPropCardCell("textattr", "lbl1", i, "3,6,333,-10,false")	
+			end if
+			
+			if g_isDisable = true then
+				contBtn.Pannel0.SetPropCardCell("enable", "lbl1", i, false)
+				contBtn.Pannel0.SetPropCardCell("enable", "imgFlag1", i, false)
+			end if 
+			
+			if g_arrContent_Check(nArrIdx) = "0" then
+				if g_isDisable = true then
+					contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl1", i, g_szBtnImg_Disable)
+				else
+					contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl1", i, g_szBtnImg_Normal)
+				end if
+			else 
+				contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl1", i, g_szBtnImg_Select)
+			end if
+			
+			nArrIdx = nArrIdx + 1
+			if nArrIdx > nArrCnt - 1 then
+				contBtn.Pannel0.SetCellVisible("lbl2",i,false)
+				Exit for
+			end if
+			
+			if instr(g_arrContent(nArrIdx), "^") > 0 then
+				arrTempData = Convert_StringToArr(g_arrContent(nArrIdx), "^")
+				szData = arrTempData(1)
+			else
+				szData = g_arrContent(nArrIdx)
+			end if
+			contBtn.Pannel0.SetCellValue( "lbl2", i, szData)	
+			Init_PannelImg(i, "imgFlag2", "lbl2", szData)
+			contBtn.Pannel0.SetPropCardCell("maxlinecnt", "lbl2", i, "2")	
+			if szData = "중국(홍콩 포함)" then
+				contBtn.Pannel0.SetPropCardCell("caption", "lbl2", i, "중국\n(홍콩포함)")	
+				contBtn.Pannel0.SetCellValue( "lbl2", i, "중국\n(홍콩포함)")	
+				
+				contBtn.Pannel0.SetPropCardCell("textattr", "lbl2", i, "3,6,333,-10,false")	
+			end if
+			
+			if g_isDisable = true then
+				contBtn.Pannel0.SetPropCardCell("enable", "lbl2", i, false)
+				contBtn.Pannel0.SetPropCardCell("enable", "imgFlag2", i, false)
+			end if 
+			
+			if g_arrContent_Check(nArrIdx) = "0" then
+				if g_isDisable = true then
+					contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl2", i, g_szBtnImg_Disable)
+				else
+					contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl2", i, g_szBtnImg_Normal)
+				end if
+			else 
+				contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl2", i, g_szBtnImg_Select)
+			end if
+			
+			nArrIdx = nArrIdx + 1
+			if nArrIdx > nArrCnt - 1 then
+				Exit for
+			end if
+		next
+		
+	elseif szGbn = "1" then
+		nArrCnt = #g_arrContent
+	
+		contList.Pannel1.rowcount = nArrCnt
+		
+		g_nContList_Height = g_nPannel_Row_Height2 * nArrCnt
+		
+		if g_nContList_Height > 395 then
+			g_nContList_Height = 395
+		end if
+	
+		contList.height = g_nContList_Height + 20
+		contList.Pannel1.height = g_nContList_Height + 20
+		
+		g_nContBg_Height = g_nContBg_Title_Height + g_nContList_Height + g_nBottomBtn_Height
+		
+		nArrIdx = 0
+		szData = ""
+		for i = 0 to nArrCnt - 1
+			contList.Pannel1.SetPropCardCell("maintainratio", "imgChk", i, "3" )
+			
+			if instr(g_arrContent(i), "^") > 0 then
+				arrTempData = Convert_StringToArr(g_arrContent(i), "^")
+				szData = arrTempData(1)
+			else
+				szData = g_arrContent(i)
+			end if
+			contList.Pannel1.setPropCardCell("bgcolor","lblLine2", i , g_szLineColor)
+			
+			
+			
+			contList.Pannel1.SetCellValue( "lblItem", i, szData)	
+			contList.Pannel1.setPropCardCell("caption","lblItem", i , szData)
+			contList.Pannel1.setPropCardCell("maxlinecnt","lblItem", i , "1^-2")
+			
+			
+			contList.Pannel1.SetPropCardCell("imgpath", "imgChk", i, "alpha")
+			contList.Pannel1.setPropCardCell("paddinginfo","lblItem", i , "0,0,0,0")
+			if g_isDisable = true then
+				contList.Pannel1.SetPropCardCell("enable", "lblItem", i, false)
+			end if 
+			
+			if g_arrContent_Check(i) = "1" then
+				contList.Pannel1.SetPropCardCell("maintainratio", "imgChk", i, "5" )
+				contList.Pannel1.SetPropCardCell("imgpath", "imgChk", i, g_szImgChk )
+			end if
+			
+		next
+		
+		
+		contList.Pannel1.setPropCardCell("bgcolor","lblLine2", nArrCnt - 1 , g_szTxtColor_White)
+	
+	end if
+	
+'	if g_szDupSel = "1" then
+'		All_Content(szGbn, g_szDupSel)
+'	end if
+	
+End Function
+
+Function Clear_Content(szGbn)
+	
+	g_nSelCnt = 0
+	
+	if szGbn = "0" then
+		nArrCnt = #g_arrContent
+		
+		nPannelRowCnt = Cint(nArrCnt / 3)
+		if (nArrCnt mod 3) > 0 then
+			nPannelRowCnt = nPannelRowCnt + 1
+		end if 
+		
+		nArrIdx = 0
+		
+		for i = 0 to nPannelRowCnt - 1
+			g_arrContent_Check(nArrIdx) = "0"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl0", i, g_szBtnImg_Normal)
+			nArrIdx = nArrIdx + 1
+			
+			if nArrIdx > nArrCnt - 1 then
+				Exit for
+			end if
+			
+			g_arrContent_Check(nArrIdx) = "0"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl1", i, g_szBtnImg_Normal)
+			nArrIdx = nArrIdx + 1
+			
+			if nArrIdx > nArrCnt - 1 then
+				Exit for
+			end if
+			
+			g_arrContent_Check(nArrIdx) = "0"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl2", i, g_szBtnImg_Normal)
+			nArrIdx = nArrIdx + 1
+			
+			if nArrIdx > nArrCnt - 1 then
+				Exit for
+			end if
+		next
+		
+	elseif szGbn = "1" then
+		nArrCnt = #g_arrContent
+
+		for i = 0 to nArrCnt - 1
+			g_arrContent_Check(i) = "0"
+			contList.Pannel1.SetPropCardCell("imgpath", "imgChk", i, "alpha")
+		next
+	end if
+	
+End Function
+
+Function All_Content(szGbn, szDupSel)
+	if szGbn = "0" then
+		nArrCnt = #g_arrContent
+		
+		nPannelRowCnt = Cint(nArrCnt / 3)
+		if (nArrCnt mod 3) > 0 then
+			nPannelRowCnt = nPannelRowCnt + 1
+		end if 
+		
+		nArrIdx = 0
+		
+		for i = 0 to nPannelRowCnt - 1
+			if szDupSel = "1" and i = 0 then
+				g_arrContent_Check(nArrIdx) = "1"
+				contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl0", i, g_szBtnImg_Select)
+			else
+				g_arrContent_Check(nArrIdx) = "0"
+				contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl0", i, g_szBtnImg_Normal)
+			end if
+			
+			nArrIdx = nArrIdx + 1
+			if nArrIdx > nArrCnt - 1 then
+				Exit for
+			end if
+			
+			g_arrContent_Check(nArrIdx) = "0"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl1", i, g_szBtnImg_Normal)
+			nArrIdx = nArrIdx + 1
+			
+			if nArrIdx > nArrCnt - 1 then
+				Exit for
+			end if
+			
+			g_arrContent_Check(nArrIdx) = "0"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl2", i, g_szBtnImg_Normal)
+			nArrIdx = nArrIdx + 1
+			
+			if nArrIdx > nArrCnt - 1 then
+				Exit for
+			end if
+		next
+		
+	elseif szGbn = "1" then
+		nArrCnt = #g_arrContent
+
+		for i = 0 to nArrCnt - 1
+			if szDupSel = "1" and i = 0 then
+				g_arrContent_Check(i) = "1"
+				contList.Pannel1.SetPropCardCell("maintainratio", "imgChk", i, "5" )
+				contList.Pannel1.SetPropCardCell("imgpath", "imgChk", i, g_szImgChk )
+			else
+				g_arrContent_Check(i) = "0"
+				contList.Pannel1.SetPropCardCell("imgpath", "imgChk", i, "alpha")
+			end if
+		next
+	end if
+	
+End Function
+
+Function DisplaySetting_PannelBtn(nRowIdx, szCtlName)
+	nCnt = nRowIdx * 3
+	if szCtlName = "imgFlag0" then
+		szCtlName = "lbl0"
+	elseif szCtlName = "imgFlag1" then
+		szCtlName = "lbl1"
+	elseif szCtlName = "imgFlag2" then
+		szCtlName = "lbl2"
+	end if
+	
+	if szCtlName = "lbl0" then
+		nCnt = Cint(nCnt) + 0
+	elseif szCtlName = "lbl1" then
+		nCnt = Cint(nCnt) + 1
+	elseif szCtlName = "lbl2" then
+		nCnt = Cint(nCnt) + 2
+	end if
+	
+	if #g_arrContent_Check < nCnt+1 then
+		Exit Function
+	end if
+	
+	if g_szDupSel = "1" and  nCnt = 0 then
+
+		if g_arrContent_Check(nCnt) = "0" then
+			All_Content("0", g_szDupSel)
+		else
+			g_arrContent_Check(0) = "0"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl0", 0, g_szBtnImg_Normal)
+		end if
+	else
+		if g_szDupSel = "1" then
+			g_arrContent_Check(0) = "0"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", "lbl0", 0, g_szBtnImg_Normal)
+		end if
+			
+		if g_arrContent_Check(nCnt) = "0" then
+			if g_nSelMaxCnt > 0 then
+				if g_nSelCnt >= g_nSelMaxCnt then
+					Form.ShowAlert("안내", "5개까지만 선택 가능합니다.")
+					exit Function
+				end if
+				
+				g_nSelCnt = g_nSelCnt + 1
+			end if
+			
+			g_arrContent_Check(nCnt) = "1"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Select)
+		else 
+			if g_nSelMaxCnt > 0 then
+				if g_nSelCnt > 0 then
+					g_nSelCnt = g_nSelCnt - 1
+				end if
+			end if
+			
+			g_arrContent_Check(nCnt) = "0"
+			contBtn.Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Normal)
+		end if
+		
+		szReturn = Return_AllChkYN(g_arrContent_Check)
+	
+		if szReturn = "Y" and g_szDupSel = "1" then
+			All_Content("0", g_szDupSel)
+		end if
+	end if
+End Function
+
+
+Function DisplaySetting_PannelList(nRowIdx, szCtlName)
+
+	if g_szDupSel = "1" and  nRowIdx = 0 then
+		if g_arrContent_Check(nRowIdx) = "0" then
+			All_Content("1", g_szDupSel)
+		else
+			g_arrContent_Check(nRowIdx) = "0"
+			contList.Pannel1.SetPropCardCell("imgpath", "imgChk", 0, "alpha")
+		end if
+	else
+		if g_szDupSel = "1" then
+			g_arrContent_Check(0) = "0"
+			contList.Pannel1.SetPropCardCell("imgpath", "imgChk", 0, "alpha")
+		end if
+		
+		if g_arrContent_Check(nRowIdx) = "0" then
+			if g_nSelMaxCnt > 0 then
+				if g_nSelCnt >= g_nSelMaxCnt then
+					Form.ShowAlert("안내", "5개까지만 선택 가능합니다.")
+					exit Function
+				end if
+				
+				g_nSelCnt = g_nSelCnt + 1
+			end if
+			
+			g_arrContent_Check(nRowIdx) = "1"
+			contList.Pannel1.SetPropCardCell("maintainratio", "imgChk", nRowIdx, "5" )
+			contList.Pannel1.SetPropCardCell("imgpath", "imgChk", nRowIdx, g_szImgChk )
+		else 
+			if g_nSelMaxCnt > 0 then
+				if g_nSelCnt > 0 then
+					g_nSelCnt = g_nSelCnt - 1
+				end if
+			end if
+			
+			g_arrContent_Check(nRowIdx) = "0"
+			contList.Pannel1.SetPropCardCell("imgpath", "imgChk", nRowIdx, "alpha")
+		end if
+		
+		szReturn = Return_AllChkYN(g_arrContent_Check)
+		if szReturn = "Y" and g_szDupSel = "1" then
+			All_Content("1", g_szDupSel)
+		end if
+	end if
+	
+End Function
+
+Function Init_PannelImg(nRowIdx, szCtlName, szBgCtlName, szData)
+	contBtn.Pannel0.SetPropCardCell("maintainratio", szCtlName, nRowIdx, "4")
+	
+	if szData = "한국" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_kor_round")
+		
+	elseif szData = "미국" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_us2")
+		
+	elseif szData = "중국(홍콩 포함)" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_chn")
+		
+	elseif szData = "일본" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_jp2")
+		
+	elseif szData = "영국" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_uk")
+		
+	elseif szData = "프랑스" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_fra_round")
+		
+	elseif szData = "독일" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_ger_round")
+		
+	elseif szData = "베트남" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_vie_round")
+		
+	elseif szData = "인도" then
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "0")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "40,0,0,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, true)
+		contBtn.Pannel0.SetPropCardCell("imgpath", szCtlName, nRowIdx, "flag_ind_round")
+		
+	else
+		contBtn.Pannel0.SetPropCardCell("halign", szBgCtlName, nRowIdx, "1")
+		contBtn.Pannel0.SetPropCardCell("paddinginfo", szBgCtlName, nRowIdx, "10,0,10,0")
+		contBtn.Pannel0.SetPropCardCell("visible", szCtlName, nRowIdx, false)
+	end if
+
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환
+'===============================================
+Function Convert_ArrToString(arrData, szSeperator)
+	szResult = ""
+	
+	if arrData = null then
+		return szResult
+	end if
+	
+	if szSeperator = null or szSeperator = "" then
+		return szResult
+	end if 	
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if i <> 0 then
+			szResult = szResult & szSeperator 
+		end if
+		
+		szResult = szResult & arrData(i) 
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환(체크항목)
+'===============================================
+Function Convert_ChkArrToString(arrData, arrChkData, szSeperator)
+	szResult = ""
+	
+	if arrData = null then
+		return szResult
+	end if
+	
+	if arrChkData = null then
+		return szResult
+	end if
+	
+	if szSeperator = null or szSeperator = "" then
+		return szResult
+	end if 	
+	
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if arrChkData(i) = "1" then
+			if szResult <> "" then
+				szResult = szResult & szSeperator 
+			end if
+			szResult = szResult & arrData(i) 
+		end if
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 문자열 -> 배열 변환
+'===============================================
+Function Convert_StringToArr(szData, szSeperator)
+	szArrData = ""
+	
+	if szData <> null and szData <> "" then
+		szArrData = split(szData, szSeperator)
+	end if
+	
+	return szArrData
+End Function
+
+'===============================================
+' 배열 데이터 확인
+'===============================================
+Function Contains_Array(arrData, szData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		szArrData = arrData(i)
+		
+		if szArrData = szData then
+			return true
+		end if
+	next 
+	
+	return false
+End Function
+
+'===============================================
+' 체크배열 초기화
+'===============================================
+Function Clear_ChkArray(arrData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		arrData(i) = "0"	
+	next 
+End Function
+
+'===============================================
+' 체크배열 전체선택
+'===============================================
+Function All_ChkArray(arrData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		arrData(i) = "1"	
+	next 
+End Function
+
+'===============================================
+' 배열 인덱스 추출
+'===============================================
+Function Return_ArrayIndex(arrData, szData)
+	nReturn = -1
+	if arrData = null or arrData = "" then
+		return nReturn
+	end if
+	
+	if szData = null or szData = "" then
+		return nReturn
+	end if
+	
+	nArrCnt = #arrData
+	for i = 0 to nArrCnt-1
+		if arrData(i) = szData then
+			nReturn = i
+			exit for
+		end if	
+	next 
+	
+	return nReturn
+End Function
+
+Function Return_AllChkYN(arrData)
+	if arrData = null or arrData = "" then
+		return "N"
+	end if
+	
+	nArrCnt = #arrData
+	for i = 0 to nArrCnt-1
+		if i = 0 then
+			if arrData(0) = "1" then
+				return "Y"
+			end if
+		else
+			if arrData(i) = "0" then
+				return "N"
+			end if	
+		end if
+	next 
+	
+	return "Y"
+End Function
+
+'
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	
+	Init_Control()
+
+	szData = Form.GetOpenLinkData()
+	
+	if szData = null or trim(szData) = "" then
+		exit Sub
+	end if
+	
+	szArrData = split(szData, "★")
+	
+	nArrCnt = #szArrData
+	
+	if nArrCnt > 4 then
+		g_szLinkGbn 	= szArrData(0)
+		g_szGbn		= szArrData(1)
+		g_szDupSel 	= szArrData(2)
+		
+		Dim szContData, szChkKey, szTempData, szArrTempData, szDisable
+		szContData 	= szArrData(3)
+		szTempData 	= szArrData(4)
+		if nArrCnt > 5 then
+			if szArrData(5) <> "" and szArrData(5) <> null then
+				szDisable 	= szArrData(5)
+				contBg.lblSubTitle.caption = szDisable
+				contBg.btnOk.caption = "확인"
+				contBg.btnCancel.visible = false
+				contBg.btnOk.left = -1
+				contBg.btnOk.width = 377
+				g_isDisable = true
+			end if
+		end if
+		
+		if g_szLinkGbn = "DomesticOperator" or g_szLinkGbn = "OverseaOperator" then
+			g_nSelMaxCnt = 5
+		end if
+		
+		if g_szDupSel = "1" then
+			szContData = "전체`" & szContData
+		end if
+		
+		g_arrContent = Convert_StringToArr(szContData, "`")
+		szArrTempData = Convert_StringToArr(szTempData, "`")
+		
+		nArrCnt = #g_arrContent
+		nChkArrCnt = #szArrTempData
+		g_arrContent_Check = {}
+		
+		for i = 0 to nArrCnt-1
+			g_arrContent_Check(i) = "0"
+			if nChkArrCnt = 0 and g_szDupSel = "1" then
+				g_arrContent_Check(0) = "1"
+			else
+				for j = 0 to nChkArrCnt-1
+					if g_arrContent(i) = szArrTempData(j) then
+						g_arrContent_Check(i) = "1"
+						g_nSelCnt = g_nSelCnt + 1
+					end if
+				next
+			end if
+		next
+		
+		szReturn = Return_AllChkYN(g_arrContent_Check)
+		if szReturn = "Y" and g_szDupSel = "1" then
+			All_Content(g_szGbn, g_szDupSel)
+		end if
+	end if
+	
+	Init_Content(g_szGbn)
+	DisplaySetting_Content(g_szGbn)
+End Sub
+
+'===============================================
+' imgBack_OnClick
+'===============================================
+Sub imgBack_OnClick()
+End Sub
+
+'============================================================================
+Sub contBtn_Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "" then
+		Exit Sub
+	end if
+	DisplaySetting_PannelBtn(nIndex, sCellID)
+End Sub
+
+'============================================================================
+Sub contList_Pannel1_OnClick(nIndex, sCellID)
+	if sCellID = "" then
+		Exit Sub
+	end if
+	DisplaySetting_PannelList(nIndex, sCellID)
+End Sub
+
+'============================================================================
+Sub contBg_btnOk_OnClick()
+	Form.SendReturnToParent("50110_P3_RETURN_DATA_"&g_szLinkGbn, Convert_ChkArrToString(g_arrContent, g_arrContent_Check, "`"))
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub contBg_btnCancel_OnClick()
+	if g_isDisable = false then
+		Clear_Content(g_szGbn)
+	end if
+End Sub
+
+'============================================================================
+Sub imgBg_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

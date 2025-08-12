@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50110" scrname="ETF Super검색_스크리너_레버리지" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,444,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblSubTitle" fontstyle="01" caption="레버리지" ly_vert="20,17,200,22,1" />
+		<PANNEL name="Pannel0" ly_vert="20,50,335,390,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblleverage0" fontsize="-2" halign="1" click="1" ly_vert="0,0,105,36,1" />
+				<LABEL name="lblleverage1" fontsize="-2" halign="1" click="1" ly_vert="115,0,105,36,1" />
+				<LABEL name="lblleverage2" fontsize="-2" halign="1" click="1" ly_vert="230,0,105,36,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="36" gap="10" >
+				<CELL name="lblleverage0" />
+				<CELL name="lblleverage1" />
+				<CELL name="lblleverage2" />
+			</CARD_INFO>
+		</PANNEL>
+		<LABEL name="lblChk" fontsize="-2" caption="전체" bgcolor="029:255212175" halign="2" ly_vert="300,18,55,20,1" />
+		<IMAGE name="imgChk" autosize="1" ly_vert="294,19,28,18,1" />
+		<BUTTON name="btnChk" btnimage="alpha" ly_vert="290,17,65,22,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="12672" _ulen="12480" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_line2_o.9"
+
+Dim g_szChkImg_Normal
+g_szChkImg_Normal = "checkmenu_n"
+
+Dim g_szChkImg_Select
+g_szChkImg_Select = "checkmenu_o"
+
+'==============================================
+' 컬러코드
+'==============================================
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+'==============================================
+' 전역변수
+'==============================================
+
+Dim g_szSharedKey
+g_szSharedKey = "50110_S5_CHECK"
+
+Dim g_arrLeverage
+g_arrLeverage = Array("+1배", "+1.25~1.75배", "+2배", "+3배")
+
+Dim g_arrLeverage_Check
+g_arrLeverage_Check = Array("0", "0", "0", "0")
+
+Dim g_szChk_Leverage
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	lblSubTitle.fgcolor = g_szTxtColor_Normal
+	lblSubTitle.paddinginfo = "0,0,0,0"
+End Function
+
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Data()
+	lblChk.fgcolor = g_szTxtColor_Grey
+	lblChk.paddinginfo = "0,0,0,0"
+	
+	lblChk.setNeighborCtlPos("imgChk", "left", 2, "전체")
+	
+	imgChk.setMaintainingRatio("3")
+	imgChk.imgpath = g_szChkImg_Normal
+	
+	nArrCnt = #g_arrLeverage
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+	
+	Pannel0.rowcount = nPannelRowCnt
+	
+	nArrIdx = 0
+	
+	szChkData = Form.GetSharedData(g_szSharedKey, false)
+	
+	for i = 0 to nPannelRowCnt - 1
+		Pannel0.SetCellValue( "lblleverage0", i, g_arrLeverage(nArrIdx))
+		Pannel0.SetPropCardCell("fgcolor", "lblleverage0", i, g_szTxtColor_Normal)
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage0", i, g_szBtnImg_Normal)
+		g_arrLeverage_Check(nArrIdx) = "0" 
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Pannel0.SetCellVisible("lblleverage1",i,false)
+			Pannel0.SetCellVisible("lblleverage2",i,false)
+			Exit for
+		end if
+		
+		Pannel0.SetCellValue( "lblleverage1", i, g_arrLeverage(nArrIdx))	
+		Pannel0.SetPropCardCell("fgcolor", "lblleverage1", i, g_szTxtColor_Normal)
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage1", i, g_szBtnImg_Normal)
+		g_arrLeverage_Check(nArrIdx) = "0"
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Pannel0.SetCellVisible("lblleverage2",i,false)
+			Exit for
+		end if
+		
+		Pannel0.SetCellValue( "lblleverage2", i, g_arrLeverage(nArrIdx))	
+		Pannel0.SetPropCardCell("fgcolor", "lblleverage2", i, g_szTxtColor_Normal)
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage2", i, g_szBtnImg_Normal)
+		g_arrLeverage_Check(nArrIdx) = "0"
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+	
+End Function
+
+Function Clear_Leverage()
+	nArrCnt = #g_arrLeverage
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage0", i, g_szBtnImg_Normal)
+		g_arrLeverage_Check(nArrIdx) = "0" 
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage1", i, g_szBtnImg_Normal)
+		g_arrLeverage_Check(nArrIdx) = "0"
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage2", i, g_szBtnImg_Normal)
+		g_arrLeverage_Check(nArrIdx) = "0"
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+End Function
+
+Function All_Leverage()
+	nArrCnt = #g_arrLeverage
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage0", i, g_szBtnImg_Select)
+		g_arrLeverage_Check(nArrIdx) = "1" 
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage1", i, g_szBtnImg_Select)
+		g_arrLeverage_Check(nArrIdx) = "1"
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		Pannel0.SetPropCardCell("imagefilepth", "lblleverage2", i, g_szBtnImg_Select)
+		g_arrLeverage_Check(nArrIdx) = "1"
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+End Function
+
+
+'===============================================
+' 패널버튼 클릭 이벤트 처리
+'===============================================
+Function DisplaySetting_PannelBtn(nRowIdx, szCtlName)
+	
+	
+	nCnt = nRowIdx * 3
+	if szCtlName = "lblleverage0" then
+		
+	elseif szCtlName = "lblleverage1" then
+		nCnt = Cint(nCnt) + 1
+	elseif szCtlName = "lblleverage2" then
+		nCnt = Cint(nCnt) + 2
+	end if
+	
+	if #g_arrLeverage_Check < nCnt+1 then
+		Exit Function
+	end if
+	
+	if g_szChk_Leverage = "1" then
+		g_szChk_Leverage = "0"
+		imgChk.imgpath = g_szChkImg_Normal
+	end if
+	
+	if g_arrLeverage_Check(nCnt) = "0" then
+		g_arrLeverage_Check(nCnt) = "1"
+		Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Select)
+	else 
+		g_arrLeverage_Check(nCnt) = "0"
+		Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Normal)
+	end if
+	
+	szReturn = Return_AllChkYN(g_arrLeverage_Check)
+
+	if szReturn = "Y" then
+		g_szChk_Leverage = "1"
+		imgChk.imgpath = g_szChkImg_Select
+	else
+		g_szChk_Leverage = "0"
+		imgChk.imgpath = g_szChkImg_Normal
+	end if
+	
+End Function
+
+Function Reload_PannelBtn(nArrIdx)
+	nIndex = 0
+	
+	nIndex= nArrIdx / 3
+	nCtlIdx = nArrIdx % 3
+	szCtlNm = ""
+	
+	if nCtlIdx = 0 then
+		szCtlNm = "lblleverage0"
+	elseif nCtlIdx = 1 then
+		szCtlNm = "lblleverage1"
+	elseif nCtlIdx = 2 then
+		szCtlNm = "lblleverage2"
+	end if
+	
+	g_arrLeverage_Check(nArrIdx) = "1"
+	Pannel0.setPropCardCell("imagefilepth", szCtlNm, nIndex, g_szBtnImg_Select)
+End Function
+
+
+'===============================================
+' 배열 -> 문자열 변환
+'===============================================
+Function Convert_ArrToString(arrData, szSeperator)
+	szResult = ""
+	
+	if arrData = null then
+		return szResult
+	end if
+	
+	if szSeperator = null or szSeperator = "" then
+		return szResult
+	end if 	
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if i <> 0 then
+			szResult = szResult & szSeperator 
+		end if
+		
+		szResult = szResult & arrData(i) 
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환(체크항목)
+'===============================================
+Function Convert_ChkArrToString(arrData, arrChkData, szSeperator)
+	szResult = ""
+	
+	if arrData = null then
+		return szResult
+	end if
+	
+	if arrChkData = null then
+		return szResult
+	end if
+	
+	if szSeperator = null or szSeperator = "" then
+		return szResult
+	end if 	
+	
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if arrChkData(i) = "1" then
+			if szResult <> "" then
+				szResult = szResult & szSeperator 
+			end if
+			szResult = szResult & arrData(i) 
+		end if
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 문자열 -> 배열 변환
+'===============================================
+Function Convert_StringToArr(szData, szSeperator)
+	szArrData = ""
+	
+	if szData <> null and szData <> "" then
+		szArrData = split(szData, szSeperator)
+	end if
+	
+	return szArrData
+End Function
+
+'===============================================
+' 배열 데이터 확인
+'===============================================
+Function Contains_Array(arrData, szData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		szArrData = arrData(i)
+		
+		if szArrData = szData then
+			return true
+		end if
+	next 
+	
+	return false
+End Function
+
+'===============================================
+' 체크배열 초기화
+'===============================================
+Function Clear_ChkArray(arrData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		arrData(i) = "0"	
+	next 
+End Function
+
+'===============================================
+' 체크배열 전체선택
+'===============================================
+Function All_ChkArray(arrData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		arrData(i) = "1"	
+	next 
+End Function
+
+'===============================================
+' 배열 인덱스 추출
+'===============================================
+Function Return_ArrayIndex(arrData, szData)
+	nReturn = -1
+	if arrData = null or arrData = "" then
+		return nReturn
+	end if
+	
+	if szData = null or szData = "" then
+		return nReturn
+	end if
+	
+	nArrCnt = #arrData
+	for i = 0 to nArrCnt-1
+		if arrData(i) = szData then
+			nReturn = i
+			exit for
+		end if	
+	next 
+	
+	return nReturn
+End Function
+
+Function Return_AllChkYN(arrData)
+	if arrData = null or arrData = "" then
+		return "N"
+	end if
+	
+	nArrCnt = #arrData
+	for i = 0 to nArrCnt-1
+		if arrData(i) = "0" then
+			return "N"
+		end if	
+	next 
+	
+	return "Y"
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	g_szSharedData = Form.GetSharedData(g_szSharedKey, false )
+	
+	Init_Control()
+	Init_Data()
+
+	arrTempData = Convert_StringToArr(g_szSharedData, "`")
+				
+	for i = 0 to #arrTempData - 1
+		nStep0_Idx = Return_ArrayIndex(g_arrLeverage, arrTempData(i))
+		Reload_PannelBtn(nStep0_Idx)
+	next
+	
+	szReturn = Return_AllChkYN(g_arrLeverage_Check)
+
+	if szReturn = "Y" then
+		g_szChk_Leverage = "1"
+		imgChk.imgpath = g_szChkImg_Select
+	end if
+End Sub
+
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "" then
+		Exit Sub
+	end if
+	
+	DisplaySetting_PannelBtn(nIndex, sCellID)
+	Form.SetSharedData(g_szSharedKey , Convert_ChkArrToString(g_arrLeverage, g_arrLeverage_Check, "`"))
+	Form.triggerEvent("#", g_szSharedKey, "")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "50110_S5_CHECK" then
+		Init_Data()
+		
+		g_szSharedData = Form.GetSharedData(g_szSharedKey, false )
+		arrTempData = Convert_StringToArr(g_szSharedData, "`")
+						
+		for i = 0 to #arrTempData - 1
+			nStep0_Idx = Return_ArrayIndex(g_arrLeverage, arrTempData(i))
+			Reload_PannelBtn(nStep0_Idx)
+		next
+		
+		szReturn = Return_AllChkYN(g_arrLeverage_Check)
+
+		if szReturn = "Y" then
+			g_szChk_Leverage = "1"
+			imgChk.imgpath = g_szChkImg_Select
+		else
+			g_szChk_Leverage = "0"
+			imgChk.imgpath = g_szChkImg_Normal
+		end if
+		
+		
+	elseif sEventName = "50110_COND_STAT" then
+		if sParam = "N" then
+			Pannel0.height = 398
+		elseif sParam = "Y" then
+			Pannel0.height = 288
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub btnChk_OnClick()
+	if g_szChk_Leverage = "1" then
+		g_szChk_Leverage = "0"
+		imgChk.imgpath = g_szChkImg_Normal
+		
+		Clear_Leverage()
+	else
+		g_szChk_Leverage = "1"
+		imgChk.imgpath = g_szChkImg_Select
+		
+		All_Leverage()
+	end if
+	
+	Form.SetSharedData(g_szSharedKey , Convert_ChkArrToString(g_arrLeverage, g_arrLeverage_Check, "`"))
+	Form.triggerEvent("#", g_szSharedKey, "")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

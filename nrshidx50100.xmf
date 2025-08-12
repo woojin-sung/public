@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50100" scrname="ETF Super검색" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBack" autosize="1" ly_vert="6,11,39,24,1" />
+		<LABEL name="lblTitle" fontsize="3" ly_vert="47,0,283,47,1" />
+		<CONTAINER name="contMain" vscroll="1" ly_vert="0,47,375,655,1" scroll_ly_vert="0,47,375,655,1" >
+			<CONTROL_INFO>
+				<FORMTAB name="fmtabSearch" tabcount="4" tabwidthtype="2" tabheadheight="47" ly_vert="0,0,376,655,1" >
+					<PAGE name="page1" caption="스크리너 " linkfile="nrshidx50110" loadingtype="1" />
+					<PAGE name="page2" caption="직접검색" linkfile="nrshidx50120" loadingtype="1" />
+					<PAGE name="page3" caption="테마검색" linkfile="nrshidx50130" loadingtype="1" />
+					<PAGE name="page4" caption="최근" linkfile="nrshidx50140" loadingtype="1" />
+				</FORMTAB>
+			</CONTROL_INFO>
+		</CONTAINER>
+		<IMAGE name="imgInfo" autosize="1" ly_vert="317,13,39,20,1" />
+		<LABEL name="lblBlock" visible="0" transmode="0" ly_vert="0,47,375,655,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6032" _ulen="5810" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+' 뒤로가기 이미지
+Dim g_szBackImg  
+g_szBackImg = "icon_main_01"
+
+' 유의사항 이미지
+Dim g_szInfoImg  
+g_szInfoImg = "icon_notice"
+
+
+'==============================================
+' 컬러코드
+'==============================================
+' 기본 텍스트 컬러 (검정색)
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal 	= "334"
+
+' 기본 텍스트 컬러 (회색)
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey 	= "333"
+
+' 기본 텍스트 컬러 (흰색)
+Dim g_szTxtColor_White 
+g_szTxtColor_White 	= "338"
+
+'==============================================
+' 폼탭 매핑정보
+'==============================================
+Dim g_arrTabTitle
+g_arrTabTitle = Array("스크리너", "직접검색", "테마검색", "최근")
+
+Dim g_arrTabMapFile
+g_arrTabMapFile = Array("nrshidx50110", "nrshidx50120", "nrshidx50130", "nrshidx50140")
+
+'==============================================
+' 기타 전역변수
+'==============================================
+Dim g_szTitle
+g_szTitle = "ETF Super 검색"
+
+Dim g_isOpen
+g_isOpen = true
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+
+	'-----------------------------------------------
+	' 뒤로가기 버튼 초기화
+	'-----------------------------------------------
+	lblTitle.caption = g_szTitle
+	lblTitle.paddinginfo = "0,0,0,0"
+	
+	'-----------------------------------------------
+	' 뒤로가기 버튼 초기화
+	'-----------------------------------------------
+	imgBack.SetMaintainingRatio("2")
+	imgBack.imgpath = g_szBackImg
+	
+	'-----------------------------------------------
+	' 유의사항 버튼 초기화
+	'-----------------------------------------------
+	imgInfo.SetMaintainingRatio("3")
+	imgInfo.imgpath = g_szInfoImg
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	szPos = Form.GetSharedData("50100_INDEX", false)	
+	szLinkData = Form.getSharedData("50110_LINK_DATA", false)
+	
+	if Cint(szPos) = 0 then
+		lblBlock.visible = true
+		Form.SetTimerEvent(1, 1, 1)
+	end if
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	Init_Control()
+	
+	
+	
+	'g_isOpen = false
+	
+End Sub
+
+'===============================================
+' imgBack_OnClick
+'===============================================
+Sub imgBack_OnClick()
+	Form.openPrevScreen()
+End Sub
+
+'===============================================
+' imgInfo_OnClick
+'===============================================
+Sub imgInfo_OnClick()
+	Form.OpenPopup("nrshidx50100_p1" , "" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "VOICEINPUT" or sEventName = "REFRESH_INTR_ITEM" then
+		Form.triggerEvent("fmtabSearch."&contMain.fmtabSearch.currenttabpageid, sEventName, sParam)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEventSCREEN(sEventName,sParam)
+	
+	if g_isOpen = true then
+		g_isOpen = false
+		szPos = Form.GetSharedData("50100_INDEX", true)	
+		'showalert sEventName .. "|" .. szPos
+		szLinkData = ""
+		if szPos = "0" then
+			szLinkData = Form.getSharedData("50110_LINK_DATA", true)
+		else
+			Form.setSharedData("50110_LINK_DATA", "")
+		end if
+		
+		if sEventName = "PREV" then
+			if szPos <> "" then
+				contMain.fmtabSearch.currenttab = szPos
+				if Cint(szPos) = 0  then
+					Form.SetTimerEvent(1, 1, 1)
+'					Form.OpenPopup("nrshidx50110_p2" , szLinkData, "")	
+				end if
+				
+				Form.triggerEvent("fmtabSearch."&contMain.fmtabSearch.currenttabpageid, "50100_INDEX", "PREV")
+			else
+				szTabPageID = Form.GetEnvData("50100_SELECT_TAB_PAGEID")
+				
+				if szTabPageID <> "" and szTabPageID <> null then
+					contMain.fmtabSearch.currenttabpageid = szTabPageID
+				end if
+				
+				lblBlock.visible = false
+				Form.triggerEvent("fmtabSearch."&contMain.fmtabSearch.currenttabpageid, "50100_INDEX", "INIT")
+			end if
+		else
+			szTabPageID = Form.GetEnvData("50100_SELECT_TAB_PAGEID")
+				
+			if szTabPageID <> "" and szTabPageID <> null then
+				contMain.fmtabSearch.currenttabpageid = szTabPageID
+			end if
+				
+			lblBlock.visible = false
+			Form.triggerEvent("fmtabSearch."&contMain.fmtabSearch.currenttabpageid, "50100_INDEX", "INIT")	
+		end if
+	else
+		lblBlock.visible = false
+	end if
+
+End Sub
+
+'============================================================================
+Sub contMain_fmtabSearch_OnTabChanged(nCurrentTab)
+	Form.triggerEvent("fmtabSearch."&contMain.fmtabSearch.currenttabpageid, "50100_TAB_CHANGE", "")
+	Form.SetEnvData(1, "50100_SELECT_TAB_PAGEID" , contMain.fmtabSearch.currenttabpageid)
+End Sub
+
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent(sTimerID, 0, 0)
+	lblBlock.visible = false
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SetEnvData(1, "50100_SELECT_TAB_PAGEID" , contMain.fmtabSearch.currenttabpageid)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

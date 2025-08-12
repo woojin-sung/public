@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16090" scrname="실시간시세기간택창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,472,375,284,1" />
+		<BUTTON name="btnSave" caption="확인" fontsize="1" btnimage="btn_20.9" ly_vert="0,696,377,60,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="선택해 주세요." bgcolor="092:185046046" halign="1" ly_vert="0,473,375,70,1" />
+		<RADIOGROUP name="RgDateType" fontsize="-2" buttonshape="1" buttonsnumber="4" ly_vert="20,567,337,44,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="당일" radioimage="input_06.9.png" transfervalue="01" position="0,0,80,44" />
+				<RADIO no="1" text="1주일" radioimage="input_06.9.png" transfervalue="02" position="84,0,80,44" />
+				<RADIO no="2" text="1개월" radioimage="input_06.9.png" transfervalue="03" position="168,0,80,44" />
+				<RADIO no="3" text="직접입력" radioimage="input_06.9.png" transfervalue="04" position="252,0,81,44" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<CALENDAR name="cldFromDate" enable="0" fontsize="-2" dispmode="65537" eventtr="ohhts_1081_002r" ly_vert="20,623,150,44,1" />
+		<LABEL name="Label1" fontsize="-2" caption="~" halign="1" ly_vert="178,623,16,44,1" />
+		<CALENDAR name="cldToDate" enable="0" fontsize="-2" dispmode="1398757700" eventtr="ohhts_1081_002r" ly_vert="200,623,150,44,1" />
+		<LABEL name="Label2" fontstyle="01" caption="조회 기간" ly_vert="16,535,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3228" _ulen="3058" >
+'============================================================================
+' 화 면 명 : 실시간시세 신청내역_기간
+' 화면설명 : 실시간시세 신청내역의 기간선택 팝업창
+' 작    성 : 2024.04.24 
+'============================================================================
+
+Dim g_szDate
+g_szDate = "%"
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()
+'msgbox 	szData	
+	if szData <> "" then
+		cldFromDate.caption = Left(szData, 8)
+		cldToDate.caption = MID(szData, 9, 8)
+		RgDateType.currentindex = CInt(Right(szData, 1))
+	else		
+	end if
+
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+	'Form.SendReturnToParent("DATE_SET", cldFromDate.caption & " ~ " & cldToDate.caption)
+End Sub
+
+'============================================================================
+Sub RgDateType_OnClick(nIndex)
+	if nIndex == 0 then      '당일
+		cldFromDate.enable = "0"
+		cldToDate.enable = "0"
+		cldFromDate.caption = Left(Form.calcDateTime( nYear, nMonth, 0, nHour, nMinute, nSecond ), 8)		
+		cldToDate.caption = Left(Form.calcDateTime( nYear,nMonth, nDay, nHour, nMinute, nSecond ), 8)		
+	elseif nIndex == 1 then  '1주일
+		cldFromDate.enable = "0"
+		cldToDate.enable = "0"
+		cldFromDate.caption = Left(Form.calcDateTime( nYear, nMonth, -7, nHour, nMinute, nSecond ), 8)		
+		cldToDate.caption = Left(Form.calcDateTime( nYear,nMonth, nDay, nHour, nMinute, nSecond ), 8)		
+	elseif nIndex == 2 then  '1개월
+		cldFromDate.enable = "0"
+		cldToDate.enable = "0"
+		cldFromDate.caption = Left(Form.calcDateTime( nYear, -1, nDay, nHour, nMinute, nSecond ), 8)		
+		cldToDate.caption = Left(Form.calcDateTime( nYear,nMonth, nDay, nHour, nMinute, nSecond ), 8)		
+	elseif nIndex == 3 then  '직접입력
+		cldFromDate.enable = "1"		
+		cldToDate.enable = "1"		
+	end if
+
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnSave_OnClick()
+'	if  CInt(cldFromDate.caption) > CInt(cldToDate.caption) then
+'msgbox "종료날짜가 시작날짜보도 과거입니다."			
+'	end if 
+	'매매유형선택 알림
+	Form.SendReturnToParent("DATE_SET", cldFromDate.caption & cldToDate.caption & RgDateType.currentindex)
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub cldFromDate_OnEditComplete()
+	'RgDateType.currentindex = 2
+	if CDbl(cldFromDate.caption) > CDbl(cldToDate.caption ) then
+		Form.ShowAlert("알림", "종료일이 시작일 이전입니다.")	
+		btnSave.enable = false
+	else
+		btnSave.enable = true
+	end if 
+End Sub
+
+'============================================================================
+Sub cldToDate_OnEditComplete()
+	'RgDateType.currentindex = 2
+	cldFromDate_OnEditComplete()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

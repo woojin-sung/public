@@ -1,0 +1,2671 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50110" scrname="ETF Super검색_스크리너" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,608,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contCategory" ly_vert="0,0,375,168,1" scroll_ly_vert="0,0,375,168,1" >
+			<CONTROL_INFO>
+				<BUTTON name="btnCategory0" fgcolor="013:051051051" fontsize="-2" ly_vert="20,20,105,36,1" />
+				<BUTTON name="btnCategory1" fgcolor="013:051051051" fontsize="-2" ly_vert="135,20,105,36,1" />
+				<BUTTON name="btnCategory2" fgcolor="013:051051051" fontsize="-2" ly_vert="250,20,105,36,1" />
+				<BUTTON name="btnCategory3" fgcolor="013:051051051" fontsize="-2" ly_vert="20,66,105,36,1" />
+				<BUTTON name="btnCategory4" fgcolor="013:051051051" fontsize="-2" ly_vert="135,66,105,36,1" />
+				<BUTTON name="btnCategory5" fgcolor="013:051051051" fontsize="-2" ly_vert="250,66,105,36,1" />
+				<BUTTON name="btnCategory6" fgcolor="013:051051051" fontsize="-2" ly_vert="20,112,105,36,1" />
+				<BUTTON name="btnCategory7" fgcolor="013:051051051" fontsize="-2" ly_vert="135,112,105,36,1" />
+				<BUTTON name="btnCategory8" fgcolor="013:051051051" fontsize="-2" ly_vert="250,112,105,36,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LINKFORM name="linkfmDetailCond" ly_vert="0,167,375,444,1" />
+		<LABEL name="lblGuide" caption="카테고리를 클릭하여
+원하는 종목을 빠르게 찾아보세요
+
+조건을 다양하게 선택할수록
+맞춤 검색이 가능해요" halign="1" valign="0" multiline="1" ly_vert="0,293,375,162,1" />
+		<IMAGE name="imgCondBg" visible="0" autosize="1" imgpath="bg_flo.9" ly_vert="0,500,375,50,0" />
+		<PANNEL name="Pannel0" carddir="1" ly_vert="20,507,335,36,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblCond" fontsize="-2" bgcolor="029:255212175" ly_vert="0,0,80,36,1" />
+				<IMAGE name="imgRemove" autosize="1" imgpath="icon_remove" ly_vert="80,12,16,12,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="100" gap="10" >
+				<CELL name="lblCond" />
+				<CELL name="imgRemove" />
+			</CARD_INFO>
+		</PANNEL>
+		<BUTTON name="btnClear" visible="0" ly_vert="0,549,145,60,0" />
+		<BUTTON name="btnSearch" visible="0" ly_vert="144,549,231,60,0" />
+		<LINKFORM name="linkfmKeypad" linkfile="nrshidx50110_p1" ly_vert="400,325,375,285,1" />
+		<IMAGE name="imgArrow" autosize="1" ly_vert="137,211,100,65,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="71747" _ulen="70841" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'==============================================
+' 이미지
+'==============================================
+' 카테고리 버튼이미지(기본)
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41.9"
+
+' 카테고리 버튼이미지(선택)
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_41_o.9"
+
+' 카테고리 버튼이미지(설정항목이 있는 경우)
+Dim g_szBtnImg_Check
+g_szBtnImg_Check = "img_box_black.9"
+
+'==============================================
+' 컬러코드
+'==============================================
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal 	= "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey 	= "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White 	= "338"
+
+Dim g_szContBgColor
+g_szContBgColor 		= "320"
+
+'==============================================
+' 수치값
+'==============================================
+Dim g_nRemove_Width 
+g_nRemove_Width = 16
+
+Dim g_nRemove_Gap
+g_nRemove_Gap = 1
+'==============================================
+' 카테고리 항목 매핑정보
+'==============================================
+Dim g_arrCategory
+g_arrCategory = Array("투자지역", "기초자산", "상장국가", "자산규모", "레버리지", "인버스", "배당", "수익률", "운용사")
+
+Dim g_arrCategory_Check
+g_arrCategory_Check = Array("0", "0", "0", "0", "0", "0", "0", "0", "0")
+
+Dim g_arrCategory_Order
+g_arrCategory_Order = {}
+
+Dim g_nCategoryIdx
+g_nCategoryIdx = -1
+
+Dim g_arrMap
+g_arrMap = Array("nrshidx50110_s1", "nrshidx50110_s2", "nrshidx50110_s3", "nrshidx50110_s4", "nrshidx50110_s5", "nrshidx50110_s6", "nrshidx50110_s7", "nrshidx50110_s8", "nrshidx50110_s9")
+
+'==============================================
+' 투자지역 / 기초자산 항목 매핑정보
+'==============================================
+Dim g_arrStep0
+g_arrStep0 = {}
+
+Dim g_arrStep0_Idx
+g_arrStep0_Idx = -1
+
+Dim g_arrStep1
+g_arrStep1 = {}
+
+Dim g_arrStep1_Idx
+g_arrStep1_Idx = -1
+
+Dim g_arrStep2
+g_arrStep2 = {}
+
+Dim g_arrStep2_Idx
+g_arrStep2_Idx = -1
+
+Dim g_arrStep3
+g_arrStep3 = {}
+
+Dim g_arrStep3_Idx
+g_arrStep3_Idx = -1
+
+'==============================================
+' 상세조건 매핑 정보
+'==============================================
+Dim g_arrS1
+g_arrS1 = {}
+
+Dim g_arrS1_Idx
+g_arrS1_Idx = 0
+
+Dim g_arrS2
+g_arrS2 = {}
+
+Dim g_arrS2_Idx
+g_arrS2_Idx = 0
+
+Dim g_arrS3
+g_arrS3 = {}
+
+Dim g_arrS3_Idx
+g_arrS3_Idx = 0
+
+Dim g_arrS4_0
+g_arrS4_0 = {}
+
+Dim g_arrS4_0_Idx
+g_arrS4_0_Idx = 0
+
+Dim g_arrS4_1
+g_arrS4_1 = {}
+
+Dim g_arrS4_1_Idx
+g_arrS4_1_Idx = 0
+
+Dim g_arrS5
+g_arrS5 = {}
+
+Dim g_arrS5_Idx
+g_arrS5_Idx = 0
+
+Dim g_arrS6
+g_arrS6 = {}
+
+Dim g_arrS6_Idx
+g_arrS6_Idx = 0
+
+Dim g_arrS7_0
+g_arrS7_0 = {}
+
+Dim g_arrS7_0_Idx
+g_arrS7_0_Idx = 0
+
+Dim g_arrS7_1
+g_arrS7_1 = {}
+
+Dim g_arrS7_1_Idx
+g_arrS7_1_Idx = 0
+
+Dim g_arrS8_0
+g_arrS8_0 = {}
+
+Dim g_arrS8_0_Idx
+g_arrS8_0_Idx = 0
+
+Dim g_arrS8_1
+g_arrS8_1 = {}
+
+Dim g_arrS8_1_Idx
+g_arrS8_1_Idx = 0
+
+Dim g_arrS9_0
+g_arrS9_0 = {}
+
+Dim g_arrS9_0_Idx
+g_arrS9_0_Idx = 0
+
+Dim g_arrS9_1
+g_arrS9_1 = {}
+
+Dim g_arrS9_1_Idx
+g_arrS9_1_Idx = 0
+
+'==============================================
+' 전역변수
+'==============================================
+Dim g_nSearchCnt
+g_nSearchCnt = 0
+
+Dim g_isPrev
+g_isPrev = false
+
+Dim g_szInBlock1
+g_szInBlock1 = ""
+Dim g_szInBlock2
+g_szInBlock2 = ""
+Dim g_szInBlock3
+g_szInBlock3 = ""
+Dim g_szInBlock4
+g_szInBlock4 = ""
+Dim g_szInBlock5
+g_szInBlock5 = ""
+Dim g_szInBlock6
+g_szInBlock6 = ""
+Dim g_szInBlock7
+g_szInBlock7 = ""
+Dim g_szInBlock8
+g_szInBlock8 = ""
+Dim g_szInBlock9
+g_szInBlock9 = ""
+Dim g_szInBlock10
+g_szInBlock10 = ""
+Dim g_szInBlock11
+g_szInBlock11 = ""
+Dim g_szInBlock12_1
+g_szInBlock12_1 = ""
+Dim g_szInBlock12_2
+g_szInBlock12_2 = ""
+Dim g_szInBlock12_3
+g_szInBlock12_3 = ""
+Dim g_szInBlock12_4
+g_szInBlock12_4 = ""
+Dim g_szInBlock12_5
+g_szInBlock12_5 = ""
+
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'==============================================
+' 컨트롤 초기설정
+'==============================================
+Function Init_Control()
+	lblGuide.fgcolor = g_szTxtColor_Grey
+	
+	btnClear.fgcolor = g_szTxtColor_Normal
+	btnSearch.fgcolor = g_szTxtColor_White
+	
+	btnClear.btnimage = "btn_21.9"
+	btnSearch.btnimage = "btn_20.9"
+	
+	btnClear.caption = "초기화"
+	
+	imgArrow.maintainratio = "1"
+	imgArrow.imgpath = "img_etf_search"
+
+	contCategory.bgcolor = g_szContBgColor
+	nArrCnt = #g_arrCategory
+	for i = 0 to nArrCnt - 1
+		Form.setCtlProp("contCategory.btnCategory"&i, "caption", g_arrCategory(i))
+	next
+End Function
+
+'===============================================
+' 데이터 초기설정
+'===============================================
+Function Init_Data()
+
+End Function
+
+'===============================================
+' 카테고리 항목 세팅
+'===============================================
+Function DisplaySetting_Category(nIdx)
+	linkfmKeypad.left = 400
+	
+	if nIdx < 0 then
+		imgArrow.visible = true
+		lblGuide.visible = true
+		linkfmDetailCond.visible = false
+		
+		linkfmDetailCond.linkfile = "nrsempty.xmf"
+	else
+		imgArrow.visible = false
+		lblGuide.visible = false
+		linkfmDetailCond.visible = true
+		
+		g_nCategoryIdx = nIdx
+		linkfmDetailCond.linkfile = g_arrMap(nIdx)
+	end if
+	
+	nArrCnt = #g_arrCategory
+
+	for i = 0 to nArrCnt - 1
+		if nIdx = i then
+			Form.setCtlProp("contCategory.btnCategory"&i, "fgcolor", g_szTxtColor_Normal)
+			Form.setCtlProp("contCategory.btnCategory"&i, "singleimage", g_szBtnImg_Select)
+		else
+			if g_arrCategory_Check(i) = "1" then
+				Form.setCtlProp("contCategory.btnCategory"&i, "fgcolor", g_szTxtColor_White)
+				Form.setCtlProp("contCategory.btnCategory"&i, "singleimage", g_szBtnImg_Check)
+			else
+				Form.setCtlProp("contCategory.btnCategory"&i, "fgcolor", g_szTxtColor_Normal)
+				Form.setCtlProp("contCategory.btnCategory"&i, "btnimage", g_szBtnImg_Normal)
+			end if
+		end if
+	next
+	
+	nPannelCnt = Pannel0.rowcount
+	if Cint(nPannelCnt) = 0 then
+		Form.triggerEvent("linkfmDetailCond", "50110_COND_STAT", "N")
+	else
+		Form.triggerEvent("linkfmDetailCond", "50110_COND_STAT", "Y")
+	end if
+End Function
+
+Function Reload_Category()
+	nArrCnt = #g_arrCategory
+
+	for i = 0 to nArrCnt - 1
+		if i = g_nCategoryIdx then
+			Form.setCtlProp("contCategory.btnCategory"&i, "fgcolor", g_szTxtColor_Normal)
+			Form.setCtlProp("contCategory.btnCategory"&i, "singleimage", g_szBtnImg_Select)
+		else
+			if g_arrCategory_Check(i) = "1" then
+				Form.setCtlProp("contCategory.btnCategory"&i, "fgcolor", g_szTxtColor_White)
+				Form.setCtlProp("contCategory.btnCategory"&i, "singleimage", g_szBtnImg_Check)
+			else
+				Form.setCtlProp("contCategory.btnCategory"&i, "fgcolor", g_szTxtColor_Normal)
+				Form.setCtlProp("contCategory.btnCategory"&i, "btnimage", g_szBtnImg_Normal)
+			end if
+		end if
+	next
+End Function
+
+'===============================================
+' 카테고리 상세조건 체크여부 확인
+'===============================================
+Function Check_Category(szData, nCategoryIdx)
+	if szData <> "" and szData <> null then
+		g_arrCategory_Check(nCategoryIdx) = "1"
+	else
+		g_arrCategory_Check(nCategoryIdx) = "0"
+	end if
+End Function
+
+'===============================================
+' 상세조건 세팅
+'===============================================
+Function DisplaySetting_Cond()
+	DATAMANAGER.ClearInputData(0, "ohhts_metf_003r")
+
+	g_szInBlock1 = ""
+	g_szInBlock2 = ""
+	g_szInBlock3 = ""
+	g_szInBlock4 = ""
+	g_szInBlock5 = ""
+	g_szInBlock6 = ""
+	g_szInBlock7 = ""
+	g_szInBlock8 = ""
+	g_szInBlock9 = ""
+	g_szInBlock10 = ""
+	g_szInBlock11 = ""
+	g_szInBlock12_1 = ""
+	g_szInBlock12_2 = ""
+	g_szInBlock12_3 = ""
+	g_szInBlock12_4 = ""
+	g_szInBlock12_5 = ""
+	
+	Pannel0.rowcount = 0
+	Pannel0.rowcount = g_arrS1_Idx + g_arrS2_Idx + g_arrS3_Idx + g_arrS4_0_Idx + g_arrS4_1_Idx + g_arrS5_Idx + g_arrS6_Idx + g_arrS7_0_Idx + g_arrS7_1_Idx + g_arrS8_0_Idx + g_arrS8_1_Idx  + g_arrS9_0_Idx + g_arrS9_1_Idx
+	
+'	if Cint(Pannel0.rowcount) > 0 then
+'		Pannel0.toprow = Cint(Pannel0.rowcount-1)
+'	end if
+	
+	if Cint(Pannel0.rowcount) > 0 then
+		imgCondBg.visible = true
+		Pannel0.visible = true
+		btnClear.visible = true
+		btnSearch.visible = true
+		
+		Form.triggerEvent("linkfmDetailCond", "50110_COND_STAT", "Y")
+	else
+		imgCondBg.visible = false
+		Pannel0.visible = false
+		btnClear.visible = false
+		btnSearch.visible = false
+		
+		Form.triggerEvent("linkfmDetailCond", "50110_COND_STAT", "N")
+	end if
+	
+	
+	nStartIdx = -1
+	
+	nLvrgCnt = 0
+	for k = 0 to #g_arrCategory_Order-1 
+		
+		if g_arrCategory_Order(k) = "50110_S1_CHECK" then
+			
+			nArrCnt = g_arrS1_Idx
+			for i = 0 to nArrCnt-1 
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				'Pannel0.setPropCardCell("autofit","lblCond",nStartIdx,"1")
+			
+				szTempData = ""
+				if instr(g_arrS1(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS1(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS1(i)
+				end if
+				
+				if g_szInBlock1 <> "" then
+					g_szInBlock1 = g_szInBlock1 & "`" & szTempData
+				else
+					g_szInBlock1 = szTempData
+				end if
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock1", "FID_INVT_REGN_NAME" , i , szTempData)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, Cint(nWidth) + 2)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+			next
+		
+		elseif g_arrCategory_Order(k) = "50110_S2_CHECK" then
+			
+			
+			'기초자산 중복선택 표시 필요
+			nArrCnt = g_arrS2_Idx
+			nSubCnt = 0
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				arrTempData = Convert_StringToArr(g_arrS2(i), "`")
+				szTempData = ""
+				
+				
+				if instr(arrTempData(0), "^") > 0 then
+					arrTempData2 = Convert_StringToArr(arrTempData(0), "^")
+					szTempData = arrTempData2 (1)
+				else
+					if instr(arrTempData(0), "Step0") > 0 then
+						szTempData = replace(arrTempData(0), "Step0", "")
+						
+						for j = 0 to #arrTempData-1
+							szValue = ""
+							if j = 0 then
+								szValue = replace(arrTempData(j), "Step0", "")
+							else
+								szValue = arrTempData(j)
+							end if
+							
+							if g_szInBlock4 <> "" then
+								g_szInBlock4 = g_szInBlock4 & "`" & szValue
+							else
+								g_szInBlock4 = szValue
+							end if
+						
+							DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock4", "FID_LRDV_CODE_NAME", j , szValue)
+						next
+						
+					elseif instr(arrTempData(0), "Step1") > 0 then
+						szTempData = replace(arrTempData(0), "Step1", "")
+						
+						for j = 0 to #arrTempData-1
+							szValue = ""
+							if j = 0 then
+								szValue = replace(arrTempData(j), "Step1", "")
+							else
+								szValue = arrTempData(j)
+							end if
+							
+							if g_szInBlock5 <> "" then
+								g_szInBlock5 = g_szInBlock5 & "`" & szValue
+							else
+								g_szInBlock5 = szValue
+							end if
+							DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock5", "FID_MDDV_CODE_NAME", j , szValue)
+						next
+						
+					elseif instr(arrTempData(0), "Step2") > 0 then
+						szTempData = replace(arrTempData(0), "Step2", "")
+						
+						nSubCnt = DATAMANAGER.GetDataCount(0, "ohhts_metf_003r", "InBlock5")
+						szData = DATAMANAGER.GetDataValue(0, "ohhts_metf_003r", "InBlock3", "FID_UNAS_NAME", 0)
+						for j = 0 to #arrTempData-1
+							szValue = ""
+							if j = 0 then
+								szValue = replace(arrTempData(j), "Step2", "")
+							else
+								szValue = arrTempData(j)
+							end if
+							
+							if szData = "원자재" then
+							
+								if g_szInBlock5 <> "" then
+									g_szInBlock5 = g_szInBlock5 & "`" & szValue
+								else
+									g_szInBlock5 = szValue
+								end if
+		
+								DATAMANAGER.SetDataValue(0,"ohhts_metf_003r", "InBlock5", "FID_MDDV_CODE_NAME" , j + nSubCnt , szValue)
+							else
+								if g_szInBlock6 <> "" then
+									g_szInBlock6 = g_szInBlock6 & "`" & szValue
+								else
+									g_szInBlock6 = szValue
+								end if
+								szTempVal = szValue
+								
+								if szTempVal = "BBB-- 이상" then
+									szTempVal = "IG"
+								elseif szTempVal = "BB+ 이하" then
+									szTempVal = "HY"
+								end if
+							
+					
+								DATAMANAGER.SetDataValue(0,"ohhts_metf_003r", "InBlock6", "FID_SMDV_CODE_NAME" , j , szTempVal)
+							end if
+						next
+					else
+						szTempData = arrTempData(0)
+						if g_szInBlock3 <> "" then
+							g_szInBlock3 = g_szInBlock3 & "`" & szTempData
+						else
+							g_szInBlock3 = szTempData
+						end if
+						DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock3", "FID_UNAS_NAME", i , szTempData)
+					end if
+				end if
+				
+				nArrCnt  = #arrTempData-1
+				
+				if nArrCnt > 0 then
+					szTempData = szTempData & " 외 " & nArrCnt & "개"
+				end if
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+		
+		elseif g_arrCategory_Order(k) = "50110_S3_CHECK" then
+			nArrCnt = g_arrS3_Idx
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS3(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS3(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS3(i)
+				end if
+				
+				szNationCd = ""
+				if szTempData = "한국 상장" then
+					szNationCd = "KOR"
+				elseif szTempData = "미국 상장" then
+					szNationCd = "USA"
+				elseif szTempData = "중국 상장" then
+					szNationCd = "CHN"
+				elseif szTempData = "홍콩 상장" then
+					szNationCd = "HKG"
+				elseif szTempData = "일본 상장" then
+					szNationCd = "JPN"
+				end if
+				
+				if g_szInBlock2 <> "" then
+					g_szInBlock2 = g_szInBlock2 & "`" & szNationCd
+				else
+					g_szInBlock2 = szNationCd
+				end if
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock2", "FID_LSTN_NTNL_CODE", i , szNationCd)
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+		
+		elseif g_arrCategory_Order(k) = "50110_S4_CHECK" then
+			nSubCnt = 0
+			nArrCnt =  g_arrS4_0_Idx
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS4_0(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS4_0(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS4_0(i)
+				end if
+				
+				szVolCd = ""
+				if szTempData = "500억 미만" then
+					szVolCd = "01"
+				elseif szTempData = "5백억~\n1천억 미만" then
+					szVolCd = "02"
+				elseif szTempData = "1천억~\n5천억 미만" then
+					szVolCd = "03"
+				elseif szTempData = "5천억 이상" then
+					szVolCd = "04"
+				end if
+				
+				if g_szInBlock7 <> "" then
+					g_szInBlock7 = g_szInBlock7 & "`" & szVolCd
+				else
+					g_szInBlock7 = szVolCd
+				end if
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock7", "FID_INPUT_ASET_SCAL", nSubCnt , szVolCd)
+				nSubCnt = nSubCnt + 1
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+			
+			nArrCnt =  g_arrS4_1_Idx
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS4_1(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS4_1(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS4_1(i)
+				end if
+				
+				szVolCd = ""
+				if szTempData = "1천만 달러 미만" then
+					szVolCd = "11"
+				elseif szTempData = "1천만~\n1억 달러 미만" then
+					szVolCd = "12"
+				elseif szTempData = "1억~\n10억 달러 미만" then
+					szVolCd = "13"
+				elseif szTempData = "10억~\n100억달러 미만" then
+					szVolCd = "14"
+				elseif szTempData = "100억 달러 이상" then
+					szVolCd = "15"
+				end if
+				
+				if g_szInBlock7 <> "" then
+					g_szInBlock7 = g_szInBlock7 & "`" & szVolCd
+				else
+					g_szInBlock7 = szVolCd
+				end if
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock7", "FID_INPUT_ASET_SCAL", nSubCnt , szVolCd)
+				nSubCnt = nSubCnt + 1
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+			
+			nSubCnt = 0
+			
+		elseif g_arrCategory_Order(k) = "50110_S5_CHECK" then
+		
+			nArrCnt = g_arrS5_Idx
+			nSubCnt = 0
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS5(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS5(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS5(i)
+				end if
+				
+				szLvrgCd = ""
+				if szTempData = "+1배" then
+					szLvrgCd = "1"
+				elseif szTempData = "+1.25~1.75배" then
+					szLvrgCd = "1.5"
+				elseif szTempData = "+2배" then
+					szLvrgCd = "2"
+				elseif szTempData = "+3배" then
+					szLvrgCd = "3"
+				end if
+				
+				if g_szInBlock8 <> "" then
+					g_szInBlock8 = g_szInBlock8 & "`" & szLvrgCd
+				else
+					g_szInBlock8 = szLvrgCd
+				end if
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock8", "FID_INPUT_LVRG", nLvrgCnt , szLvrgCd)
+				nLvrgCnt = nLvrgCnt + 1
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+		
+		elseif g_arrCategory_Order(k) = "50110_S6_CHECK" then
+			nArrCnt = g_arrS6_Idx
+			nSubCnt = 0
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS6(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS6(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS6(i)
+				end if
+				
+				szLvrgCd = ""
+				if szTempData = "-1배" then
+					szLvrgCd = "-1"
+				elseif szTempData = "-1.25~1.75배" then
+					szLvrgCd = "-1.5"
+				elseif szTempData = "-2배" then
+					szLvrgCd = "-2"
+				elseif szTempData = "-3배" then
+					szLvrgCd = "-3"
+				end if
+				
+				if g_szInBlock8 <> "" then
+					g_szInBlock8 = g_szInBlock8 & "`" & szLvrgCd
+				else
+					g_szInBlock8 = szLvrgCd
+				end if
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock8", "FID_INPUT_LVRG", nLvrgCnt , szLvrgCd)
+				nLvrgCnt = nLvrgCnt + 1
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+			
+			
+		elseif g_arrCategory_Order(k) = "50110_S7_CHECK" then
+		
+			nArrCnt = g_arrS7_0_Idx
+			nSubCnt = 0
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS7_0(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS7_0(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS7_0(i)
+				end if
+				
+			
+				arrRate = split(replace(szTempData, "%", ""),"~")
+				
+				g_szInBlock12_1 = trim(arrRate(0))
+				g_szInBlock12_2 = trim(arrRate(1))
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock12", "FID_INPUT_DVRT", 0 , trim(arrRate(0)))
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock12", "FID_INPUT_DVRT2", 0 ,  trim(arrRate(1)))
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+			
+			nArrCnt = g_arrS7_1_Idx
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS7_1(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS7_1(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS7_1(i)
+				end if
+				
+				szPeriodCd = ""
+				
+				if szTempData = "월" then
+					szPeriodCd = "1"
+				elseif szTempData = "분기" then
+					szPeriodCd = "2"
+				elseif szTempData = "반기" then
+					szPeriodCd = "3"
+				elseif szTempData = "연간" then
+					szPeriodCd = "4"
+				elseif szTempData = "비정기" then
+					szPeriodCd = "5"
+				end if
+				
+				if g_szInBlock11 <> "" then
+					g_szInBlock11 = g_szInBlock11 & "`" & szPeriodCd
+				else
+					g_szInBlock11 = szPeriodCd
+				end if
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock11", "FIDX_INPUT_DVDN_CYCL", i , szPeriodCd)
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+		
+		elseif g_arrCategory_Order(k) = "50110_S8_CHECK" then
+			nArrCnt = g_arrS8_0_Idx
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS8_0(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS8_0(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS8_0(i)
+				end if
+				
+				szPeriodCd = ""
+				
+				if szTempData = "1개월" then
+					szPeriodCd = "1"
+				elseif szTempData = "3개월" then
+					szPeriodCd = "2"
+				elseif szTempData = "6개월" then
+					szPeriodCd = "3"
+				elseif szTempData = "1년" then
+					szPeriodCd = "4"
+				elseif szTempData = "3년" then
+					szPeriodCd = "5"
+				end if
+				
+				g_szInBlock12_5 = szPeriodCd
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock12", "FID_INPUT_ERNN_PRD", 0 , szPeriodCd)
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+			
+			nArrCnt = g_arrS8_1_Idx
+			for i = 0 to nArrCnt-1
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				if instr(g_arrS8_1(i), "^") > 0 then
+					arrTempData = Convert_StringToArr(g_arrS8_1(i), "^")
+					szTempData = arrTempData(1)
+				else
+					szTempData = g_arrS8_1(i)
+				end if
+				
+				arrRate = split(replace(szTempData, "%", ""),"~")
+				
+				g_szInBlock12_3 = trim(arrRate(0))
+				g_szInBlock12_4 = trim(arrRate(1))
+				
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock12", "FID_INPUT_ERT", 0 , trim(arrRate(0)))
+				DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock12", "FID_INPUT_ERT2", 0 ,  trim(arrRate(1)))
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			next
+		
+		elseif g_arrCategory_Order(k) = "50110_S9_CHECK" then
+		
+			nSubCnt = 0
+			nArrCnt = g_arrS9_0_Idx
+			if nArrCnt > 0 then
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				
+				arrTempData = Convert_StringToArr(g_arrS9_0(0), "`")
+				nArrTempCnt = #arrTempData 
+				if nArrTempCnt > 1 then
+					szTempData = arrTempData(0) & " 외 " & nArrTempCnt-1 & "개"
+				else
+					szTempData = arrTempData(0)
+				end if
+				
+				for j = 0 to nArrTempCnt-1
+					if g_szInBlock10 <> "" then
+						g_szInBlock10 = g_szInBlock10 & "`" & arrTempData(j)
+					else
+						g_szInBlock10 = arrTempData(j)
+					end if
+					DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock10", "FIDX_MGCO_NAME", nSubCnt , arrTempData(j))
+					nSubCnt = nSubCnt + 1
+				next
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			end if
+		
+			nArrCnt = g_arrS9_1_Idx
+			if nArrCnt > 0 then
+				nStartIdx = nStartIdx + 1
+				Pannel0.setPropCardCell("paddinginfo","lblCond",nStartIdx,"0,0,0,0")
+				Pannel0.setPropCardCell("maintainratio","imgRemove",nStartIdx,"3")
+				Pannel0.setPropCardCell("imgpath","imgRemove",nStartIdx,"icon_close")
+				szTempData = ""
+				
+				arrTempData = Convert_StringToArr(g_arrS9_1(0), "`")
+				nArrTempCnt = #arrTempData 
+				if nArrTempCnt > 1 then
+					szTempData = arrTempData(0) & " 외 " & nArrTempCnt-1 & "개"
+				else
+					szTempData = arrTempData(0)
+				end if
+				
+				for j = 0 to nArrTempCnt-1
+					if g_szInBlock10 <> "" then
+						g_szInBlock10 = g_szInBlock10 & "`" & arrTempData(j)
+					else
+						g_szInBlock10 = arrTempData(j)
+					end if
+					DATAMANAGER.SetDataValue(0, "ohhts_metf_003r", "InBlock10", "FIDX_MGCO_NAME", nSubCnt , arrTempData(j))
+					nSubCnt = nSubCnt + 1
+				next
+				
+				nWidth = Form.getTextWidth(szTempData, -2, false, false)
+				Pannel0.setPropCardCell("width", "lblCond", nStartIdx, nWidth)
+				Pannel0.setPropCardCell("left", "imgRemove", nStartIdx, nWidth + g_nRemove_Gap)
+				Pannel0.SetCardWHAt(nStartIdx,nWidth+g_nRemove_Gap+g_nRemove_Width)
+				
+				Pannel0.setPropCardCell("caption","lblCond",nStartIdx, szTempData)
+			end if
+		end if
+	next
+	nLvrgCnt = 0
+	nSubCnt = 0
+	
+	if Cint(Pannel0.rowcount) > 0 then
+		Pannel0.toprow = Cint(Pannel0.rowcount-1)
+	end if
+	
+'	Form.SetTimerEvent3(1,1,1)
+
+	DATAMANAGER.RequestTranData("ohhts_metf_003r")
+
+End Function
+
+Dim g_isRequset
+g_isRequset = false
+'===============================================
+' 상세조건 삭제
+'===============================================
+Function Remove_Cond(nIdx)
+	nStartIdx = 0
+	nDataCnt = 0
+	arrTemp = g_arrCategory_Order
+	
+	for k = 0 to #arrTemp-1 
+		
+		if arrTemp(k) = "50110_S1_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS1_Idx
+			
+			if g_arrS1_Idx <> 0 and nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				'nArrCnt = g_arrS1_Idx
+				
+				szRemoveData = g_arrS1(nPos-1)
+				
+				Table.remove(g_arrS1, nPos)
+				g_arrS1_Idx = g_arrS1_Idx - 1
+				
+				szResultData = Convert_ArrToString(g_arrS1, "`")
+				
+				Check_Category(Convert_ArrToString(g_arrS1, "`"), 0)
+				Form.SetSharedData("50110_S1_CHECK" , Convert_ArrToString(g_arrS1, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S1_CHECK", "")
+				
+				if szResultData <> "" then
+					if g_arrS2_Idx > 1 then
+						if g_arrS2(0) = "주식" and g_arrS2(1) = "Step0대표지수" then
+							if g_arrS2_Idx > 3  then
+								Table.remove(g_arrS2,3)
+								Table.remove(g_arrS2,3)
+							elseif  g_arrS2_Idx > 2  then
+								Table.remove(g_arrS2,3)
+							end if
+								
+							Table.insert(g_arrS2, 3, "Step1"&szResultData)
+					
+							g_arrS2_Idx = #g_arrS2
+							Form.SetSharedData("50110_S2_CHECK" , Convert_ArrToString(g_arrS2, "★"))
+							
+							Form.triggerEvent("linkfmDetailCond", "50110_S2_CHECK", "")
+						end if
+					end if	
+				elseif szResultData = "" then
+					if g_arrS2_Idx > 1 then
+						if g_arrS2(0) = "주식" and g_arrS2(1) = "Step0대표지수" then
+							if g_arrS2_Idx > 3  then
+								Table.remove(g_arrS2,3)
+								Table.remove(g_arrS2,3)
+							elseif  g_arrS2_Idx > 2  then
+								Table.remove(g_arrS2,3)
+							end if
+						end if
+					end if
+					
+					g_arrS2_Idx = #g_arrS2
+					Form.SetSharedData("50110_S2_CHECK" , Convert_ArrToString(g_arrS2, "★"))
+					
+					Form.triggerEvent("linkfmDetailCond", "50110_S2_CHECK", "")
+					
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				
+				exit Function
+			end if
+		
+		elseif arrTemp(k) = "50110_S2_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS2_Idx
+			
+			if g_arrS2_Idx <> 0  and  nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS2_Idx
+		
+				if nArrCnt > 0 then
+					if g_arrS2(0) = "채권" then
+						if g_arrS2(nPos-1) = "채권" then
+							for i = nPos to nArrCnt
+								Table.remove(g_arrS2, nPos)
+								g_arrS2_Idx = g_arrS2_Idx - 1
+							next
+						else
+							if instr(g_arrS2(nPos-1), "Step0") > 0 then
+								for i = nPos to nArrCnt
+									if instr(g_arrS2(i-1), "Step2") > 0 then
+							
+										Table.remove(g_arrS2, i)
+										g_arrS2_Idx = g_arrS2_Idx - 1
+									end if
+								next
+							end if
+							
+							Table.remove(g_arrS2, nPos)
+							g_arrS2_Idx = g_arrS2_Idx - 1
+						end if
+						
+					elseif g_arrS2(0) = "원자재" then
+						
+						if g_arrS2(nPos-1) = "원자재" then
+							for i = nPos to nArrCnt
+								Table.remove(g_arrS2, nPos)
+								g_arrS2_Idx = g_arrS2_Idx - 1
+							next
+						else
+							if instr(g_arrS2(nPos-1), "Step0") > 0 then
+								for i = nPos to nArrCnt
+									Table.remove(g_arrS2, i)
+									g_arrS2_Idx = g_arrS2_Idx - 1
+								next
+							else
+								Table.remove(g_arrS2, nPos)
+								g_arrS2_Idx = g_arrS2_Idx - 1
+							end if
+						
+						end if
+					else
+						if g_arrS2_Idx > 1 then
+							if g_arrS2(0) = "주식" and g_arrS2(1) = "Step0대표지수" then
+								if g_arrS1_Idx > 0 and instr(g_arrS2(nPos-1), "Step1") > 0 then
+								
+								else
+									for i = nPos to nArrCnt
+										Table.remove(g_arrS2, nPos)
+										g_arrS2_Idx = g_arrS2_Idx - 1
+									next
+								end if
+							else
+								for i = nPos to nArrCnt
+									Table.remove(g_arrS2, nPos)
+									g_arrS2_Idx = g_arrS2_Idx - 1
+								next
+							end if
+						else
+							for i = nPos to nArrCnt
+								Table.remove(g_arrS2, nPos)
+								g_arrS2_Idx = g_arrS2_Idx - 1
+							next
+						end if
+					end if
+					
+					szResultData = Convert_ArrToString(g_arrS2, "")
+					if szResultData = "" then
+						Table.remove(g_arrCategory_Order, k+1)
+						Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+					end if
+					
+					Check_Category(Convert_ArrToString(g_arrS2, "`"), 1)
+					Form.SetSharedData("50110_S2_CHECK" , Convert_ArrToString(g_arrS2, "★"))
+					Form.triggerEvent("linkfmDetailCond", "50110_S2_CHECK", "") 
+				end if
+				
+				exit Function
+			end if
+		
+		elseif arrTemp(k) = "50110_S3_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS3_Idx
+			
+			if g_arrS3_Idx <> 0 and nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS3_Idx
+				
+				if g_arrS3(nPos-1) = "한국 상장" then
+					Form.SetSharedData("50110_S4_CHECK_DOMESTIC", "" )
+					g_arrS4_0 = {}
+					g_arrS4_0_Idx = 0
+					
+					Check_Category(Convert_ArrToString(g_arrS4_0, "`"), 3)
+				end if
+				
+				if g_arrS3(nPos-1) = "미국 상장" or g_arrS3(nPos-1) = "중국 상장" or g_arrS3(nPos-1) = "홍콩 상장" or g_arrS3(nPos-1) = "일본 상장"  then
+					if (g_arrS3(0) <> "한국 상장" and #g_arrS3 = 1) or (g_arrS3(0) = "한국 상장" and #g_arrS3 = 2) then
+						Form.SetSharedData("50110_S4_CHECK_OVERSEA", "" )
+						g_arrS4_1 = {}
+						g_arrS4_1_Idx = 0
+						
+						Check_Category(Convert_ArrToString(g_arrS4_1, "`"), 3)
+					end if
+				end if
+				
+				Table.remove(g_arrS3, nPos)
+				g_arrS3_Idx = g_arrS3_Idx - 1
+				
+				szResultData = Convert_ArrToString(g_arrS3, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				
+				Check_Category(Convert_ArrToString(g_arrS3, "`"), 2)
+				Form.SetSharedData("50110_S3_CHECK" , Convert_ArrToString(g_arrS3, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S3_CHECK", "") 	
+				Form.triggerEvent("linkfmDetailCond", "50110_S4_CHECK", "")
+				exit Function
+			end if
+		
+		elseif arrTemp(k) = "50110_S4_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS4_0_Idx
+			
+			if g_arrS4_0_Idx <> 0 and  nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS4_0_Idx
+				
+				Table.remove(g_arrS4_0, nPos)
+				g_arrS4_0_Idx = g_arrS4_0_Idx - 1
+				
+				
+				
+				Form.SetSharedData("50110_S4_CHECK_DOMESTIC" , Convert_ArrToString(g_arrS4_0, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S4_CHECK", "") 	
+				
+				szResultData = Convert_ArrToString(g_arrS4_0, "")
+				szResultData = szResultData & Convert_ArrToString(g_arrS4_1, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+			
+				Check_Category(szResultData, 3)
+				
+				exit Function
+			end if
+			
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS4_1_Idx
+			
+			if g_arrS4_1_Idx <> 0 and  nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS4_1_Idx
+				
+				Table.remove(g_arrS4_1, nPos)
+				g_arrS4_1_Idx = g_arrS4_1_Idx - 1
+				
+				
+				
+				Form.SetSharedData("50110_S4_CHECK_OVERSEA" , Convert_ArrToString(g_arrS4_1, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S4_CHECK", "") 
+				
+				szResultData = Convert_ArrToString(g_arrS4_0, "")
+				szResultData = szResultData & Convert_ArrToString(g_arrS4_1, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+			
+				Check_Category(szResultData, 3)
+				
+				exit Function
+			end if
+			
+			
+			
+		elseif arrTemp(k) = "50110_S5_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS5_Idx
+			
+			if g_arrS5_Idx <> 0 and nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS5_Idx
+				
+				Table.remove(g_arrS5, nPos)
+				g_arrS5_Idx = g_arrS5_Idx - 1
+				
+				szResultData = Convert_ArrToString(g_arrS5, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				
+				Check_Category(Convert_ArrToString(g_arrS5, "`"), 4)
+				Form.SetSharedData("50110_S5_CHECK" , Convert_ArrToString(g_arrS5, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S5_CHECK", "") 
+				
+				exit Function
+			end if
+		
+		elseif arrTemp(k) = "50110_S6_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS6_Idx
+			
+			if g_arrS6_Idx <> 0 and  nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS6_Idx
+		
+				Table.remove(g_arrS6, nPos)
+				g_arrS6_Idx = g_arrS6_Idx - 1
+				
+				szResultData = Convert_ArrToString(g_arrS6, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				
+				Check_Category(Convert_ArrToString(g_arrS6, "`"), 5)
+				Form.SetSharedData("50110_S6_CHECK" , Convert_ArrToString(g_arrS6, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S6_CHECK", "") 
+				
+				exit Function
+			end if
+		
+		elseif arrTemp(k) = "50110_S7_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS7_0_Idx
+	
+			if g_arrS7_0_Idx <> 0 and nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS7_0_Idx
+		
+				Table.remove(g_arrS7_0, nPos)
+				g_arrS7_0_Idx = g_arrS7_0_Idx - 1
+				
+				Form.SetSharedData("50110_S7_CHECK_RATE" , Convert_ArrToString(g_arrS7_0, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S7_CHECK", "") 
+				
+				szResultData = Convert_ArrToString(g_arrS7_0, "")
+				szResultData = szResultData & Convert_ArrToString(g_arrS7_1, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				
+				Check_Category(szResultData, 6)
+				
+				exit Function
+			end if
+			
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS7_1_Idx
+			
+			if g_arrS7_1_Idx <> 0 and nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS7_1_Idx
+		
+				Table.remove(g_arrS7_1, nPos)
+				g_arrS7_1_Idx = g_arrS7_1_Idx - 1
+
+				Form.SetSharedData("50110_S7_CHECK_PERIOD" , Convert_ArrToString(g_arrS7_1, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S7_CHECK", "") 
+				
+				szResultData = Convert_ArrToString(g_arrS7_0, "")
+				szResultData = szResultData & Convert_ArrToString(g_arrS7_1, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				
+				Check_Category(szResultData, 6)
+				
+				exit Function
+			end if
+			
+			
+		
+		elseif arrTemp(k) = "50110_S8_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS8_0_Idx
+			
+			if g_arrS8_0_Idx <> 0 and nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS8_0_Idx
+		
+				Table.remove(g_arrS8_0, nPos)
+				g_arrS8_0_Idx = g_arrS8_0_Idx - 1
+				
+				Form.SetSharedData("50110_S8_CHECK_PERIOD" , Convert_ArrToString(g_arrS8_0, "`"))
+				
+				g_arrS8_1 = {}
+				g_arrS8_1_Idx = 0
+				Form.SetSharedData("50110_S8_CHECK_RATE" , Convert_ArrToString(g_arrS8_1, "`"))
+				
+				Form.triggerEvent("linkfmDetailCond", "50110_S8_CHECK", "") 
+				
+				szResultData = Convert_ArrToString(g_arrS8_0, "")
+				szResultData = szResultData & Convert_ArrToString(g_arrS8_1, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				Check_Category(szResultData, 7)
+		
+				exit Function
+			end if
+			
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS8_1_Idx
+			
+			if g_arrS8_1_Idx <> 0 and nIdx < nDataCnt and nIdx >= nStartIdx then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS8_1_Idx
+		
+				Table.remove(g_arrS8_1, nPos)
+				g_arrS8_1_Idx = g_arrS8_1_Idx - 1
+				
+				Form.SetSharedData("50110_S8_CHECK_RATE" , Convert_ArrToString(g_arrS8_1, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S8_CHECK", "") 
+				
+				szResultData = Convert_ArrToString(g_arrS8_0, "")
+				szResultData = szResultData & Convert_ArrToString(g_arrS8_1, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				Check_Category(szResultData, 7)
+		
+				exit Function
+				
+			end if
+			
+			
+			
+		elseif arrTemp(k) = "50110_S9_CHECK" then
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS9_0_Idx
+			
+			if g_arrS9_0_Idx <> 0 and nIdx < nDataCnt then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS9_0_Idx
+		
+				Table.remove(g_arrS9_0, nPos)
+				g_arrS9_0_Idx = g_arrS9_0_Idx - 1
+				
+				Form.SetSharedData("50110_S9_CHECK_DOMESTIC" , Convert_ArrToString(g_arrS9_0, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S9_CHECK", "") 
+				
+				szResultData = Convert_ArrToString(g_arrS9_0, "")
+				szResultData = szResultData & Convert_ArrToString(g_arrS9_1, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				Check_Category(szResultData, 8)
+				exit Function
+			end if
+			
+			nStartIdx = nDataCnt
+			nDataCnt = nDataCnt + g_arrS9_1_Idx
+			
+			if g_arrS9_1_Idx <> 0 and nIdx < nDataCnt then
+				nPos = nIdx - nStartIdx + 1
+				nArrCnt = g_arrS9_1_Idx
+		
+				Table.remove(g_arrS9_1, nPos)
+				g_arrS9_1_Idx = g_arrS9_1_Idx - 1
+		
+				Form.SetSharedData("50110_S9_CHECK_OVERSEA" , Convert_ArrToString(g_arrS9_1, "`"))
+				Form.triggerEvent("linkfmDetailCond", "50110_S9_CHECK", "") 
+				
+				szResultData = Convert_ArrToString(g_arrS9_0, "")
+				szResultData = szResultData & Convert_ArrToString(g_arrS9_1, "")
+				if szResultData = "" then
+					Table.remove(g_arrCategory_Order, k+1)
+					Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+				end if
+				Check_Category(szResultData, 8)
+				exit Function
+			end if
+			
+			
+		
+		end if
+	next
+
+End Function
+
+'===============================================
+' 상세조건 전체삭제
+'===============================================
+Function Clear_Cond()
+	g_arrS1 = {}
+	g_arrS1_Idx = 0
+	
+	g_arrS2 = {}
+	g_arrS2_Idx = 0
+	
+	g_arrS3 = {}
+	g_arrS3_Idx = 0
+	
+	g_arrS4_0 = {}
+	g_arrS4_0_Idx = 0
+	
+	g_arrS4_1 = {}
+	g_arrS4_1_Idx = 0
+	
+	g_arrS5 = {}
+	g_arrS5_Idx = 0
+	
+	g_arrS6 = {}
+	g_arrS6_Idx = 0
+	
+	g_arrS7_0 = {}
+	g_arrS7_0_Idx = 0
+	
+	g_arrS7_1 = {}
+	g_arrS7_1_Idx = 0
+	
+	g_arrS8_0 = {}
+	g_arrS8_0_Idx = 0
+	
+	g_arrS8_1 = {}
+	g_arrS8_1_Idx = 0
+	
+	g_arrS9_0 = {}
+	g_arrS9_0_Idx = 0
+	
+	g_arrS9_1 = {}
+	g_arrS9_1_Idx = 0
+	
+	Check_Category("", 0)
+	Check_Category("", 1)
+	Check_Category("", 2)
+	Check_Category("", 3)
+	Check_Category("", 4)
+	Check_Category("", 5)
+	Check_Category("", 6)
+	Check_Category("", 7)
+	Check_Category("", 8)
+	
+	
+	Form.SetSharedData("50110_CATEGORY", "" )
+	Form.SetSharedData("50110_S1_CHECK", "" )
+	
+	Form.SetSharedData("50110_S2_CHECK", "" )
+	
+	Form.SetSharedData("50110_S3_CHECK", "" )
+	
+	Form.SetSharedData("50110_S4_CHECK_DOMESTIC", "" )
+	Form.SetSharedData("50110_S4_CHECK_OVERSEA", "" )
+	
+	Form.SetSharedData("50110_S5_CHECK", "" )
+	
+	Form.SetSharedData("50110_S6_CHECK", "" )
+	
+	Form.SetSharedData("50110_S7_CHECK_RATE", "" )
+	Form.SetSharedData("50110_S7_CHECK_PERIOD", "" )
+	
+	Form.SetSharedData("50110_S8_CHECK_RATE", "" )
+	Form.SetSharedData("50110_S8_CHECK_PERIOD", "" )
+	
+	Form.SetSharedData("50110_S9_CHECK_DOMESTIC", "" )
+	Form.SetSharedData("50110_S9_CHECK_OVERSEA", "" )
+	
+	
+	
+	Reload_Category()
+	DisplaySetting_Cond()
+	DisplaySetting_Category(-1)
+End Function
+
+
+'===============================================
+' 배열 -> 문자열 변환
+'===============================================
+Function Convert_ArrToString(arrData, szSeperator)
+	szResult = ""
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if i <> 0 then
+			szResult = szResult & szSeperator 
+		end if
+		
+		szResult = szResult & arrData(i) 
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환(체크항목)
+'===============================================
+Function Convert_ChkArrToString(arrData, arrChkData, szSeperator)
+	szResult = ""
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if arrChkData(i) = "1" then
+			if szResult <> "" then
+				szResult = szResult & szSeperator 
+			end if
+			szResult = szResult & arrData(i) 
+		end if
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 문자열 -> 배열 변환
+'===============================================
+Function Convert_StringToArr(szData, szSeperator)
+	szArrData = ""
+	
+	if szData <> null and szData <> "" then
+		szArrData = split(szData, szSeperator)
+	end if
+	
+	return szArrData
+End Function
+
+'===============================================
+' 배열 데이터 확인
+'===============================================
+Function Contains_Array(arrData, szData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		szArrData = arrData(i)
+		
+		if szArrData = szData then
+			return true
+		end if
+	next 
+	
+	return false
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	DATAMANAGER.RequestTranData("ohhts_metf_031r")
+	
+	Init_Control()
+
+'	Dim szData
+'	szData = Form.GetSharedData("50110_CATEGORY", false )
+'	
+'	g_arrCategory_Order = Convert_StringToArr(szData, "`")
+'	
+'	if g_arrCategory_Order = "" then
+'		g_arrCategory_Order = {}
+'	end if
+'
+'	szData = Form.GetSharedData("50110_S1_CHECK", false )
+'	Check_Category(szData, 0)
+'	
+'	g_arrS1 = Convert_StringToArr(szData, "`")
+'	g_arrS1_Idx = #g_arrS1
+'	
+'	szData = Form.GetSharedData("50110_S2_CHECK", false )
+'	Check_Category(szData, 1)
+'	
+'	g_arrS2 = Convert_StringToArr(szData, "★")
+'	g_arrS2_Idx = #g_arrS2
+'	
+'	szData = Form.GetSharedData("50110_S3_CHECK", false )
+'	Check_Category(szData, 2)
+'	g_arrS3 = Convert_StringToArr(szData, "`")
+'	g_arrS3_Idx = #g_arrS3
+'	
+'	szData0 = Form.GetSharedData("50110_S4_CHECK_DOMESTIC", false )
+'	g_arrS4_0 = Convert_StringToArr(szData0, "`")
+'	g_arrS4_0_Idx = #g_arrS4_0
+'	
+'	szData1 = Form.GetSharedData("50110_S4_CHECK_OVERSEA", false )
+'	g_arrS4_1 = Convert_StringToArr(szData1, "`")
+'	g_arrS4_1_Idx = #g_arrS4_1
+'	
+'	szData = szData0&szData1
+'	Check_Category(szData, 3)
+'	
+'	szData = Form.GetSharedData("50110_S5_CHECK", false )
+'	Check_Category(szData, 4)
+'	g_arrS5 = Convert_StringToArr(szData, "`")
+'	g_arrS5_Idx = #g_arrS5
+'	
+'	szData = Form.GetSharedData("50110_S6_CHECK", false )
+'	Check_Category(szData, 5)
+'	g_arrS6 = Convert_StringToArr(szData, "`")
+'	g_arrS6_Idx = #g_arrS6
+'	
+'	szData0 = Form.GetSharedData("50110_S7_CHECK_RATE", false )
+'	szSubResult = ""
+'	if szData0 <> "" then
+'		arrTempData = Convert_StringToArr(szData0, "`")
+'		
+'		if #arrTempData > 1 then
+'			szSubResult = arrTempData(0)&" ~ "&arrTempData(1)
+'		end if
+'	end if
+'	
+'	if szSubResult <> "" then
+'		g_arrS7_0 = {szSubResult}
+'	else
+'		g_arrS7_0 = {}
+'	end if
+'	
+'	g_arrS7_0_Idx = #g_arrS7_0
+'	
+'	szData1 = Form.GetSharedData("50110_S7_CHECK_PERIOD", false )
+'	g_arrS7_1 = Convert_StringToArr(szData1, "`")
+'	g_arrS7_1_Idx = #g_arrS7_1
+'	
+'	szData = szData0&szData1
+'	Check_Category(szData, 6)
+'	
+'	szData0 = Form.GetSharedData("50110_S8_CHECK_PERIOD", false )
+'	g_arrS8_0 = Convert_StringToArr(szData0, "`")
+'	g_arrS8_0_Idx = #g_arrS8_0
+'	
+'	szData1 = Form.GetSharedData("50110_S8_CHECK_RATE", false )
+'	
+'	szSubResult = ""
+'	if szData1 <> "" then
+'		arrTempData = Convert_StringToArr(szData1, "`")
+'		
+'		if #arrTempData > 1 then
+'			szSubResult = arrTempData(0)&" ~ "&arrTempData(1)
+'		end if
+'	end if
+'	
+'	if szSubResult <> "" then
+'		g_arrS8_1 = {szSubResult}
+'	else
+'		g_arrS8_1 = {}
+'	end if
+'	
+'	g_arrS8_1_Idx = #g_arrS8_1
+'	
+'	szData = szData0&szData1
+'	Check_Category(szData, 7)
+'	
+'	szData0 = Form.GetSharedData("50110_S9_CHECK_DOMESTIC", false )
+'	if szData0 <> "" then
+'		g_arrS9_0 = {szData0}
+'	else
+'		g_arrS9_0 = {}
+'	end if
+'	
+'	g_arrS9_0_Idx = #g_arrS9_0
+'	
+'	szData1 = Form.GetSharedData("50110_S9_CHECK_OVERSEA", false )
+'	if szData1 <> "" then
+'		g_arrS9_1 = {szData1}
+'	else
+'		g_arrS9_1 = {}
+'	end if
+'	g_arrS9_1_Idx = #g_arrS9_1
+'	
+'	szData = szData0&szData1
+'	Check_Category(szData, 8)
+'	
+'	
+'	Reload_Category()
+'	DisplaySetting_Cond()
+'	DisplaySetting_Category(-1)
+	
+'	Clear_Cond()
+	
+End Sub
+
+'===============================================
+' DATAMANAGER_OnSendTranBefore
+'===============================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "ohhts_metf_031r" then
+		DATAMANAGER.SetDataValue(0, "ohhts_metf_031r", "InBlock1", "FID_ETF_CTGR_NO", 0 , "5")
+	elseif szTranID = "ohhts_metf_003r" then
+		
+		
+		
+	end if
+End Sub
+
+'===============================================
+' DATAMANAGER_OnReceiveTranComplete
+'===============================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "ohhts_metf_031r" then
+		
+		nDataCnt = DATAMANAGER.GetDataCount(0, "ohhts_metf_031r", "OutBlock1")
+		
+		for i = 0 to nDataCnt-1
+			szCd_Step0 = DATAMANAGER.GetDataValue(0, "ohhts_metf_031r", "OutBlock1", "FID_ETF_UNAS_SRNO" 		, i)
+			szNm_Step0 = DATAMANAGER.GetDataValue(0, "ohhts_metf_031r", "OutBlock1", "FID_ETF_UNAS_NAME" 		, i)
+			
+			szCd_Step1 = DATAMANAGER.GetDataValue(0, "ohhts_metf_031r", "OutBlock1", "FID_ETF_LRDV_SRNO"		, i)
+			szNm_Step1 = DATAMANAGER.GetDataValue(0, "ohhts_metf_031r", "OutBlock1", "FID_ETF_LRDV_NAME"		, i)
+			
+			szCd_Step2 = DATAMANAGER.GetDataValue(0, "ohhts_metf_031r", "OutBlock1", "FID_ETF_MDDV_SRNO"		, i)
+			szNm_Step2 = DATAMANAGER.GetDataValue(0, "ohhts_metf_031r", "OutBlock1", "FID_ETF_MDDV_NAME" 		, i)
+			
+			szCd_Step3 = DATAMANAGER.GetDataValue(0, "ohhts_metf_031r", "OutBlock1", "FID_ETF_SMDV_SRNO"		, i)
+			szNm_Step3 = DATAMANAGER.GetDataValue(0, "ohhts_metf_031r", "OutBlock1", "FID_ETF_SMDV_NAME"		, i)
+			
+			szStep0 = szNm_Step0
+			szStep1 = szNm_Step1
+			szStep2 = szNm_Step2
+			szStep3 = szNm_Step3
+			
+			
+			if Contains_Array(g_arrStep0, szStep0) = false then
+				if szCd_Step0 <> "0000" then
+					Table.insert(g_arrStep0, szStep0)
+				end if
+				
+				if g_arrStep0_Idx <> -1 then
+					Form.SetSharedData("ETF_Step1_"&g_arrStep0_Idx , Convert_ArrToString(g_arrStep1, "`"))
+					Form.SetSharedData("ETF_Step2_"&g_arrStep0_Idx&"_"&g_arrStep1_Idx , Convert_ArrToString(g_arrStep2, "`"))
+					Form.SetSharedData("ETF_Step3_"&g_arrStep0_Idx&"_"&g_arrStep1_Idx&"_"&g_arrStep2_Idx , Convert_ArrToString(g_arrStep3, "`"))
+				end if
+				
+				g_arrStep1 = {}
+				g_arrStep2 = {}
+				g_arrStep3 = {}
+				
+				g_arrStep0_Idx = g_arrStep0_Idx + 1
+				g_arrStep1_Idx = -1
+				g_arrStep2_Idx = -1
+			end if	
+		
+			if Contains_Array(g_arrStep1, szStep1) = false then
+				if szCd_Step1 <> "0000" then
+					Table.insert(g_arrStep1, szStep1)
+				end if
+				
+				if g_arrStep1_Idx <> -1 then
+					Form.SetSharedData("ETF_Step2_"&g_arrStep0_Idx&"_"&g_arrStep1_Idx , Convert_ArrToString(g_arrStep2, "`"))
+					Form.SetSharedData("ETF_Step3_"&g_arrStep0_Idx&"_"&g_arrStep1_Idx&"_"&g_arrStep2_Idx , Convert_ArrToString(g_arrStep3, "`"))
+				end if
+				
+				g_arrStep2 = {}
+				g_arrStep3 = {}
+				
+				g_arrStep1_Idx = g_arrStep1_Idx +  1
+				g_arrStep2_Idx = -1
+			end if
+			
+			if Contains_Array(g_arrStep2, szStep2) = false then
+				if szCd_Step2 <> "0000" then
+					Table.insert(g_arrStep2, szStep2)
+				end if
+				
+				if g_arrStep2_Idx <> -1 then
+					Form.SetSharedData("ETF_Step3_"&g_arrStep0_Idx&"_"&g_arrStep1_Idx&"_"&g_arrStep2_Idx , Convert_ArrToString(g_arrStep3, "`"))
+				end if
+				
+				g_arrStep3 = {}
+				
+				g_arrStep2_Idx = g_arrStep2_Idx +  1
+			end if
+			
+			
+			if Contains_Array(g_arrStep3, szStep3) = false then
+				if szCd_Step3 <> "0000" then
+					Table.insert(g_arrStep3, szStep3)
+				end if
+			end if	
+		next
+			
+		if DATAMANAGER.IsMoreNextData("ohhts_metf_031r") then
+			DATAMANAGER.RequestNextData("ohhts_metf_031r")
+		else
+			Form.SetSharedData("ETF_Step0" , Convert_ArrToString(g_arrStep0, "`"))
+			g_arrStep0 = {}
+			
+			Form.SetSharedData("ETF_Step1_"&g_arrStep0_Idx , Convert_ArrToString(g_arrStep1, "`"))
+			g_arrStep1 = {}
+			
+			Form.SetSharedData("ETF_Step2_"&g_arrStep0_Idx&"_"&g_arrStep1_Idx , Convert_ArrToString(g_arrStep2, "`"))
+			g_arrStep2 = {}
+			
+			Form.SetSharedData("ETF_Step3_"&g_arrStep0_Idx&"_"&g_arrStep1_Idx&"_"&g_arrStep2_Idx , Convert_ArrToString(g_arrStep3, "`"))
+			g_arrStep3 = {}
+			
+			g_arrStep0_Idx = -1
+			g_arrStep1_Idx = -1
+			g_arrStep2_Idx = -1
+			g_arrStep3_Idx = -1
+		end if
+		
+	elseif szTranID = "ohhts_metf_003r" then
+		szCntData = DATAMANAGER.GetDataValue(0, "ohhts_metf_003r", "OutBlock1", "FID_ISSU_CNT", 0)
+		g_nSearchCnt = Clng(szCntData)
+		
+		btnSearch.caption = "종목 확인 하기 ("& FormatNumber(g_nSearchCnt,0)&"건)"
+		
+		if g_isPrev = true then
+			btnSearch_OnClick()
+			g_isPrev = false
+		end if
+	end if
+End Sub
+
+'===============================================
+' DATAMANAGER_OnReceiveTranError
+'===============================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	if szTranID = "obsim_stsv_100r" then
+		Form.ShowAlert("안내", szErrMsg)
+	elseif szTranID = "ohhts_metf_003r" then
+		szCntData = DATAMANAGER.GetDataValue(0, "ohhts_metf_003r", "OutBlock1", "FID_ISSU_CNT", 0)
+		g_nSearchCnt = Clng(szCntData)
+		
+		btnSearch.caption = "종목 확인 하기 ("&FormatNumber(g_nSearchCnt,0)&"건)"
+	end if
+End Sub
+
+'===============================================
+' Form_OnTriggerEvent
+'===============================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "50110_S1_CHECK" then
+		szData = Form.GetSharedData(sEventName, false )
+		Check_Category(szData, 0)
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+		
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+		
+		g_arrS1 = Convert_StringToArr(szData, "`")
+		g_arrS1_Idx = #g_arrS1
+
+		if g_arrS2_Idx > 1 then
+			if g_arrS2(0) = "주식" and g_arrS2(1) = "Step0대표지수" then
+				if g_arrS2_Idx > 3  then
+					Table.remove(g_arrS2,3)
+					Table.remove(g_arrS2,3)
+				elseif  g_arrS2_Idx > 2  then
+					Table.remove(g_arrS2,3)
+				end if
+					
+				if szData <> "" then
+					Table.insert(g_arrS2, 3, "Step1"&szData)
+				end if		
+			end if		
+			
+			g_arrS2_Idx = #g_arrS2
+			Form.SetSharedData("50110_S2_CHECK" , Convert_ArrToString(g_arrS2, "★"))
+		end if
+		
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+	
+	elseif sEventName = "50110_S2_CHECK" then
+		szData = Form.GetSharedData(sEventName, false )
+
+		Check_Category(szData, 1)
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+		
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+		
+		g_arrS2 = {}
+		g_arrS2_Idx = 0
+		
+		g_arrS2 = Convert_StringToArr(szData, "★")
+		g_arrS2_Idx = #g_arrS2
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+		
+	elseif sEventName = "50110_S3_CHECK" then
+		szData = Form.GetSharedData(sEventName, false )
+		Check_Category(szData, 2)
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+		
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+		
+		g_arrS3 = Convert_StringToArr(szData, "`")
+		g_arrS3_Idx = #g_arrS3
+		
+		szMrgData = ""
+		szData = Form.GetSharedData("50110_S4_CHECK_DOMESTIC", false )
+		szMrgData = szMrgData & szData
+	
+		g_arrS4_0 = Convert_StringToArr(szData, "`")
+		g_arrS4_0_Idx = #g_arrS4_0
+		
+		szData = Form.GetSharedData("50110_S4_CHECK_OVERSEA", false )
+		szMrgData = szMrgData & szData
+		
+		g_arrS4_1 = Convert_StringToArr(szData, "`")
+		g_arrS4_1_Idx = #g_arrS4_1
+		
+		Check_Category(szMrgData, 3)
+		Reload_Category()
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+		
+	elseif sEventName = "50110_S4_CHECK" then
+		szMrgData = ""
+		szData = Form.GetSharedData(sEventName&"_DOMESTIC", false )
+		szMrgData = szMrgData & szData
+	
+		g_arrS4_0 = Convert_StringToArr(szData, "`")
+		g_arrS4_0_Idx = #g_arrS4_0
+		
+		szData = Form.GetSharedData(sEventName&"_OVERSEA", false )
+		szMrgData = szMrgData & szData
+		
+		g_arrS4_1 = Convert_StringToArr(szData, "`")
+		g_arrS4_1_Idx = #g_arrS4_1
+		Check_Category(szMrgData, 3)
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+		
+	elseif sEventName = "50110_S5_CHECK" then
+		szData = Form.GetSharedData(sEventName, false )
+		Check_Category(szData, 4)
+		
+		g_arrS5 = Convert_StringToArr(szData, "`")
+		g_arrS5_Idx = #g_arrS5
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+		
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+		
+	elseif sEventName = "50110_S6_CHECK" then
+		szData = Form.GetSharedData(sEventName, false )
+		Check_Category(szData, 5)
+		
+		g_arrS6 = Convert_StringToArr(szData, "`")
+		g_arrS6_Idx = #g_arrS6
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+		
+	elseif sEventName = "50110_S7_CHECK" then
+		szMrgData = ""
+		szData = Form.GetSharedData(sEventName&"_RATE", false )
+		szMrgData = szMrgData & szData
+		
+		szSubResult = ""
+		if szData <> "" then
+			arrTempData = Convert_StringToArr(szData, "`")
+			
+			if #arrTempData > 1 then
+				szSubResult = arrTempData(0)&" ~ "&arrTempData(1)
+			end if
+		end if
+		
+		if szSubResult <> "" then
+			g_arrS7_0 = {szSubResult}
+		else
+			g_arrS7_0 = {}
+		end if
+		
+		g_arrS7_0_Idx = #g_arrS7_0
+		
+		szData = Form.GetSharedData(sEventName&"_PERIOD", false )
+		szMrgData = szMrgData & szData
+	
+		g_arrS7_1 = Convert_StringToArr(szData, "`")
+		g_arrS7_1_Idx = #g_arrS7_1
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+		
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+		
+		Check_Category(szMrgData, 6)
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+		
+	elseif sEventName = "50110_S8_CHECK" then
+		szMrgData = ""
+		szData = Form.GetSharedData(sEventName&"_RATE", false )
+		szMrgData = szMrgData & szData
+	
+		
+		szSubResult = ""
+		if szData <> "" then
+			arrTempData = Convert_StringToArr(szData, "`")
+			
+			if #arrTempData > 1 then
+				szSubResult = arrTempData(0)&" ~ "&arrTempData(1)
+			end if
+		end if
+		
+		if szSubResult <> "" then
+			g_arrS8_1 = {szSubResult}
+		else
+			g_arrS8_1 = {}
+		end if
+		
+		g_arrS8_1_Idx = #g_arrS8_1
+		
+		szData = Form.GetSharedData(sEventName&"_PERIOD", false )
+		szMrgData = szMrgData & szData
+		
+		g_arrS8_0 = Convert_StringToArr(szData, "`")
+		g_arrS8_0_Idx = #g_arrS8_0
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+		
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+		
+		Check_Category(szMrgData, 7)
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+		
+	elseif sEventName = "50110_S9_CHECK" then
+		szMrgData = ""
+		szData = Form.GetSharedData(sEventName&"_DOMESTIC", false )
+		szMrgData = szMrgData & szData
+		
+		if szData <> "" then
+			g_arrS9_0 = {szData}
+		else
+			g_arrS9_0 = {}
+		end if
+		g_arrS9_0_Idx = #g_arrS9_0
+		
+		szData = Form.GetSharedData(sEventName&"_OVERSEA", false )
+		szMrgData = szMrgData & szData
+		
+		if szData <> "" then
+			g_arrS9_1 = {szData}
+		else
+			g_arrS9_1 = {}
+		end if
+		g_arrS9_1_Idx = #g_arrS9_1
+		
+		for i = 0 to #g_arrCategory_Order-1
+			if g_arrCategory_Order(i) = sEventName then
+				Table.remove(g_arrCategory_Order, i+1)
+			end if 
+		next
+		
+		Table.insert(g_arrCategory_Order, sEventName)
+		Form.SetSharedData("50110_CATEGORY" , Convert_ArrToString(g_arrCategory_Order, "`"))
+		
+		Check_Category(szMrgData, 8)
+'		Form.SetTimerEvent3(1,0,0)
+		DisplaySetting_Cond()
+		
+	elseif sEventName = "50110_S7_KEYPAD" then
+		if sParam = "CLOSE" then
+			linkfmKeypad.left = 400
+		else 
+			linkfmKeypad.left = 0
+			Form.triggerEvent("linkfmKeypad", "INIT_KEYPAD", sParam)
+		end if
+	elseif sEventName = "50110_S8_KEYPAD" then
+		if sParam = "CLOSE" then
+			linkfmKeypad.left = 400
+		else 
+			linkfmKeypad.left = 0
+			Form.triggerEvent("linkfmKeypad", "INIT_KEYPAD", sParam)
+		end if
+	end if
+	
+	
+	if sEventName = "KEYPAD" then
+		Form.triggerEvent("linkfmDetailCond", "KEYPAD", sParam)
+	end if
+	
+	if sEventName = "KEYPAD_END" then
+		linkfmKeypad.left = 400
+		Form.triggerEvent("linkfmDetailCond", "KEYPAD_END", sParam)
+	end if
+	
+
+	if sEventName = "50100_INDEX" then
+		if sParam = "PREV" then
+			g_isPrev = true
+			
+			Dim szData
+			szData = Form.GetSharedData("50110_CATEGORY", false )
+			
+			g_arrCategory_Order = Convert_StringToArr(szData, "`")
+			
+			if g_arrCategory_Order = "" then
+				g_arrCategory_Order = {}
+			end if
+		
+			szData = Form.GetSharedData("50110_S1_CHECK", false )
+			Check_Category(szData, 0)
+			
+			g_arrS1 = Convert_StringToArr(szData, "`")
+			g_arrS1_Idx = #g_arrS1
+			
+			szData = Form.GetSharedData("50110_S2_CHECK", false )
+			Check_Category(szData, 1)
+			
+			g_arrS2 = Convert_StringToArr(szData, "★")
+			g_arrS2_Idx = #g_arrS2
+			
+			szData = Form.GetSharedData("50110_S3_CHECK", false )
+			Check_Category(szData, 2)
+			g_arrS3 = Convert_StringToArr(szData, "`")
+			g_arrS3_Idx = #g_arrS3
+			
+			szData0 = Form.GetSharedData("50110_S4_CHECK_DOMESTIC", false )
+			g_arrS4_0 = Convert_StringToArr(szData0, "`")
+			g_arrS4_0_Idx = #g_arrS4_0
+			
+			szData1 = Form.GetSharedData("50110_S4_CHECK_OVERSEA", false )
+			g_arrS4_1 = Convert_StringToArr(szData1, "`")
+			g_arrS4_1_Idx = #g_arrS4_1
+			
+			szData = szData0&szData1
+			Check_Category(szData, 3)
+			
+			szData = Form.GetSharedData("50110_S5_CHECK", false )
+			Check_Category(szData, 4)
+			g_arrS5 = Convert_StringToArr(szData, "`")
+			g_arrS5_Idx = #g_arrS5
+			
+			szData = Form.GetSharedData("50110_S6_CHECK", false )
+			Check_Category(szData, 5)
+			g_arrS6 = Convert_StringToArr(szData, "`")
+			g_arrS6_Idx = #g_arrS6
+			
+			szData0 = Form.GetSharedData("50110_S7_CHECK_RATE", false )
+			szSubResult = ""
+			if szData0 <> "" then
+				arrTempData = Convert_StringToArr(szData0, "`")
+				
+				if #arrTempData > 1 then
+					szSubResult = arrTempData(0)&" ~ "&arrTempData(1)
+				end if
+			end if
+			
+			if szSubResult <> "" then
+				g_arrS7_0 = {szSubResult}
+			else
+				g_arrS7_0 = {}
+			end if
+			
+			g_arrS7_0_Idx = #g_arrS7_0
+			
+			szData1 = Form.GetSharedData("50110_S7_CHECK_PERIOD", false )
+			g_arrS7_1 = Convert_StringToArr(szData1, "`")
+			g_arrS7_1_Idx = #g_arrS7_1
+			
+			szData = szData0&szData1
+			Check_Category(szData, 6)
+			
+			szData0 = Form.GetSharedData("50110_S8_CHECK_PERIOD", false )
+			g_arrS8_0 = Convert_StringToArr(szData0, "`")
+			g_arrS8_0_Idx = #g_arrS8_0
+			
+			szData1 = Form.GetSharedData("50110_S8_CHECK_RATE", false )
+			
+			szSubResult = ""
+			if szData1 <> "" then
+				arrTempData = Convert_StringToArr(szData1, "`")
+				
+				if #arrTempData > 1 then
+					szSubResult = arrTempData(0)&" ~ "&arrTempData(1)
+				end if
+			end if
+			
+			if szSubResult <> "" then
+				g_arrS8_1 = {szSubResult}
+			else
+				g_arrS8_1 = {}
+			end if
+			
+			g_arrS8_1_Idx = #g_arrS8_1
+			
+			szData = szData0&szData1
+			Check_Category(szData, 7)
+			
+			szData0 = Form.GetSharedData("50110_S9_CHECK_DOMESTIC", false )
+			if szData0 <> "" then
+				g_arrS9_0 = {szData0}
+			else
+				g_arrS9_0 = {}
+			end if
+			
+			g_arrS9_0_Idx = #g_arrS9_0
+			
+			szData1 = Form.GetSharedData("50110_S9_CHECK_OVERSEA", false )
+			if szData1 <> "" then
+				g_arrS9_1 = {szData1}
+			else
+				g_arrS9_1 = {}
+			end if
+			g_arrS9_1_Idx = #g_arrS9_1
+			
+			szData = szData0&szData1
+			Check_Category(szData, 8)
+			
+			
+			Reload_Category()
+			DisplaySetting_Cond()
+			
+			nCnt = #g_arrCategory_Order
+			if nCnt > 0 then
+				szLast = g_arrCategory_Order(nCnt-1)
+				
+				szIdx = ""
+				for i = 1 to 9 
+					if instr(szLast, "S"&i) > 0 then
+						szIdx = i-1
+						exit for
+					end if
+				next
+				
+				if szIdx = "" then
+					DisplaySetting_Category(-1)
+				else
+					DisplaySetting_Category(szIdx)
+				end if
+			else
+				DisplaySetting_Category(-1)
+			end if
+
+		else
+			Clear_Cond()
+		end if
+	end if
+	
+	if sEventName = "50100_TAB_CHANGE" then
+		Clear_Cond()
+	end if
+End Sub
+
+'===============================================
+' contCategory_btnCategory0_OnClick
+'===============================================
+Sub contCategory_btnCategory0_OnClick()
+	DisplaySetting_Category(0)
+End Sub
+
+'===============================================
+' contCategory_btnCategory1_OnClick
+'===============================================
+Sub contCategory_btnCategory1_OnClick()
+	DisplaySetting_Category(1)
+End Sub
+
+'===============================================
+' contCategory_btnCategory2_OnClick
+'===============================================
+Sub contCategory_btnCategory2_OnClick()
+	DisplaySetting_Category(2)
+End Sub
+
+'===============================================
+' contCategory_btnCategory3_OnClick
+'===============================================
+Sub contCategory_btnCategory3_OnClick()
+	DisplaySetting_Category(3)
+End Sub
+
+'===============================================
+' contCategory_btnCategory4_OnClick
+'===============================================
+Sub contCategory_btnCategory4_OnClick()
+	DisplaySetting_Category(4)
+End Sub
+
+'===============================================
+' contCategory_btnCategory5_OnClick
+'===============================================
+Sub contCategory_btnCategory5_OnClick()
+	DisplaySetting_Category(5)
+End Sub
+
+'===============================================
+' contCategory_btnCategory6_OnClick
+'===============================================
+Sub contCategory_btnCategory6_OnClick()
+	DisplaySetting_Category(6)
+End Sub
+
+'===============================================
+' contCategory_btnCategory7_OnClick
+'===============================================
+Sub contCategory_btnCategory7_OnClick()
+	DisplaySetting_Category(7)
+End Sub
+
+'===============================================
+' contCategory_btnCategory8_OnClick
+'===============================================
+Sub contCategory_btnCategory8_OnClick()
+	DisplaySetting_Category(8)
+End Sub
+
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "imgRemove" then
+		Remove_Cond(nIndex)
+		Reload_Category()
+		DisplaySetting_Cond()
+	end if
+End Sub
+
+'============================================================================
+Sub btnClear_OnClick()
+	Clear_Cond()
+End Sub
+
+'============================================================================
+Sub btnSearch_OnClick()
+	if g_nSearchCnt > 0 then
+		szLnkData = g_szInBlock1 & "★" & g_szInBlock2 & "★" & g_szInBlock3 & "★" & g_szInBlock4 & "★" & g_szInBlock5 & "★" & g_szInBlock6 & "★" & g_szInBlock7 & "★" & g_szInBlock8 & "★" & g_szInBlock9 & "★" & g_szInBlock10 & "★" & g_szInBlock11 & "★" & g_szInBlock12_1 & "★" & g_szInBlock12_2 & "★" & g_szInBlock12_3 & "★" & g_szInBlock12_4 & "★" & g_szInBlock12_5
+		szLnkData = szLnkData & "★" & g_nSearchCnt
+		if g_isPrev = true then
+			szLnkData = szLnkData & "★1" 
+		else
+			szLnkData = szLnkData & "★0"
+		end if
+		
+		Form.setSharedData("50110_LINK_DATA", szLnkData)
+		Form.OpenPopup("nrshidx50110_p2" , szLnkData, "")
+	else
+		Form.ShowAlert("안내", "검색된 종목이 없습니다. 조건설정을 확인하세요")
+	end if
+End Sub
+
+
+
+'============================================================================
+'Sub Form_OnTimerEvent(sTimerID)
+'	if Cint(sTimerID) = 1 then
+'		Form.SetTimerEvent3(1,0,0)
+'		DATAMANAGER.RequestTranData("ohhts_metf_003r")
+'	end if
+'End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obsim_stsv_100r" trcode="obsim_stsv_100r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_metf_031r" trcode="ohhts_metf_031r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_metf_030r" trcode="ohhts_metf_030r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="ohhts_metf_003r" trcode="ohhts_metf_003r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obsim_stsv_100r" title="ETF카테고리 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="231" _ulen="173" >
+
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+UNAS_ISCD^기초자산종목코드^12^0^0^0^0^0^0
+LRDV_CODE^대분류코드^12^0^0^0^0^0^0
+MDDV_CODE^중분류코드^12^0^0^0^0^0^0
+SMDV_CODE^소분류코드^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="50" inout="out" _len="480" _ulen="362" >
+
+UNAS_ISCD^기초자산종목코드^12^0^0^0^0^0^0
+UNAS_NAME^기초자산명^100^0^0^0^0^0^0
+LRDV_CODE^대분류코드^12^0^0^0^0^0^0
+LRDV_CODE_NAME^대분류코드명^200^0^0^0^0^0^0
+MDDV_CODE^중분류코드^12^0^0^0^0^0^0
+MDDV_CODE_NAME^중분류코드명^200^0^0^0^0^0^0
+SMDV_CODE^소분류코드^12^0^0^0^0^0^0
+SMDV_CODE_NAME^소분류코드명^200^0^0^0^0^0^0
+DTL_DIV_CODE_NAME^상세분류코드명^200^0^0^0^0^0^0
+UNAS_THNM^기초자산개수^8^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="40" _ulen="32" >
+
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_metf_031r" title="ETF 카테고리 관리(전체)" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" inout="in" _len="63" _ulen="51" >
+
+FID_ETF_CTGR_NO^FIDETF카테고리번호^17^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="200" inout="out" _len="529" _ulen="425" >
+
+FID_ETF_CTGR_NO^FIDETF카테고리번호^17^0^7^0^0^0^0
+FID_ETF_UNAS_SRNO^FIDETF기초자산일련번호^5^0^7^0^0^0^0
+FID_ETF_UNAS_NAME^FIDETF기초자산명^100^0^0^0^0^0^0
+FID_ETF_LRDV_SRNO^FIDETF대분류일련번호^5^0^7^0^0^0^0
+FID_ETF_LRDV_NAME^FIDETF대분류명^200^0^0^0^0^0^0
+FID_ETF_MDDV_SRNO^FIDETF중분류일련번호^5^0^7^0^0^0^0
+FID_ETF_MDDV_NAME^FIDETF중분류명^200^0^0^0^0^0^0
+FID_ETF_SMDV_SRNO^FIDETF소분류일련번호^5^0^7^0^0^0^0
+FID_ETF_SMDV_NAME^FIDETF소분류명^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_metf_030r" title="ETF 카테고리 관리" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" inout="in" _len="62" _ulen="50" >
+
+FID_INPUT_CLS_CODE^FID입력구분코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="200" inout="out" _len="120" _ulen="98" >
+
+FID_ETF_CTGR_NO^FIDETF카테고리번호^17^0^7^0^0^0^0
+FID_ETF_UNAS_NAME^FIDETF기초자산명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="ohhts_metf_003r" title="ETF 종목검색 (스크리너검색 종?" realdata="0" dessvr="2" >
+				<TRBLOCK name="InBlock1" occurs="1" inout="in" _len="61" _ulen="51" >
+
+FID_INVT_REGN_NAME^FID투자지역명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock2" occurs="1" inout="in" _len="62" _ulen="50" >
+
+FID_LSTN_NTNL_CODE^FID상장국가코드^5^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock3" inout="in" _len="56" _ulen="46" >
+
+FID_UNAS_NAME^FID기초자산명^100^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock4" occurs="1" inout="in" _len="64" _ulen="52" >
+
+FID_LRDV_CODE_NAME^FID대분류코드명^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock5" occurs="1" inout="in" _len="64" _ulen="52" >
+
+FID_MDDV_CODE_NAME^FID중분류코드명^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock6" occurs="1" inout="in" _len="64" _ulen="52" >
+
+FID_SMDV_CODE_NAME^FID소분류코드명^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock7" occurs="1" inout="in" _len="63" _ulen="51" >
+
+FID_INPUT_ASET_SCAL^FID입력자산규모^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock8" occurs="1" inout="in" _len="59" _ulen="47" >
+
+FID_INPUT_LVRG^FID입력레버리지^14^4^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock9" occurs="1" inout="in" _len="59" _ulen="47" >
+
+FID_INPUT_LVRG^FID입력레버리지^14^4^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock10" occurs="1" inout="in" _len="55" _ulen="47" >
+
+FIDX_MGCO_NAME^FIDX운용사명^128^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock11" occurs="1" inout="in" _len="65" _ulen="53" >
+
+FIDX_INPUT_DVDN_CYCL^FIDX입력배당주기^3^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock12" inout="in" _len="260" _ulen="208" >
+
+FID_INPUT_DVRT^FID입력배당률^9^2^7^0^0^0^0
+FID_INPUT_DVRT2^FID입력배당률2^9^2^7^0^0^0^0
+FID_INPUT_ERT^FID입력수익률^9^2^7^0^0^0^0
+FID_INPUT_ERT2^FID입력수익률2^9^2^7^0^0^0^0
+FID_INPUT_ERNN_PRD^FID입력수익기간^5^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="InBlock13" inout="in" _len="143" _ulen="111" >
+
+FIDX_INPUT_NTNL_CODE^FIDX입력국가코드^8^0^0^0^0^0^0
+FID_INPUT_RANK_SORT_CLS_CODE^FID입력순위정렬구분코드^3^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="47" _ulen="41" >
+
+FID_ISSU_CNT^FID종목수^6^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50020" scrname="INCOME HOME" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" ly_vert="47,0,320,47,1" />
+		<IMAGE name="imgBack" autosize="1" ly_vert="6,11,39,24,1" />
+		<CONTAINER name="contMain" vscroll="1" ly_vert="0,40,375,662,1" scroll_ly_vert="0,40,375,662,1" >
+			<CONTROL_INFO>
+				<LINKFORM name="LinkForm0" linkfile="nrshidx50020_s1" ly_vert="0,0,375,235,1" />
+				<LINKFORM name="LinkForm1" linkfile="nrshidx50020_s2" ly_vert="0,235,375,203,1" />
+				<LINKFORM name="LinkForm2" linkfile="nrshidx50020_s3" ly_vert="0,438,375,554,1" />
+				<LINKFORM name="LinkForm3" linkfile="nrshidx50020_s4" ly_vert="0,992,375,340,1" />
+				<CONTAINER name="contInfoBg" ly_vert="0,1332,375,56,1" scroll_ly_vert="0,1332,375,56,1" >
+					<CONTROL_INFO>
+						<CONTAINER name="contInfo" ly_vert="0,0,375,56,1" scroll_ly_vert="0,0,375,56,1" >
+							<CONTROL_INFO/>
+						</CONTAINER>
+					</CONTROL_INFO>
+				</CONTAINER>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5315" _ulen="4938" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+Dim g_szBackImg  
+g_szBackImg = "icon_main_01"
+
+Dim g_szTitle
+g_szTitle = "Income 투자하기"
+
+Dim g_szFilterImg  
+g_szFilterImg = "icon_filter"
+
+Dim g_szIntrImg_Normal 
+g_szIntrImg_Normal = "icon_like_n"
+
+Dim g_szIntrImg_Select
+g_szIntrImg_Select = "icon_like_o"
+
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_42_n.9"
+
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_szTxtColor_Red 
+g_szTxtColor_Red = "326"
+
+Dim g_szContBgColor
+g_szContBgColor = "320"
+
+Dim g_szBadgeBgColor
+g_szBadgeBgColor = "393"
+
+Dim g_szLineColor
+g_szLineColor = "347"
+
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	'===============================================
+	' 뒤로가기 버튼 초기화
+	'===============================================
+	imgBack.SetMaintainingRatio("2")
+	imgBack.imgpath = g_szBackImg
+	
+	'===============================================
+	' 타이틀 초기화
+	'===============================================
+	lblTitle.caption = g_szTitle
+	lblTitle.paddinginfo = "0,0,0,0"
+	
+	contMain.setScrollBarVisible("2")
+	
+	contMain.contInfoBg.contInfo.makeExpandableList("", "", -2, -2, g_szTxtColor_Grey, g_szTxtColor_Grey, 0, 0, False, "")
+	szInfo = "·투자자는 금융투자상품에 대하여 금융상품 판매업자로부터 충분한 설명을 받을 권리가 있으며, 투자전 상품설명서 등을 반드시 읽어보시기 바랍니다.\n\n"
+	szInfo = szInfo & "·이 금융상품은 예금자 보호법에 따라 보호되지 않습니다.\n\n"
+	szInfo = szInfo & "·금융투자상품은 자산가격 변동, 환율 변동, 심용등급 하락 등에 따라 투자원금의 손실(0~100%)이 발생할 수 있으며, 그 손실은 투자자에게 귀속됩니다.\n\n"
+	szInfo = szInfo & "메리츠증권 준법감시인 심사필 제24-355호 (2024.05.09 ~ 2025.05.08)"
+	
+	contMain.contInfoBg.contInfo.addExpandableList("    투자 유의사항" , szInfo)
+End Function
+
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+   Init_Control()
+End Sub
+
+'===============================================
+' imgBack_OnClick
+'===============================================
+Sub imgBack_OnClick()
+	Form.openPrevScreen()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEventSCREEN(sEventName,sParam)
+	szPos = Form.GetSharedData("50020_SCROLL_POS", false)
+	
+	if sEventName = "PREV" and szPos <> "" then
+		szPos = Form.GetSharedData("50020_SCROLL_POS", true)
+		if cint(szPos) > 700 then
+			szPos = "end"
+		end if
+		
+		if Form.GetSharedData("&OS_TYPE", false) = "2" then
+			contMain.scroll_pos_noAni = szPos
+		else
+			contMain.scroll_pos = szPos
+		end if
+		
+		szData = Form.GetSharedData("TAX365_SUB_WEB", true)
+		if szData = "1" then
+			Form.triggerEvent("LinkForm3", "TAX365_SUB_WEB", szData)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "50020_SCROLL_POS" then
+		nScrollPos = contMain.scroll_pos
+		Form.SetSharedData("50020_SCROLL_POS", nScrollPos)	
+	end if
+End Sub
+
+g_szOSType = Form.GetSharedData("&OS_TYPE", false )
+Sub contMain_contInfoBg_contInfo_OnExpandableClick(nIdx, nStatus)
+	'Form.Log("[PSM3ETF]", nIdx & "$" & nStatus)
+	contMain.contInfoBg.contInfo.height = 1000
+
+	
+	if nStatus = "1" then
+		if g_szOSType = "1" then
+			contMain.scroll_pos = 1322
+		else
+			contMain.scroll_pos_noAni = "end"
+		end if
+	else
+		if g_szOSType = "1" then
+			contMain.scroll_pos = 1322
+		else
+			contMain.scroll_pos_noAni = "end"
+		end if
+	end if
+End Sub
+
+Sub contMain_contInfoBg_contInfo_OnExpandableSize(nHeight)	
+
+	contMain.contInfoBg.height = nHeight
+	contMain.contInfoBg.contInfo.height = nHeight
+	
+	contMain.setScrollAutoSize()
+	g_szOSType = Form.GetSharedData("&OS_TYPE", false )
+	if g_szOSType = "1" then
+		contMain.scroll_pos = 1322
+	end if
+		
+'	if g_szOSType = "1" then
+'		contMain.contInfo.height = nHeight
+'	
+'		contMain.setScrollAutoSize()
+'	
+'		if nStatus = "1" then
+'			contMain.scroll_pos = g_nInfo_Top
+'		else
+'			contMain.scroll_pos = g_nInfo_Top
+'		end if
+'	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50120" scrname="ETF검색_직접검색_조건설정" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnBackGround" btnimage="alpha.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,295,375,460,1" />
+		<LABEL name="LabelTitle" fontsize="2" caption="선택해주세요" halign="1" ly_vert="20,310,335,30,1" />
+		<IMAGE name="imgClose" visible="0" imgpath="icon_close" margin="5,7,5,7" ly_vert="330,310,30,30,0" />
+		<BUTTON name="btnReset" caption="초기화" fgcolor="004:000000000" btnimage="btn_21.9" ly_vert="0,700,187,60,1" />
+		<BUTTON name="btnOk" caption="검색" btnimage="btn_20.9" ly_vert="187,700,188,60,1" />
+		<CONTAINER name="contNation" ly_vert="0,360,375,130,1" scroll_ly_vert="0,360,375,130,1" >
+			<CONTROL_INFO>
+				<LABEL name="LabelNation" fontstyle="01" caption="조회국가" paddinginfo="1,0,0,0" ly_vert="20,0,200,20,1" />
+				<IMAGE name="imgFilterAll" autosize="1" imgpath="btn_line2_n.9" ly_vert="20,30,105,32,1" />
+				<LABEL name="LabelAll" fontsize="-2" caption="전체" halign="1" autofontsize="1" ly_vert="20,30,105,32,1" />
+				<IMAGE name="imgFilterKo" autosize="1" imgpath="btn_line2_n.9" ly_vert="135,30,105,32,1" />
+				<LABEL name="LabelKo" fontsize="-2" caption="국내" halign="1" autofontsize="1" ly_vert="135,30,105,32,1" />
+				<IMAGE name="imgFilterCHN" autosize="1" imgpath="btn_line2_n.9" ly_vert="20,72,105,32,1" />
+				<LABEL name="LabelCHN" fontsize="-2" caption="중국" halign="1" autofontsize="1" ly_vert="20,72,105,32,1" />
+				<IMAGE name="imgFilterHK" autosize="1" imgpath="btn_line2_n.9" ly_vert="135,72,105,32,1" />
+				<LABEL name="LabelHK" fontsize="-2" caption="홍콩" halign="1" autofontsize="1" ly_vert="135,72,105,32,1" />
+				<IMAGE name="imgFilterUSA" autosize="1" imgpath="btn_line2_n.9" ly_vert="250,30,105,32,1" />
+				<LABEL name="LabelUSA" fontsize="-2" caption="미국" halign="1" autofontsize="1" ly_vert="250,30,105,32,1" />
+				<IMAGE name="imgFilterJP" autosize="1" imgpath="btn_line2_n.9" ly_vert="250,73,105,32,1" />
+				<LABEL name="LabelJP" fontsize="-2" caption="일본" halign="1" autofontsize="1" ly_vert="250,73,105,32,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="contSort" ly_vert="0,490,375,210,1" scroll_ly_vert="0,490,375,210,1" >
+			<CONTROL_INFO>
+				<LABEL name="LabelSort" fontstyle="01" caption="정렬기준" paddinginfo="1,0,0,0" ly_vert="18,0,200,20,1" />
+				<RADIOGROUP name="RgSortType" fontsize="-2" buttonshape="1" buttonsnumber="6" ly_vert="18,31,335,170,1" >
+					<RADIO_INFO>
+						<RADIO no="0" text="상승률 낮은순" radioimage="input_06.9.png" transfervalue="01" position="0,0,162,44" />
+						<RADIO no="1" text="상승률 높은순" radioimage="input_06.9.png" transfervalue="02" position="172,0,162,44" />
+						<RADIO no="2" text="거래량 적은순" radioimage="input_06.9.png" transfervalue="03" position="0,54,162,44" />
+						<RADIO no="3" text="거래량 많은순" radioimage="input_06.9.png" transfervalue="04" position="172,54,162,44" />
+						<RADIO no="4" text="보수 낮은순" radioimage="input_06.9.png" transfervalue="05" position="0,108,162,44" />
+						<RADIO no="5" text="보수 높은순" radioimage="input_06.9.png" transfervalue="06" position="172,108,162,44" />
+					</RADIO_INFO>
+				</RADIOGROUP>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="9553" _ulen="8617" >
+
+Dim gContType
+Dim optionNationTable(),optionNationCtlTable()
+Dim optionSortIndex
+Dim gParentScreen
+
+'전체/국내/미국/중국/홍콩/일본
+optionNationTable = {"Y","N","N","N","N","N"} 
+optionNationCtlTable = {"contNation.imgFilterAll","contNation.imgFilterKo","contNation.imgFilterUSA","contNation.imgFilterCHN","contNation.imgFilterHK","contNation.imgFilterJP"}
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	szLinkData = Form.GetOpenLinkData()
+	
+	if szLinkData <> "" then
+	
+		'타입★국가선택여부@국가선택여부@..★정렬기준★호출화면
+		'EX) 2★N@Y@Y@Y@Y@N★1★DIRECT_SEARCH
+		
+		arrData = Split(szLinkData,"★")
+		
+		if #arrData < 3 then
+			
+			SetDefaultOption()
+			SelectNationOption()
+			SelectSortOption()
+			
+		else
+			
+			gContType = arrData(0)
+			arrNationSelect = Split(arrData(1),"@")
+			optionSortIndex = arrData(2)
+			gParentScreen = arrData(3)
+			
+			'조회국가 숨김처리 타입
+			'조회국가는 무조건 "전체"로 설정되도록 변경
+			if gContType == "1" then
+				arrNationSelect = Split("Y@N@N@N@N@N","@")
+				ChangeContType(gContType)
+			end if
+			
+			
+			for i = 0 to #arrNationSelect - 1 
+				if arrNationSelect(i) == "Y" then
+					Change_optionNationTable(i)
+				end if
+			next
+			
+			SelectNationOption()
+			SelectSortOption()
+			
+			
+		end if
+		
+	
+	else
+		
+		'화면링크데이터가 없으면 디폴트 데이터값 설정
+		SetDefaultOption()
+		
+		'설정된 디폴트 값으로 조회구분 세팅(국가/정렬)
+		SelectNationOption()
+		SelectSortOption()
+	
+	end if
+	
+
+End Sub
+
+'============================================================================
+'
+'============================================================================
+Sub BtnBackGround_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 정렬조건 선택 시
+'============================================================================
+Sub contSort_RgSortType_OnClick(nIndex)
+
+	'optionSortIndex = nIndex
+	
+	if optionSortIndex == nIndex then
+		optionSortIndex = -1
+		contSort.RgSortType.currentindex = -1
+	else
+		
+		optionSortIndex = nIndex
+	
+	end if
+
+	
+End Sub
+
+'============================================================================
+' 국가 선택시(전체)
+'============================================================================
+Sub contNation_imgFilterAll_OnClick()
+	Change_optionNationTable(0)
+	SelectNationOption()
+End Sub
+'============================================================================
+' 국가 선택시(국내)
+'============================================================================
+Sub contNation_imgFilterKo_OnClick()
+	Change_optionNationTable(1)
+	SelectNationOption()
+End Sub
+
+'============================================================================
+' 국가 선택시(미국)
+'============================================================================
+Sub contNation_imgFilterUSA_OnClick()
+	Change_optionNationTable(2)
+	SelectNationOption()
+End Sub
+'============================================================================
+' 국가 선택시(중국)
+'============================================================================
+Sub contNation_imgFilterCHN_OnClick()
+	Change_optionNationTable(3)
+	SelectNationOption()
+End Sub
+
+'============================================================================
+' 국가 선택시(홍콩)
+'============================================================================
+Sub contNation_imgFilterHK_OnClick()
+	Change_optionNationTable(4)
+	SelectNationOption()
+End Sub
+
+'============================================================================
+' 국가 선택시(일본)
+'============================================================================
+Sub contNation_imgFilterJP_OnClick()
+	Change_optionNationTable(5)
+	SelectNationOption()
+End Sub
+
+'============================================================================
+' 초기화 버튼 클릭이벤트
+'============================================================================
+Sub btnReset_OnClick()
+
+	SetDefaultOption()
+	SelectNationOption()
+	SelectSortOption()
+		
+End Sub
+'============================================================================
+' 검색버튼 클릭이벤트(조회조건 설정 리턴)
+'============================================================================
+Sub btnOk_OnClick()
+
+	sRsltNationOption = ""
+	sRsltSortOption = ""
+	
+	
+	for i = 0 to #optionNationTable -1
+		if i == 0 then
+			sRsltNationOption = optionNationTable[i]
+		else
+			sRsltNationOption = sRsltNationOption .."@".. optionNationTable[i]
+		end if
+	next
+	
+	sRsltSortOption = optionSortIndex
+	Form.SendReturnToParent("FILTER_SET_COMPLETE" , sRsltNationOption.."★"..sRsltSortOption)
+	Form.CloseForm()
+	
+	
+End Sub
+
+'============================================================================
+' 닫기버튼 클릭이벤트
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+' 조회조건(국가/기간) 디폴트값 설정
+'============================================================================
+Function SetDefaultOption()
+
+	'조회국가 디폴트값 설정(전체)
+	for i = 0 to #optionNationTable -1
+		if i == 0 then
+			optionNationTable[i] = "Y"
+		else
+			optionNationTable[i] = "N"
+		end if	 
+	next
+	
+	'---------------------------------------------------
+	'20240612 LES START ETF추가개선
+	'---------------------------------------------------
+	'테마검색 거래량많은순 인덱스값 변경(2->3)
+
+	'정렬기준 디폴트값 설정
+	'직접검색 : 미선택 / 테마검색 : 거래량 많은순
+	if gParentScreen == "THEME_SEARCH" then
+		optionSortIndex = 3
+	else
+		optionSortIndex = -1
+	end if
+	
+	'---------------------------------------------------
+	'20240612 LES END
+	'---------------------------------------------------
+	
+End Function
+
+'============================================================================
+' 조회조건(국가)에 따라 선택/미선택 표시
+'============================================================================
+Function SelectNationOption()
+
+	for i = 0 to #optionNationTable -1
+		
+		isSelect = optionNationTable[i]
+		
+		if isSelect == "Y" then
+			Form.SetCtlProp(optionNationCtlTable[i], "imgpath", "btn_line2_o.9")
+		else
+			Form.SetCtlProp(optionNationCtlTable[i], "imgpath", "btn_line2_n.9")
+		end if
+	
+	next
+
+End Function
+
+'============================================================================
+' 조회조건(정렬)에 따라 선택/미선택 표시
+'============================================================================
+Function SelectSortOption()
+	
+	contSort.RgSortType.currentindex = optionSortIndex
+	
+End Function
+
+'============================================================================
+' 조회조건(국가) 변경 처리
+'============================================================================
+Function Change_optionNationTable(nIndex)
+	
+	'---------------------------------------------
+	'0:전체일경우 첫번째인덱스만 Y 나머지 다 N처리
+	'그외 : 선택한 인덱스값 변경처리(Y->N, N->Y)
+	'---------------------------------------------
+	Select Case nIndex
+		Case 0
+			
+			for i = 0 to #optionNationTable - 1
+				
+				if i == 0 then
+					optionNationTable[i] = "Y"
+				else
+					optionNationTable[i] = "N"
+				end if
+				
+			next
+			
+		Case 1,2,3,4,5
+			optionNationTable[0] = "N"
+			
+			beforeFlag = optionNationTable[nIndex]
+			
+			if beforeFlag == "Y" then
+				optionNationTable[nIndex] = "N"
+			else
+				optionNationTable[nIndex] = "Y"
+			end if
+			
+	End Select
+	
+	'---------------------------------------------
+	' 전체를 제외한 모든 플래그 Y여부 체크
+	' 모든 플래그가 Y인 경우 전체로 자동으로 변경
+	'---------------------------------------------
+	isAllFlagY = True
+	for i = 1 to #optionNationTable - 1
+		
+		isSelect = optionNationTable[i]
+		
+		if isSelect == "N" then
+			isAllFlagY = False
+		end if
+		
+	next
+	
+	'---------------------------------------------
+	' 전체를 포함한 모든 플래그 N여부 체크
+	' 모든 플래그가 N인 경우 전체로 자동으로 변경
+	'---------------------------------------------
+	isAllFalgN = True
+	for i = 0 to #optionNationTable - 1
+		
+		isSelect = optionNationTable[i]
+		
+		if isSelect == "Y" then
+			isAllFalgN = False
+		end if
+		
+	next
+	
+	if isAllFlagY  then
+		Change_optionNationTable(0)
+	end if
+	
+	if isAllFalgN then
+		Change_optionNationTable(0)
+	end if
+	'--------------------------------------
+	
+	
+End Function
+
+'==============================================================================================
+' 타입에 따라서 화면 구성 변경 (gContType 1:정렬기준만 보임 / 2:조회국가,정렬기준 둘다 보임)
+'==============================================================================================
+Function ChangeContType(sType)
+	
+	'sType == 1일때 조회국가 숨김처리 및 컨트롤 위치 조정
+	'sType == 2일때는 기본구성 그대로 쓰면됨
+	if sType == "1" then
+	
+		contNation.visible = false
+		imgBG.height = 500 - 130
+		imgBG.top = 255 + 130
+		LabelTitle.top = 270 + 130
+		imgClose.top = 270 + 130
+
+	end if
+
+
+End Function
+
+
+
+
+
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

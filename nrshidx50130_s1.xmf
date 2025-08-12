@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50130" scrname="ETF검색_테마검색(테마1)" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,255,1" />
+	<CONTROL_INFO>
+		<LABEL name="LabelBG" bgcolor="320:246247248" transmode="0" ly_vert="0,0,375,255,1" />
+		<IMAGE name="ImageThemeBg0" visible="0" imgpath="btn_line2_n.9" ly_vert="16,16,80,108,0" />
+		<IMAGE name="ImageThemeBg1" visible="0" imgpath="btn_line2_n.9" ly_vert="104,16,80,108,0" />
+		<IMAGE name="ImageThemeBg2" visible="0" imgpath="btn_line2_n.9" ly_vert="192,16,80,108,0" />
+		<IMAGE name="ImageThemeBg3" visible="0" imgpath="btn_line2_n.9" ly_vert="280,16,80,108,0" />
+		<IMAGE name="ImageThemeBg4" visible="0" imgpath="btn_line2_n.9" ly_vert="16,132,80,108,0" />
+		<IMAGE name="ImageThemeBg5" visible="0" imgpath="btn_line2_n.9" ly_vert="104,132,80,108,0" />
+		<IMAGE name="ImageThemeBg6" visible="0" imgpath="btn_line2_n.9" ly_vert="192,132,80,108,0" />
+		<IMAGE name="ImageThemeBg7" visible="0" imgpath="btn_line2_n.9" ly_vert="280,132,80,108,0" />
+		<IMAGE name="ImgTheme0" visible="0" imgpath="etf_magazine_list_sample" ly_vert="31,26,50,50,0" />
+		<IMAGE name="ImgTheme1" visible="0" imgpath="etf_magazine_list_sample" ly_vert="120,26,50,50,0" />
+		<IMAGE name="ImgTheme2" visible="0" imgpath="etf_magazine_list_sample" ly_vert="208,26,50,50,0" />
+		<IMAGE name="ImgTheme3" visible="0" imgpath="etf_magazine_list_sample" ly_vert="296,26,50,50,0" />
+		<IMAGE name="ImgTheme4" visible="0" imgpath="etf_magazine_list_sample" ly_vert="31,142,50,50,0" />
+		<IMAGE name="ImgTheme5" visible="0" imgpath="etf_magazine_list_sample" ly_vert="120,142,50,50,0" />
+		<IMAGE name="ImgTheme6" visible="0" imgpath="etf_magazine_list_sample" ly_vert="208,142,50,50,0" />
+		<IMAGE name="ImgTheme7" visible="0" imgpath="etf_magazine_list_sample" ly_vert="296,142,50,50,0" />
+		<LABEL name="LblTheme0" visible="0" fgcolor="334:034034034" fontsize="-4" bgcolor="035:237246255" halign="1" multiline="1" ly_vert="21,80,74,40,0" />
+		<LABEL name="LblTheme1" visible="0" fgcolor="334:034034034" fontsize="-4" halign="1" multiline="1" ly_vert="109,80,74,40,0" />
+		<LABEL name="LblTheme2" visible="0" fgcolor="334:034034034" fontsize="-4" halign="1" multiline="1" ly_vert="197,80,74,40,0" />
+		<LABEL name="LblTheme3" visible="0" fgcolor="334:034034034" fontsize="-4" halign="1" multiline="1" ly_vert="285,80,74,40,0" />
+		<LABEL name="LblTheme4" visible="0" fgcolor="334:034034034" fontsize="-4" halign="1" multiline="1" ly_vert="21,196,74,40,0" />
+		<LABEL name="LblTheme5" visible="0" fgcolor="334:034034034" fontsize="-4" halign="1" multiline="1" ly_vert="109,196,74,40,0" />
+		<LABEL name="LblTheme6" visible="0" fgcolor="334:034034034" fontsize="-4" halign="1" multiline="1" ly_vert="197,196,74,40,0" />
+		<LABEL name="LblTheme7" visible="0" fgcolor="334:034034034" fontsize="-4" halign="1" multiline="1" ly_vert="285,196,74,40,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8300" _ulen="7764" >
+Dim gThemeButtonBG()
+gThemeButtonBG = {"ImageThemeBg0","ImageThemeBg1","ImageThemeBg2","ImageThemeBg3","ImageThemeBg4","ImageThemeBg5","ImageThemeBg6","ImageThemeBg7"}
+
+Dim gThemeButton()
+gThemeButton = {"LblTheme0","LblTheme1","LblTheme2","LblTheme3","LblTheme4","LblTheme5","LblTheme6","LblTheme7"}
+
+Dim gThemeButtonIcon()
+gThemeButtonIcon = {"ImgTheme0","ImgTheme1","ImgTheme2","ImgTheme3","ImgTheme4","ImgTheme5","ImgTheme6","ImgTheme7"}
+
+Dim gThemeName()
+gThemeName = {}
+'gThemeName = {"첨단산업","AI/로봇","모빌리티","신재생에너지","인터넷/빅데이터","인프라/건설","바이오테크","소비재(럭셔리등)"}
+
+Dim gThemeCode()
+gThemeCode = {}
+
+Dim gTabIndex
+gTabIndex = 0
+
+Dim gOsType
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	'OS타입
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+
+	'라벨 좌우상하 패딩값 제거
+	LblTheme0.paddinginfo = "0,0,0,0"
+	LblTheme1.paddinginfo = "0,0,0,0"
+	LblTheme2.paddinginfo = "0,0,0,0"
+	LblTheme3.paddinginfo = "0,0,0,0"
+	
+	LblTheme4.paddinginfo = "0,0,0,0"
+	LblTheme5.paddinginfo = "0,0,0,0"
+	LblTheme6.paddinginfo = "0,0,0,0"
+	LblTheme7.paddinginfo = "0,0,0,0"
+	
+	'큰글씨모드 대응
+	szTextSize = Form.GetEnvData("common.textsize")
+	if CInt(szTextSize) > 0 then
+		
+		LblTheme0.fontsize = -3 - CInt(szTextSize) * 2
+		LblTheme1.fontsize = -3 - CInt(szTextSize) * 2
+		LblTheme2.fontsize = -3 - CInt(szTextSize) * 2
+		LblTheme3.fontsize = -3 - CInt(szTextSize) * 2
+		LblTheme4.fontsize = -3 - CInt(szTextSize) * 2
+		LblTheme5.fontsize = -3 - CInt(szTextSize) * 2
+		LblTheme6.fontsize = -3 - CInt(szTextSize) * 2
+		LblTheme7.fontsize = -3 - CInt(szTextSize) * 2
+	else
+		
+		
+		LblTheme0.fontsize = -3 
+		LblTheme1.fontsize = -3 
+		LblTheme2.fontsize = -3 
+		LblTheme3.fontsize = -3 
+		LblTheme4.fontsize = -3 
+		LblTheme5.fontsize = -3 
+		LblTheme6.fontsize = -3 
+		LblTheme7.fontsize = -3 
+	
+	end if	
+	
+	'최대 줄수 설정
+	LblTheme0.SetMaxLineCount(2)
+	LblTheme1.SetMaxLineCount(2)
+	LblTheme2.SetMaxLineCount(2)
+	LblTheme3.SetMaxLineCount(2)
+	LblTheme4.SetMaxLineCount(2)
+	LblTheme5.SetMaxLineCount(2)
+	LblTheme6.SetMaxLineCount(2)
+	LblTheme7.SetMaxLineCount(2)
+	
+	'라벨위치 조정
+	if gOsType == "1" then
+		LblTheme0.left = 19
+		LblTheme1.left = 107
+		LblTheme2.left = 195
+		LblTheme3.left = 283
+		LblTheme4.left = 19
+		LblTheme5.left = 107
+		LblTheme6.left = 195
+		LblTheme7.left = 283
+	end if
+	
+	'이미지비율 조정
+	ImgTheme0.setMaintainingRatio("1")
+	ImgTheme1.setMaintainingRatio("1")
+	ImgTheme2.setMaintainingRatio("1")
+	ImgTheme3.setMaintainingRatio("1")
+	ImgTheme4.setMaintainingRatio("1")
+	ImgTheme5.setMaintainingRatio("1")
+	ImgTheme6.setMaintainingRatio("1")
+	ImgTheme7.setMaintainingRatio("1")
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	
+End Sub
+
+'============================================================================
+Sub ImageThemeBg0_OnClick()
+	ClickThemeButton(0,false)
+End Sub
+'============================================================================
+Sub ImgTheme0_OnClick()
+	ClickThemeButton(0,false)
+End Sub
+'============================================================================
+Sub ImageThemeBg1_OnClick()
+	ClickThemeButton(1,false)
+End Sub
+'============================================================================
+Sub ImgTheme1_OnClick()
+	ClickThemeButton(1,false)
+End Sub
+'============================================================================
+Sub ImageThemeBg2_OnClick()
+	ClickThemeButton(2,false)
+End Sub
+'============================================================================
+Sub ImgTheme2_OnClick()
+	ClickThemeButton(2,false)
+End Sub
+'============================================================================
+Sub ImageThemeBg3_OnClick()
+	ClickThemeButton(3,false)
+End Sub
+'============================================================================
+Sub ImgTheme3_OnClick()
+	ClickThemeButton(3,false)
+End Sub
+'============================================================================
+Sub ImageThemeBg4_OnClick()
+	ClickThemeButton(4,false)
+End Sub
+'============================================================================
+Sub ImgTheme4_OnClick()
+	ClickThemeButton(4,false)
+End Sub
+'============================================================================
+Sub ImageThemeBg5_OnClick()
+	ClickThemeButton(5,false)
+End Sub
+'============================================================================
+Sub ImgTheme5_OnClick()
+	ClickThemeButton(5,false)
+End Sub
+'============================================================================
+Sub ImageThemeBg6_OnClick()
+	ClickThemeButton(6,false)
+End Sub
+'============================================================================
+Sub ImgTheme6_OnClick()
+	ClickThemeButton(6,false)
+End Sub
+'============================================================================
+Sub ImageThemeBg7_OnClick()
+	ClickThemeButton(7,false)
+End Sub
+'============================================================================
+Sub ImgTheme7_OnClick()
+	ClickThemeButton(7,false)
+End Sub
+
+'============================================================================
+Function ClickThemeButton(nIndx,bSlient)
+	
+	'배경이미지 변경
+	for i = 0 to #gThemeButtonBG - 1
+		
+		if i == nIndx then
+			Form.SetCtlProp(gThemeButtonBG[i], "imgpath", "btn_line2_o.9")
+			
+		else
+			Form.SetCtlProp(gThemeButtonBG[i], "imgpath", "btn_line2_n.9")
+		end if
+		
+	next
+	
+	'----------------------------------------------------------------
+	'선택 페이지 인덱스/ 버튼 인덱스 전달
+	'bSlient == true인 경우에는 부모화면에 알리지 않음.
+	'----------------------------------------------------------------
+	'테마선택 Flow
+	'----------------------------------------------------------------
+	'1. 테마선택(ClickThemeButton)
+	'2. 부모화면에 Noti(SELECT_THEME)
+	'3. 부모화면에서 자식화면들한테 Noti(CHANGE_SELECT_IMAGE) 
+	'4. 테마선택(ClickThemeButton)
+	'4번에서 호출되는 ClickThemeButton에서 bSlient = true로 호출하여 부모에게 Noti안하도록함.
+	if bSlient <> true then
+		Form.triggerEvent("#", "SELECT_THEME", gTabIndex .."@"..nIndx .."@"..gThemeName[nIndx] .."@"..gThemeCode[nIndx])
+	end if
+
+End Function
+
+
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+
+	if sEventName == "CHANGE_SELECT_IMAGE" then
+		
+		arrData = Split(sParam,"★")
+		
+		sTabIndex = Cint(arrData(0))
+		sBtnIndex = Cint(arrData(1))
+		
+		if gTabIndex == sTabIndex then
+			ClickThemeButton(sBtnIndex,true)
+		else
+			ClickThemeButton(-1,true)
+		end if
+	
+	'부모화면(nrshidx50130)에서 폼탭페이지 생성 후 몇번째 페이지인지 전달
+	elseif sEventName == "INIT_INDEX" then
+		
+		gTabIndex = Cint(sParam)
+		
+	'부모화면(nrshidx50130)에서 테마리스트 조회후 테마리스트 전달
+	elseif sEventName == "SEND_THEME_LIST" then
+	
+		'이미지명@테마명@테마코드^이미지명@테마명@테마코드...
+		arrData = Split(sParam,"^")
+	
+		if #arrData > 1 then
+		
+			for i = 0 to #arrData - 1
+			
+				'이미지명@테마명@테마코드
+				arrItem = Split(arrData(i),"@")
+				sItemName = arrItem(0)
+				sItemCode = arrItem(1)
+				
+				gThemeName[i] = sItemName
+				gThemeCode[i] = sItemCode
+				
+				sThemeImageName = GetThemeImageName(sItemName)
+				Form.SetCtlProp(gThemeButtonIcon[i]	, "imgpath", sThemeImageName)
+				Form.SetCtlProp(gThemeButtonIcon[i]	, "visible", "1")
+				
+				Form.SetCtlProp(gThemeButtonBG[i]	, "visible", "1")
+				Form.SetCtlProp(gThemeButton[i]		, "visible", "1")
+				Form.SetCtlProp(gThemeButton[i]		, "caption", sItemName)
+			
+			next
+		
+		end if
+	
+	'부모화면에서 이전 설정값이 있는경우 전송
+	elseif sEventName == "SELECT_HISTORY_THEME" then
+		'Form.ShowAlert("["..gTabIndex.."]"..sEventName, sParam)
+		ClickThemeButton(Cint(sParam),false)
+		
+	end if
+	
+End Sub
+'============================================================================
+Function GetThemeImageName(sItemKey)
+	
+	sName = Form.getIconImg("THEME",sItemKey)
+	
+	if sName == "" then
+		sName = Form.getIconImg("THEME","기타")
+	end if
+	
+	return sName
+	
+
+End Function
+
+
+
+	</SCRIPT_INFO>
+</ROOT>

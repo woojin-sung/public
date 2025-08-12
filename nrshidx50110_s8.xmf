@@ -1,0 +1,997 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50110" scrname="ETF Super검색_스크리너_수익률" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,444,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contMain" vscroll="1" ly_vert="0,0,375,444,1" scroll_ly_vert="0,0,375,444,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblSubTitle0" fontstyle="01" caption="수익기간" ly_vert="20,17,150,22,1" />
+				<LABEL name="lblSubTitle1" fontsize="-2" fontstyle="01" caption="수익률 범위" ly_vert="20,179,200,22,1" />
+				<PANNEL name="Pannel0" ly_vert="20,50,335,82,1" >
+					<CONTROL_INFO>
+						<LABEL name="lblPeriod0" fontsize="-2" halign="1" click="1" ly_vert="0,0,105,36,1" />
+						<LABEL name="lblPeriod1" fontsize="-2" halign="1" click="1" ly_vert="115,0,105,36,1" />
+						<LABEL name="lblPeriod2" fontsize="-2" halign="1" click="1" ly_vert="230,0,105,36,1" />
+					</CONTROL_INFO>
+					<CARD_INFO cardheight="36" gap="10" >
+						<CELL name="lblPeriod0" />
+						<CELL name="lblPeriod1" />
+						<CELL name="lblPeriod2" />
+					</CARD_INFO>
+				</PANNEL>
+				<BUTTON name="btnSlider" ly_vert="10,271,355,32,1" />
+				<LABEL name="Label0" caption="~" halign="1" ly_vert="177,210,21,44,1" />
+				<LABEL name="lblRate0" fontsize="-2" halign="1" click="1" ly_vert="20,210,157,44,1" />
+				<LABEL name="lblRate1" fontsize="-2" halign="1" click="1" ly_vert="199,210,157,44,1" />
+				<LABEL name="lblGuide" ly_vert="0,330,375,1,1" />
+				<BUTTON name="btnEmpty" btnimage="alpha" ly_vert="20,210,335,100,1" />
+				<LABEL name="lblGuideVal1" fontsize="-4" caption="100%" halign="2" ly_vert="290,300,65,22,1" />
+				<LABEL name="lblGuideVal0" fontsize="-4" caption="-100%" ly_vert="20,300,60,22,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="24966" _ulen="24466" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+'==============================================
+' 이미지
+'==============================================
+Dim g_szLblImg_Normal
+g_szLblImg_Normal = "btn_line2_n.9"
+
+Dim g_szLblImg_Select
+g_szLblImg_Select = "btn_line2_o.9"
+
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_line2_o.9"
+
+Dim g_szChkImg_Normal
+g_szChkImg_Normal = "checkmenu_n"
+
+Dim g_szChkImg_Select
+g_szChkImg_Select = "checkmenu_o"
+
+'==============================================
+' 컬러코드
+'==============================================
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_arrPeriod
+g_arrPeriod = Array("1개월", "3개월", "6개월", "1년", "3년")
+
+Dim g_arrPeriod_Check
+g_arrPeriod_Check = Array("0", "0", "0", "0", "0")
+
+Dim g_szSharedKey
+g_szSharedKey = "50110_S8_CHECK"
+
+Dim g_szSharedKey_Period
+g_szSharedKey_Period = "50110_S8_CHECK_PERIOD"
+
+Dim g_szSharedKey_Rate
+g_szSharedKey_Rate = "50110_S8_CHECK_RATE"
+
+Dim g_szRate0, g_szRate1, g_szChk
+g_szRate0 = ""
+g_szRate1 = ""
+
+Dim g_isClick0
+g_isClick0 = false
+
+Dim g_isClick1
+g_isClick1 = false
+
+Dim g_isExpand
+g_isExpand = false
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	contMain.lblSubTitle0.fgcolor = g_szTxtColor_Normal
+	contMain.lblSubTitle0.paddinginfo = "0,0,0,0"
+	
+	contMain.lblSubTitle1.fgcolor = g_szTxtColor_Grey
+	contMain.lblSubTitle1.paddinginfo = "0,0,0,0"
+	
+	contMain.btnSlider.makeRangeSlider(true, -100.0, 100.0, -100.0, 100.0, 0.1, 1)
+	contMain.btnSlider.SetRangeSliderLabelHide(true)
+	contMain.btnSlider.setRangeSliderLineColor( 347,  347)
+	
+	contMain.lblRate0.imagefilepth = g_szLblImg_Normal
+	contMain.lblRate1.imagefilepth = g_szLblImg_Normal
+	
+	contMain.lblRate0.fgcolor = g_szTxtColor_Grey
+	contMain.lblRate1.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblRate0.caption = "수익률 입력"
+	contMain.lblRate1.caption = "수익률 입력"
+	
+	contMain.lblGuideVal0.caption = "-100%"
+	contMain.lblGuideVal0.paddinginfo = "0,0,0,0"
+	contMain.lblGuideVal0.fgcolor = g_szTxtColor_Grey
+	
+	contMain.lblGuideVal1.caption = "100%"
+	contMain.lblGuideVal1.paddinginfo = "0,0,0,0"
+	contMain.lblGuideVal1.fgcolor = g_szTxtColor_Grey
+	
+	Enable_Slider(false)
+End Function
+
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Data()
+	nArrCnt = #g_arrPeriod
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+	
+	contMain.Pannel0.rowcount = nPannelRowCnt
+	
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		contMain.Pannel0.SetCellValue( "lblPeriod0", i, g_arrPeriod(nArrIdx))	
+		
+		contMain.Pannel0.SetPropCardCell("fgcolor", "lblPeriod0", i, g_szTxtColor_Normal)
+		contMain.Pannel0.SetPropCardCell("imagefilepth", "lblPeriod0", i, g_szBtnImg_Normal)
+		g_arrPeriod_Check(nArrIdx) = "0" 
+		
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			contMain.Pannel0.SetCellVisible("lblPeriod1",i,false)
+			contMain.Pannel0.SetCellVisible("lblPeriod2",i,false)
+			Exit for
+		end if
+		
+		contMain.Pannel0.SetCellValue( "lblPeriod1", i, g_arrPeriod(nArrIdx))	
+		contMain.Pannel0.SetPropCardCell("fgcolor", "lblPeriod1", i, g_szTxtColor_Normal)
+		contMain.Pannel0.SetPropCardCell("imagefilepth", "lblPeriod1", i, g_szBtnImg_Normal)
+		g_arrPeriod_Check(nArrIdx) = "0" 
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			contMain.Pannel0.SetCellVisible("lblPeriod2",i,false)
+			Exit for
+		end if
+		
+		contMain.Pannel0.SetCellValue( "lblPeriod2", i, g_arrPeriod(nArrIdx))	
+		contMain.Pannel0.SetPropCardCell("fgcolor", "lblPeriod2", i, g_szTxtColor_Normal)
+		contMain.Pannel0.SetPropCardCell("imagefilepth", "lblPeriod2", i, g_szBtnImg_Normal)
+		g_arrPeriod_Check(nArrIdx) = "0" 
+		nArrIdx = nArrIdx + 1
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+	
+End Function
+
+'===============================================
+' 패널버튼 클릭 이벤트 처리
+'===============================================
+Function DisplaySetting_PannelBtn(nRowIdx, szCtlName)
+	nCnt = nRowIdx * 3
+	if szCtlName = "lblPeriod0" then
+		
+	elseif szCtlName = "lblPeriod1" then
+		nCnt = Cint(nCnt) + 1
+	elseif szCtlName = "lblPeriod2" then
+		nCnt = Cint(nCnt) + 2
+	end if
+	
+	if #g_arrPeriod_Check < nCnt+1 then
+		Exit Function
+	end if
+	
+	if g_arrPeriod_Check(nCnt) = "0" then
+		Clear_Period()
+		
+		Enable_Slider(true)
+		
+		g_arrPeriod_Check(nCnt) = "1"
+		contMain.Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Select)
+	else 
+		Enable_Slider(false)
+	
+		g_arrPeriod_Check(nCnt) = "0"
+		contMain.Pannel0.SetPropCardCell("imagefilepth", szCtlName, nRowIdx, g_szBtnImg_Normal)
+	end if
+End Function
+
+Function Reload_PannelBtn(nArrIdx)
+	nIndex = 0
+	
+	nIndex= nArrIdx / 3
+	nCtlIdx = nArrIdx % 3
+	szCtlNm = ""
+	
+	if nCtlIdx = 0 then
+		szCtlNm = "lblPeriod0"
+	elseif nCtlIdx = 1 then
+		szCtlNm = "lblPeriod1"
+	elseif nCtlIdx = 2 then
+		szCtlNm = "lblPeriod2"
+	end if
+	
+	g_arrPeriod_Check(nArrIdx) = "1"
+	contMain.Pannel0.setPropCardCell("imagefilepth", szCtlNm, nIndex, g_szBtnImg_Select)
+End Function
+
+Function Clear_Period()
+	
+	nArrCnt = #g_arrPeriod
+	
+	nPannelRowCnt = Cint(nArrCnt / 3)
+	if (nArrCnt mod 3) > 0 then
+		nPannelRowCnt = nPannelRowCnt + 1
+	end if 
+	
+	nArrIdx = 0
+	
+	for i = 0 to nPannelRowCnt - 1
+		g_arrPeriod_Check(nArrIdx) = "0"
+		contMain.Pannel0.SetPropCardCell("imagefilepth", "lblPeriod0", i, g_szBtnImg_Normal)
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		g_arrPeriod_Check(nArrIdx) = "0"
+		contMain.Pannel0.SetPropCardCell("imagefilepth", "lblPeriod1", i, g_szBtnImg_Normal)
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+		
+		g_arrPeriod_Check(nArrIdx) = "0"
+		contMain.Pannel0.SetPropCardCell("imagefilepth", "lblPeriod2", i, g_szBtnImg_Normal)
+		nArrIdx = nArrIdx + 1
+		
+		if nArrIdx > nArrCnt - 1 then
+			Exit for
+		end if
+	next
+	
+End Function
+
+Function Enable_Slider(isEnable)
+	if isEnable = true then
+		contMain.btnSlider.enable = true
+		contMain.lblRate0.enable = true
+		contMain.lblRate1.enable = true
+		
+		contMain.btnEmpty.visible = false
+	else
+		contMain.btnSlider.enable = false
+		contMain.lblRate0.enable = false
+		contMain.lblRate1.enable = false
+		
+		contMain.btnEmpty.visible = true
+
+		g_szRate0 = ""
+		g_szRate1 = ""
+
+		g_isClick0 = false
+		g_isClick1 = false
+		
+		contMain.btnSlider.SetRangeSlider(-100.0, 100.0, -100.0, 100.0, 0.1,1)
+		
+		contMain.lblRate0.fgcolor = g_szTxtColor_Grey
+		contMain.lblRate1.fgcolor = g_szTxtColor_Grey
+		
+		contMain.lblRate0.caption = "수익률 입력"
+		contMain.lblRate1.caption = "수익률 입력"
+		contMain.btnSlider.setRangeSliderLineColor(347, 347)
+		'Form.SetSharedData(g_szSharedKey_Rate, "")
+	end if
+End Function
+
+Function Send_ChkDataToParent()
+	szRateData = ""
+	if contMain.lblRate0.caption <> "" and contMain.lblRate0.caption <> "수익률 입력" then
+		szRateData = contMain.lblRate0.caption
+		
+		if contMain.lblRate1.caption <> "" and contMain.lblRate1.caption <> "수익률 입력" then
+			szRateData = szRateData & "`" & contMain.lblRate1.caption
+			Form.SetSharedData(g_szSharedKey_Rate, szRateData)
+		else
+			Form.SetSharedData(g_szSharedKey_Rate, "")
+		end if
+	else
+		Form.SetSharedData(g_szSharedKey_Rate, "")
+	end if
+	
+	szPeriodData = Convert_ChkArrToString(g_arrPeriod, g_arrPeriod_Check, "`")
+	
+	Form.SetSharedData(g_szSharedKey_Period, szPeriodData)
+	
+	Form.triggerEvent("#", g_szSharedKey, "")
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환
+'===============================================
+Function Convert_ArrToString(arrData, szSeperator)
+	szResult = ""
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if i <> 0 then
+			szResult = szResult & szSeperator 
+		end if
+		
+		szResult = szResult & arrData(i) 
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환
+'===============================================
+Function Convert_ArrToString(arrData, szSeperator)
+	szResult = ""
+	
+	if arrData = null then
+		return szResult
+	end if
+	
+	if szSeperator = null or szSeperator = "" then
+		return szResult
+	end if 	
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if i <> 0 then
+			szResult = szResult & szSeperator 
+		end if
+		
+		szResult = szResult & arrData(i) 
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 배열 -> 문자열 변환(체크항목)
+'===============================================
+Function Convert_ChkArrToString(arrData, arrChkData, szSeperator)
+	szResult = ""
+	
+	if arrData = null then
+		return szResult
+	end if
+	
+	if arrChkData = null then
+		return szResult
+	end if
+	
+	if szSeperator = null or szSeperator = "" then
+		return szResult
+	end if 	
+	
+	szArrCnt = #arrData
+	
+	for i = 0 to szArrCnt - 1
+		if arrChkData(i) = "1" then
+			if szResult <> "" then
+				szResult = szResult & szSeperator 
+			end if
+			szResult = szResult & arrData(i) 
+		end if
+	next
+	
+	return szResult
+End Function
+
+'===============================================
+' 문자열 -> 배열 변환
+'===============================================
+Function Convert_StringToArr(szData, szSeperator)
+	szArrData = ""
+	
+	if szData <> null and szData <> "" then
+		szArrData = split(szData, szSeperator)
+	end if
+	
+	return szArrData
+End Function
+
+'===============================================
+' 배열 데이터 확인
+'===============================================
+Function Contains_Array(arrData, szData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		szArrData = arrData(i)
+		
+		if szArrData = szData then
+			return true
+		end if
+	next 
+	
+	return false
+End Function
+
+'===============================================
+' 체크배열 초기화
+'===============================================
+Function Clear_ChkArray(arrData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		arrData(i) = "0"	
+	next 
+End Function
+
+'===============================================
+' 체크배열 전체선택
+'===============================================
+Function All_ChkArray(arrData)
+
+	if arrData = null or arrData = "" then
+		return false
+	end if
+	
+	if szData = null or szData = "" then
+		return false
+	end if
+	
+	nArrCnt = #arrData
+	
+	for i = 0 to nArrCnt-1
+		arrData(i) = "1"	
+	next 
+End Function
+
+'===============================================
+' 배열 인덱스 추출
+'===============================================
+Function Return_ArrayIndex(arrData, szData)
+	nReturn = -1
+	if arrData = null or arrData = "" then
+		return nReturn
+	end if
+	
+	if szData = null or szData = "" then
+		return nReturn
+	end if
+	
+	nArrCnt = #arrData
+	for i = 0 to nArrCnt-1
+		if arrData(i) = szData then
+			nReturn = i
+			exit for
+		end if	
+	next 
+	
+	return nReturn
+End Function
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInitBefore
+'===============================================
+Sub Form_OnFormInitBefore()
+End Sub
+
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	g_szSharedData0 = Form.GetSharedData(g_szSharedKey_Rate, false )
+	g_szSharedData1 = Form.GetSharedData(g_szSharedKey_Period, false )
+	
+	Init_Control()
+	Init_Data()
+	
+	arrTempData = Convert_StringToArr(g_szSharedData1, "`")
+	
+	if #arrTempData > 0 then
+		Enable_Slider(true)
+	end if
+					
+	for i = 0 to #arrTempData - 1
+		nStep0_Idx = Return_ArrayIndex(g_arrPeriod, arrTempData(i))
+		Reload_PannelBtn(nStep0_Idx)
+	next
+	
+	arrTempData = Convert_StringToArr(g_szSharedData0, "`")
+	
+	if #arrTempData > 1 then 
+		szMinValue = replace(arrTempData(0), "%", "")
+		szMaxValue = replace(arrTempData(1), "%", "")
+		nMinValue = Cdbl(szMinValue)
+		nMaxValue = Cdbl(szMaxValue)
+		
+		g_szRate0 = szMinValue
+		g_szRate1 = szMaxValue
+		
+		contMain.btnSlider.SetRangeSlider(-100,  100,  nMinValue, nMaxValue, 0.1,1)
+		
+		contMain.lblRate0.fgcolor = g_szTxtColor_Normal
+		contMain.lblRate1.fgcolor = g_szTxtColor_Normal
+	
+		contMain.lblRate0.caption = arrTempData(0)
+		contMain.lblRate1.caption = arrTempData(1)
+	else
+		contMain.btnSlider.SetRangeSlider(-100.0, 100.0, -100.0, 100.0, 0.1,1)
+		
+		contMain.lblRate0.fgcolor = g_szTxtColor_Grey
+		contMain.lblRate1.fgcolor = g_szTxtColor_Grey
+		
+		contMain.lblRate0.caption = "수익률 입력"
+		contMain.lblRate1.caption = "수익률 입력"
+		Form.SetSharedData(g_szSharedKey_Rate, "")
+	end if
+	
+	
+	
+End Sub
+
+'===============================================
+' btnSlider_OnDragSliderEnd
+'===============================================
+Sub contMain_btnSlider_OnDragSlider(dMin,dMax)
+	contMain.btnSlider.setRangeSliderLineColor( 323	,  347)
+	contMain.lblRate0.fgcolor = g_szTxtColor_Normal
+	contMain.lblRate1.fgcolor = g_szTxtColor_Normal
+	
+'	if g_szRate0 = "" and dMin = -100 then
+'		contMain.lblRate0.caption = "수익률 입력"
+'	else
+'		'g_szRate0 = dMin
+'		contMain.lblRate0.caption = dMin&"%"
+'	end if
+'	
+'	if g_szRate1 = "" and dMax = 100 then
+'		contMain.lblRate1.caption = "수익률 입력"
+'	else
+'		'g_szRate1 = dMax
+'		contMain.lblRate1.caption = dMax&"%"
+'	end if
+	
+	contMain.lblRate0.caption = dMin&"%"
+	contMain.lblRate1.caption = dMax&"%"
+	
+	'Send_ChkDataToParent()
+End Sub
+
+Sub contMain_btnSlider_OnDragSliderEnd(dMin,dMax)
+	
+	contMain.lblRate0.fgcolor = g_szTxtColor_Normal
+	contMain.lblRate1.fgcolor = g_szTxtColor_Normal
+	
+'	if g_szRate0 = "" and dMin = -100 then
+'		contMain.lblRate0.caption = "수익률 입력"
+'	else
+'		g_szRate0 = dMin
+'		contMain.lblRate0.caption = dMin&"%"
+'	end if
+'	
+'	if g_szRate1 = "" and dMax = 100 then
+'		contMain.lblRate1.caption = "수익률 입력"
+'	else
+'		g_szRate1 = dMax
+'		contMain.lblRate1.caption = dMax&"%"
+'	end if
+	
+	g_szRate0 = dMin
+	contMain.lblRate0.caption = dMin&"%"
+		
+	g_szRate1 = dMax
+	contMain.lblRate1.caption = dMax&"%"
+	
+	Send_ChkDataToParent()
+End Sub
+
+
+'============================================================================
+Sub contMain_Pannel0_OnClick(nIndex, sCellID)
+	if sCellID = "" then
+		Exit Sub
+	end if
+	
+	DisplaySetting_PannelBtn(nIndex, sCellID)
+	
+	Send_ChkDataToParent()
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "50110_S8_CHECK" then
+		Init_Data()
+		
+		g_szSharedData = Form.GetSharedData(g_szSharedKey_Period, false )
+		arrTempData = Convert_StringToArr(g_szSharedData, "`")
+		
+		if #arrTempData > 0 then
+			Enable_Slider(true)
+		else
+			Enable_Slider(false)
+		end if
+						
+		for i = 0 to #arrTempData - 1
+			nStep0_Idx = Return_ArrayIndex(g_arrPeriod, arrTempData(i))
+			Reload_PannelBtn(nStep0_Idx)
+		next
+		
+		g_szSharedData = Form.GetSharedData(g_szSharedKey_Rate, false )
+		
+		arrTempData = Convert_StringToArr(g_szSharedData, "`")
+		
+		if #arrTempData > 1 then 
+			szMinValue = replace(arrTempData(0), "%", "")
+			szMaxValue = replace(arrTempData(1), "%", "")
+			nMinValue = Cdbl(szMinValue)
+			nMaxValue = Cdbl(szMaxValue)
+			
+			contMain.btnSlider.SetRangeSlider(-100,  100,  nMinValue, nMaxValue, 0.1,1)
+			
+			contMain.lblRate0.fgcolor = g_szTxtColor_Normal
+			contMain.lblRate1.fgcolor = g_szTxtColor_Normal
+		
+			contMain.lblRate0.caption = arrTempData(0)
+			contMain.lblRate1.caption = arrTempData(1)
+		else
+			contMain.btnSlider.SetRangeSlider(-100,  100,  -100, 100, 0.1,1)
+			contMain.btnSlider.setRangeSliderLineColor( 347,  347)
+			contMain.lblRate0.fgcolor = g_szTxtColor_Grey
+			contMain.lblRate1.fgcolor = g_szTxtColor_Grey
+			
+			contMain.lblRate0.caption = "수익률 입력"
+			contMain.lblRate1.caption = "수익률 입력"
+		end if
+		
+		
+	end if
+	
+	if sEventName = "KEYPAD" then
+		if g_isClick0 = true then
+			contMain.lblRate0.caption = sParam
+			g_szRate0 = sParam
+			
+'			if g_szRate0 = "-" then
+'				g_szRate0 = ""
+'			end if
+		elseif g_isClick1 = true then
+			contMain.lblRate1.caption = sParam
+			g_szRate1 = sParam
+			
+'			if g_szRate1 = "-" then
+'				g_szRate1 = ""
+'			end if
+		end if
+	end if
+	
+	if sEventName = "KEYPAD_END" then
+		
+		if g_isClick0 = true then
+			
+			if (sParam = "" or sParam = "-") and (contMain.lblRate0.caption = "" or contMain.lblRate0.caption = "-" or contMain.lblRate0.caption = "수익률 입력" or contMain.lblRate0.caption = "%") then
+				g_szRate0 = ""
+				
+				contMain.btnSlider.setRangeSlider(-100,  100,  -100, 100, 0.1,1)
+
+				contMain.lblRate0.caption = "수익률 입력"
+				if g_szRate1 <> "" then
+					contMain.lblRate1.caption = FormatNumber(g_szRate1, 1)&"%"
+				end if
+				contMain.btnSlider.setRangeSliderLineColor(347, 347)
+				
+				contMain.lblRate0.fgcolor = g_szTxtColor_Grey
+				contMain.lblRate1.fgcolor = g_szTxtColor_Grey
+				
+				g_isClick0 = false
+					
+				contMain.lblRate0.imagefilepth = g_szLblImg_Normal
+				
+				Form.triggerEvent("#", "50110_S8_KEYPAD", "CLOSE")
+				
+				contMain.lblGuide.top = 330
+				contMain.setScrollAutoSize()
+				
+				Send_ChkDataToParent()
+				exit Sub
+			end if
+			
+			if sParam <> "" and sParam <> "-"  then
+				g_szRate0 = sParam
+			end if
+			
+			if g_szRate1 <> "" then
+				if Cdbl(g_szRate0) > Cdbl(g_szRate1) then
+					g_szRate0 = ""
+					contMain.btnSlider.setRangeSlider(-100,  100,  -100, 100, 0.1,1)
+					
+					contMain.lblRate0.caption = "수익률 입력"
+					if g_szRate1 <> "" then
+						contMain.lblRate1.caption = FormatNumber(g_szRate1, 1)&"%"
+					end if
+					contMain.btnSlider.setRangeSliderLineColor(347, 347)
+					
+					contMain.lblRate0.fgcolor = g_szTxtColor_Grey
+					contMain.lblRate1.fgcolor = g_szTxtColor_Grey
+					
+					Form.ShowAlert("알림", "수익률을 " & g_szRate1 & "% 보다 작게 입력해주세요")
+					
+'					contMain_lblRate0_OnClick()
+					g_isClick0 = false
+					
+					contMain.lblRate0.imagefilepth = g_szLblImg_Normal
+					
+					Form.triggerEvent("#", "50110_S8_KEYPAD", "CLOSE")
+					
+					contMain.lblGuide.top = 330
+					contMain.setScrollAutoSize()
+					
+					Send_ChkDataToParent()
+					exit Sub
+				end if
+			end if
+
+			contMain.lblRate0.caption = FormatNumber(g_szRate0, 1)&"%"
+			
+			if g_szRate1 <> "" then
+				contMain.btnSlider.setRangeSlider(-100, 100, CDbl(g_szRate0), CDbl(g_szRate1), 0.1,1)
+				
+				contMain.btnSlider.setRangeSliderLineColor(323,347)
+				
+				contMain.lblRate0.fgcolor = g_szTxtColor_Normal
+				contMain.lblRate1.fgcolor = g_szTxtColor_Normal
+			end if
+			g_isClick0 = false
+				
+			contMain.lblRate0.imagefilepth = g_szLblImg_Normal
+			
+			Form.triggerEvent("#", "50110_S8_KEYPAD", "CLOSE")
+			
+			contMain.lblGuide.top = 330
+			contMain.setScrollAutoSize()
+			
+			Send_ChkDataToParent()
+			
+		elseif g_isClick1 = true then
+			
+			if (sParam = "" or sParam = "-") and (contMain.lblRate1.caption = "" or contMain.lblRate1.caption = "-" or contMain.lblRate1.caption = "수익률 입력" or contMain.lblRate1.caption = "%") then
+				g_szRate1 = ""
+				contMain.btnSlider.setRangeSlider(-100,  100,  -100, 100, 0.1,1)
+				
+				contMain.lblRate1.caption = "수익률 입력"
+				if g_szRate0 <> "" then
+					contMain.lblRate0.caption = FormatNumber(g_szRate0, 1)&"%"
+				end if
+				contMain.btnSlider.setRangeSliderLineColor(347, 347)
+				
+				contMain.lblRate0.fgcolor = g_szTxtColor_Grey
+				contMain.lblRate1.fgcolor = g_szTxtColor_Grey
+				
+'				contMain_lblRate1_OnClick()
+				g_isClick1 = false
+				
+				contMain.lblRate1.imagefilepth = g_szLblImg_Normal
+				
+				contMain.lblGuide.top = 330
+				contMain.setScrollAutoSize()
+				Form.triggerEvent("#", "50110_S8_KEYPAD", "CLOSE")
+				
+				Send_ChkDataToParent()
+				exit Sub
+			end if
+			
+			if sParam <> "" and sParam <> "-"  then
+				g_szRate1 = sParam
+			end if
+			
+			if g_szRate0 <> "" then	
+				if Cdbl(g_szRate0) > Cdbl(g_szRate1) then
+					g_szRate1 = ""
+					contMain.btnSlider.setRangeSlider(-100,  100, -100, 100, 0.1,1)
+					
+					contMain.lblRate1.caption = "수익률 입력"
+					if g_szRate0 <> "" then
+						contMain.lblRate0.caption = FormatNumber(g_szRate0, 1)&"%"
+					end if
+					contMain.btnSlider.setRangeSliderLineColor(347, 347)
+					
+					contMain.lblRate0.fgcolor = g_szTxtColor_Grey
+					contMain.lblRate1.fgcolor = g_szTxtColor_Grey
+					
+					Form.ShowAlert("알림", "수익률을 " & g_szRate0 & "% 보다 크게 입력해주세요")
+					
+'					contMain_lblRate1_OnClick()
+					g_isClick1 = false
+							
+					contMain.lblRate1.imagefilepth = g_szLblImg_Normal
+					
+					contMain.lblGuide.top = 330
+					contMain.setScrollAutoSize()
+					Form.triggerEvent("#", "50110_S8_KEYPAD", "CLOSE")
+					
+					Send_ChkDataToParent()
+				
+					exit Sub
+				end if
+			end if
+			
+			
+			contMain.lblRate1.caption = FormatNumber(g_szRate1, 1)&"%"
+			
+			if g_szRate0 <> "" then
+				contMain.btnSlider.setRangeSlider(-100, 100, CDbl(g_szRate0), CDbl(g_szRate1), 0.1,1)
+				
+				contMain.btnSlider.setRangeSliderLineColor(323,347)
+				
+				contMain.lblRate0.fgcolor = g_szTxtColor_Normal
+				contMain.lblRate1.fgcolor = g_szTxtColor_Normal
+			end if
+			
+'			contMain_lblRate1_OnClick()
+			g_isClick1 = false
+					
+			contMain.lblRate1.imagefilepth = g_szLblImg_Normal
+			
+			contMain.lblGuide.top = 330
+			contMain.setScrollAutoSize()
+			Form.triggerEvent("#", "50110_S8_KEYPAD", "CLOSE")
+			
+			Send_ChkDataToParent()
+
+		end if
+		
+	end if
+	
+	if sEventName = "50110_COND_STAT" then
+		if sParam = "N" then
+			contMain.height = 444
+			g_isExpand = false
+		elseif sParam = "Y" then
+			contMain.height = 334
+			g_isExpand = true
+		end if
+		
+		contMain.setScrollAutoSize()
+	end if
+End Sub
+
+'============================================================================
+Sub contMain_lblRate0_OnClick()
+	if g_isClick0 = false then
+		if g_isClick1 = true then
+			Form.triggerEvent("#", "KEYPAD_END", g_szRate1)
+		end if
+		
+		g_isClick0 = true
+		g_isClick1 = false
+		
+		contMain.lblRate0.imagefilepth = g_szLblImg_Select
+		contMain.lblRate1.imagefilepth = g_szLblImg_Normal
+		
+		Form.triggerEvent("#", "50110_S8_KEYPAD", "-100`100`1`")'&g_szRate0)
+		
+		if g_isExpand = true then
+			contMain.lblGuide.top = 500
+			
+		else
+			contMain.lblGuide.top = 600
+			
+		end if
+		
+		contMain.setScrollAutoSize()
+		if Form.GetSharedData("&OS_TYPE", false) = "2" then
+			contMain.scroll_pos_noAni = 140
+		else
+			contMain.scroll_pos = 140
+		end if
+	else
+		Form.triggerEvent("#", "KEYPAD_END", g_szRate0)
+		
+		g_isClick0 = false
+		g_isClick1 = false
+		
+		contMain.lblRate0.imagefilepth = g_szLblImg_Normal
+		contMain.lblRate1.imagefilepth = g_szLblImg_Normal
+		
+		Form.triggerEvent("#", "50110_S8_KEYPAD", "CLOSE")
+		
+		contMain.lblGuide.top = 330
+		contMain.setScrollAutoSize()
+		
+		Send_ChkDataToParent()
+	end if
+	
+End Sub
+
+'============================================================================
+Sub contMain_lblRate1_OnClick()
+	if g_isClick1 = false then
+		if g_isClick0 = true then
+			Form.triggerEvent("#", "KEYPAD_END", g_szRate0)
+		end if
+		
+		g_isClick1 = true
+		g_isClick0 = false
+		
+		contMain.lblRate1.imagefilepth = g_szLblImg_Select
+		contMain.lblRate0.imagefilepth = g_szLblImg_Normal
+		
+		Form.triggerEvent("#", "50110_S8_KEYPAD", "-100`100`1`")'&g_szRate1)
+		
+		if g_isExpand = true then
+			contMain.lblGuide.top = 500
+		else
+			contMain.lblGuide.top = 600
+		end if
+		
+		contMain.setScrollAutoSize()
+		if Form.GetSharedData("&OS_TYPE", false) = "2" then
+			contMain.scroll_pos_noAni = 140
+		else
+			contMain.scroll_pos = 140
+		end if
+
+	else
+		Form.triggerEvent("#", "KEYPAD_END", g_szRate1)
+		
+		g_isClick0 = false
+		g_isClick1 = false
+		
+		contMain.lblRate0.imagefilepth = g_szLblImg_Normal
+		contMain.lblRate1.imagefilepth = g_szLblImg_Normal
+		
+		Form.triggerEvent("#", "50110_S8_KEYPAD", "CLOSE")
+		
+		contMain.lblGuide.top = 330
+		contMain.setScrollAutoSize()
+		
+		Send_ChkDataToParent()
+	end if
+End Sub
+'============================================================================
+Sub contMain_btnEmpty_OnClick()
+	Form.ShowAlert("안내", "기간 선택 후 수익률을 입력해주세요")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

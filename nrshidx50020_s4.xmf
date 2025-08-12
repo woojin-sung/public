@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50020" scrname="INCOME_절세가이드" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,340,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblSubTitle" fontsize="2" fontstyle="01" caption="TAX365" ly_vert="20,25,270,32,1" />
+		<LABEL name="lblSubTitle0" fontsize="-2" caption="자산은 늘리고, 세금은 줄이는 절세 알짜 정보" bgcolor="143:049050052" valign="0" multiline="1" ly_vert="20,60,335,50,1" />
+		<LABEL name="Label1" transmode="0" ly_vert="0,330,375,10,1" />
+		<PANNEL name="Pannel0" ly_vert="0,90,375,240,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblLine2" transmode="0" ly_vert="20,79,335,1,1" />
+				<LABEL name="lblTitle" fontsize="-2" fontstyle="01" bgcolor="029:255212175" multiline="1" ly_vert="80,25,280,50,1" />
+				<LABEL name="lblIndex" fontsize="-4" fontstyle="01" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="80,10,176,20,1" />
+				<IMAGE name="Image0" autosize="1" ly_vert="20,17,80,45,1" />
+				<LABEL name="lblUrl" visible="0" ly_vert="100,80,260,32,0" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="80" >
+				<CELL name="lblLine2" />
+				<CELL name="lblTitle" />
+				<CELL name="lblIndex" />
+				<CELL name="Image0" />
+				<CELL name="lblUrl" />
+			</CARD_INFO>
+		</PANNEL>
+		<LABEL name="lblSubTitle1" fontsize="-2" caption="<![CDATA[더보기 >]]>" halign="2" click="1" ly_vert="270,25,85,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7793" _ulen="7445" >
+--===========================================================================
+--===========================================================================
+Dim g_szBackImg  
+g_szBackImg = "icon_main_01"
+
+Dim g_szTitle
+g_szTitle = "Income 투자하기"
+
+Dim g_szFilterImg  
+g_szFilterImg = "icon_filter"
+
+Dim g_szIntrImg_Normal 
+g_szIntrImg_Normal = "icon_like_n"
+
+Dim g_szIntrImg_Select
+g_szIntrImg_Select = "icon_like_o"
+
+Dim g_szBtnImg_Normal
+g_szBtnImg_Normal = "btn_41_n.9"
+
+Dim g_szBtnImg_Select
+g_szBtnImg_Select = "btn_42_n.9"
+
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal = "334"
+
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey = "333"
+
+Dim g_szTxtColor_White 
+g_szTxtColor_White = "338"
+
+Dim g_szTxtColor_Red 
+g_szTxtColor_Red = "326"
+
+Dim g_szContBgColor
+g_szContBgColor = "320"
+
+Dim g_szBadgeBgColor
+g_szBadgeBgColor = "393"
+
+Dim g_szTxtColor_Buy
+g_szTxtColor_Buy = "290"
+
+Dim g_szTxtColor_Sell
+g_szTxtColor_Sell = "291"
+
+Dim g_szLineColor
+g_szLineColor = "256"
+
+Dim g_nExpandHeight 
+g_nExpandHeight = 120
+
+Dim g_nFoldHeight
+g_nFoldHeight = 60
+
+Dim g_nPrev_Expand_Idx
+g_nPrev_Expand_Idx = -1
+
+Dim g_szThemeNm
+g_szThemeNm = ""
+
+Dim g_isCompChk
+g_isCompChk = false
+
+Dim g_nCompChkCnt
+g_nCompChkCnt = 0
+
+Dim g_nCompChkIdx_1
+g_nCompChkIdx_1 = -1
+
+Dim g_nCompChkIdx_2
+g_nCompChkIdx_2 = -1
+
+Dim g_szIntrItemCd, g_szIntrIdx, g_szIntrGrpCnt
+g_szIntrItemCd = ""
+g_szIntrIdx = ""
+g_szIntrGrpCnt = 0
+
+Dim g_szNationSet
+g_szNationSet = ""
+Dim g_szSortIdx
+g_szSortIdx = ""
+
+Dim g_isPopup
+g_isPopup = false
+
+
+'인덱스 / 종목코드(시장조치) / 종목명 / 현재가(전일대비) / 국기이미지 / 레버리지인버스 배율 / 관심여부 / 보수율 / NAV / 거래량 / 종목코드
+Function DisplaySetting_Pannel(nIdx, szImg, szUrlImg, szSubTitle, szTitle, szUrl) 
+	'상단 라인표시
+	if nIdx <> 2 then
+	Pannel0.setPropCardCell("bgcolor","lblLine2", nIdx , g_szLineColor)
+	end if
+	
+	'종목 국가 국기이미지 
+	
+	Pannel0.setPropCardCell("maintainratio", "Image0", nIdx, "2")
+	if szUrlImg <> "" then
+		
+		szOSType = Form.GetSharedData("&OS_TYPE", false)
+		If szOSType == "1" Then 'Android
+			Pannel0.setPropCardCell("imgurl","Image0", nIdx, szUrlImg)
+		Else
+			Pannel0.SetPropCardCell("imagetarget", "Image0" , nIdx, 2)
+			Pannel0.SetPropCardCell("imgurl","Image0" , nIdx, szUrlImg)
+		End If
+	else
+		Pannel0.setPropCardCell("maintainratio", "Image0", nIdx, "2")
+		Pannel0.setPropCardCell("imgpath","Image0", nIdx, szImg)
+	end if
+	
+	Pannel0.setPropCardCell("paddinginfo","lblIndex",nIdx, "0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor","lblIndex",nIdx, g_szTxtColor_Grey)
+	Pannel0.setPropCardCell("maxlinecnt","lblIndex",nIdx, "1")
+	Pannel0.setPropCardCell("caption","lblIndex",nIdx, szSubTitle)
+	
+	'종목명
+	Pannel0.setPropCardCell("paddinginfo","lblTitle",nIdx, "0,0,0,0")
+	Pannel0.setPropCardCell("fgcolor","lblTitle",nIdx, g_szTxtColor_Normal)
+	Pannel0.setPropCardCell("maxlinecnt","lblTitle",nIdx, "2^-2")
+	Pannel0.setPropCardCell("caption","lblTitle",nIdx, szTitle)	
+	
+'	Pannel0.SetPropCardCell("top", "lblIndex", nIdx, "18")
+'	Pannel0.SetPropCardCell("top", "lblTitle", nIdx, "33")
+'		
+	if nIdx = 0 then
+'		Pannel0.SetPropCardCell("top", "lblIndex", nIdx, "13")
+'		Pannel0.SetPropCardCell("top", "lblTitle", nIdx, "32")
+		if Form.GetSharedData("&OS_TYPE", false) = "1" then
+			Pannel0.SetPropCardCell("fontstyle", "lblTitle", nIdx, "00")
+		end if
+		Pannel0.SetPropCardCell("textattr", "lblTitle", nIdx, "0^10^334^-2^true^ETF 투자와 세금\n세금을 아끼는 ETF 투자방법은?^0")
+	end if
+
+	
+	
+	Pannel0.setPropCardCell("caption","lblUrl",nIdx, szUrl)	
+End Function
+
+'============================================================================
+Sub lblSubTitle1_OnClick()
+	Form.OpenScreen("50900" , "")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	lblSubTitle.paddinginfo = "0,0,0,0"
+	lblSubTitle0.paddinginfo = "0,0,0,0"
+	lblSubTitle1.paddinginfo = "0,0,0,0"
+
+	lblSubTitle0.fgcolor = g_szTxtColor_Grey
+	lblSubTitle1.fgcolor = g_szTxtColor_Grey
+	lblSubTitle0.maxlinecnt = "2"
+	
+	Label1.bgcolor = g_szContBgColor
+	
+	DATAMANAGER.RequestTranData("ooopc_rprt_002r")	
+End Sub
+
+'============================================================================
+Sub Pannel0_OnClick(nIndex, sCellID)
+	szData = Pannel0.getPropCardCell("caption", "lblUrl", nIndex)
+	Form.triggerEvent("#", "50020_SCROLL_POS", "")
+	if szData = "50900" then
+		Form.OpenScreen("50900" , "3")
+	elseif szData <> "" then
+		if nIndex  = 0 then
+			Form.OpenPopup("nrshidx50900_s4", szData, "")
+		elseif nIndex = 1 then
+			Form.OpenPopup("nrshidx50910_s1", szData, "")
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	If szTranID == "ooopc_rprt_002r" Then
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_GRP_ID" 				, 0 , "bascGrp")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_ID" 					, 0 , "MoWbTaxT")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_CNTT_DIV_CODE" 		, 0 , "%")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_CNTT_WRTR_NAME" 		, 0 , "%")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "BBS_CNTT_TITL_NAME" 		, 0 , "%")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "STA_DATE" 				, 0 , "00000000")
+		DATAMANAGER.SetDataValue(0, "ooopc_rprt_002r", "InBlock1", "FIN_DATE" 				, 0 , "99999999")
+	End If
+End Sub
+
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	If szTranID == "ooopc_rprt_002r" Then
+		nDataCnt = DATAMANAGER.GetDataCount(0, "ooopc_rprt_002r", "OutBlock1")
+		
+		g_serverMode = Form.GetSharedData("&SERVER_MODE", false)
+		If g_serverMode == "1" Then	'개발기
+			sURL = "https://testhome.imeritz.com/bbs/mwCtn1.do?bbsId=MoWbTax&bbsCnttTurnNo=3"
+		else
+			sURL = "https://home.imeritz.com/bbs/mwCtn1.do?bbsId=MoWbTax&bbsCnttTurnNo=3"
+		end if
+			
+		if nDataCnt = 0 then
+			Pannel0.rowcount = "2"
+		
+			DisplaySetting_Pannel(0, "tax365_icon_etf.png", "" , "절세투자", "ETF 투자와 세금\n세금을 아끼는 ETF 투자방법은?", sURL) 
+			DisplaySetting_Pannel(1, "icon_taxcal", "", "세무캘린더", "한 눈에 보는 세무일정 알아보기", "50900") 
+		else
+			sTitle = DATAMANAGER.GetDataValue(0, "ooopc_rprt_002r", "OutBlock1", "BBS_CNTT_TITL_NAME", 0)
+			sThumPath = DATAMANAGER.GetDataValue(0, "ooopc_rprt_002r", "OutBlock1", "BBS_CNTT_SPLM_ITEM_VAL13", 0)
+			sContentsUrl = DATAMANAGER.GetDataValue(0, "ooopc_rprt_002r", "OutBlock1", "BBS_CNTT_TURN_NO", 0)
+
+			If g_serverMode == "1" Then	'개발기
+				sThumPath = "https://testhome.imeritz.com" & sThumPath
+				sContentsUrl = "https://testhome.imeritz.com/bbs/mwCtn1.do?bbsId=MoWbTaxT&bbsCnttTurnNo="..Cint(sContentsUrl)
+				
+			else
+				sThumPath = "https://home.imeritz.com" & sThumPath
+				sContentsUrl = "https://home.imeritz.com/bbs/mwCtn1.do?bbsId=MoWbTaxT&bbsCnttTurnNo="..Cint(sContentsUrl)	
+			end if
+			
+			Pannel0.rowcount = "3"
+
+			DisplaySetting_Pannel(0, "tax365_icon_etf.png","", "절세투자", "ETF 투자와 세금\n세금을 아끼는 ETF 투자방법은?", sURL) 
+			DisplaySetting_Pannel(1, "icon_taxstory",sThumPath, "세금이야기", sTitle, sContentsUrl) 
+			DisplaySetting_Pannel(2, "icon_taxcal","", "세무캘린더", "한 눈에 보는 세무일정 알아보기", "50900") 	
+		end if
+		
+		if g_isPopup = true then
+			g_isPopup = false
+			Pannel0_OnClick(0, "")
+			
+		end if
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName = "TAX365_SUB_WEB" then
+		g_isPopup = true
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ooopc_rprt_002r" trcode="ooopc_rprt_002r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ooopc_rprt_002r" title="(홈페이지)ETF매거진 컨텐츠 목?" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="345" _ulen="261" >
+
+BBS_GRP_ID^게시판그룹ID^36^0^0^0^0^0^0
+BBS_ID^게시판ID^36^0^0^0^0^0^0
+BBS_CNTT_DIV_CODE^게시판내용분류코드^2^0^0^0^0^0^0
+BBS_CNTT_WRTR_NAME^게시판내용작성자명^40^0^0^0^0^0^0
+BBS_CNTT_TITL_NAME^게시판내용제목명^200^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="1047" _ulen="761" >
+
+BBS_GRP_ID^게시판그룹ID^36^0^0^0^0^0^0
+BBS_ID^게시판ID^36^0^0^0^0^0^0
+BBS_CNTT_TURN_NO^게시판내용순차번호^11^0^7^0^0^0^0
+BBS_ATCH_TURN_NO^게시판첨부순차번호^16^0^7^0^0^0^0
+BBS_CNTT_WRTN_YMDH^게시판내용작성일시^19^0^0^0^0^0^0
+BBS_CNTT_MOD_YMDH^게시판내용수정일시^19^0^0^0^0^0^0
+BBS_CNTT_WRTR_ID^게시판내용작성자ID^36^0^0^0^0^0^0
+BBS_CNTT_WRTR_NAME^게시판내용작성자명^40^0^0^0^0^0^0
+BBS_CNTT_TITL_NAME^게시판내용제목명^200^0^0^0^0^0^0
+BBS_CNTT_ATCH_FILE_CNT^게시판내용첨부파일수^13^0^7^0^0^0^0
+BBS_ATCH_ORTX_FILE_PATH_NAME^게시판첨부원본파일경로명^256^0^0^0^0^0^0
+BBS_ATCH_ORTX_FILE_NAME^게시판첨부원본파일명^200^0^0^0^0^0^0
+BBS_ATCH_SRVR_FILE_PATH_NAME^게시판첨부서버파일경로명^256^0^0^0^0^0^0
+BBS_ATCH_SRVR_FILE_NAME^게시판첨부서버파일명^200^0^0^0^0^0^0
+BBS_CNTT_SPLM_ITEM_VAL13^게시판내용추가항목값13^200^0^0^0^0^0^0
+BBS_CNTT_SPLM_ITEM_VAL14^게시판내용추가항목값14^200^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="208" _ulen="156" >
+
+BBS_GRP_ID^게시판그룹ID^36^0^0^0^0^0^0
+BBS_ID^게시판ID^36^0^0^0^0^0^0
+BBS_CNTT_TURN_NO^게시판내용순차번호^11^0^7^0^0^0^0
+BBS_ATCH_TURN_NO^게시판첨부순차번호^16^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16090" scrname="해외 실시간 시세신청/해지" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBack" autosize="1" imgpath="icon_main_01" margin="2,0,0,0" ly_vert="6,11,39,24,1" />
+		<LABEL name="lblTitle" fontsize="3" caption="실시간 시세 신청" multiline="1" paddinginfo="1,0,0,0" click="1" ly_vert="47,0,283,47,1" />
+		<IMAGE name="imgInfo" imgpath="icon_notice.png" ly_vert="341,12,20,20,1" />
+		<FORMTAB name="fmtab01" tabcount="2" tabwidthtype="1" tabheadheight="45" ly_vert="0,53,376,650,1" >
+			<PAGE name="page005898" caption="신청/해지" linkfile="nrsbtro16090_t1" />
+			<PAGE name="page009417" caption="신청내역" linkfile="nrsbtro16090_t2" />
+		</FORMTAB>
+		<IMAGE name="imgTitleArrow" enable="0" visible="0" autosize="1" ly_vert="200,16,39,15,0" />
+		<COMBO name="Combo0" visible="0" cbinputdatatext="해외(주식/ETP)거래 신청
+해외주식 소수점 서비스 신청
+통합증거금 서비스 신청
+실시간시세 신청" popuptitle="메뉴를 선택해 주세요." ly_vert="1747,21,111,40,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6730" _ulen="5984" >
+'실시간 시세 신청
+
+Dim g_szOpenData
+g_szOpenData = ""
+
+Dim g_szScreenNo, g_szOpen
+g_szScreenNo = ""
+g_szOpen = ""
+
+'CFD관련 메시지 한번만 표기
+Dim g_szDisplayMsgForCFD
+g_szDisplayMsgForCFD = true
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'imgBack.setMaintainingRatio("1")	
+	imgInfo.setMaintainingRatio("1")
+End Sub
+
+'211216 아이티젠 김성수 END
+'============================================================================
+Sub Form_OnFormInit()
+	Form.SetSharedData("&BACK_PRESS_ENABLE", "N") 
+	Form.SetSharedData("nrsbtro16090_ScrNo", "1") 
+	
+	Dim  szOS_TYPE
+	szOS_TYPE = Form.GetSharedData("&OS_TYPE", false)	
+	g_szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+'gszScreenNo = "16095" 'for TEST		
+
+	'로그인 여부 체크
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+	if CInt(sLOGIN_TYPE) > 1 then  '로그인상태
+	else
+		g_szOpen = g_szScreenNo
+		Form.OpenPopup("mhetc90021","","")	
+		Exit Sub
+	end if 	
+	
+ 	if g_szScreenNo == "16095" then 'CFD
+		'실시간 시세 조회(CFD)
+		lblTitle.caption = "실시간 시세 신청(CFD용)"
+		'imgTitleArrow.visible = false
+		imgInfo.visible = false
+	Else 
+		lblTitle.caption = "실시간 시세 신청"
+		'imgTitleArrow.visible = true
+		imgInfo.visible = true
+	end if   
+	
+	g_szOpenData = Form.GetOpenLinkData() 
+'환전완료`통화`화면번호`계좌번호`마켓명`이용기간(0,1,2) 
+'g_szOpenData = "환전완료`USD`16090`3008432104`미국`0" 'for TEST
+'g_szOpenData = "환전완료`CNY`16095`3008432104`상해`2" 'for TEST
+'g_szOpenData = "1" 'for TEST
+	if g_szOpenData <> "" or g_szOpenData <> "nil" then
+		if g_szOpenData == "1" then
+			'탭번호 1 : 신청내역, 0 또는 "" : 신청/해지
+			'CFD 실시간 시세신청한 고객이 해외주식 실시간 시세 신청 화면에서 해지하는 경우 실시신시세신청 CFD의 신청내역 탭으로 이동 
+			'해외주식 실시간 시세신청한 고객이 해외CFD 실시간 시세 신청 화면에서 해지하는 경우 실시신시세신청의 신청내역 탭으로 이동 			
+			g_szOpenData = "" '탭이동 데이터이기 때문에 초기화
+			fmtab01.currenttab = 1
+			fmtab01_OnTabChanged(1)
+		else
+			'6500 환전신청 후 
+			'신청/해지
+			fmtab01.currenttab = 0
+			fmtab01_OnTabChanged(0)
+		end if
+	else
+		fmtab01.currenttab = 0
+		if szOS_TYPE ~= "2" then
+			fmtab01_OnTabChanged(0)
+		end if
+	end if 	
+		
+	'-----------------------------------------------
+	' 타이틀 초기화
+	'-----------------------------------------------
+'	Dim nWidth
+	lblTitle.paddinginfo = "0,0,0,0"
+	
+'	nWidth = Form.GetTextWidth(lblTitle.caption, 3, false, false)	
+'	imgTitleArrow.maintainratio = "2" 
+'	imgTitleArrow.imgpath = "icon_arrow_down2"
+'	imgTitleArrow.left = 47 + nWidth + 10	
+	
+	'-----------------------------------------------
+	' 뒤로가기 버튼 초기화
+	'-----------------------------------------------
+	imgBack.SetMaintainingRatio("2")
+	imgBack.imgpath = "icon_main_01"	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	fmtab01_OnTabChanged(tonumber(fmtab01.currenttab))
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	'ImgBack_OnClick()	
+End Sub
+
+'============================================================================
+Sub fmtab01_OnTabChanged(nCurrentTab)
+
+	Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "INFO_REFRESH", g_szOpenData)
+	if nCurrentTab == 0 then
+		Form.SetSharedData("&BACK_PRESS_ENABLE", "N") 
+		Form.SetSharedData("nrsbtro16090_ScrNo", "1")
+		if g_szDisplayMsgForCFD == true then
+			Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "DISPLAY_MSG_FOR_CFD", "1")
+			g_szDisplayMsgForCFD = false
+		else
+			Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "DISPLAY_MSG_FOR_CFD", "0")
+	    end if 
+	else
+		g_szOpenData = "" '탭이동 이전 데이터 초기화
+		Form.SetSharedData("&BACK_PRESS_ENABLE", "Y") 
+		Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "DISPLAY_MSG_FOR_CFD", "0")
+	end if
+	
+End Sub
+
+'============================================================================
+Sub imgInfo_OnClick()
+    Form.OpenPopup("nrsbtro16090_p10" , "" , "")		
+End Sub
+
+'============================================================================
+Sub imgBack_OnClick()
+	Dim szPrevScr
+	szPrevScr = Form.GetSharedData("&PREV_SCREEN_NO", false )	'직전화면번호
+
+	if CInt(fmtab01.currenttab) == 0  then '신청해지
+		if Form.GetSharedData("nrsbtro16090_ScrNo", false) == "2" then '시장정보입력 >> 시장선택
+			Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "SET_SUBSCREEN", "1")
+		else
+			if szPrevScr == "99999" then
+				Form.CloseForm()
+			else
+				'화면닫기전 안드로이드-백버튼 작동Y 원복
+				Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")  			
+				Form.OpenPrevScreen()
+			end if 
+		end if 
+	else
+		if szPrevScr == "99999" then
+			Form.CloseForm()
+		else
+			'화면닫기전 안드로이드-백버튼 작동Y 원복
+			Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")  			
+			Form.OpenPrevScreen()
+		end if 
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+'msgbox sKeyName & " :: " & sRet
+	if sKeyName == "Login_Type" then
+		if Cint(sRet) > 1 then
+			if g_szOpen == g_szScreenNo then
+				Form_OnFormInit()
+			end if	
+		end if 
+	end if	
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+    '화면닫기전 안드로이드-백버튼 작동Y 원복
+    Form.SetSharedData("&BACK_PRESS_ENABLE" , "Y")  	
+End Sub
+
+''============================================================================
+'Sub lblTitle_OnClick()
+'	imgTitleArrow_OnClick()
+'End Sub
+'
+''메뉴
+''============================================================================
+'Sub imgTitleArrow_OnClick()
+'	Combo0.currentindex = 3
+'	Combo0.OpenList()	
+'End Sub
+'
+''============================================================================
+'Sub Combo0_OnEditComplete(iIndex)
+'	if iIndex == 1 then  '해외주식 소수점 서비스 신청
+'		Form.CloseForm()
+'		Form.OpenScreen("87052" , "") 
+'	elseif iIndex == 2 then '통합증거금 서비스 신청
+'		Form.CloseForm()
+'		Form.OpenScreen("87054" , "")  
+'	elseif iIndex == 0 then '해외(주식,ETP)거래 신청 87051
+'		Form.CloseForm()
+'		Form.OpenScreen("87051" , "") 
+'	else '실시간시세 신청
+'		imgTitleArrow.imgpath = "icon_arrow_down2.png"
+'	end if 
+'End Sub
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtre_comm_004r" trcode="obtre_comm_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtre_comm_004r" title="해외CFD_계좌 상태 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="122" _ulen="90" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1262" _ulen="926" >
+
+CFD_DEAL_ABLE_YN_CODE^CFD매매가능여부코드^1^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+CFD_MARG_RATE^CFD증거금비율^20^13^7^0^0^0^0
+ACNT_LVRG^계좌레버리지^20^6^7^0^0^0^0
+HTS_ODER_FERT^HTS주문수수료율^20^13^7^0^0^0^0
+BRNC_ODER_FERT^지점주문수수료율^20^13^7^0^0^0^0
+SECO_BYOV_RLOV_SPEAD^증권회사매수롤오버스프레드^20^13^7^0^0^0^0
+ACNT_LVRG_LIMT_RATE^계좌레버리지한도비율^20^6^7^0^0^0^0
+CFD_CUST_LIMT_AMT^CFD고객한도금액^20^6^7^0^0^0^0
+CFD_MARG_GRAD_CODE^CFD증거금등급코드^1^0^0^0^0^0^0
+MARG_GRAD_NAME^증거금등급명^40^0^0^0^0^0^0
+CTCD^국가코드^3^0^0^0^0^0^0
+INVT_FIN_DATE^투자종료일자^8^0^0^0^0^0^0
+CFD_MNTN_MARG_RATE^CFD유지증거금비율^20^6^7^0^0^0^0
+CFD_ATMT_LSCT_MARG_RATE^CFD자동로스컷증거금비율^20^6^7^0^0^0^0
+FRCR_DFPR_HFERT^외화부족분헷지수수료율^20^12^7^0^0^0^0
+FRCR_HDPR_HFERT^외화보유분헷지수수료율^20^12^7^0^0^0^0
+CFD_MARG_RATE_APLY_TYPE^CFD증거금비율적용유형^2^0^0^0^0^0^0
+CFD_RELF_AGRM_YN^CFD안심동의여부^1^0^0^0^0^0^0
+FRCR_ATBY_APLT_YN^외화자동매수신청여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+SFCN_YN^충족여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

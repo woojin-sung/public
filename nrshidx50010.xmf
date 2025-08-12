@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50010" scrname="ETF홈" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contTitle" ly_vert="0,0,375,47,1" scroll_ly_vert="0,0,375,47,1" >
+			<CONTROL_INFO>
+				<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_main_01" ly_vert="6,11,40,24,1" />
+				<LABEL name="lblTitle" fontsize="4" caption="ETF 투자하기" bgcolor="035:237246255" multiline="1" click="1" ly_vert="40,12,300,23,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="contBody" vscroll="1" ly_vert="0,47,375,654,1" scroll_ly_vert="0,47,375,654,1" >
+			<CONTROL_INFO>
+				<LINKFORM name="LinkForm0" linkfile="nrshidx50010_s1" ly_vert="0,0,375,225,1" />
+				<LABEL name="separator0" bgcolor="320:246247248" transmode="0" ly_vert="0,225,375,10,1" />
+				<LINKFORM name="LinkForm1" linkfile="nrshidx50010_s2" ly_vert="0,235,375,193,1" />
+				<LABEL name="separator1" bgcolor="320:246247248" transmode="0" ly_vert="0,428,375,10,1" />
+				<LINKFORM name="LinkForm2" linkfile="nrshidx50010_s3" ly_vert="0,766,375,303,1" />
+				<LABEL name="separator2" bgcolor="320:246247248" transmode="0" ly_vert="0,756,375,10,1" />
+				<LINKFORM name="LinkForm3" linkfile="nrshidx50010_s4" ly_vert="0,438,375,318,1" />
+				<LABEL name="separator3" bgcolor="320:246247248" transmode="0" ly_vert="0,1069,375,10,1" />
+				<LINKFORM name="LinkForm4" linkfile="nrshidx50010_s5" ly_vert="0,1079,375,225,1" />
+				<LABEL name="separator4" bgcolor="320:246247248" transmode="0" ly_vert="0,1304,375,10,1" />
+				<LINKFORM name="LinkForm5" linkfile="nrshidx50010_s6" ly_vert="0,1314,375,474,1" />
+				<LABEL name="separator5" bgcolor="320:246247248" transmode="0" ly_vert="0,1788,375,10,1" />
+				<CONTAINER name="contNotice" ly_vert="0,1798,375,50,1" scroll_ly_vert="0,1798,375,50,1" >
+					<CONTROL_INFO/>
+				</CONTAINER>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5819" _ulen="4792" >
+'============================================================================
+' LinkForm0 : ETF Super검색
+' LinkForm1 : ETF 투자 첫걸임
+' LinkForm2 : ETF 매거진
+' LinkForm3 : ETF 리포트
+' LinkForm4 : 메리츠 선정 테마
+' LinkForm5 : 시장에서 관심받는 ETF
+'============================================================================
+
+Dim gOsType
+Dim gbLargeFont			'큰글씨 사용여부
+Dim gsLargeFontsize		'큰글씨 폰트크기(1:조금크게 2:크게)
+
+gbLargeFont = false
+gsLargeFontsize = 0
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	
+	gOsType = Form.GetSharedData("&OS_TYPE", false)
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	SettingUI()
+	
+End Sub
+'============================================================================
+Function SettingUI()
+	
+	'--------------------------------------------------------------
+	'(안드로이드 전용) 스크롤보임 후 숨김처리
+	'--------------------------------------------------------------
+	if gOsType == "1" then	
+		contBody.setScrollBarVisible("2")
+	end if
+	
+	'--------------------------------------------------------------
+	'뒤로가기 버튼
+	'--------------------------------------------------------------
+	contTitle.ImgBackPress.setMaintainingRatio("2")
+	contTitle.ImgBackPress.imgpath = "icon_main_01"
+	
+	'--------------------------------------------------------------
+	'큰글씨모드 대응
+	'--------------------------------------------------------------
+	szTextSizeMode = Form.GetEnvData("common.textsize")
+	nTextsize = -2
+	if CInt(szTextSizeMode) > 0 then
+		gbLargeFont = true
+		gsLargeFontsize = Cint(szTextSizeMode)
+	end if	
+	
+	
+	'--------------------------------------------------------------------------------
+	' 하단 유의사항 아코디언 생성 및 큰글씨 모드 대응
+	'
+	' 아코디언 컨트롤 초기 사이즈 지정 
+	' : iOS -> Forminit에서 지정
+	' : AOS -> addExpandableList 시 OnExpandableAdd 발생. OnExpandableAdd에서 지정
+	'--------------------------------------------------------------------------------
+	if gOsType == "2" then
+		contBody.contNotice.height = 50	
+	end if
+	
+	sNoticeText = "·투자자는 금융투자상품에 대하여 금융상품 판매업자로부터 충분한 설명을 받을 권리가 있으며, 투자전 상품설명서 등을 반드시 읽어보시기 바랍니다.\n\n"..
+				"·이 금융상품은 예금자보호법에 따라 보호되지 않습니다.\n\n"..
+				"·금융투자상품은 자산가격 변동, 환율 변동, 신용등급 하락등에 따라 투자원금의 손실(0~100%)이 발생할 수 있으며, 그 손실은 투자자에게 귀속됩니다.\n\n"..
+				"·채권은 발생사의 신용등급의 하락시 원금손실 발생이 가능하고, 발행사의 파산·부도시 원금 100% 손실이 발생할 수 있습니다.\n\n"..
+				"·ETF 거래 시 온라인 거래수수료는 0.009% ~ 0.498132%이며, 기타 자세한 사항은 홈페이지 등을 참고하시기 바랍니다.\n\n"..
+				"·증권거래비용, ETF 보수, 기타비용이 추가로 발생할 수 있습니다.\n\n"..
+				"메리츠증권 준법감시인 심사필 제 24-354호(2024.05.09 ~ 2025.05.08)"
+	
+	if gbLargeFont then
+		nTextSize = - Cint((gsLargeFontsize * 2))
+		contBody.contNotice.makeExpandableList("","",nTextSize,nTextSize,334,333,0,320,false,3)
+	else
+		contBody.contNotice.makeExpandableList("","",nTextsize,nTextsize,334,333,0,320,false,3)
+	end if
+	
+	contBody.contNotice.addExpandableList("       투자 유의사항",sNoticeText)
+	contBody.SetScrollAutoSize()
+	
+
+End Function
+'============================================================================
+Sub Form_OnTriggerEventSCREEN(sEventName, sParam)
+	
+	if sEventName == "PREV" then
+	
+		'이전스크롤 값 존재 시 스크롤 위치
+		sScrollPos = Form.GetSharedData("ETF_HOME_SCROLL", false )
+		
+		if sScrollPos <> "" then
+			Form.SetSharedData("ETF_HOME_SCROLL" , "")
+			contBody.uniSetScroll("0", Cint(sScrollPos))
+		end if
+	
+	else
+		
+		if sEventName <> "" then
+		
+			'보고있던 매거진URL(매거진화면에서 링크화면으로 이동 시 저장됨)
+			'백버튼으로 다시 되돌아온 경우가 없으면 클리어 시켜줌.
+			Form.SetSharedData("50300_SELECT_URL" , "")
+			Form.SetSharedData("ETF_HOME_SCROLL" , "")
+			
+		end if
+	
+	end if
+	
+	
+End Sub
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	
+	if sEventName == "SAVE_ETF_HOME_SCROLL" then
+		
+		nScrollPos = contBody.uniGetScroll()
+		Form.SetSharedData("ETF_HOME_SCROLL" , nScrollPos)
+	
+	end if
+	
+	
+End Sub
+
+'============================================================================
+Sub contTitle_ImgBackPress_OnClick()
+	Form.openPrevScreen()
+End Sub
+
+'=======================================================================================
+' (안드로이드 전용) 아코디언 Add할때 높이값 리턴
+'=======================================================================================
+Sub contBody_contNotice_OnExpandableAdd(nHeight)
+	contBody.contNotice.height = nHeight + 1
+	contBody.SetScrollAutoSize()
+End Sub
+
+'=======================================================================================
+' 유의사항 컨테이너(아코디언) 접기/펼치기 후 사이즈 리턴(애니메이션 미사용 시에만 호출)
+'=======================================================================================
+Sub contBody_contNotice_OnExpandableSize(nHeight)
+
+	if gOsType == "1" then
+		contBody.contNotice.height = nHeight + 1
+	else
+		contBody.contNotice.height = nHeight
+	end if
+	
+	contBody.SetScrollAutoSize()
+	contBody.scroll_pos = "end"
+	
+End Sub
+	</SCRIPT_INFO>
+</ROOT>
