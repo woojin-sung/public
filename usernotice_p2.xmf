@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="사용자알림_Watching" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,340,490,1" />
+	<CONTROL_INFO>
+		<COMBO name="Combo0" cbinputdatatext="ALL`전체
+J`종목 알림
+T`투자정보 알림
+I`지수 알림
+S`시황 알림
+A`계좌정보" ly_vert="6,9,328,34,1" />
+		<GRID name="Grid0" colcount="4" ly_vert="0,51,340,439,1" ver="1" itemcodeid="" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-3" halign="1" valign="2" autofontsize="1" />
+				<LABEL name="th_cell0" fontsize="-2" caption="구분" halign="1" valign="2" />
+				<LABEL name="bd_cell1" fontsize="-3" multiline="1" />
+				<LABEL name="th_cell1" fontsize="-2" caption="내용" halign="1" />
+				<LABEL name="th_cell2" fontsize="-2" caption="시간" halign="1" valign="0" />
+				<LABEL name="bd_cell2" fontsize="-3" halign="1" valign="0" />
+				<LABEL name="bd_cell3" halign="2" />
+				<LABEL name="th_cell3" halign="1" />
+				<LABEL name="th_cell4" halign="1" />
+				<LABEL name="bd_cell4" halign="2" />
+				<LABEL name="bd_cell5" halign="2" />
+				<LABEL name="th_cell5" halign="1" />
+				<LABEL name="th_cell6" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" initrowcount="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="90,250,100,70" ly_vert_visible="0,0,2,2" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<TOPHEADER rowcount="2" >
+						<ROWINFO ly_vert_height="20,20" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" line="1,0" />
+							<CELL name="th_cell2" cell_ly="0,1,0,1" line="1,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell2" cell_ly="0,1,0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="250" ly_vert_visible="0" />
+					<TOPHEADER rowcount="2" >
+						<ROWINFO ly_vert_height="20,20" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,1" line="0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="100" ly_vert_visible="2" />
+					<TOPHEADER rowcount="2" >
+						<ROWINFO ly_vert_height="20,20" />
+						<CELLINFO>
+							<CELL name="th_cell3" cell_ly="0,0,0,0" line="0,0" />
+							<CELL name="th_cell4" cell_ly="0,1,0,1" line="0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell3" cell_ly="0,0,0,0" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell4" cell_ly="0,1,0,1" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<TOPHEADER rowcount="2" >
+						<ROWINFO ly_vert_height="20,20" />
+						<CELLINFO>
+							<CELL name="th_cell5" cell_ly="0,0,0,0" line="0,0" />
+							<CELL name="th_cell6" cell_ly="0,1,0,1" line="0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell5" cell_ly="0,0,0,1" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5451" _ulen="5121" >
+'============================================================================
+Sub Form_OnFormInit()
+	Call SetGridData()
+End Sub
+
+'============================================================================
+Sub Combo0_OnEditComplete(iIndex)
+	Call SetGridData()
+End Sub
+
+Sub SetGridData()
+	
+	Grid0.rowcount = "0"
+	
+	szType = Combo0.cbkeydata
+	szPushData = Form.GetPushWatchingMessage(szType)
+	if szPushData	= NULL	or	 Len(szPushData) == 0 then
+		Exit Sub
+	end if
+	
+	listPush =  Split(szPushData, "`SEPARATOR`")
+	
+	nCnt = #listPush
+	
+	for i = 0 to nCnt-1 
+		sPush = listPush[i]
+		pushItem = Split(sPush, "^SEPARATOR^")
+				
+		szMessageSeq = ""
+		szMessageType = ""
+		szItemCode = ""
+		szMessageTime = ""
+		szMessageData = ""		
+		
+		szMessageSeq = pushItem[0]
+		if #pushItem >= 1 then
+			szMessageType = pushItem[1]
+			if #pushItem >= 2 then
+				szItemCode = pushItem[2]
+				if #pushItem >= 3 then
+					szMessageTime = pushItem[3]
+					if #pushItem >= 4 then
+						szMessageData = pushItem[4]
+					end if
+				end if
+			end if
+		end if
+		
+		'20170210 NOHES START : 전일자 데이터는 날짜로 표기
+		szMessageDate = ""
+		szToday = ""
+		szMessageDate = Left(szMessageSeq, 8)
+		szToday =  Form.GetSharedData("&HOST_DATE", 0)
+		'20170210 NOHES END
+		
+		Grid0.AddRow()
+		
+		Grid0.SetCellData("bd_cell3", i, szMessageSeq)
+		Grid0.SetCellData("bd_cell4", i, szItemCode)
+		Grid0.SetCellData("bd_cell5", i, szMessageType)
+		if szMessageType == "Ja" then
+			Grid0.SetCellData("bd_cell0", i, "현재가")
+		elseif szMessageType == "Jb" then
+			Grid0.SetCellData("bd_cell0", i, "신고가")
+		elseif szMessageType == "Jc" then
+			Grid0.SetCellData("bd_cell0", i, "신저가")
+		elseif szMessageType == "Jd" then
+			Grid0.SetCellData("bd_cell0", i, "급등/급락")
+		elseif szMessageType == "Ta" then
+			Grid0.SetCellData("bd_cell0", i, "리서치리포트")
+		elseif szMessageType == "Tb" then
+			Grid0.SetCellData("bd_cell0", i, "뉴스/공시")
+		elseif szMessageType == "Tc" then
+			Grid0.SetCellData("bd_cell0", i, "기관,외국인")
+		elseif szMessageType == "Ia" then
+			Grid0.SetCellData("bd_cell0", i, "코스피/코스닥")
+		elseif szMessageType == "Ib" then
+			Grid0.SetCellData("bd_cell0", i, "중국시장")
+		elseif szMessageType == "Ic" then
+			Grid0.SetCellData("bd_cell0", i, "홍콩시장")
+		elseif szMessageType == "Id" then
+			Grid0.SetCellData("bd_cell0", i, "일본시장")
+		elseif szMessageType == "Ie" then
+			Grid0.SetCellData("bd_cell0", i, "원/달러 환율")
+		elseif szMessageType == "If" then
+			Grid0.SetCellData("bd_cell0", i, "미국시장 마감지수")
+		elseif szMessageType == "Sa" then
+			Grid0.SetCellData("bd_cell0", i, "미국 시황")
+		elseif szMessageType == "Sb" then
+			Grid0.SetCellData("bd_cell0", i, "국내 시황")
+		elseif szMessageType == "Aa" then
+			Grid0.SetCellData("bd_cell0", i, "계좌 평가")
+		end if
+		
+		if Len(szMessageTime) >= 6 then
+			szHour = Left(szMessageTime, 2)
+			szMinute = Mid(szMessageTime, 3, 2)
+			szSecond = Right(szMessageTime, 2)
+			Grid0.SetCellData("bd_cell2", i, szHour&":"&szMinute&":"&szSecond)
+		end if
+		
+		'20170210 NOHES START : 전일자 데이터는 날짜로 표기
+		if CInt(szToday) > CInt(szMessageDate) then
+			szYear = Left(szMessageDate, 4)
+			szMonth = Mid(szMessageDate, 5, 2)
+			szDate = Right(szMessageDate, 2)
+			Grid0.SetCellData("bd_cell2", i, szYear &"/"& szMonth &"/"& szDate)
+		end if
+		'(NOHES) 시황 데이터 : 줄바꿈 개행문자 제거
+		if szMessageType == "Sb" or szMessageType == "Sa" then
+			slinefeed = "\r\n"
+			szMsgData = Replace(szMessageData, slinefeed, "")
+			
+			Grid0.SetCellData("bd_cell1", i, szMsgData)
+		else
+			Grid0.SetCellData("bd_cell1", i, szMessageData)
+		end if	
+		'20170210 NOHES END
+		
+	next
+	
+	Grid0.toprow = "0"
+	
+End Sub
+
+
+
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	szMessageSeq = Grid0.GetCellData("bd_cell3", lRow)
+	szItemCode = Grid0.GetCellData("bd_cell4", lRow)
+	szMessageType = Grid0.GetCellData("bd_cell5", lRow)
+	
+	Form.Log(szMessageSeq, lRow&"&"&szItemCode&"&"&szMessageType)
+	Form.SetReadPushMessage(szMessageSeq)
+	
+	if Left(szMessageType, 1) == "J" then
+		Form.OpenScreen("11000" , szItemCode&"★"&"호가")
+	elseif szMessageType == "Ta" then
+		Form.OpenScreen("11000" , szItemCode&"★"&"투자의견")
+	elseif szMessageType == "Tb" then
+		Form.OpenScreen("11000" , szItemCode&"★"&"뉴스")
+	elseif szMessageType == "Tc" then
+		Form.OpenScreen("11000" , szItemCode&"★"&"투자자")
+	elseif szMessageType == "Ia" then
+		Form.OpenScreen("42000" , "0★" & szItemCode)
+	elseif szMessageType == "Ib" or szMessageType == "Ic" or szMessageType == "Id" then
+		Form.OpenScreen("42040" , "주요지수"&"★"&"아시아")
+	elseif szMessageType == "Ie" then
+		Form.OpenScreen("42040" , "환율")
+	elseif szMessageType == "If" then
+		Form.OpenScreen("42040" , "주요지수"&"★"&"미국")
+	elseif szMessageType == "Sa" then
+		Form.OpenScreen("44010" , "해외시황"&"★"&"미국")
+	elseif szMessageType == "Sb" then
+		Form.OpenScreen("44010" , "국내시황"&"★"&"주식")
+	elseif szMessageType == "Aa" then
+		Form.OpenScreen("71052" , "")	'20221019 HSZ 계좌별평가 메뉴 변경
+	end if
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if sKey == "RECEIVE_PUSH" then
+		SetGridData()
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="사이드종목" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="btn_side_r_o" ly_vert="17,455,17,54,1" />
+		<IMAGE name="Image2" imgpath="btn_02_n.9" ly_vert="34,103,342,543,1" />
+		<FORMTAB name="FormTab0" fontsize="-3" tabcount="4" tabheadwidth="75" tabheadheight="34" ly_vert="55,133,320,511,1" >
+			<PAGE name="page008191" caption="최근종목" linkfile="sideitem_t2.xmf" />
+			<PAGE name="page008979" caption="관심종목" linkfile="sideitem_t3.xmf" />
+			<PAGE name="page007962" caption="Watching" linkfile="sideitem_t1.xmf" />
+			<PAGE name="page005782" caption="계좌잔고" linkfile="sideitem_t5.xmf" loadingtype="1" />
+		</FORMTAB>
+		<FORMTAB name="FormTab1" fontsize="-3" tabcount="0" tabwidthtype="2" tabheadheight="27" ly_vert="55,1133,305,34,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2652" _ulen="2444" >
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	sSide = Form.GetOpenLinkData()
+	'16-04-20 YCJ 좌측일때 빨간 배경색이 보이는 부분 
+	if sSide = "left" then
+		FormTab0.left = "20"
+		Image2.left = "0"
+		Image1.left = "342"
+		'Image1.imgpath = "btn_side_l"
+		Image1.imgpath = "btn_side_l_o.png"
+
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+    '20230418 KKM 탭버튼 이미지 수정
+	FormTab0.setTabHeaderImage("img_bgcircle_black.9" , "img_bgcircle_line.9" , 5) '활성화/비활성화/여백
+	FormTab0.setTabHeaderFgColor("28" , "321") '활성화/비활성화 폰트색상
+	'20230418 KKM END
+	
+	DATAMANAGER.RequestTranData("ohhts_open_001r") '20230321 HSZ : 화면집계 서비스호출 추가
+	nTab = Form.GetSharedData("SIDEITEM_TAB", 0 )
+	
+	szScreenType = Form.GetSharedData("&SCREEN_TYPE", false)
+'	Form.ShowAlert("TEST", szScreenType)
+	if szScreenType == "7" or szScreenType == "10" then
+		FormTab0.hidepage = "page007962"
+		if nTab == "2" then
+			nTab = "0"
+		end if
+	end if
+		
+	FormTab0.currenttab = nTab
+End Sub
+
+'============================================================================
+Sub Image1_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Form.SetSharedData("SIDEITEM_TAB" , nCurrentTab)
+End Sub
+
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "CLOSE_FORM" then
+		Form.CloseForm()
+	end if
+End Sub
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	'20230321 HSZ START : 화면집계 서비스호출 추가
+	if szTranID = "ohhts_open_001r" then
+		szID = Form.GetSharedData("&USER_ID", false )
+		szOSType = Form.GetSharedData("&OS_TYPE", false)'1.안드로이드 2.iOS
+		if szOSType <> "" then
+			szOSType = CInt(szOSType) + 2
+		end if
+			
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SORT_CLS" , 0 , szOSType) 'OS_TYPE 3:MTS(안드로이드) 4:MTS(iOS)
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SCR_NO" , 0 , "99995") '하드코딩(미사용 화면번호)
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "FID_SCR_NAME" , 0 , "사이드아이템") '하드코딩
+		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "USER_ID" , 0 , szID) '최근 로그인 아이디
+	'20230321 HSZ END
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ohhts_open_001r" trcode="ohhts_open_001r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ohhts_open_001r" title="화면조회 횟수 입력" realdata="0" dessvr="C" >
+				<TRBLOCK name="InBlock1" inout="in" _len="171" _ulen="143" >
+
+FID_SORT_CLS^FID정렬구분^1^0^0^0^0^0^0
+FID_SCR_NO^FID화면번호^5^0^0^0^0^0^0
+FID_SCR_NAME^FID화면명^100^0^0^0^0^0^0
+USER_ID^사용자ID^20^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

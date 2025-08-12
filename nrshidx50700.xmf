@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50700" scrname="REITs 투자가이드" version="2" writer="노일호" />
+	<FORM_INFO name="Form" acecnt="0" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<IMAGE name="ImgBackPress" autosize="1" ly_vert="6,11,40,24,1" />
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="REITs 투자가이드" bgcolor="320:246247248" ly_vert="40,12,195,23,1" />
+		<TAB name="tabMenu" tabheadheight="47" tabheadwidth="164" tabcount="2" ly_vert="20,47,335,48,1" >
+			<PAGE name="0" caption="리츠(REITs)란?" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="1" caption="자주하는 질문" >
+				<CONTROL_INFO/>
+			</PAGE>
+		</TAB>
+		<LINKFORM name="lkformScreen" ly_vert="0,94,375,608,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1890" _ulen="1788" >
+
+'***************************************************
+'               전역 변수
+'***************************************************
+Dim g_szTitle
+Dim g_szOpenData
+
+'***************************************************
+'               공용 함수
+'***************************************************
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	call Init_Control("1")    ' Personal Function 호출시 call 붙여준다.
+End Sub
+
+'***************************************************
+'               개별 함수
+'***************************************************
+'===============================================
+' Init_Control(szCbn) 
+'===============================================
+Function Init_Control(szCbn) --> 리턴과 상관없이 Function으로 정의한다.	
+	'뒤로가기 버튼
+	imgBackPress.setMaintainingRatio("2")
+	imgBackPress.imgpath = "icon_main_01"
+	
+	'들어오는 값에 따라 띄울 탭 지정
+	g_szOpenData = Form.GetOpenLinkData()
+	If g_szOpenData <> "" and g_szOpenData <> null then
+		If CInt(g_szOpenData) == 1 then
+			tabMenu.currenttab = 0
+		ElseIf CInt(g_szOpenData) == 2 then
+			tabMenu.currenttab = 1
+		End If
+	End If
+	
+	If CInt(tabMenu.currenttab) == 0 then
+		lkformScreen.linkfile = "nrshidx50700_t1"
+	ElseIf CInt(tabMenu.currenttab) == 1 then 
+		lkformScreen.linkfile = "nrshidx50700_s5"
+	End If
+End Function
+'============================================================================
+Sub ImgBackPress_OnClick()
+    Form.openPrevScreen()
+End Sub
+
+'============================================================================
+Sub tabMenu_OnTabChanged(nCurrentTab)
+	if nCurrentTab == 0 then
+		lkformScreen.linkfile = "nrshidx50700_t1"
+	else
+		lkformScreen.linkfile = "nrshidx50700_s5"
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

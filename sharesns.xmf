@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="8888" scrname="SNS공유" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="ImgClose" autosize="1" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg_common.9" ly_vert="20,210,335,280,1" />
+		<IMAGE name="Image0" enable="0" visible="0" autosize="1" ly_vert="20,215,335,57,0" />
+		<LABEL name="Label0" caption="현재가 공유" ly_vert="35,281,139,37,1" />
+		<BUTTON name="Button0" caption="카카오톡 공유" fgcolor="004:000000000" ly_vert="45,323,288,47,1" />
+		<BUTTON name="Button1" visible="0" caption="트위터 공유" fgcolor="004:000000000" ly_vert="450,306,288,47,0" />
+		<BUTTON name="Button2" visible="0" caption="페이스북 공유" fgcolor="004:000000000" ly_vert="450,362,288,47,0" />
+		<LABEL name="Label2" caption="화면 공유" ly_vert="35,384,139,37,1" />
+		<BUTTON name="Button3" caption="카카오톡 공유" fgcolor="004:000000000" ly_vert="45,421,288,47,1" />
+		<LABEL name="Label1" fontsize="2" fontstyle="01" caption="SNS 공유" bgcolor="064:197070070" halign="1" ly_vert="32,215,309,55,1" />
+		<IMAGE name="ImageClose" autosize="1" imgpath="icon_close_s" ly_vert="300,230,22,22,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1762" _ulen="1706" >
+
+'============================================================================
+Sub ImageClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	Form.SendReturnToParent("snsshare" , "1")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	Form.SendReturnToParent("snsshare" , "3")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Button2_OnClick()
+	Form.SendReturnToParent("snsshare" , "4")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Button3_OnClick()
+	Form.SendReturnToParent("snsshare" , "2")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData, szOsType
+	szData = Form.GetOpenLinkData()
+	szOsType = Form.GetSharedData( "&OS_TYPE", false )  '1:안드로이드, 2:IOS
+	
+	If szData = "1" Then
+		Button0.enable = true
+		Button1.enable = true
+		Button2.enable = true		
+	Else
+		Button0.enable = false
+		Button1.enable = false
+		Button2.enable = false
+	End If
+	
+	
+	
+	'IOS에서 화면공유기능이 지원이 안되어서 관련컨트롤 숨김.
+	If szOsType = "2" Then
+		Label2.visible	= false
+		Button3.visible	= false
+		
+'		Button3.enable = false
+	End If
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImageClose.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub ImgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

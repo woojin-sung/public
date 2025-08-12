@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50700" scrname="REITs 투자가이드-리츠란" version="2" writer="노일호" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,619,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgDesc" autosize="1" ly_vert="257,10,88,100,1" />
+		<LABEL name="lblMainTitle" fontstyle="01" valign="0" multiline="1" ly_vert="20,29,225,91,1" />
+		<CONTAINER name="contMain" ly_vert="0,110,375,510,1" scroll_ly_vert="0,110,375,510,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblContMainBg" caption=" " transmode="0" ly_vert="0,0,375,122,1" />
+				<BUTTON name="btnS1" caption="리츠(REITs) 안내" fgcolor="013:051051051" fontsize="-2" fontstyle="01" ly_vert="20,20,163,36,1" />
+				<BUTTON name="btnS2" caption="리츠(REITs)의 장점" fgcolor="013:051051051" fontsize="-2" ly_vert="193,20,163,36,1" />
+				<BUTTON name="btnS3" caption="분리과세 혜택 안내" fgcolor="013:051051051" fontsize="-2" ly_vert="20,66,163,36,1" />
+				<BUTTON name="btnS4" caption="추천대상고객" fgcolor="013:051051051" fontsize="-2" ly_vert="193,66,163,36,1" />
+				<CONTAINER name="contLinkfm" vscroll="1" ly_vert="0,122,375,388,1" scroll_ly_vert="0,122,375,388,1" >
+					<CONTROL_INFO>
+						<LINKFORM name="linkfmS1" linkfile="nrshidx50700_s1" ly_vert="0,0,375,408,1" />
+						<LINKFORM name="linkfmS2" linkfile="nrshidx50700_s2" ly_vert="0,408,375,563,1" />
+						<LINKFORM name="linkfmS3" linkfile="nrshidx50700_s3" ly_vert="0,971,375,646,1" />
+						<LINKFORM name="linkfmS4" linkfile="nrshidx50700_s4" ly_vert="0,1617,375,328,1" />
+					</CONTROL_INFO>
+				</CONTAINER>
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="5367" _ulen="5043" >
+'***************************************************
+'               전역 변수
+'***************************************************
+Dim g_szTitle
+Dim i_S1TopPos
+Dim i_S2TopPos
+Dim i_S3TopPos
+Dim i_S4TopPos
+i_S1TopPos = 0
+i_S2TopPos = i_S1TopPos + 408
+i_S3TopPos = i_S2TopPos + 563
+i_S4TopPos = i_S3TopPos + 646
+'***************************************************
+'               공용 함수
+'***************************************************
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	call Init_Control("1")    ' Personal Function 호출시 call 붙여준다.
+End Sub
+
+'***************************************************
+'               개별 함수
+'***************************************************
+'===============================================
+' Init_Control(szCbn) 
+'===============================================
+Function Init_Control(szCbn)
+	' (34/34/34): 334, (255/255/255): 338, (115/118/124): 333
+	' 적은 자금~ 텍스트컬러
+	lblMainTitle.fgcolor = "334"
+	
+'	이미지 관련은 미리 설정되어 있음
+	imgDesc.setMaintainingRatio("1")
+	imgDesc.imgpath = "reits_img_reits.png"
+
+	lblMainTitle.paddinginfo = "0,0,0,0"
+	lblMainTitle.caption = "적은 자금으로 부담없이 편리하게 부동산에 투자하는 방법"
+
+	'버튼1에 스타일 적용
+	f_changeBtnStyle(contMain.btnS1)
+
+	' 컨테이너 스크롤 위치 알림 활성화
+'	scrollpos1 = CInt(Form.calcUnResize(contMain.contLinkfm.linkfmS1.top, "1")) - 300
+'	scrollpos2 = CInt(Form.calcUnResize(contMain.contLinkfm.linkfmS2.top, "1")) - 300
+'	scrollpos3 = CInt(Form.calcUnResize(contMain.contLinkfm.linkfmS3.top, "1")) - 300
+'	scrollpos4 = CInt(Form.calcUnResize(contMain.contLinkfm.linkfmS4.top, "1")) - 300
+	scrollpos1 = i_S1TopPos - 5
+	scrollpos2 = i_S2TopPos - 5
+	scrollpos3 = i_S3TopPos - 5
+	scrollpos4 = i_S4TopPos - 300
+	
+	contMain.contLinkfm.SetNotifyScrollPos(scrollpos1..":"..scrollpos2..":"..scrollpos3..":"..scrollpos4)
+	
+	' 제스처 활성화
+	contMain.gesture = true
+	contMain.contLinkfm.SetUseScrollingEvent(true)
+	
+	'스크롤시만 스크롤바 보이기
+	contMain.setScrollBarVisible("2")
+	contMain.contLinkfm.setScrollBarVisible("2")
+End Function
+
+'============================================================================
+Sub contMain_OnGestureEvent(sParam)
+	mainheight = 510
+	downamount = 110
+	innertop = 122
+	if sParam == "Up" Then
+		contMain.height = mainheight + downamount
+		contMain.contLinkfm.height = mainheight - innertop + downamount
+		contMain.contLinkfm.setScrollAutoSize()
+		contMain.fixTopAreaWhenScrolling("1", 0, "Up")
+	elseif sParam == "Down" Then
+		contMain.height = 510
+		contMain.contLinkfm.height = mainheight - innertop
+		contMain.contLinkfm.setScrollAutoSize()
+		contMain.fixTopAreaWhenScrolling("1", downamount, "Down")
+	end if
+End Sub
+'============================================================================
+Sub invokeScrollPosByOS(posamount)
+	OSType = Form.GetSharedData("&OS_TYPE", false)
+	If OSType == "1" Then '1: 안드로이드
+		contMain.contLinkfm.scroll_pos = posamount
+	Else '2: iOS
+		contMain.contLinkfm.scroll_pos_noAni = posamount
+	End If
+End Sub
+'============================================================================
+Sub contMain_btnS1_OnClick()
+	invokeScrollPosByOS(i_S1TopPos)
+	f_changeBtnStyle(contMain.btnS1)
+End Sub
+
+'============================================================================
+Sub contMain_btnS2_OnClick()
+	invokeScrollPosByOS(i_S2TopPos)
+	f_changeBtnStyle(contMain.btnS2)
+End Sub
+
+'============================================================================
+Sub contMain_btnS3_OnClick()
+	invokeScrollPosByOS(i_S3TopPos)
+	f_changeBtnStyle(contMain.btnS3)
+End Sub
+
+'============================================================================
+Sub contMain_btnS4_OnClick()
+	invokeScrollPosByOS(i_S4TopPos)
+	f_changeBtnStyle(contMain.btnS4)
+End Sub
+
+'============================================================================
+' 유저의 스크롤 위치/버튼에 따라 버튼 이미지를 누른 모양으로 변경
+Function f_changeBtnStyle(paramBtn)
+	' 버튼 이미지
+	contMain.btnS1.singleimage = "img_bgcircle_line.9.png"
+	contMain.btnS2.singleimage = "img_bgcircle_line.9.png"
+	contMain.btnS3.singleimage = "img_bgcircle_line.9.png"
+	contMain.btnS4.singleimage = "img_bgcircle_line.9.png"
+	
+	' 버튼 텍스트컬러
+	contMain.btnS1.fgcolor = "333"
+	contMain.btnS2.fgcolor = "333"
+	contMain.btnS3.fgcolor = "333"
+	contMain.btnS4.fgcolor = "333"
+	
+	'굵게 해제
+	contMain.btnS1.fontbold = false
+	contMain.btnS2.fontbold = false
+	contMain.btnS3.fontbold = false
+	contMain.btnS4.fontbold = false
+	
+	'누른 것만 press 효과 적용
+	paramBtn.singleimage = "img_bgcircle_black.9.png"
+	paramBtn.fgcolor = "338"
+	paramBtn.fontbold = true
+
+End Function
+'============================================================================
+Function contMain_contLinkfm_OnNotifyScrolling(nIndex)
+	If nIndex == 0 Then
+		f_changeBtnStyle(contMain.btnS1)
+	ElseIf nIndex == 1 Then
+		f_changeBtnStyle(contMain.btnS2)
+	ElseIf nIndex == 2 Then
+		f_changeBtnStyle(contMain.btnS3)
+	Else'If nIndex == 3 Then
+		f_changeBtnStyle(contMain.btnS4)
+	End If
+End Function
+	</SCRIPT_INFO>
+</ROOT>

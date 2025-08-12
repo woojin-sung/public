@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="마케팅 푸시 상세팝업" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image1" autosize="1" imgpath="icon_main_01" ly_vert="8,9,22,22,1" />
+		<LABEL name="Label0" fontsize="3" fontstyle="01" caption="스마트톡" ly_vert="40,0,265,40,1" />
+		<LABEL name="Label1" fontsize="2" fontstyle="01" multiline="1" ly_vert="7,37,362,43,1" />
+		<LABEL name="Label2" fgcolor="146:124124124" fontsize="-5" ly_vert="7,72,363,32,1" />
+		<BUTTON name="Button0" enable="0" visible="0" btnimage="btn_01.9" ly_vert="449,529,304,32,0" />
+		<LABEL name="Label4" visible="0" fgcolor="146:124124124" fontsize="-3" ly_vert="402,95,364,32,0" />
+		<LABEL name="Label5" visible="0" fgcolor="146:124124124" fontsize="-3" ly_vert="6,569,282,25,0" />
+		<BUTTON name="Button1" caption="닫기" btnimage="btn_01.9" ly_vert="12,598,352,40,1" />
+		<IMAGE name="imgKakao" autosize="1" imgpath="icon_kakaotalk" ly_vert="340,569,24,24,1" />
+		<IMAGE name="imgYoutube" autosize="1" imgpath="icon_youtube" ly_vert="311,569,24,24,1" />
+		<CONTAINER name="Cont0" vscroll="1" ly_vert="0,110,375,450,1" scroll_ly_vert="0,110,375,450,1" >
+			<CONTROL_INFO>
+				<IMAGE name="Image0" autosize="1" ly_vert="0,0,375,450,1" />
+				<LABEL name="Label3" fontsize="-1" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="7,0,361,450,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10975" _ulen="10849" >
+--===========================================================================
+--===========================================================================
+Dim g_sBtnName
+g_sBtnName = ""
+
+Dim g_sBtnLinkType
+g_sBtnLinkType = ""
+
+Dim g_sBtnLink
+g_sBtnLink = ""
+
+Dim g_sMkCode
+g_sMkCode = ""
+
+Dim g_sDev
+g_sDev = ""
+
+Dim g_sOSType
+g_sOSType = ""
+
+Dim g_sMsg
+g_sMsg = ""
+'============================================================================
+Sub Form_OnFormInit()	
+	g_sDev 		= Form.GetSharedData("&SERVER_MODE", False)
+	g_sOSType	= Form.GetSharedData("&OS_TYPE", False )
+	
+	sData = Form.getOpenLinkData()
+
+	Label5.caption = "수신거부 : 설정 > 알림 > 스마트톡 미사용"
+
+	if sData <> null and sData <> "" then
+		arrData = split(sData, "^SEPARATOR^")
+		nDataSize = #arrData
+		
+		if nDataSize >= 7 then
+			Label1.caption = arrData(0)
+			
+			szYear 	= Left(arrData(1), 4)
+			szMonth 	= Mid(arrData(1), 5, 2)
+			szDate 	= Mid(arrData(1), 7, 2)
+			szHour 	= Mid(arrData(1), 9, 2)
+			szMinute = Mid(arrData(1), 11, 2)
+			szSecond = Mid(arrData(1), 13, 2)
+		
+			Label2.caption = szYear & "-" & szMonth & "-" & szDate & " " & szHour & ":" & szMinute & ":" & szSecond
+			g_sMsg = trim(replace(arrData(2), "※ 수신거부 : 설정 > 알림 > 스마트톡", ""))
+			Cont0.Label3.caption = arrData(2)
+			
+			g_sMkCode = arrData(3)
+			
+			g_sBtnName = arrData(4)
+			g_sBtnLinkType = arrData(5)
+			g_sBtnLink = arrData(6)
+		end if
+	end if
+	
+	if g_sBtnName <> "" then
+		Button1.caption = g_sBtnName
+	end if
+	
+	if g_sMkCode = "MK202309040001" then
+		Cont0.Image0.height = 630
+		Cont0.Image0.imgpath = "MK202309040001"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202309040002" then
+		Cont0.Image0.height = 630
+		Cont0.Image0.imgpath = "MK202309040002"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202309040004" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "MK202309040004"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202309040008" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "MK202309040008"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202309130001" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202309130001"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202309130002" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202309130002"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202309200001" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202309200001"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202309200002" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202309200002"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202309250001" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202309250001"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202309250002" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202309250002"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202309250003" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202309250003"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202309250004" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202309250004"
+		Cont0.Label3.visible = false	
+		
+	elseif g_sMkCode = "MK202310310001" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202310310001"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202310310002" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202310310002"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202310310003" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202310310003"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202310310004" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202310310004"
+		Cont0.Label3.visible = false
+
+	elseif g_sMkCode = "MK202311290001" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202311290001"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202311290002" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202311290002"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202311290003" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202311290003"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202311290004" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202311290004"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202311290005" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202311290005"
+		Cont0.Label3.visible = false
+		
+	elseif g_sMkCode = "MK202312290003" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202312290003"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202312290004" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202312290004"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202312290005" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202312290005"
+		Cont0.Label3.visible = false	
+	elseif g_sMkCode = "MK202312290006" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202312290006"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202312290007" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202312290007"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202312290008" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202312290008"
+		Cont0.Label3.visible = false
+		
+	elseif g_sMkCode = "MK202401110001" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202401110001"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202401110002" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202401110002"
+		Cont0.Label3.visible = false
+		
+	elseif g_sMkCode = "MK202401310002" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202401310002"
+		Cont0.Label3.visible = false
+		
+	elseif g_sMkCode = "MK202402010001" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202402010001"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202402010002" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202402010002"
+		Cont0.Label3.visible = false
+	
+	elseif g_sMkCode = "MK202401310001" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202401310001"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202401310003" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202401310003"
+		Cont0.Label3.visible = false
+		
+	elseif g_sMkCode = "MK202402060001" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202402060001"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202402060002" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202402060002"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202402060003" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202402060003"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202402060004" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "mk202402060004"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202402070002" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "mk202402070002"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202405270001" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "MK202405270001"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202406250003" then
+		Cont0.Image0.height = 610
+		Cont0.Image0.imgpath = "MK202406250003"
+		Cont0.Label3.visible = false
+	elseif g_sMkCode = "MK202407250002" then
+		Cont0.Image0.height = 310
+		Cont0.Image0.imgpath = "MK202407250002"
+		Cont0.Label3.visible = false	
+	else
+		Cont0.Image0.visible = false
+		Cont0.Label3.visible = true
+		
+		Form.SetTimerEvent2(2, 1, 0.3)
+		
+		'DATAMANAGER.RequestTranData("ooopc_push_011r")
+	end if
+	
+	Cont0.setScrollAutoSize()
+	
+	if g_sOSType = "1" then
+		Form.SetTimerEvent2(1, 1, 0.5)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image1.SetMaintainingRatio("1")
+	Cont0.Image0.SetMaintainingRatio("1")
+	imgYoutube.SetMaintainingRatio("1")
+	imgKakao.SetMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Image1_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	if g_sBtnLinkType == "0" then
+		openLinkData = ""
+		if g_sBtnLink = "88062" then
+			openLinkData = "88062"
+		end if
+		Form.OpenScreen(g_sBtnLink , openLinkData)
+	elseif g_sBtnLinkType == "1" then
+		Form.openExternalBrowser(g_sBtnLink)
+	end if
+End Sub
+
+'============================================================================
+Sub imgKakao_OnClick()
+	Form.openExternalBrowser("http://pf.kakao.com/_SsZqxb")
+End Sub
+
+'============================================================================
+Sub imgYoutube_OnClick()
+	Form.openExternalBrowser("https://m.youtube.com/@meritzon")
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	
+	if g_sBtnLinkType == "0" or g_sBtnLinkType == "1" then
+		if g_sBtnLinkType == "0" then
+			openLinkData = ""
+			if g_sBtnLink = "88062" then
+				openLinkData = "88062"
+			end if
+			Form.OpenScreen(g_sBtnLink , openLinkData)
+			Form.CloseForm()
+		elseif g_sBtnLinkType == "1" then
+			Form.openExternalBrowser(g_sBtnLink)
+			
+			'20240514_01 HWG START : 앱연동 URL 경우 팝업 닫기
+			if instr(g_sBtnLink, "https://home.imeritz.com/biz/appLink.html") > 0 or instr(g_sBtnLink, "https://testhome.imeritz.com/biz/appLink.html") > 0 then
+				Form.CloseForm()
+			end if
+			'20240514_01 HWG END
+		end if
+	else
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(Cint(sTimerID), 0, 0)
+	if cint(sTimerID) = 1 then
+		if g_sOSType = "1" then
+			Form.closePopup("notice_p0")
+			Form.closePopup("notice_event")
+		end if
+	elseif cint(sTimerID) = 2 then
+		DATAMANAGER.RequestTranData("ooopc_push_011r")
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID = "ooopc_push_011r" then
+		DATAMANAGER.SetDataValue(0, "ooopc_push_011r", "InBlock1", "ADVR_PUSH_ID" , 0 , g_sMkCode)
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID = "ooopc_push_011r" then
+		szEpmdMsg = DATAMANAGER.GetDataValue(0, "ooopc_push_011r", "OutBlock1", "EPMD_MSG_CNTT" , 0)
+		
+		if szEpmdMsg <> "" then
+			Cont0.Label3.caption = g_sMsg & "\n\n" & szEpmdMsg & "\n\n" & "※ 수신거부 : 설정 > 알림 > 스마트톡"
+		else
+			Cont0.Label3.caption = g_sMsg & "\n\n" & "※ 수신거부 : 설정 > 알림 > 스마트톡"
+		end if
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="ooopc_push_011r" trcode="ooopc_push_011r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="ooopc_push_011r" title="운영CRM_광고성PUSH 심의필 POOL" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="48" _ulen="44" >
+
+ADVR_PUSH_ID^광고PUSHID^36^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="213" _ulen="171" >
+
+ADVR_PUSH_ID^광고PUSHID^36^0^0^0^0^0^0
+DLBR_NO^심의번호^20^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+EPMD_MSG_CNTT^유의메시지내용^2000^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

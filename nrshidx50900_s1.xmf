@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50900" scrname="TAX365-절세투자Sub1" version="2" writer="노일호" />
+	<FORM_INFO name="Form" ly_vert="0,0,343,412,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBg" imgpath="bg_listbox.9.png" ly_vert="0,0,343,412,1" />
+		<IMAGE name="imgPoint" autosize="1" imgpath="tax365_roundbg.png" ly_vert="132,38,80,28,1" />
+		<LABEL name="lblPoint" fontsize="-2" fontstyle="01" caption="Point 1" halign="1" ly_vert="139,42,67,20,1" />
+		<LABEL name="lblTitle" fontsize="8" fontstyle="01" caption="ETF 투자와 세금" halign="1" ly_vert="41,79,262,29,1" />
+		<LABEL name="lblDesc" caption="세금을 아끼는 ETF 투자방법은?" halign="1" ly_vert="29,113,285,22,1" />
+		<IMAGE name="imgDesc" autosize="1" ly_vert="106,144,130,130,1" />
+		<LABEL name="lblTag" fontsize="-2" halign="1" multiline="1" ly_vert="34,283,280,58,1" />
+		<LABEL name="lblMore" fontsize="-2" fontstyle="10" caption="더 알아보기" halign="1" click="1" ly_vert="100,340,148,36,1" />
+		<LABEL name="lblForClick" click="1" ly_vert="0,0,343,412,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1956" _ulen="1804" >
+
+'***************************************************
+'               전역 변수
+'***************************************************
+Dim g_szTitle
+
+'***************************************************
+'               공용 함수
+'***************************************************
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	call Init_Control("1")    ' Personal Function 호출시 call 붙여준다.
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgDesc.setMaintainingRatio("1")
+End Sub
+
+'***************************************************
+'               개별 함수
+'***************************************************
+'===============================================
+' Init_Control(szCbn) 
+'===============================================
+Function Init_Control(szCbn) --> 리턴과 상관없이 Function으로 정의한다.
+	'텍스트
+	lblTag.caption = "#ETF세금종류 #절세투자\n#이것만 아껴도 수익률이 달라져요"
+
+	'폼 배경색 지정
+	Form.bgcolor = "320"
+	
+	'텍스트색상
+	lblPoint.fgcolor = "416"
+	lblTitle.fgcolor = "334"
+	lblDesc.fgcolor = "334"
+	lblTag.fgcolor = "333"
+	lblMore.fgcolor = "334"
+	
+	'이미지경로
+	imgDesc.setMaintainingRatio("1")
+	imgDesc.imgpath = "tax365_icon_etf.png"
+	
+End Function
+'============================================================================
+Sub lblForClick_OnClick(sParam)
+	g_serverMode = Form.GetSharedData("&SERVER_MODE", false)
+	If g_serverMode == "1" Then	'개발기
+		sURL = "https://testhome.imeritz.com/bbs/mwCtn1.do?bbsId=MoWbTax&bbsCnttTurnNo=3"
+	else
+		sURL = "https://home.imeritz.com/bbs/mwCtn1.do?bbsId=MoWbTax&bbsCnttTurnNo=3"
+	end if
+
+	Form.SetSharedData("TAX365_SUB", "1")
+	Form.OpenPopup("nrshidx50900_s4", sURL, "")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

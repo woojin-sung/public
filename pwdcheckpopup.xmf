@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="매매용 보안키패드" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="alpha128.png" ly_vert="376,0,375,647,1" />
+		<IMAGE name="Image1" imgpath="popup_bg.9" ly_vert="0,312,375,335,1" />
+		<BUTTON name="Button2" btnimage="alpha" ly_vert="0,311,375,335,1" />
+		<LABEL name="Label0" fontsize="5" fontstyle="01" caption="계좌 비밀번호" fonttype="3" ly_vert="9,323,145,47,1" />
+		<IMAGE name="PwdFail0" autosize="1" imgpath="pwd_gray" ly_vert="126,403,20,17,1" />
+		<IMAGE name="PwdFail1" autosize="1" imgpath="pwd_gray" ly_vert="162,403,20,17,1" />
+		<IMAGE name="PwdFail2" autosize="1" imgpath="pwd_gray" ly_vert="195,403,20,17,1" />
+		<IMAGE name="PwdFail3" autosize="1" imgpath="pwd_gray" ly_vert="228,403,20,17,1" />
+		<IMAGE name="PwdFail4" visible="0" autosize="1" imgpath="pwd_gray" ly_vert="396,403,20,17,0" />
+		<IMAGE name="PwdFail5" visible="0" autosize="1" imgpath="pwd_gray" ly_vert="422,403,20,17,0" />
+		<IMAGE name="PwdFail6" visible="0" autosize="1" imgpath="pwd_gray" ly_vert="448,403,20,17,0" />
+		<IMAGE name="PwdFail7" visible="0" autosize="1" imgpath="pwd_gray" ly_vert="474,403,20,17,0" />
+		<BUTTON name="Button1" btnimage="alpha" ly_vert="126,403,122,20,1" />
+		<ACCOUNT name="acnt" visible="0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,200" etcfunctions="" accpwdctl="Edit0" delegate="1" ly_vert="10,192,271,39,0" />
+		<BUTTON name="Button3" btnimage="alpha" ly_vert="0,0,376,320,1" />
+		<EDIT name="Edit0" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호를 입력해주세요" ly_vert="35,388,305,45,1" />
+		<BUTTON name="Button0" ly_vert="285,332,72,25,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="10067" _ulen="9581" >
+--===========================================================================
+--===========================================================================
+Dim m_sEditIndex
+Dim m_bShowSwitch
+Dim m_bErrorCheck
+Dim m_bCloseForm
+Dim m_bOpenPopup
+Dim g_szPwd
+Dim g_szPwdLen
+Dim g_szAccount
+g_szAccount = ""
+
+'============================================================================
+'초기화 함수
+'============================================================================
+Function Func_Clear_Pwd()
+	g_szPwd = ""
+	g_szPwdLen = ""
+	Edit0.clear = true
+	m_sEditIndex = 0
+	
+	PwdFail0.left = 126
+	PwdFail1.left = 162
+	PwdFail2.left = 195
+	PwdFail3.left = 228
+	
+	PwdFail0.imgpath = "pwd_gray"
+	PwdFail1.imgpath = "pwd_gray"
+	PwdFail2.imgpath = "pwd_gray"
+	PwdFail3.imgpath = "pwd_gray"
+	
+	PwdFail4.visible = false
+	PwdFail5.visible = false
+	PwdFail6.visible = false
+	PwdFail7.visible = false
+End Function
+
+'============================================================================
+Sub Form_OnFormInit()
+	'iOS 에디트컨트롤 설정
+	g_DeviceOS 	= Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	'20220714 HSZ START : 버튼 스위치 적용
+	appVer = Form.GetSharedData("&APP_VERSION", false )
+	appVer = replace(appVer,".","")
+	'20220714 HSZ END
+	
+'	if g_DeviceOS == "2" then
+'		Edit0.SetApplyLabel("숫자 6자리 입력", 0 , 76 , "left" , true)
+'	end if
+	
+	'20220531 아이티젠 김성수 START
+	'특정 화면에서 사용 시 저장 토글 안보이게 설정
+	dim szScreenNo
+	szScreenNo = Form.GetSharedData("&SCREEN_NO", false )
+	
+	szData = Form.GetOpenLinkData()
+	arrData = Split(szData, "☆")
+	
+	if UBOUND(arrData) == 0 then
+		g_szAccount = arrData(0)
+		Button0.visible = true
+		szVisible = true
+		
+	elseif UBOUND(arrData) == 1 then
+		g_szAccount = arrData(0)
+		
+		if arrData(1) == "1" then
+			Button0.visible = true
+			szVisible = true
+		else
+			Button0.visible = false
+			szVisible = false
+		end if 
+	else
+		Form.CloseForm()
+	end if	
+	
+	if szScreenNo == "16093" or szScreenNo == "87052" or szScreenNo == "16094"  or szScreenNo == "16404" then
+		Button0.visible = false
+		szVisible = false
+	end if
+
+	'20220714 HSZ START : 버튼 스위치 적용
+	if szVisible = true then
+		if Cint(appVer) > 2518 or Cint(appVer) > 223 then 'iOS 앱버전 2.5.18 '안드로이드 앱버전 2.2.3
+			Button0.setApplySwitch("OFF", "ON", "294", "200", "270", "249") 'CI색상
+	'		Button0.setApplySwitch("OFF", "ON", "269", "261", "286", "289") '공통남색
+		else
+			Button0.setApplySwitch("OFF", "ON")
+		end if
+	end if
+'	20220714 HSZ END
+	'20220531 아이티젠 김성수 END
+	
+	m_sEditIndex = 0 
+	
+	'계좌비밀번호 저장기능 설정적용
+	m_bShowSwitch 	= true	'스위치버튼 초기설정 
+	Button0.switchindex = Form.GetEnvData("order.save_orderpwd")
+	m_bShowSwitch 	= false
+	
+	m_bErrorCheck 	= false	'
+	m_bCloseForm 		= true	'비밀번호 검증 완료 시, 팝업종료 여부 
+	m_bOpenPopup 		= false	'자동저장기능 안내팝업 여부
+	
+	'0.5초 후 보안키패드 띄움
+	Form.SetTimerEvent2(1, 1, 0.5)             
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID, 0, 0.5)
+
+	'Form_OnFormInit()
+	if Cint(sTimerID) = 1 then
+		
+		if g_szAccount = "" then
+			Form.MsgBox("알림", "계좌번호가 입력되지 않았습니다.", "pwdcheck", 0)
+		else
+			nIdx = acnt.GetIndexByAccountInfo(g_szAccount)
+			acnt.currentindex = nIdx
+			Edit0.setShowKeypad(True)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditComplete()
+	if m_bCloseForm = true then
+		g_szPwd = Edit0.caption
+		g_szPwdLen = Edit0.pwdlen
+		Form.CloseForm()
+	else
+		m_bCloseForm = true
+	end if
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditError()
+	'비밀번호 검증 오류 발생 시, 자동저장기능 안내팝업 뜬경우 후처리 비활성화
+	if m_bOpenPopup = false then
+		Func_Clear_Pwd()
+		
+		m_bErrorCheck = true
+		Edit0.setShowKeypad(True)
+		
+		PwdFail0.imgpath 	= "pwd_gray"
+		PwdFail1.imgpath 	= "pwd_gray"
+		PwdFail2.imgpath 	= "pwd_gray"
+		PwdFail3.imgpath 	= "pwd_gray"
+		PwdFail4.imgpath 	= "pwd_gray"
+		PwdFail5.imgpath 	= "pwd_gray"
+		PwdFail6.imgpath 	= "pwd_gray"
+		PwdFail7.imgpath 	= "pwd_gray"
+	end if
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditChar(CharCode)
+	m_bCloseForm = true
+	
+	if m_bErrorCheck then
+		m_bErrorCheck = false
+		Func_Clear_Pwd()
+	end if
+	
+	if CharCode == "0" then
+		m_sEditIndex = m_sEditIndex + 1 
+		
+		if CInt(m_sEditIndex) = 1 then
+			PwdFail0.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 2 then
+			PwdFail1.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 3 then
+			PwdFail2.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 4 then
+			PwdFail3.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 5 then
+			PwdFail0.left 	= 110
+			PwdFail1.left 	= 146
+			PwdFail2.left 	= 179
+			PwdFail3.left 	= 212
+			
+			PwdFail4.visible 	= true
+			PwdFail4.imgpath 	= "pwd_blue"
+			PwdFail4.left 	= 245
+			
+			Button1.left 		= 110
+			Button1.width		= 155
+		elseif CInt(m_sEditIndex) = 6 then
+			PwdFail0.left = 94
+			PwdFail1.left = 130
+			PwdFail2.left = 163
+			PwdFail3.left = 199
+			PwdFail4.left = 232
+			
+			PwdFail5.visible = true
+			PwdFail5.imgpath = "pwd_blue"
+			PwdFail5.left = 265
+			
+			Button1.left 		= 94
+			Button1.width		= 188
+		elseif CInt(m_sEditIndex) = 7 then
+			PwdFail0.left = 78
+			PwdFail1.left = 114
+			PwdFail2.left = 147
+			PwdFail3.left = 180
+			PwdFail4.left = 214
+			PwdFail5.left = 246
+			
+			PwdFail6.visible = true
+			PwdFail6.imgpath = "pwd_blue"
+			PwdFail6.left = 279
+			
+			Button1.left 		= 78
+			Button1.width		= 221
+		
+		elseif CInt(m_sEditIndex) = 8 then
+			PwdFail0.left = 62
+			PwdFail1.left = 98
+			PwdFail2.left = 131
+			PwdFail3.left = 164
+			PwdFail4.left = 197
+			PwdFail5.left = 230
+			PwdFail6.left = 263
+			
+			PwdFail7.visible = true
+			PwdFail7.imgpath = "pwd_blue"
+			PwdFail7.left = 296
+			
+			Button1.left 		= 62
+			Button1.width		= 254
+		end if
+	elseif CharCode == "1" then
+		if CInt(m_sEditIndex) > 0 then 
+			m_sEditIndex = m_sEditIndex - 1
+		end if
+		
+		if CInt(m_sEditIndex) = 0 then
+			PwdFail0.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 1 then
+			PwdFail1.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 2 then
+			PwdFail2.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 3 then
+			PwdFail3.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 4 then
+			PwdFail0.left = 126
+			PwdFail1.left = 162
+			PwdFail2.left = 195
+			PwdFail3.left = 228
+			
+			PwdFail4.visible = false
+			
+			Button1.left 		= 126
+			Button1.width		= 122
+		elseif CInt(m_sEditIndex) = 5 then
+			PwdFail0.left = 110
+			PwdFail1.left = 146
+			PwdFail2.left = 179
+			PwdFail3.left = 212
+			PwdFail4.left = 245
+			
+			PwdFail5.visible = false
+			
+			Button1.left 		= 110
+			Button1.width		= 155
+		elseif CInt(m_sEditIndex) = 6 then
+			PwdFail0.left = 94
+			PwdFail1.left = 130
+			PwdFail2.left = 163
+			PwdFail3.left = 199
+			PwdFail4.left = 232
+			PwdFail5.left = 265
+			
+			PwdFail6.visible = false
+			
+			Button1.left 		= 94
+			Button1.width		= 188
+		elseif CInt(m_sEditIndex) = 7 then
+			PwdFail0.left = 78
+			PwdFail1.left = 114
+			PwdFail2.left = 147
+			PwdFail3.left = 180
+			PwdFail4.left = 213
+			PwdFail5.left = 246
+			PwdFail6.left = 279
+			
+			PwdFail7.visible = false
+			
+			Button1.left 		= 78
+			Button1.width		= 221
+		end if
+
+	elseif CharCode == "2" then
+		If g_DeviceOS == "2" then
+			Edit0.setShowKeypad(True)
+		End if
+	end if
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	Func_Clear_Pwd()
+	Edit0.setShowKeypad(True)
+	m_bCloseForm = false
+End Sub
+
+'============================================================================
+Sub Button2_OnClick()
+	Func_Clear_Pwd()
+	Edit0.setShowKeypad(True)
+	m_bCloseForm = false
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	m_bCloseForm = false
+	Func_Clear_Pwd()
+	if m_bShowSwitch = false then
+		strSwitchIndex = Button0.switchindex
+	
+		if strSwitchIndex = "1" then
+			Form.SetEnvData(1, "order.save_orderpwd", "1")
+			m_bOpenPopup = true
+			Form.OpenPopup("pwdcheckpopup_p1" , "", "")
+			Edit0.setShowKeypadNoCheck(False)
+		
+		elseif strSwitchIndex = "0" then
+			Form.SetEnvData(1, "order.save_orderpwd", "0")
+			Edit0.setShowKeypad(True)
+		end if
+	end if 
+End Sub
+
+'============================================================================
+Sub Button3_OnClick()
+	m_bCloseForm = false
+	g_szPwd = ""
+	g_szPwdLen = ""
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	if g_szPwd = "" or g_szPwd = null then
+		Form.SendReturnToParent("CORRECT_PWD" , "")
+	else
+		Form.SendReturnToParent("CORRECT_PWD" , g_szPwd .."★"..g_szPwdLen)
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	m_bOpenPopup = false
+	Edit0.setShowKeypad(True)
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName = "pwdcheck" then
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'20220622 아이티젠 START:
+	'20220622 아이티젠 END:
+	PwdFail0.setMaintainingRatio("1")
+	PwdFail1.setMaintainingRatio("1")
+	PwdFail2.setMaintainingRatio("1")
+	PwdFail3.setMaintainingRatio("1")
+	PwdFail4.setMaintainingRatio("1")
+	PwdFail5.setMaintainingRatio("1")
+	PwdFail6.setMaintainingRatio("1")
+	PwdFail7.setMaintainingRatio("1")
+End Sub
+
+Sub Edit0_OnEditCancel()
+	'20220622 아이티젠 START: 안드로이드에서 비번입력후 백버튼 탭시 부모폼으로 비번넘기는 현상 수정
+	'20220622 아이티젠 END:
+	Func_Clear_Pwd()
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

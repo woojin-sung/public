@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16090" scrname="실시간 시시신청/해지" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,604,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label3" fontsize="-1" caption="시장구분" ly_vert="437,147,65,32,1" />
+		<COMBO name="cmbExch" fontsize="-1" cbinputdatatext="<![CDATA[%`전체
+01`미국
+02`홍콩
+03`상해
+04`심천
+05`일본]]>" ly_vert="507,7,70,32,1" />
+		<LABEL name="Label4" fontsize="-1" caption="조회기간" ly_vert="437,185,65,32,1" />
+		<CALENDAR name="cldFrom" fontsize="-4" dispmode="1" ly_vert="506,186,100,32,1" />
+		<LABEL name="Label5" caption="~" halign="1" ly_vert="606,186,20,32,1" />
+		<BUTTON name="btnSubmit" fgcolor="063:255255255" btnimage="btn_01.9" ly_vert="817,271,359,36,1" />
+		<CALENDAR name="cldTo" fontsize="-4" dispmode="1" ly_vert="625,186,100,32,1" />
+		<EDIT name="edtPwd01" halign="1" password="2" imetype="1" maxlength="8" minlength="4" hintcaption="비밀번호" des="비밀번호" ly_vert="764,11,86,35,1" />
+		<ACCOUNT name="acnt01" bgcolor="052:255255255" itemcodetype="100,119,200" etcfunctions="" accpwdctl="edtPwd01" ly_vert="401,9,355,46,1" />
+		<CONTAINER name="Container1" ly_vert="0,0,375,55,1" scroll_ly_vert="0,0,375,55,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblFilter" fontsize="-1" caption="전체 · 시장 전체" halign="2" click="1" ly_vert="212,8,127,40,1" />
+				<IMAGE name="ImgFilter" imgpath="icon_filter" ly_vert="339,17,20,20,1" />
+				<LABEL name="lbDate" fontsize="-1" caption="240206240523" mask="1,0,,,1,##.##.## ~ ##.##.##,0,1,1,0,0" transmode="0" halign="1" border="1" bordercolor="026:186186186" click="1" ly_vert="7,8,182,40,1" />
+				<IMAGE name="imgDate" autosize="1" imgpath="icon_calender" ly_vert="511,14,20,20,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<COMBO name="cmbGubun" fontsize="-1" cbinputdatatext="<![CDATA[%`전체
+0`이용중
+1`해지]]>" ly_vert="504,108,70,32,1" />
+		<LABEL name="Label14" fontsize="-1" caption="이용구분" ly_vert="435,109,65,32,1" />
+		<PANNEL name="Pannel0" ly_vert="0,55,375,549,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblName" fontsize="3" fontstyle="01" multiline="1" autofontsize="1" ly_vert="10,30,172,40,1" />
+				<LABEL name="lbl1" fgcolor="146:124124124" fontsize="-2" caption="이용기간" ly_vert="10,70,160,25,1" />
+				<LABEL name="lbl2" fgcolor="146:124124124" fontsize="-2" caption="결제계좌" ly_vert="10,95,160,25,1" />
+				<LABEL name="lblDate2" fontsize="-2" halign="2" ly_vert="195,70,168,25,1" />
+				<LABEL name="lblFee" fontsize="2" fontstyle="01" halign="2" ly_vert="194,30,169,40,1" />
+				<LABEL name="lblAccount" fontsize="-2" mask="1,0,,,1,########-##,-1,1,0,0,0" halign="2" ly_vert="195,95,168,25,1" />
+				<LABEL name="lblLine1" transmode="0" border="1" bordercolor="050:132132132" ly_vert="10,124,355,1,1" />
+				<LABEL name="lblDate1" fgcolor="146:124124124" fontsize="-2" ly_vert="10,5,160,25,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="126" gap="1" >
+				<CELL name="lblName" />
+				<CELL name="lbl1" />
+				<CELL name="lbl2" />
+				<CELL name="lblDate2" />
+				<CELL name="lblFee" />
+				<CELL name="lblAccount" />
+				<CELL name="lblLine1" />
+				<CELL name="lblDate1" />
+			</CARD_INFO>
+		</PANNEL>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8579" _ulen="8144" >
+'해외/해외CFD 실시간시세 신청내역 조회
+
+Dim g_szPlainRm
+g_szPlainRm = ""			'MTS메모리평문 적용여부
+
+Dim g_szOKType
+g_szOKType = "1" '실시간시세신청
+
+Dim g_szCSNo '고객번호
+g_szCSNo = ""
+
+Dim g_szUserId '사용자 아이디
+g_szUserId = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Container1.imgDate.setMaintainingRatio("1")		
+	Container1.ImgFilter.setMaintainingRatio("1")		
+	Container1.bgcolor = "246247248"
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'화면번호
+	g_szScreenNum = Form.GetSharedData( "&SCREEN_NO" , false )	
+	'고객번호
+	g_szCSNo = Form.GetSharedData("&CUST_NUM", false )'로그인 해야만 고객번호 받아옴
+	'사용자ID
+	g_szUserId = Form.GetSharedData("&USER_ID", false )
+	
+	'MTS메모리평문 적용유무 (0:미적용 / 1:적용) - 2020.09.17
+	g_szPlainRm = Form.GetSharedData("&PLAIN_RM", false)
+	
+	'신청내역-기간설정
+	'cldFrom.caption = Form.GetSharedData("&HOST_DATE", false )
+	'cldTo.caption = "99991231"
+	cldFrom.caption = Left(Form.calcDateTime( nYear, nMonth, -7, nHour, nMinute, nSecond ), 8)		
+	cldTo.caption = Form.GetSharedData("&HOST_DATE", false )
+	'신청기간 표기
+	Container1.lbDate.caption = Right(cldFrom.caption, 6) & Right(cldTo.caption, 6)	
+	
+'msgbox cldFrom.caption .. ";;" .. cldTo.caption
+	DATAMANAGER.RequestTranData("obtro_acnt_211r")
+
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "DATE_SET" then  '신청내역-기간 nrsmbtro16090_p5	
+		if sRet <> "" and sRet <> null then	
+			cldFrom.caption = Left(sRet, 8)
+			cldTo.caption = Right(sRet, 8)
+			Container1.lbDate.caption = Right(cldFrom.caption, 6) & Right(cldTo.caption, 6)
+			
+			DATAMANAGER.RequestTranData("obtro_acnt_211r")  '재조회
+			
+		end if 		
+	elseif sKeyName == "OPTION_SET" then '신청내역-이용구분+시장구분 nrsmbtro16090_p6
+		if sRet <> "" and sRet <> null then
+			Dim tData
+			tData = Split(sRet, "★")
+
+			cmbGubun.cbkeydata = tData(0)
+			cmbExch.cbkeydata = tData(1)
+			Container1.lblFilter.caption = cmbGubun.caption & " · " & cmbExch.caption 
+			
+			DATAMANAGER.RequestTranData("obtro_acnt_211r")  '재조회
+		end if 
+		
+	END if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)	
+	if szTranID = "obtro_acnt_211r" then 
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "CSNO" 			, 0 , g_szCSNo)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "OVRS_STCK_MRKT_TR_CLS_CODE", 0 , cmbExch.cbkeydata )
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "QTTN_REG_CLCD" 	, 0 , cmbGubun.cbkeydata)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "STA_DATE"         , 0 , cldFrom.caption 	)
+		DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "FIN_DATE"		 , 0 , cldTo.caption 	)
+		'조회구분코드 - 1.해외주식가능계좌, 2. 해외CFD 가능계좌
+		if g_szScreenNum == "16091" then 
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "IQRY_CLS_CODE" , 	0 , "2") '해외CFD
+		else
+			DATAMANAGER.SetDataValue(0, szTranID, "InBlock1", "IQRY_CLS_CODE" , 	0 , "1") 
+		end if	
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+		
+	if szTranID = "obtro_acnt_211r" then
+
+		Dim nCnt, nRowIdx, szOvrsStckMrktTrClsCode, szQttnApltClcd, szRegPrdClcd,szQttnRegClcd, szApltDate, szAccount',szChanTypeClsCode
+		Dim sTemp, sFontColor	
+		
+		sFontColor = 124  '디폴트(회색)
+		
+		nCnt = DATAMANAGER.GetDataCount( false, szTranID, "OutBlock1" )	
+		Pannel0.rowcount = nCnt
+		for i = 0 to nCnt - 1 step 1
+			'nRowIdx = Container1.grdStatus.rowcount - nCnt + i
+			
+			szOvrsStckMrktTrClsCode = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "OVRS_STCK_MRKT_TR_CLS_CODE" , i )
+			szQttnRegClcd           = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "QTTN_REG_CLCD" , i )			
+			szRegPrdClcd            = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "REG_PRD_CLCD" , i )
+			szQttnApltClcd          = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "QTTN_APLT_CLCD" , i )
+			szApltDate      		 = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "APLT_DATE" , i )
+			szAccount       		 = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "ACNO" , i ) & DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "ASNO" , i ) 
+			'szChanTypeClsCode       = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "CHAN_TYPE_CLS_CODE" , i )
+			'신청일+이용여부
+			Select Case szQttnRegClcd
+				Case "0"
+					Pannel0.SetCellValue( "lblDate1", i, Left(szApltDate, 4) &"-"& MID(szApltDate, 5, 2) &"-"& Right(szApltDate, 2) & " |  이용중")
+					'sFontColor = 18
+				Case "1"
+					Pannel0.SetCellValue( "lblDate1", i, Left(szApltDate, 4) &"-"& MID(szApltDate, 5, 2) &"-"& Right(szApltDate, 2) & " |  해지")	
+					'sFontColor = 124
+					'sFontColor = 18
+			End Select
+			
+			'국가
+			Select Case szOvrsStckMrktTrClsCode
+				Case "01"
+					Pannel0.SetCellValue("lblName", i, "미국")
+				Case "02"
+					Pannel0.SetCellValue("lblName", i, "홍콩")
+				Case "03"
+					Pannel0.SetCellValue("lblName", i, "상해A")
+				Case "04"
+					Pannel0.SetCellValue("lblName", i, "상해A")
+				Case "05"
+					Pannel0.SetCellValue("lblName", i, "일본")
+			End Select
+			
+			'이용기간
+			sTemp = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "STA_DATE" , i ) '시작일
+			szStaDate = Left(sTemp, 4) & "." & Mid(sTemp, 5, 2) & "." & Right(sTemp, 2)
+			sTemp = DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "FIN_DATE" , i ) '종료일 
+			szFinDate = Left(sTemp, 4) & "." & Mid(sTemp, 5, 2) & "." & Right(sTemp, 2)
+			Select Case szRegPrdClcd
+				Case "1"
+					Pannel0.SetCellValue("lblDate2", i, szStaDate &" ~ " & "자동연장")
+				Case "2"
+					Pannel0.SetCellValue("lblDate2", i, szStaDate &" ~ " & szFinDate)
+				Case "3"
+					Pannel0.SetCellValue("lblDate2", i, szStaDate &" ~ " & szFinDate)
+			End Select
+			
+			'수수료
+			sTemp = CDbl(DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "OVRS_QTTN_EXPN" , i )).. ""
+			sTemp = sTemp & " " & DATAMANAGER.GetDataValue( false, szTranID, "OutBlock1", "CRCD" , i ) 
+'if i == 1 then 'for TEST
+'	sTemp = "무료"
+'end if 
+			Pannel0.SetCellValue("lblFee", i, sTemp)
+			
+			'계좌
+			'수수료가 무료이면 account가 보이지 않기
+			Pannel0.SetCellValue("lblAccount", i, szAccount)
+			if sTemp == "무료" then
+				Pannel0.SetCellVisible("lbl2", i, 0) 
+				Pannel0.SetCellVisible("lblAccount", i, 0) 
+'				Pannel0.SetCellVisible("lblLine1", i, 0) 
+'				Pannel0.SetCellVisible("lblLine2", i, 1) 
+				Pannel0.SetPropCardCell( "top", "lblLine1", i, 100 )				
+				Pannel0.SetCardWHAt( i, 101)				
+			else
+				Pannel0.SetCellVisible("lbl2", i, 1)
+				Pannel0.SetCellVisible("lblAccount", i, 1)
+'				Pannel0.SetCellVisible("lblLine1", i, 1)
+'				Pannel0.SetCellVisible("lblLine2", i, 0)
+				Pannel0.SetPropCardCell( "top", "lblLine1", i, 124 )				
+				Pannel0.SetCardWHAt( i, 126)				
+			end if 
+			
+			'글자색설정 이용중??
+		next		
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+	Dim szSubErr
+	
+	szSubErr = DATAMANAGER.GetDataMsgSubText(szTranID)	
+	Form.ShowAlert( "알림", szErrMsg.."\n("..szSubErr..")" )	
+End Sub
+
+'============================================================================
+Sub Container1_imgDate_OnClick()
+	Container1_lbDate_OnClick()
+End Sub
+
+'============================================================================
+Sub Container1_lbDate_OnClick()
+	Form.OpenPopupAnimation("nrsmbtro16090_p5", cldFrom.caption&cldTo.caption,  "",  2)	
+End Sub
+
+'============================================================================
+Sub Container1_ImgFilter_OnClick()
+	Container1_lblFilter_OnClick()
+End Sub
+
+'============================================================================
+Sub Container1_lblFilter_OnClick()
+	Form.OpenPopupAnimation("nrsmbtro16090_p6",  cmbGubun.cbkeydata & "★"&cmbExch.cbkeydata,  "",  2)	
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName		= "INFO_REFRESH" then
+		DATAMANAGER.RequestTranData("obtro_acnt_211r")
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtro_acnt_211r" trcode="obtro_acnt_211r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtro_acnt_211r" title="해외주식 실시간 시세 신청내역" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="334" _ulen="250" >
+
+CSNO^고객번호^10^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+QTTN_REG_CLCD^시세등록구분코드^1^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="626" _ulen="464" >
+
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+APLT_DATE^신청일자^8^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+QTTN_APLN^시세신청자^10^0^0^0^0^0^0
+QTTN_APLT_CLCD^시세신청구분코드^1^0^0^0^0^0^0
+REG_PRD_CLCD^등록기간구분코드^1^0^0^0^0^0^0
+QTTN_REG_CLCD^시세등록구분코드^1^0^0^0^0^0^0
+STA_DATE^시작일자^8^0^0^0^0^0^0
+FIN_DATE^종료일자^8^0^0^0^0^0^0
+EXMP_YN^면제여부^1^0^0^0^0^0^0
+OVRS_QTTN_EXPN^해외시세비용^26^6^7^0^0^0^0
+CRCD^통화코드^3^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="216" _ulen="158" >
+
+QTTN_APLN^시세신청자^10^0^0^0^0^0^0
+OVRS_STCK_MRKT_TR_CLS_CODE^해외주식시장거래구분코드^2^0^0^0^0^0^0
+QTTN_APLT_CLCD^시세신청구분코드^1^0^0^0^0^0^0
+SRNO^일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

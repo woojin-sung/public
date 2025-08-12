@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99998" scrname="티커 설정" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,250,415,1" />
+	<CONTROL_INFO>
+		<BUTTON name="Button0" caption="확인" btnimage="btn_01.9" ly_vert="17,365,219,39,1" />
+		<IMAGE name="imgTitle" imgpath="pop_header.9" ly_vert="0,0,250,55,1" />
+		<LABEL name="Label0" caption="티커설정" bgcolor="064:188030030" halign="1" ly_vert="0,0,250,55,1" />
+		<CHKBUTTON name="ChkButton0" chkcaption="KOSPI" unchkcaption="KOSPI" chkdata="KGG01P" ly_vert="14,99,100,32,1" />
+		<CHKBUTTON name="ChkButton2" chkcaption="KOSPI200" unchkcaption="KOSPI200" chkdata="K2G01P" ly_vert="14,150,100,32,1" />
+		<CHKBUTTON name="ChkButton4" chkcaption="다우산업" unchkcaption="다우산업" chkdata="DJI@DJI" ly_vert="14,201,100,32,1" />
+		<CHKBUTTON name="ChkButton6" chkcaption="상해종합" unchkcaption="상해종합" chkdata="SHS@000001" ly_vert="14,252,100,32,1" />
+		<CHKBUTTON name="ChkButton8" chkcaption="홍콩H" unchkcaption="홍콩H" chkdata="HSI@HSCE" ly_vert="14,303,100,32,1" />
+		<CHKBUTTON name="ChkButton1" chkcaption="KOSDAQ" unchkcaption="KOSDAQ" chkdata="QGG01P" ly_vert="125,99,100,32,1" />
+		<CHKBUTTON name="ChkButton3" chkcaption="선물" unchkcaption="선물" chkdata="FUTURE" ly_vert="125,150,100,32,1" />
+		<CHKBUTTON name="ChkButton5" chkcaption="나스닥종합" unchkcaption="나스닥종합" chkdata="NAS@IXIC" ly_vert="125,201,100,32,1" />
+		<CHKBUTTON name="ChkButton7" chkcaption="니케이225" unchkcaption="니케이225" chkdata="NII@NI225" ly_vert="125,252,100,32,1" />
+		<TAB name="Tab0" tabheadheight="36" tabwidthtype="1" tabcount="2" ly_vert="0,55,250,41,1" >
+			<PAGE name="0" caption="상단" >
+				<CONTROL_INFO/>
+			</PAGE>
+			<PAGE name="1" caption="하단" >
+				<CONTROL_INFO/>
+			</PAGE>
+		</TAB>
+		<IMAGE name="imgClose" autosize="1" imgpath="ic_pop_close.png" ly_vert="215,15,24,24,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="6297" _ulen="5731" >
+
+'20221117 LES START 차세대 업종코드 변경
+'0001 => KGG01P , 1001 => QGG01P
+g_szTopTickerKey = "KGG01P"
+g_szBotTickerkey = "QGG01P"
+'20221117 LES END
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+	' 최근 월물 조회
+	g_szTopTickerKey = Form.GetEnvData("alrim.ticker.top")
+	if g_szTopTickerKey == "" then
+		
+		'20221117 LES START 차세대 업종코드 변경
+		'0001 => KGG01P , 1001 => QGG01P
+		g_szTopTickerKey = "KGG01P:QGG01P"
+		'20221117 LES END
+		
+	end if
+	
+	g_szBotTickerkey = Form.GetEnvData("alrim.ticker.bottom")
+	if g_szBotTickerkey == "" then
+		g_szBotTickerkey = "DJI@DJI:NAS@IXIC"
+	end if
+	
+	'20221117 LES START 차세대 업종코드 변경
+	replace(g_szTopTickerKey, "0001" , "KGG01P")
+	replace(g_szTopTickerKey, "1001" , "QGG01P")
+	replace(g_szTopTickerKey, "2029" , "K2G01P")
+	
+	replace(g_szBotTickerkey, "0001" , "KGG01P")
+	replace(g_szBotTickerkey, "1001" , "QGG01P")
+	replace(g_szBotTickerkey, "2029" , "K2G01P")
+	'20221117 LES END
+	
+	SetCheckTopKey(g_szTopTickerKey)
+	
+End Sub
+
+' 리스트로 선택된 키 값을 체크 박스에 표시해준다.
+Sub SetCheckTopKey(sTopKey)
+	AllUnCheckBox()
+	arrTopKey = Split( sTopKey, ":", 0, 0 )
+	if #arrTopKey > 0 then
+		For i = 0 To #arrTopKey - 1
+			sKey = arrTopKey(i)
+			CheckCheckBox(sKey)
+		Next
+	end if
+end sub
+
+' 모든 체크 박스르를 언체크로 표시한다.
+Sub AllUnCheckBox()
+	for i = 0 to 9
+		sCtlName = "ChkButton"..i
+		Form.SetCtlProp(sCtlName, "chksilence", "0")
+	next
+End Sub
+
+' 키에 해당되는 체크 박스를 표시한다.
+Sub CheckCheckBox(sKey)
+	for i = 0 to 9
+		sCtlName = "ChkButton"..i
+		sChData = Form.GetCtlProp(sCtlName, "chkdata")
+		if sChData == sKey then
+			Form.SetCtlProp(sCtlName, "chksilence", "1")
+		end if
+	next
+end Sub
+
+' 선택된 체크 박스의 키 값을 리스트 형태로 구성한다.
+Sub GetCheckKey()
+	sKeyData = ""
+	for i = 0 to 9
+		sCtlName = "ChkButton"..i
+		sState = Form.GetCtlProp(sCtlName, "checkstate")
+		if sState == "1" then
+			sChData = Form.GetCtlProp(sCtlName, "chkdata")
+			if sKeyData == "" then
+				sKeyData = sChData
+			else
+				sKeyData = sKeyData..":"..sChData
+			end if
+		end if
+	next
+	return sKeyData
+end Sub
+
+
+'============================================================================
+Sub Button0_OnClick()
+
+	Form.SetEnvData( 1 ,"alrim.ticker.top", g_szTopTickerKey)
+	Form.SetEnvData( 1 ,"alrim.ticker.bottom", g_szBotTickerKey)
+	
+	Form.SendMessageToMain("TICKER_CHANGE", "", "")
+	
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub Tab0_OnTabChanged(nCurrentTab)
+	if nCurrentTab == 0 or nCurrentTab == "0" then
+		g_szBotTickerKey = GetCheckKey()
+		SetCheckTopKey(g_szTopTickerKey)
+	elseif nCurrentTab == 1 or nCurrentTab == "1" then
+		g_szTopTickerKey = GetCheckKey()
+		SetCheckTopKey(g_szBotTickerKey)
+	end if
+End Sub
+
+'' 현재 선택된 상하단의 키 값을 가져 온다.
+Sub GetSelectTickerKey()
+	if Tab0.currenttab == 0 or Tab0.currenttab == "0" then
+		g_szTopTickerKey = GetCheckKey()
+		if g_szTopTickerKey == "" then
+			return false
+		end if
+	elseif Tab0.currenttab == 1 or Tab0.currenttab == "1" then
+		g_szBotTickerKey = GetCheckKey()
+		if g_szBotTickerKey == "" then
+			return false
+		end if
+	end if
+	
+	return true
+end Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton0.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton1_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton1.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton5_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton5.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton6_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton6.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton2_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton2.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton7_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton7.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton3_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton3.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton8_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton8.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+Sub ChkButton4_OnChange(sCheckState)
+	if (GetSelectTickerKey() == false) then
+		Form.MsgBox("알림", "최소 하나 이상은 선택을 하셔야 합니다.", "", 0)
+		ChkButton4.checkstate = "1"
+	end if
+End Sub
+
+'============================================================================
+
+
+'============================================================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

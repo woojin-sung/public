@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="사이드종목" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="alpha" ly_vert="0,0,375,647,1" />
+		<IMAGE name="Image2" imgpath="btn_02_n.9" ly_vert="34,114,342,533,1" />
+		<FORMTAB name="FormTab0" tabcount="3" tabwidthtype="2" tabheadheight="40" ly_vert="35,116,340,530,1" >
+			<PAGE name="page008191" caption="최근종목" linkfile="sideitem_exst_t1.xmf" />
+			<PAGE name="page008979" caption="관심종목" linkfile="sideitem_exst_t2.xmf" />
+			<PAGE name="page005782" caption="계좌잔고" linkfile="sideitem_exst_t3.xmf" loadingtype="1" />
+		</FORMTAB>
+		<IMAGE name="Image1" autosize="1" imgpath="btn_side_r_o" ly_vert="17,390,17,54,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1258" _ulen="1214" >
+'============================================================================
+Sub Form_OnFormInitBefore()
+	sSide = Form.GetOpenLinkData()
+	'20230630 HSZ START: 왼쪽 이미지 수정
+	'16-04-20 YCJ 좌측일때 빨간 배경색이 보이는 부분 
+	if sSide = "left" then
+		FormTab0.left = "0"
+		Image2.left = "0"
+		Image1.left = "342"
+		Image1.imgpath = "btn_side_l_o.png"
+	end if
+	'20230630 HSZ END
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	nTab = Form.GetSharedData("SIDEITEM_EXST_TAB", 0 )
+	FormTab0.currenttab = nTab
+End Sub
+
+'============================================================================
+
+'============================================================================
+Sub Image1_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Form.SetSharedData("SIDEITEM_EXST_TAB" , nCurrentTab)
+End Sub
+
+
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "CLOSE_FORM" then
+		Form.CloseForm()
+	end if
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

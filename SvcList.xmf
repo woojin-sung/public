@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="00000" scrname="RP테스트 연결화면" version="2" writer="김유경" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,562,1" />
+	<CONTROL_INFO>
+		<LABEL name="Label0" caption="1. RP매도" ly_vert="8,89,76,32,1" />
+		<LABEL name="Label1" fontsize="-2" caption="조회: obsat_deal_121r" ly_vert="13,118,376,32,1" />
+		<LABEL name="Label2" fontsize="-2" caption="처리: obsar_deal_003a" ly_vert="13,150,160,32,1" />
+		<LABEL name="Label3" fgcolor="191:255255255" fontstyle="01" caption="* 테스트계좌: 30025362-13" ly_vert="153,61,211,32,1" />
+		<LABEL name="Label4" caption="2. 외화RP매도" ly_vert="8,254,116,32,1" />
+		<LABEL name="Label5" fontsize="-2" caption="조회: obsat_deal_122r" ly_vert="14,283,156,32,1" />
+		<LABEL name="Label6" fontsize="-2" caption="처리: obsav_deal_203a" ly_vert="14,315,160,32,1" />
+		<LABEL name="Label7" fontsize="-2" caption="예상금액 대상 조회: obsat_deal_106r" ly_vert="13,182,212,32,1" />
+		<LABEL name="Label8" fontsize="-2" caption="예상금액 대상 조회: obsav_bsop_002r" ly_vert="14,347,223,32,1" />
+		<LABEL name="Label9" fontsize="-2" caption="예상금액 계산: obsar_deal_403r" ly_vert="13,214,183,32,1" />
+		<LABEL name="Label10" fontsize="-2" caption="예상금액 계산: obsav_deal_207r" ly_vert="14,379,183,32,1" />
+		<BUTTON name="Button0" caption="다드림 원화RP" fgcolor="013:051051051" ly_vert="10,114,348,122,1" />
+		<BUTTON name="Button1" caption="다드림 외화RP" fgcolor="012:000000000" ly_vert="9,278,347,68,1" />
+		<BUTTON name="Button2" caption="기타 외화RP" fgcolor="012:000000000" ly_vert="7,353,349,59,1" />
+		<ACCOUNT name="acnt0" bgcolor="052:255255255" itemcodetype="100,118,200" etcfunctions="" accpwdctl="edtPwd" delegate="1" ly_vert="10,2,355,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1597" _ulen="1339" >
+--===========================================================================
+--===========================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	
+End Sub
+
+'============================================================================
+Sub Button0_OnClick()
+	Dim sData
+	'RP구분 > 1:다드림-원화RP 2:다드림-외화RP 3:기간물-외화RP
+	
+	'계좌번호 ☆ RP구분 ☆ RP종목코드 ☆ 매수일련번호
+	sData = acnt0.caption & "☆" & "1" & "☆" & "RP10200" & "☆" & "1"
+	Form.OpenFramePopup( "mbfnp55010" , sData , "" )
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	Dim szDate
+	szDate = Form.GetSharedData("&HOST_DATE", false )
+	'RP구분 > 1:다드림-원화RP 2:다드림-외화RP 3:기간물-외화RP
+	
+	Dim sData
+	'계좌번호 ☆ RP구분 ☆ RP종목코드 ☆ 매수일련번호 ☆ 매수일자
+	sData = acnt0.caption & "☆" & "2" & "☆" & "USDRP200" & "☆" & "1" & "☆" & szDate
+	Form.OpenFramePopup( "mbfnp55020" , sData , "" )
+End Sub
+
+'============================================================================
+Sub Button2_OnClick()
+	Dim sData
+	'RP구분 > 1:다드림-원화RP 2:다드림-외화RP 3:기간물-외화RP
+	
+	'계좌번호 ☆ RP구분 ☆ RP종목코드 ☆ 매수일련번호 ☆ 매수일자
+	sData = acnt0.caption & "☆" & "3" & "☆" & "USDRPTERM" & "☆" & "1" & "☆" & "20220830"
+	Form.OpenFramePopup( "mbfnp55020" , sData , "" )
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obsat_deal_106r" trcode="obsat_deal_106r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obsat_deal_106r" title="계좌 잔고 내역 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="210" _ulen="158" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌 비밀번호^68^0^0^0^0^0^0
+IQRY_DATE^조회 일자^8^0^0^0^0^0^0
+IQRY_CLS_CODE^조회구분코드^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" occurs="30" inout="out" _len="751" _ulen="573" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+KOR_ISNM^한글 종목명^100^0^0^0^0^0^0
+BYOV_DATE^매수일자^8^0^0^0^0^0^0
+STPL_INRT_PRVS_STND_DATE^약정이율지급기준일자^8^0^0^0^0^0^0
+BYOV_SRNO^매수일련번호^11^0^7^0^0^0^0
+DSCS_STIM^협의약정기간^7^0^7^0^0^0^0
+HLDN_PRD_DYNU^보유 기간 일수^8^0^7^0^0^0^0
+RPRC_INRT^환매이율^9^4^7^0^0^0^0
+STIM_CLS_NAME^약정기간 구분 명^40^0^0^0^0^0^0
+DRNG_ABLE_AMT^출금 가능 금액^19^0^7^0^0^0^0
+MNRC_AMT^입금 금액^19^0^7^0^0^0^0
+RP_PROD_TYPE_CODE^RP 상품 유형 코드^2^0^0^0^0^0^0
+HLFW_RPRC_INRT^중도 환매 이율^9^4^7^0^0^0^0
+MTRT_AFT_APLY_INRT^만기 후 적용 이율^9^4^7^0^0^0^0
+MTRT_DATE^만기일자^8^0^0^0^0^0^0
+FNCD^펀드코드^4^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="95" _ulen="75" >
+
+DRNG_ABLE_AMT^출금 가능 금액^19^0^7^0^0^0^0
+MNRC_AMT^입금금액^19^0^7^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="NextBlock1" inout="next" _len="123" _ulen="95" >
+
+ISCD^종목코드^12^0^0^0^0^0^0
+BYOV_DATE^매수일자^8^0^0^0^0^0^0
+BYOV_SRNO^매수일련번호^11^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

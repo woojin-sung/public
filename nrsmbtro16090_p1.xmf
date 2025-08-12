@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16090" scrname="실시간시세신청_약관동의창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" imgpath="alpha.png" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha128.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,460,375,300,1" />
+		<BUTTON name="btnOK" enable="0" caption="확인" fontsize="2" btnimage="btn_20.9" ly_vert="0,696,375,60,1" />
+		<IMAGE name="imgUIAllChk" autosize="1" imgpath="icon_check_off" ly_vert="25,484,15,15,1" />
+		<LABEL name="lblTitle0" fontsize="-2" fontstyle="01" caption="약관 및 확인사항" valign="0" multiline="1" ly_vert="29,534,279,30,1" />
+		<IMAGE name="imgUIChk3" autosize="1" imgpath="icon_check_off" ly_vert="29,635,13,13,1" />
+		<IMAGE name="imgUIChk2" autosize="1" imgpath="icon_check_off" ly_vert="29,604,13,13,1" />
+		<IMAGE name="imgUIChk1" autosize="1" imgpath="icon_check_off" ly_vert="29,568,13,13,1" />
+		<IMAGE name="ImageInfo1" autosize="1" imgpath="icon_dot.png" ly_vert="19,534,18,18,1" />
+		<BUTTON name="btnAllChk" caption="모두 확인하고, 동의 합니다." fgcolor="127:162162162" fontsize="1" fontstyle="01" btnimage="alpha" halign="0" ly_vert="43,475,305,35,1" />
+		<LABEL name="lblUnderLine" bgcolor="143:049050052" transmode="0" ly_vert="26,516,327,1,1" />
+		<CHKBUTTON name="chkAll" enable="0" visible="0" ly_vert="391,527,21,32,0" />
+		<CHKBUTTON name="chk3" enable="0" visible="0" ly_vert="391,625,21,32,0" />
+		<CHKBUTTON name="chk2" enable="0" visible="0" ly_vert="391,590,21,32,0" />
+		<IMAGE name="imgChk2" imgpath="ic_link.9" ly_vert="25,595,325,27,1" />
+		<IMAGE name="imgChk1" imgpath="ic_link.9" ly_vert="25,561,325,27,1" />
+		<IMAGE name="imgChk3" imgpath="ic_link.9" ly_vert="25,629,325,27,1" />
+		<BUTTON name="lblChkText1" caption="해외주식 실시간시세정보 이용약관" fgcolor="127:162162162" fontsize="-2" btnimage="alpha" halign="0" ly_vert="48,562,260,25,1" />
+		<BUTTON name="lblChkText2" caption="해외주식 시세신청 비전문가 확인" fgcolor="127:162162162" fontsize="-2" btnimage="alpha" halign="0" ly_vert="48,596,260,25,1" />
+		<BUTTON name="lblChkText3" caption="해외주식 개인(신용)정보 동의서(필수)" fgcolor="127:162162162" fontsize="-2" btnimage="alpha" halign="0" ly_vert="48,630,260,25,1" />
+		<CHKBUTTON name="chk1" enable="0" visible="0" ly_vert="391,554,21,32,0" />
+		<BUTTON name="Button0" ly_vert="413,663,70,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="15026" _ulen="13770" >
+'============================================================================
+' 화 면 명 : 실시간시세신청_약관
+' 화면설명 : 실시간시세신청_약관동의창
+' 작    성 : 2024.04.24 
+'============================================================================
+
+dim g_szUnCheckImg, g_szCheckImg'체크이미지
+dim g_szUnCheckFg, g_szCheckFg	'체크 폰트 컬러
+
+dim g_bAllChkClickFlag		'전체 체크 여부
+dim g_bChk1ClickFlag		'해외주식 실시간시세정보 이용약관
+dim g_bChk2ClickFlag		'해외주식 시세신청 비전문가 확인
+dim g_bChk3ClickFlag		'해외주식 개인(신용)정보 동의서(필수)
+
+dim g_szCUST_CLS_CODE 		'고객구분코드(2:법인)
+g_szCUST_CLS_CODE = ""
+
+'============================================================================
+'f_SetRegType() : 약정 처리 CASE SET 
+'리턴 값 > 0:이미 약정된 상태, 1:소수점 약정, 2:소수점,ETP 약정, 3:해외주식,소수점,ETP약정, 4:해외주식, 소수점
+'============================================================================
+Function f_GetPopupType()
+	if g_bGlobal_DotTrade_State == true then
+		return "0"
+	end if
+	
+	if g_bGlobal_Trade_State = false then
+		return "3"
+	else
+		if g_bGlobal_ETP_State == false then
+			return "2"
+		else
+			return "1"
+		end if
+	end if
+	
+	return "0"
+End Function
+
+'============================================================================
+'f_OpenChkAllPopup() : 전체 동의체크 별 안내팝업 호출
+'============================================================================
+Function f_OpenChkAllPopup()
+	dim szURL, szTitle
+'	szURL = ""
+	szTitle = ""
+	
+	for i= 1 to 3
+'		if i == 5 then
+'			szURL = szURL & f_sGetURL(i)
+'			szTitle = szTitle & f_sGetURLTitle(i)
+'		else
+'			if szURL == "" then
+			if szTitle == "" then
+'				'szURL = f_sGetURL(i) & "★"
+'				szURL = "" & "★"
+				'szTitle = f_sGetURLTitle(i) & "★"
+				szTitle = f_sGetURLTitle(i) 
+			else
+				'szURL = szURL & f_sGetURL(i) & "★"
+'				szURL = szURL & "" & "★"
+				szTitle = szTitle & "★" & f_sGetURLTitle(i) 
+			end if
+'		end if
+	next
+	
+	'팝업 호출
+	'if szURL <> "" then
+		Form.SetSharedData("16090_CUST_CLS_CODE" , g_szCUST_CLS_CODE)
+		'Form.OpenPopup("nrsmbtro16090_p8" , "All"&"♥"&szURL&"♥"&szTitle, "")
+		Form.OpenPopup("nrsmbtro16090_p8" , "All"&"♥"&szTitle, "")
+	'end if
+End Function
+
+'============================================================================
+'f_OpenChkPopup(iIdx) : 각 동의체크 별 안내팝업 호출
+'============================================================================
+Function f_OpenChkPopup(iIdx)
+	'if g_FinCustomer <> "N" then
+		if iIdx < 4 then
+			'Form.SetSharedData("OPEN_URL", f_sGetURL(iIdx) )
+			'Form.OpenFramePopup("nrsmbtro16090_p8", iIdx&"♥"& f_sGetURL(iIdx) &"♥"& f_sGetURLTitle(iIdx), "")
+			Form.SetSharedData("16090_CUST_CLS_CODE" , g_szCUST_CLS_CODE)
+			Form.OpenPopup("nrsmbtro16090_p8", iIdx&"♥"&f_sGetURLTitle(iIdx), "")
+		elseif iIdx == 4 then
+			Form.OpenPopup("nrsmbtro16090_p9", "", "") '개인정보처리요약동의창
+		end if
+	'end if
+End Function
+
+'============================================================================
+'f_sGetURLTitle(iIdx) : 각 동의체크 별 타이틀 리턴
+'============================================================================
+Function f_sGetURLTitle(iIdx)
+	Dim szTitle
+	Select Case iIdx	
+		Case 1
+			szTitle = "해외주식 실시간시세정보 이용약관"	
+		Case 2
+			szTitle = "해외주식 시세신청 비전문가 확인"
+		Case 3
+			szTitle = "해외주식 개인(신용)정보 동의서(필수)"
+	End Select
+	return szTitle
+End Function
+'
+''============================================================================
+''f_sGetURL(iIdx) : 각 동의체크 별 안내팝업 URL 리턴
+''============================================================================
+'Function f_sGetURL(iIdx)		
+'	dim sURLheader, sURL
+'	Select Case iIdx
+'		Case 1
+'			'해외주식 실시간시세정보 이용약관
+'			If g_ServerMode == "1" Then	'개발기
+'				sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf_test/"
+'			Else
+'				sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/"
+'			End If
+'			sURL = sURLheader & "meritz_yk_42.html"
+'		Case 2
+'			'해외주식 시세신청 비전문가 확인
+''			If g_ServerMode == "1" Then	'개발기
+''				sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf_test/"
+''			Else
+''				sURLheader = "http://home.imeritz.com/include/resource/comm/ctcn/pdf/"
+''			End If
+''			sURL = sURLheader & "meritz_yk_15.html"
+'			sURL = g_szCUST_CLS_CODE
+'		Case 3
+'			'해외주식 개인(신용)정보 동의서(필수)
+''			If g_ServerMode == "1" Then	'개발기
+''				sURLheader = "http://211.201.184.87/include/resource/htsdown/PDF/"
+''			Else
+''				sURLheader = "http://home.imeritz.com/include/resource/htsdown/PDF/"
+''			End If
+''			sURL = sURLheader & "htsdown_18.pdf"
+'			sURL = ""
+'	End Select
+'	
+'	return sURL
+'End Function
+
+'============================================================================
+'f_SetBtnRegEnable() : 확인 처리 버튼 상태 결정
+'============================================================================
+Function f_SetBtnRegEnable()
+
+	'전체체크여부
+	if g_bAllChkClickFlag == "" or g_bAllChkClickFlag == null or CInt(chkAll.checkstate) == 0 then
+		btnOK.enable = false
+'msgbox 1
+		Exit Function	
+	end if	
+	
+	'해외주식 실시간시세정보 이용약관
+	if g_bChk1ClickFlag == "" or g_bChk1ClickFlag == null or CInt(chk1.checkstate) == 0 then
+		btnOK.enable = false
+msgbox 2
+		Exit Function	
+	end if
+	
+	'해외주식 시세신청 비전문가 확인
+	if g_bChk2ClickFlag == "" or g_bChk2ClickFlag == null or CInt(chk2.checkstate) == 0 then
+		btnOK.enable = false
+'msgbox 3
+		Exit Function	
+	end if
+	
+	'해외주식 개인(신용)정보 동의서(필수)
+	if g_bChk3ClickFlag == "" or g_bChk3ClickFlag == null or CInt(chk3.checkstate) == 0 then
+		btnOK.enable = false
+'msgbox 4
+		Exit Function	
+	end if	
+	
+	'신청가능
+	btnOK.enable = true
+End Function
+
+'============================================================================
+Function f_SetAllCheckState()
+'	dim nCheck, nChkCnt
+'	nChkCnt = 0
+'	if CInt(grid0.rowcount) > 0 then
+'		for i=0 to CInt(grid0.rowcount)-1
+'			nCheck = CInt(grid0.GetCellData( "bd_check", i ))
+'			if nCheck == 1 then
+'				nChkCnt = nChkCnt + 1
+'			end if
+'		next
+'		if g_nAbleCnt == nChkCnt then
+'			chkAll.chksilence = "1"
+'		else
+'			chkAll.chksilence = "0"
+'		end if
+'	end if
+	
+	if chk1.chksilence == "0" OR chk2.chksilence == "0" OR chk3.chksilence == "0" then
+		g_bAllChkClickFlag = false
+		chkAll.chksilence = "0"
+	else
+		g_bAllChkClickFlag = true
+		chkAll.chksilence = "1"
+	end if 
+	f_SetContAllChkState(g_bAllChkClickFlag)
+End Function
+
+'============================================================================
+'f_SetContAllChkState(bValue) : 전체동의 체크 상태 SET
+'============================================================================
+Function f_SetContAllChkState(bValue)
+	if bValue == true then
+		chkAll.chksilence = "1"
+		imgUIAllChk.imgpath = "icon_chk_off.png"
+		btnAllChk.fgcolor = "4"
+		lblUnderLine.bgcolor = "4"
+		g_bAllChkClickFlag = false
+	else
+		chkAll.chksilence = "0"
+		imgUIAllChk.imgpath = "icon_chk_on.png"
+		btnAllChk.fgcolor = "127"
+		lblUnderLine.bgcolor = "127"
+	end if	
+End Function
+
+'============================================================================
+Function f_SetChk1State(bValue)
+	if bValue == true then
+		chk1.chksilence = "1"
+		imgUIChk1.imgpath = g_szCheckImg
+		lblChkText1.fgcolor = g_szCheckFg
+	else
+		chk1.chksilence = "0"
+		imgUIChk1.imgpath = g_szUnCheckImg
+		lblChkText1.fgcolor = g_szUnCheckFg
+	end if
+	
+	g_bChk1ClickFlag = bValue
+	
+	'전체동의 체크 상태
+	f_SetAllCheckState()
+	'확인버튼 활성화 여부
+	f_SetBtnRegEnable()
+End Function
+
+'============================================================================
+Function f_SetChk2State(bValue)
+	if bValue == true then
+		chk2.chksilence = "1"
+		imgUIChk2.imgpath = g_szCheckImg
+		lblChkText2.fgcolor = g_szCheckFg
+	else
+		chk2.chksilence = "0"
+		imgUIChk2.imgpath = g_szUnCheckImg
+		lblChkText2.fgcolor = g_szUnCheckFg
+	end if
+	
+	g_bChk2ClickFlag = bValue
+	
+	'전체동의 체크 상태
+	f_SetAllCheckState()
+	'확인버튼 활성화 여부
+	f_SetBtnRegEnable()
+End Function
+
+'============================================================================
+Function f_SetChk3State(bValue)
+	if bValue == true then
+		chk3.chksilence = "1"
+		imgUIChk3.imgpath = g_szCheckImg
+		lblChkText3.fgcolor = g_szCheckFg
+	else
+		chk3.chksilence = "0"
+		imgUIChk3.imgpath = g_szUnCheckImg
+		lblChkText3.fgcolor = g_szUnCheckFg
+	end if
+	
+	g_bChk3ClickFlag = bValue
+
+	'전체동의 체크 상태
+	f_SetAllCheckState()
+	'확인버튼 활성화 여부
+	f_SetBtnRegEnable()
+End Function
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	g_szUnCheckImg = "icon_chk_on.png"
+	g_szCheckImg = "icon_chk_off.png"
+	g_szUnCheckFg = "127"
+	g_szCheckFg = "4"
+	g_szNotiFlag = ""	
+End Sub
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	szData = Form.GetOpenLinkData()	
+	if szData <> "" then
+		g_szCUST_CLS_CODE = szData		
+'		cldFromDate.caption = Left(szData, 8)
+'		cldToDate.caption = Right(szData, 8)
+'		RgDateType.currentindex = 2
+'		cldFromDate.enable = "1"
+	else	
+		g_szCUST_CLS_CODE = ""
+	end if	
+	Form.SetSharedData("16090_CUST_CLS_CODE" , g_szCUST_CLS_CODE)
+	
+	g_ServerMode = Form.GetSharedData("&SERVER_MODE", false)
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+	'Form.SendReturnToParent("DATE_SET", cldFromDate.caption & " ~ " & cldToDate.caption)
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnOK_OnClick()
+'	if  CInt(cldFromDate.caption) > CInt(cldToDate.caption) then
+'msgbox "종료날짜가 시작날짜보도 과거입니다."			
+'	end if 
+	'매매유형선택 알림
+	'Form.SendReturnToParent("DATE_SET", cldFromDate.caption & " ~ " & cldToDate.caption)
+	Form.SendReturnToParent("mbtro16090_p1_RETURN", "OK")
+	Form.CloseForm()	
+End Sub
+
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	if sKeyName == "nrsmbtro16090_p8" then
+'msgbox sRet 
+		if sRet == "All" then
+			'f_SetContAllChkState(true)	
+			f_SetChk1State(true)
+			f_SetChk2State(true)
+			f_SetChk3State(true)
+		else
+			if sRet == "1" then
+				f_SetChk1State(true)
+			elseif sRet == "2" then
+				f_SetChk2State(true)
+			elseif sRet == "3" then
+				f_SetChk3State(true)
+			else
+				'g_bAllChkClickFlag = false
+				
+				'g_bChk1ClickFlag		'해외주식 실시간시세정보 이용약관
+				'g_bChk2ClickFlag		'해외주식 시세신청 비전문가 확인
+				'g_bChk3ClickFlag		'해외주식 개인(신용)정보 동의서(필수)				
+			end if 
+		end if 
+		
+		'전체동의 체크 상태
+		f_SetAllCheckState()
+		'확인버튼 활성화 여부
+		f_SetBtnRegEnable()		
+	elseif sKeyName == "nrsmbtro16090_p9" then
+		if sRet == "OK" then
+			f_OpenChkPopup(3)
+		end if 
+	end if 
+End Sub
+
+'============================================================================
+'모두 확인하고, 동의 합니다.
+'============================================================================
+Sub btnAllChk_OnClick()
+	if CInt(chkAll.checkstate) == 1 then
+		g_bAllChkClickFlag = false
+		f_SetContAllChkState(false)
+		f_SetChk1State(false)
+		f_SetChk2State(false)
+		f_SetChk3State(false)
+	else
+		g_bAllChkClickFlag = true
+		f_OpenChkAllPopup()
+	end if
+	
+	'확인버튼 활성화 여부
+	f_SetBtnRegEnable()	
+End Sub
+
+'해외주식 실시간시세정보 이용약관
+'============================================================================
+Sub imgChk1_OnClick()
+	if CInt(chk1.checkstate) == 1 then
+		f_SetChk1State(false)
+		f_SetContAllChkState(false)
+		'contNoti.visible = false
+		btnOK.enable	= False
+	else
+		f_OpenChkPopup(1)
+	end if	
+End Sub
+
+'============================================================================
+Sub lblChkText1_OnClick()
+	imgChk1_OnClick()
+End Sub
+
+'============================================================================
+Sub imgUIChk1_OnClick()
+	imgChk1_OnClick()
+End Sub
+
+
+'해외주식 시세신청 비전문가 확인
+'============================================================================
+Sub imgChk2_OnClick()
+'	if sCheckState == "1" then
+'		'법인(전문가)
+'		if g_szCUST_CLS_CODE == "2" then
+'			Form.OpenFramePopup("mbtro16090_p8", "" , "")
+'		else
+'			Form.OpenFramePopup("mbtro16090_p5", "" , "")
+'		end if
+'		
+'		chkAgrm.chksilence = "0"
+'	end if	
+	
+	if CInt(chk2.checkstate) == 1 then
+		f_SetChk2State(false)
+		f_SetContAllChkState(false)
+		'contNoti.visible = false
+		btnOK.enable	= False
+	else
+		f_OpenChkPopup(2)
+	end if
+End Sub
+
+'============================================================================
+Sub lblChkText2_OnClick()
+	imgChk2_OnClick()
+End Sub
+
+'============================================================================
+Sub imgUIChk2_OnClick()
+	imgChk2_OnClick()
+End Sub
+
+'해외주식 개인(신용)정보 동의서(필수)
+'============================================================================
+Sub imgChk3_OnClick()
+'	if sCheckState == "1" then
+'		'내용 팝업
+'		Dim sURL 
+'		sURL = "https://home.imeritz.com/include/resource/comm/ctcn/pdf/crinoferagrm6.pdf"
+'		
+'		acno = Form.GetCtlProp("#acnt01", "caption")
+'		
+'		Form.SetSharedData("ACNO"  , acno )	'계좌번호
+'		Form.SetSharedData("EMPLYN", "N"  )	'직원여부
+'		Form.SetSharedData("OPEN_URL"  , sURL )	'PDF링크
+'		
+'		Form.OpenFramePopup("mbtro16090_p6" , "해외주식 개인정보처리 요약동의서" , "")
+'		
+'		chkAgree.chksilence = "0"
+'	end if	
+	
+	if CInt(chk3.checkstate) == 1 then
+		f_SetChk3State(false)
+		f_SetContAllChkState(false)
+		'contNoti.visible = false
+		btnOK.enable	= False
+	else
+		f_OpenChkPopup(4) '개인정보처리요약동의창
+		'>>> f_OpenChkPopup(3)
+	end if	
+End Sub
+
+'============================================================================
+Sub lblChkText3_OnClick()
+	imgChk3_OnClick()
+End Sub
+
+'============================================================================
+Sub imgUIChk3_OnClick()
+	imgChk3_OnClick()
+End Sub
+'============================================================================
+Sub Button0_OnClick()
+	g_szCUST_CLS_CODE = "2"
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

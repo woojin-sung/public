@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50900" scrname="TAX365" version="2" writer="노일호" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBackPress" autosize="1" ly_vert="6,11,40,24,1" />
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="TAX365" bgcolor="320:246247248" click="1" ly_vert="40,12,195,23,1" />
+		<LABEL name="lblDesc" fontstyle="01" valign="0" multiline="1" ly_vert="20,66,210,94,1" />
+		<IMAGE name="imgDesc" autosize="1" ly_vert="257,47,88,100,1" />
+		<CONTAINER name="contMain" bgcolor="026:186186186" ly_vert="0,147,375,665,1" scroll_ly_vert="0,147,375,665,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblContMainBg" caption=" " transmode="0" ly_vert="0,0,375,66,1" />
+				<BUTTON name="btn50900" caption="절세 투자" fgcolor="013:051051051" fontsize="-2" fontstyle="01" ly_vert="20,10,105,36,1" />
+				<BUTTON name="btn50910" caption="세금이야기" fgcolor="013:051051051" fontsize="-2" ly_vert="135,10,105,36,1" />
+				<BUTTON name="btn50920" caption="세무 캘린더" fgcolor="013:051051051" fontsize="-2" ly_vert="250,10,105,36,1" />
+				<CONTAINER name="contSub" vscroll="1" ly_vert="0,66,375,599,1" scroll_ly_vert="0,66,375,599,1" >
+					<CONTROL_INFO>
+						<LINKFORM name="linkfmS1" linkfile="nrshidx50900_s1" ly_vert="16,18,343,412,1" />
+						<LINKFORM name="linkfmS2" linkfile="nrshidx50900_s2" ly_vert="16,440,343,412,1" />
+						<LINKFORM name="linkfmS3" linkfile="nrshidx50900_s3" ly_vert="16,862,343,479,1" />
+					</CONTROL_INFO>
+				</CONTAINER>
+				<LINKFORM name="linkfm50910" linkfile="nrshidx50910" visible="0" ly_vert="0,66,375,655,0" />
+				<LINKFORM name="linkfm50920" linkfile="nrshidx50920" visible="0" ly_vert="0,66,375,599,0" />
+			</CONTROL_INFO>
+		</CONTAINER>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7746" _ulen="6996" >
+'***************************************************
+'               전역 변수
+'***************************************************
+Dim g_szTitle
+Dim g_szOpenData
+Dim g_clickedBtnIdx
+
+Dim g_prevWebFm
+'***************************************************
+'               공용 함수
+'***************************************************
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	call Init_Control("1")    'Personal Function 호출시 call 붙여준다.
+End Sub
+
+'***************************************************
+'               개별 함수
+'***************************************************
+'===============================================
+' Init_Control(szCbn) 
+'===============================================
+Function Init_Control(szCbn) --> 리턴과 상관없이 Function으로 정의한다.	
+	'컨테이너 배경색 지정
+	contMain.bgcolor = "320"
+	contMain.contSub.bgcolor = "320"
+	
+	'적은 자금~ 텍스트컬러 (34/34/34): 334
+	contMain.lblMainTitle.fgcolor = "334"
+	
+	'imgDesc 설정
+	imgDesc.setMaintainingRatio("1")
+	imgDesc.imgpath = "tax365_img.png"
+	
+	'버튼1에 스타일 적용
+	f_Set_Button_Style(contMain.btn50900)
+	
+	'제스처 활성화
+	contMain.gesture = true
+	
+	'뒤로가기 버튼
+	imgBackPress.setMaintainingRatio("2")
+	imgBackPress.imgpath = "icon_main_01"
+	
+	lblDesc.caption = "자산은 늘리고, 세금은 줄이는\n절세 알짜 정보"
+	
+	'들어오는 값에 따라 띄울 탭 지정
+	g_szOpenData = Form.GetOpenLinkData()
+	If g_szOpenData <> "" then
+		If Instr(g_szOpenData, "1") > 0 then
+			contMain_btn50900_OnClick()
+		ElseIf Instr(g_szOpenData, "2") > 0 then
+			contMain_btn50910_OnClick()
+		ElseIf Instr(g_szOpenData, "3") > 0 then
+			contMain_btn50920_OnClick()
+		ElseIf Instr(g_szOpenData, "TAXSTORY") > 0 then
+			contMain_btn50910_OnClick()
+		End If
+	End if
+	
+	'현재 클릭한 버튼 인덱스 설정
+	g_clickedBtnIdx = 0
+	
+	contMain.setScrollBarVisible("2") '스크롤시만 스크롤바 보이기
+	contMain.contSub.setScrollBarVisible("2") '스크롤시만 스크롤바 보이기
+End Function
+
+'============================================================================
+'버튼 이미지를 누른 모양으로 변경
+Function f_Set_Button_Style(paramBtn)	
+	'버튼 이미지
+	contMain.btn50900.singleimage = "img_bgcircle_line.9.png"
+	contMain.btn50910.singleimage = "img_bgcircle_line.9.png"
+	contMain.btn50920.singleimage = "img_bgcircle_line.9.png"
+	
+	'버튼 텍스트컬러
+	contMain.btn50900.fgcolor = "333"
+	contMain.btn50910.fgcolor = "333"
+	contMain.btn50920.fgcolor = "333"
+	
+	'굵게 해제
+	contMain.btn50900.fontbold = false
+	contMain.btn50910.fontbold = false
+	contMain.btn50920.fontbold = false
+	
+	'누른 것만 press 효과 적용
+	paramBtn.singleimage = "img_bgcircle_black.9.png"
+	paramBtn.fgcolor = "338"
+	paramBtn.fontbold = true
+End Function
+
+'============================================================================
+Sub contMain_OnGestureEvent(sParam)
+	If sParam == "Up" Then
+		contMain.height = 665 + 130 'contMain.height + contMain.top
+		contMain.fixTopAreaWhenScrolling("1", 37, "Up") '탭바높이 47에서 여백10 뺌
+		contMain.linkfm50920.height = 599 + 130
+'		contMain.linkfm50920.setScrollAutoSize()
+	Else'If sParam == "Down" Then
+		contMain.height = 665 'contMain.height
+		contMain.fixTopAreaWhenScrolling("1", 147, "Down")
+		contMain.linkfm50920.height = 599
+'		contMain.linkfm50920.setScrollAutoSize()
+	End If
+
+'	if sParam == "Up" Then
+'		contMain.height = mainheight + downamount
+'		contMain.contLinkfm.height = mainheight - innertop + downamount
+'		contMain.contLinkfm.setScrollAutoSize()
+'		contMain.fixTopAreaWhenScrolling("1", 0, "Up")
+'	elseif sParam == "Down" Then
+'		contMain.height = 510
+'		contMain.contLinkfm.height = mainheight - innertop
+'		contMain.contLinkfm.setScrollAutoSize()
+'		contMain.fixTopAreaWhenScrolling("1", downamount, "Down")
+'	end if
+
+'	contMain.contSub.height = 599 'contSub.height + contMain.top
+'	If g_clickedBtnIdx == 0 Then '50900 절세투자
+'	ElseIf g_clickedBtnIdx == 1 Then '50910 세금이야기
+'	ElseIf g_clickedBtnIdx == 2 Then '50920 세무캘린더
+'	End If
+'	contMain.contSub.height = 599 + 147 'contSub.height + contMain.top
+'	contMain.contSub.setScrollAutoSize()
+End Sub
+'============================================================================
+Sub contMain_btn50900_OnClick()
+	'컨테이너 배경색 회색 지정
+	contMain.bgcolor = "320"
+	contMain.contSub.bgcolor = "320"
+	
+	'버튼 바꾸기
+	f_Set_Button_Style(contMain.btn50900)
+	
+	'탭 전환 시 맨 위로 스크롤
+	contMain.uniSetScroll("0", 0)
+	
+	' 내 링크폼 빼고 다 끄기
+	contMain.contSub.linkfmS1.visible = 1
+	contMain.contSub.linkfmS2.visible = 1
+	contMain.contSub.linkfmS3.visible = 1
+	contMain.linkfm50910.visible = 0
+	contMain.linkfm50920.visible = 0
+
+	' 컨테이너 사이즈 재조정
+	contMain.setScrollAutoSize()
+	
+	g_clickedBtnIdx = 0
+End Sub
+
+'============================================================================
+Sub contMain_btn50910_OnClick()
+	'컨테이너 배경색 흰색 지정
+	contMain.bgcolor = "016"
+	contMain.contSub.bgcolor = "016"
+	
+	'버튼 바꾸기
+	f_Set_Button_Style(contMain.btn50910)
+	
+	'탭 전환 시 맨 위로 스크롤
+	contMain.uniSetScroll("0", 0)
+	
+	'내 링크폼 빼고 다 끄기
+	contMain.contSub.linkfmS1.visible = 0
+	contMain.contSub.linkfmS2.visible = 0
+	contMain.contSub.linkfmS3.visible = 0
+	contMain.linkfm50910.visible = 1
+	contMain.linkfm50920.visible = 0
+
+	'컨테이너 사이즈 재조정
+	contMain.setScrollAutoSize()
+	
+	g_clickedBtnIdx = 1
+End Sub
+
+'============================================================================
+Sub contMain_btn50920_OnClick()
+	'컨테이너 배경색 흰색 지정
+	contMain.bgcolor = "016"
+	contMain.contSub.bgcolor = "016"
+
+	'버튼 바꾸기
+	f_Set_Button_Style(contMain.btn50920)
+	
+	'TODO 탭 전환 시 맨 위로 스크롤: 안드만안됨
+	
+	contMain.setScrollAutoSize()
+	
+	OSType = Form.GetSharedData("&OS_TYPE", false)
+	If OSType == "1" Then '1: 안드로이드
+		contMain.scroll_pos = "0"
+		contMain.scroll_pos = "top"
+	Else '2: iOS
+		contMain.scroll_pos_noAni = "0"
+		contMain.scroll_pos_noAni = "top"
+	End If
+	
+	'내 링크폼 빼고 다 끄기
+	contMain.contSub.linkfmS1.visible = 0
+	contMain.contSub.linkfmS2.visible = 0
+	contMain.contSub.linkfmS3.visible = 0
+	contMain.linkfm50910.visible = 0
+	contMain.linkfm50920.visible = 1
+
+	'컨테이너 사이즈 재조정
+	contMain.setScrollAutoSize()
+	
+	g_clickedBtnIdx = 2
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+    Form.openPrevScreen()
+End Sub
+
+'============================================================================
+'눌렀던 subform 번호 가져오기
+Sub Form_OnTriggerEventSCREEN(sEventName, sParam)
+	'g_prevWebFm: SharedData가 없으면 0, S1=1, S2=2, S3=3
+	If sEventName == "PREV" then
+		g_prevWebFm = CInt(Form.GetSharedData("TAX365_SUB", false))
+		serverMode = Form.GetSharedData("&SERVER_MODE", false)
+		If serverMode == "1" Then	'개발기
+			sURL = "https://testhome.imeritz.com/bbs/mwCtn1.do?bbsId=MoWbTax&bbsCnttTurnNo="..2+g_prevWebFm
+		else
+			sURL = "https://home.imeritz.com/bbs/mwCtn1.do?bbsId=MoWbTax&bbsCnttTurnNo="..2+g_prevWebFm
+		end if
+		
+		'값이 들어있으면 웹뷰 띄워 넘기기
+		If g_prevWebFm <> 0 and g_prevWebFm <> "0" Then
+			Form.OpenPopup("nrshidx50900_s4", sURL, "")
+		End If
+	End If
+End Sub
+	</SCRIPT_INFO>
+</ROOT>

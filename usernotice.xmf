@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="사용자알림" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="bg_dim40.9.png" ly_vert="0,0,375,647,1" />
+		<LABEL name="Label0" bgcolor="026:186186186" transmode="0" ly_vert="37,131,301,401,1" />
+		<IMAGE name="Image2" imgpath="btn_02_n.9" ly_vert="18,40,342,566,1" />
+		<FORMTAB name="FormTab0" fontsize="-1" fontstyle="01" tabcount="3" tabwidthtype="2" tabheadheight="40" ly_vert="19,78,340,522,1" >
+			<PAGE name="page000070" caption="Watching" linkfile="usernotice_p2.xmf" loadingtype="1" />
+			<PAGE name="page000292" caption="Push알리미" linkfile="usernotice_p3.xmf" loadingtype="1" />
+			<PAGE name="page001499" caption="스마트톡" linkfile="usernotice_p4.xmf" loadingtype="1" />
+		</FORMTAB>
+		<IMAGE name="Image1" autosize="1" imgpath="icon_main_11" ly_vert="328,50,21,21,1" />
+		<LABEL name="Label1" fontsize="1" fontstyle="01" caption="알람(앱푸시) 수신내역" ly_vert="25,46,217,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2136" _ulen="2044" >
+'20230901_01 HWG START : 마케팅 푸시 시스템 신규구축
+Dim g_szPushLinkType
+Dim g_szPushLink
+'20230901_01 HWG END
+
+'============================================================================
+Sub Image0_OnClick()
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	'20220222 HWG START : 푸시알림 연동기능 추가
+	szLinkIdx = ""
+	szLinkIdx = Form.GetOpenLinkData()
+	
+	if szLinkIdx == "E" then
+		FormTab0.currenttab = 1
+		
+	'20230901_01 HWG START : 마케팅 푸시 시스템 신규구축
+	elseif szLinkIdx <> null and szLinkIdx <> "" then
+	
+		aLinkData = split(szLinkIdx, "^SEPARATOR^")
+		
+		szLinkType = aLinkData[0]
+	
+		if szLinkType == "MKT" then
+			FormTab0.currenttab = 2
+			if #aLinkData >= 3 then
+				g_szPushLinkType   = aLinkData(1)
+				g_szPushLink		= aLinkData(2)
+			end if
+			
+			Form.SetTimerEvent2(1, 1, 0.5)
+		end if
+	'20230901_01 HWG END
+	else
+		nTab = Form.GetSharedData("USERNOTICE_TAB", 0 )
+		FormTab0.currenttab = nTab
+	end if
+	'20220222 HWG END
+End Sub
+
+'============================================================================
+Sub FormTab0_OnTabChanged(nCurrentTab)
+	Form.SetSharedData("USERNOTICE_TAB" , nCurrentTab)
+End Sub
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image1.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Image1_OnClick()
+	Form.CloseForm()
+End Sub
+
+'20230901_01 HWG START : 마케팅 푸시 시스템 신규구축
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID, 0, 0)
+	
+	if Cint(sTimerID) = 1 then
+		if g_szPushLinkType == "0" then
+			openLinkData = ""
+			if g_szPushLink = "88062" then
+				openLinkData = "88062"
+			end if
+			
+			Form.OpenScreen(g_szPushLink , openLinkData)
+			Form.CloseForm()
+		elseif g_szPushLinkType == "1" then
+			Form.openExternalBrowser(g_szPushLink)
+			Form.CloseForm()
+		end if
+	end if
+End Sub
+'20230901_01 HWG END
+
+	</SCRIPT_INFO>
+</ROOT>

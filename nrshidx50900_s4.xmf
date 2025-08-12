@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50900" scrname="TAX365-절세투자-웹뷰" version="2" writer="노일호" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<IMAGE name="imgBackPress" autosize="1" imgpath="icon_main_01" ly_vert="6,11,40,24,1" />
+		<WEBVIEW name="web0" urlpath="about:blank" ly_vert="0,47,375,715,1" />
+		<LABEL name="lblTitle" fontsize="3" fontstyle="01" caption="절세 투자" bgcolor="320:246247248" click="1" ly_vert="40,12,195,23,1" />
+		<IMAGE name="imgShare" autosize="1" imgpath="icon_sharenew" ly_vert="335,13,20,20,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3313" _ulen="3089" >
+'***************************************************
+'               전역 변수
+'***************************************************
+Dim g_szUrl
+
+'***************************************************
+'               공용 함수
+'***************************************************
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+	call Init_Control("1")    ' Personal Function 호출시 call 붙여준다.
+End Sub
+
+'***************************************************
+'               개별 함수
+'***************************************************
+'===============================================
+' Init_Control(szCbn) 
+'===============================================
+Function Init_Control(szCbn) --> 리턴과 상관없이 Function으로 정의한다.
+	'뒤로가기 버튼
+'	imgBackPress.setMaintainingRatio("2")
+'	imgBackPress.imgpath = "icon_main_01"
+	
+	'받은 링크 웹뷰에서 열기
+	szData = Form.GetOpenLinkData()
+	web0.fitresize = "0"
+	web0.urlpath = szData
+	
+	szDeviceOS = Form.GetSharedData("&OS_TYPE", false)
+	if szDeviceOS == "1" then
+		web0.SetUserAgent("meritz_android")
+	elseif szDeviceOS == "2" then
+		web0.SetUseJavaScript("1")
+		web0.SetUserAgent("meritz_ios")
+	end if
+	
+	Dim szOpenData
+	szOpenData = Form.GetOpenLinkData()
+	if szOpenData <> "" and szOpenData <> null then
+		g_szUrl = szOpenData
+		web0.urlpath = szOpenData
+	end if
+End Function
+'============================================================================
+Sub imgBackPress_OnClick()
+    Form.GetSharedData("TAX365_SUB", true)
+    Form.GetSharedData("TAX365_SUB_WEB", true)
+    Form.CloseForm()
+End Sub
+'============================================================================
+Sub imgShare_OnClick()
+	Form.shareSNS(g_szURL)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgBackPress.setMaintainingRatio("2")
+	imgShare.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub Form_OnTriggerEvent(sEventName, sParam)
+	if sEventName == "WebViewReturn" and sParam <> "" and sParam <> null then
+		Dim tData
+		tData = split(sParam, "★")
+		if tData(0) == "ETF" then
+			if tData(1) == "1" then 'tData(1) 1: ETF스크리너 화면이동
+				'주소 길면 외부 브라우저를 띄우기
+				'주소 합치기: https://home.imeritz.com (테스트는 ~testhome~)뒤에 파라미터 붙이기
+				nLen = Form.getLen(tData(2))
+				If Form.GetSharedData("&SERVER_MODE", false) == "1" Then '개발기
+					sURL = "https://testhome.imeritz.com" & tData(2)
+				else
+					sURL = "https://home.imeritz.com" & tData(2)
+				end if
+				
+				If nLen > 5 Then
+					Form.OpenExternalBrowser(sURL)
+				ElseIf nLen == 5 Then '아니면 shareddata 설정 후 openscreen
+					Form.SetSharedData("TAX365_SUB_WEB", 1) 'Income화면 확인용도 (1 하드코딩)
+					Form.OpenScreen(tData(2), "")
+				End If
+				
+			elseif tData(1) == "3" then 'tData(1) 3: 공유하기
+				Dim szUrl
+				szUrl = tData(3)
+				if szUrl <> "" and szUrl <> null then
+					Form.shareSNS(szURL)
+				end if
+			end if
+		end if 
+	end if
+End Sub
+
+
+	</SCRIPT_INFO>
+</ROOT>

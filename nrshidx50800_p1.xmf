@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="50100" scrname="ETF Super검색_유의사항" version="2" writer="함원규" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<LABEL name="lblTitle" fontsize="3" halign="1" ly_vert="47,0,283,47,1" />
+		<IMAGE name="imgClose" autosize="1" ly_vert="320,14,39,18,1" />
+		<LABEL name="lblInfo0" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="440,470,325,393,1" />
+		<LABEL name="lblGuide0" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="550,470,10,50,1" />
+		<LABEL name="lblInfo1" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="570,490,325,75,1" />
+		<LABEL name="lblGuide1" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="550,531,10,50,1" />
+		<LABEL name="lblGuide2" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="550,594,10,50,1" />
+		<LABEL name="lblInfo2" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="570,567,325,75,1" />
+		<LABEL name="lblGuide3" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="550,655,10,50,1" />
+		<LABEL name="lblInfo3" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="570,643,325,75,1" />
+		<PANNEL name="Pannel0" ly_vert="0,60,375,380,1" >
+			<CONTROL_INFO>
+				<LABEL name="lblGuide" fontsize="-2" fontstyle="01" halign="1" valign="0" ly_vert="20,0,10,50,1" />
+				<LABEL name="lblInfo" fontsize="-2" bgcolor="029:255212175" valign="0" multiline="1" ly_vert="35,0,310,160,1" />
+			</CONTROL_INFO>
+			<CARD_INFO cardheight="70" gap="5" >
+				<CELL name="lblGuide" />
+				<CELL name="lblInfo" />
+			</CARD_INFO>
+		</PANNEL>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4779" _ulen="4402" >
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+'-----------------------------------------------
+' 이미지
+'-----------------------------------------------
+Dim g_szCloseImg  
+g_szCloseImg = "icon_close"
+
+'-----------------------------------------------
+' 컬러코드
+'-----------------------------------------------
+' 기본 텍스트 컬러 (검정색)
+Dim g_szTxtColor_Normal 
+g_szTxtColor_Normal 	= "334"
+
+' 기본 텍스트 컬러 (회색)
+Dim g_szTxtColor_Grey 
+g_szTxtColor_Grey 	= "333"
+
+' 기본 텍스트 컬러 (흰색)
+Dim g_szTxtColor_White 
+g_szTxtColor_White 	= "338"
+
+' 기본 텍스트 컬러 (빨강)
+Dim g_szTxtColor_Red 
+g_szTxtColor_Red = "326"
+
+'-----------------------------------------------
+' 기타 전역변수
+'-----------------------------------------------
+Dim g_szTitle
+g_szTitle = "유의사항"
+
+'****************************************************************************
+'            P  E  R  S  O  N  A  L       F  U  N  C  T  I  O  N              
+'****************************************************************************
+'===============================================
+' 컨트롤 초기설정
+'===============================================
+Function Init_Control()
+	'-----------------------------------------------
+	' 뒤로가기 버튼 초기화
+	'-----------------------------------------------
+	lblTitle.paddinginfo = "0,0,0,0"
+	lblTitle.caption = g_szTitle
+	
+	'-----------------------------------------------
+	' 유의사항 버튼 초기화
+	'-----------------------------------------------
+	imgClose.SetMaintainingRatio("3")
+	imgClose.imgpath = g_szCloseImg
+	
+	'-----------------------------------------------
+	' 유의사항 본문내용 초기화
+	'-----------------------------------------------
+	szTextSize = Form.getEnvData("common.textsize")
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "종목 검색 시 제공되는 시세 정보는 정규장 기준으로 제공되어 조회됩니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("autofit" ,"lblInfo",nIdx,"1")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("autofit" ,"lblInfo",nIdx,"1")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,50)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,45)
+	end if
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "미국 종목의 경우 주간거래 시세는 미적용되며 정규장 시세(Pre Market 포함)로만 조회됩니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("autofit" ,"lblInfo",nIdx,"1")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("autofit" ,"lblInfo",nIdx,"1")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,70)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,45)
+	end if
+	
+	
+	nIdx = Pannel0.AddRow()
+	Pannel0.setPropCardCell("paddinginfo" ,"lblGuide",nIdx,"0,1,0,0")
+	Pannel0.setPropCardCell("caption" ,"lblGuide",nIdx,"·")
+	
+	szText = "해외 종목 시세는 '실시간 시세 신청' 기준으로(실시간 시세 또는 지연 시세) 조회됩니다."
+	Pannel0.setPropCardCell("paddinginfo" ,"lblInfo",nIdx,"0,0,0,0")
+	Pannel0.setPropCardCell("autofit" ,"lblInfo",nIdx,"1")
+	Pannel0.setPropCardCell("caption" ,"lblInfo",nIdx,szText)
+	Pannel0.SetCellValue("lblInfo",nIdx,szText)
+	Pannel0.setPropCardCell("autofit" ,"lblInfo",nIdx,"1")
+	
+	if szTextSize = "2" then
+		Pannel0.SetCardWHAt(nIdx,70)
+	elseif szTextSize = "-2" then
+		Pannel0.SetCardWHAt(nIdx,35)
+	else
+		Pannel0.SetCardWHAt(nIdx,45)
+	end if
+
+End Function
+
+'****************************************************************************
+'               C  O  M  M  O  N       F  U  N  C  T  I  O  N               
+'****************************************************************************
+'===============================================
+' Form_OnFormInit
+'===============================================
+Sub Form_OnFormInit()
+   Init_Control()
+End Sub
+
+'===============================================
+' imgInfo_OnClick
+'===============================================
+Sub imgClose_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

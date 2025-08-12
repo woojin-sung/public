@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="공통 텍스트키패드" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="-1,0,375,639,1" />
+		<IMAGE name="Image1" imgpath="popup_bg.9" ly_vert="0,279,375,368,1" />
+		<LABEL name="lblTitle" fontsize="1" fontstyle="01" fonttype="3" ly_vert="9,283,350,47,1" />
+		<EDIT name="Edit0" imetype="0" maxlength="30" clearall="0" imagefilepth="login_input.9" ly_vert="12,330,330,45,1" />
+		<IMAGE name="imgClear" autosize="1" imgpath="icon_remove" ly_vert="312,344,15,15,1" />
+		<LABEL name="lblClear" click="1" ly_vert="298,334,40,40,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4096" _ulen="3804" >
+'--===========================================================================
+'--===========================================================================
+Dim m_bCloseForm
+
+Dim g_szTxt
+Dim g_szData
+
+Dim g_exInputString 
+Dim g_szMaxLen
+'============================================================================
+'초기화 함수
+'============================================================================
+Function Func_Clear_Txt()
+	Edit0.caption = g_szTxt
+End Function
+
+'============================================================================
+Sub Form_OnFormInit()
+	Edit0.imagefilepth = "login_input.9"
+
+	szOpenData = Form.GetOpenLinkData()					'키패드타이틀☆입력문자열☆입력창힌트문구☆최소입력길이☆최대입력길이
+'	szOpenData = "계좌별명☆김메리☆최대 10글자 입력 가능☆1☆10"	'테스트용 하드코딩
+	g_szData = Split(szOpenData, "☆")
+	
+	if UBOUND(g_szData)< 1 then
+		Exit Sub
+	end if
+	
+	g_szTxt = ""
+	
+	lblTitle.caption 	= g_szData(0)
+	Edit0.caption		= g_szData(1)
+	g_szTxt			= g_szData(1)
+	Edit0.hintcaption	= g_szData(2)
+	Edit0.minlength	= g_szData(3)
+	Edit0.maxlength	= g_szData(4)
+	
+	g_szMaxLen		= g_szData(4)
+	g_exInputString 	= g_szData(1)
+	
+	m_bCloseForm 		= true	'입력 완료 시, 팝업종료 여부 
+	
+	'0.5초 후 보안키패드 띄움
+	Form.SetTimerEvent2(1, 1, 0.5)             
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID, 0, 0.5)
+
+	if Cint(sTimerID) = 1 then
+		Edit0.setShowKeypad(True)
+	else
+		if m_bCloseForm = true then
+			g_szTxt = Edit0.caption
+			if g_szTxt <> "" and g_szTxt <> null then
+				Form.CloseForm()
+			else
+				Func_Clear_Txt()
+				Form.CloseForm()
+			end if
+'			Form.CloseForm()
+		else
+			m_bCloseForm = true
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditComplete()
+'	if m_bCloseForm = true then
+'		g_szTxt = Edit0.caption
+'		Form.ShowAlert("len", LEN(g_szTxt))
+''		Form.CloseForm()
+'	else
+'		m_bCloseForm = true
+'	end if
+	Form.SetTimerEvent2("2", 1, 0.1)
+End Sub
+
+'============================================================================
+Sub Edit0_OnEditChar(CharCode)
+	'LES START => 20220929
+	'자리수제한 체크(iOS에서 자음만 들어올 경우 자리수 체크안됨)
+	'sDeviceOS = Form.GetSharedData("&OS_TYPE", False) 	'1.안드로이드 2.iOS
+	'if sDeviceOS == "2" then
+		nTextLen = Edit0.getLenByte(Edit0.caption)
+		
+		if Cint(nTextLen) > Cint(g_szMaxLen) then
+			Edit0.caption = g_exInputString
+			Edit0.SetFocus()
+		else
+			g_exInputString = CharCode
+		end if
+		
+	'end if
+	'LES END => 20220929
+	
+	
+	m_bCloseForm = true
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	'if g_szTxt <> "" and g_szTxt <> null then
+		Form.SendReturnToParent("POPUP_TEXT" , g_szTxt)
+	'end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	Edit0.setShowKeypad(True)
+End Sub
+'============================================================================
+Sub Edit0_OnEditCancel()
+	'안드로이드에서 텍스트 입력후 백버튼 탭시 부모폼으로 넘기는 현상 수정
+	Func_Clear_Txt()
+End Sub 
+
+'============================================================================
+Sub BtnClose_OnClick()					
+	m_bCloseForm = true
+	Form.SetTimerEvent2("2", 1, 0.1)
+End Sub
+
+'============================================================================
+Sub imgClear_OnClick()
+	m_bCloseForm = false
+	Edit0.caption = ""
+	Form.SetTimerEvent2(1, 1, 0.5)
+End Sub
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgClear.SetMaintainingRatio("1")
+	Edit0.replaceWonSign(true)
+End Sub
+
+'============================================================================
+Sub lblClear_OnClick()
+	m_bCloseForm = false
+	Edit0.caption = ""
+	Form.SetTimerEvent2(1, 1, 0.5)
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

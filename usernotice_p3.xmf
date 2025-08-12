@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="사용자알림_Push알리미" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" ly_vert="0,0,340,490,1" />
+	<CONTROL_INFO>
+		<GRID name="Grid0" colcount="4" ly_vert="0,0,340,490,1" ver="1" >
+			<CONTROL_INFO>
+				<LABEL name="bd_cell0" fontsize="-3" halign="1" valign="2" autofontsize="1" />
+				<LABEL name="th_cell0" fontsize="-2" caption="구분" halign="1" valign="2" />
+				<LABEL name="bd_cell1" fontsize="-3" multiline="1" />
+				<LABEL name="th_cell1" fontsize="-2" caption="내용" halign="1" />
+				<LABEL name="th_cell2" fontsize="-2" caption="시간" halign="1" valign="0" />
+				<LABEL name="bd_cell2" fontsize="-3" halign="1" valign="0" />
+				<LABEL name="bd_cell3" halign="2" />
+				<LABEL name="th_cell3" halign="1" />
+				<LABEL name="th_cell4" halign="1" />
+				<LABEL name="bd_cell4" halign="2" />
+				<LABEL name="bd_cell5" halign="2" />
+				<LABEL name="th_cell5" halign="1" />
+				<LABEL name="th_cell6" halign="1" />
+			</CONTROL_INFO>
+			<DEFAULTINFO useblockclr="0" initrowcount="0" inlinecolor="025:255255255" />
+			<COLINFO ly_vert_width="90,250,100,70" ly_vert_visible="0,0,2,2" >
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="90" ly_vert_visible="0" />
+					<TOPHEADER rowcount="2" >
+						<ROWINFO ly_vert_height="20,20" />
+						<CELLINFO>
+							<CELL name="th_cell0" cell_ly="0,0,0,0" line="1,0" />
+							<CELL name="th_cell2" cell_ly="0,1,0,1" line="1,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell0" cell_ly="0,0,0,0" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell2" cell_ly="0,1,0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="250" ly_vert_visible="0" />
+					<TOPHEADER rowcount="2" >
+						<ROWINFO ly_vert_height="20,20" />
+						<CELLINFO>
+							<CELL name="th_cell1" cell_ly="0,0,0,1" line="0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell1" cell_ly="0,0,0,1" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="100" ly_vert_visible="2" />
+					<TOPHEADER rowcount="2" >
+						<ROWINFO ly_vert_height="20,20" />
+						<CELLINFO>
+							<CELL name="th_cell3" cell_ly="0,0,0,0" line="0,0" />
+							<CELL name="th_cell4" cell_ly="0,1,0,1" line="0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell3" cell_ly="0,0,0,0" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+							<CELL name="bd_cell4" cell_ly="0,1,0,1" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+				<COLUMN colcount="1" >
+					<SUBCOLINFO ly_vert_width="70" ly_vert_visible="2" />
+					<TOPHEADER rowcount="2" >
+						<ROWINFO ly_vert_height="20,20" />
+						<CELLINFO>
+							<CELL name="th_cell5" cell_ly="0,0,0,0" line="0,0" />
+							<CELL name="th_cell6" cell_ly="0,1,0,1" line="0,0" />
+						</CELLINFO>
+					</TOPHEADER>
+					<BODY rowcount="2" >
+						<ROWINFO ly_vert_height="25,25" />
+						<CELLINFO>
+							<CELL name="bd_cell5" cell_ly="0,0,0,1" line="1,0" >
+								<STATECOMP_INFO desttype="1" />
+							</CELL>
+						</CELLINFO>
+					</BODY>
+				</COLUMN>
+			</COLINFO>
+			<UPDATETR_INFO/>
+			<UPDATEBC_INFO keycellid="bd_cell0" rangecellid="bd_cell0" hlcolorcellid="bd_cell0" />
+		</GRID>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="3328" _ulen="3110" >
+--===========================================================================
+--===========================================================================
+
+'============================================================================
+Sub Form_OnFormInit()
+	SetGridData()
+End Sub
+
+Sub SetGridData()
+	
+	Grid0.rowcount = "0"
+
+	szPushData = Form.GetPushAlimiMessage("ALL")
+	if szPushData	= NULL	or	 Len(szPushData) == 0 then
+		Exit Sub
+	end if
+	
+	listPush =  Split(szPushData, "`SEPARATOR`")
+	
+	nCnt = #listPush
+
+	for i = 0 to nCnt-1 
+		sPush = listPush[i]
+
+		if Trim(sPush) == "" then
+			Exit Sub
+		end if	
+
+		pushItem = Split(sPush, "^SEPARATOR^")
+				
+		szMessageSeq = ""
+		szMessageType = ""
+		szItemCode = ""
+		szMessageTime = ""
+		szMessageData = ""		
+		
+		szMessageSeq = pushItem[0]
+		if #pushItem >= 1 then
+			szMessageType = pushItem[1]
+			if #pushItem >= 2 then
+				szItemCode = pushItem[2]
+				if #pushItem >= 3 then
+					szMessageTime = pushItem[3]
+					if #pushItem >= 4 then
+						szMessageData = pushItem[4]
+					end if
+				end if
+			end if
+		end if
+		
+		'20170210 NOHES START : 전일자 데이터는 날짜로 표기
+		szMessageDate = ""
+		szToday = ""
+		szMessageDate = Left(szMessageSeq, 8)
+		szToday =  Form.GetSharedData("&HOST_DATE", 0)
+		'20170210 NOHES END
+		
+		Grid0.AddRow()
+		
+		Grid0.SetCellData("bd_cell3", i, szMessageSeq)
+		Grid0.SetCellData("bd_cell4", i, szItemCode)
+		Grid0.SetCellData("bd_cell5", i, szMessageType)
+		if szMessageType == "Ea" then
+			Grid0.SetCellData("bd_cell0", i, "체결")
+		end if
+		
+		if Len(szMessageTime) >= 6 then
+			szHour = Left(szMessageTime, 2)
+			szMinute = Mid(szMessageTime, 3, 2)
+			szSecond = Right(szMessageTime, 2)
+			Grid0.SetCellData("bd_cell2", i, szHour&":"&szMinute&":"&szSecond)
+		end if
+		'20170210 NOHES START : 전일자 데이터는 날짜로 표기
+		if CInt(szToday) > CInt(szMessageDate) then
+			szYear = Left(szMessageDate, 4)
+			szMonth = Mid(szMessageDate, 5, 2)
+			szDate = Right(szMessageDate, 2)
+			Grid0.SetCellData("bd_cell2", i, szYear &"/"& szMonth &"/"& szDate)
+		end if
+		'20170210 NOHES END
+		
+		Grid0.SetCellData("bd_cell1", i, szMessageData)
+	next
+	
+	Grid0.toprow = "0"
+	
+End Sub
+'============================================================================
+Sub Grid0_OnClickUp(lRow, szCellID)
+	if lRow >= 0 then
+		szItemCode = Grid0.GetCellData("bd_cell4", lRow)
+		szMk = Form.GetItemCodeInfo(szItemCode, "market")
+		
+		'20210429 SWJ START : 모바일OTP 푸시알림은 그리드 클릭 필요 없음
+		if szItemCode == null or szItemCode == "" then
+			exit sub
+		end if
+		'20210429 SWJ END
+		
+		Select Case szMk
+			Case "J", "Q", "T", "W"		' 코스피/코스닥, ETF, 신주인수권/신주인수권증서, 수익증권, K-OTC(프리보드), ELW
+				Form.OpenScreen("12040" , "")
+			Case "F", "MF", "O", "MO"		' KOSPI200지수 선물/선물 스프레드(옵션), 코스닥150 선물, 미니코스피 선물/선물 스프레드(옵션)
+				Form.OpenScreen("31080" , "")
+			Case "B"						' 소액채권, 장내채권
+				Form.OpenScreen("54030" , "")
+			Case Else
+				Form.OpenScreen("12040" , "")
+		End Select		
+		
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Form_OnLinkData(sKey, sValue)
+	if sKey == "RECEIVE_PUSH" then
+		SetGridData()
+	end if	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

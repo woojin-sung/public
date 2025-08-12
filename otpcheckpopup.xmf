@@ -1,0 +1,1148 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="OTP인증 키패드" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="alpha128.png" ly_vert="400,0,375,647,1" />
+		<BUTTON name="Button2" btnimage="alpha" ly_vert="0,311,375,335,1" />
+		<ACCOUNT name="acnt" visible="0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,200" etcfunctions="" accpwdctl="Edit0" delegate="1" ly_vert="10,192,271,39,0" />
+		<EDIT name="EditInput0" visible="0" halign="1" password="1" imetype="1" maxlength="6" ly_vert="159,35,210,39,0" />
+		<EDIT name="EditInput1" visible="0" password="2" imetype="1" maxlength="6" minlength="6" imagefilepth="input_03" ly_vert="11,138,307,45,0" />
+		<BUTTON name="Button3" btnimage="alpha" ly_vert="0,0,376,320,1" />
+		<LABEL name="LabelSRNO" ly_vert="501,64,100,32,1" />
+		<LABEL name="LabelDATE" ly_vert="612,62,100,32,1" />
+		<IMAGE name="Image1" imgpath="popup_bg.9" ly_vert="0,260,375,387,1" />
+		<BUTTON name="BtnApp" caption="    스마트OTP 공동앱 열기" fgcolor="155:051051051" fontsize="-2" fontstyle="10" ly_vert="85,316,196,28,1" />
+		<BUTTON name="BtnRetryd" visible="0" caption="데이터통신 장애 등 비상시 스마트 OTP 수동 입력" fgcolor="146:124124124" fontsize="-3" ly_vert="402,71,290,30,0" />
+		<IMAGE name="ImageHelp01" resize="0011" autosize="1" imgpath="icon_otpapp.png" ly_vert="100,320,20,18,1" />
+		<CONTAINER name="cont0" scroll_pos="0,0" ly_vert="0,352,375,42,1" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<IMAGE name="PwdFail0" autosize="1" imgpath="pwd_gray" ly_vert="87,10,20,17,1" />
+				<IMAGE name="PwdFail1" autosize="1" imgpath="pwd_gray" ly_vert="123,10,20,17,1" />
+				<IMAGE name="PwdFail2" autosize="1" imgpath="pwd_gray" ly_vert="156,10,20,17,1" />
+				<IMAGE name="PwdFail3" autosize="1" imgpath="pwd_gray" ly_vert="189,10,20,17,1" />
+				<IMAGE name="PwdFail4" autosize="1" imgpath="pwd_gray" ly_vert="221,10,20,17,1" />
+				<IMAGE name="PwdFail5" autosize="1" imgpath="pwd_gray" ly_vert="254,10,20,17,1" />
+				<BUTTON name="Button1" btnimage="alpha" ly_vert="88,10,186,20,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<CONTAINER name="Container1" visible="0" scroll_pos="0,0" ly_vert="0,421,375,50,0" scroll_ly_vert="0,0" >
+			<CONTROL_INFO>
+				<EDIT name="EditPin" enable="0" fontsize="-2" halign="1" imetype="0" ly_vert="183,3,147,35,1" />
+				<BUTTON name="ButtonRequest" caption="PIN번호 재조회" fontsize="-2" btnimage="btn_01.9" ly_vert="35,3,133,35,1" />
+			</CONTROL_INFO>
+		</CONTAINER>
+		<LABEL name="Label0" fontsize="3" fontstyle="01" caption="OTP 입력" fonttype="3" ly_vert="9,268,145,47,1" />
+		<CHKBUTTON name="BtnRetry" fontsize="-2" chkcaption="통신장애 등 비상 시, 스마트OTP 수동 입력" unchkcaption="통신장애 등 비상 시, 스마트OTP 수동 입력" ly_vert="50,392,320,30,1" />
+		<BUTTON name="ButtonOK" enable="0" visible="0" ly_vert="10,222,40,26,0" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="32133" _ulen="29597" >
+'EditInput0->일반/스마트OTP 20221114 추가
+'EditInput1->모바일OTP
+'****************************************************************************
+'               G  L  O  B  A  L       V  A  R  I  A  B  L  E
+'****************************************************************************
+
+Dim m_sEditIndex
+Dim m_bShowSwitch
+Dim m_bErrorCheck
+Dim m_bCloseForm
+Dim m_bOpenPopup
+
+Dim g_sRetData
+Dim g_sUserID, g_nOTPCnt, g_sSmartYN '사용자ID, OTP인증처리횟수, SmartOTP여부값
+Dim g_nOTPPreCnt		'OTP 사전정보전송 cnt
+Dim	g_PlainRm 'v003
+
+Dim szText
+Dim g_sAthnType
+Dim g_sTrData
+Dim g_sTranCrpt
+Dim g_sSmrtOtpYn
+Dim g_szChk
+
+Dim g_szPwd
+Dim g_szPwdLen
+
+Dim g_szSuccFail
+
+Dim g_RcnoPip, g_Csno, g_sUserNM, g_DeviceID, g_sTRNo, g_sTrAuthMsg
+
+Dim g_MOtpSrnoSvr
+
+'============================================================================
+'초기화 함수
+'============================================================================
+Function Func_Clear_Pwd()
+	g_szPwd = ""
+	g_szPwdLen = ""
+	EditInput0.clear = true
+	EditInput1.clear = true
+	Container1.EditPin.clear = true
+	m_sEditIndex = 0
+
+	cont0.PwdFail0.imgpath = "pwd_gray"
+	cont0.PwdFail1.imgpath = "pwd_gray"
+	cont0.PwdFail2.imgpath = "pwd_gray"
+	cont0.PwdFail3.imgpath = "pwd_gray"
+	cont0.PwdFail4.imgpath = "pwd_gray"
+	cont0.PwdFail5.imgpath = "pwd_gray"
+
+End Function
+
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData
+	
+	g_RcnoPip	= Form.GetSharedData( "&JUMIN_NUM"	, false )    	'주민번호 암호화 값
+	g_sUserNM	= Form.GetSharedData( "&USER_NAME"	, false )	'고객명
+	g_Csno		= Form.GetSharedData( "&CUST_NUM"	, false )	'고객번호
+	
+	g_DeviceID	= Form.GetDeviceID() 
+	
+	DATAMANAGER.RequestTranData("obcsb_oimf_172r")	'서버조회
+	
+	'v0003 메모리평문적용여부(0:미적용 / 1:적용)
+	g_PlainRm = Form.GetSharedData("&PLAIN_RM", false)
+	if g_PlainRm == "1" then
+	     '화면 마스킹표시/평문데이터로 설정(컨트롤속성-일반비밀번호사용 적용필수)
+		EditInput0.SetEncExcept()	'일반/스마트OTP만 - 20221114
+	end if 
+	
+	EditInput0.certname = "OTP번호 입력"
+	Container1.EditPin.certname = "PIN번호 입력"
+	
+	g_sSmartYN = "N"
+	g_nOTPCnt = 0
+	g_nOTPPreCnt = 0
+	g_sRetData = "cancel"
+	g_sAthnType = "2"		'거래연동인증
+	g_szChk = "1"
+	
+	g_szSuccFail = "Fail"
+	
+	g_sTrData = Form.GetSharedData("OTP_TR_MSG_1", false )
+	g_sTrAuthMsg = Form.GetSharedData("OTP_TR_AUTH_MSG", true)
+
+	LabelSRNO.caption = ""
+	LabelDATE.caption = ""
+	
+'	cont0.enable = TRUE
+'	cont0.EditInput1.enable = TRUE
+'	Container1.visible = FALSE
+	
+
+	g_sUserID = Form.GetSharedData("CERT_ID" , false)
+	if g_sUserID == null or g_sUserID == "" then
+		g_sUserID = Form.GetSharedData("&USER_ID" , false)
+	end if
+	
+	if g_sUserID ~= null and g_sUserID ~= "" then
+		DATAMANAGER.RequestTranData( "obcsb_oimf_520r" ) '보안매체상태조회
+	end if
+	'-------------------------------------------------------
+
+	m_sEditIndex = 0 
+	
+	m_bErrorCheck 	= false	'
+	m_bCloseForm 		= true	'비밀번호 검증 완료 시, 팝업종료 여부 
+	m_bOpenPopup 		= false	'자동저장기능 안내팝업 여부
+	
+'	'0.5초 후 보안키패드 띄움 20221114
+'	Form.SetTimerEvent2(1, 1, 0.5)             
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+	Form.SetTimerEvent2(sTimerID, 0, 0.5)
+
+	if Cint(sTimerID) = 1 then	
+		EditInput1.setShowKeypad(True)
+	elseif Cint(sTimerID) = 2 then	
+		EditInput0.setShowKeypad(True)
+	end if
+End Sub
+
+'============================================================================
+Sub EditInput1_OnEditComplete()
+	if m_bCloseForm = true then
+		g_szPwd = EditInput1.caption
+		
+		if g_sSmrtOtpYn = "M" then
+			DATAMANAGER.RequestTranData( "obcsb_oimf_174a" )
+		else
+			g_nOTPCnt = 0
+			DATAMANAGER.RequestTranData( "obcsb_oimf_522a" ) 'OTP정보확인
+		end if
+	else
+		m_bCloseForm = true
+	end if
+
+End Sub
+
+'============================================================================
+Sub EditInput1_OnEditError()
+	'비밀번호 검증 오류 발생 시, 자동저장기능 안내팝업 뜬경우 후처리 비활성화
+	if m_bOpenPopup = false then
+		Func_Clear_Pwd()
+		
+		m_bErrorCheck = true
+		EditInput1.setShowKeypad(True)
+		
+		cont0.PwdFail0.imgpath 	= "pwd_gray"
+		cont0.PwdFail1.imgpath 	= "pwd_gray"
+		cont0.PwdFail2.imgpath 	= "pwd_gray"
+		cont0.PwdFail3.imgpath 	= "pwd_gray"
+		cont0.PwdFail4.imgpath 	= "pwd_gray"
+		cont0.PwdFail5.imgpath 	= "pwd_gray"
+
+	end if
+End Sub
+
+'============================================================================
+Sub EditInput1_OnEditChar(CharCode)
+	m_bCloseForm = true
+	
+	if m_bErrorCheck then
+		m_bErrorCheck = false
+		Func_Clear_Pwd()
+	end if
+	
+	if CharCode == "0" then
+		m_sEditIndex = m_sEditIndex + 1 
+		
+		if CInt(m_sEditIndex) = 1 then
+			cont0.PwdFail0.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 2 then
+			cont0.PwdFail1.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 3 then
+			cont0.PwdFail2.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 4 then
+			cont0.PwdFail3.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 5 then
+			cont0.PwdFail4.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 6 then
+			cont0.PwdFail5.imgpath = "pwd_blue"
+		end if
+		
+	elseif CharCode == "1" then
+		if CInt(m_sEditIndex) > 0 then 
+			m_sEditIndex = m_sEditIndex - 1
+		end if
+		
+		if CInt(m_sEditIndex) = 0 then
+			cont0.PwdFail0.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 1 then
+			cont0.PwdFail1.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 2 then
+			cont0.PwdFail2.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 3 then
+			cont0.PwdFail3.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 4 then
+			cont0.PwdFail4.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 5 then
+			cont0.PwdFail5.imgpath = "pwd_gray"
+		end if
+
+	elseif CharCode == "2" then
+		If g_DeviceOS == "2" then
+			EditInput1.setShowKeypad(True)
+		End if
+	end if
+	
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	Func_Clear_Pwd()
+	if g_sSmrtOtpYn == "M" then		'20221114
+		EditInput1.setShowKeypad(True)
+	else
+		EditInput0.setShowKeypad(True)
+	end if
+	m_bCloseForm = false
+End Sub
+
+'============================================================================
+Sub Button2_OnClick()
+	Func_Clear_Pwd()
+	if g_sSmrtOtpYn == "M" then		'20221114
+		EditInput1.setShowKeypad(True)
+	else
+		EditInput0.setShowKeypad(True)
+	end if
+	m_bCloseForm = false
+End Sub
+
+'============================================================================
+Sub Button3_OnClick()
+	m_bCloseForm = false 
+	g_szPwd = ""
+	g_szPwdLen = ""
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Label0_OnClick()
+	Func_Clear_Pwd()
+	if g_sSmrtOtpYn == "M" then		'20221114
+		EditInput1.setShowKeypad(True)
+	else
+		EditInput0.setShowKeypad(True)
+	end if
+	m_bCloseForm = false
+End Sub
+
+'============================================================================
+Sub Image1_OnClick()
+	Func_Clear_Pwd()
+	if g_sSmrtOtpYn == "M" then		'20221114
+		EditInput1.setShowKeypad(True)
+	else
+		EditInput0.setShowKeypad(True)
+	end if
+	m_bCloseForm = false
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+'	if CInt(BtnRetry.checkstate) = 1 then
+'		g_szPwd = Contatiner1.EditPin.caption
+'	else
+'		g_szPwd = EditInput1.caption
+'		g_szPwdLen = EditInput1.pwdlen
+'	end if
+'	Form.ShowAlert("g_szPwd", g_szPwd)' .."★"..g_szPwdLen)
+'	if g_szPwd = "" or g_szPwd = null then
+'		Form.SendReturnToParent("OTP" , "")
+'	else
+'		Form.SendReturnToParent("OTP" , g_szPwd)' .."★"..g_szPwdLen)
+'	end if
+	
+	Form.SendReturnToParent("OTP" , g_szSuccFail)
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	m_bOpenPopup = false
+	if g_sSmrtOtpYn == "M" then		'20221114
+		EditInput1.setShowKeypad(True)
+	else
+		EditInput0.setShowKeypad(True)
+	end if
+End Sub
+
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	'20220622 아이티젠 START:
+	'20220622 아이티젠 END:
+	cont0.PwdFail0.setMaintainingRatio("1")
+	cont0.PwdFail1.setMaintainingRatio("1")
+	cont0.PwdFail2.setMaintainingRatio("1")
+	cont0.PwdFail3.setMaintainingRatio("1")
+	cont0.PwdFail4.setMaintainingRatio("1")
+	cont0.PwdFail5.setMaintainingRatio("1")
+	ImageHelp01.setMaintainingRatio("1")
+End Sub
+
+Sub EditInput1_OnEditCancel()
+	'20220622 아이티젠 START: 안드로이드에서 비번입력후 백버튼 탭시 부모폼으로 비번넘기는 현상 수정
+	'20220622 아이티젠 END:
+	Func_Clear_Pwd()
+End Sub 
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_oimf_520r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "INPUT_CLS" , 0 , "1" ) '전자금융ID
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+	elseif szTranID == "obcsb_oimf_522a" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "INPUT_CLS" , 0 , "2" ) '전자금융ID
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		'v0003 값은 평문으로 전송(인증번호는 암호화없이 전문전송)
+		'MTS메모리평문적용(g_plain_rm == "1")시에는 OnFormInit()에서 평문데이터로 설정하므로 caption으로 전송가능
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "OTP_RSPN_VAL" , 0 , EditInput0.caption )
+		if g_nOTPCnt == 0 then
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "TRNM_RSLT_YN" , 0 , "N" )
+		else
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "TRNM_RSLT_YN" , 0 , "Y" )
+		end if
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "OTP_TLMS_SRNO" , 0 , LabelSRNO.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "STND_DATE" , 0 , LabelDATE.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "ATHN_BSWR_CLCD" , 0 , g_sAthnType )	'거래연동인증
+		
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_522a", "InBlock1", "TRAN_CRPT" , 0 , g_sTranCrpt )	'거래연동인증
+		
+	elseif szTranID == "obcsb_oimf_523a" then
+		if g_nOTPPreCnt == 0 then
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_523a", "InBlock1", "TRNM_RSLT_YN" , 0 , "N" )
+		else
+			DATAMANAGER.SetDataValue( 0, "obcsb_oimf_523a", "InBlock1", "TRNM_RSLT_YN" , 0 , "Y" )
+		end if
+
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_523a", "InBlock1", "INPUT_CLS" , 0 , "2" )'전자금융ID
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_523a", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_523a", "InBlock1", "OTP_TLMS_SRNO" , 0 , LabelSRNO.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_523a", "InBlock1", "STND_DATE" , 0 , LabelDATE.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_523a", "InBlock1", "ATHN_BSWR_CLCD" , 0 , g_sAthnType )	'거래연동인증
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_523a", "InBlock1", "TR_DTL_CNTT" , 0 , g_sTrAuthMsg )	'거래연동인증
+	
+	ElseIf szTranID == "obcsb_oimf_174a" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MOTP_PROS_CLCD"  	, 0 , "TRTI")
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ACNO"                 , 0 , "")
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP"             , 0 , g_RcnoPip)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ELFN_ID"              , 0 , g_sUserID)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CSNO"                 , 0 , g_Csno)
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MSBO_VRSN"            , 0 , g_mSBValue)
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MOTP_SRNO"            , 0 , RIGHT(g_mOTPsrno, 12))
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CUST_TERM_ID"         , 0 , g_DeviceID)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MOTP_ATHN_TYPE_CLCD"  , 0 , "10")
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MOTP_ATHN_DATA_CNTT"  , 0 , EditInput1.caption )		'20221114
+		
+	elseif szTranID == "obcsb_oimf_176a" then
+		
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MOTP_PROS_CLCD" , 0 , "NBVR")
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CSNO"           , 0 ,  g_Csno)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "ELFN_ID"        , 0 ,  g_sUserID)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MSBO_VRSN"      , 0 ,  g_mSBValue)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MOTP_SRNO"      , 0 ,  RIGHT(g_mOTPsrno, 12))
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "CUST_TERM_ID"   , 0 ,  g_DeviceID)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MOTP_TR_NO"     , 0 ,  g_sTRNo)
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "MOTP_PWD_PIP"   , 0 ,  g_mOTPData)
+	elseif szTranID == "obcsb_oimf_172r" Then
+		DATAMANAGER.SetDataValue( 0, szTranID, "InBlock1", "RCNO_PIP", 0, g_RcnoPip )
+
+	end if	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_oimf_520r" then
+		Dim sRSLT_CLS, sSCRC_STAT_CODE
+		
+		'결과구분 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "RSLT_CLS" , 0 )
+		'상태코드 0:정상, 1:매체사고, 2:비번오류횟수초과, 6:사용등록안됨
+		sSCRC_STAT_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "SCRC_STAT_CODE" , 0 )
+		g_sSmrtOtpYn = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "UI_SMRT_OTP_YN" , 0 )
+		
+		if g_sSmrtOtpYn == "M" then		'20221114
+			Form.SetTimerEvent2(1, 1, 0.5)
+		else
+			Form.SetTimerEvent2(2, 1, 0.5)
+		end if
+		
+		SetSmartUI(g_sSmrtOtpYn)		' obcsb_oimf_523a 호출함.
+		
+		if sRSLT_CLS == "3" And g_sSmrtOtpYn <> "M" then 'OTP
+			if sSCRC_STAT_CODE == "0" then '정상
+				DATAMANAGER.RequestTranData( "obcsb_oimf_523a" )
+'				ButtonOK.enable = true
+				'DATAMANAGER.RequestTranData( "obcsb_oimf_523a" ) '일반/스마트OTP여부조회 --> 위로 이동
+			elseif sSCRC_STAT_CODE == "1" then '매체사고	
+				Form.MsgBox( "알림", "매체사고 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "2" then '비번오류횟수초과	
+				Form.MsgBox( "알림", "비밀번호 오류초과 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "6" then '사용등록안됨	
+				Form.MsgBox( "알림", "사용등록이 안되었습니다.", "", 6 )
+			else '그외
+				Form.MsgBox( "알림", "미지정 상태입니다.", "", 6 )
+			end if
+		end if
+		
+		if sRSLT_CLS == "3" And g_sSmrtOtpYn = "M" then 'MOTP
+			if sSCRC_STAT_CODE == "0" then '정상
+				Form.requestMOTP("MOTP_GET_VERSION" , "" , "otpcheckpopup")     'mSB 버전값 획득위한 호출
+				'2023-07-21 jsi start : obcsb_oimf_172r에서 세팅하는 변수라 172r receiveComplete 자리로 이동
+				'Form.requestMOTP("MOTP_GETINFO"     , "" , "otpcheckpopup")     '등록된 OTP alias 존재하는지 확인
+				'2023-07-21 jsi end
+			elseif sSCRC_STAT_CODE == "1" then '매체사고	
+				Form.MsgBox( "알림", "매체사고 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "2" then '비번오류횟수초과	
+				Form.MsgBox( "알림", "비밀번호 오류초과 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "6" then '사용등록안됨	
+				Form.MsgBox( "알림", "사용등록이 안되었습니다.", "", 6 )
+			else '그외
+				Form.MsgBox( "알림", "미지정 상태입니다.", "", 6 )
+			end if
+		end if
+		
+	elseif szTranID == "obcsb_oimf_523a" then
+		Dim sUI_SMRT_OTP_YN, sPROS_YN, sOTP_TLMS_SRNO, sSTND_DATE, sPIN_NO
+		
+		'N:스마트OTP아님 Y:스마트OTP
+		sUI_SMRT_OTP_YN = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_523a", "OutBlock1", "UI_SMRT_OTP_YN" , 0 )
+		'N:전문미수신/전문수신완료
+		sPROS_YN = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_523a", "OutBlock1", "PROS_YN" , 0 ) 
+		sOTP_TLMS_SRNO = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_523a", "OutBlock1", "OTP_TLMS_SRNO" , 0 ) 
+		sSTND_DATE = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_523a", "OutBlock1", "STND_DATE" , 0 ) 
+		sPIN_NO = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_523a", "OutBlock1", "PIN_NO" , 0 ) 
+		
+		if g_nOTPPreCnt == 0 then
+			g_sTranCrpt = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_523a", "OutBlock1", "TRAN_CRPT" , 0 ) 
+		end if
+		
+		if Len(Trim(sOTP_TLMS_SRNO)) > 7 then '전문일련번호
+			LabelSRNO.caption = sOTP_TLMS_SRNO
+		end if
+	
+		if Len(Trim(sSTND_DATE)) == 8 then '기준일자
+			LabelDATE.caption = sSTND_DATE
+		end if
+		
+		if sUI_SMRT_OTP_YN <> "Y" then
+			exit sub
+		end if 
+		
+		if g_nOTPPreCnt == 0 then
+			g_nOTPPreCnt = g_nOTPPreCnt+1
+			DATAMANAGER.RequestTranData( "obcsb_oimf_523a" ) 'OTP사전정보전송
+			Exit Sub
+		end if
+		
+		Dim sCode 
+		sCode = DATAMANAGER.GetDataMsgCode( szTranID ) 
+		if sCode == "3021" then 'OTP 코드 체크(3021)
+			g_nOTPPreCnt = g_nOTPPreCnt+1
+			if g_nOTPPreCnt < 9 then
+				DATAMANAGER.RequestTranData( "obcsb_oimf_523a" ) 'OTP정보확인
+			else
+				g_nOTPPreCnt = 0
+				Form.MsgBox( "알림", "OTP 전문 수신오류입니다.", "", 6 )
+				Exit Sub
+			end if
+		elseif sCode == "0000" then
+			Container1.EditPin.caption = sPIN_NO
+		else
+			sMsg = DATAMANAGER.GetDataMsgText( szTranID )
+			sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+			Form.MsgBox( "알림", sMsg.." "..sSubMsg, "", 6 )
+		end if
+
+	elseif szTranID == "obcsb_oimf_522a" then
+		Dim sOTP_TLMS_SRNO, sSTND_DATE, sOTP_RSPN_CODE, sRSLT_CLS, sOTP_PWD_MSTK_TMNU
+		
+		sOTP_TLMS_SRNO = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_522a", "OutBlock1", "OTP_TLMS_SRNO" , 0 )
+		sSTND_DATE = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_522a", "OutBlock1", "STND_DATE" , 0 )
+		'0000:정상 나머지:오류
+		sOTP_RSPN_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_522a", "OutBlock1", "OTP_RSPN_CODE" , 0 )
+		'결과구분 0:정상 그외에러
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_522a", "OutBlock1", "RSLT_CLS" , 0 )
+		'OTP오류횟수
+		sOTP_PWD_MSTK_TMNU = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_522a", "OutBlock1", "OTP_PWD_MSTK_TMNU" , 0 )
+				
+		if Len(Trim(sOTP_TLMS_SRNO)) > 7 then '전문일련번호
+			LabelSRNO.caption = sOTP_TLMS_SRNO
+		end if
+	
+		if Len(Trim(sSTND_DATE)) == 8 then '기준일자
+			LabelDATE.caption = sSTND_DATE
+		end if
+	
+		if g_nOTPCnt == 0 then
+			g_nOTPCnt = g_nOTPCnt+1
+			DATAMANAGER.RequestTranData( "obcsb_oimf_522a" ) 'OTP정보확인
+			Exit Sub
+		end if
+		
+		Dim sCode 
+		sCode = DATAMANAGER.GetDataMsgCode( szTranID ) 
+		if sCode == "3021" then 'OTP 코드 체크(3021)
+			g_nOTPCnt = g_nOTPCnt+1
+			if g_nOTPCnt < 9 then
+				DATAMANAGER.RequestTranData( "obcsb_oimf_522a" ) 'OTP정보확인
+			else
+				g_nOTPCnt = 0
+				Form.MsgBox( "알림", "OTP 전문 수신오류입니다.", "", 6 )
+				Exit Sub
+			end if
+		end if
+	
+		if sOTP_RSPN_CODE == "0000" then 'OTP응답코드
+			if sRSLT_CLS == "0" then '정상
+				if CInt(sOTP_PWD_MSTK_TMNU) > 5 then '에러	
+					Form.MsgBox( "알림", "OTP 입력 오류 횟수 초과입니다.", "", 6 )
+				else
+					g_sRetData = "ok"  'otp성공후 공인인증
+					'Form.ShowAlert(sOTP_RSPN_CODE, g_sRetData)
+					g_szSuccFail = "Success"
+					Form.CloseForm()
+				end if
+			else
+				Dim sMsg, sSubMsg 
+				sMsg = DATAMANAGER.GetDataMsgText( szTranID )
+				sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+				Form.MsgBox( "알림", sMsg.." "..sSubMsg, "", 6 )
+			end if
+		'20160601 최일규 추가 : OTP unsync 재조회시 SKIP
+		elseif sOTP_RSPN_CODE == "4000" then
+		     Exit Sub
+		'16-03-11 YCJ 추가
+		else
+			sMsg = DATAMANAGER.GetDataMsgText( szTranID )
+			sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+			Form.MsgBox( "알림", sMsg.." "..sSubMsg, "", 6 )
+
+		end if
+	elseif szTranID == "obcsb_oimf_174a" then
+		
+		sTRcntt  = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_174a", "OutBlock1", "MOTP_TR_CNTT" , 0 )
+		sTRNo    = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_174a", "OutBlock1", "MOTP_TR_NO"   , 0 )
+		sHourVal = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_174a", "OutBlock1", "MOTP_HOUR_VAL", 0 )
+		sErrCode = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_174a", "OutBlock1", "MOTP_ERR_CODE", 0 )
+		sErrCntt = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_174a", "OutBlock1", "MOTP_ERR_CNTT", 0 )
+		
+		g_sTRNo = sTRNo
+		if sErrCode == "000000" then
+			szData = g_mOTPsrno.."★".."02010".."★"..sHourVal.."★"..sTRcntt '기관코드(siteCode) 02010으로 고정
+			Form.requestMOTP("MOTP_REQ_OTP_ENC", szData , "otpcheckpopup")
+		else
+			Form.MsgBox("알림", sErrCntt, "", 6)
+		end if
+		
+	elseif szTranID == "obcsb_oimf_176a" then
+		sErrCode = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_176a", "OutBlock1", "MOTP_ERR_CODE", 0 )
+		sErrCntt = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_176a", "OutBlock1", "MOTP_ERR_CNTT", 0 )
+		
+		if sErrCode <> "000000" then
+			Form.MsgBox("알림", sErrCntt, "", 6)
+		else
+			g_szSuccFail = "Success"
+			Form.CloseForm()
+		end if
+	elseif szTranID == "obcsb_oimf_172r" Then
+		g_MOtpSrnoSvr	= DATAMANAGER.GetDataValue( 0, szTranID, "OutBlock1", "MOTP_SRNO"		, 0 )
+		''2023-07-21 jsi start : obcsb_oimf_172r에서 세팅하는 변수라 172r receiveComplete 자리로 이동
+		if g_MOtpSrnoSvr <> "" then '2023-11-15 jsi : motp일련번호 존재시에만 해당 단말의 motp 존재 체크하러 가도록 수정
+			Form.requestMOTP("MOTP_GETINFO"     , "" , "otpcheckpopup")     '등록된 OTP alias 존재하는지 확인
+		end if
+		'2023-07-21 jsi end
+	end if
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranError(szTranID , szErrCode , szErrMsg)
+		Func_Clear_Pwd()
+	if szTranID == "obcsb_oimf_523a" then
+		Dim sSubMsg
+		sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+		
+		if sSubMsg ~= null and Trim(sSubMsg) ~= "" then
+			szErrMsg = szErrMsg.." "..sSubMsg
+		end if
+		
+		Form.MsgBox( "알림", szErrMsg, "", 6 )
+	elseif szTranID == "obcsb_oimf_522a" then
+		if szErrCode ~= "3021" and szErrCode ~= "9221" then
+			Form.MsgBox( "알림", "OTP 입력 에러입니다. 다시 입력하십시오.", "", 6 )
+		elseif szErrCode == "3021" then
+			g_nOTPCnt = g_nOTPCnt+1
+			if g_nOTPCnt < 9 then
+				DATAMANAGER.RequestTranData( "obcsb_oimf_522a" ) 'OTP정보확인
+			else
+				g_nOTPCnt = 0
+				Form.MsgBox( "알림", "OTP 전문 수신오류입니다.", "", 6 )
+			end if 
+		else
+			Form.MsgBox( "알림", szErrMsg, "", 0)
+		end if
+	elseIf szTranID == "obcsb_oimf_174a" then
+		If szErrCode == "2424" Then
+			Form.MsgBox( "인증오류횟수 초과", "모바일 OTP 비밀번호 5회 오류로 OTP 사용이 불가합니다.\n모바일 OTP 비밀번호를 재설정 후 이용해주시기 바랍니다.", "", 0)
+		Else
+			Form.MsgBox( "안내", szErrMsg&"\n["&DATAMANAGER.GetDataMsgSubText(szTranID)&"]", "", 0)
+		End If
+	
+	elseIf szTranID == "obcsb_oimf_176a" then
+		Form.MsgBox( "안내", szErrMsg&"\n["&DATAMANAGER.GetDataMsgSubText(szTranID)&"]", "", 0)
+
+	end if
+End Sub
+ 
+'============================================================================
+'Sub ButtonOK_OnClick()
+'	if EditInput1.caption == null or EditInput1.caption == "" then
+'		Form.MsgBox( "알림", "OTP 카드 비밀번호를 입력해주세요.", "", 6 )
+'	else
+'		if g_sSmartYN == "Y" then 'SmartOTP인경우 PIN번호확인
+'			if (Container1.EditPin.caption == null or Container1.EditPin.caption == "") and g_sAthnType = "9" then
+'				Form.MsgBox( "알림", "PIN번호를 재조회해주세요.", "", 6 )	
+'			else
+'				g_nOTPCnt = 0
+'				DATAMANAGER.RequestTranData( "obcsb_oimf_522a" ) 'OTP정보확인
+'			end if
+'		else
+'			g_nOTPCnt = 0
+'			DATAMANAGER.RequestTranData( "obcsb_oimf_522a" ) 'OTP정보확인
+'		end if
+'	end if
+'End Sub
+
+'============================================================================
+Sub Container1_ButtonRequest_OnClick()
+	g_sSmartYN = "N"      
+	g_nOTPPreCnt = 0
+	LabelSRNO.caption = ""
+	LabelDATE.caption = ""
+
+	DATAMANAGER.RequestTranData( "obcsb_oimf_523a" ) 'PIN번호조회	
+End Sub
+'============================================================================
+Sub SetSmartUI(bState)
+'	Form.ShowAlert("bState", bState)
+	If bState == "Y" Then
+'		contMotp.visible = False
+		BtnRetry.visible = TRUE
+		BtnRetry.enable = TRUE
+		ImageHelp01.enable = TRUE
+		ImageHelp01.visible = TRUE
+		Image1.top = 260
+		Image1.height = 387
+		cont0.top = 352
+		Label0.top = 268
+		BtnApp.visible = TRUE
+		BtnRetry.visible = TRUE
+	else	
+'		contMotp.visible = False
+		BtnRetry.visible = FALSE
+		BtnRetry.enable = FALSE
+		ImageHelp01.enable = FALSE
+		ImageHelp01.visible = FALSE
+		BtnApp.visible = FALSE
+		'Container1.visible = FALSE
+		g_sAthnType = "1"
+		Image1.top = 311
+		Image1.height = 335
+		cont0.top = 388
+		Label0.top = 323	
+		BtnRetry.visible = FALSE
+	END IF   
+	
+	cont0.visible = TRUE
+End Sub
+'============================================================================
+Sub BtnRetry_OnClick()
+	if g_szChk == "1" Then
+		g_sAthnType = "9"
+		Container1.visible = TRUE
+		BtnRetry.caption = "스마트 OTP 수동입력 해제"  'v0001
+		g_szChk = "0"
+	else
+		g_sAthnType = "2"
+'		Container1.visible = FALSE
+		BtnRetry.caption = "데이터통신 장애 등 비상시 스마트 OTP 수동 입력" 'v0001
+		g_szChk = "1"
+	end if
+	Container1_ButtonRequest_OnClick()
+End Sub
+
+
+'============================================================================
+Sub BtnApp_OnClick()
+	'테스트용 인증 스킵 체크 
+	nDev = Form.GetSharedData("&SERVER_MODE", 0 )
+	
+	Dim sTemp
+	sTemp = ""
+	if  Form.GetSharedData("&OS_TYPE", false ) == "2" then'iOS("2")Android("1")
+		sTemp = "IOS는 금융결제원(KFTC)스마트OTP앱을 지원하지 않습니다.\n"
+	else
+		if nDev == "1" then
+			bRtn = Form.runStoreApp("com.kftc.smartotp", "")	
+		else
+			bRtn = Form.runStoreApp("com.kftc.smartotp", "")
+		end if
+	end if
+	
+	'bRtn = "" 함수정의 없음, 'bRtn = "0" 설치 안됨, 'bRtn = "1" 설치 됨
+	if bRtn <> "1" then
+		if Trim(bRtn) == "" Then
+			Form.MsgBox("알림", sTemp&"Google play 스토어에서 금융결제원(KFTC) '스마트OTP 공동앱'을 다운받으신 후 실행해주시기 바랍니다.")
+		elseif bRtn == 0 or bRtn == "0" Then
+			Form.MsgBox("알림", "금융결제원(KFTC) 스마트OTP 공동앱을 설치하시겠습니까?", "KFTC_OTP", "1")
+		end if
+	end if	
+End Sub
+'============================================================================
+Sub cont0_Button1_OnClick()
+	Func_Clear_Pwd()
+	if g_sSmrtOtpYn == "M" then		'20221114
+		EditInput1.setShowKeypad(True)
+	else
+		EditInput0.setShowKeypad(True)
+	end if
+	m_bCloseForm = false
+End Sub
+
+'============================================================================
+Sub BtnRetry_OnChange(sCheckState)
+	if sCheckState == "1" Then
+		g_sAthnType = "9"
+		EditInput1.setShowKeypad(False)
+		Container1.visible = TRUE
+		Form.SetTimerEvent2(2, 1, 0.5)  
+		BtnRetry.chkcaption = "스마트 OTP 수동입력 해제"  'v0001
+		g_szChk = "0"
+	else
+		g_sAthnType = "2"
+		Container1.visible = FALSE
+		BtnRetry.chkcaption = "데이터통신 장애 등 비상시 스마트 OTP 수동 입력" 'v0001
+		g_szChk = "1"
+	end if
+	Container1_ButtonRequest_OnClick()
+End Sub 
+'============================================================================
+Sub EditInput0_OnEditComplete()
+	if m_bCloseForm = true then
+		g_szPwd = EditInput0.caption
+		
+		if (Container1.EditPin.caption == null or Container1.EditPin.caption == "") and g_sAthnType = "9" then
+			Form.MsgBox( "알림", "PIN번호를 재조회해주세요.", "", 6 )	
+		else
+			g_nOTPCnt = 0
+			DATAMANAGER.RequestTranData( "obcsb_oimf_522a" ) 'OTP정보확인
+		end if
+		
+		'Form.CloseForm()
+	else
+		m_bCloseForm = true
+	end if
+End Sub
+
+
+Sub Form_OnTriggerEventMOTP(sEventName, sParam)
+	if sEventName == "MOTP_GET_VERSION_RETURN_otpcheckpopup" then
+		arrData = Split(sParam,"★")		'resultcode★resultMsg★mSBVersion
+		
+		if arrData[0] <> "00000" then
+			Form.MsgBox( "알림", arrData(1), "close", 6 )
+		Else
+			g_mSBValue  = arrData[2]
+		end if
+		
+	elseif sEventName == "MOTP_GETINFO_RETURN_otpcheckpopup" then
+		
+		arrData  = Split(sParam,"★")    'resultc ode★resultMsg★otpAlias(일련번호)-로컬
+		
+		if arrData[0] <> "00000" then
+			Form.MsgBox( "알림", "모바일OTP가 발급된 정보가 없습니다.".."\n".."모바일OTP를 발급하시겠습니까?", "close", 6 )
+		else
+			g_mOTPSrno = arrData(2)
+			'20221114
+			If g_mOTPSrno == null or g_mOTPSrno == "" then
+				Form.MsgBox( "알림", "모바일OTP가 발급된 정보가 없습니다.".."\n".."모바일OTP를 발급하시겠습니까?", "close", 6 )
+			else
+				if g_MOtpSrnoSvr <> Right(g_mOTPSrno, 12) then	'로컬MOTP와 서버MOTP 정보 비교
+					Form.MsgBox( "알림", "모바일OTP가 발급된 정보가 없습니다.".."\n".."모바일OTP를 발급하시겠습니까?", "close", 6 )
+				end if
+			end if
+		end if
+		
+	elseif sEventName == "MOTP_REQ_OTP_ENC_RETURN_otpcheckpopup" then
+
+		arrData = Split(sParam,"★")
+		
+		if arrData[0] <> "00000" then
+			Form.MsgBox( "알림", arrData(1), "close", 6 )
+		else
+			g_mOTPData = arrData[2]
+			DATAMANAGER.RequestTranData("obcsb_oimf_176a")
+		end if
+	end if
+	
+End Sub
+
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "close" then
+		Form.SetSharedData("mOTP_IntoClcd"   , "MTS"     )  '(모바일OTP)진입구분코드 20221114
+		Form.OpenNextPopup( "mbotp86100.xmf", "", "" )
+	else	
+		if g_sSmrtOtpYn <> "Y" then
+			EditInput1.setShowKeypad(True)
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub EditInput0_OnEditChar(CharCode)
+	m_bCloseForm = true
+	
+	if m_bErrorCheck then
+		m_bErrorCheck = false
+		Func_Clear_Pwd()
+	end if
+	
+	if CharCode == "0" then
+		m_sEditIndex = m_sEditIndex + 1 
+		
+		if CInt(m_sEditIndex) = 1 then
+			cont0.PwdFail0.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 2 then
+			cont0.PwdFail1.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 3 then
+			cont0.PwdFail2.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 4 then
+			cont0.PwdFail3.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 5 then
+			cont0.PwdFail4.imgpath = "pwd_blue"
+		elseif CInt(m_sEditIndex) = 6 then
+			cont0.PwdFail5.imgpath = "pwd_blue"
+		end if
+		
+	elseif CharCode == "1" then
+		if CInt(m_sEditIndex) > 0 then 
+			m_sEditIndex = m_sEditIndex - 1
+		end if
+		
+		if CInt(m_sEditIndex) = 0 then
+			cont0.PwdFail0.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 1 then
+			cont0.PwdFail1.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 2 then
+			cont0.PwdFail2.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 3 then
+			cont0.PwdFail3.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 4 then
+			cont0.PwdFail4.imgpath = "pwd_gray"
+		elseif CInt(m_sEditIndex) = 5 then
+			cont0.PwdFail5.imgpath = "pwd_gray"
+		end if
+
+	elseif CharCode == "2" then
+		If g_DeviceOS == "2" then
+			EditInput0.setShowKeypad(True)
+		End if
+	end if
+	
+End Sub
+
+'============================================================================
+Sub EditInput0_OnEditError()
+	'비밀번호 검증 오류 발생 시, 자동저장기능 안내팝업 뜬경우 후처리 비활성화
+	if m_bOpenPopup = false then
+		Func_Clear_Pwd()
+		
+		m_bErrorCheck = true
+		EditInput0.setShowKeypad(True)
+		
+		cont0.PwdFail0.imgpath 	= "pwd_gray"
+		cont0.PwdFail1.imgpath 	= "pwd_gray"
+		cont0.PwdFail2.imgpath 	= "pwd_gray"
+		cont0.PwdFail3.imgpath 	= "pwd_gray"
+		cont0.PwdFail4.imgpath 	= "pwd_gray"
+		cont0.PwdFail5.imgpath 	= "pwd_gray"
+
+	end if
+End Sub 
+'============================================================================
+Sub EditInput0_OnEditCancel()
+	'20220622 아이티젠 START: 안드로이드에서 비번입력후 백버튼 탭시 부모폼으로 비번넘기는 현상 수정
+	'20220622 아이티젠 END:
+	Func_Clear_Pwd()
+End Sub 
+'============================================================================
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_520r" trcode="obcsb_oimf_520r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_523a" trcode="obcsb_oimf_523a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_522a" trcode="obcsb_oimf_522a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_174a" trcode="obcsb_oimf_174a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_176a" trcode="obcsb_oimf_176a" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_oimf_172r" trcode="obcsb_oimf_172r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_520r" title="개인별보안매체상태조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="205" _ulen="157" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="614" _ulen="460" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+HTS_STPL_YN^HTS 약정 여부^1^0^0^0^0^0^0
+SCRC_STAT_CODE^보안카드 상태 코드^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT1^부가정보 확인 질문 내용1^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT2^부가정보 확인 질문 내용2^2^0^0^0^0^0^0
+ACNT_OPNG_YN^계좌 개설 여부^1^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+ELFN_ID_EXST_YN^전자금융 ID 존재 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+UI_SMRT_OTP_YN^UI스마트OTP여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_523a" title="스마트OTP일회용PIN생성" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="443" _ulen="335" >
+
+INPUT_CLS^입력구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+TRNM_RSLT_YN^전송결과여부^1^0^0^0^0^0^0
+STND_DATE^기준일자^8^0^0^0^0^0^0
+OTP_TLMS_SRNO^OTP전문일련번호^8^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+TR_DTL_CNTT^거래상세내용^1000^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="344" _ulen="272" >
+
+UI_SMRT_OTP_YN^UI스마트OTP여부^1^0^0^0^0^0^0
+PROS_YN^처리여부^1^0^0^0^0^0^0
+STND_DATE^기준일자^8^0^0^0^0^0^0
+OTP_TLMS_SRNO^OTP전문일련번호^8^0^0^0^0^0^0
+OTP_RSPN_CODE^OTP응답코드^4^0^0^0^0^0^0
+RSLT_CLS^결과구분^1^0^0^0^0^0^0
+PIN_NO^PIN번호^8^0^0^0^0^0^0
+TRAN_CRPT^거래내역암호화^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_522a" title="OTP인증처리" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="489" _ulen="373" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+OTP_RSPN_VAL^OTP 응답 값^8^0^0^0^0^0^0
+TRNM_RSLT_YN^전송결과여부^1^0^0^0^0^0^0
+OTP_TLMS_SRNO^OTP 전문 일련번호^8^0^0^0^0^0^0
+STND_DATE^기준일자^8^0^0^0^0^0^0
+ATHN_BSWR_CLCD^인증업무구분코드^1^0^0^0^0^0^0
+TRAN_CRPT^거래내역암호화^64^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="316" _ulen="246" >
+
+OTHR_ISTU_ACDN_RCVR_YN^타 기관 사고 회복 여부^1^0^0^0^0^0^0
+OTP_PWD_MSTK_TMNU^OTP 비밀번호 오류 횟수^4^0^7^0^0^0^0
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+OTP_TLMS_SRNO^OTP 전문 일련번호^8^0^0^0^0^0^0
+OTP_RSPN_CODE^OTP 응답 코드^4^0^0^0^0^0^0
+STND_DATE^기준일자^8^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_174a" title="모바일OTP 거래등록 및 시간요청" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="559" _ulen="423" >
+
+MOTP_PROS_CLCD^모바일OTP처리구분코드^4^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_DATA_CNTT^모바일OTP인증데이터내용^256^0^0^0^0^0^0
+MOTP_TR_CNTT^모바일OTP거래내용^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="450" _ulen="332" >
+
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_TR_NO^모바일OTP거래번호^20^0^0^0^0^0^0
+MOTP_TR_REG_YMDH^모바일OTP거래등록일시^14^0^0^0^0^0^0
+MOTP_HOUR_VAL^모바일OTP시간값^64^0^0^0^0^0^0
+MOTP_TR_REG_YN^모바일OTP거래등록여부^1^0^0^0^0^0^0
+MOTP_TR_CNTT^모바일OTP거래내용^64^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_176a" title="모바일OTP 번호등록 및 검증" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="391" _ulen="303" >
+
+MOTP_PROS_CLCD^모바일OTP처리구분코드^4^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ELFN_ID^전자금융ID^20^0^0^0^0^0^0
+MSBO_VRSN^MOBILESAFEBOX버전^32^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+MOTP_TR_NO^모바일OTP거래번호^20^0^0^0^0^0^0
+MOTP_PWD_PIP^모바일OTP비밀번호PIP^64^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="116" _ulen="88" >
+
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_oimf_172r" title="OTP조회(실물&모바일)" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="215" _ulen="161" >
+
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1257" _ulen="937" >
+
+MOTP_ERR_CNTT^모바일OTP에러내용^300^0^0^0^0^0^0
+MOTP_ERR_CODE^모바일OTP에러코드^6^0^0^0^0^0^0
+MOTP_SRNO^모바일OTP일련번호^12^0^0^0^0^0^0
+MOTP_STAT_CODE^모바일OTP상태코드^2^0^0^0^0^0^0
+CUST_TERM_ID^고객단말ID^200^0^0^0^0^0^0
+OS_CLCD^운영체제구분코드^2^0^0^0^0^0^0
+OS_VRSN^운영체제버전^100^0^0^0^0^0^0
+CUST_TERM_NAME^고객단말명^100^0^0^0^0^0^0
+MOTP_ISNC_YMDH^모바일OTP발급일시^14^0^0^0^0^0^0
+MOTP_LOCK_YMDH^모바일OTPLOCK일시^14^0^0^0^0^0^0
+MOTP_MISS_YMDH^모바일OTP분실일시^14^0^0^0^0^0^0
+MOTP_DSCD_YMDH^모바일OTP폐기일시^14^0^0^0^0^0^0
+VALD_PRD_STA_DATE^유효기간시작일자^8^0^0^0^0^0^0
+VALD_PRD_EXPI_DATE^유효기간만료일자^8^0^0^0^0^0^0
+MOTP_MTRT_GUDE_YN^모바일OTP만기안내여부^1^0^0^0^0^0^0
+LAST_VRFC_YMDH^최종검증일시^14^0^0^0^0^0^0
+MOTP_MSTK_CSNU^모바일OTP오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_TYPE_CLCD^모바일OTP인증유형구분코드^2^0^0^0^0^0^0
+MOTP_ATHN_MSTK_CSNU^모바일OTP인증오류건수^4^0^7^0^0^0^0
+MOTP_ATHN_LOCK_YN^모바일OTP인증LOCK여부^1^0^0^0^0^0^0
+MOTP_ATHN_LOCK_YMDH^모바일OTP인증LOCK일시^14^0^0^0^0^0^0
+MOTP_ATHN_LAST_MOD_YMDH^모바일OTP인증최종수정일시^14^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock2" inout="out" _len="315" _ulen="247" >
+
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+OTP_CARD_SRNO^OTP카드일련번호^12^0^0^0^0^0^0
+OTP_ISNC_ISTU_CODE^OTP발급기관코드^5^0^0^0^0^0^0
+OTP_SUPL_CO_CODE^OTP공급회사코드^3^0^0^0^0^0^0
+OTP_USE_RANG_CODE^OTP사용범위코드^1^0^0^0^0^0^0
+OTP_STAT_CODE^OTP상태코드^2^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock3" inout="out" _len="131" _ulen="103" >
+
+ABLE_PRHB_YN^가능불가여부^1^0^0^0^0^0^0
+UI_PRHB_REAS^UI불가사유^30^0^0^0^0^0^0
+CSNO^고객번호^10^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

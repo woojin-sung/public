@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="(공통)종목선택창" version="2" writer="이은섭" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<CONTAINER name="contSearch" ly_vert="0,47,375,708,1" scroll_ly_vert="0,47,375,708,1" >
+			<CONTROL_INFO/>
+		</CONTAINER>
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_main_01" ly_vert="6,11,40,24,1" />
+		<LABEL name="lblTitle" fontsize="4" caption="종목검색" bgcolor="035:237246255" multiline="1" click="1" ly_vert="40,12,300,23,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="4016" _ulen="3656" >
+Dim gHistoryKeyName
+gHistoryKeyName = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+
+	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	'-------------------------------------------------------
+	'뒤로가기 버튼
+	'-------------------------------------------------------
+	ImgBackPress.setMaintainingRatio("2")
+	ImgBackPress.imgpath = "icon_main_01"
+	
+	'-------------------------------------------------------
+	'타이틀명★SearchType★히스토리키
+	'-------------------------------------------------------
+	sLinkData = Form.GetOpenLinkData()
+	arrData   = Split(sLinkData,"★")
+	
+	if #arrData > 2 then
+		sTitle = arrData(0)
+		sSearchType = arrData(1)
+		gHistoryKeyName = arrData(2)
+		
+		lblTitle.caption = sTitle
+		contSearch.SetSearchMode(true)
+		contSearch.SetSearchType(sSearchType)
+		
+	end if
+
+End Sub
+
+'============================================================================
+Sub Form_OnCommonDialogReturn(sDlgName, sReturn1, sReturn2)
+	
+	if sDlgName == "SEARCH_DLG_RETURN" then
+		
+		'-------------------------------------------------------
+		'종목선택(sReturn1 = 거래소@티커★종목명 // sReturn2 = SELECT)
+		'-------------------------------------------------------
+		if sReturn2 == "SELECT" then
+			
+			'종목선택 시 히스토리 관리 
+			arrData = Split(sReturn1,"★")
+			SetHistory("set",arrData(0))
+			
+			'부모화면에 선택 종목정보 넘김
+			Form.SendReturnToParent("DLG_SELECT" , sReturn1)
+			Form.CloseForm()
+			
+		'----------------------------------------------------------------------------		
+		'관심종목(sReturn1 = 거래소@티커★종목명 // sReturn2 = INTR_ADD or INTR_DEL)
+		'----------------------------------------------------------------------------
+		'[팝업화면 링크데이터]
+		'종목정보★처리구분값★처리완료후 리턴받을 값
+		'arrData(0) 	= 거래소@티커
+		'sParam 		= 관심종목처리 구분값
+		'arrData(0) 	= 거래소@티커(처리완료 후 리턴받을 값)
+		'----------------------------------------------------------------------------
+		elseif sReturn2 == "INTR" then
+			'
+			arrData = Split(sReturn1,"★")
+			sParam = "ADD"
+			Form.OpenPopupAnimation("nrshidx50600_p2", arrData(0) & "★"& sParam & "★" & arrData(0) ,"", "2")	'종목등록
+		
+		
+		elseif sReturn2 == "INTR_ADD" then
+			
+			arrData = Split(sReturn1,"★")
+			sParam = "ADD"
+			Form.OpenPopupAnimation("nrshidx50600_p2", arrData(0) & "★"& sParam & "★" & arrData(0) ,"", "2")	'종목등록
+		
+		elseif sReturn2 == "INTR_DEL" then
+			
+			arrData = Split(sReturn1,"★")
+			sParam = "DEL"
+			Form.OpenPopup("nrshidx50600_p4" , arrData(0) & "★"& sParam & "★" & arrData(0) , "")
+		
+		end if
+		
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	
+	if sKeyName == "GWAN_ADD_COMPLETE" then
+		
+		'-------------------------------------------------------
+		'관심종목 로컬 추가
+		'-------------------------------------------------------
+		'sRet =>  nrshidx50600_p2 호출할때 마지막 파라미터(리턴받을 값)
+		Form.addIntrItemList(sRet)
+		
+		'-------------------------------------------------------
+		'종목선택창 refresh
+		'-------------------------------------------------------
+		contSearch.refreshIntrItem()
+		
+	elseif sKeyName == "GWAN_DELETE_COMPLETE" then
+	
+		Form.delIntrItemList(sRet)
+		contSearch.refreshIntrItem()
+			
+	end if
+	
+End Sub
+
+'============================================================================
+Function SetHistory(sGubun,sData)
+
+	Form.manageTotalSearch(gHistoryKeyName, sGubun, sData)
+	
+	'테스트확인용
+	'test = Form.manageTotalSearch(gHistoryKeyName, "get", "")
+	'Form.ShowAlert("test", test)
+
+End Function
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.CloseForm()
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

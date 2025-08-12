@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="보안카드인증 키패드" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,647,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image0" autosize="1" imgpath="alpha128.png" ly_vert="376,0,375,647,1" />
+		<IMAGE name="Image1" imgpath="popup_bg.9" ly_vert="0,282,375,365,1" />
+		<BUTTON name="Button2" btnimage="alpha" ly_vert="0,291,375,335,1" />
+		<LABEL name="Label0" fontsize="3" fontstyle="01" caption="보안카드 입력" fonttype="3" ly_vert="9,293,299,47,1" />
+		<IMAGE name="imgIcon0" autosize="1" imgpath="pwd_gray" ly_vert="255,355,20,17,1" />
+		<IMAGE name="imgIcon1" autosize="1" imgpath="pwd_gray" ly_vert="291,355,20,17,1" />
+		<IMAGE name="imgIcon2" autosize="1" imgpath="pwd_gray" ly_vert="172,420,20,17,1" />
+		<IMAGE name="imgIcon3" autosize="1" imgpath="pwd_gray" ly_vert="205,420,20,17,1" />
+		<BUTTON name="Button1" btnimage="alpha" ly_vert="426,403,122,20,1" />
+		<ACCOUNT name="acnt" visible="0" bgcolor="052:255255255" itemcodetype="100,101,102,103,104,105,106,107,108,109,110,112,113,114,115,117,118,119,120,121,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,200" accpwdctl="Edit0" delegate="1" ly_vert="10,192,271,39,0" />
+		<BUTTON name="Button3" btnimage="alpha" ly_vert="0,-5,376,320,1" />
+		<LABEL name="Label1" fgcolor="061:239059036" fontstyle="01" mask="0,0,[,],1,,0,0,0" ly_vert="20,344,50,39,1" import="0,1,6" />
+		<LABEL name="Label2" fontsize="-1" fontstyle="01" caption=" 앞 두자리" ly_vert="54,344,100,39,1" />
+		<EDIT name="EditInput1" halign="1" password="1" imetype="1" maxlength="2" imagefilepth="login_input.9" ly_vert="166,344,73,39,1" />
+		<LABEL name="Label3" fgcolor="061:239059036" fontstyle="01" mask="0,0,[,],1,,0,0,0" ly_vert="20,407,50,39,1" import="0,1,7" />
+		<LABEL name="Label4" fontsize="-1" fontstyle="01" caption=" 뒤 두자리" ly_vert="54,407,100,39,1" />
+		<EDIT name="EditInput2" halign="1" password="1" imetype="1" maxlength="2" imagefilepth="login_input.9" ly_vert="242,407,73,39,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="8927" _ulen="8131" >
+'--===========================================================================
+'--===========================================================================
+Dim m_sEditIndex
+Dim m_b4Switch
+Dim m_bErrorCheck
+Dim m_bCloseForm
+Dim m_bOpenPopup
+
+
+Dim g_sRetData
+Dim g_sUserID
+Dim g_sSecCardCertYn
+Dim g_plain_rm  'v0001 메모리평문적용여부
+'============================================================================
+'초기화 함수
+'============================================================================
+Function Func_Clear_Pwd()
+	m_sEditIndex = 0
+
+End Function
+
+'============================================================================
+Sub Form_OnFormInit()
+
+	EditInput1.certname = "보안카드 "&Label1.caption&Label2.caption
+	EditInput2.certname = "보안카드 "&Label3.caption&Label4.caption
+	
+	EditInput1.imagefilepth = "login_input.9"
+	EditInput2.imagefilepth = "login_input.9"
+	
+	g_sSecCardCertYn = "N"
+	g_sRetData = "cancel"
+
+	'v0001 메모리평문적용여부(0:미적용 / 1:적용)
+	g_plain_rm = Form.GetSharedData("&PLAIN_RM", false)
+	if g_plain_rm == "1" then
+	     '화면 마스킹표시/평문데이터로 설정(컨트롤속성-일반비밀번호사용 적용필수)
+		EditInput1.SetEncExcept()
+		EditInput2.SetEncExcept()
+	end if 
+
+	g_sUserID = Form.GetSharedData("CERT_ID" , false)
+	szUserID = Form.GetSharedData("&USER_ID" , false)
+	if g_sUserID == null or g_sUserID == "" then
+		g_sUserID = szUserID
+	elseif g_sUserID ~= szUserID then
+		g_sUserID = szUserID
+	end if
+
+	if g_sUserID ~= null and g_sUserID ~= "" then
+		DATAMANAGER.RequestTranData( "obcsb_oimf_520r" ) '보안매체상태조회
+	end if
+	
+	m_sEditIndex = 0 
+	
+	m_bErrorCheck 	= false	'
+	m_bCloseForm 		= true	'비밀번호 검증 완료 시, 팝업종료 여부 
+	m_bOpenPopup 		= false	'자동저장기능 안내팝업 여부
+	
+	'0.5초 후 보안키패드 띄움
+	Form.SetTimerEvent2(1, 1, 0.5)             
+End Sub
+
+'============================================================================
+Sub Form_OnTimerEvent(sTimerID)
+
+	if Cint(sTimerID) = 1 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.5)
+		EditInput1.setShowKeypad(True)
+	
+	'20221103 LES START
+	elseif Cint(sTimerID) = 2 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.1)
+		EditInput2.setShowKeypad(True)
+	
+	elseif Cint(sTimerID) = 3 then
+		Form.SetTimerEvent2(sTimerID, 0, 0.1)
+		EditInput1.setShowKeypad(True)
+	'20221103 LES END
+	
+	end if
+End Sub
+
+'============================================================================
+Sub Button1_OnClick()
+	Func_Clear_Pwd()
+	EditInput1.setShowKeypad(True)
+	m_bCloseForm = false
+End Sub
+
+'============================================================================
+Sub Button2_OnClick()
+	Func_Clear_Pwd()
+'	20221117 HSZ START
+	if (EditInput1.caption == null or EditInput1.getLen(EditInput1.caption) < 2 ) then
+		Form.SetTimerEvent2(3, 1, 0.1)
+	elseif (EditInput2.caption == null or EditInput2.getLen(EditInput2.caption) < 2 ) then
+		Form.SetTimerEvent2(2, 1, 0.1)
+	else
+		m_bCloseForm = false
+	end if
+'	EditInput1.setShowKeypad(True)
+'	m_bCloseForm = false
+'	20221117 HSZ END
+End Sub
+'============================================================================
+Sub Button3_OnClick()
+	m_bCloseForm = false
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	if g_sSecCardCertYn = "Y" then
+		Form.SendReturnToParent("보안카드" , "Success")
+	else
+		Form.SendReturnToParent("보안카드" , "Fail")
+	end if
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+	m_bOpenPopup = false
+	EditInput1.setShowKeypad(True)
+End Sub
+'============================================================================
+Sub Form_OnFormInitBefore()
+	imgIcon0.setMaintainingRatio("1")
+	imgIcon1.setMaintainingRatio("1")
+	imgIcon2.setMaintainingRatio("1")
+	imgIcon3.setMaintainingRatio("1")
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnSendTranBefore(szTranID)
+	if szTranID == "obcsb_oimf_520r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "INPUT_CLS" , 0 , "1" ) '전자금융ID
+		DATAMANAGER.SetDataValue( 0, "obcsb_oimf_520r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+	elseif szTranID == "obcsb_simf_000r" then
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "INPUT_CLS" , 0 , "2" ) '전자금융ID
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "ELFN_ID" , 0 , g_sUserID )
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_IDX_NO1" , 0 , Label1.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_IDX_NO2" , 0 , Label3.caption )
+		'v0001 값은 평문으로 전송(서비스에서 해쉬암호화처리해서 체크함)
+		'MTS메모리평문적용(g_plain_rm == "1")시에는 OnFormInit()에서 평문데이터로 설정하므로 caption으로 전송가능
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_NO1" , 0 , EditInput1.caption )
+		DATAMANAGER.SetDataValue( 0, "obcsb_simf_000r", "InBlock1", "SCRC_NO2" , 0 , EditInput2.caption )
+	end if	
+End Sub
+
+'============================================================================
+Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+	if szTranID == "obcsb_oimf_520r" then
+		Dim sRSLT_CLS, sSCRC_STAT_CODE
+		
+		'결과구분 0:보안카드, 1:부가정보, 2:없을경우, 3:OTP, 9:에러
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "RSLT_CLS" , 0 )
+		'보안카드상태코드 0:정상, 1:매체사고, 2:비번오류횟수초과, 6:사용등록안됨
+		sSCRC_STAT_CODE = DATAMANAGER.GetDataValue( 0, "obcsb_oimf_520r", "OutBlock1", "SCRC_STAT_CODE" , 0 )
+	
+		if sRSLT_CLS == "0" then '보안카드
+			if sSCRC_STAT_CODE == "0" then '정상
+				'ButtonOK.enable = true
+			elseif sSCRC_STAT_CODE == "1" then '매체사고	
+				Form.MsgBox( "알림", "매체사고 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "2" then '비번오류횟수초과	
+				Form.MsgBox( "알림", "비밀번호 오류초과 입니다.", "", 6 )
+			elseif sSCRC_STAT_CODE == "6" then '사용등록안됨	
+				Form.MsgBox( "알림", "사용등록이 안되었습니다.", "", 6 )
+			else '그외
+				Form.MsgBox( "알림", "미지정 상태입니다.", "", 6 )
+			end if
+		end if
+		
+		EditInput1.certname = "보안카드 "&CInt(Label1.caption)&Label2.caption
+		EditInput2.certname = "보안카드 "&CInt(Label3.caption)&Label4.caption
+	elseif szTranID == "obcsb_simf_000r" then
+		Dim sRSLT_CLS, sSCRC_PWD_MSTK_TMNU
+		
+		'결과구분 0:정상 그외에러
+		sRSLT_CLS = DATAMANAGER.GetDataValue( 0, "obcsb_simf_000r", "OutBlock1", "RSLT_CLS" , 0 )
+		'보안카드오류횟수
+		sSCRC_PWD_MSTK_TMNU = DATAMANAGER.GetDataValue( 0, "obcsb_simf_000r", "OutBlock1", "SCRC_PWD_MSTK_TMNU" , 0 )
+		
+		if sRSLT_CLS == "0" then '정상
+			if CInt(sSCRC_PWD_MSTK_TMNU) > 5 then '에러
+				Form.MsgBox( "알림", "보안카드 입력 오류 횟수 초과입니다.", "", 6 )				
+			else
+				g_sSecCardCertYn = "Y"
+'				Form.SendReturnToParent("보안카드" , "Success")
+				Form.CloseForm()
+			end if
+		else
+			Dim sMsg, sSubMsg 
+			sMsg = DATAMANAGER.GetDataMsgText( szTranID )
+			sSubMsg = DATAMANAGER.GetDataMsgSubText( szTranID )
+			Form.MsgBox( "알림", sMsg.." "..sSubMsg, "", 6 )
+		end if
+	end if
+End Sub
+
+'============================================================================
+Sub EditInput1_OnEditComplete()
+
+	if (EditInput1.caption == null or EditInput1.getLen(EditInput1.caption) < 2 ) then
+		Form.MsgBox( "알림", "보안카드 번호를 입력해주세요.", "EditInput1", 6 )
+		EditInput1.caption = ""
+	elseif (EditInput2.caption == null or EditInput2.getLen(EditInput2.caption) < 2 ) then
+		
+		'20221103 LES START
+		Form.SetTimerEvent2(2, 1, 0.1)
+		'EditInput2.setShowKeypad(True)
+		'20221103 LES END 
+		
+	else
+		DATAMANAGER.RequestTranData( "obcsb_simf_000r" ) '보안카드정보확인
+	end if	
+End Sub
+
+'============================================================================
+Sub EditInput2_OnEditComplete()
+	if (EditInput2.caption == null or EditInput2.getLen(EditInput2.caption) < 2 ) then
+		Form.MsgBox( "알림", "보안카드 번호를 입력해주세요.", "EditInput2", 6 )
+		EditInput2.caption = ""
+	elseif (EditInput1.caption == null or EditInput1.getLen(EditInput1.caption) < 2 ) then
+		
+		'20221103 LES START
+		Form.SetTimerEvent2(3, 1, 0.1)
+		'EditInput1.setShowKeypad(True)
+		'20221103 LES END 
+		
+	else
+		DATAMANAGER.RequestTranData( "obcsb_simf_000r" ) '보안카드정보확인
+	end if	
+End Sub
+
+'============================================================================
+Sub Form_OnMsgBoxClose(sKeyName, sRet)
+	if sKeyName == "EditInput1" then
+		EditInput1.setShowKeypad(True)
+	elseif sKeyName == "EditInput1" then
+		EditInput2.setShowKeypad(True)
+	end if
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obcsb_oimf_520r" trcode="obcsb_oimf_520r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+			<TRAN tranid="obcsb_simf_000r" trcode="obcsb_simf_000r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obcsb_oimf_520r" title="개인별보안매체상태조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="205" _ulen="157" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="614" _ulen="460" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+HTS_STPL_YN^HTS 약정 여부^1^0^0^0^0^0^0
+SCRC_STAT_CODE^보안카드 상태 코드^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT1^부가정보 확인 질문 내용1^2^0^0^0^0^0^0
+ADIF_CNFR_QSTN_CNTT2^부가정보 확인 질문 내용2^2^0^0^0^0^0^0
+ACNT_OPNG_YN^계좌 개설 여부^1^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+ELFN_ID_EXST_YN^전자금융 ID 존재 여부^1^0^0^0^0^0^0
+CUST_FULL_NAME^고객 풀 명^100^0^0^0^0^0^0
+UI_SMRT_OTP_YN^UI스마트OTP여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+			<TRAN name="obcsb_simf_000r" title="보안카드정보확인" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="540" _ulen="400" >
+
+INPUT_CLS^입력 구분^1^0^0^0^0^0^0
+RCNO^실명확인번호^13^0^0^0^0^0^0
+ELFN_ID^전자금융 ID^20^0^0^0^0^0^0
+ACNO^계좌번호^8^0^0^0^0^0^0
+SCRC_IDX_NO1^보안카드 인덱스 번호1^3^0^7^0^0^0^0
+SCRC_NO1^보안카드 번호1^68^0^0^0^0^0^0
+SCRC_IDX_NO2^보안카드 인덱스 번호2^3^0^7^0^0^0^0
+SCRC_NO2^보안카드 번호2^68^0^0^0^0^0^0
+CONN_CUST_OUTS_IPAD^접속고객외부IP주소^39^0^0^0^0^0^0
+CONN_CUST_INS_IPAD^접속고객내부IP주소^39^0^0^0^0^0^0
+RCNO_PIP^실명확인번호PIP^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="118" _ulen="86" >
+
+RSLT_CLS^결과 구분^1^0^0^0^0^0^0
+SCRC_PWD_MSTK_TMNU^보안카드 비밀번호 오류 횟수^4^0^7^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>

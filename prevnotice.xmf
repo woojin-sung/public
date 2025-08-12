@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="99999" scrname="prevnotice" version="2" writer="함원규" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,674,1" />
+	<CONTROL_INFO>
+		<IMAGE name="Image2" autosize="1" imgpath="alpha128" ly_vert="0,0,375,674,1" />
+		<IMAGE name="Image0" visible="0" autosize="1" imgpath="popup_bg_2.9" ly_vert="485,167,325,245,0" />
+		<LABEL name="Label0" bgcolor="028:255255255" transmode="0" ly_vert="20,60,335,517,1" />
+		<IMAGE name="Image1" autosize="1" imgpath="img_home_popup" ly_vert="20,60,335,400,1" />
+		<BUTTON name="Button2" caption="자세히 보기" fontsize="-2" btnimage="btn_38.9" ly_vert="40,470,295,40,1" />
+		<LABEL name="Label1" bgcolor="272:246246246" transmode="0" ly_vert="20,526,335,1,1" />
+		<CHKBUTTON name="ChkButton0" fgcolor="146:124124124" fontsize="-2" chkcaption="다시 보지 않기" unchkcaption="다시 보지 않기" chkbtnimage="checkmenu_o" unchkbtnimage="checkmenu_n" ly_vert="35,535,170,32,1" />
+		<LABEL name="Label2" fgcolor="146:124124124" fontsize="-2" caption="닫기" halign="2" click="1" ly_vert="262,535,60,32,1" />
+		<IMAGE name="Image3" autosize="1" imgpath="icon_close_40" ly_vert="295,543,45,16,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="1760" _ulen="1760" >
+Dim szEnv
+szEnv = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	Image1.setMaintainingRatio("1")
+	Image3.setMaintainingRatio("3")
+End Sub
+
+'============================================================================
+Sub Form_OnFormInit()
+	sUserID 	= Form.GetSharedData("&USER_ID" , false)
+	if sUserID == "" then
+		'Form.SendReturnToParent("prevnotice" , "")
+		Form.CloseForm()
+	end if
+	
+	szEnv = Form.GetEnvData("PREV_NOTICE_OPEN")
+	
+	if szEnv == "" then
+		szEnv = "0" 
+		Form.SetEnvData("1", "PREV_NOTICE_OPEN", "0")
+	end if
+	
+	if szEnv == "1" then
+		'Form.SendReturnToParent("prevnotice" , "")
+		Form.CloseForm()
+	end if
+End Sub
+
+'============================================================================
+Sub Image1_OnClick()
+	'Form.SendReturnToParent("prevnotice" , "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub ChkButton0_OnChange(sCheckState)
+	Form.SetEnvData("1", "PREV_NOTICE_OPEN", sCheckState)
+	'Form.SendReturnToParent("prevnotice" , "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Label2_OnClick()
+	'Form.SendReturnToParent("prevnotice" , "")
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Image3_OnClick()
+	
+	Form.CloseForm()
+End Sub
+
+'============================================================================
+Sub Button2_OnClick()
+	Form.OpenPopup("notice_p10","InterestInteg","")
+End Sub
+
+'============================================================================
+Sub Form_OnFormClose()
+	Form.SendReturnToParent("prevnotice" , "")
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

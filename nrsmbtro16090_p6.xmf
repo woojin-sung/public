@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16090" scrname="실시간시세조건선택창" version="2" writer="아이티젠" />
+	<FORM_INFO name="Form" transmode="0" ly_vert="0,0,375,755,1" />
+	<CONTROL_INFO>
+		<BUTTON name="BtnClose" btnimage="alpha.png" ly_vert="0,0,375,755,1" />
+		<IMAGE name="imgBG" autosize="1" imgpath="popup_bg.9" ly_vert="0,381,375,366,1" />
+		<BUTTON name="btnSave" caption="적용" fontsize="1" btnimage="btn_20.9" ly_vert="0,696,375,60,1" />
+		<LABEL name="lblTitle" fontsize="2" fontstyle="01" caption="선택해 주세요." bgcolor="092:185046046" halign="1" ly_vert="0,386,375,70,1" />
+		<RADIOGROUP name="RgGubun" fontsize="-2" buttonshape="1" buttonsnumber="3" ly_vert="20,478,337,45,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" radioimage="input_06.9.png" transfervalue="%" position="0,0,105,44" />
+				<RADIO no="1" text="이용중" radioimage="input_06.9.png" transfervalue="01" position="115,0,105,44" />
+				<RADIO no="2" text="해지" radioimage="input_06.9.png" transfervalue="02" position="225,0,105,44" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<RADIOGROUP name="RgExch" fontsize="-2" buttonshape="1" buttonsnumber="6" ly_vert="23,573,337,100,1" >
+			<RADIO_INFO>
+				<RADIO no="0" text="전체" radioimage="input_06.9.png" transfervalue="%" position="0,0,105,44" />
+				<RADIO no="1" text="미국" radioimage="input_06.9.png" transfervalue="01" position="115,0,105,44" />
+				<RADIO no="2" text="홍콩" radioimage="input_06.9.png" transfervalue="02" position="225,0,105,44" />
+				<RADIO no="3" text="심천" radioimage="input_06.9.png" transfervalue="04" position="0,54,105,44" />
+				<RADIO no="4" text="상해" radioimage="input_06.9.png" transfervalue="03" position="115,54,105,44" />
+				<RADIO no="5" text="일본" radioimage="input_06.9.png" transfervalue="17" position="225,54,105,44" />
+			</RADIO_INFO>
+		</RADIOGROUP>
+		<LABEL name="Label2" fontstyle="01" caption="이용 구분" ly_vert="16,448,100,32,1" />
+		<LABEL name="Label0" fontstyle="01" caption="시장" ly_vert="19,540,100,32,1" />
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="2806" _ulen="2634" >
+'============================================================================
+' 화 면 명 : 권리화면_권리유형
+' 화면설명 : 권리화면의 권리유형선택 팝업창
+' 작    성 : 2023.09.12 KKM
+'============================================================================
+
+Dim g_szRghtCd, g_szGubun
+g_szGubun = "%" '이용구분
+g_szExch = "%" '시장
+
+'============================================================================
+' Form_OnFormInit
+'============================================================================
+Sub Form_OnFormInit()
+	Dim szData
+	szData = Form.GetOpenLinkData()	
+'msgbox 	szData
+	if szData <> "" then
+		tData = Split(szData, "★")
+		g_szGubun = tData(0)	
+		g_szExch = tData(1)
+		
+		'이용구분
+		if g_szGubun == "01" then      '01	이용중
+			RgGubun.currentindex = 1
+		elseif g_szGubun == "02" then  '02	 해지
+			RgGubun.currentindex = 2
+		else
+			RgGubun.currentindex = 0 '% 전체
+		end if 
+		
+		'시장
+		if g_szExch == "01" then      '01	미국
+			RgExch.currentindex = 1
+		elseif g_szExch == "02" then  '02	홍콩
+			RgExch.currentindex = 2
+		elseif g_szExch == "04" then  '03	심천
+			RgExch.currentindex = 3
+		elseif g_szExch == "03" then  '04   상해
+			RgExch.currentindex = 4
+		elseif g_szExch == "05" then  '05	일본
+			RgExch.currentindex = 5
+		else
+			RgExch.currentindex = 0 '% 전체
+		end if 		
+		
+	else
+		'디폴트 전체
+		RgGubun.currentindex = 0
+		RgExch.currentindex = 0
+	end if 
+End Sub
+
+'============================================================================
+' Form_OnFormClose 
+'============================================================================
+Sub Form_OnFormClose()
+	'Form.SendReturnToParent("OPTION_SET", g_szRghtCd)
+End Sub
+
+'============================================================================
+Sub RgGubun_OnClick(nIndex)
+	if nIndex == 1 then      '01	이용중
+		g_szGubun = "0" 
+	elseif nIndex == 2 then  '02	해지
+		g_szGubun = "1" 	
+	else
+		g_szGubun = "%" 	' % 전체
+	end if
+End Sub
+
+
+'============================================================================
+Sub RgExch_OnClick(nIndex)
+
+	if nIndex == 1 then      '01	미국
+		g_szExch = "01" 
+	elseif nIndex == 2 then  '02	홍콩
+		g_szExch = "02" 	
+	elseif nIndex == 3 then  '03	심천
+		g_szExch = "04" 	
+	elseif nIndex == 4 then  '04    상해
+		g_szExch = "03" 	
+	elseif nIndex == 5 then  '17	일본
+		g_szExch = "05" 	
+	else
+		g_szExch = "%" 	
+	end if
+End Sub
+
+'============================================================================
+Sub BtnClose_OnClick()
+	Form.CloseForm()	
+End Sub
+
+'============================================================================
+Sub btnSave_OnClick()
+	Form.SendReturnToParent("OPTION_SET",  g_szGubun&  "★" & g_szExch)
+	Form.CloseForm()	
+End Sub
+
+	</SCRIPT_INFO>
+</ROOT>

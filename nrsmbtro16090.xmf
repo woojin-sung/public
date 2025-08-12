@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ROOT>
+	<MAP_INFO scrno="16090" scrname="해외 실시간 시세신청/해지" version="2" writer="이준행" />
+	<FORM_INFO name="Form" ly_vert="0,0,375,702,1" />
+	<CONTROL_INFO>
+		<IMAGE name="ImgBackPress" autosize="1" imgpath="icon_main_01" ly_vert="9,17,27,24,1" />
+		<LABEL name="lblTitle" fontsize="3" caption="실시간 시세 신청" multiline="1" paddinginfo="1,0,0,0" click="1" ly_vert="38,11,291,35,1" />
+		<IMAGE name="imgInfo" imgpath="icon_notice.png" ly_vert="341,19,20,20,1" />
+		<FORMTAB name="fmtab01" tabcount="2" tabwidthtype="1" tabheadheight="45" ly_vert="1,53,375,649,1" >
+			<PAGE name="page005898" caption="신청/해지" linkfile="nrsmbtro16090_t1" />
+			<PAGE name="page009417" caption="신청내역" linkfile="nrsmbtro16090_t2" />
+		</FORMTAB>
+	</CONTROL_INFO>
+	<SCRIPT_INFO _len="7146" _ulen="5884" >
+'실시간 시세 신청
+
+Dim g_szOpenData
+g_szOpenData = ""
+
+Dim g_szOKType
+g_szOKType = ""
+
+Dim g_szScreenNo, g_szOpen
+g_szScreenNo = ""
+g_szOpen = ""
+
+'============================================================================
+Sub Form_OnFormInitBefore()
+	ImgBackPress.setMaintainingRatio("1")	
+	imgInfo.setMaintainingRatio("1")
+End Sub
+
+'211216 아이티젠 김성수 END
+'============================================================================
+Sub Form_OnFormInit()
+	Dim  szOS_TYPE
+	szOS_TYPE = Form.GetSharedData("&OS_TYPE", false)
+	g_szScreenNo = Form.GetSharedData( "&SCREEN_NO" , false )
+'gszScreenNo = "16091" 'for TEST		
+	'로그인 여부 체크
+	Dim sLOGIN_TYPE  
+	sLOGIN_TYPE = Form.GetSharedData("&LOGIN_TYPE", false )
+	if CInt(sLOGIN_TYPE) > 1 then  '로그인상태
+	else
+		g_szOpen = g_szScreenNo
+		Form.OpenPopup("mhetc90021","","")	
+		Exit Sub
+	end if 	
+	
+	'20211215 아이티젠 김성수 추가 START
+	g_szOpenData = Form.GetOpenLinkData() '주문"★"해외마켓코드
+	'20211215 아이티젠 김성수 추가 END
+
+	if g_szScreenNo == "16091" then 'CFD
+		'실시간 시세 조회(CFD)
+		lblTitle.caption = "실시간 시세 신청(CFD용)"
+		fmtab01.currenttab = 1
+		if szOS_TYPE ~= "2" then
+			fmtab01_OnTabChanged(1)
+		end if
+	Else 
+		lblTitle.caption = "실시간 시세 신청"
+		fmtab01.currenttab = 0
+		fmtab01_OnTabChanged(0)
+		if szOS_TYPE ~= "2" then
+			fmtab01_OnTabChanged(0)
+		else
+			'211230 아이티젠 김성수 추가 START
+			'iOS에서 비번 없이 바로 조회를 위해 추가
+			if acnt01.caption <> null and len(acnt01.caption) > 6 then
+				Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "ACNTINFO_CHG", left(acnt01.caption,8) & "★" & mid(acnt01.caption,9,2)  & "★" & edtPwd01.caption)
+			end	if
+			'211230 아이티젠 김성수 추가 END
+		end if
+	end if	
+	
+End Sub
+
+'============================================================================
+Sub Form_OnRefresh()
+	fmtab01_OnTabChanged(tonumber(fmtab01.currenttab))
+End Sub
+
+'============================================================================
+Sub Form_OnFormBackKeyPressed()	'안드로이드전용_백버튼
+	Form.OpenPrevScreen()
+End Sub
+
+'============================================================================
+Sub fmtab01_OnTabChanged(nCurrentTab)
+'	if acnt01.caption <>	null	and	len(acnt01.caption) > 6 then
+'		Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "ACNTINFO_CHG", left(acnt01.caption,8) & "★" & mid(acnt01.caption,9,2)  & "★" & edtPwd01.caption)
+'	end	if
+'	
+'	'20211215 아이티젠 김성수 추가 START
+'	'주문화면에서 연동 시 최초 1회 계좌 비밀번호 없이 조회
+'	if g_szOpenData <> "" and g_szOpenData <> null then
+'		dim tData
+'		tData = {}
+'		tData = split(g_szOpenData, "★")
+'		
+'		if tData(0) == "주문" then
+'			Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "PWDINFO_CHG_EXEPT", tData(1))
+'		end if
+'		
+'		g_szOpenData = "" '1회만 적용 되므로 변수 초기화
+'	else
+'		if	edtPwd01.caption	<>	null		and	len(edtPwd01.caption)	> 2	then
+'			Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "PWDINFO_CHG", edtPwd01.caption)
+'		end	if
+'	end if
+'	'20211215 아이티젠 김성수 추가 END
+	
+	Form.triggerEvent("fmtab01." & fmtab01.currenttabpageid, "INFO_REFRESH", "")
+
+End Sub
+
+
+''20220124 아이티젠 김성수 추가 START : CFD계좌일 때 안내문구 팝업(전요셉 부장 요청)
+''============================================================================
+'Sub DATAMANAGER_OnSendTranBefore(szTranID)
+'	if szTranID == "obtre_comm_004r" then
+'		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ACNO" , 0 , acnt01.total)'Left(cmb0.caption , 8))		'계좌번호
+'		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ASNO" , 0 , acnt01.sequence)'Right(cmb0.caption , 2))	'계좌일련번호
+'		DATAMANAGER.SetDataValue( 0 , szTranID, "InBlock1", "ACNT_PWD" , 0 , "")							'비밀번호
+'	end if
+'End Sub
+'
+''============================================================================
+'Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
+'	if szTranID == "obtre_comm_004r" then
+'		Dim szNationalCode
+'		szNationalCode = DATAMANAGER.GetDataValue(0, szTranID , "OutBlock1" , "CTCD", 0)
+'
+'	        if szNationalCode = "840" then '미국
+'		    g_ExchName = "미국"
+'		elseif szNationalCode = "344" then '홍콩
+'		    g_ExchName = "홍콩"
+'		elseif szNationalCode = "156" then '중국
+'		    g_ExchName = "중국"
+'		elseif szNationalCode = "392" then '일본
+'		    g_ExchName = "일본"
+'	        end if
+'
+'		if szNationalCode <> null and szNationalCode <> "" then
+'			if CInt(fmtab01.currenttab) == 0 then
+'			    '20220701 알림문구변경, T2205160017 해외주식 실시간시세 이벤트
+'				'Form.ShowAlert("알림", "※2022년 12월까지 개설한 CFD계좌는 실시간시세 신청시 개설국가에 한하여 2023년 6월까지 무료 적용됩니다." & chr(10) & "(단, 잔고와 매매내역이 없는 경우 익월 자동해지)")
+'                                'Form.ShowAlert("알림", "※2022년 6월까지 개설한 CFD계좌는 실시간시세 신청시 개설국가에 한하여 당해 12월까지 무료 적용됩니다.")
+'				'20230101 알림문구변경, T2212230006 해외주식 실시간시세 이벤트 연장
+'				'Form.ShowAlert("알림", "※ 해외주식CFD 거래를 위해 실시간 시세 신청이 필요합니다. 2024년 06월까지 실시간 시세 사용료는 무료입니다." & chr(10) & "(단, 잔고와 매매내역이 모두 없는 경우 익월 자동 해지됩니다.)")
+'				'Form.ShowAlert("알림", "※ 해외주식CFD 거래를 위해 실시간 시세 신청이 필요합니다. " & g_ExchName & "주식CFD 거래 고객은 2024년 06월까지 해외시장(" & g_ExchName & ")의 실시간 시세 사용료는 무료입니다."& chr(10) & "(단, 잔고와 매매내역이 모두 없는 경우 익월 자동 해지)")
+'				'Form.ShowAlert("알림", "해외CFD 거래를 위해서 해외시장의 실시간 시세 신청이 필요하며, 해외CFD를 거래하시는 고객님에게는 무료로 제공하고 있습니다." & chr(10) & chr(10) & "단, 매월 매매내역이 없고 월말잔고 미보유 시 익월 실시간 시세 신청이 해지되며, 무료 제공은 회사 정책에 따라 변경될 수 있습니다.")
+'				g_szOKType = "6" '해외CFD 신청내역이 없는 고객 팝업	
+'				Form.OpenFramePopup("nrsmbtro16090_p7" , g_szOKType, "")				
+'			end if
+'		end if
+'	end if
+'End Sub
+
+'============================================================================
+Sub imgInfo_OnClick()
+    Form.OpenPopup("nrsmbtro16090_p10" , "" , "")		
+End Sub
+
+'============================================================================
+Sub ImgBackPress_OnClick()
+	Form.OpenPrevScreen()
+End Sub
+
+'============================================================================
+Sub Form_OnPopupReturn(sKeyName, sRet)
+'msgbox sKeyName & " :: " & sRet
+	if sKeyName == "Login_Type" then
+		if Cint(sRet) > 1 then
+			if g_szOpen == g_szScreenNo then
+				Form_OnFormInit()
+			end if	
+		end if 
+	end if	
+End Sub
+
+	</SCRIPT_INFO>
+	<DATAIO_INFO>
+		<TRID_INFO>
+			<TRAN tranid="obtre_comm_004r" trcode="obtre_comm_004r" compress="1" encryption="1" inputcheck="1" useattr="0" />
+		</TRID_INFO>
+		<TRIO_INFO>
+			<TRAN name="obtre_comm_004r" title="해외CFD_계좌 상태 조회" realdata="0" dessvr="9" >
+				<TRBLOCK name="InBlock1" inout="in" _len="122" _ulen="90" >
+
+ACNO^계좌번호^8^0^0^0^0^0^0
+ASNO^계좌일련번호^2^0^0^0^0^0^0
+ACNT_PWD^계좌비밀번호^68^0^0^0^0^0^0
+
+				</TRBLOCK>
+				<TRBLOCK name="OutBlock1" inout="out" _len="1262" _ulen="926" >
+
+CFD_DEAL_ABLE_YN_CODE^CFD매매가능여부코드^1^0^0^0^0^0^0
+PFIN_VLDT_FIN_DATE^전문투자자효력종료일자^8^0^0^0^0^0^0
+CFD_MARG_RATE^CFD증거금비율^20^13^7^0^0^0^0
+ACNT_LVRG^계좌레버리지^20^6^7^0^0^0^0
+HTS_ODER_FERT^HTS주문수수료율^20^13^7^0^0^0^0
+BRNC_ODER_FERT^지점주문수수료율^20^13^7^0^0^0^0
+SECO_BYOV_RLOV_SPEAD^증권회사매수롤오버스프레드^20^13^7^0^0^0^0
+ACNT_LVRG_LIMT_RATE^계좌레버리지한도비율^20^6^7^0^0^0^0
+CFD_CUST_LIMT_AMT^CFD고객한도금액^20^6^7^0^0^0^0
+CFD_MARG_GRAD_CODE^CFD증거금등급코드^1^0^0^0^0^0^0
+MARG_GRAD_NAME^증거금등급명^40^0^0^0^0^0^0
+CTCD^국가코드^3^0^0^0^0^0^0
+INVT_FIN_DATE^투자종료일자^8^0^0^0^0^0^0
+CFD_MNTN_MARG_RATE^CFD유지증거금비율^20^6^7^0^0^0^0
+CFD_ATMT_LSCT_MARG_RATE^CFD자동로스컷증거금비율^20^6^7^0^0^0^0
+FRCR_DFPR_HFERT^외화부족분헷지수수료율^20^12^7^0^0^0^0
+FRCR_HDPR_HFERT^외화보유분헷지수수료율^20^12^7^0^0^0^0
+CFD_MARG_RATE_APLY_TYPE^CFD증거금비율적용유형^2^0^0^0^0^0^0
+CFD_RELF_AGRM_YN^CFD안심동의여부^1^0^0^0^0^0^0
+FRCR_ATBY_APLT_YN^외화자동매수신청여부^1^0^0^0^0^0^0
+PPP_YN^팝업여부^1^0^0^0^0^0^0
+SFCN_YN^충족여부^1^0^0^0^0^0^0
+
+				</TRBLOCK>
+			</TRAN>
+		</TRIO_INFO>
+	</DATAIO_INFO>
+</ROOT>
