@@ -1620,7 +1620,7 @@
 			</CONTROL_INFO>
 		</CONTAINER>
 	</CONTROL_INFO>
-	<SCRIPT_INFO _len="280150" _ulen="248366" >
+	<SCRIPT_INFO _len="283594" _ulen="251260" >
 '============================================================================
 ' 화 면 명 : 관심종목_스타일1 (375 X 524)
 ' 화면설명 : 관심종목_스타일1
@@ -1755,6 +1755,13 @@ Dim g_sColor_Right '오른쪽사이드화면 상단 배경색
 Dim g_szKormarket
 Dim g_szFlagImg
 
+'20251021 SWJ START
+Dim g_sData
+g_sData = ""
+
+Dim g_savePopupReturned
+g_savePopupReturned = False
+
 '----------------------------------------------------------------------------------------------------
 '20240524_01 KBC START : 해외주식 고도화
 '----------------------------------------------------------------------------------------------------
@@ -1838,8 +1845,8 @@ Dim g_nSdPrice
 g_nSdPrice = 0
 
 ' 20250918 이윤성 2차 대체거래소, 중복 실행 방지
-Dim g_szRunning
-g_szRunning = "N"
+'Dim g_szRunning
+'g_szRunning = "N"
 
 
 '****************************************************************************
@@ -1852,9 +1859,6 @@ g_szRunning = "N"
 Function init_GWList()
 	' 설정에서 구분자를 받아온다.
 	if g_szCloud == "1" then		
-		
-	'	Form.setDelayEvent(2, 1)			'20250923_2 SWJ START
-		
 		DATAMANAGER.RequestTranData("ohhts_intr_007r")
 	else
 		' 로컬 저장된 관심종목 가져오기
@@ -4777,9 +4781,11 @@ Sub Form_OnPopupReturn(sKeyName, sRet)
 	' 무브팝업리턴 받아 화면 이동
 	' ----------------------------------------------------------------------		
 	if sKeyName == "mhprc11000_save" then '관심등록/삭제/관심그룹과관심등록 완료 후
+		
 		' ADD, DEL, GROUP_ADD2
 		szInstr = CInt(Instr(sRet, "★"))
-		if szInstr > 0 and Trim(sRet) <> "" then	'Split 전 체크방어로직 추가		
+		if szInstr > 0 and Trim(sRet) <> "" then	'Split 전 체크방어로직 추가
+			
 			tList = Split(sRet, "★")
 			if (tList(2) == "GROUP_ADD2") then '1.최초 관심그룹 등록과 종목등록
 				Container0.imgInterest.imgpath = "icon_like_o.png"
@@ -5014,7 +5020,13 @@ Sub Form_OnTriggerEvent(sEventName, sParam)
 			
 			setGridDragEdit() '20240524_01 KBC : 해외주식 고도화
 		end if
+	
+	'20251021 SWJ START
+	elseif sEventName == "EDIT_JONGMOK" then
 		
+		g_savePopupReturned = True
+	
+	
 	' ----------------------------------------------------------------------
 	' 메인화면에서 관심종목 추가 Trigger
 	' 20160407 : 종목다중선택 로직 추가
@@ -5554,32 +5566,28 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 		
 		'************************************ SOR_START
 		' 20250918 이윤성 2차 대체거래소, 중복 실행 방지
-		
-		if g_szGSID <> "CC" then
-			'Form.ShowAlert("이미 실행중 : 중복실행 방지")
-			Exit Sub
-		end if	
-		
-		if g_szRunning == "Y" then
-			'Form.ShowAlert("이미 실행중 : 중복실행 방지")
-			Exit Sub
-		end if		
-		g_szRunning = "Y"
+'		if g_szGSID <> "CC" then
+'			Exit Sub
+'		end if	
+'		
+'		if g_szRunning == "Y" then
+'			Exit Sub
+'		end if		
+'		g_szRunning = "Y"
 		'************************************ SOR_END
-		
 						
 		nCnt = DATAMANAGER.GetDataCount(0, szTranID, "OutBlock1")
-	
+		
 		if nCnt > 0 then				
 			nRow = g_nNextCount			
 			if g_nNextCount == 0  then
 				grdCode.SetClear()
 			end if 				
 			For i = 0 to nCnt -1 
-			
+				
 				szCd = DATAMANAGER.GetDataValue(0, szTranID, "OutBlock1", "ISCD", i)
 				grdCode.insertrow = nRow
-				
+					
 				'20160729 NOHES START ETN, 채권 마켓타입에 따른 처리 추가
 				szMk = Form.GetItemCodeInfo(szCd, "market")
 				szMk = Change_EtcMarket(szMk)
@@ -5590,17 +5598,17 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 					Case "J", "NJ", "TJ"	' 20250208_01 HWG
 						szCutCd = szCd
 					'20210608 SWJ END
-					
+						
 					Case Else
 						szCutCd = Mid(szCd, 2, Len(szCd))
 						szMk = Form.GetItemCodeInfo(szCutCd, "market")
 				End Select
 				'20160729 NOHES END
-				
+					
 				' 보유종목리스트에서 주식종목은 종목코드 맨 앞에 "A", ELW는 "J"가 붙어서 내려옴. 예외처리 ////
 				' 보유종목리스트에서 선옵종목은 종목코드 맨 앞에 "K"가 붙어서 내려옴. 예외처리 20160402
 				' ETN (mk) = Q, 채권(mk) = BN	
-			
+				
 				Select Case szMk
 					Case "J", "T", "W", "F", "MF", "O", "MO", "JF", "JO", "XF", "QO", "WO", "KF", "NJ", "TJ"	'20190809_01 HWG : 위클리옵션추가(KRX300, 코스닥150 옵션 추가)	/	KF: 20240412 HSZ 코스닥글로벌지수 추가
 						grdCode.SetCellData("bd_code", nRow, szCutCd)
@@ -5623,14 +5631,30 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 						end if
 				End Select
 				' ////////////////////////////////////////////////////////////////////////////////////////////
-				
+					
 				grdCode.SetCellData("bd_mk",   nRow, szMk)
 				grdCode.SetCellData("bd_gubun",   nRow, "KR") '국내
+					
+				'20251021 SWJ START
+				'종목 중복 + 빈 값 나오는 현상(현재는 종목마스터에 없거나의 사유) 삭제 처리
+				if Cint(nRow) > 0 then
+					if grdCode.GetCellData("bd_code", nRow - 1) == szCutCd and grdCode.GetCellData("bd_mk", nRow - 1) == szMk then
+						grdCode.SetDeleteRow(nRow)
+					else
+						nRow = nRow + 1
+					end if
+				else
+					nRow = nRow + 1
+				end if
 				
-				nRow = nRow + 1
+				'ORG SRC
+				'nRow = nRow + 1
+				'20251021 SWJ END
+					
 			Next
-'			else 				
-'				 Form.MsgBox("안내", "관심그룹에 등록된 종목이 없습니다.\n종목을 등록하시겠습니까?", "ADD_ITEM", 1)
+	'			else 				
+	'				 Form.MsgBox("안내", "관심그룹에 등록된 종목이 없습니다.\n종목을 등록하시겠습니까?", "ADD_ITEM", 1)
+	
 		end if
 		
 		if szTranID == "obsim_stsv_047r" then '국내 보유종목  NEXT
@@ -5667,11 +5691,12 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 		nCnt = DATAMANAGER.GetDataCount(0, "obsim_stsv_048r", "OutBlock1")
 		if nCnt > 0 then
 			'nRow = 0
+			
 			nRow = g_nNextCount
 			if g_nNextCount == 0  then
 				grdCode.SetClear()
 			end if 				
-			
+
 			For i = 0 to nCnt -1 
 				szCd = DATAMANAGER.GetDataValue(0, "obsim_stsv_048r", "OutBlock1", "ISCD", i)
 				szName = DATAMANAGER.GetDataValue(0, "obsim_stsv_048r", "OutBlock1", "KOR_NAME", i)
@@ -5706,7 +5731,21 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 				end if
 				grdCode.SetCellData("bd_gubun",   nRow, "OV") '해외
 				
-				nRow = nRow + 1
+				'20251021 SWJ START
+				'종목 중복 + 빈 값 나오는 현상(현재는 종목마스터에 없거나의 사유) 삭제 처리
+				if Cint(nRow) > 0 then
+					if  grdCode.GetCellData("bd_code", nRow - 1) == szCutCd and grdCode.GetCellData("bd_mk", nRow - 1) == szMk then
+						grdCode.SetDeleteRow(nRow)
+					else
+						nRow = nRow + 1
+					end if
+				else
+					nRow = nRow + 1
+				end if
+				
+				'ORG SRC
+				'nRow = nRow + 1
+				'20251021 SWJ END
 			Next
 '			else
 '				if grdCode.rowcount ==  0 then '해외/국내 모두 없는 경우 
@@ -5717,7 +5756,8 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 		if  DATAMANAGER.IsMoreNextData( "obsim_stsv_048r" ) == True then '해외 보유종목 NEXT
 			 g_nNextCount = grdCode.rowcount
 			DATAMANAGER.RequestNextData( "obsim_stsv_048r" )
-		else		
+		else	
+			
 			' 메인화면에서 종목추가 가능하므로 메인화면에 종목리스트 카운트를 알린다.
 			Form.SetCtlProp("##edtListCnt", "caption", grdCode.rowcount)
 			Form.triggerEvent("##", "SET_VISIBLE", "")
@@ -5733,7 +5773,7 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 		
 		'************************************ SOR_START
 		' 20250918 이윤성 2차 대체거래소, 중복 실행 방지		
-		g_szRunning = "N"
+		'g_szRunning = "N"
 		'************************************ SOR_END
 		
 			
@@ -5772,14 +5812,29 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 				grdCode.SetCellData("bd_name", nRow, Form.GetItemCodeInfo(szMk&"@"&szCutCd, "name"))
 				grdCode.SetCellData("bd_gubun", nRow, "OV") '해외
 				
-				nRow = nRow + 1
+				'20251021 SWJ START
+				'종목 중복 + 빈 값 나오는 현상(현재는 종목마스터에 없거나의 사유) 삭제 처리
+				if Cint(nRow) > 0 then
+					if grdCode.GetCellData("bd_code", nRow - 1) == szCutCd and grdCode.GetCellData("bd_mk", nRow - 1) == szMk then
+						grdCode.SetDeleteRow(nRow)
+					else
+						nRow = nRow + 1
+					end if
+				else
+					nRow = nRow + 1
+				end if
+				
+				'ORG SRC
+				'nRow = nRow + 1
+				'20251021 SWJ END
 			Next
 		end if
 		
 		if  DATAMANAGER.IsMoreNextData( "obsim_stsv_073r" ) == True then '해외CFD 보유종목 NEXT
 			g_nNextCount = grdCode.rowcount
 			DATAMANAGER.RequestNextData( "obsim_stsv_073r" )
-		else			
+		else		
+			
 			' 메인화면에서 종목추가 가능하므로 메인화면에 종목리스트 카운트를 알린다.
 			Form.SetCtlProp("##edtListCnt", "caption", grdCode.rowcount)
 			Form.triggerEvent("##", "SET_VISIBLE", "") 
@@ -5795,7 +5850,7 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 		
 		'************************************ SOR_START
 		' 20250918 이윤성 2차 대체거래소, 중복 실행 방지
-		g_szRunning = "N"
+		'g_szRunning = "N"
 		'************************************ SOR_END
 			
 	' ----------------------------------------------------------------------
@@ -5807,20 +5862,28 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 		'************************************ SOR_START
 		' 20250918 이윤성 2차 대체거래소, 중복 실행 방지
 		
-		if g_szRunning == "Y" then
-			'Form.ShowAlert("이미 실행중 : 중복실행 방지")
-			Exit Sub
-			
-		end if
+'		if g_szRunning == "Y" then
+'			'Form.ShowAlert("이미 실행중 : 중복실행 방지")
+'			Exit Sub
+'			
+'		end if
 		'************************************ SOR_END
 		
 		'g_szRunning = "Y"		'20250923_2 SWJ START
 		
+		'20251021 SWJ START
+		'하단에 그리드 인덱스 i-index로 만듦..
+		'더럽지만 이게 최선(while문 먹이면 앱 crash 남)
+		Dim szName
+		Dim index
+		index = 0
+		'20251021 SWJ END
+		
 		nRow = grdCode.rowcount			
 		For i = 0 to nRow - 1 
-			szCode = grdCode.GetCellData("bd_code", i)
-			szGubun = Trim(grdCode.GetCellData("bd_gubun", i))
-			szMk = grdCode.GetCellData("bd_mk", i)
+			szCode = grdCode.GetCellData("bd_code", i - index)
+			szGubun = Trim(grdCode.GetCellData("bd_gubun", i - index))
+			szMk = grdCode.GetCellData("bd_mk", i - index)
 		
 			if szCode <> "EMPTY" then '빈칸이 아닌 경우
 				if szGubun == "OV" then '해외				
@@ -5829,16 +5892,26 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 					szMk = Form.GetItemCodeInfo(szCode, "market")
 					szMk = Change_EtcMarket(szMk)
 					szName = Form.GetItemCodeInfo(szCode, "name")
-					grdCode.SetCellData("bd_gubun",   i, "KR") '국내
+					grdCode.SetCellData("bd_gubun",   i - index, "KR") '국내
 				end if
 			else
 				szName = ""
-				grdCode.SetCellData("bd_gubun",   i, "")
+				grdCode.SetCellData("bd_gubun",   i - index, "")
 			end if
 				
-			grdCode.SetCellData("bd_mk", i, szMk)
-			grdCode.SetCellData("bd_name", i, szName)	
-		Next			
+			grdCode.SetCellData("bd_mk", i - index, szMk)
+			grdCode.SetCellData("bd_name", i - index, szName)	
+			
+			'20251021 SWJ START
+			'종목 중복 + 빈 값 나오는 현상(현재는 종목마스터에 없거나의 사유) 삭제 처리
+			if Cint(i) > 0 then
+				if grdCode.GetCellData("bd_code", i  - index - 1) == szCutCd and grdCode.GetCellData("bd_mk", i - index - 1) == szMk then
+					grdCode.SetDeleteRow(i - index)
+					index = index + 1
+				end if
+			end if
+			'20251021 SWJ END
+		Next
 		
 		' 메인화면에서 종목추가 가능하므로 메인화면에 종목리스트 카운트를 알린다.
 		Form.SetCtlProp("##edtListCnt", "caption", grdCode.rowcount)
@@ -6245,22 +6318,36 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 				end if								
 			end if			
 			
-			'************************************ SOR_START
-			' 20250507 이윤성 2차 대체거래소 NXT,SOR 추가작업
-			if g_szRSelect == "1" or g_szRSelect == "5" or g_szRSelect == "7" then '예상가
-				' KRX 예상가(1),  NXT 예상가(5), SOR 예상가(7)
-			'************************************ SOR_END
+			'20251021 SWJ START			
+			'순서 변경, TopRow를 앞으로
+			'소팅 기능있으면 Top row 세팅 안함(의미없음)
+			'SetNoticeMsg() '종목없음 안내메시지처리
+			if szData == 0 then
+				Form.SetTimerEvent2(1, 1, 0.1)	'20231026 HSZ START: TOPROW 세팅
+			end if
 			
-				grdList1.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
-			elseif g_szRSelect == "2" then 
-				grdList2.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
-			else 
-				grdList0.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
+			if g_savePopupReturned then
+				g_sData = szData 
+				Form.setDelayEvent(1, 1)
+			
+			else
+				'************************************ SOR_START
+				' 20250507 이윤성 2차 대체거래소 NXT,SOR 추가작업
+				if g_szRSelect == "1" or g_szRSelect == "5" or g_szRSelect == "7" then '예상가
+					' KRX 예상가(1),  NXT 예상가(5), SOR 예상가(7)
+				'************************************ SOR_END
+					
+					grdList1.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
+				elseif g_szRSelect == "2" then 
+					grdList2.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
+				else 
+					grdList0.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
+				end if
 			end if
 			'20241218_01 HWG END
 			
-			'SetNoticeMsg() '종목없음 안내메시지처리
-			Form.SetTimerEvent2(1, 1, 0.1)	'20231026 HSZ START: TOPROW 세팅
+			'20251021 SWJ END
+			
 		end if 
 		
 	elseif szTranID == "ohhts_1030_002r" then	'해외(주간포함시세)
@@ -6743,21 +6830,35 @@ Sub DATAMANAGER_OnReceiveTranComplete(szTranID)
 			
 		end if
 		
-		'************************************ SOR_START
-		' 20250507 이윤성 2차 대체거래소 NXT,SOR 추가작업
-		if g_szRSelect == "1" or g_szRSelect == "5" or g_szRSelect == "7" then '예상가
-			' KRX 예상가(1),  NXT 예상가(5), SOR 예상가(7)
-		'************************************ SOR_END
-		
-			grdList1.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
-		elseif g_szRSelect == "2" then 
-			grdList2.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
-		else 
-			grdList0.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
+		'20251021 SWJ START			
+		'순서 변경, TopRow를 앞으로
+		'소팅 기능있으면 Top row 세팅 안함(의미없음)
+		'SetNoticeMsg() '종목없음 안내메시지처리
+		if szData == 0 then
+			Form.SetTimerEvent2(1, 1, 0.1)	'20231026 HSZ START: TOPROW 세팅
 		end if
-		'20241218_01 HWG END
+			
+		if g_savePopupReturned then
+			g_sData = szData 
+			Form.setDelayEvent(1, 1)
 		
-		Form.SetTimerEvent2(1, 1, 0.1)	'20231026 HSZ : TOPROW 세팅
+		else
+			'************************************ SOR_START
+			' 20250507 이윤성 2차 대체거래소 NXT,SOR 추가작업
+			if g_szRSelect == "1" or g_szRSelect == "5" or g_szRSelect == "7" then '예상가
+				' KRX 예상가(1),  NXT 예상가(5), SOR 예상가(7)
+			'************************************ SOR_END
+			
+				grdList1.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
+			elseif g_szRSelect == "2" then 
+				grdList2.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
+			else 
+				grdList0.onSortingByScript(g_szSortHeader, szData, g_szSortIdx)
+			end if
+			'20241218_01 HWG END
+		end if
+		'20251021 SWJ END
+		
 		
 	' ----------------------------------------------------------------------
 	' 관심 수정 TR : 종목추가
@@ -7973,17 +8074,6 @@ End Sub
 '20231026 HSZ END
 
 '===========================================================================
-'20250923_2 SWJ START
-'===========================================================================
-Sub Form_OnDelayEvent(sTimerID)
-	
-	if Cint(sTimerID) == 2 then
-		g_szRunning = "N"
-	end if
-	
-End Sub
-
-'===========================================================================
 '20240826_01 KBC START : 관심종목 2차개선 (관심그룹/관심종목 스크롤 저장 변경)
 Sub Getting_Toprow()
 	'************************************ SOR_START
@@ -8179,10 +8269,40 @@ Sub grdList2_OnHeaderClickUp(lRow, szCellID)
 	Form.SetEnvData(1, "INTR_SORT_IDX", g_szSortIdx)
 End Sub
 '20241218_01 HWG END
-
 '============================================================================
-Sub grdList0_OnHeaderClicked(lRow, szCellID, bUpDn, pvarProcessed)
+'20251021 SWJ START
+'OnSortingByScript 타이밍 이슈 화면에서 해결
+'필터된 상태에서 종목편집에서 종목 순서 바꾸면 발생
+
+'mhprc11011에서 Form_OnRefresh탈 때
+'종목편집에서 순서 바꿀 때
+'============================================================================
+Sub Form_OnDelayEvent(nID)
 	
+	if Cint(nID) == 1 then
+		
+		'************************************ SOR_START
+		' 20250507 이윤성 2차 대체거래소 NXT,SOR 추가작업
+		if g_szRSelect == "1" or g_szRSelect == "5" or g_szRSelect == "7" then '예상가
+			' KRX 예상가(1),  NXT 예상가(5), SOR 예상가(7)
+		'************************************ SOR_END
+			
+			grdList1.onSortingByScript(g_szSortHeader, g_sData, g_szSortIdx)
+		elseif g_szRSelect == "2" then 
+			grdList2.onSortingByScript(g_szSortHeader, g_sData, g_szSortIdx)
+		else 
+			grdList0.onSortingByScript(g_szSortHeader, g_sData, g_szSortIdx)
+		end if
+		
+		'2번타도 True로 바꿔라 여기까지 탔으면(종목편집은 2번 탐)
+		if g_savePopupReturned = False then
+			g_savePopupReturned = True
+		else
+			g_savePopupReturned = False
+		end if
+		
+	end if
+
 End Sub
 
 	</SCRIPT_INFO>

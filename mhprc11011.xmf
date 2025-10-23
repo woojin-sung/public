@@ -131,7 +131,7 @@ OV`해외]]>" imagefilepth="combo_04.9" ly_vert="428,336,80,30,0" />
 		<IMAGE name="imgAtsToggle" autosize="1" imgpath="toggle_sor_3dots_02.9" ly_vert="266,6,68,30,1" />
 		<LABEL name="lblAtsToggle" fgcolor="144:034034034" fontsize="-2" fontstyle="01" caption="통합" paddinginfo="1,0,0,0" click="1" ly_vert="286,11,40,20,1" />
 	</CONTROL_INFO>
-	<SCRIPT_INFO _len="97295" _ulen="85323" >
+	<SCRIPT_INFO _len="97554" _ulen="85582" >
 '============================================================================
 ' 화 면 명 : 관심종목 (375 X 602)
 ' 화면설명 : 관심종목
@@ -1704,7 +1704,7 @@ Sub Form_OnPopupReturn(sKeyName, sRet)
 		if Trim(szvrsnID) <> "" then
 			edtvrsnID.caption = szvrsnID
 		end if
-
+		
 		if sRet == "0" then		' 0 : 종목편집 'mhprc11010_p13
 			if (Trim(sRet)  <> "") and (CInt(fmTab.tabcount) > 0) then			
 				edtListCnt.caption = sRet
@@ -1736,6 +1736,9 @@ Sub Form_OnPopupReturn(sKeyName, sRet)
 			    '관심종목 조회
 				edtGWAdd.caption = "1"	' 20160401 관심 타매체 실시간 연동(1:MTS에서 관심등록)
 				
+				'20251021 SWJ START
+				Form.triggerEvent("linkfm0", "EDIT_JONGMOK", "")
+				'20251021 SWJ END
 					
 				' 20250408 이윤성 대체거랫 1차개선 콤보에서 토글로 변경
 				Form.triggerEvent("linkfm0", "GW_LIST", cmbGroup.cbkeydata & "♥" & edtvrsnID.caption & "♥" & g_nKrOvToggleCurrIndex )
@@ -1747,6 +1750,11 @@ Sub Form_OnPopupReturn(sKeyName, sRet)
 			Insert_cmbGroup()
 			
 		elseif sRet == "1" then    '1 : 그룹편집 'mhprc11010_p12
+			
+			'20251021 SWJ START
+			Form.triggerEvent("linkfm0", "EDIT_JONGMOK", "")
+			'20251021 SWJ END
+			
 			init_GWGroup()
 			f_SetPrcType(g_szRSelect)
 		end if
@@ -1928,6 +1936,9 @@ End Sub
 ' Form_OnRefresh : 관심을 첫화면으로 했을때 종목 재조회
 '============================================================================
 Sub Form_OnRefresh()
+	
+	Form.triggerEvent("linkfm0", "EDIT_JONGMOK", "")
+	
 	'20240524_01 KBC START : 해외주식 고도화 (백그라운드->포그라운드 전환 시, 재등록해야 함)
 	if CInt(fmTab.tabcount) > 0  then
 		Form.triggerEvent("linkfm0", "CLOSE_RIGHT", "")
